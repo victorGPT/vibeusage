@@ -1,152 +1,29 @@
+@import url("https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .glow-text {
+    text-shadow: 0 0 15px rgba(0, 255, 65, 0.4);
+  }
+  .shadow-glow {
+    filter: drop-shadow(0 0 2px rgba(0, 255, 65, 0.3));
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
 :root {
   color-scheme: dark;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
-
-  --bg: #05070a;
-  --panel: rgba(7, 12, 18, 0.92);
-  --fg: #dcffe8;
-  --muted: rgba(220, 255, 232, 0.7);
-  --accent: #00ff88;
-  --accent-dim: rgba(0, 255, 136, 0.16);
-  --border: rgba(0, 255, 136, 0.28);
-  --border-dim: rgba(0, 255, 136, 0.16);
 }
 
 body {
-  margin: 0;
-  background: radial-gradient(1200px 800px at 20% 0%, rgba(0, 255, 136, 0.08), transparent 60%),
-    radial-gradient(900px 600px at 90% 10%, rgba(0, 255, 136, 0.05), transparent 55%), var(--bg);
-  color: var(--fg);
-}
-
-a {
-  color: inherit;
-  text-decoration-color: rgba(0, 255, 136, 0.5);
-  text-underline-offset: 3px;
-}
-
-.container {
-  max-width: 980px;
-  margin: 0 auto;
-  padding: 24px;
-}
-
-.card {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 16px;
-  box-shadow: 0 0 0 1px rgba(0, 255, 136, 0.08) inset, 0 18px 70px rgba(0, 0, 0, 0.6);
-}
-
-.row {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  align-items: center;
-}
-
-.spacer {
-  flex: 1;
-}
-
-.btn {
-  appearance: none;
-  border: 1px solid var(--border);
-  background: transparent;
-  color: var(--fg);
-  padding: 10px 12px;
-  border-radius: 10px;
-  font-weight: 600;
-  text-decoration: none;
-  cursor: pointer;
-}
-
-.btn.primary {
-  background: var(--accent-dim);
-  border-color: var(--accent);
-}
-
-.btn:hover {
-  background: rgba(0, 255, 136, 0.09);
-}
-
-.btn.primary:hover {
-  background: rgba(0, 255, 136, 0.22);
-}
-
-.btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.muted {
-  color: var(--muted);
-  font-size: 13px;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(140px, 1fr));
-  gap: 12px;
-}
-
-.metric .label {
-  font-size: 12px;
-  color: var(--muted);
-}
-
-.metric .value {
-  font-size: 20px;
-  font-weight: 800;
-  margin-top: 6px;
-}
-
-input {
-  background: rgba(0, 0, 0, 0.25);
-  border: 1px solid var(--border-dim);
-  border-radius: 10px;
-  color: var(--fg);
-  padding: 8px 10px;
-  font-family: inherit;
-}
-
-input:focus {
-  outline: none;
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(0, 255, 136, 0.12);
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  border: 1px solid var(--border-dim);
-  border-radius: 10px;
-  overflow: hidden;
-}
-
-th,
-td {
-  padding: 10px 8px;
-  border-bottom: 1px solid rgba(0, 255, 136, 0.12);
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-}
-
-th:first-child,
-td:first-child {
-  text-align: left;
-}
-
-code {
-  background: rgba(0, 255, 136, 0.08);
-  border: 1px solid rgba(0, 255, 136, 0.18);
-  padding: 2px 6px;
-  border-radius: 8px;
-}
-
-@media (max-width: 860px) {
-  .grid {
-    grid-template-columns: repeat(2, minmax(140px, 1fr));
-  }
+  @apply bg-[#050505] text-[#00FF41] font-mono subpixel-antialiased overflow-hidden;
 }
