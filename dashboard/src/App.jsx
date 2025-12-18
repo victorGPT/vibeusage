@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 const STORAGE_KEY = 'vibescore.dashboard.auth.v1';
 
@@ -185,9 +185,94 @@ function Sparkline({ rows }) {
   );
 }
 
+function MatrixRain() {
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const canvas = ref.current;
+    if (!canvas) return;
+
+    const reduceMotion = Boolean(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    if (reduceMotion) return;
+
+    const ctx = canvas.getContext('2d', { alpha: true });
+    if (!ctx) return;
+
+    const fontSize = 14;
+    const chars =
+      'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ#$%*+-=<>?';
+
+    let width = 0;
+    let height = 0;
+    let columns = 0;
+    let drops = [];
+    let raf = 0;
+
+    function resize() {
+      width = window.innerWidth || 0;
+      height = window.innerHeight || 0;
+      const dpr = window.devicePixelRatio || 1;
+
+      canvas.width = Math.max(1, Math.floor(width * dpr));
+      canvas.height = Math.max(1, Math.floor(height * dpr));
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      columns = Math.max(1, Math.floor(width / fontSize));
+      drops = Array.from({ length: columns }, () => Math.floor((Math.random() * height) / fontSize));
+
+      ctx.font = `${fontSize}px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace`;
+      ctx.textBaseline = 'top';
+    }
+
+    resize();
+    window.addEventListener('resize', resize, { passive: true });
+
+    let last = 0;
+    const fps = 28;
+    const frameInterval = 1000 / fps;
+
+    function draw(ts) {
+      if (!last) last = ts;
+      const dt = ts - last;
+      if (dt < frameInterval) {
+        raf = window.requestAnimationFrame(draw);
+        return;
+      }
+      last = ts;
+
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.08)';
+      ctx.fillRect(0, 0, width, height);
+
+      ctx.fillStyle = 'rgba(0, 255, 65, 0.85)';
+
+      for (let i = 0; i < drops.length; i++) {
+        const x = i * fontSize;
+        const y = drops[i] * fontSize;
+        const ch = chars[Math.floor(Math.random() * chars.length)];
+        ctx.fillText(ch, x, y);
+
+        if (y > height && Math.random() > 0.975) drops[i] = 0;
+        else drops[i] += 1;
+      }
+
+      raf = window.requestAnimationFrame(draw);
+    }
+
+    raf = window.requestAnimationFrame(draw);
+
+    return () => {
+      window.cancelAnimationFrame(raf);
+      window.removeEventListener('resize', resize);
+    };
+  }, []);
+
+  return <canvas ref={ref} className="tui-matrix" aria-hidden="true" />;
+}
+
 function TuiFrame({ title, right, footer, children }) {
   return (
     <div className="tui-screen">
+      <MatrixRain />
       <div className="tui-frame">
         <div className="tui-header">
           <div className="tui-title">{title}</div>

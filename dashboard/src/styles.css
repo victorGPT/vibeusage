@@ -2,37 +2,37 @@
   color-scheme: dark;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
 
-  /* Retro TUI theme tokens (visual only). */
-  --bg: #010704;
-  --panel: rgba(0, 12, 6, 0.88);
+  /* Retro TUI theme tokens (Matrix). */
+  --bg: #000705;
+  --panel: rgba(0, 12, 6, 0.9);
   --panel-solid: #020f08;
-  --fg: #dcffe8;
-  --muted: rgba(220, 255, 232, 0.72);
+  --fg: #d7ffe6;
+  --muted: rgba(215, 255, 230, 0.72);
 
-  --accent: #00ff6a;
-  --accent-dim: rgba(0, 255, 106, 0.14);
-  --border: rgba(0, 255, 106, 0.5);
-  --border-dim: rgba(0, 255, 106, 0.22);
+  --accent: #00ff41;
+  --accent-dim: rgba(0, 255, 65, 0.14);
+  --border: rgba(0, 255, 65, 0.55);
+  --border-dim: rgba(0, 255, 65, 0.22);
 
-  --glow: rgba(0, 255, 106, 0.28);
+  --glow: rgba(0, 255, 65, 0.28);
   --error: #ff6b6b;
 }
 
 ::selection {
-  background: rgba(0, 255, 106, 0.25);
+  background: rgba(0, 255, 65, 0.25);
 }
 
 body {
   margin: 0;
-  background: radial-gradient(1200px 800px at 12% 0%, rgba(0, 255, 106, 0.1), transparent 60%),
-    radial-gradient(900px 600px at 92% 10%, rgba(0, 255, 106, 0.06), transparent 55%),
-    radial-gradient(800px 520px at 60% 90%, rgba(0, 255, 106, 0.04), transparent 60%), var(--bg);
+  background: radial-gradient(1200px 800px at 15% 0%, rgba(0, 255, 65, 0.12), transparent 60%),
+    radial-gradient(900px 600px at 92% 10%, rgba(0, 255, 65, 0.08), transparent 55%),
+    radial-gradient(1000px 700px at 60% 90%, rgba(0, 255, 65, 0.05), transparent 60%), var(--bg);
   color: var(--fg);
 }
 
 a {
   color: inherit;
-  text-decoration-color: rgba(0, 255, 106, 0.5);
+  text-decoration-color: rgba(0, 255, 65, 0.5);
   text-underline-offset: 3px;
 }
 
@@ -44,6 +44,16 @@ a {
   align-items: flex-start;
   position: relative;
   isolation: isolate;
+}
+
+.tui-matrix {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  opacity: 0.16;
+  filter: blur(0.2px) contrast(1.08) saturate(1.1);
 }
 
 .tui-screen::before {
@@ -67,10 +77,10 @@ a {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  opacity: 0.06;
-  background: radial-gradient(circle at 30% 20%, rgba(0, 255, 106, 0.25), transparent 60%),
-    radial-gradient(circle at 80% 0%, rgba(0, 255, 106, 0.16), transparent 55%);
-  animation: tui-flicker 2.6s infinite;
+  opacity: 0.08;
+  background: radial-gradient(circle at 30% 20%, rgba(0, 255, 65, 0.22), transparent 62%),
+    radial-gradient(circle at 80% 0%, rgba(0, 255, 65, 0.14), transparent 55%);
+  animation: tui-flicker 2.2s infinite;
 }
 
 @keyframes tui-flicker {
@@ -89,15 +99,18 @@ a {
   .tui-screen::after {
     animation: none;
   }
+  .tui-matrix {
+    display: none;
+  }
 }
 
 .tui-frame {
   width: min(104ch, 100%);
   background: var(--panel);
   border: 2px solid var(--border);
-  box-shadow: 0 0 0 1px rgba(0, 255, 106, 0.1) inset, 0 0 42px rgba(0, 255, 106, 0.09),
+  box-shadow: 0 0 0 1px rgba(0, 255, 65, 0.12) inset, 0 0 46px rgba(0, 255, 65, 0.1),
     0 18px 70px rgba(0, 0, 0, 0.7);
-  text-shadow: 0 0 12px rgba(0, 255, 106, 0.12);
+  text-shadow: 0 0 12px rgba(0, 255, 65, 0.14);
 }
 
 .tui-header,
@@ -188,7 +201,7 @@ a {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  box-shadow: 0 0 0 1px rgba(0, 255, 106, 0.08) inset;
+  box-shadow: 0 0 0 1px rgba(0, 255, 65, 0.1) inset, 0 0 12px rgba(0, 255, 65, 0.06);
 }
 
 .btn::before {
@@ -207,11 +220,11 @@ a {
 }
 
 .btn:hover {
-  background: rgba(0, 255, 106, 0.09);
+  background: rgba(0, 255, 65, 0.09);
 }
 
 .btn.primary:hover {
-  background: rgba(0, 255, 106, 0.22);
+  background: rgba(0, 255, 65, 0.22);
 }
 
 .btn:active {
@@ -221,7 +234,7 @@ a {
 .btn:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
-  box-shadow: 0 0 0 1px rgba(0, 255, 106, 0.22) inset, 0 0 0 3px rgba(0, 255, 106, 0.12);
+  box-shadow: 0 0 0 1px rgba(0, 255, 65, 0.22) inset, 0 0 0 3px rgba(0, 255, 65, 0.12);
 }
 
 .btn:disabled {
@@ -271,7 +284,7 @@ input {
 input:focus {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(0, 255, 106, 0.12);
+  box-shadow: 0 0 0 3px rgba(0, 255, 65, 0.12);
 }
 
 .tui-table-scroll {
@@ -300,7 +313,7 @@ table {
 th,
 td {
   padding: 10px 8px;
-  border-bottom: 1px solid rgba(0, 255, 106, 0.14);
+  border-bottom: 1px solid rgba(0, 255, 65, 0.14);
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
@@ -343,7 +356,7 @@ th {
 .tui-sort-indicator {
   display: inline-block;
   width: 1ch;
-  color: rgba(0, 255, 106, 0.35);
+  color: rgba(0, 255, 65, 0.35);
 }
 
 .tui-sort-indicator.active {
@@ -351,19 +364,19 @@ th {
 }
 
 tbody tr:hover {
-  background: rgba(0, 255, 106, 0.06);
+  background: rgba(0, 255, 65, 0.06);
 }
 
 .tui-sparkline {
-  filter: drop-shadow(0 0 10px rgba(0, 255, 106, 0.18));
+  filter: drop-shadow(0 0 10px rgba(0, 255, 65, 0.22));
 }
 
 code {
-  background: rgba(0, 255, 106, 0.08);
-  border: 1px solid rgba(0, 255, 106, 0.18);
+  background: rgba(0, 255, 65, 0.08);
+  border: 1px solid rgba(0, 255, 65, 0.18);
   padding: 2px 6px;
   border-radius: 0;
-  box-shadow: 0 0 0 1px rgba(0, 255, 106, 0.08) inset;
+  box-shadow: 0 0 0 1px rgba(0, 255, 65, 0.08) inset;
 }
 
 @media (max-width: 860px) {
