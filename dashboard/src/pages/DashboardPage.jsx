@@ -80,8 +80,13 @@ export function DashboardPage({ baseUrl, auth, signedIn, signOut }) {
 
   const streakDays = useMemo(() => {
     if (!signedIn) return 0;
+    const serverStreak = Number(heatmap?.streak_days);
+    if (Number.isFinite(serverStreak)) return serverStreak;
     return computeActiveStreakDays({ dailyRows: heatmapDaily, to: heatmapRange.to });
-  }, [signedIn, heatmapDaily, heatmapRange.to]);
+  }, [signedIn, heatmap?.streak_days, heatmapDaily, heatmapRange.to]);
+
+  const heatmapFrom = heatmap?.from || heatmapRange.from;
+  const heatmapTo = heatmap?.to || heatmapRange.to;
 
   const isLocalhost = useMemo(() => {
     const h = window.location.hostname;
@@ -245,7 +250,7 @@ export function DashboardPage({ baseUrl, auth, signedIn, signOut }) {
             >
               <ActivityHeatmap heatmap={heatmap} />
               <div className="mt-3 text-[8px] opacity-30 uppercase tracking-widest font-black">
-                Range: {heatmapRange.from}..{heatmapRange.to}
+                Range: {heatmapFrom}..{heatmapTo}
               </div>
             </AsciiBox>
 

@@ -45,7 +45,7 @@ Response (draft):
 - 取数范围：`weeks * 7` 天（滚动窗口），`to` 默认为 today(UTC)
 - 缺失天补零：缺失视为 `value = 0` / `level = 0`
 - 对齐：起始日期向前对齐到周边界（`sun`/`mon`），保证网格按整周展示
-- Limits（防滥用）：`weeks` 限制在 `[4, 104]`（可在实现阶段定稿）
+- Limits（防滥用）：`weeks` 限制在 `[1, 104]`（上限两年）
 
 ### Non-negotiables
 
@@ -110,4 +110,3 @@ Response (draft):
 ### Streak (optional, no backend state)
 
 定义：从 `to` 往回数，连续天 `value > 0` 的天数（UTC）。
-

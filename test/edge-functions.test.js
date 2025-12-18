@@ -397,3 +397,111 @@ test('vibescore-ingest anonKey path falls back to per-row inserts on 23505', asy
   assert.deepEqual(data, { success: true, inserted: 1, skipped: 1 });
   assert.equal(postCount, 3);
 });
+
+test('vibescore-usage-heatmap returns a week-aligned grid with derived fields', async () => {
+  const fn = require('../insforge-functions/vibescore-usage-heatmap');
+
+  const userId = '55555555-5555-5555-5555-555555555555';
+  const userJwt = 'user_jwt_test';
+
+  const rows = [
+    { day: '2025-12-10', total_tokens: '10' },
+    { day: '2025-12-11', total_tokens: '10' },
+    { day: '2025-12-12', total_tokens: '100' },
+    { day: '2025-12-18', total_tokens: '1000' }
+  ];
+
+  globalThis.createClient = (args) => {
+    if (args && args.edgeFunctionToken === userJwt) {
+      return {
+        auth: {
+          getCurrentUser: async () => ({ data: { user: { id: userId } }, error: null })
+        },
+        database: {
+          from: (table) => {
+            assert.equal(table, 'vibescore_tracker_daily');
+            return {
+              select: () => ({
+                eq: (col, value) => {
+                  assert.equal(col, 'user_id');
+                  assert.equal(value, userId);
+                  return {
+                    gte: (gteCol, from) => {
+                      assert.equal(gteCol, 'day');
+                      assert.equal(from, '2025-12-07');
+                      return {
+                        lte: (lteCol, to) => {
+                          assert.equal(lteCol, 'day');
+                          assert.equal(to, '2025-12-18');
+                          return {
+                            order: async (orderCol, opts) => {
+                              assert.equal(orderCol, 'day');
+                              assert.equal(opts?.ascending, true);
+                              return { data: rows, error: null };
+                            }
+                          };
+                        }
+                      };
+                    }
+                  };
+                }
+              })
+            };
+          }
+        }
+      };
+    }
+    throw new Error(`Unexpected createClient args: ${JSON.stringify(args)}`);
+  };
+
+  const req = new Request(
+    'http://localhost/functions/vibescore-usage-heatmap?weeks=2&to=2025-12-18&week_starts_on=sun',
+    {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${userJwt}` }
+    }
+  );
+
+  const res = await fn(req);
+  assert.equal(res.status, 200);
+  const body = await res.json();
+
+  assert.equal(body.from, '2025-12-07');
+  assert.equal(body.to, '2025-12-18');
+  assert.equal(body.week_starts_on, 'sun');
+  assert.equal(body.active_days, 4);
+  assert.equal(body.streak_days, 1);
+
+  assert.ok(Array.isArray(body.weeks));
+  assert.equal(body.weeks.length, 2);
+  assert.equal(body.weeks[0].length, 7);
+  assert.equal(body.weeks[1].length, 7);
+
+  // Days after "to" in the last week are null.
+  assert.equal(body.weeks[1][5], null);
+  assert.equal(body.weeks[1][6], null);
+
+  const cell1210 = body.weeks[0][3];
+  assert.deepEqual(cell1210, { day: '2025-12-10', value: '10', level: 1 });
+
+  const cell1212 = body.weeks[0][5];
+  assert.deepEqual(cell1212, { day: '2025-12-12', value: '100', level: 2 });
+
+  const cell1218 = body.weeks[1][4];
+  assert.deepEqual(cell1218, { day: '2025-12-18', value: '1000', level: 4 });
+});
+
+test('vibescore-usage-heatmap rejects invalid parameters', async () => {
+  const fn = require('../insforge-functions/vibescore-usage-heatmap');
+
+  const req = new Request(
+    'http://localhost/functions/vibescore-usage-heatmap?weeks=105&to=2025-13-40&week_starts_on=wat',
+    {
+      method: 'GET',
+      headers: { Authorization: 'Bearer user_jwt_test' }
+    }
+  );
+
+  const res = await fn(req);
+  assert.equal(res.status, 400);
+});

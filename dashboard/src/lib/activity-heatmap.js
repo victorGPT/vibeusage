@@ -9,7 +9,8 @@ function parseUtcDateString(yyyyMmDd) {
   const mo = Number(m[2]) - 1;
   const d = Number(m[3]);
   const dt = new Date(Date.UTC(y, mo, d));
-  return Number.isFinite(dt.getTime()) ? dt : null;
+  if (!Number.isFinite(dt.getTime())) return null;
+  return formatDateUTC(dt) === yyyyMmDd.trim() ? dt : null;
 }
 
 function addUtcDays(date, days) {
@@ -42,14 +43,21 @@ function clampLevel(level) {
   return level;
 }
 
-export function getHeatmapRangeUtc({ weeks = 52, now = new Date() } = {}) {
+export function getHeatmapRangeUtc({
+  weeks = 52,
+  now = new Date(),
+  weekStartsOn = "sun",
+} = {}) {
   const to = formatDateUTC(now);
-  const end = parseUtcDateString(to) || new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  const end =
+    parseUtcDateString(to) ||
+    new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
 
-  const days = Math.max(1, weeks * 7);
-  const start = addUtcDays(end, -(days - 1));
-  const from = formatDateUTC(start);
-  return { from, to };
+  const desired = weekStartsOn === "mon" ? 1 : 0;
+  const endDow = end.getUTCDay();
+  const endWeekStart = addUtcDays(end, -((endDow - desired + 7) % 7));
+  const start = addUtcDays(endWeekStart, -7 * (Math.max(1, weeks) - 1));
+  return { from: formatDateUTC(start), to };
 }
 
 export function buildActivityHeatmap({
@@ -67,7 +75,11 @@ export function buildActivityHeatmap({
         new Date().getUTCDate()
       )
     );
-  const { from } = getHeatmapRangeUtc({ weeks, now: end });
+  const { from } = getHeatmapRangeUtc({
+    weeks,
+    now: end,
+    weekStartsOn,
+  });
   const start = parseUtcDateString(from) || addUtcDays(end, -(weeks * 7 - 1));
 
   const startAligned = (() => {

@@ -2,6 +2,24 @@ import React from "react";
 
 const OPACITY_BY_LEVEL = [0.15, 0.45, 0.62, 0.8, 1];
 
+function formatTokenValue(value) {
+  if (typeof value === "bigint") return value.toLocaleString();
+  if (typeof value === "number") {
+    return Number.isFinite(value) ? Math.round(value).toLocaleString() : "0";
+  }
+  if (typeof value === "string") {
+    const s = value.trim();
+    if (/^[0-9]+$/.test(s)) {
+      try {
+        return BigInt(s).toLocaleString();
+      } catch (_e) {}
+    }
+    const n = Number(s);
+    return Number.isFinite(n) ? Math.round(n).toLocaleString() : s;
+  }
+  return "0";
+}
+
 export function ActivityHeatmap({ heatmap }) {
   const weeks = heatmap?.weeks || [];
 
@@ -48,7 +66,7 @@ export function ActivityHeatmap({ heatmap }) {
                     key={dIdx}
                     className={`text-[9px] leading-none transition-all duration-700 ${className}`}
                     style={{ opacity }}
-                    title={`${cell.day} • ${Math.round(cell.value).toLocaleString()} tokens`}
+                    title={`${cell.day} • ${formatTokenValue(cell.value)} tokens`}
                   >
                     {char}
                   </span>
@@ -75,4 +93,3 @@ export function ActivityHeatmap({ heatmap }) {
     </div>
   );
 }
-
