@@ -2,9 +2,9 @@ const DEFAULTS = {
   intervalMs: 5 * 60_000,
   jitterMsMax: 60_000,
   backlogBytes: 1_000_000,
-  batchSize: 500,
-  maxBatchesSmall: 3,
-  maxBatchesLarge: 20,
+  batchSize: 200,
+  maxBatchesSmall: 2,
+  maxBatchesLarge: 8,
   backoffInitialMs: 60_000,
   backoffMaxMs: 30 * 60_000
 };
@@ -127,4 +127,3 @@ module.exports = {
   recordUploadFailure,
   parseRetryAfterMs
 };
-

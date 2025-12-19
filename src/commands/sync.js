@@ -73,7 +73,7 @@ async function cmdSync(argv) {
       const beforeState = (await readJson(queueStatePath)) || { offset: 0 };
       const queueSize = await safeStatSize(queuePath);
       const pendingBytes = Math.max(0, queueSize - Number(beforeState.offset || 0));
-      let maxBatches = opts.auto ? 3 : opts.drain ? 10_000 : 50;
+      let maxBatches = opts.auto ? 3 : opts.drain ? 10_000 : 10;
       let batchSize = UPLOAD_DEFAULTS.batchSize;
       let allowUpload = pendingBytes > 0;
 
