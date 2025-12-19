@@ -15,11 +15,11 @@
 
 ## M3：查询闭环
 
-- [ ] `vibescore-usage-daily/summary` 在插入事件后能返回非 0 数据（冒烟脚本）
+- [x] `vibescore-usage-daily/summary` 在插入事件后能返回非 0 数据（冒烟脚本）
 
 ## M4：自动化与可回归
 
-- [ ] 增加一键冒烟脚本：使用“已验证的 email/password 测试账号”→ 签发 device token → ingest → 查询 summary 校验
+- [x] 增加一键冒烟脚本：使用“已验证的 email/password 测试账号”→ 签发 device token → ingest → 查询 summary/daily 校验
 - [x] `openspec validate 2025-12-18-fix-service-role-key-missing --strict` 通过
 
 ## 验收证据（完成时补齐）

@@ -1,0 +1,29 @@
+name: Refresh Leaderboard Snapshots
+
+on:
+  schedule:
+    - cron: '0 * * * *'
+  workflow_dispatch:
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call refresh endpoint
+        env:
+          BASE_URL: ${{ secrets.INSFORGE_BASE_URL }}
+          SERVICE_ROLE_KEY: ${{ secrets.INSFORGE_SERVICE_ROLE_KEY }}
+        run: |
+          if [ -z "$BASE_URL" ] || [ -z "$SERVICE_ROLE_KEY" ]; then
+            echo "Missing INSFORGE_BASE_URL or INSFORGE_SERVICE_ROLE_KEY" >&2
+            exit 1
+          fi
+
+          curl --fail --show-error --silent \
+            --retry 3 \
+            --retry-all-errors \
+            --retry-delay 2 \
+            -X POST "$BASE_URL/functions/vibescore-leaderboard-refresh" \
+            -H "Authorization: Bearer $SERVICE_ROLE_KEY" \
+            -H "Content-Type: application/json" \
+            --data "{}"

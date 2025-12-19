@@ -70,6 +70,12 @@
 
 ### 5.3 云端接口（Edge Functions）
 
+提示（开发者必读）：
+
+- 更详细的接口契约、示例、以及 build/deploy 说明：见仓库根目录 `BACKEND_API.md`
+- Edge Functions 源码在 `insforge-src/`；部署产物在 `insforge-functions/`（单文件、生成物）
+  - 修改后端逻辑：改 `insforge-src/` → 运行 `npm run build:insforge` → 用 `insforge2 update-function` 部署
+
 - `POST /functions/vibescore-device-token-issue`
   - Auth：`Authorization: Bearer <user_jwt>`（或 admin bootstrap：Bearer `<service_role_key>` + body `user_id`）
   - In：`{ device_name?: string, platform?: string }`
@@ -77,13 +83,23 @@
 - `POST /functions/vibescore-ingest`
   - Auth：`Authorization: Bearer <device_token>`
   - In：`{ events: Event[] }` 或 `Event[]`
-  - Out：`{ inserted: number, skipped: number }`
+  - Out：`{ success: true, inserted: number, skipped: number }`
 - `GET /functions/vibescore-usage-daily?from=YYYY-MM-DD&to=YYYY-MM-DD`
   - Auth：`Authorization: Bearer <user_jwt>`
   - Out：`{ from, to, data: [{ day, total_tokens, ... }] }`
 - `GET /functions/vibescore-usage-summary?from=YYYY-MM-DD&to=YYYY-MM-DD`
   - Auth：`Authorization: Bearer <user_jwt>`
-  - Out：`{ from, to, totals: { ... } }`（bigint 以 string 返回）
+  - Out：`{ from, to, days, totals: { ... } }`（bigint 以 string 返回）
+- `GET /functions/vibescore-usage-heatmap?weeks=52&to=YYYY-MM-DD&week_starts_on=sun|mon`
+  - Auth：`Authorization: Bearer <user_jwt>`
+  - Out：heatmap grid（详见 `BACKEND_API.md`）
+- `GET /functions/vibescore-leaderboard?period=day|week|month|total&limit=20`
+  - Auth：`Authorization: Bearer <user_jwt>`
+  - Out：`{ period, from, to, entries, me }`（详见 `BACKEND_API.md`）
+- `POST /functions/vibescore-leaderboard-settings`
+  - Auth：`Authorization: Bearer <user_jwt>`
+  - In：`{ leaderboard_public: boolean }`
+  - Out：`{ leaderboard_public: boolean, updated_at: string }`
 
 ### 5.4 数据表（InsForge Database）
 
@@ -106,6 +122,7 @@
 ### 6.2 Dashboard（Vite）
 
 - `VITE_VIBESCORE_INSFORGE_BASE_URL`
+- UI 组件库统一使用：`dashboard/src/ui/matrix-a/components`
 
 ### 6.3 InsForge Edge Functions（Deno）
 

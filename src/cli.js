@@ -1,6 +1,7 @@
 const { cmdInit } = require('./commands/init');
 const { cmdSync } = require('./commands/sync');
 const { cmdStatus } = require('./commands/status');
+const { cmdDiagnostics } = require('./commands/diagnostics');
 const { cmdUninstall } = require('./commands/uninstall');
 
 async function run(argv) {
@@ -21,6 +22,9 @@ async function run(argv) {
     case 'status':
       await cmdStatus(rest);
       return;
+    case 'diagnostics':
+      await cmdDiagnostics(rest);
+      return;
     case 'uninstall':
       await cmdUninstall(rest);
       return;
@@ -39,6 +43,7 @@ function printHelp() {
       '  npx @vibescore/tracker init',
       '  npx @vibescore/tracker sync [--auto] [--drain]',
       '  npx @vibescore/tracker status',
+      '  npx @vibescore/tracker diagnostics [--out diagnostics.json]',
       '  npx @vibescore/tracker uninstall [--purge]',
       '',
       'Notes:',

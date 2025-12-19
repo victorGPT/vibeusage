@@ -5,8 +5,16 @@ const fs = require('node:fs/promises');
 const { readJson } = require('../lib/fs');
 const { readCodexNotify } = require('../lib/codex-config');
 const { normalizeState: normalizeUploadState } = require('../lib/upload-throttle');
+const { collectTrackerDiagnostics } = require('../lib/diagnostics');
 
-async function cmdStatus() {
+async function cmdStatus(argv = []) {
+  const opts = parseArgs(argv);
+  if (opts.diagnostics) {
+    const diagnostics = await collectTrackerDiagnostics();
+    process.stdout.write(JSON.stringify(diagnostics, null, 2) + '\n');
+    return;
+  }
+
   const home = os.homedir();
   const trackerDir = path.join(home, '.vibescore', 'tracker');
   const configPath = path.join(trackerDir, 'config.json');
@@ -63,6 +71,18 @@ async function cmdStatus() {
       .filter(Boolean)
       .join('\n')
   );
+}
+
+function parseArgs(argv) {
+  const out = { diagnostics: false };
+
+  for (let i = 0; i < argv.length; i++) {
+    const a = argv[i];
+    if (a === '--diagnostics' || a === '--json') out.diagnostics = true;
+    else throw new Error(`Unknown option: ${a}`);
+  }
+
+  return out;
 }
 
 async function safeStatSize(p) {

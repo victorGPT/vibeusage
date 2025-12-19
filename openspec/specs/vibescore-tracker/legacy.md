@@ -144,6 +144,9 @@
 Dashboard（MVP）：
 
 - 前端（React）只做最小展示：登录/注册 → 拉取 daily/summary → 表格/简易曲线
+- UI 视觉风格：Dashboard UI SHALL 采用“复古 TUI 皮肤”（monospace、窗口化边框、终端配色等），但交互保持标准 Web 方式（鼠标点击、表单输入、链接跳转），不引入真实终端 raw-mode 输入模型
+- 动效降级：必须尊重 `prefers-reduced-motion`，自动禁用闪烁/持续动效（如 CRT flicker、背景雨等）
+- 统一性：`/connect` 页面与主 Dashboard 使用同一主题与可用性规则（错误提示、按钮、焦点态）
 - 登录方式：跳转 InsForge 内置页面 `/auth/sign-in`/`/auth/sign-up`，携带 `redirect=<dashboard>/auth/callback`
   - 登录成功后，`/auth/callback` 从 URL 参数中读取 `access_token` 并在前端持久化（MVP：localStorage），再用于调用上述查询接口
   - 后续可升级为更安全的会话方案（例如 HttpOnly cookie/BFF），但不属于 MVP 目标

@@ -3,7 +3,7 @@ const fssync = require('node:fs');
 const readline = require('node:readline');
 
 const { ensureDir, readJson, writeJson } = require('./fs');
-const { parseRetryAfterMs } = require('./upload-throttle');
+const { ingestEvents } = require('./vibescore-api');
 
 async function drainQueueToCloud({ baseUrl, deviceToken, queuePath, queueStatePath, maxBatches, batchSize, onProgress }) {
   await ensureDir(require('node:path').dirname(queueStatePath));
@@ -23,7 +23,7 @@ async function drainQueueToCloud({ baseUrl, deviceToken, queuePath, queueStatePa
     if (res.events.length === 0) break;
 
     attempted += res.events.length;
-    const ingest = await postIngest({ baseUrl, deviceToken, events: res.events });
+    const ingest = await ingestEvents({ baseUrl, deviceToken, events: res.events });
     inserted += ingest.inserted || 0;
     skipped += ingest.skipped || 0;
 
@@ -83,37 +83,6 @@ async function safeFileSize(p) {
   } catch (_e) {
     return 0;
   }
-}
-
-async function postIngest({ baseUrl, deviceToken, events }) {
-  const url = new URL('/functions/vibescore-ingest', baseUrl).toString();
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${deviceToken}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ events })
-  });
-
-  const text = await res.text();
-  let data = null;
-  try {
-    data = JSON.parse(text);
-  } catch (_e) {}
-
-  if (!res.ok) {
-    const msg = data?.error || data?.message || `HTTP ${res.status}`;
-    const err = new Error(`Ingest failed: ${msg}`);
-    err.status = res.status;
-    err.retryAfterMs = parseRetryAfterMs(res.headers.get('Retry-After'));
-    throw err;
-  }
-
-  return {
-    inserted: Number(data?.inserted || 0),
-    skipped: Number(data?.skipped || 0)
-  };
 }
 
 module.exports = { drainQueueToCloud };

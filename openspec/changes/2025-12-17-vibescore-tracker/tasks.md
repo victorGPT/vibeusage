@@ -22,12 +22,13 @@
 
 ## MVP-2（可靠性与排障）
 
-- [ ] 本地重试与退避；互斥锁防止并发 sync
-- [ ] `status/diagnostics`（脱敏导出）
-- [ ] 可重复验收脚本：断网→产生事件→恢复→补传成功
+- [x] 本地重试与退避；互斥锁防止并发 sync
+- [x] `status/diagnostics`（脱敏导出）
+- [x] Dashboard 顶部显示后端状态（显示 host；hover 查看 status/http）
+- [x] 可重复验收脚本：断网→产生事件→恢复→补传成功（`node scripts/acceptance/offline-replay.cjs`）
 - [x] 自动化单测：edge functions（service client 必须带 admin token，避免 RLS 回归）
 
 ## 验收证据（完成时补齐）
 
 - [ ] 录屏/截图：初始化后使用 Codex CLI 产生数据 → 云端曲线更新
-- [ ] 冷回归步骤：`uninstall` 后 Codex 行为不受影响
+- [x] 冷回归步骤：`uninstall` 后 Codex 行为不受影响（自动化：`node --test test/init-uninstall.test.js`）

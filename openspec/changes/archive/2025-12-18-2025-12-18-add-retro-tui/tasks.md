@@ -17,6 +17,13 @@
 - [x] `/connect` 页面使用同一框架与组件风格（按钮/提示/错误态）
 - [x] “redirect URL 无效”错误提示在复古主题下仍清晰可读
 
+## M4：界面与数据解耦（为后续换主题做准备）
+
+- [x] 抽离纯逻辑到 `dashboard/src/lib/**`（config/auth/url/format/date-range/daily/http）
+- [x] 抽离状态到 hooks：`dashboard/src/hooks/use-auth.js`、`dashboard/src/hooks/use-usage-data.js`
+- [x] UI 组件化：`dashboard/src/components/**` + `dashboard/src/pages/**`，`dashboard/src/App.jsx` 仅负责路由分发
+- [x] CSS 分层：`dashboard/src/styles/base.css` + `dashboard/src/styles/themes/matrix.css`，`dashboard/src/styles.css` 作为入口
+
 ## 验收与验证
 
 - [ ] 手工验收：Chrome/Safari 下视觉一致；`prefers-reduced-motion` 生效（无闪烁/强动效）
