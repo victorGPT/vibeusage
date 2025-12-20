@@ -155,6 +155,7 @@ export function ActivityHeatmap({ heatmap }) {
   const scrollRef = useRef(null);
   const trackRef = useRef(null);
   const thumbRef = useRef(null);
+  const hasAutoScrolledRef = useRef(false);
 
   const [scrollState, setScrollState] = useState({
     left: 0,
@@ -205,6 +206,25 @@ export function ActivityHeatmap({ heatmap }) {
       el.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onResize);
     };
+  }, [updateScrollState, weeks.length]);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    if (hasAutoScrolledRef.current) return;
+    if (!weeks.length) return;
+
+    const snapToLatest = () => {
+      const maxScroll = el.scrollWidth - el.clientWidth;
+      if (maxScroll > 1) {
+        el.scrollLeft = maxScroll;
+      }
+      updateScrollState();
+      hasAutoScrolledRef.current = true;
+    };
+
+    // Wait for layout to settle before snapping.
+    requestAnimationFrame(() => requestAnimationFrame(snapToLatest));
   }, [updateScrollState, weeks.length]);
 
   // --- CONTENT DRAG HANDLERS ---
@@ -367,9 +387,6 @@ export function ActivityHeatmap({ heatmap }) {
       onMouseLeave={() => setIsHoveringHeatmap(false)}
     >
       <div className="relative group">
-        <div className="absolute inset-y-0 left-0 w-6 pointer-events-none heatmap-scroll-hint-left z-10"></div>
-        <div className="absolute inset-y-0 right-0 w-10 pointer-events-none heatmap-scroll-hint-right z-10"></div>
-
         {/* Scroll Container: Hide native scrollbar but allow scrolling */}
         <div
           ref={scrollRef}

@@ -77,14 +77,6 @@ body {
     transition: transform 120ms ease-out;
   }
 
-  .heatmap-scroll-hint-left {
-    background: linear-gradient(to right, rgba(0, 0, 0, 0.6), transparent);
-  }
-
-  .heatmap-scroll-hint-right {
-    background: linear-gradient(to left, rgba(0, 0, 0, 0.75), transparent);
-  }
-
   .matrix-scanlines {
     background-image: linear-gradient(
       to bottom,
