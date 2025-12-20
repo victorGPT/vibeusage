@@ -16,20 +16,44 @@ jobs:
           API_KEY: ${{ secrets.INSFORGE_API_KEY }}
         run: |
           TOKEN="${API_KEY:-$SERVICE_ROLE_KEY}"
+          TOKEN_SOURCE="INSFORGE_API_KEY"
+          if [ -z "$API_KEY" ]; then
+            TOKEN_SOURCE="INSFORGE_SERVICE_ROLE_KEY"
+          fi
           if [ -z "$BASE_URL" ] || [ -z "$TOKEN" ]; then
             echo "Missing INSFORGE_BASE_URL or INSFORGE_API_KEY/INSFORGE_SERVICE_ROLE_KEY" >&2
             exit 1
           fi
+          echo "Using token from ${TOKEN_SOURCE}"
 
+          failures=0
           for period in day week month total; do
             echo "Refreshing period=${period}"
-            curl --fail --show-error --silent \
+            response_file=$(mktemp)
+            curl_exit=0
+            status=$(curl --show-error --silent \
               --retry 3 \
               --retry-all-errors \
               --retry-delay 2 \
               -X POST "$BASE_URL/functions/vibescore-leaderboard-refresh?period=${period}" \
               -H "Authorization: Bearer $TOKEN" \
               -H "Content-Type: application/json" \
-              --data "{}"
+              --data "{}" \
+              -o "$response_file" \
+              -w "%{http_code}") || curl_exit=$?
+            echo "HTTP ${status}"
+            cat "$response_file"
+            if [ "$curl_exit" -ne 0 ]; then
+              echo "Refresh failed (curl_exit=${curl_exit}) period=${period}" >&2
+              failures=1
+            elif [ "$status" -lt 200 ] || [ "$status" -ge 300 ]; then
+              echo "Refresh failed (HTTP ${status}) period=${period}" >&2
+              failures=1
+            fi
+            rm -f "$response_file"
             sleep 2
           done
+
+          if [ "$failures" -ne 0 ]; then
+            exit 1
+          fi
