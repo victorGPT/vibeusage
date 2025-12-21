@@ -7,7 +7,7 @@
 - [x] Dashboard：扩展 API client 与 hooks，按 period 拉取 hourly/daily/monthly。
 - [x] Dashboard：TREND 组件支持 hourly（月度）标签与数据格式对齐。
 - [x] 缓存：按粒度拆分 cache key，避免互相污染。
-- [ ] 验证：
+- [x] 验证：
   - `period=day` 显示 24 小时曲线。
   - `period=week/month` 使用日聚合。
   - `period=total` 显示最近 24 个月曲线。
