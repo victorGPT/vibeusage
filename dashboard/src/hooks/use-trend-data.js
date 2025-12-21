@@ -208,6 +208,12 @@ function fillDailyGaps(rows, from, to) {
   const end = parseUtcDate(to);
   if (!start || !end || end < start) return Array.isArray(rows) ? rows : [];
 
+  const now = new Date();
+  const today = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
+  );
+  const todayTime = today.getTime();
+
   const byDay = new Map();
   for (const row of rows || []) {
     if (row?.day) byDay.set(row.day, row);
@@ -218,16 +224,19 @@ function fillDailyGaps(rows, from, to) {
     const day = formatDateUTC(cursor);
     const existing = byDay.get(day);
     if (existing) {
-      filled.push(existing);
+      filled.push({ ...existing, missing: false, future: false });
       continue;
     }
+    const isFuture = cursor.getTime() > todayTime;
     filled.push({
       day,
-      total_tokens: "0",
-      input_tokens: "0",
-      cached_input_tokens: "0",
-      output_tokens: "0",
-      reasoning_output_tokens: "0",
+      total_tokens: null,
+      input_tokens: null,
+      cached_input_tokens: null,
+      output_tokens: null,
+      reasoning_output_tokens: null,
+      missing: !isFuture,
+      future: isFuture,
     });
   }
 

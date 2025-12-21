@@ -15,7 +15,9 @@ export function getRangeForPeriod(period) {
 
   if (period === "week") {
     const fromDate = new Date(today);
-    fromDate.setUTCDate(fromDate.getUTCDate() - fromDate.getUTCDay()); // Sunday start
+    const day = fromDate.getUTCDay();
+    const offset = (day + 6) % 7; // Monday start
+    fromDate.setUTCDate(fromDate.getUTCDate() - offset);
     const toDate = new Date(fromDate);
     toDate.setUTCDate(toDate.getUTCDate() + 6);
     return { from: formatDateUTC(fromDate), to: formatDateUTC(toDate) };

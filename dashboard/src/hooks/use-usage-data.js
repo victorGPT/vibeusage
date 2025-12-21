@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { getUsageDaily, getUsageSummary } from "../lib/vibescore-api.js";
+import { formatDateUTC } from "../lib/date-range.js";
 import { isMockEnabled } from "../lib/mock-data.js";
 
 export function useUsageData({
@@ -65,8 +66,11 @@ export function useUsageData({
       const summaryRes = includeDaily ? results[1] : results[0];
       const dailyRes = includeDaily ? results[0] : null;
 
-      const nextDaily =
+      let nextDaily =
         includeDaily && Array.isArray(dailyRes?.data) ? dailyRes.data : [];
+      if (includeDaily) {
+        nextDaily = fillDailyGaps(nextDaily, from, to);
+      }
       const nextSummary = summaryRes?.totals || null;
       const nowIso = new Date().toISOString();
 
@@ -89,7 +93,11 @@ export function useUsageData({
       const cached = readCache();
       if (cached?.summary) {
         setSummary(cached.summary);
-        setDaily(Array.isArray(cached.daily) ? cached.daily : []);
+        const cachedDaily = Array.isArray(cached.daily) ? cached.daily : [];
+        const filledDaily = includeDaily
+          ? fillDailyGaps(cachedDaily, cached.from || from, cached.to || to)
+          : cachedDaily;
+        setDaily(filledDaily);
         setSource("cache");
         setFetchedAt(cached.fetchedAt || null);
         setError(null);
@@ -127,7 +135,11 @@ export function useUsageData({
     const cached = readCache();
     if (cached?.summary) {
       setSummary(cached.summary);
-      setDaily(Array.isArray(cached.daily) ? cached.daily : []);
+      const cachedDaily = Array.isArray(cached.daily) ? cached.daily : [];
+      const filledDaily = includeDaily
+        ? fillDailyGaps(cachedDaily, cached.from || from, cached.to || to)
+        : cachedDaily;
+      setDaily(filledDaily);
       setSource("cache");
       setFetchedAt(cached.fetchedAt || null);
     }
@@ -154,4 +166,66 @@ function safeHost(baseUrl) {
   } catch (_e) {
     return null;
   }
+}
+
+function parseUtcDate(yyyyMmDd) {
+  if (!yyyyMmDd) return null;
+  const raw = String(yyyyMmDd).trim();
+  const parts = raw.split("-");
+  if (parts.length !== 3) return null;
+  const y = Number(parts[0]);
+  const m = Number(parts[1]) - 1;
+  const d = Number(parts[2]);
+  if (!Number.isFinite(y) || !Number.isFinite(m) || !Number.isFinite(d)) {
+    return null;
+  }
+  const dt = new Date(Date.UTC(y, m, d));
+  if (!Number.isFinite(dt.getTime())) return null;
+  return formatDateUTC(dt) === raw ? dt : null;
+}
+
+function addUtcDays(date, days) {
+  return new Date(
+    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate() + days)
+  );
+}
+
+function fillDailyGaps(rows, from, to) {
+  const start = parseUtcDate(from);
+  const end = parseUtcDate(to);
+  if (!start || !end || end < start) return Array.isArray(rows) ? rows : [];
+
+  const now = new Date();
+  const today = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
+  );
+  const todayTime = today.getTime();
+
+  const byDay = new Map();
+  for (const row of rows || []) {
+    if (row?.day) byDay.set(row.day, row);
+  }
+
+  const filled = [];
+  for (let cursor = start; cursor <= end; cursor = addUtcDays(cursor, 1)) {
+    const day = formatDateUTC(cursor);
+    const existing = byDay.get(day);
+    if (existing) {
+      filled.push({ ...existing, missing: false, future: false });
+      continue;
+    }
+    const isFuture = cursor.getTime() > todayTime;
+    filled.push({
+      day,
+      total_tokens: null,
+      input_tokens: null,
+      cached_input_tokens: null,
+      output_tokens: null,
+      reasoning_output_tokens: null,
+      missing: !isFuture,
+      future: isFuture,
+    });
+  }
+
+  return filled;
 }

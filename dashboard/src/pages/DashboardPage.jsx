@@ -93,6 +93,18 @@ export function DashboardPage({ baseUrl, auth, signedIn, signOut }) {
 
   const [sort, setSort] = useState(() => ({ key: "day", dir: "desc" }));
   const sortedDaily = useMemo(() => sortDailyRows(daily, sort), [daily, sort]);
+  const hasDailyActual = useMemo(
+    () => daily.some((row) => !row?.missing && !row?.future),
+    [daily]
+  );
+
+  function renderDailyCell(row, key) {
+    if (row?.future) return "—";
+    if (row?.missing) {
+      return key === "total_tokens" ? "未同步" : "—";
+    }
+    return toDisplayNumber(row?.[key]);
+  }
 
   function toggleSort(key) {
     setSort((prev) => {
@@ -390,77 +402,82 @@ export function DashboardPage({ baseUrl, auth, signedIn, signOut }) {
 
             {period !== "total" ? (
               <AsciiBox title="Daily_Totals" subtitle="Sortable">
-                {daily.length === 0 ? (
-                  <div className="text-[10px] opacity-40">
+                {!hasDailyActual ? (
+                  <div className="text-[10px] opacity-40 mb-2">
                     No data yet. Use Codex CLI then run{" "}
                     <code className="px-1 py-0.5 bg-black/40 border border-[#00FF41]/20">
                       {installSyncCmd}
                     </code>
                     .
                   </div>
-                ) : (
-                  <div
-                    className="overflow-auto max-h-[520px] border border-[#00FF41]/10"
-                    role="region"
-                    aria-label="Daily totals table"
-                    tabIndex={0}
-                  >
-                    <table className="w-full border-collapse">
-                      <thead className="sticky top-0 bg-black/90 backdrop-blur">
-                        <tr className="border-b border-[#00FF41]/10">
-                          {DAILY_SORT_COLUMNS.map((c) => (
-                            <th
-                              key={c.key}
-                              aria-sort={ariaSortFor(c.key)}
-                              className="text-left p-0"
-                            >
-                              <button
-                                type="button"
-                                onClick={() => toggleSort(c.key)}
-                                title={c.title}
-                                className="w-full px-3 py-2 text-[9px] uppercase tracking-widest font-black opacity-70 hover:opacity-100 hover:bg-[#00FF41]/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00FF41]/30"
-                              >
-                                <span className="inline-flex items-center gap-2">
-                                  <span>{c.label}</span>
-                                  <span className="opacity-40">
-                                    {sortIconFor(c.key)}
-                                  </span>
-                                </span>
-                              </button>
-                            </th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {sortedDaily.map((r) => (
-                          <tr
-                            key={String(r.day)}
-                            className="border-b border-[#00FF41]/5 hover:bg-[#00FF41]/5"
+                ) : null}
+                <div
+                  className="overflow-auto max-h-[520px] border border-[#00FF41]/10"
+                  role="region"
+                  aria-label="Daily totals table"
+                  tabIndex={0}
+                >
+                  <table className="w-full border-collapse">
+                    <thead className="sticky top-0 bg-black/90 backdrop-blur">
+                      <tr className="border-b border-[#00FF41]/10">
+                        {DAILY_SORT_COLUMNS.map((c) => (
+                          <th
+                            key={c.key}
+                            aria-sort={ariaSortFor(c.key)}
+                            className="text-left p-0"
                           >
-                            <td className="px-3 py-2 text-[10px] opacity-80 font-mono">
-                              {String(r.day)}
-                            </td>
-                            <td className="px-3 py-2 text-[10px] font-mono">
-                              {toDisplayNumber(r.total_tokens)}
-                            </td>
-                            <td className="px-3 py-2 text-[10px] font-mono">
-                              {toDisplayNumber(r.input_tokens)}
-                            </td>
-                            <td className="px-3 py-2 text-[10px] font-mono">
-                              {toDisplayNumber(r.output_tokens)}
-                            </td>
-                            <td className="px-3 py-2 text-[10px] font-mono">
-                              {toDisplayNumber(r.cached_input_tokens)}
-                            </td>
-                            <td className="px-3 py-2 text-[10px] font-mono">
-                              {toDisplayNumber(r.reasoning_output_tokens)}
-                            </td>
-                          </tr>
+                            <button
+                              type="button"
+                              onClick={() => toggleSort(c.key)}
+                              title={c.title}
+                              className="w-full px-3 py-2 text-[9px] uppercase tracking-widest font-black opacity-70 hover:opacity-100 hover:bg-[#00FF41]/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00FF41]/30"
+                            >
+                              <span className="inline-flex items-center gap-2">
+                                <span>{c.label}</span>
+                                <span className="opacity-40">
+                                  {sortIconFor(c.key)}
+                                </span>
+                              </span>
+                            </button>
+                          </th>
                         ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {sortedDaily.map((r) => (
+                        <tr
+                          key={String(r.day)}
+                          className={`border-b border-[#00FF41]/5 hover:bg-[#00FF41]/5 ${
+                            r.missing
+                              ? "text-[#00FF41]/50"
+                              : r.future
+                              ? "text-[#00FF41]/30"
+                              : ""
+                          }`}
+                        >
+                          <td className="px-3 py-2 text-[10px] opacity-80 font-mono">
+                            {String(r.day)}
+                          </td>
+                          <td className="px-3 py-2 text-[10px] font-mono">
+                            {renderDailyCell(r, "total_tokens")}
+                          </td>
+                          <td className="px-3 py-2 text-[10px] font-mono">
+                            {renderDailyCell(r, "input_tokens")}
+                          </td>
+                          <td className="px-3 py-2 text-[10px] font-mono">
+                            {renderDailyCell(r, "output_tokens")}
+                          </td>
+                          <td className="px-3 py-2 text-[10px] font-mono">
+                            {renderDailyCell(r, "cached_input_tokens")}
+                          </td>
+                          <td className="px-3 py-2 text-[10px] font-mono">
+                            {renderDailyCell(r, "reasoning_output_tokens")}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </AsciiBox>
             ) : null}
           </div>
