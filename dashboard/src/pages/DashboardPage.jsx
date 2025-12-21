@@ -80,13 +80,6 @@ export function DashboardPage({ baseUrl, auth, signedIn, signOut }) {
     [daily]
   );
 
-  const fluxData = useMemo(() => {
-    const values = (trendRows || []).map((row) =>
-      Number(row?.total_tokens || 0)
-    );
-    return values;
-  }, [trendRows]);
-
   function toggleSort(key) {
     setSort((prev) => {
       if (prev.key === key) return { key, dir: prev.dir === "asc" ? "desc" : "asc" };
@@ -333,7 +326,7 @@ export function DashboardPage({ baseUrl, auth, signedIn, signOut }) {
             />
 
             <TrendMonitor
-              data={fluxData}
+              rows={trendRows}
               label="TREND"
               from={from}
               to={to}

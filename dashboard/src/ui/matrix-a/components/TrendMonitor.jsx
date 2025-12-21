@@ -1,8 +1,9 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useRef, useState } from "react";
 
 // --- Trend Monitor (NeuralFluxMonitor v2.0) ---
 // Industrial TUI style: independent axes, precise grid, physical partitions.
 export function TrendMonitor({
+  rows,
   data = [],
   color = "#00FF41",
   label = "TREND",
@@ -10,7 +11,17 @@ export function TrendMonitor({
   to,
   period,
 }) {
-  const safeData = data.length > 0 ? data : Array.from({ length: 24 }, () => 0);
+  const series = Array.isArray(rows) && rows.length ? rows : null;
+  const seriesValues = series
+    ? series.map((row) => Number(row?.total_tokens || 0))
+    : [];
+  const seriesLabels = series ? series.map((row) => row?.day || "") : [];
+  const safeData =
+    seriesValues.length > 0
+      ? seriesValues
+      : data.length > 0
+      ? data
+      : Array.from({ length: 24 }, () => 0);
   const max = Math.max(...safeData, 100);
   const avg = safeData.reduce((a, b) => a + b, 0) / safeData.length;
 
@@ -84,6 +95,29 @@ export function TrendMonitor({
     );
   }
 
+  function formatCompact(value) {
+    const n = Number(value) || 0;
+    const abs = Math.abs(n);
+    if (abs >= 1e9) {
+      const fixed = abs >= 1e10 ? 0 : 1;
+      return `${(n / 1e9).toFixed(fixed)}B`;
+    }
+    if (abs >= 1e6) {
+      const fixed = abs >= 1e7 ? 0 : 1;
+      return `${(n / 1e6).toFixed(fixed)}M`;
+    }
+    if (abs >= 1e3) {
+      const fixed = abs >= 1e4 ? 0 : 1;
+      return `${(n / 1e3).toFixed(fixed)}K`;
+    }
+    return String(Math.round(n));
+  }
+
+  function formatFull(value) {
+    const n = Number(value) || 0;
+    return n.toLocaleString();
+  }
+
   const points = useMemo(() => {
     const denom = Math.max(safeData.length - 1, 1);
     return safeData
@@ -100,6 +134,38 @@ export function TrendMonitor({
     height - plotBottom
   }`;
   const xLabels = useMemo(() => buildXAxisLabels(), [from, period, to]);
+
+  const plotRef = useRef(null);
+  const [hover, setHover] = useState(null);
+
+  function handleMove(e) {
+    const el = plotRef.current;
+    if (!el || safeData.length === 0) return;
+    const rect = el.getBoundingClientRect();
+    const axisWidthPx = (axisWidth / width) * rect.width;
+    const plotWidthPx = rect.width - axisWidthPx;
+    const rawX = Math.min(Math.max(e.clientX - rect.left, 0), plotWidthPx);
+    const ratio = plotWidthPx > 0 ? rawX / plotWidthPx : 0;
+    const index = Math.round(ratio * Math.max(safeData.length - 1, 0));
+    const value = safeData[index] ?? 0;
+    const labelText = seriesLabels[index] || "";
+    const yRatio = max > 0 ? 1 - value / max : 1;
+    const yPx =
+      (plotTop / height) * rect.height +
+      yRatio * (plotHeight / height) * rect.height;
+    setHover({
+      index,
+      value,
+      label: labelText,
+      x: rawX,
+      y: yPx,
+      rectWidth: rect.width,
+    });
+  }
+
+  function handleLeave() {
+    setHover(null);
+  }
 
   return (
     <div className="w-full h-full min-h-[160px] flex flex-col relative group select-none bg-[#050505] border border-white/10 p-1">
@@ -155,12 +221,34 @@ export function TrendMonitor({
         </svg>
 
         <div className="absolute right-0 top-0 bottom-0 flex flex-col justify-between py-1 px-1 text-[7px] font-mono text-[#00FF41]/60 pointer-events-none bg-black/60 backdrop-blur-[1px] border-l border-white/5 w-8 text-right">
-          <span>{Math.round(max)}k</span>
-          <span>{Math.round(max * 0.75)}k</span>
-          <span>{Math.round(max * 0.5)}k</span>
-          <span>{Math.round(max * 0.25)}k</span>
+          <span>{formatCompact(max)}</span>
+          <span>{formatCompact(max * 0.75)}</span>
+          <span>{formatCompact(max * 0.5)}</span>
+          <span>{formatCompact(max * 0.25)}</span>
           <span>0</span>
         </div>
+
+        <div
+          ref={plotRef}
+          className="absolute inset-0 z-20"
+          onMouseMove={handleMove}
+          onMouseLeave={handleLeave}
+        ></div>
+
+        {hover ? (
+          <div
+            className="absolute z-30 px-2 py-1 text-[9px] font-mono bg-black/90 border border-[#00FF41]/30 text-[#00FF41] pointer-events-none"
+            style={{
+              left: Math.min(hover.x + 10, hover.rectWidth - 120),
+              top: Math.max(hover.y - 24, 6),
+            }}
+          >
+            <div className="opacity-70">
+              {hover.label ? `${hover.label} UTC` : "UTC"}
+            </div>
+            <div className="font-bold">{formatFull(hover.value)} tokens</div>
+          </div>
+        ) : null}
       </div>
 
       <div className="h-4 flex justify-between items-center px-1 mt-1 text-[8px] font-mono text-[#00FF41]/40 border-t border-white/5 pt-1">
