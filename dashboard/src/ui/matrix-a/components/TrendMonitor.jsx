@@ -170,8 +170,7 @@ export function TrendMonitor({
   return (
     <div className="w-full h-full min-h-[160px] flex flex-col relative group select-none bg-[#050505] border border-white/10 p-1">
       <div className="flex justify-between items-center px-1 mb-1 border-b border-white/5 pb-1">
-        <span className="text-[9px] font-black uppercase tracking-widest text-[#00FF41]/80 flex items-center gap-2">
-          <span className="w-1.5 h-1.5 bg-[#00FF41] animate-pulse shadow-[0_0_5px_#00FF41]"></span>
+        <span className="shrink-0 font-black uppercase tracking-[0.2em] text-[#00FF41] px-2 py-0.5 bg-[#00FF41]/10 text-[9px] border border-[#00FF41]/20">
           {label}
         </span>
         <div className="flex gap-3 text-[8px] font-mono text-[#00FF41]/50">
