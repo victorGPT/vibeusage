@@ -145,9 +145,12 @@ export function TrendMonitor({
     const axisWidthPx = (axisWidth / width) * rect.width;
     const plotWidthPx = rect.width - axisWidthPx;
     const rawX = Math.min(Math.max(e.clientX - rect.left, 0), plotWidthPx);
+    const denom = Math.max(safeData.length - 1, 1);
     const ratio = plotWidthPx > 0 ? rawX / plotWidthPx : 0;
-    const index = Math.round(ratio * Math.max(safeData.length - 1, 0));
+    const index = Math.round(ratio * denom);
     const value = safeData[index] ?? 0;
+    const snappedX =
+      denom > 0 ? (index / denom) * plotWidthPx : plotWidthPx / 2;
     const labelText = seriesLabels[index] || "";
     const yRatio = max > 0 ? 1 - value / max : 1;
     const yPx =
@@ -157,7 +160,7 @@ export function TrendMonitor({
       index,
       value,
       label: labelText,
-      x: rawX,
+      x: snappedX,
       y: yPx,
       rectWidth: rect.width,
       axisWidthPx,
