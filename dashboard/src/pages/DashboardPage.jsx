@@ -8,7 +8,6 @@ import { toDisplayNumber } from "../lib/format.js";
 import { useActivityHeatmap } from "../hooks/use-activity-heatmap.js";
 import { useUsageData } from "../hooks/use-usage-data.js";
 import { BackendStatus } from "../components/BackendStatus.jsx";
-import { Sparkline } from "../components/Sparkline.jsx";
 import { AsciiBox } from "../ui/matrix-a/components/AsciiBox.jsx";
 import { ActivityHeatmap } from "../ui/matrix-a/components/ActivityHeatmap.jsx";
 import { BootScreen } from "../ui/matrix-a/components/BootScreen.jsx";
@@ -76,17 +75,17 @@ export function DashboardPage({ baseUrl, auth, signedIn, signOut }) {
 
   const [sort, setSort] = useState(() => ({ key: "day", dir: "desc" }));
   const sortedDaily = useMemo(() => sortDailyRows(daily, sort), [daily, sort]);
-  const sparklineRows = useMemo(
+  const trendRows = useMemo(
     () => sortDailyRows(daily, { key: "day", dir: "asc" }),
     [daily]
   );
 
   const fluxData = useMemo(() => {
-    const values = (sparklineRows || []).map((row) =>
+    const values = (trendRows || []).map((row) =>
       Number(row?.total_tokens || 0)
     );
     return values;
-  }, [sparklineRows]);
+  }, [trendRows]);
 
   function toggleSort(key) {
     setSort((prev) => {
@@ -340,12 +339,6 @@ export function DashboardPage({ baseUrl, auth, signedIn, signOut }) {
               to={to}
               period={period}
             />
-
-            {period !== "total" ? (
-              <AsciiBox title="Sparkline" subtitle={`${period.toUpperCase()} ${from}..${to}`}>
-                <Sparkline rows={sparklineRows} />
-              </AsciiBox>
-            ) : null}
 
             {period !== "total" ? (
               <AsciiBox title="Daily_Totals" subtitle="Sortable">
