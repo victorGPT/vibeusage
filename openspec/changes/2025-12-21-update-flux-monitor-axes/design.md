@@ -3,20 +3,18 @@ The dashboard includes a Neural_Flux_Monitor sparkline panel, but it lacks axis 
 
 ## Goals / Non-Goals
 - Goals:
-  - Add X/Y axes and tick labels to make the metric legible.
-  - Keep the flux monitor aligned with the Zion_Index period/range selection.
-  - Keep the UI minimal and consistent with the Matrix UI A theme.
+  - Implement the provided TUI-style TrendMonitor v2 layout without altering its structure.
+  - Preserve axis/grid/scan sweep visuals and fixed time labels for the X-axis.
+  - Keep the UI consistent with Matrix UI A typography and color system.
 - Non-Goals:
   - Add new backend endpoints or change data aggregation.
   - Introduce heavy charting libraries.
 
 ## Decisions
-- Use existing daily usage data (already used by Zion_Index) to feed the flux monitor.
-- X-axis reflects the current period range (UTC), e.g. day/week/month/total.
-- Y-axis shows token count scale derived from current data (min=0, max=tick max).
-- Keep axes styling subtle to avoid clutter (small font, low opacity).
-- Show minimal axes/range labels even when data is empty to preserve context.
-- Rename the panel label to `Trend` (industry-standard trend naming).
+- Use the provided v2 layout as-is, with only the component name and label adjusted.
+- Keep X-axis labels fixed at `-24H/-18H/-12H/-6H/NOW` as specified.
+- Use the existing usage data series (same source as Zion_Index) to feed the chart.
+- Keep the scan sweep defined inline via the component style block.
 
 ## Alternatives Considered
 - Keep current minimalist view: rejected because readability is poor.

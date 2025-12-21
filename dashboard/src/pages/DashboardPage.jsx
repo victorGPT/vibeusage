@@ -333,12 +333,7 @@ export function DashboardPage({ baseUrl, auth, signedIn, signOut }) {
               statusLabel={usageStatusLabel}
             />
 
-            <TrendMonitor
-              data={fluxData}
-              from={from}
-              to={to}
-              period={period}
-            />
+            <TrendMonitor data={fluxData} label="TREND" />
 
             {period !== "total" ? (
               <AsciiBox title="Sparkline" subtitle={`${period.toUpperCase()} ${from}..${to}`}>

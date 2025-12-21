@@ -1,85 +1,37 @@
 import React, { useMemo } from "react";
 
-const DEFAULT_COLOR = "#00FF41";
-const GRID_SIZE = 20;
-
-function parseDate(value) {
-  if (!value) return null;
-  const parts = String(value).trim().split("-");
-  if (parts.length !== 3) return null;
-  const y = Number(parts[0]);
-  const m = Number(parts[1]) - 1;
-  const d = Number(parts[2]);
-  if (!Number.isFinite(y) || !Number.isFinite(m) || !Number.isFinite(d)) return null;
-  return new Date(Date.UTC(y, m, d));
-}
-
-function formatAxisDate(dt) {
-  if (!dt) return "";
-  const mm = String(dt.getUTCMonth() + 1).padStart(2, "0");
-  const dd = String(dt.getUTCDate()).padStart(2, "0");
-  return `${mm}-${dd}`;
-}
-
-function buildXAxisLabels({ from, to, period }) {
-  if (period === "day") {
-    return ["00:00", "06:00", "12:00", "18:00", "NOW"];
-  }
-  const start = parseDate(from);
-  const end = parseDate(to);
-  if (!start || !end || end < start) {
-    return ["-24H", "-18H", "-12H", "-6H", "NOW"];
-  }
-  const totalMs = end.getTime() - start.getTime();
-  const steps = [0, 0.25, 0.5, 0.75, 1];
-  return steps.map((ratio, idx) => {
-    if (idx === steps.length - 1) return "NOW";
-    const dt = new Date(start.getTime() + totalMs * ratio);
-    return formatAxisDate(dt);
-  });
-}
-
+// --- Trend Monitor (NeuralFluxMonitor v2.0) ---
+// Industrial TUI style: independent axes, precise grid, physical partitions.
 export function TrendMonitor({
   data = [],
-  color = DEFAULT_COLOR,
-  label = "TREND",
-  from,
-  to,
-  period,
-  className = "",
+  color = "#00FF41",
+  label = "NEURAL_FLUX",
 }) {
-  const hasData = Array.isArray(data) && data.length > 0;
-  const safeData = hasData ? data : Array.from({ length: 24 }, () => 0);
+  const safeData = data.length > 0 ? data : Array.from({ length: 24 }, () => 0);
   const max = Math.max(...safeData, 100);
   const avg = safeData.reduce((a, b) => a + b, 0) / safeData.length;
 
+  const width = 100;
+  const height = 100;
+
   const points = useMemo(() => {
-    if (safeData.length <= 1) return "";
     return safeData
       .map((val, i) => {
-        const x = (i / (safeData.length - 1)) * 100;
-        const normalizedVal = max > 0 ? val / max : 0;
-        const y = 100 - normalizedVal * 100;
+        const x = (i / (safeData.length - 1)) * width;
+        const normalizedVal = val / max;
+        const y = height - normalizedVal * height;
         return `${x},${y}`;
       })
       .join(" ");
   }, [safeData, max]);
 
-  const fillPath = points ? `${points} 100,100 0,100` : "";
-  const xLabels = useMemo(
-    () => buildXAxisLabels({ from, to, period }),
-    [from, period, to]
-  );
+  const fillPath = `${points} ${width},${height} 0,${height}`;
 
   return (
-    <div
-      className={`w-full h-full min-h-[160px] flex flex-col relative group select-none bg-[#050505] border border-white/10 p-1 ${className}`}
-    >
+    <div className="w-full h-full min-h-[160px] flex flex-col relative group select-none bg-[#050505] border border-white/10 p-1">
       <div className="flex justify-between items-center px-1 mb-1 border-b border-white/5 pb-1">
         <span className="text-[9px] font-black uppercase tracking-widest text-[#00FF41]/80 flex items-center gap-2">
-          <span
-            className="w-1.5 h-1.5 bg-[#00FF41] animate-pulse shadow-[0_0_5px_#00FF41]"
-          ></span>
+          <span className="w-1.5 h-1.5 bg-[#00FF41] animate-pulse shadow-[0_0_5px_#00FF41]"></span>
           {label}
         </span>
         <div className="flex gap-3 text-[8px] font-mono text-[#00FF41]/50">
@@ -96,14 +48,14 @@ export function TrendMonitor({
               linear-gradient(to right, ${color} 1px, transparent 1px),
               linear-gradient(to bottom, ${color} 1px, transparent 1px)
             `,
-            backgroundSize: `${GRID_SIZE}px ${GRID_SIZE}px`,
+            backgroundSize: "20px 20px",
           }}
         />
 
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#00FF41]/25 to-transparent w-[60%] h-full animate-[scan-x_3s_linear_infinite] pointer-events-none mix-blend-screen opacity-80" />
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#00FF41]/10 to-transparent w-[50%] h-full animate-[scan-x_3s_linear_infinite] pointer-events-none mix-blend-screen" />
 
         <svg
-          viewBox="0 0 100 100"
+          viewBox={`0 0 ${width} ${height}`}
           className="w-full h-full preserve-3d absolute inset-0 z-10"
           preserveAspectRatio="none"
         >
@@ -122,23 +74,19 @@ export function TrendMonitor({
             </mask>
           </defs>
 
-          {fillPath ? (
-            <path
-              d={`M${fillPath} Z`}
-              fill={`url(#grad-${label})`}
-              mask={`url(#grid-mask-${label})`}
-            />
-          ) : null}
-          {points ? (
-            <polyline
-              points={points}
-              fill="none"
-              stroke={color}
-              strokeWidth="1.5"
-              vectorEffect="non-scaling-stroke"
-              className="drop-shadow-[0_0_5px_rgba(0,255,65,0.8)]"
-            />
-          ) : null}
+          <path
+            d={`M${fillPath} Z`}
+            fill={`url(#grad-${label})`}
+            mask={`url(#grid-mask-${label})`}
+          />
+          <polyline
+            points={points}
+            fill="none"
+            stroke={color}
+            strokeWidth="1.5"
+            vectorEffect="non-scaling-stroke"
+            className="drop-shadow-[0_0_5px_rgba(0,255,65,0.8)]"
+          />
         </svg>
 
         <div className="absolute right-0 top-0 bottom-0 flex flex-col justify-between py-1 px-1 text-[7px] font-mono text-[#00FF41]/60 pointer-events-none bg-black/60 backdrop-blur-[1px] border-l border-white/5 w-8 text-right">
@@ -148,24 +96,26 @@ export function TrendMonitor({
           <span>{Math.round(max * 0.25)}k</span>
           <span>0</span>
         </div>
-
-        {!hasData ? (
-          <div className="absolute inset-0 flex items-center justify-center text-[10px] opacity-40">
-            No signal data.
-          </div>
-        ) : null}
       </div>
 
       <div className="h-4 flex justify-between items-center px-1 mt-1 text-[8px] font-mono text-[#00FF41]/40 border-t border-white/5 pt-1">
-        {xLabels.map((labelText, idx) => (
-          <span
-            key={`${labelText}-${idx}`}
-            className={labelText === "NOW" ? "text-[#00FF41] font-bold animate-pulse" : ""}
-          >
-            {labelText}
-          </span>
-        ))}
+        <span>-24H</span>
+        <span>-18H</span>
+        <span>-12H</span>
+        <span>-6H</span>
+        <span className="text-[#00FF41] font-bold animate-pulse">NOW</span>
       </div>
+
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
+        @keyframes scan-x {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(200%); }
+        }
+      `,
+        }}
+      />
     </div>
   );
 }
