@@ -76,9 +76,40 @@ export function TrendMonitor({
     return `${MONTH_LABELS[dt.getUTCMonth()]} ${yy}`;
   }
 
+  function parseMonth(value) {
+    if (!value) return null;
+    const raw = String(value).trim();
+    const parts = raw.split("-");
+    if (parts.length !== 2) return null;
+    const y = Number(parts[0]);
+    const m = Number(parts[1]) - 1;
+    if (!Number.isFinite(y) || !Number.isFinite(m)) return null;
+    return new Date(Date.UTC(y, m, 1));
+  }
+
+  function pickLabelIndices(length) {
+    if (length <= 1) return [0];
+    const last = length - 1;
+    const steps = [0, 0.25, 0.5, 0.75, 1];
+    return steps.map((ratio) => Math.round(last * ratio));
+  }
+
+  function formatAxisLabel(raw) {
+    if (!raw) return "";
+    if (period === "total") {
+      return formatMonth(parseMonth(raw));
+    }
+    return formatAxisDate(parseDate(raw));
+  }
+
   function buildXAxisLabels() {
     if (period === "day") {
       return ["00:00", "06:00", "12:00", "18:00", "23:00"];
+    }
+    if (seriesLabels.length > 0) {
+      const indices = pickLabelIndices(seriesLabels.length);
+      const labels = indices.map((idx) => formatAxisLabel(seriesLabels[idx] || ""));
+      if (labels.some((label) => label)) return labels;
     }
     const start = parseDate(from);
     const end = parseDate(to);

@@ -5,6 +5,7 @@ import {
   getUsageHourly,
   getUsageMonthly,
 } from "../lib/vibescore-api.js";
+import { formatDateUTC } from "../lib/date-range.js";
 import { isMockEnabled } from "../lib/mock-data.js";
 
 const DEFAULT_MONTHS = 24;
@@ -87,9 +88,12 @@ export function useTrendData({
         response = await getUsageDaily({ baseUrl, accessToken, from, to });
       }
 
-      const nextRows = Array.isArray(response?.data) ? response.data : [];
       const nextFrom = response?.from || from || response?.day || null;
       const nextTo = response?.to || to || response?.day || null;
+      let nextRows = Array.isArray(response?.data) ? response.data : [];
+      if (mode === "daily") {
+        nextRows = fillDailyGaps(nextRows, nextFrom || from, nextTo || to);
+      }
       const nowIso = new Date().toISOString();
 
       setRows(nextRows);
@@ -175,4 +179,57 @@ function safeHost(baseUrl) {
   } catch (_e) {
     return null;
   }
+}
+
+function parseUtcDate(yyyyMmDd) {
+  if (!yyyyMmDd) return null;
+  const raw = String(yyyyMmDd).trim();
+  const parts = raw.split("-");
+  if (parts.length !== 3) return null;
+  const y = Number(parts[0]);
+  const m = Number(parts[1]) - 1;
+  const d = Number(parts[2]);
+  if (!Number.isFinite(y) || !Number.isFinite(m) || !Number.isFinite(d)) {
+    return null;
+  }
+  const dt = new Date(Date.UTC(y, m, d));
+  if (!Number.isFinite(dt.getTime())) return null;
+  return formatDateUTC(dt) === raw ? dt : null;
+}
+
+function addUtcDays(date, days) {
+  return new Date(
+    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate() + days)
+  );
+}
+
+function fillDailyGaps(rows, from, to) {
+  const start = parseUtcDate(from);
+  const end = parseUtcDate(to);
+  if (!start || !end || end < start) return Array.isArray(rows) ? rows : [];
+
+  const byDay = new Map();
+  for (const row of rows || []) {
+    if (row?.day) byDay.set(row.day, row);
+  }
+
+  const filled = [];
+  for (let cursor = start; cursor <= end; cursor = addUtcDays(cursor, 1)) {
+    const day = formatDateUTC(cursor);
+    const existing = byDay.get(day);
+    if (existing) {
+      filled.push(existing);
+      continue;
+    }
+    filled.push({
+      day,
+      total_tokens: "0",
+      input_tokens: "0",
+      cached_input_tokens: "0",
+      output_tokens: "0",
+      reasoning_output_tokens: "0",
+    });
+  }
+
+  return filled;
 }
