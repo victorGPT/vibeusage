@@ -24,5 +24,8 @@
   },
   "devDependencies": {
     "esbuild": "0.27.2"
+  },
+  "dependencies": {
+    "@insforge/sdk": "^1.0.4"
   }
 }

@@ -115,6 +115,7 @@
 ### 6.1 CLI（Node）
 
 - `VIBESCORE_INSFORGE_BASE_URL`：InsForge base URL（默认：`https://5tmappuk.us-east.insforge.app`）
+- `VIBESCORE_INSFORGE_ANON_KEY`：可选；InsForge anon key（SDK 使用）。若未设置，则回退 `INSFORGE_ANON_KEY`
 - `VIBESCORE_DASHBOARD_URL`：可选；用于 CLI 打开自托管 `/connect` 页面
 - `VIBESCORE_DEVICE_TOKEN`：可选；用于无交互配置 device token（覆盖本地 config）
 - `VIBESCORE_HTTP_TIMEOUT_MS`：可选；HTTP 请求超时（毫秒）。`0` 表示关闭超时；默认 `20000`；取值会被限制在 `1000..120000`
@@ -124,6 +125,7 @@
 ### 6.2 Dashboard（Vite）
 
 - `VITE_VIBESCORE_INSFORGE_BASE_URL`
+- `VITE_VIBESCORE_INSFORGE_ANON_KEY`：可选；Dashboard SDK 用的 anon key（回退 `VITE_INSFORGE_ANON_KEY`）
 - UI 组件库统一使用：`dashboard/src/ui/matrix-a/components`
 - `VITE_VIBESCORE_MOCK`：可选；`1|true` 时使用本地 mock 数据（可用 `?mock=1`）
 - `VITE_VIBESCORE_MOCK_SEED`：可选；mock 数据种子（可用 `?mock_seed=xxx`）

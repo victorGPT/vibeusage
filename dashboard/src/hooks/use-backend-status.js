@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { getBackendProbeUrl } from "../lib/vibescore-api.js";
+import { probeBackend } from "../lib/vibescore-api.js";
 
 export function useBackendStatus({
   baseUrl,
   accessToken,
   intervalMs = 60_000,
-  timeoutMs = 1500,
+  timeoutMs = 2500,
+  retryDelayMs = 300,
+  failureThreshold = 2,
 } = {}) {
   const [status, setStatus] = useState("unknown"); // unknown | active | error | down
   const [checking, setChecking] = useState(false);
@@ -16,6 +18,10 @@ export function useBackendStatus({
   const [error, setError] = useState(null);
 
   const inFlightRef = useRef(false);
+  const failureCountRef = useRef(0);
+  const threshold = Number.isFinite(Number(failureThreshold))
+    ? Math.max(1, Math.floor(Number(failureThreshold)))
+    : 2;
 
   const refresh = useCallback(async () => {
     if (!baseUrl) {
@@ -27,9 +33,8 @@ export function useBackendStatus({
       return;
     }
 
-    let url;
     try {
-      url = getBackendProbeUrl(baseUrl);
+      new URL(baseUrl);
     } catch (_e) {
       setStatus("error");
       setChecking(false);
@@ -44,42 +49,49 @@ export function useBackendStatus({
     setChecking(true);
     setError(null);
 
-    const controller = new AbortController();
-    const t = window.setTimeout(() => controller.abort(), timeoutMs);
-
     try {
-      const res = await fetch(url.toString(), {
-        method: "GET",
-        cache: "no-store",
-        headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
-        signal: controller.signal,
+      const result = await probeWithRetry({
+        baseUrl,
+        accessToken,
+        timeoutMs,
+        retryDelayMs,
       });
 
-      setHttpStatus(res.status);
+      if (!result.ok) {
+        throw result.error;
+      }
+
+      failureCountRef.current = 0;
+      setHttpStatus(result.status ?? 200);
+      const now = new Date().toISOString();
+      setLastCheckedAt(now);
+      setStatus("active");
+      setError(null);
+      setLastOkAt(now);
+    } catch (e) {
+      const statusCode = e?.status ?? e?.statusCode;
+      setHttpStatus(Number.isFinite(statusCode) ? statusCode : null);
       setLastCheckedAt(new Date().toISOString());
 
-      if (res.status === 401 || res.status === 403) {
+      if (statusCode === 401 || statusCode === 403) {
+        failureCountRef.current = 0;
         setStatus("error");
         setError("Unauthorized");
-      } else if (res.status === 404 || res.status >= 500) {
+      } else if (typeof statusCode === "number" && statusCode < 500) {
+        failureCountRef.current = 0;
         setStatus("error");
-        setError(`HTTP ${res.status}`);
+        setError(`HTTP ${statusCode}`);
       } else {
-        setStatus("active");
-        setError(null);
-        setLastOkAt(new Date().toISOString());
+        failureCountRef.current += 1;
+        const nextStatus = failureCountRef.current >= threshold ? "down" : "error";
+        setStatus(nextStatus);
+        setError(e?.name === "AbortError" ? "Timeout" : e?.message || "Fetch failed");
       }
-    } catch (e) {
-      setHttpStatus(null);
-      setLastCheckedAt(new Date().toISOString());
-      setStatus("down");
-      setError(e?.name === "AbortError" ? "Timeout" : e?.message || "Fetch failed");
     } finally {
-      window.clearTimeout(t);
       inFlightRef.current = false;
       setChecking(false);
     }
-  }, [baseUrl, timeoutMs]);
+  }, [accessToken, baseUrl, retryDelayMs, threshold, timeoutMs]);
 
   useEffect(() => {
     let id = null;
@@ -118,4 +130,45 @@ export function useBackendStatus({
     error,
     refresh,
   };
+}
+
+async function probeWithRetry({ baseUrl, accessToken, timeoutMs, retryDelayMs }) {
+  const first = await probeOnce({ baseUrl, accessToken, timeoutMs });
+  if (first.ok) return first;
+  if (!shouldRetry(first.error)) return first;
+  if (retryDelayMs > 0) {
+    await sleep(retryDelayMs);
+  }
+  return probeOnce({ baseUrl, accessToken, timeoutMs });
+}
+
+async function probeOnce({ baseUrl, accessToken, timeoutMs }) {
+  const controller = new AbortController();
+  const t = window.setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const res = await probeBackend({
+      baseUrl,
+      accessToken,
+      signal: controller.signal,
+    });
+    return { ok: true, status: res?.status ?? 200 };
+  } catch (error) {
+    return { ok: false, error };
+  } finally {
+    window.clearTimeout(t);
+  }
+}
+
+function shouldRetry(error) {
+  if (!error) return false;
+  if (error.retryable) return true;
+  const statusCode = error?.status ?? error?.statusCode;
+  if (statusCode >= 500) return true;
+  return error?.name === "AbortError";
+}
+
+function sleep(ms) {
+  if (!ms || ms <= 0) return Promise.resolve();
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }

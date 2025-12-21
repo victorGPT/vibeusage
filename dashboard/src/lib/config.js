@@ -5,3 +5,10 @@ export function getInsforgeBaseUrl() {
   );
 }
 
+export function getInsforgeAnonKey() {
+  return (
+    import.meta.env.VITE_VIBESCORE_INSFORGE_ANON_KEY ||
+    import.meta.env.VITE_INSFORGE_ANON_KEY ||
+    ""
+  );
+}

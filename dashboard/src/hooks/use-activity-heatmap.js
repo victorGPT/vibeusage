@@ -136,7 +136,7 @@ export function useActivityHeatmap({
         }
         return;
       } catch (e) {
-        const status = e?.status;
+        const status = e?.status ?? e?.statusCode;
         if (status === 401 || status === 403) throw e;
       }
 

@@ -1,16 +1,11 @@
 'use strict';
 
-const { parseRetryAfterMs } = require('./upload-throttle');
+const { createInsforgeClient } = require('./insforge-client');
 
 async function signInWithPassword({ baseUrl, email, password }) {
-  const url = new URL('/api/auth/sessions', baseUrl).toString();
-  const { data } = await requestJson({
-    url,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: { email, password },
-    errorPrefix: 'Sign-in failed'
-  });
+  const client = createInsforgeClient({ baseUrl });
+  const { data, error } = await client.auth.signInWithPassword({ email, password });
+  if (error) throw normalizeSdkError(error, 'Sign-in failed');
 
   const accessToken = data?.accessToken;
   if (typeof accessToken !== 'string' || accessToken.length === 0) {
@@ -21,14 +16,11 @@ async function signInWithPassword({ baseUrl, email, password }) {
 }
 
 async function issueDeviceToken({ baseUrl, accessToken, deviceName, platform = 'macos' }) {
-  const url = new URL('/functions/vibescore-device-token-issue', baseUrl).toString();
-  const { data } = await requestJson({
-    url,
+  const data = await invokeFunction({
+    baseUrl,
+    accessToken,
+    slug: 'vibescore-device-token-issue',
     method: 'POST',
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      'Content-Type': 'application/json'
-    },
     body: { device_name: deviceName, platform },
     errorPrefix: 'Device token issue failed'
   });
@@ -44,14 +36,11 @@ async function issueDeviceToken({ baseUrl, accessToken, deviceName, platform = '
 }
 
 async function ingestEvents({ baseUrl, deviceToken, events }) {
-  const url = new URL('/functions/vibescore-ingest', baseUrl).toString();
-  const { data } = await requestJson({
-    url,
+  const data = await invokeFunctionWithRetry({
+    baseUrl,
+    accessToken: deviceToken,
+    slug: 'vibescore-ingest',
     method: 'POST',
-    headers: {
-      Authorization: `Bearer ${deviceToken}`,
-      'Content-Type': 'application/json'
-    },
     body: { events },
     errorPrefix: 'Ingest failed',
     retry: { maxRetries: 3, baseDelayMs: 500, maxDelayMs: 5000 }
@@ -69,19 +58,20 @@ module.exports = {
   ingestEvents
 };
 
-async function requestJson({ url, method, headers, body, errorPrefix, retry }) {
-  return requestJsonWithRetry({ url, method, headers, body, errorPrefix, retry });
+async function invokeFunction({ baseUrl, accessToken, slug, method, body, errorPrefix }) {
+  const client = createInsforgeClient({ baseUrl, accessToken });
+  const { data, error } = await client.functions.invoke(slug, { method, body });
+  if (error) throw normalizeSdkError(error, errorPrefix);
+  return data;
 }
 
-async function requestJsonWithRetry({ url, method, headers, body, errorPrefix, retry }) {
+async function invokeFunctionWithRetry({ baseUrl, accessToken, slug, method, body, errorPrefix, retry }) {
   const retryOptions = normalizeRetryOptions(retry);
   let attempt = 0;
 
-  // attempt = 0 is the first retry delay after the initial failure.
-  // maxRetries=0 means "no retries" and behaves like a single attempt.
   while (true) {
     try {
-      return await requestJsonOnce({ url, method, headers, body, errorPrefix });
+      return await invokeFunction({ baseUrl, accessToken, slug, method, body, errorPrefix });
     } catch (e) {
       if (!shouldRetry({ err: e, attempt, retryOptions })) throw e;
       const delayMs = computeRetryDelayMs({ retryOptions, attempt, err: e });
@@ -91,69 +81,16 @@ async function requestJsonWithRetry({ url, method, headers, body, errorPrefix, r
   }
 }
 
-async function requestJsonOnce({ url, method, headers, body, errorPrefix }) {
-  const timeoutMs = getHttpTimeoutMs();
-  const startedAt = Date.now();
-  debugLog(`request ${method || 'GET'} ${url} timeout=${timeoutMs > 0 ? `${timeoutMs}ms` : 'off'}`);
-  let res;
-  let timeoutId = null;
-  let controller = null;
-  try {
-    if (timeoutMs > 0) {
-      controller = new AbortController();
-      timeoutId = setTimeout(() => controller.abort(), timeoutMs);
-    }
-    res = await fetch(url, {
-      method: method || 'GET',
-      headers: {
-        ...(headers || {})
-      },
-      body: body == null ? undefined : JSON.stringify(body),
-      signal: controller ? controller.signal : undefined
-    });
-  } catch (e) {
-    if (timeoutId) clearTimeout(timeoutId);
-    const elapsedMs = Date.now() - startedAt;
-    if (controller?.signal?.aborted && timeoutMs > 0) {
-      debugLog(`timeout ${method || 'GET'} ${url} ${elapsedMs}ms`);
-      const err = new Error(`Request timeout after ${timeoutMs}ms`);
-      err.cause = e;
-      throw err;
-    }
-    debugLog(`error ${method || 'GET'} ${url} ${elapsedMs}ms ${e?.message || String(e)}`);
-    const raw = e?.message || String(e);
-    const msg = normalizeBackendErrorMessage(raw);
-    const err = new Error(errorPrefix ? `${errorPrefix}: ${msg}` : msg);
-    err.cause = e;
-    err.retryable = isRetryableMessage(raw);
-    if (msg !== raw) err.originalMessage = raw;
-    throw err;
-  } finally {
-    if (timeoutId) clearTimeout(timeoutId);
-  }
-
-  const text = await res.text();
-  let data = null;
-  try {
-    data = JSON.parse(text);
-  } catch (_e) {}
-
-  const elapsedMs = Date.now() - startedAt;
-  if (!res.ok) {
-    const raw = data?.error || data?.message || `HTTP ${res.status}`;
-    debugLog(`response ${res.status} ${method || 'GET'} ${url} ${elapsedMs}ms error=${raw}`);
-    const msg = normalizeBackendErrorMessage(raw);
-    const err = new Error(errorPrefix ? `${errorPrefix}: ${msg}` : msg);
-    err.status = res.status;
-    err.data = data;
-    err.retryAfterMs = parseRetryAfterMs(res.headers.get('Retry-After'));
-    err.retryable = isRetryableStatus(res.status) || isRetryableMessage(raw);
-    if (msg !== raw) err.originalMessage = raw;
-    throw err;
-  }
-
-  debugLog(`response ${res.status} ${method || 'GET'} ${url} ${elapsedMs}ms`);
-  return { res, data };
+function normalizeSdkError(error, errorPrefix) {
+  const raw = error?.message || String(error || 'Unknown error');
+  const msg = normalizeBackendErrorMessage(raw);
+  const err = new Error(errorPrefix ? `${errorPrefix}: ${msg}` : msg);
+  const status = error?.statusCode ?? error?.status;
+  if (typeof status === 'number') err.status = status;
+  err.retryable = isRetryableStatus(status) || isRetryableMessage(raw);
+  if (msg !== raw) err.originalMessage = raw;
+  if (error?.nextActions) err.nextActions = error.nextActions;
+  return err;
 }
 
 function normalizeBackendErrorMessage(message) {
@@ -202,20 +139,6 @@ function shouldRetry({ err, attempt, retryOptions }) {
   if (!retryOptions || retryOptions.maxRetries <= 0) return false;
   if (attempt >= retryOptions.maxRetries) return false;
   return Boolean(err && err.retryable);
-}
-
-function getHttpTimeoutMs() {
-  const raw = process.env.VIBESCORE_HTTP_TIMEOUT_MS;
-  if (raw == null || raw === '') return 20_000;
-  const n = Number(raw);
-  if (!Number.isFinite(n)) return 20_000;
-  if (n <= 0) return 0;
-  return clampInt(n, 1000, 120_000);
-}
-
-function debugLog(message) {
-  if (process.env.VIBESCORE_DEBUG !== '1') return;
-  process.stderr.write(`[vibescore] ${message}\n`);
 }
 
 function computeRetryDelayMs({ retryOptions, attempt, err }) {
