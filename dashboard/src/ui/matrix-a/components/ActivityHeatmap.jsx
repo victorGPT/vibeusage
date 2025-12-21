@@ -214,16 +214,20 @@ export function ActivityHeatmap({ heatmap }) {
     if (hasAutoScrolledRef.current) return;
     if (!weeks.length) return;
 
+    const maxScroll = el.scrollWidth - el.clientWidth;
+    if (maxScroll <= 1) {
+      updateScrollState();
+      hasAutoScrolledRef.current = true;
+      return;
+    }
+
     const snapToLatest = () => {
-      const maxScroll = el.scrollWidth - el.clientWidth;
-      if (maxScroll > 1) {
-        el.scrollLeft = maxScroll;
-      }
+      el.scrollLeft = el.scrollWidth - el.clientWidth;
       updateScrollState();
       hasAutoScrolledRef.current = true;
     };
 
-    // Wait for layout to settle before snapping.
+    // Wait two frames to ensure layout settles before snapping.
     requestAnimationFrame(() => requestAnimationFrame(snapToLatest));
   }, [updateScrollState, weeks.length]);
 

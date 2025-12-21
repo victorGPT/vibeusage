@@ -40,16 +40,17 @@ function printHelp() {
       '@vibescore/tracker',
       '',
       'Usage:',
-      '  npx @vibescore/tracker init',
-      '  npx @vibescore/tracker sync [--auto] [--drain]',
-      '  npx @vibescore/tracker status',
-      '  npx @vibescore/tracker diagnostics [--out diagnostics.json]',
-      '  npx @vibescore/tracker uninstall [--purge]',
+      '  npx @vibescore/tracker [--debug] init',
+      '  npx @vibescore/tracker [--debug] sync [--auto] [--drain]',
+      '  npx @vibescore/tracker [--debug] status',
+      '  npx @vibescore/tracker [--debug] diagnostics [--out diagnostics.json]',
+      '  npx @vibescore/tracker [--debug] uninstall [--purge]',
       '',
       'Notes:',
       '  - init installs a Codex notify hook and issues a device token (default: browser sign in/up).',
       '  - optional: set VIBESCORE_DASHBOARD_URL (or --dashboard-url) to use a hosted /connect page.',
       '  - sync parses ~/.codex/sessions/**/rollout-*.jsonl and uploads token_count deltas.',
+      '  - --debug prints original backend errors when they are normalized.',
       ''
     ].join('\n')
   );

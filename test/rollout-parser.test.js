@@ -118,6 +118,56 @@ test('parseRolloutIncremental handles total_token_usage reset by counting last_t
   }
 });
 
+test('parseRolloutIncremental handles total_token_usage reset when last_token_usage is missing', async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'vibescore-rollout-'));
+  try {
+    const rolloutPath = path.join(tmp, 'rollout-test.jsonl');
+    const queuePath = path.join(tmp, 'queue.jsonl');
+    const cursors = { version: 1, files: {}, updatedAt: null };
+
+    const usageA = {
+      input_tokens: 0,
+      cached_input_tokens: 0,
+      output_tokens: 0,
+      reasoning_output_tokens: 0,
+      total_tokens: 4
+    };
+    const usageB = {
+      input_tokens: 0,
+      cached_input_tokens: 0,
+      output_tokens: 0,
+      reasoning_output_tokens: 0,
+      total_tokens: 6
+    };
+
+    const totalsA = usageA;
+    const totalsB = { ...usageA, total_tokens: usageA.total_tokens + usageB.total_tokens };
+    const totalsReset = { ...usageA, total_tokens: 5 };
+
+    const lines = [
+      buildTokenCountLine({ ts: '2025-12-17T00:00:00.000Z', last: usageA, total: totalsA }),
+      buildTokenCountLine({ ts: '2025-12-17T00:00:01.000Z', last: usageB, total: totalsB }),
+      buildTokenCountLine({ ts: '2025-12-17T00:00:02.000Z', last: null, total: totalsReset }),
+      buildTokenCountLine({ ts: '2025-12-17T00:00:03.000Z', last: null, total: totalsReset }) // duplicate after reset
+    ];
+
+    await fs.writeFile(rolloutPath, lines.join('\n') + '\n', 'utf8');
+
+    const res = await parseRolloutIncremental({ rolloutFiles: [rolloutPath], cursors, queuePath });
+    assert.equal(res.filesProcessed, 1);
+    assert.equal(res.eventsQueued, 3);
+
+    const queued = await readJsonLines(queuePath);
+    assert.equal(queued.length, 3);
+    assert.equal(
+      queued.reduce((sum, ev) => sum + Number(ev.total_tokens || 0), 0),
+      usageA.total_tokens + usageB.total_tokens + totalsReset.total_tokens
+    );
+  } finally {
+    await fs.rm(tmp, { recursive: true, force: true });
+  }
+});
+
 function buildTokenCountLine({ ts, last, total }) {
   return JSON.stringify({
     type: 'event_msg',
@@ -138,4 +188,3 @@ async function readJsonLines(filePath) {
   const lines = text.split('\n').filter(Boolean);
   return lines.map((l) => JSON.parse(l));
 }
-

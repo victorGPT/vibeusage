@@ -56,31 +56,6 @@ var require_http = __commonJS({
   }
 });
 
-// insforge-src/shared/auth.js
-var require_auth = __commonJS({
-  "insforge-src/shared/auth.js"(exports2, module2) {
-    "use strict";
-    function getBearerToken2(headerValue) {
-      if (!headerValue) return null;
-      const prefix = "Bearer ";
-      if (!headerValue.startsWith(prefix)) return null;
-      const token = headerValue.slice(prefix.length).trim();
-      return token.length > 0 ? token : null;
-    }
-    async function getEdgeClientAndUserId({ baseUrl, bearer }) {
-      const edgeClient = createClient({ baseUrl, edgeFunctionToken: bearer });
-      const { data: userData, error: userErr } = await edgeClient.auth.getCurrentUser();
-      const userId = userData?.user?.id;
-      if (userErr || !userId) return { ok: false, edgeClient: null, userId: null };
-      return { ok: true, edgeClient, userId };
-    }
-    module2.exports = {
-      getBearerToken: getBearerToken2,
-      getEdgeClientAndUserId
-    };
-  }
-});
-
 // insforge-src/shared/env.js
 var require_env = __commonJS({
   "insforge-src/shared/env.js"(exports2, module2) {
@@ -98,6 +73,33 @@ var require_env = __commonJS({
       getBaseUrl: getBaseUrl2,
       getServiceRoleKey: getServiceRoleKey2,
       getAnonKey: getAnonKey2
+    };
+  }
+});
+
+// insforge-src/shared/auth.js
+var require_auth = __commonJS({
+  "insforge-src/shared/auth.js"(exports2, module2) {
+    "use strict";
+    var { getAnonKey: getAnonKey2 } = require_env();
+    function getBearerToken2(headerValue) {
+      if (!headerValue) return null;
+      const prefix = "Bearer ";
+      if (!headerValue.startsWith(prefix)) return null;
+      const token = headerValue.slice(prefix.length).trim();
+      return token.length > 0 ? token : null;
+    }
+    async function getEdgeClientAndUserId({ baseUrl, bearer }) {
+      const anonKey = getAnonKey2();
+      const edgeClient = createClient({ baseUrl, anonKey: anonKey || void 0, edgeFunctionToken: bearer });
+      const { data: userData, error: userErr } = await edgeClient.auth.getCurrentUser();
+      const userId = userData?.user?.id;
+      if (userErr || !userId) return { ok: false, edgeClient: null, userId: null };
+      return { ok: true, edgeClient, userId };
+    }
+    module2.exports = {
+      getBearerToken: getBearerToken2,
+      getEdgeClientAndUserId
     };
   }
 });
@@ -229,7 +231,28 @@ async function ingestWithServiceClient(serviceClient, tokenRow, rows, nowIso) {
 async function ingestWithAnonKey({ baseUrl, anonKey, tokenHash, rows }) {
   if (!anonKey) return { ok: false, error: "Anon key missing", inserted: 0, skipped: 0 };
   const url = new URL("/api/database/records/vibescore_tracker_events", baseUrl);
-  const bulk = await recordsInsert({ url, anonKey, tokenHash, rows });
+  const ignore = await recordsInsert({
+    url,
+    anonKey,
+    tokenHash,
+    rows,
+    onConflict: "user_id,event_id",
+    prefer: "return=representation",
+    resolution: "ignore-duplicates",
+    select: "event_id"
+  });
+  if (ignore.ok) {
+    const insertedRows = normalizeRows(ignore.data);
+    const inserted2 = Array.isArray(insertedRows) ? insertedRows.length : rows.length;
+    const skipped2 = Math.max(0, rows.length - inserted2);
+    return { ok: true, inserted: inserted2, skipped: skipped2 };
+  }
+  if (!isUpsertUnsupported(ignore)) {
+    if (ignore.status !== 409 || ignore.code !== "23505") {
+      return { ok: false, error: ignore.error || `HTTP ${ignore.status}`, inserted: 0, skipped: 0 };
+    }
+  }
+  const bulk = await recordsInsert({ url, anonKey, tokenHash, rows, prefer: "return=minimal" });
   if (bulk.ok) return { ok: true, inserted: rows.length, skipped: 0 };
   if (bulk.status !== 409 || bulk.code !== "23505") {
     return { ok: false, error: bulk.error || `HTTP ${bulk.status}`, inserted: 0, skipped: 0 };
@@ -237,7 +260,7 @@ async function ingestWithAnonKey({ baseUrl, anonKey, tokenHash, rows }) {
   let inserted = 0;
   let skipped = 0;
   for (const row of rows) {
-    const one = await recordsInsert({ url, anonKey, tokenHash, rows: [row] });
+    const one = await recordsInsert({ url, anonKey, tokenHash, rows: [row], prefer: "return=minimal" });
     if (one.ok) {
       inserted += 1;
       continue;
@@ -282,18 +305,32 @@ function normalizeRows(data) {
   if (data && typeof data === "object" && Array.isArray(data.data)) return data.data;
   return null;
 }
-async function recordsInsert({ url, anonKey, tokenHash, rows }) {
-  const res = await fetch(url.toString(), {
+async function recordsInsert({ url, anonKey, tokenHash, rows, prefer, onConflict, resolution, select }) {
+  const target = new URL(url.toString());
+  if (onConflict) target.searchParams.set("on_conflict", onConflict);
+  if (select) target.searchParams.set("select", select);
+  const preferParts = [];
+  if (prefer) preferParts.push(prefer);
+  if (resolution) preferParts.push(`resolution=${resolution}`);
+  const preferHeader = preferParts.filter(Boolean).join(",");
+  const res = await fetch(target.toString(), {
     method: "POST",
     headers: {
       ...buildAnonHeaders({ anonKey, tokenHash }),
-      Prefer: "return=minimal",
+      ...preferHeader ? { Prefer: preferHeader } : {},
       "Content-Type": "application/json"
     },
     body: JSON.stringify(rows)
   });
   const { data, error, code } = await readApiJson(res);
   return { ok: res.ok, status: res.status, data, error, code };
+}
+function isUpsertUnsupported(result) {
+  const status = Number(result?.status || 0);
+  if (status !== 400 && status !== 404 && status !== 405 && status !== 409 && status !== 422) return false;
+  const msg = String(result?.error || "").toLowerCase();
+  if (!msg) return false;
+  return msg.includes("on_conflict") || msg.includes("resolution") || msg.includes("prefer") || msg.includes("unknown") || msg.includes("invalid");
 }
 function normalizeEvents(data) {
   if (Array.isArray(data)) return data;

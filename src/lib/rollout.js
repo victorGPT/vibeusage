@@ -172,6 +172,11 @@ function pickDelta(lastUsage, totalUsage, prevTotals) {
     return null;
   }
 
+  if (!hasLast && hasTotal && hasPrevTotals && totalsReset(totalUsage, prevTotals)) {
+    const normalized = normalizeUsage(totalUsage);
+    return isAllZeroUsage(normalized) ? null : normalized;
+  }
+
   if (hasLast) {
     return normalizeUsage(lastUsage);
   }
@@ -225,6 +230,17 @@ function sameUsage(a, b) {
     if (toNonNegativeInt(a?.[k]) !== toNonNegativeInt(b?.[k])) return false;
   }
   return true;
+}
+
+function totalsReset(curr, prev) {
+  const currTotal = curr?.total_tokens;
+  const prevTotal = prev?.total_tokens;
+  if (!isFiniteNumber(currTotal) || !isFiniteNumber(prevTotal)) return false;
+  return currTotal < prevTotal;
+}
+
+function isFiniteNumber(v) {
+  return typeof v === 'number' && Number.isFinite(v);
 }
 
 function toNonNegativeInt(v) {

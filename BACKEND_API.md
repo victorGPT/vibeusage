@@ -38,6 +38,27 @@ insforge2 update-function --slug vibescore-usage-summary --codeFile insforge-fun
 
 All endpoints support CORS `OPTIONS` preflight.
 
+## CLI troubleshooting (timeouts + debug)
+
+When ingestion hangs or fails, use these client-side controls:
+
+- `VIBESCORE_HTTP_TIMEOUT_MS`: HTTP request timeout in milliseconds. `0` disables timeouts. Default `20000`. Clamped to `1000..120000`.
+- `VIBESCORE_DEBUG=1` or `--debug`: print request/response timing and original backend errors to stderr.
+
+Examples:
+
+```bash
+VIBESCORE_HTTP_TIMEOUT_MS=60000 node bin/tracker.js sync --debug
+```
+
+## Client backpressure defaults
+
+To keep low-tier backends stable, the CLI and dashboard apply conservative defaults:
+
+- CLI auto sync interval: ~10 minutes (with jitter)
+- CLI batch size: 300 (max batches per auto run: 2 small / 4 large)
+- Dashboard backend probe: every 60 seconds, paused when the tab is hidden
+
 ## Endpoints
 
 ### POST /functions/vibescore-device-token-issue

@@ -22,6 +22,7 @@
   - `last_token_usage`（优先）
   - `total_token_usage`（兜底：做差分）
   - **去重规则（重要）**：Codex 可能会在相邻行重复写入同一笔 `token_count`；当相邻两条记录的 `total_token_usage` **完全相同** 时，客户端 **必须跳过** 该行（否则会把同一笔 `last_token_usage` 重复计入，造成总量膨胀）。
+  - **重置兜底（重要）**：当 `last_token_usage` 缺失且相邻两条记录的 `total_token_usage` 出现 **回退/重置**（当前值小于上一条）时，客户端 **应将当前 `total_token_usage` 视为本次增量**，以避免漏计。
 
 ### 3.2 不可靠字段（设计时不要依赖）
 

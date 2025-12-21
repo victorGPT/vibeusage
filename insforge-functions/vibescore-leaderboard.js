@@ -56,31 +56,6 @@ var require_http = __commonJS({
   }
 });
 
-// insforge-src/shared/auth.js
-var require_auth = __commonJS({
-  "insforge-src/shared/auth.js"(exports2, module2) {
-    "use strict";
-    function getBearerToken2(headerValue) {
-      if (!headerValue) return null;
-      const prefix = "Bearer ";
-      if (!headerValue.startsWith(prefix)) return null;
-      const token = headerValue.slice(prefix.length).trim();
-      return token.length > 0 ? token : null;
-    }
-    async function getEdgeClientAndUserId2({ baseUrl, bearer }) {
-      const edgeClient = createClient({ baseUrl, edgeFunctionToken: bearer });
-      const { data: userData, error: userErr } = await edgeClient.auth.getCurrentUser();
-      const userId = userData?.user?.id;
-      if (userErr || !userId) return { ok: false, edgeClient: null, userId: null };
-      return { ok: true, edgeClient, userId };
-    }
-    module2.exports = {
-      getBearerToken: getBearerToken2,
-      getEdgeClientAndUserId: getEdgeClientAndUserId2
-    };
-  }
-});
-
 // insforge-src/shared/env.js
 var require_env = __commonJS({
   "insforge-src/shared/env.js"(exports2, module2) {
@@ -98,6 +73,33 @@ var require_env = __commonJS({
       getBaseUrl: getBaseUrl2,
       getServiceRoleKey: getServiceRoleKey2,
       getAnonKey: getAnonKey2
+    };
+  }
+});
+
+// insforge-src/shared/auth.js
+var require_auth = __commonJS({
+  "insforge-src/shared/auth.js"(exports2, module2) {
+    "use strict";
+    var { getAnonKey: getAnonKey2 } = require_env();
+    function getBearerToken2(headerValue) {
+      if (!headerValue) return null;
+      const prefix = "Bearer ";
+      if (!headerValue.startsWith(prefix)) return null;
+      const token = headerValue.slice(prefix.length).trim();
+      return token.length > 0 ? token : null;
+    }
+    async function getEdgeClientAndUserId2({ baseUrl, bearer }) {
+      const anonKey = getAnonKey2();
+      const edgeClient = createClient({ baseUrl, anonKey: anonKey || void 0, edgeFunctionToken: bearer });
+      const { data: userData, error: userErr } = await edgeClient.auth.getCurrentUser();
+      const userId = userData?.user?.id;
+      if (userErr || !userId) return { ok: false, edgeClient: null, userId: null };
+      return { ok: true, edgeClient, userId };
+    }
+    module2.exports = {
+      getBearerToken: getBearerToken2,
+      getEdgeClientAndUserId: getEdgeClientAndUserId2
     };
   }
 });

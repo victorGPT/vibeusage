@@ -4,7 +4,7 @@ import { getBackendProbeUrl } from "../lib/vibescore-api.js";
 
 export function useBackendStatus({
   baseUrl,
-  intervalMs = 15_000,
+  intervalMs = 60_000,
   timeoutMs = 1500,
 } = {}) {
   const [status, setStatus] = useState("unknown"); // unknown | active | error | down
@@ -75,9 +75,31 @@ export function useBackendStatus({
   }, [baseUrl, timeoutMs]);
 
   useEffect(() => {
-    refresh();
-    const id = window.setInterval(() => refresh(), intervalMs);
-    return () => window.clearInterval(id);
+    let id = null;
+
+    const stop = () => {
+      if (id) window.clearInterval(id);
+      id = null;
+    };
+
+    const start = () => {
+      if (typeof document !== "undefined" && document.hidden) return;
+      if (id) return;
+      refresh();
+      id = window.setInterval(() => refresh(), intervalMs);
+    };
+
+    const onVisibility = () => {
+      if (typeof document !== "undefined" && document.hidden) stop();
+      else start();
+    };
+
+    start();
+    document?.addEventListener?.("visibilitychange", onVisibility);
+    return () => {
+      stop();
+      document?.removeEventListener?.("visibilitychange", onVisibility);
+    };
   }, [intervalMs, refresh]);
 
   return {

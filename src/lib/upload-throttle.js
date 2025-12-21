@@ -1,10 +1,10 @@
 const DEFAULTS = {
-  intervalMs: 5 * 60_000,
-  jitterMsMax: 60_000,
+  intervalMs: 10 * 60_000,
+  jitterMsMax: 120_000,
   backlogBytes: 1_000_000,
-  batchSize: 200,
+  batchSize: 300,
   maxBatchesSmall: 2,
-  maxBatchesLarge: 8,
+  maxBatchesLarge: 4,
   backoffInitialMs: 60_000,
   backoffMaxMs: 30 * 60_000
 };
@@ -67,7 +67,7 @@ function recordUploadFailure({ nowMs, state, error, config }) {
   const status = toSafeInt(error?.status);
 
   let backoffMs = 0;
-  if (status === 429 && retryAfterMs > 0) {
+  if (retryAfterMs > 0) {
     backoffMs = Math.min(cfg.backoffMaxMs, Math.max(cfg.backoffInitialMs, retryAfterMs));
   } else {
     const step = Math.min(10, Math.max(0, s.backoffStep || 0));

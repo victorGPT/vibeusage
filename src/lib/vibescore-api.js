@@ -92,16 +92,35 @@ async function requestJsonWithRetry({ url, method, headers, body, errorPrefix, r
 }
 
 async function requestJsonOnce({ url, method, headers, body, errorPrefix }) {
+  const timeoutMs = getHttpTimeoutMs();
+  const startedAt = Date.now();
+  debugLog(`request ${method || 'GET'} ${url} timeout=${timeoutMs > 0 ? `${timeoutMs}ms` : 'off'}`);
   let res;
+  let timeoutId = null;
+  let controller = null;
   try {
+    if (timeoutMs > 0) {
+      controller = new AbortController();
+      timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+    }
     res = await fetch(url, {
       method: method || 'GET',
       headers: {
         ...(headers || {})
       },
-      body: body == null ? undefined : JSON.stringify(body)
+      body: body == null ? undefined : JSON.stringify(body),
+      signal: controller ? controller.signal : undefined
     });
   } catch (e) {
+    if (timeoutId) clearTimeout(timeoutId);
+    const elapsedMs = Date.now() - startedAt;
+    if (controller?.signal?.aborted && timeoutMs > 0) {
+      debugLog(`timeout ${method || 'GET'} ${url} ${elapsedMs}ms`);
+      const err = new Error(`Request timeout after ${timeoutMs}ms`);
+      err.cause = e;
+      throw err;
+    }
+    debugLog(`error ${method || 'GET'} ${url} ${elapsedMs}ms ${e?.message || String(e)}`);
     const raw = e?.message || String(e);
     const msg = normalizeBackendErrorMessage(raw);
     const err = new Error(errorPrefix ? `${errorPrefix}: ${msg}` : msg);
@@ -109,6 +128,8 @@ async function requestJsonOnce({ url, method, headers, body, errorPrefix }) {
     err.retryable = isRetryableMessage(raw);
     if (msg !== raw) err.originalMessage = raw;
     throw err;
+  } finally {
+    if (timeoutId) clearTimeout(timeoutId);
   }
 
   const text = await res.text();
@@ -117,8 +138,10 @@ async function requestJsonOnce({ url, method, headers, body, errorPrefix }) {
     data = JSON.parse(text);
   } catch (_e) {}
 
+  const elapsedMs = Date.now() - startedAt;
   if (!res.ok) {
     const raw = data?.error || data?.message || `HTTP ${res.status}`;
+    debugLog(`response ${res.status} ${method || 'GET'} ${url} ${elapsedMs}ms error=${raw}`);
     const msg = normalizeBackendErrorMessage(raw);
     const err = new Error(errorPrefix ? `${errorPrefix}: ${msg}` : msg);
     err.status = res.status;
@@ -129,6 +152,7 @@ async function requestJsonOnce({ url, method, headers, body, errorPrefix }) {
     throw err;
   }
 
+  debugLog(`response ${res.status} ${method || 'GET'} ${url} ${elapsedMs}ms`);
   return { res, data };
 }
 
@@ -149,7 +173,7 @@ function isBackendRuntimeDownMessage(message) {
 }
 
 function isRetryableStatus(status) {
-  return status === 502 || status === 503 || status === 504;
+  return status === 429 || status === 502 || status === 503 || status === 504;
 }
 
 function isRetryableMessage(message) {
@@ -178,6 +202,20 @@ function shouldRetry({ err, attempt, retryOptions }) {
   if (!retryOptions || retryOptions.maxRetries <= 0) return false;
   if (attempt >= retryOptions.maxRetries) return false;
   return Boolean(err && err.retryable);
+}
+
+function getHttpTimeoutMs() {
+  const raw = process.env.VIBESCORE_HTTP_TIMEOUT_MS;
+  if (raw == null || raw === '') return 20_000;
+  const n = Number(raw);
+  if (!Number.isFinite(n)) return 20_000;
+  if (n <= 0) return 0;
+  return clampInt(n, 1000, 120_000);
+}
+
+function debugLog(message) {
+  if (process.env.VIBESCORE_DEBUG !== '1') return;
+  process.stderr.write(`[vibescore] ${message}\n`);
 }
 
 function computeRetryDelayMs({ retryOptions, attempt, err }) {

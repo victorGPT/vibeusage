@@ -157,8 +157,32 @@ async function ingestWithAnonKey({ baseUrl, anonKey, tokenHash, rows }) {
 
   const url = new URL('/api/database/records/vibescore_tracker_events', baseUrl);
 
-  // Fast path: bulk insert. If any duplicates exist, Postgres will reject the whole batch with 23505.
-  const bulk = await recordsInsert({ url, anonKey, tokenHash, rows });
+  // Fast path: bulk insert with duplicate ignore (if supported by records API).
+  const ignore = await recordsInsert({
+    url,
+    anonKey,
+    tokenHash,
+    rows,
+    onConflict: 'user_id,event_id',
+    prefer: 'return=representation',
+    resolution: 'ignore-duplicates',
+    select: 'event_id'
+  });
+  if (ignore.ok) {
+    const insertedRows = normalizeRows(ignore.data);
+    const inserted = Array.isArray(insertedRows) ? insertedRows.length : rows.length;
+    const skipped = Math.max(0, rows.length - inserted);
+    return { ok: true, inserted, skipped };
+  }
+
+  if (!isUpsertUnsupported(ignore)) {
+    if (ignore.status !== 409 || ignore.code !== '23505') {
+      return { ok: false, error: ignore.error || `HTTP ${ignore.status}`, inserted: 0, skipped: 0 };
+    }
+  }
+
+  // Legacy fast path: bulk insert. If any duplicates exist, Postgres will reject the whole batch with 23505.
+  const bulk = await recordsInsert({ url, anonKey, tokenHash, rows, prefer: 'return=minimal' });
   if (bulk.ok) return { ok: true, inserted: rows.length, skipped: 0 };
 
   if (bulk.status !== 409 || bulk.code !== '23505') {
@@ -170,7 +194,7 @@ async function ingestWithAnonKey({ baseUrl, anonKey, tokenHash, rows }) {
   let skipped = 0;
 
   for (const row of rows) {
-    const one = await recordsInsert({ url, anonKey, tokenHash, rows: [row] });
+    const one = await recordsInsert({ url, anonKey, tokenHash, rows: [row], prefer: 'return=minimal' });
     if (one.ok) {
       inserted += 1;
       continue;
@@ -222,12 +246,20 @@ function normalizeRows(data) {
   return null;
 }
 
-async function recordsInsert({ url, anonKey, tokenHash, rows }) {
-  const res = await fetch(url.toString(), {
+async function recordsInsert({ url, anonKey, tokenHash, rows, prefer, onConflict, resolution, select }) {
+  const target = new URL(url.toString());
+  if (onConflict) target.searchParams.set('on_conflict', onConflict);
+  if (select) target.searchParams.set('select', select);
+  const preferParts = [];
+  if (prefer) preferParts.push(prefer);
+  if (resolution) preferParts.push(`resolution=${resolution}`);
+  const preferHeader = preferParts.filter(Boolean).join(',');
+
+  const res = await fetch(target.toString(), {
     method: 'POST',
     headers: {
       ...buildAnonHeaders({ anonKey, tokenHash }),
-      Prefer: 'return=minimal',
+      ...(preferHeader ? { Prefer: preferHeader } : {}),
       'Content-Type': 'application/json'
     },
     body: JSON.stringify(rows)
@@ -235,6 +267,20 @@ async function recordsInsert({ url, anonKey, tokenHash, rows }) {
 
   const { data, error, code } = await readApiJson(res);
   return { ok: res.ok, status: res.status, data, error, code };
+}
+
+function isUpsertUnsupported(result) {
+  const status = Number(result?.status || 0);
+  if (status !== 400 && status !== 404 && status !== 405 && status !== 409 && status !== 422) return false;
+  const msg = String(result?.error || '').toLowerCase();
+  if (!msg) return false;
+  return (
+    msg.includes('on_conflict') ||
+    msg.includes('resolution') ||
+    msg.includes('prefer') ||
+    msg.includes('unknown') ||
+    msg.includes('invalid')
+  );
 }
 
 function normalizeEvents(data) {
@@ -295,4 +341,3 @@ function toNonNegativeInt(n) {
   const i = Math.floor(n);
   return i === n ? i : null;
 }
-

@@ -319,7 +319,10 @@ test('vibescore-ingest works without serviceRoleKey via anonKey records API', as
 
   assert.ok(String(postCall.url).includes('/api/database/records/vibescore_tracker_events'));
   assert.equal(postCall.init?.method, 'POST');
-  assert.equal(postCall.init?.headers?.Prefer, 'return=minimal');
+  assert.equal(postCall.init?.headers?.Prefer, 'return=representation,resolution=ignore-duplicates');
+  const postUrl = new URL(postCall.url);
+  assert.equal(postUrl.searchParams.get('on_conflict'), 'user_id,event_id');
+  assert.equal(postUrl.searchParams.get('select'), 'event_id');
 });
 
 test('vibescore-ingest anonKey path falls back to per-row inserts on 23505', async () => {
@@ -348,15 +351,21 @@ test('vibescore-ingest anonKey path falls back to per-row inserts on 23505', asy
     if (u.pathname.endsWith('/api/database/records/vibescore_tracker_events')) {
       postCount += 1;
       if (postCount === 1) {
+        return new Response(JSON.stringify({ message: 'unknown on_conflict' }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+      if (postCount === 2) {
         return new Response(JSON.stringify({ code: '23505', message: 'duplicate key value violates unique constraint' }), {
           status: 409,
           headers: { 'Content-Type': 'application/json' }
         });
       }
-      if (postCount === 2) {
+      if (postCount === 3) {
         return new Response('[]', { status: 201, headers: { 'Content-Type': 'application/json' } });
       }
-      if (postCount === 3) {
+      if (postCount === 4) {
         return new Response(JSON.stringify({ code: '23505', message: 'duplicate key value violates unique constraint' }), {
           status: 409,
           headers: { 'Content-Type': 'application/json' }
@@ -395,7 +404,7 @@ test('vibescore-ingest anonKey path falls back to per-row inserts on 23505', asy
 
   const data = await res.json();
   assert.deepEqual(data, { success: true, inserted: 1, skipped: 1 });
-  assert.equal(postCount, 3);
+  assert.equal(postCount, 4);
 });
 
 test('vibescore-usage-heatmap returns a week-aligned grid with derived fields', async () => {
@@ -413,6 +422,7 @@ test('vibescore-usage-heatmap returns a week-aligned grid with derived fields', 
 
   globalThis.createClient = (args) => {
     if (args && args.edgeFunctionToken === userJwt) {
+      assert.equal(args.anonKey, ANON_KEY);
       return {
         auth: {
           getCurrentUser: async () => ({ data: { user: { id: userId } }, error: null })
@@ -507,6 +517,11 @@ test('vibescore-usage-heatmap rejects invalid parameters', async () => {
 });
 
 test('vibescore-leaderboard returns a week window and slices entries to limit', async () => {
+  setDenoEnv({
+    INSFORGE_INTERNAL_URL: BASE_URL,
+    ANON_KEY
+  });
+
   const fn = require('../insforge-functions/vibescore-leaderboard');
 
   const userId = '66666666-6666-6666-6666-666666666666';
@@ -521,6 +536,7 @@ test('vibescore-leaderboard returns a week window and slices entries to limit', 
 
   globalThis.createClient = (args) => {
     if (args && args.edgeFunctionToken === userJwt) {
+      assert.equal(args.anonKey, ANON_KEY);
       return {
         auth: {
           getCurrentUser: async () => ({ data: { user: { id: userId } }, error: null })
@@ -587,6 +603,11 @@ test('vibescore-leaderboard returns a week window and slices entries to limit', 
 });
 
 test('vibescore-leaderboard uses system earliest day for total window', async () => {
+  setDenoEnv({
+    INSFORGE_INTERNAL_URL: BASE_URL,
+    ANON_KEY
+  });
+
   const fn = require('../insforge-functions/vibescore-leaderboard');
 
   const userId = '77777777-7777-7777-7777-777777777777';
