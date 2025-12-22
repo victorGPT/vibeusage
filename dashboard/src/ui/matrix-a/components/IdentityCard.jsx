@@ -11,8 +11,6 @@ export function IdentityCard({
   onDecrypt,
   title = copy("identity_card.title_default"),
   subtitle,
-  email,
-  userId,
   rankLabel,
   streakDays,
   showStats = true,
@@ -87,14 +85,6 @@ export function IdentityCard({
                   displayName
                 )}
               </div>
-              {email ? (
-                <div className="text-[9px] opacity-40 mt-1 truncate">{email}</div>
-              ) : null}
-              {userId ? (
-                <div className="text-[9px] opacity-25 mt-1 font-mono truncate">
-                  {userId}
-                </div>
-              ) : null}
             </div>
 
             {!isPublic && onDecrypt ? (

@@ -3,15 +3,13 @@ import React, { useMemo } from "react";
 import { copy } from "../../../lib/copy.js";
 
 function toHandle(auth) {
-  const raw = (auth?.name || auth?.email || copy("dashboard.identity.fallback")).trim();
-  const base = raw.includes("@") ? raw.split("@")[0] : raw;
-  return base.replace(/[^a-zA-Z0-9._-]/g, "_");
+  const raw = auth?.name?.trim();
+  const safe = raw && !raw.includes("@") ? raw : copy("dashboard.identity.fallback");
+  return safe.replace(/[^a-zA-Z0-9._-]/g, "_");
 }
 
 export function IdentityPanel({ auth, streakDays = 0, rankLabel }) {
   const handle = useMemo(() => toHandle(auth), [auth]);
-  const email = auth?.email || null;
-  const userId = auth?.userId || null;
   const rankValue = rankLabel ?? copy("identity_panel.rank_placeholder");
   const streakValue = Number.isFinite(Number(streakDays))
     ? copy("identity_panel.streak_value", { days: Number(streakDays) })
@@ -36,14 +34,6 @@ export function IdentityPanel({ auth, streakDays = 0, rankLabel }) {
           <div className="text-white font-black text-lg tracking-tight leading-none uppercase truncate">
             {handle}
           </div>
-          {email ? (
-            <div className="text-[9px] opacity-40 mt-1 truncate">{email}</div>
-          ) : null}
-          {userId ? (
-            <div className="text-[9px] opacity-25 mt-1 font-mono truncate">
-              {userId}
-            </div>
-          ) : null}
         </div>
 
         <div className="grid grid-cols-2 gap-2">

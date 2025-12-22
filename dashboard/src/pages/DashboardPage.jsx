@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import { buildAuthUrl } from "../lib/auth-url.js";
 import { computeActiveStreakDays } from "../lib/activity-heatmap.js";
+import { copy } from "../lib/copy.js";
 import { getRangeForPeriod } from "../lib/date-range.js";
 import { DAILY_SORT_COLUMNS, sortDailyRows } from "../lib/daily.js";
 import { toDisplayNumber } from "../lib/format.js";
@@ -78,11 +79,13 @@ export function DashboardPage({ baseUrl, auth, signedIn, signOut }) {
     from,
     to,
     includeDaily: period !== "total",
+    deriveSummaryFromDaily: period !== "total",
     cacheKey: auth?.userId || auth?.email || "default",
     timeZone,
     tzOffsetMinutes,
   });
 
+  const shareDailyToTrend = period === "week" || period === "month";
   const {
     rows: trendRows,
     from: trendFrom,
@@ -99,6 +102,8 @@ export function DashboardPage({ baseUrl, auth, signedIn, signOut }) {
     cacheKey: auth?.userId || auth?.email || "default",
     timeZone,
     tzOffsetMinutes,
+    sharedRows: shareDailyToTrend ? daily : null,
+    sharedRange: shareDailyToTrend ? { from, to } : null,
   });
 
   const {
@@ -172,11 +177,15 @@ export function DashboardPage({ baseUrl, auth, signedIn, signOut }) {
     [heatmapSource]
   );
 
+  const identityLabel = useMemo(() => {
+    const raw = auth?.name?.trim();
+    if (!raw || raw.includes("@")) return copy("dashboard.identity.fallback");
+    return raw;
+  }, [auth?.name]);
+
   const identityHandle = useMemo(() => {
-    const raw = (auth?.name || auth?.email || "Anonymous").trim();
-    const base = raw.includes("@") ? raw.split("@")[0] : raw;
-    return base.replace(/[^a-zA-Z0-9._-]/g, "_");
-  }, [auth?.email, auth?.name]);
+    return identityLabel.replace(/[^a-zA-Z0-9._-]/g, "_");
+  }, [identityLabel]);
 
   const heatmapFrom = heatmap?.from || heatmapRange.from;
   const heatmapTo = heatmap?.to || heatmapRange.to;
@@ -289,7 +298,7 @@ export function DashboardPage({ baseUrl, auth, signedIn, signOut }) {
       {signedIn ? (
         <>
           <span className="hidden md:block text-[10px] opacity-60 max-w-[240px] truncate">
-            {auth?.email || auth?.name || "Signed in"}
+            {identityLabel}
           </span>
           <MatrixButton onClick={signOut}>Sign out</MatrixButton>
         </>
@@ -347,8 +356,6 @@ export function DashboardPage({ baseUrl, auth, signedIn, signOut }) {
               subtitle="Authorized"
               name={identityHandle}
               isPublic
-              email={auth?.email || null}
-              userId={auth?.userId || null}
               rankLabel="—"
               streakDays={streakDays}
             />
