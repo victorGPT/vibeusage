@@ -12,6 +12,8 @@ const { getBearerToken, getEdgeClientAndUserId } = require('../shared/auth');
 const { getBaseUrl, getAnonKey, getServiceRoleKey } = require('../shared/env');
 const { sha256Hex } = require('../shared/crypto');
 
+const ISSUE_ERROR_MESSAGE = 'Failed to issue device token';
+
 module.exports = async function(request) {
   const opt = handleOptions(request);
   if (opt) return opt;
@@ -68,7 +70,10 @@ module.exports = async function(request) {
         platform
       }
     ]);
-  if (deviceErr) return json({ error: deviceErr.message }, 500);
+  if (deviceErr) {
+    logIssueError('device insert failed', ISSUE_ERROR_MESSAGE);
+    return json({ error: ISSUE_ERROR_MESSAGE }, 500);
+  }
 
   const { error: tokenErr } = await dbClient.database
     .from('vibescore_tracker_device_tokens')
@@ -80,7 +85,11 @@ module.exports = async function(request) {
         token_hash: tokenHash
       }
     ]);
-  if (tokenErr) return json({ error: tokenErr.message }, 500);
+  if (tokenErr) {
+    logIssueError('token insert failed', ISSUE_ERROR_MESSAGE);
+    await bestEffortDeleteDevice({ dbClient, deviceId, userId });
+    return json({ error: ISSUE_ERROR_MESSAGE }, 500);
+  }
 
   return json(
     {
@@ -103,3 +112,19 @@ function generateToken() {
   return crypto.randomUUID().replace(/-/g, '') + crypto.randomUUID().replace(/-/g, '');
 }
 
+async function bestEffortDeleteDevice({ dbClient, deviceId, userId }) {
+  try {
+    let query = dbClient.database.from('vibescore_tracker_devices').delete().eq('id', deviceId);
+    if (userId) query = query.eq('user_id', userId);
+    const { error } = await query;
+    if (error) {
+      logIssueError('compensation delete failed', ISSUE_ERROR_MESSAGE);
+    }
+  } catch (_err) {
+    logIssueError('compensation delete threw', ISSUE_ERROR_MESSAGE);
+  }
+}
+
+function logIssueError(stage, message) {
+  console.error(`device token issue ${stage}: ${message}`);
+}
