@@ -22,7 +22,7 @@ landing.handle.placeholder,landing,LandingPage,LandingPage,handle_placeholder,"T
 landing.rank.expectation,landing,LandingPage,LandingPage,rank_expectation,"RANK_EXPECTATION: {{rank}}",,active
 landing.rank.singularity,landing,LandingPage,LandingPage,rank_singularity,"APEX",,active
 landing.rank.unranked,landing,LandingPage,LandingPage,rank_unranked,"UNRANKED",,active
-landing.cta.initialize,landing,LandingPage,LandingPage,cta_primary,">> INITIALIZE_UPLINK <<",,active
+landing.cta.initialize,landing,LandingPage,LandingPage,cta_primary,">> INITIALIZE_LINK <<",,active
 landing.cta.subtext,landing,LandingPage,LandingPage,cta_subtext,"Connect with GitHub // Enter the System",,active
 landing.footer.link.manifesto,landing,LandingPage,LandingPage,footer_link_manifesto,"Manifesto",,active
 landing.footer.link.docs,landing,LandingPage,LandingPage,footer_link_docs,"Docs",,active
@@ -32,7 +32,7 @@ landing.footer.system_ready,landing,LandingPage,LandingPage,footer_system_ready,
 connect.header.right,connect,ConnectCliPage,MatrixShell,header_right,"Connect_CLI",,active
 connect.footer.left,connect,ConnectCliPage,MatrixShell,footer_left,"Click sign-in/sign-up • browser returns to local CLI callback",,active
 connect.footer.right,connect,ConnectCliPage,MatrixShell,footer_right,"/connect",,active
-connect.box.title,connect,ConnectCliPage,AsciiBox,title,"Link_Your_CLI",,active
+connect.box.title,connect,ConnectCliPage,AsciiBox,title,"LINK_YOUR_CLI",,active
 connect.box.subtitle,connect,ConnectCliPage,AsciiBox,subtitle,"Local_Callback",,active
 connect.box.body,connect,ConnectCliPage,AsciiBox,body,"Sign in or sign up. When finished, the browser will return to your local CLI to complete setup.",,active
 connect.error.prefix,connect,ConnectCliPage,AsciiBox,error_prefix,"Invalid or missing",,active
@@ -65,7 +65,7 @@ boot.skip_aria,ui,BootScreen,BootScreen,aria_label,"Skip boot screen",,active
 
 system.header.title_default,ui,SystemHeader,SystemHeader,title_default,"VIBE_OS_v9.0",,active
 
-signalbox.title_default,ui,SignalBox,SignalBox,title_default,"SIGNAL",,active
+signalbox.title_default,ui,SignalBox,SignalBox,title_default,"LINK",,active
 
 sparkline.aria_label,components,Sparkline,Sparkline,aria_label,"Daily token usage sparkline",,active
 
@@ -206,7 +206,7 @@ dashboard.footer.auth,dashboard,DashboardPage,Footer,footer_auth,"Sign in to vie
 dashboard.footer.right,dashboard,DashboardPage,Footer,footer_right,"VibeScore_Dashboard",,active
 
 dashboard.auth_required.title,dashboard,DashboardPage,AsciiBox,title,"Auth_Required",,active
-dashboard.auth_required.subtitle,dashboard,DashboardPage,AsciiBox,subtitle,"Signal_UI_A",,active
+dashboard.auth_required.subtitle,dashboard,DashboardPage,AsciiBox,subtitle,"LINK_UI_A",,active
 dashboard.auth_required.body,dashboard,DashboardPage,AsciiBox,body,"Sign in / sign up to view your daily token usage (UTC).",,active
 
 dashboard.auth_optional.title,dashboard,DashboardPage,AsciiBox,title,"Auth_Optional",,active
@@ -233,12 +233,12 @@ dashboard.identity.title,dashboard,DashboardPage,IdentityCard,title,"Identity_Co
 dashboard.identity.subtitle,dashboard,DashboardPage,IdentityCard,subtitle,"Authorized",,active
 dashboard.identity.fallback,dashboard,DashboardPage,IdentityCard,handle_fallback,"ANONYMOUS",,active
 
-live_sniffer.log.system,ui,LiveSniffer,LiveSniffer,log,"[SYSTEM] KERNEL_UPLINK_ESTABLISHED",,active
+live_sniffer.log.system,ui,LiveSniffer,LiveSniffer,log,"[SYSTEM] KERNEL_LINK_ESTABLISHED",,active
 live_sniffer.log.socket,ui,LiveSniffer,LiveSniffer,log,"[SOCKET] LISTENING_ON_LOCAL_CLI_PIPE...",,active
 live_sniffer.event.intercepted,ui,LiveSniffer,LiveSniffer,event,"> INTERCEPTED: CODEX_COMPLETION_EVENT",,active
 live_sniffer.event.quantifying,ui,LiveSniffer,LiveSniffer,event,"> QUANTIFYING: +64 NEURAL_TOKENS",,active
 live_sniffer.event.analysis,ui,LiveSniffer,LiveSniffer,event,"> ANALYSIS: HIGH_VIBE_FLOW_DETECTED",,active
 live_sniffer.event.sync,ui,LiveSniffer,LiveSniffer,event,"> SYNC: UPLOADING_TO_CORE_RELAY",,active
 live_sniffer.event.batch,ui,LiveSniffer,LiveSniffer,event,"[STATUS] BATCH_TRANSMISSION_COMPLETE",,active
-live_sniffer.event.hooking,ui,LiveSniffer,LiveSniffer,event,"> HOOKING: CODEX_CLI_PIPE_SIGNAL",,active
+live_sniffer.event.hooking,ui,LiveSniffer,LiveSniffer,event,"> HOOKING: CODEX_CLI_PIPE_LINK",,active
 live_sniffer.event.capture,ui,LiveSniffer,LiveSniffer,event,"> CAPTURE: +128 NEURAL_TOKENS",,active
