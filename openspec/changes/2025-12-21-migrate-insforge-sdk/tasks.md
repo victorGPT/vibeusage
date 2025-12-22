@@ -33,7 +33,12 @@
 - [ ] 6.2 Record freeze commit hash and update `tasks.md` statuses.
 
 ## Milestones & Acceptance
-- [ ] M1 SDK lock-in: both packages depend on identical `@insforge/sdk` version; SDK clients compile.
+- [x] M1 SDK lock-in: both packages depend on identical `@insforge/sdk` version; SDK clients compile.
 - [ ] M2 CLI migration: CLI requests all routed via SDK; tests pass.
-- [ ] M3 Dashboard migration: all data fetching via SDK; dashboard build passes.
+- [x] M3 Dashboard migration: all data fetching via SDK; dashboard build passes.
 - [ ] M4 Cleanup & freeze: old HTTP wrappers removed or unused; docs updated; freeze hash recorded.
+
+证据：
+- 2025-12-22 `npm --prefix dashboard run build` 通过。
+- 2025-12-22 `node -e "require('./src/lib/insforge-client')"` 通过；`package.json` 与 `dashboard/package.json` 均为 `@insforge/sdk ^1.0.4`。
+- 2025-12-22 `npm test` 当前失败 4 cases（ingest/leaderboard），因此 M2 未勾选。
