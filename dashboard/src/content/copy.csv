@@ -1,5 +1,4 @@
 key,module,page,component,slot,text,notes,status
-shared.placeholder,shared,*,*,placeholder,"—",,active
 shared.placeholder.short,shared,*,*,placeholder_short,"--",,active
 shared.placeholder.anon_mark,shared,*,*,placeholder_anon_mark,"?",,active
 shared.button.sign_in,shared,*,MatrixButton,label,"$ sign-in",,active
@@ -192,13 +191,8 @@ daily.sort.cached.title,dashboard,DashboardPage,DailyTable,sort_title,"Sort by C
 daily.sort.reasoning.label,dashboard,DashboardPage,DailyTable,sort_label,"Reasoning",,active
 daily.sort.reasoning.title,dashboard,DashboardPage,DailyTable,sort_title,"Sort by Reasoning output",,active
 
-dashboard.period.day,dashboard,DashboardPage,UsagePanel,period_label,"DAY",,active
-dashboard.period.week,dashboard,DashboardPage,UsagePanel,period_label,"WEEK",,active
-dashboard.period.month,dashboard,DashboardPage,UsagePanel,period_label,"MONTH",,active
-dashboard.period.total,dashboard,DashboardPage,UsagePanel,period_label,"TOTAL",,active
 
 dashboard.session.label,dashboard,DashboardPage,Header,session_label,"Session_Time:",,active
-dashboard.signed_in.fallback,dashboard,DashboardPage,Header,signed_in_fallback,"Signed in",,active
 dashboard.sign_out,dashboard,DashboardPage,Header,sign_out,"Sign out",,active
 dashboard.not_signed_in,dashboard,DashboardPage,Header,not_signed_in,"Not signed in",,active
 
