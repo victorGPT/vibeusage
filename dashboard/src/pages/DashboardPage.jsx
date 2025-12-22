@@ -45,6 +45,8 @@ export function DashboardPage({ baseUrl, auth, signedIn, signOut }) {
     return () => window.clearInterval(t);
   }, []);
 
+  const timeZone = useMemo(() => getBrowserTimeZone(), []);
+  const tzOffsetMinutes = useMemo(() => getBrowserTimeZoneOffsetMinutes(), []);
   const [period, setPeriod] = useState("week");
   const range = useMemo(
     () => getRangeForPeriod(period, { timeZone, offsetMinutes: tzOffsetMinutes }),
@@ -54,8 +56,6 @@ export function DashboardPage({ baseUrl, auth, signedIn, signOut }) {
   const to = range.to;
   const mockEnabled = isMockEnabled();
   const accessEnabled = signedIn || mockEnabled;
-  const timeZone = useMemo(() => getBrowserTimeZone(), []);
-  const tzOffsetMinutes = useMemo(() => getBrowserTimeZoneOffsetMinutes(), []);
   const timeZoneLabel = useMemo(
     () => formatTimeZoneLabel({ timeZone, offsetMinutes: tzOffsetMinutes }),
     [timeZone, tzOffsetMinutes]

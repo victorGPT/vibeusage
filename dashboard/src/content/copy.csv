@@ -7,6 +7,11 @@ shared.range.simple,shared,*,*,label,"Range: {{range}}",,active
 shared.data_source,shared,*,*,label,"DATA_SOURCE: {{source}}",,active
 shared.error.prefix,shared,*,*,label,"Error: {{error}}",,active
 shared.status.unsynced,shared,*,*,status,"未同步",,active
+error.boundary.title,shared,*,ErrorBoundary,title,"SYSTEM_FAULT",,active
+error.boundary.subtitle,shared,*,ErrorBoundary,subtitle,"RENDER_FAILURE",,active
+error.boundary.hint,shared,*,ErrorBoundary,hint,"OPEN_CONSOLE // THEN RELOAD",,active
+error.boundary.no_details,shared,*,ErrorBoundary,details,"NO_ERROR_DETAILS",,active
+error.boundary.action.reload,shared,*,ErrorBoundary,action_reload,"RELOAD",,active
 
 landing.handle.default,landing,LandingPage,LandingPage,handle_default,"VIBE_USER",,active
 landing.handle.special,landing,LandingPage,LandingPage,handle_special,"VOLT",,active
