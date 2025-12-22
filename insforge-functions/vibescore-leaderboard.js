@@ -477,6 +477,24 @@ module.exports = async function(request) {
   }
   const entriesView = `vibescore_leaderboard_${period}_current`;
   const meView = `vibescore_leaderboard_me_${period}_current`;
+  const singleQuery = await tryLoadSingleQuery({
+    edgeClient: auth.edgeClient,
+    entriesView,
+    limit
+  });
+  if (singleQuery) {
+    return json(
+      {
+        period,
+        from,
+        to,
+        generated_at: (/* @__PURE__ */ new Date()).toISOString(),
+        entries: singleQuery.entries,
+        me: singleQuery.me
+      },
+      200
+    );
+  }
   const { data: rawEntries, error: entriesErr } = await auth.edgeClient.database.from(entriesView).select("rank,is_me,display_name,avatar_url,total_tokens").order("rank", { ascending: true }).limit(limit);
   if (entriesErr) return json({ error: entriesErr.message }, 500);
   const { data: rawMe, error: meErr } = await auth.edgeClient.database.from(meView).select("rank,total_tokens").maybeSingle();
@@ -495,6 +513,24 @@ module.exports = async function(request) {
     200
   );
 };
+async function tryLoadSingleQuery({ edgeClient, entriesView, limit }) {
+  try {
+    const { data, error } = await edgeClient.database.from(entriesView).select("rank,is_me,display_name,avatar_url,total_tokens").or(`rank.lte.${limit},is_me.eq.true`).order("rank", { ascending: true });
+    if (error) return null;
+    const rows = Array.isArray(data) ? data : [];
+    const entries = [];
+    for (const row of rows) {
+      const rank = toPositiveInt(row?.rank);
+      if (rank < 1 || rank > limit) continue;
+      entries.push(normalizeEntry(row));
+    }
+    const meRow = rows.find((row) => Boolean(row?.is_me));
+    const me = normalizeMe(meRow);
+    return { entries: entries.slice(0, limit), me };
+  } catch (_e) {
+    return null;
+  }
+}
 function normalizePeriod(raw) {
   if (typeof raw !== "string") return null;
   const v = raw.trim().toLowerCase();
