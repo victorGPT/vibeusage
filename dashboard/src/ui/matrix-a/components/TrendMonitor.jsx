@@ -233,6 +233,34 @@ export function TrendMonitor({
     return segments;
   }, [max, plotHeight, plotTop, plotWidth, pointCount, seriesValues, stepWithPadding, xPadding]);
 
+  function solveSmoothPath(points) {
+    if (!Array.isArray(points) || points.length === 0) return "";
+    if (points.length === 1) {
+      const pt = points[0];
+      return `M ${pt.x},${pt.y}`;
+    }
+    if (points.length === 2) {
+      const [a, b] = points;
+      return `M ${a.x},${a.y} L ${b.x},${b.y}`;
+    }
+
+    let d = `M ${points[0].x},${points[0].y}`;
+    for (let i = 0; i < points.length - 1; i += 1) {
+      const p0 = points[Math.max(i - 1, 0)];
+      const p1 = points[i];
+      const p2 = points[i + 1];
+      const p3 = points[Math.min(i + 2, points.length - 1)];
+
+      const cp1x = p1.x + (p2.x - p0.x) * 0.16;
+      const cp1y = p1.y + (p2.y - p0.y) * 0.16;
+      const cp2x = p2.x - (p3.x - p1.x) * 0.16;
+      const cp2y = p2.y - (p3.y - p1.y) * 0.16;
+
+      d += ` C ${cp1x},${cp1y} ${cp2x},${cp2y} ${p2.x},${p2.y}`;
+    }
+    return d;
+  }
+
   const missingPoints = useMemo(() => {
     if (!series || seriesValues.length === 0) return [];
     return seriesMeta
@@ -357,17 +385,17 @@ export function TrendMonitor({
                 />
               );
             }
-            const points = segment.map((pt) => `${pt.x},${pt.y}`).join(" ");
             const first = segment[0];
             const last = segment[segment.length - 1];
-            const fillPath = `M${points} L${last.x},${height - plotBottom} L${first.x},${
+            const linePath = solveSmoothPath(segment);
+            const fillPath = `${linePath} L ${last.x},${height - plotBottom} L ${first.x},${
               height - plotBottom
             } Z`;
             return (
               <React.Fragment key={`seg-${idx}`}>
                 <path d={fillPath} fill={`url(#grad-${label})`} />
-                <polyline
-                  points={points}
+                <path
+                  d={linePath}
                   fill="none"
                   stroke={color}
                   strokeWidth="1.5"
