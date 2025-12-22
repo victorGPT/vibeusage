@@ -10,17 +10,17 @@ shared.error.prefix,shared,*,*,label,"Error: {{error}}",,active
 shared.status.unsynced,shared,*,*,status,"未同步",,active
 
 landing.handle.default,landing,LandingPage,LandingPage,handle_default,"VIBE_USER",,active
-landing.handle.special,landing,LandingPage,LandingPage,handle_special,"NEO",,active
+landing.handle.special,landing,LandingPage,LandingPage,handle_special,"VOLT",,active
 landing.hero.title_primary,landing,LandingPage,LandingPage,hero_title_primary,"MORE_TOKENS.",,active
 landing.hero.title_secondary,landing,LandingPage,LandingPage,hero_title_secondary,"MORE_VIBE.",,active
 landing.hero.tagline,landing,LandingPage,LandingPage,hero_tagline,"QUANTIFY YOUR NEURAL OUTPUT",,active
 landing.hero.subtagline,landing,LandingPage,LandingPage,hero_subtagline,"for codex cli token // Real-time Neural Analytics",,active
-landing.signal.identity_probe,landing,LandingPage,SignalBox,title,"IDENTITY_PROBE",,active
+landing.signal.identity_probe,landing,LandingPage,SignalBox,title,"Identity_Probe",,active
 landing.signal.live_sniffer,landing,LandingPage,SignalBox,title,"LIVE_SNIFFER",,active
 landing.handle.label,landing,LandingPage,LandingPage,handle_label,"Set_Handle",,active
 landing.handle.placeholder,landing,LandingPage,LandingPage,handle_placeholder,"TRY '{{handle}}'",,active
 landing.rank.expectation,landing,LandingPage,LandingPage,rank_expectation,"RANK_EXPECTATION: {{rank}}",,active
-landing.rank.singularity,landing,LandingPage,LandingPage,rank_singularity,"SINGULARITY",,active
+landing.rank.singularity,landing,LandingPage,LandingPage,rank_singularity,"APEX",,active
 landing.rank.unranked,landing,LandingPage,LandingPage,rank_unranked,"UNRANKED",,active
 landing.cta.initialize,landing,LandingPage,LandingPage,cta_primary,">> INITIALIZE_UPLINK <<",,active
 landing.cta.subtext,landing,LandingPage,LandingPage,cta_subtext,"Connect with GitHub // Enter the System",,active
@@ -42,9 +42,9 @@ connect.button.sign_in,connect,ConnectCliPage,MatrixButton,label,"$ sign-in",,ac
 connect.button.sign_up,connect,ConnectCliPage,MatrixButton,label,"$ sign-up",,active
 
 shell.header.title,ui,MatrixShell,MatrixShell,header_title,"VIBE SCORE",,active
-shell.header.link_active,ui,MatrixShell,MatrixShell,header_link_active,"Link_Active",,active
+shell.header.link_active,ui,MatrixShell,MatrixShell,header_link_active,"LINK_ACTIVE",,active
 shell.footer.help,ui,MatrixShell,MatrixShell,footer_help,"[F1] Help",,active
-shell.footer.neural_index,ui,MatrixShell,MatrixShell,footer_neural_index,"Neural_Index: 0.942.A1",,active
+shell.footer.neural_index,ui,MatrixShell,MatrixShell,footer_neural_index,"CORE_INDEX: 0.942.A1",,active
 
 backend.meta.status_label,components,BackendStatus,BackendStatus,meta_status,"status",,active
 backend.meta.host_label,components,BackendStatus,BackendStatus,meta_host,"host",,active
@@ -56,10 +56,10 @@ backend.meta.click_refresh,components,BackendStatus,BackendStatus,meta_click,"cl
 
 status.link.stable,ui,ConnectionStatus,ConnectionStatus,label,"LINK: STABLE",,active
 status.link.unstable,ui,ConnectionStatus,ConnectionStatus,label,"LINK: WEAK",,active
-status.link.lost,ui,ConnectionStatus,ConnectionStatus,label,"SIGNAL: LOST",,active
+status.link.lost,ui,ConnectionStatus,ConnectionStatus,label,"LINK: LOST",,active
 
 boot.ascii_art,ui,BootScreen,BootScreen,ascii,"██╗   ██╗██╗██████╗ ███████╗███████╗ ██████╗  ██████╗ ██████╗ ███████╗\\n██║   ██║██║██╔══██╗██╔════╝██╔════╝██╔════╝ ██╔═══██╗██╔══██╗██╔════╝\\n██║   ██║██║██████╔╝█████╗  ███████╗██║      ██║   ██║██████╔╝█████╗\\n╚██╗ ██╔╝██║██╔══██╗██╔══╝  ╚════██║██║      ██║   ██║██╔══██╗██╔══╝\\n ╚████╔╝ ██║██████╔╝███████╗███████║╚██████╗ ╚██████╔╝██║  ██║███████╗\\n  ╚═══╝  ╚═╝╚═════╝ ╚══════╝╚══════╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═╝╚══════╝",,active
-boot.prompt,ui,BootScreen,BootScreen,prompt,"WAKE UP, OPERATOR...",,active
+boot.prompt,ui,BootScreen,BootScreen,prompt,"INITIALIZING DASHBOARD...",,active
 boot.skip_hint,ui,BootScreen,BootScreen,skip_hint,"Click to skip",,active
 boot.skip_aria,ui,BootScreen,BootScreen,aria_label,"Skip boot screen",,active
 
@@ -69,10 +69,10 @@ signalbox.title_default,ui,SignalBox,SignalBox,title_default,"SIGNAL",,active
 
 sparkline.aria_label,components,Sparkline,Sparkline,aria_label,"Daily token usage sparkline",,active
 
-identity_card.title_default,ui,IdentityCard,IdentityCard,title_default,"Identity_Matrix",,active
-identity_card.name_default,ui,IdentityCard,IdentityCard,name_default,"NEO.SYST_3M",,active
+identity_card.title_default,ui,IdentityCard,IdentityCard,title_default,"Identity_Core",,active
+identity_card.name_default,ui,IdentityCard,IdentityCard,name_default,"VOLT.SYS_3M",,active
 identity_card.unknown,ui,IdentityCard,IdentityCard,unknown_label,"UNKNOWN_GHOST",,active
-identity_card.operator_label,ui,IdentityCard,IdentityCard,operator_label,"Operator_Handle",,active
+identity_card.operator_label,ui,IdentityCard,IdentityCard,operator_label,"Handle",,active
 identity_card.decrypt,ui,IdentityCard,IdentityCard,decrypt_label,"[ ! ] DECRYPT_IDENTITY",,active
 identity_card.rank_label,ui,IdentityCard,IdentityCard,rank_label,"Rank",,active
 identity_card.streak_label,ui,IdentityCard,IdentityCard,streak_label,"Streak",,active
@@ -81,13 +81,13 @@ identity_card.streak_value,ui,IdentityCard,IdentityCard,streak_value,"{{days}}_D
 
 identity_panel.badge,ui,IdentityPanel,IdentityPanel,badge,"VS",,active
 identity_panel.level,ui,IdentityPanel,IdentityPanel,level,"Lvl_05",,active
-identity_panel.access_label,ui,IdentityPanel,IdentityPanel,access_label,"Access_Handle",,active
+identity_panel.access_label,ui,IdentityPanel,IdentityPanel,access_label,"Handle",,active
 identity_panel.rank_label,ui,IdentityPanel,IdentityPanel,rank_label,"Rank",,active
 identity_panel.streak_label,ui,IdentityPanel,IdentityPanel,streak_label,"Streak",,active
 identity_panel.rank_placeholder,ui,IdentityPanel,IdentityPanel,rank_placeholder,"—",,active
 identity_panel.streak_value,ui,IdentityPanel,IdentityPanel,streak_value,"{{days}}_DAYS",,active
 
-usage.panel.title,ui,UsagePanel,UsagePanel,title,"Zion_Index",,active
+usage.panel.title,ui,UsagePanel,UsagePanel,title,"CORE_INDEX",,active
 usage.summary.total_system_output,ui,UsagePanel,UsagePanel,summary_label_total_system,"TOTAL_SYSTEM_OUTPUT",,active
 usage.summary.total,ui,UsagePanel,UsagePanel,summary_label_total,"TOTAL",,active
 usage.metric.total,ui,UsagePanel,UsagePanel,metric_total,"TOTAL",,active
@@ -101,7 +101,7 @@ usage.button.loading,ui,UsagePanel,UsagePanel,button_loading,"Loading…",,activ
 usage.button.refresh,ui,UsagePanel,UsagePanel,button_refresh,"Refresh",,active
 usage.range_label,ui,UsagePanel,UsagePanel,range_label,"Range: {{range}} (UTC)",,active
 
-leaderboard.panel.title,ui,LeaderboardPanel,LeaderboardPanel,title,"Zion_Index",,active
+leaderboard.panel.title,ui,LeaderboardPanel,LeaderboardPanel,title,"CORE_INDEX",,active
 leaderboard.period.cycle_24h,ui,LeaderboardPanel,LeaderboardPanel,period_label,"Cycle_24h",,active
 leaderboard.period.legacy_all,ui,LeaderboardPanel,LeaderboardPanel,period_label,"Legacy_All",,active
 leaderboard.load_more,ui,LeaderboardPanel,LeaderboardPanel,load_more,"-- LOAD_NEXT_BATCH --",,active
@@ -172,8 +172,8 @@ heatmap.day.thu,ui,ActivityHeatmap,ActivityHeatmap,day_label,"Thu",,active
 heatmap.day.fri,ui,ActivityHeatmap,ActivityHeatmap,day_label,"Fri",,active
 heatmap.day.sat,ui,ActivityHeatmap,ActivityHeatmap,day_label,"Sat",,active
 
-archive.title,ui,ArchiveHeatmap,ArchiveHeatmap,title,"Archive_Sector",,active
-archive.footer.left,ui,ArchiveHeatmap,ArchiveHeatmap,footer_left,"Yearly_Map",,active
+archive.title,ui,ArchiveHeatmap,ArchiveHeatmap,title,"Archive_Grid",,active
+archive.footer.left,ui,ArchiveHeatmap,ArchiveHeatmap,footer_left,"Yearly_Grid",,active
 
 
 daily.table.aria_label,dashboard,DashboardPage,DashboardPage,aria_label,"Daily totals table",,active
@@ -206,7 +206,7 @@ dashboard.footer.auth,dashboard,DashboardPage,Footer,footer_auth,"Sign in to vie
 dashboard.footer.right,dashboard,DashboardPage,Footer,footer_right,"VibeScore_Dashboard",,active
 
 dashboard.auth_required.title,dashboard,DashboardPage,AsciiBox,title,"Auth_Required",,active
-dashboard.auth_required.subtitle,dashboard,DashboardPage,AsciiBox,subtitle,"Matrix_UI_A",,active
+dashboard.auth_required.subtitle,dashboard,DashboardPage,AsciiBox,subtitle,"Signal_UI_A",,active
 dashboard.auth_required.body,dashboard,DashboardPage,AsciiBox,body,"Sign in / sign up to view your daily token usage (UTC).",,active
 
 dashboard.auth_optional.title,dashboard,DashboardPage,AsciiBox,title,"Auth_Optional",,active
@@ -221,7 +221,7 @@ dashboard.install.step2,dashboard,DashboardPage,AsciiBox,install_step,"2) use Co
 dashboard.install.step3,dashboard,DashboardPage,AsciiBox,install_step,"3) run",,active
 dashboard.install.step3_suffix,dashboard,DashboardPage,AsciiBox,install_step_suffix,"(or wait for auto sync)",,active
 
-dashboard.activity.title,dashboard,DashboardPage,AsciiBox,title,"Activity_Matrix",,active
+dashboard.activity.title,dashboard,DashboardPage,AsciiBox,title,"Activity_Grid",,active
 dashboard.activity.subtitle,dashboard,DashboardPage,AsciiBox,subtitle,"52W_UTC",,active
 dashboard.activity.range,dashboard,DashboardPage,AsciiBox,range_label,"Range: {{from}}..{{to}}",,active
 
@@ -229,7 +229,7 @@ dashboard.daily.title,dashboard,DashboardPage,AsciiBox,title,"Daily_Totals",,act
 dashboard.daily.subtitle,dashboard,DashboardPage,AsciiBox,subtitle,"Sortable",,active
 dashboard.daily.empty,dashboard,DashboardPage,AsciiBox,empty_state,"No data yet. Use Codex CLI then run {{cmd}}.",,active
 
-dashboard.identity.title,dashboard,DashboardPage,IdentityCard,title,"Architect_Identity",,active
+dashboard.identity.title,dashboard,DashboardPage,IdentityCard,title,"Identity_Core",,active
 dashboard.identity.subtitle,dashboard,DashboardPage,IdentityCard,subtitle,"Authorized",,active
 dashboard.identity.fallback,dashboard,DashboardPage,IdentityCard,handle_fallback,"ANONYMOUS",,active
 
@@ -238,7 +238,7 @@ live_sniffer.log.socket,ui,LiveSniffer,LiveSniffer,log,"[SOCKET] LISTENING_ON_LO
 live_sniffer.event.intercepted,ui,LiveSniffer,LiveSniffer,event,"> INTERCEPTED: CODEX_COMPLETION_EVENT",,active
 live_sniffer.event.quantifying,ui,LiveSniffer,LiveSniffer,event,"> QUANTIFYING: +64 NEURAL_TOKENS",,active
 live_sniffer.event.analysis,ui,LiveSniffer,LiveSniffer,event,"> ANALYSIS: HIGH_VIBE_FLOW_DETECTED",,active
-live_sniffer.event.sync,ui,LiveSniffer,LiveSniffer,event,"> SYNC: UPLOADING_TO_ZION_MAINFRAME",,active
+live_sniffer.event.sync,ui,LiveSniffer,LiveSniffer,event,"> SYNC: UPLOADING_TO_CORE_RELAY",,active
 live_sniffer.event.batch,ui,LiveSniffer,LiveSniffer,event,"[STATUS] BATCH_TRANSMISSION_COMPLETE",,active
 live_sniffer.event.hooking,ui,LiveSniffer,LiveSniffer,event,"> HOOKING: CODEX_CLI_PIPE_SIGNAL",,active
 live_sniffer.event.capture,ui,LiveSniffer,LiveSniffer,event,"> CAPTURE: +128 NEURAL_TOKENS",,active

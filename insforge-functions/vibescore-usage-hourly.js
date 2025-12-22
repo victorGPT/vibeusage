@@ -223,7 +223,7 @@ var require_date = __commonJS({
       if (v < -840 || v > 840) return null;
       return Math.trunc(v);
     }
-    function normalizeTimeZone2(tzRaw, offsetRaw) {
+    function normalizeTimeZone(tzRaw, offsetRaw) {
       const tz = typeof tzRaw === "string" ? tzRaw.trim() : "";
       let timeZone = null;
       if (tz) {
@@ -240,6 +240,9 @@ var require_date = __commonJS({
       if (timeZone) return { timeZone, offsetMinutes: null, source: "iana" };
       if (offsetMinutes != null) return { timeZone: null, offsetMinutes, source: "offset" };
       return { timeZone: null, offsetMinutes: 0, source: "utc" };
+    }
+    function getUsageTimeZoneContext2(_url) {
+      return normalizeTimeZone();
     }
     function isUtcTimeZone2(tzContext) {
       if (!tzContext) return true;
@@ -352,7 +355,8 @@ var require_date = __commonJS({
       datePartsFromDateUTC,
       addDatePartsDays: addDatePartsDays2,
       addDatePartsMonths,
-      normalizeTimeZone: normalizeTimeZone2,
+      normalizeTimeZone,
+      getUsageTimeZoneContext: getUsageTimeZoneContext2,
       isUtcTimeZone: isUtcTimeZone2,
       getTimeZoneOffsetMinutes,
       getLocalParts: getLocalParts2,
@@ -423,8 +427,8 @@ var {
   formatDateUTC,
   getLocalParts,
   isUtcTimeZone,
+  getUsageTimeZoneContext,
   localDatePartsToUtc,
-  normalizeTimeZone,
   parseDateParts,
   parseUtcDateString
 } = require_date();
@@ -440,10 +444,7 @@ module.exports = async function(request) {
   const auth = await getEdgeClientAndUserId({ baseUrl, bearer });
   if (!auth.ok) return json({ error: "Unauthorized" }, 401);
   const url = new URL(request.url);
-  const tzContext = normalizeTimeZone(
-    url.searchParams.get("tz"),
-    url.searchParams.get("tz_offset_minutes")
-  );
+  const tzContext = getUsageTimeZoneContext(url);
   if (isUtcTimeZone(tzContext)) {
     const dayRaw2 = url.searchParams.get("day");
     const today = parseUtcDateString(formatDateUTC(/* @__PURE__ */ new Date()));

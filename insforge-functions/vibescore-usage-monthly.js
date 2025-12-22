@@ -223,7 +223,7 @@ var require_date = __commonJS({
       if (v < -840 || v > 840) return null;
       return Math.trunc(v);
     }
-    function normalizeTimeZone2(tzRaw, offsetRaw) {
+    function normalizeTimeZone(tzRaw, offsetRaw) {
       const tz = typeof tzRaw === "string" ? tzRaw.trim() : "";
       let timeZone = null;
       if (tz) {
@@ -240,6 +240,9 @@ var require_date = __commonJS({
       if (timeZone) return { timeZone, offsetMinutes: null, source: "iana" };
       if (offsetMinutes != null) return { timeZone: null, offsetMinutes, source: "offset" };
       return { timeZone: null, offsetMinutes: 0, source: "utc" };
+    }
+    function getUsageTimeZoneContext2(_url) {
+      return normalizeTimeZone();
     }
     function isUtcTimeZone2(tzContext) {
       if (!tzContext) return true;
@@ -352,7 +355,8 @@ var require_date = __commonJS({
       datePartsFromDateUTC,
       addDatePartsDays: addDatePartsDays2,
       addDatePartsMonths: addDatePartsMonths2,
-      normalizeTimeZone: normalizeTimeZone2,
+      normalizeTimeZone,
+      getUsageTimeZoneContext: getUsageTimeZoneContext2,
       isUtcTimeZone: isUtcTimeZone2,
       getTimeZoneOffsetMinutes,
       getLocalParts: getLocalParts2,
@@ -423,8 +427,8 @@ var {
   formatDateUTC,
   getLocalParts,
   isUtcTimeZone,
+  getUsageTimeZoneContext,
   localDatePartsToUtc,
-  normalizeTimeZone,
   parseDateParts,
   parseUtcDateString
 } = require_date();
@@ -441,10 +445,7 @@ module.exports = async function(request) {
   const auth = await getEdgeClientAndUserId({ baseUrl, bearer });
   if (!auth.ok) return json({ error: "Unauthorized" }, 401);
   const url = new URL(request.url);
-  const tzContext = normalizeTimeZone(
-    url.searchParams.get("tz"),
-    url.searchParams.get("tz_offset_minutes")
-  );
+  const tzContext = getUsageTimeZoneContext(url);
   const monthsRaw = url.searchParams.get("months");
   const monthsParsed = toPositiveIntOrNull(monthsRaw);
   const months = monthsParsed == null ? MAX_MONTHS : monthsParsed;
@@ -459,22 +460,28 @@ module.exports = async function(request) {
     );
     const from2 = formatDateUTC(startMonth);
     const to2 = formatDateUTC(toDate);
+    const { monthKeys: monthKeys2, buckets: buckets2 } = initMonthlyBuckets(startMonth, months);
+    const aggregateRows = await tryAggregateMonthlyTotals({
+      edgeClient: auth.edgeClient,
+      userId: auth.userId,
+      from: from2,
+      to: to2
+    });
+    if (aggregateRows) {
+      for (const row of aggregateRows) {
+        const key = formatMonthKeyFromValue(row?.month);
+        const bucket = key ? buckets2.get(key) : null;
+        if (!bucket) continue;
+        bucket.total += toBigInt(row?.sum_total_tokens);
+        bucket.input += toBigInt(row?.sum_input_tokens);
+        bucket.cached += toBigInt(row?.sum_cached_input_tokens);
+        bucket.output += toBigInt(row?.sum_output_tokens);
+        bucket.reasoning += toBigInt(row?.sum_reasoning_output_tokens);
+      }
+      return json({ from: from2, to: to2, months, data: buildMonthlyResponse(monthKeys2, buckets2) }, 200);
+    }
     const { data: data2, error: error2 } = await auth.edgeClient.database.from("vibescore_tracker_daily").select("day,total_tokens,input_tokens,cached_input_tokens,output_tokens,reasoning_output_tokens").eq("user_id", auth.userId).gte("day", from2).lte("day", to2).order("day", { ascending: true });
     if (error2) return json({ error: error2.message }, 500);
-    const monthKeys2 = [];
-    const buckets2 = /* @__PURE__ */ new Map();
-    for (let i = 0; i < months; i += 1) {
-      const dt = new Date(Date.UTC(startMonth.getUTCFullYear(), startMonth.getUTCMonth() + i, 1));
-      const key = `${dt.getUTCFullYear()}-${String(dt.getUTCMonth() + 1).padStart(2, "0")}`;
-      monthKeys2.push(key);
-      buckets2.set(key, {
-        total: 0n,
-        input: 0n,
-        cached: 0n,
-        output: 0n,
-        reasoning: 0n
-      });
-    }
     for (const row of data2 || []) {
       const day = row?.day;
       if (typeof day !== "string" || day.length < 7) continue;
@@ -487,18 +494,7 @@ module.exports = async function(request) {
       bucket.output += toBigInt(row?.output_tokens);
       bucket.reasoning += toBigInt(row?.reasoning_output_tokens);
     }
-    const monthly2 = monthKeys2.map((key) => {
-      const bucket = buckets2.get(key);
-      return {
-        month: key,
-        total_tokens: bucket.total.toString(),
-        input_tokens: bucket.input.toString(),
-        cached_input_tokens: bucket.cached.toString(),
-        output_tokens: bucket.output.toString(),
-        reasoning_output_tokens: bucket.reasoning.toString()
-      };
-    });
-    return json({ from: from2, to: to2, months, data: monthly2 }, 200);
+    return json({ from: from2, to: to2, months, data: buildMonthlyResponse(monthKeys2, buckets2) }, 200);
   }
   const todayParts = getLocalParts(/* @__PURE__ */ new Date(), tzContext);
   const toParts = toRaw ? parseDateParts(toRaw) : {
@@ -565,3 +561,54 @@ module.exports = async function(request) {
   });
   return json({ from, to, months, data: monthly }, 200);
 };
+function initMonthlyBuckets(startMonth, months) {
+  const monthKeys = [];
+  const buckets = /* @__PURE__ */ new Map();
+  for (let i = 0; i < months; i += 1) {
+    const dt = new Date(Date.UTC(startMonth.getUTCFullYear(), startMonth.getUTCMonth() + i, 1));
+    const key = `${dt.getUTCFullYear()}-${String(dt.getUTCMonth() + 1).padStart(2, "0")}`;
+    monthKeys.push(key);
+    buckets.set(key, {
+      total: 0n,
+      input: 0n,
+      cached: 0n,
+      output: 0n,
+      reasoning: 0n
+    });
+  }
+  return { monthKeys, buckets };
+}
+function buildMonthlyResponse(monthKeys, buckets) {
+  return monthKeys.map((key) => {
+    const bucket = buckets.get(key);
+    return {
+      month: key,
+      total_tokens: bucket.total.toString(),
+      input_tokens: bucket.input.toString(),
+      cached_input_tokens: bucket.cached.toString(),
+      output_tokens: bucket.output.toString(),
+      reasoning_output_tokens: bucket.reasoning.toString()
+    };
+  });
+}
+function formatMonthKeyFromValue(value) {
+  if (!value) return null;
+  if (typeof value === "string") {
+    if (value.length >= 7) return value.slice(0, 7);
+    return null;
+  }
+  const dt = value instanceof Date ? value : new Date(value);
+  if (!Number.isFinite(dt.getTime())) return null;
+  return `${dt.getUTCFullYear()}-${String(dt.getUTCMonth() + 1).padStart(2, "0")}`;
+}
+async function tryAggregateMonthlyTotals({ edgeClient, userId, from, to }) {
+  try {
+    const { data, error } = await edgeClient.database.from("vibescore_tracker_daily").select(
+      "month:date_trunc('month', day),sum_total_tokens:sum(total_tokens),sum_input_tokens:sum(input_tokens),sum_cached_input_tokens:sum(cached_input_tokens),sum_output_tokens:sum(output_tokens),sum_reasoning_output_tokens:sum(reasoning_output_tokens)"
+    ).eq("user_id", userId).gte("day", from).lte("day", to).order("month", { ascending: true });
+    if (error) return null;
+    return data || [];
+  } catch (_e) {
+    return null;
+  }
+}

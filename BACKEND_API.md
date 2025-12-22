@@ -61,6 +61,8 @@ To keep low-tier backends stable, the CLI and dashboard apply conservative defau
 
 ## Endpoints
 
+**Phase 1 note (2025-12-22):** For usage endpoints, `tz` and `tz_offset_minutes` are accepted but ignored; aggregates are computed in UTC to guarantee completeness. These parameters will be restored in Phase 2.
+
 ### POST /functions/vibescore-device-token-issue
 
 Issue a long-lived device token for the current user.

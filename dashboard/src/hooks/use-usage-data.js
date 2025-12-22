@@ -4,6 +4,7 @@ import { getUsageDaily, getUsageSummary } from "../lib/vibescore-api.js";
 import { formatDateLocal, formatDateUTC } from "../lib/date-range.js";
 import { isMockEnabled } from "../lib/mock-data.js";
 import { getTimeZoneCacheKey } from "../lib/timezone.js";
+import { sumDailyRowsToTotals } from "../lib/usage-aggregate.js";
 
 export function useUsageData({
   baseUrl,
@@ -11,6 +12,7 @@ export function useUsageData({
   from,
   to,
   includeDaily = true,
+  deriveSummaryFromDaily = false,
   cacheKey,
   timeZone,
   tzOffsetMinutes,
@@ -61,25 +63,31 @@ export function useUsageData({
     setLoading(true);
     setError(null);
     try {
-      const promises = [
-        getUsageSummary({ baseUrl, accessToken, from, to, timeZone, tzOffsetMinutes }),
-      ];
+      const shouldDeriveSummary = includeDaily && deriveSummaryFromDaily;
+      const promises = [];
       if (includeDaily) {
-        promises.unshift(
+        promises.push(
           getUsageDaily({ baseUrl, accessToken, from, to, timeZone, tzOffsetMinutes })
+        );
+      }
+      if (!shouldDeriveSummary) {
+        promises.push(
+          getUsageSummary({ baseUrl, accessToken, from, to, timeZone, tzOffsetMinutes })
         );
       }
 
       const results = await Promise.all(promises);
-      const summaryRes = includeDaily ? results[1] : results[0];
       const dailyRes = includeDaily ? results[0] : null;
+      const summaryRes = shouldDeriveSummary ? null : results[includeDaily ? 1 : 0];
 
       let nextDaily =
         includeDaily && Array.isArray(dailyRes?.data) ? dailyRes.data : [];
       if (includeDaily) {
         nextDaily = fillDailyGaps(nextDaily, from, to);
       }
-      const nextSummary = summaryRes?.totals || null;
+      const nextSummary = shouldDeriveSummary
+        ? sumDailyRowsToTotals(nextDaily)
+        : summaryRes?.totals || null;
       const nowIso = new Date().toISOString();
 
       setDaily(nextDaily);
@@ -124,6 +132,7 @@ export function useUsageData({
     baseUrl,
     from,
     includeDaily,
+    deriveSummaryFromDaily,
     mockEnabled,
     readCache,
     timeZone,

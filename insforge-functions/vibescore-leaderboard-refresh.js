@@ -241,6 +241,9 @@ var require_date = __commonJS({
       if (offsetMinutes != null) return { timeZone: null, offsetMinutes, source: "offset" };
       return { timeZone: null, offsetMinutes: 0, source: "utc" };
     }
+    function getUsageTimeZoneContext(_url) {
+      return normalizeTimeZone();
+    }
     function isUtcTimeZone(tzContext) {
       if (!tzContext) return true;
       const tz = tzContext.timeZone;
@@ -353,6 +356,7 @@ var require_date = __commonJS({
       addDatePartsDays,
       addDatePartsMonths,
       normalizeTimeZone,
+      getUsageTimeZoneContext,
       isUtcTimeZone,
       getTimeZoneOffsetMinutes,
       getLocalParts,

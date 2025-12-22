@@ -13,8 +13,8 @@ const {
   formatDateUTC,
   getLocalParts,
   isUtcTimeZone,
+  getUsageTimeZoneContext,
   localDatePartsToUtc,
-  normalizeTimeZone,
   parseDateParts,
   parseUtcDateString
 } = require('../shared/date');
@@ -37,10 +37,7 @@ module.exports = async function(request) {
   if (!auth.ok) return json({ error: 'Unauthorized' }, 401);
 
   const url = new URL(request.url);
-  const tzContext = normalizeTimeZone(
-    url.searchParams.get('tz'),
-    url.searchParams.get('tz_offset_minutes')
-  );
+  const tzContext = getUsageTimeZoneContext(url);
   const monthsRaw = url.searchParams.get('months');
   const monthsParsed = toPositiveIntOrNull(monthsRaw);
   const months = monthsParsed == null ? MAX_MONTHS : monthsParsed;
@@ -58,6 +55,31 @@ module.exports = async function(request) {
     const from = formatDateUTC(startMonth);
     const to = formatDateUTC(toDate);
 
+    const { monthKeys, buckets } = initMonthlyBuckets(startMonth, months);
+
+    const aggregateRows = await tryAggregateMonthlyTotals({
+      edgeClient: auth.edgeClient,
+      userId: auth.userId,
+      from,
+      to
+    });
+
+    if (aggregateRows) {
+      for (const row of aggregateRows) {
+        const key = formatMonthKeyFromValue(row?.month);
+        const bucket = key ? buckets.get(key) : null;
+        if (!bucket) continue;
+
+        bucket.total += toBigInt(row?.sum_total_tokens);
+        bucket.input += toBigInt(row?.sum_input_tokens);
+        bucket.cached += toBigInt(row?.sum_cached_input_tokens);
+        bucket.output += toBigInt(row?.sum_output_tokens);
+        bucket.reasoning += toBigInt(row?.sum_reasoning_output_tokens);
+      }
+
+      return json({ from, to, months, data: buildMonthlyResponse(monthKeys, buckets) }, 200);
+    }
+
     const { data, error } = await auth.edgeClient.database
       .from('vibescore_tracker_daily')
       .select('day,total_tokens,input_tokens,cached_input_tokens,output_tokens,reasoning_output_tokens')
@@ -67,22 +89,6 @@ module.exports = async function(request) {
       .order('day', { ascending: true });
 
     if (error) return json({ error: error.message }, 500);
-
-    const monthKeys = [];
-    const buckets = new Map();
-
-    for (let i = 0; i < months; i += 1) {
-      const dt = new Date(Date.UTC(startMonth.getUTCFullYear(), startMonth.getUTCMonth() + i, 1));
-      const key = `${dt.getUTCFullYear()}-${String(dt.getUTCMonth() + 1).padStart(2, '0')}`;
-      monthKeys.push(key);
-      buckets.set(key, {
-        total: 0n,
-        input: 0n,
-        cached: 0n,
-        output: 0n,
-        reasoning: 0n
-      });
-    }
 
     for (const row of data || []) {
       const day = row?.day;
@@ -98,19 +104,7 @@ module.exports = async function(request) {
       bucket.reasoning += toBigInt(row?.reasoning_output_tokens);
     }
 
-    const monthly = monthKeys.map((key) => {
-      const bucket = buckets.get(key);
-      return {
-        month: key,
-        total_tokens: bucket.total.toString(),
-        input_tokens: bucket.input.toString(),
-        cached_input_tokens: bucket.cached.toString(),
-        output_tokens: bucket.output.toString(),
-        reasoning_output_tokens: bucket.reasoning.toString()
-      };
-    });
-
-    return json({ from, to, months, data: monthly }, 200);
+    return json({ from, to, months, data: buildMonthlyResponse(monthKeys, buckets) }, 200);
   }
 
   const todayParts = getLocalParts(new Date(), tzContext);
@@ -193,3 +187,67 @@ module.exports = async function(request) {
 
   return json({ from, to, months, data: monthly }, 200);
 };
+
+function initMonthlyBuckets(startMonth, months) {
+  const monthKeys = [];
+  const buckets = new Map();
+
+  for (let i = 0; i < months; i += 1) {
+    const dt = new Date(Date.UTC(startMonth.getUTCFullYear(), startMonth.getUTCMonth() + i, 1));
+    const key = `${dt.getUTCFullYear()}-${String(dt.getUTCMonth() + 1).padStart(2, '0')}`;
+    monthKeys.push(key);
+    buckets.set(key, {
+      total: 0n,
+      input: 0n,
+      cached: 0n,
+      output: 0n,
+      reasoning: 0n
+    });
+  }
+
+  return { monthKeys, buckets };
+}
+
+function buildMonthlyResponse(monthKeys, buckets) {
+  return monthKeys.map((key) => {
+    const bucket = buckets.get(key);
+    return {
+      month: key,
+      total_tokens: bucket.total.toString(),
+      input_tokens: bucket.input.toString(),
+      cached_input_tokens: bucket.cached.toString(),
+      output_tokens: bucket.output.toString(),
+      reasoning_output_tokens: bucket.reasoning.toString()
+    };
+  });
+}
+
+function formatMonthKeyFromValue(value) {
+  if (!value) return null;
+  if (typeof value === 'string') {
+    if (value.length >= 7) return value.slice(0, 7);
+    return null;
+  }
+  const dt = value instanceof Date ? value : new Date(value);
+  if (!Number.isFinite(dt.getTime())) return null;
+  return `${dt.getUTCFullYear()}-${String(dt.getUTCMonth() + 1).padStart(2, '0')}`;
+}
+
+async function tryAggregateMonthlyTotals({ edgeClient, userId, from, to }) {
+  try {
+    const { data, error } = await edgeClient.database
+      .from('vibescore_tracker_daily')
+      .select(
+        "month:date_trunc('month', day),sum_total_tokens:sum(total_tokens),sum_input_tokens:sum(input_tokens),sum_cached_input_tokens:sum(cached_input_tokens),sum_output_tokens:sum(output_tokens),sum_reasoning_output_tokens:sum(reasoning_output_tokens)"
+      )
+      .eq('user_id', userId)
+      .gte('day', from)
+      .lte('day', to)
+      .order('month', { ascending: true });
+
+    if (error) return null;
+    return data || [];
+  } catch (_e) {
+    return null;
+  }
+}

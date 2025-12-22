@@ -21,6 +21,8 @@ export function useTrendData({
   cacheKey,
   timeZone,
   tzOffsetMinutes,
+  sharedRows,
+  sharedRange,
 } = {}) {
   const [rows, setRows] = useState([]);
   const [range, setRange] = useState(() => ({ from, to }));
@@ -29,6 +31,9 @@ export function useTrendData({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const mockEnabled = isMockEnabled();
+  const sharedEnabled = Array.isArray(sharedRows);
+  const sharedFrom = sharedRange?.from || from;
+  const sharedTo = sharedRange?.to || to;
 
   const mode = useMemo(() => {
     if (period === "day") return "hourly";
@@ -78,6 +83,15 @@ export function useTrendData({
   );
 
   const refresh = useCallback(async () => {
+    if (sharedEnabled) {
+      setRows(Array.isArray(sharedRows) ? sharedRows : []);
+      setRange({ from: sharedFrom, to: sharedTo });
+      setSource("shared");
+      setFetchedAt(null);
+      setLoading(false);
+      setError(null);
+      return;
+    }
     if (!accessToken && !mockEnabled) return;
     setLoading(true);
     setError(null);
@@ -158,6 +172,10 @@ export function useTrendData({
     mode,
     months,
     readCache,
+    sharedEnabled,
+    sharedFrom,
+    sharedRows,
+    sharedTo,
     timeZone,
     to,
     tzOffsetMinutes,
@@ -165,6 +183,15 @@ export function useTrendData({
   ]);
 
   useEffect(() => {
+    if (sharedEnabled) {
+      setRows(Array.isArray(sharedRows) ? sharedRows : []);
+      setRange({ from: sharedFrom, to: sharedTo });
+      setSource("shared");
+      setFetchedAt(null);
+      setLoading(false);
+      setError(null);
+      return;
+    }
     if (!accessToken && !mockEnabled) {
       setRows([]);
       setRange({ from, to });
@@ -182,7 +209,7 @@ export function useTrendData({
       setFetchedAt(cached.fetchedAt || null);
     }
     refresh();
-  }, [accessToken, mockEnabled, readCache, refresh]);
+  }, [accessToken, mockEnabled, readCache, refresh, sharedEnabled, sharedFrom, sharedRows, sharedTo]);
 
   const normalizedSource = mockEnabled ? "mock" : source;
 

@@ -10,10 +10,10 @@ const {
   addDatePartsDays,
   formatLocalDateKey,
   isUtcTimeZone,
+  getUsageTimeZoneContext,
   listDateStrings,
   localDatePartsToUtc,
   normalizeDateRangeLocal,
-  normalizeTimeZone,
   parseDateParts
 } = require('../shared/date');
 const { toBigInt } = require('../shared/numbers');
@@ -33,10 +33,7 @@ module.exports = async function(request) {
   if (!auth.ok) return json({ error: 'Unauthorized' }, 401);
 
   const url = new URL(request.url);
-  const tzContext = normalizeTimeZone(
-    url.searchParams.get('tz'),
-    url.searchParams.get('tz_offset_minutes')
-  );
+  const tzContext = getUsageTimeZoneContext(url);
   const { from, to } = normalizeDateRangeLocal(
     url.searchParams.get('from'),
     url.searchParams.get('to'),

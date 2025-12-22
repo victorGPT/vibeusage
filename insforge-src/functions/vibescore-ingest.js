@@ -85,7 +85,15 @@ module.exports = async function(request) {
   }
 
   const ingest = serviceClient
-    ? await ingestWithServiceClient(serviceClient, tokenRow, rows, nowIso)
+    ? await ingestWithServiceClient({
+        serviceClient,
+        tokenRow,
+        rows,
+        nowIso,
+        baseUrl,
+        serviceRoleKey,
+        tokenHash
+      })
     : await ingestWithAnonKey({ baseUrl, anonKey, tokenHash, tokenRow, rows });
   if (!ingest.ok) return json({ error: ingest.error }, 500);
 
@@ -130,7 +138,43 @@ async function getTokenRowWithAnonKey({ baseUrl, anonKey, tokenHash }) {
   return tokenRow;
 }
 
-async function ingestWithServiceClient(serviceClient, tokenRow, rows, nowIso) {
+async function ingestWithServiceClient({
+  serviceClient,
+  tokenRow,
+  rows,
+  nowIso,
+  baseUrl,
+  serviceRoleKey,
+  tokenHash
+}) {
+  if (serviceRoleKey && baseUrl) {
+    const url = new URL('/api/database/records/vibescore_tracker_events', baseUrl);
+    const ignore = await recordsInsert({
+      url,
+      anonKey: serviceRoleKey,
+      tokenHash,
+      rows,
+      onConflict: 'user_id,event_id',
+      prefer: 'return=representation',
+      resolution: 'ignore-duplicates',
+      select: 'event_id'
+    });
+
+    if (ignore.ok) {
+      const insertedRows = normalizeRows(ignore.data);
+      const inserted = Array.isArray(insertedRows) ? insertedRows.length : rows.length;
+      const skipped = Math.max(0, rows.length - inserted);
+      await bestEffortTouchWithServiceClient(serviceClient, tokenRow, nowIso);
+      return { ok: true, inserted, skipped };
+    }
+
+    if (!isUpsertUnsupported(ignore)) {
+      if (ignore.status !== 409 || ignore.code !== '23505') {
+        return { ok: false, error: ignore.error || `HTTP ${ignore.status}`, inserted: 0, skipped: 0 };
+      }
+    }
+  }
+
   const eventIds = rows.map((r) => r.event_id);
   const { data: existingRows, error: existingErr } = await serviceClient.database
     .from('vibescore_tracker_events')

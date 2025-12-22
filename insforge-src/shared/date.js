@@ -152,6 +152,11 @@ function normalizeTimeZone(tzRaw, offsetRaw) {
   return { timeZone: null, offsetMinutes: 0, source: 'utc' };
 }
 
+function getUsageTimeZoneContext(_url) {
+  // Phase 1: ignore tz parameters to avoid partial aggregates.
+  return normalizeTimeZone();
+}
+
 function isUtcTimeZone(tzContext) {
   if (!tzContext) return true;
   const tz = tzContext.timeZone;
@@ -274,6 +279,7 @@ module.exports = {
   addDatePartsDays,
   addDatePartsMonths,
   normalizeTimeZone,
+  getUsageTimeZoneContext,
   isUtcTimeZone,
   getTimeZoneOffsetMinutes,
   getLocalParts,

@@ -14,7 +14,9 @@
     "dashboard:build": "npm --prefix dashboard run build",
     "dashboard:preview": "npm --prefix dashboard run preview",
     "dev:shim": "node scripts/dev-bin-shim.cjs",
-    "validate:copy": "node scripts/validate-copy-registry.cjs"
+    "validate:copy": "node scripts/validate-copy-registry.cjs",
+    "copy:pull": "node scripts/copy-sync.cjs pull",
+    "copy:push": "node scripts/copy-sync.cjs push"
   },
   "bin": {
     "tracker": "bin/tracker.js",

@@ -13,8 +13,8 @@ const {
   formatDateUTC,
   getLocalParts,
   isUtcTimeZone,
+  getUsageTimeZoneContext,
   localDatePartsToUtc,
-  normalizeTimeZone,
   parseDateParts,
   parseUtcDateString
 } = require('../shared/date');
@@ -35,10 +35,7 @@ module.exports = async function(request) {
   if (!auth.ok) return json({ error: 'Unauthorized' }, 401);
 
   const url = new URL(request.url);
-  const tzContext = normalizeTimeZone(
-    url.searchParams.get('tz'),
-    url.searchParams.get('tz_offset_minutes')
-  );
+  const tzContext = getUsageTimeZoneContext(url);
 
   if (isUtcTimeZone(tzContext)) {
     const dayRaw = url.searchParams.get('day');

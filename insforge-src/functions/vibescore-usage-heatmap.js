@@ -16,8 +16,8 @@ const {
   formatLocalDateKey,
   getLocalParts,
   isUtcTimeZone,
+  getUsageTimeZoneContext,
   localDatePartsToUtc,
-  normalizeTimeZone,
   parseDateParts,
   parseUtcDateString
 } = require('../shared/date');
@@ -34,10 +34,7 @@ module.exports = async function(request) {
   if (!bearer) return json({ error: 'Missing bearer token' }, 401);
 
   const url = new URL(request.url);
-  const tzContext = normalizeTimeZone(
-    url.searchParams.get('tz'),
-    url.searchParams.get('tz_offset_minutes')
-  );
+  const tzContext = getUsageTimeZoneContext(url);
 
   const weeksRaw = url.searchParams.get('weeks');
   const weeks = normalizeWeeks(weeksRaw);

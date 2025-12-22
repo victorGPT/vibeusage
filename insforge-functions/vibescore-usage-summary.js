@@ -223,7 +223,7 @@ var require_date = __commonJS({
       if (v < -840 || v > 840) return null;
       return Math.trunc(v);
     }
-    function normalizeTimeZone2(tzRaw, offsetRaw) {
+    function normalizeTimeZone(tzRaw, offsetRaw) {
       const tz = typeof tzRaw === "string" ? tzRaw.trim() : "";
       let timeZone = null;
       if (tz) {
@@ -240,6 +240,9 @@ var require_date = __commonJS({
       if (timeZone) return { timeZone, offsetMinutes: null, source: "iana" };
       if (offsetMinutes != null) return { timeZone: null, offsetMinutes, source: "offset" };
       return { timeZone: null, offsetMinutes: 0, source: "utc" };
+    }
+    function getUsageTimeZoneContext2(_url) {
+      return normalizeTimeZone();
     }
     function isUtcTimeZone2(tzContext) {
       if (!tzContext) return true;
@@ -352,7 +355,8 @@ var require_date = __commonJS({
       datePartsFromDateUTC,
       addDatePartsDays: addDatePartsDays2,
       addDatePartsMonths,
-      normalizeTimeZone: normalizeTimeZone2,
+      normalizeTimeZone,
+      getUsageTimeZoneContext: getUsageTimeZoneContext2,
       isUtcTimeZone: isUtcTimeZone2,
       getTimeZoneOffsetMinutes,
       getLocalParts,
@@ -419,10 +423,10 @@ var { getBaseUrl } = require_env();
 var {
   addDatePartsDays,
   isUtcTimeZone,
+  getUsageTimeZoneContext,
   listDateStrings,
   localDatePartsToUtc,
   normalizeDateRangeLocal,
-  normalizeTimeZone,
   parseDateParts
 } = require_date();
 var { toBigInt } = require_numbers();
@@ -437,16 +441,30 @@ module.exports = async function(request) {
   const auth = await getEdgeClientAndUserId({ baseUrl, bearer });
   if (!auth.ok) return json({ error: "Unauthorized" }, 401);
   const url = new URL(request.url);
-  const tzContext = normalizeTimeZone(
-    url.searchParams.get("tz"),
-    url.searchParams.get("tz_offset_minutes")
-  );
+  const tzContext = getUsageTimeZoneContext(url);
   const { from, to } = normalizeDateRangeLocal(
     url.searchParams.get("from"),
     url.searchParams.get("to"),
     tzContext
   );
   if (isUtcTimeZone(tzContext)) {
+    const aggregate = await tryAggregateDailyTotals({
+      edgeClient: auth.edgeClient,
+      userId: auth.userId,
+      from,
+      to
+    });
+    if (aggregate) {
+      return json(
+        {
+          from,
+          to,
+          days: aggregate.days,
+          totals: aggregate.totals
+        },
+        200
+      );
+    }
     const { data: data2, error: error2 } = await auth.edgeClient.database.from("vibescore_tracker_daily").select("day,total_tokens,input_tokens,cached_input_tokens,output_tokens,reasoning_output_tokens").eq("user_id", auth.userId).gte("day", from).lte("day", to);
     if (error2) return json({ error: error2.message }, 500);
     const totals2 = sumDailyRows(data2 || []);
@@ -522,4 +540,32 @@ function sumEventRows(rows) {
     output_tokens: outputTokens.toString(),
     reasoning_output_tokens: reasoningOutputTokens.toString()
   };
+}
+async function tryAggregateDailyTotals({ edgeClient, userId, from, to }) {
+  try {
+    const { data, error } = await edgeClient.database.from("vibescore_tracker_daily").select(
+      "days:count(),sum_total_tokens:sum(total_tokens),sum_input_tokens:sum(input_tokens),sum_cached_input_tokens:sum(cached_input_tokens),sum_output_tokens:sum(output_tokens),sum_reasoning_output_tokens:sum(reasoning_output_tokens)"
+    ).eq("user_id", userId).gte("day", from).lte("day", to).maybeSingle();
+    if (error || !data) return null;
+    return {
+      days: normalizeCount(data.days),
+      totals: {
+        total_tokens: toBigInt(data.sum_total_tokens).toString(),
+        input_tokens: toBigInt(data.sum_input_tokens).toString(),
+        cached_input_tokens: toBigInt(data.sum_cached_input_tokens).toString(),
+        output_tokens: toBigInt(data.sum_output_tokens).toString(),
+        reasoning_output_tokens: toBigInt(data.sum_reasoning_output_tokens).toString()
+      }
+    };
+  } catch (_e) {
+    return null;
+  }
+}
+function normalizeCount(value) {
+  if (typeof value === "number" && Number.isFinite(value)) return Math.max(0, Math.floor(value));
+  if (typeof value === "string" && value.trim() !== "") {
+    const n = Number(value);
+    if (Number.isFinite(n)) return Math.max(0, Math.floor(n));
+  }
+  return 0;
 }
