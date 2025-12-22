@@ -14,6 +14,7 @@ import {
   formatTimeZoneShortLabel,
   getBrowserTimeZone,
   getBrowserTimeZoneOffsetMinutes,
+  getLocalDayKey,
 } from "../lib/timezone.js";
 import { BackendStatus } from "../components/BackendStatus.jsx";
 import { AsciiBox } from "../ui/matrix-a/components/AsciiBox.jsx";
@@ -71,6 +72,10 @@ export function DashboardPage({ baseUrl, auth, signedIn, signOut }) {
   const trendTimeZone = timeZone;
   const trendTzOffsetMinutes = tzOffsetMinutes;
   const trendTimeZoneLabel = timeZoneLabel;
+  const todayKey = useMemo(
+    () => getLocalDayKey({ timeZone, offsetMinutes: tzOffsetMinutes, date: new Date() }),
+    [timeZone, tzOffsetMinutes]
+  );
 
   const {
     daily,
@@ -92,10 +97,14 @@ export function DashboardPage({ baseUrl, auth, signedIn, signOut }) {
   });
 
   const shareDailyToTrend = period === "week" || period === "month";
-  const visibleDaily = useMemo(
-    () => daily.filter((row) => !row?.future),
-    [daily]
-  );
+  const useDailyTrend = period === "week" || period === "month";
+  const visibleDaily = useMemo(() => {
+    return daily.filter((row) => {
+      if (row?.future) return false;
+      if (!row?.day || !todayKey) return true;
+      return String(row.day) <= String(todayKey);
+    });
+  }, [daily, todayKey]);
   const {
     rows: trendRows,
     from: trendFrom,
@@ -112,7 +121,7 @@ export function DashboardPage({ baseUrl, auth, signedIn, signOut }) {
     cacheKey: auth?.userId || auth?.email || "default",
     timeZone: trendTimeZone,
     tzOffsetMinutes: trendTzOffsetMinutes,
-    sharedRows: shareDailyToTrend ? visibleDaily : null,
+    sharedRows: shareDailyToTrend ? daily : null,
     sharedRange: shareDailyToTrend ? { from, to } : null,
   });
 
@@ -141,6 +150,15 @@ export function DashboardPage({ baseUrl, auth, signedIn, signOut }) {
     () => visibleDaily.some((row) => !row?.missing && !row?.future),
     [visibleDaily]
   );
+  const trendRowsForDisplay = useMemo(() => {
+    if (useDailyTrend) return daily;
+    if (period === "day") {
+      return Array.isArray(trendRows) ? trendRows.filter((row) => row?.hour) : [];
+    }
+    return trendRows;
+  }, [daily, period, trendRows, useDailyTrend]);
+  const trendFromForDisplay = useDailyTrend ? from : trendFrom;
+  const trendToForDisplay = useDailyTrend ? to : trendTo;
 
   function renderDailyCell(row, key) {
     if (row?.future) return "—";
@@ -492,9 +510,9 @@ export function DashboardPage({ baseUrl, auth, signedIn, signOut }) {
             />
 
             <TrendMonitor
-              rows={trendRows}
-              from={trendFrom}
-              to={trendTo}
+              rows={trendRowsForDisplay}
+              from={trendFromForDisplay}
+              to={trendToForDisplay}
               period={period}
               timeZoneLabel={trendTimeZoneLabel}
               showTimeZoneLabel={false}

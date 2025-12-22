@@ -130,14 +130,13 @@ export function TrendMonitor({
 
   function buildXAxisLabels() {
     if (period === "day") {
-      const tzSuffix = showTimeZoneLabel && timeZoneLabel ? ` ${timeZoneLabel}` : "";
       return [
         copy("trend.monitor.fallback.hour_00"),
         copy("trend.monitor.fallback.hour_06"),
         copy("trend.monitor.fallback.hour_12"),
         copy("trend.monitor.fallback.hour_18"),
         copy("trend.monitor.fallback.hour_23"),
-      ].map((label) => `${label}${tzSuffix}`);
+      ];
     }
     if (seriesLabels.length > 0) {
       const indices = pickLabelIndices(seriesLabels.length);

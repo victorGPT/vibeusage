@@ -1,7 +1,7 @@
 ## 1. Implementation
-- [x] 1.1 TREND 数据源过滤 `future` 桶（仅展示已发生部分）。
-- [x] 1.2 DETAILS（日表）过滤 `future` 行。
-- [x] 1.3 保持 `missing`（未同步）在已发生区间的标识不变。
+- [x] 1.1 TREND 保留完整坐标轴，future 桶保留但不绘制（趋势线截断于当前）。
+- [x] 1.2 DETAILS（日表）过滤未来日期行（不依赖 `future` 标记也能生效）。
+- [x] 1.3 未来桶标记覆盖已有行（避免未来 0 值被当成真实数据）。
 
 ## 2. Verification
 - [ ] 2.1 Dashboard week/month：TREND 不显示未来桶（无空线/零值）。

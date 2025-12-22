@@ -236,11 +236,11 @@ function fillDailyGaps(rows, from, to, { timeZone, offsetMinutes } = {}) {
   for (let cursor = start; cursor <= end; cursor = addUtcDays(cursor, 1)) {
     const day = formatDateUTC(cursor);
     const existing = byDay.get(day);
+    const isFuture = cursor.getTime() > todayTime;
     if (existing) {
-      filled.push({ ...existing, missing: false, future: false });
+      filled.push({ ...existing, missing: false, future: isFuture });
       continue;
     }
-    const isFuture = cursor.getTime() > todayTime;
     filled.push({
       day,
       total_tokens: null,

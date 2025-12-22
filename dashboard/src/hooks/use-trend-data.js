@@ -84,8 +84,7 @@ export function useTrendData({
 
   const refresh = useCallback(async () => {
     if (sharedEnabled) {
-      const shared = stripFutureRows(sharedRows);
-      setRows(shared);
+      setRows(Array.isArray(sharedRows) ? sharedRows : []);
       setRange({ from: sharedFrom, to: sharedTo });
       setSource("shared");
       setFetchedAt(null);
@@ -146,7 +145,6 @@ export function useTrendData({
           offsetMinutes: tzOffsetMinutes,
         });
       }
-      nextRows = stripFutureRows(nextRows);
       const nowIso = new Date().toISOString();
 
       setRows(nextRows);
@@ -184,7 +182,7 @@ export function useTrendData({
             offsetMinutes: tzOffsetMinutes,
           });
         }
-        setRows(stripFutureRows(filledRows));
+        setRows(filledRows);
         setRange({ from: cached.from || from, to: cached.to || to });
         setSource("cache");
         setFetchedAt(cached.fetchedAt || null);
@@ -219,7 +217,7 @@ export function useTrendData({
 
   useEffect(() => {
     if (sharedEnabled) {
-      setRows(stripFutureRows(sharedRows));
+      setRows(Array.isArray(sharedRows) ? sharedRows : []);
       setRange({ from: sharedFrom, to: sharedTo });
       setSource("shared");
       setFetchedAt(null);
@@ -258,7 +256,7 @@ export function useTrendData({
           offsetMinutes: tzOffsetMinutes,
         });
       }
-      setRows(stripFutureRows(filledRows));
+      setRows(filledRows);
       setRange({ from: cached.from || from, to: cached.to || to });
       setSource("cache");
       setFetchedAt(cached.fetchedAt || null);
@@ -329,11 +327,11 @@ function fillDailyGaps(rows, from, to, { timeZone, offsetMinutes } = {}) {
   for (let cursor = start; cursor <= end; cursor = addUtcDays(cursor, 1)) {
     const day = formatDateUTC(cursor);
     const existing = byDay.get(day);
+    const isFuture = cursor.getTime() > todayTime;
     if (existing) {
-      filled.push({ ...existing, missing: false, future: false });
+      filled.push({ ...existing, missing: false, future: isFuture });
       continue;
     }
-    const isFuture = cursor.getTime() > todayTime;
     filled.push({
       day,
       total_tokens: null,
@@ -383,11 +381,6 @@ function markMonthlyFuture(rows, { timeZone, offsetMinutes } = {}) {
       (parsed.year === nowParts.year && parsed.month > nowParts.month);
     return { ...row, future: isFuture };
   });
-}
-
-function stripFutureRows(rows) {
-  if (!Array.isArray(rows)) return [];
-  return rows.filter((row) => !row?.future);
 }
 
 function getNowParts({ timeZone, offsetMinutes } = {}) {
