@@ -102,18 +102,19 @@ export function DashboardPage({ baseUrl, auth, signedIn, signOut }) {
 
   const [sort, setSort] = useState(() => ({ key: "day", dir: "desc" }));
   const sortedDaily = useMemo(() => sortDailyRows(daily, sort), [daily, sort]);
+  const dailyTableRows = useMemo(
+    () => sortedDaily.filter((row) => !row?.future),
+    [sortedDaily]
+  );
   const hasDailyActual = useMemo(
     () => daily.some((row) => !row?.missing && !row?.future),
     [daily]
   );
   const dailyPlaceholder = copy("shared.placeholder");
-  const dailyUnsynced = copy("shared.status.unsynced");
 
   function renderDailyCell(row, key) {
     if (row?.future) return dailyPlaceholder;
-    if (row?.missing) {
-      return key === "total_tokens" ? dailyUnsynced : dailyPlaceholder;
-    }
+    if (row?.missing) return toDisplayNumber(0);
     return toDisplayNumber(row?.[key]);
   }
 
@@ -503,7 +504,7 @@ export function DashboardPage({ baseUrl, auth, signedIn, signOut }) {
                       </tr>
                     </thead>
                     <tbody>
-                      {sortedDaily.map((r) => (
+                      {dailyTableRows.map((r) => (
                         <tr
                           key={String(r.day)}
                           className={`border-b border-[#00FF41]/5 hover:bg-[#00FF41]/5 ${

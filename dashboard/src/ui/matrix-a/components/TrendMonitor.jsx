@@ -453,7 +453,6 @@ export function TrendMonitor({
   const avgLabel = copy("trend.monitor.avg_label", { value: Math.round(avg) });
   const nowLabel = copy("trend.monitor.now_label");
   const tooltipUnit = copy("trend.monitor.tooltip.tokens");
-  const unsyncedLabel = copy("shared.status.unsynced");
 
   return (
     <div className="w-full h-full min-h-[160px] flex flex-col relative group select-none bg-[#050505] border border-white/10 p-1">
@@ -586,16 +585,12 @@ export function TrendMonitor({
               <div className="opacity-70">
                 {formatTooltipLabel(hover.label)}
               </div>
-              {hover.missing ? (
-                <div className="font-bold">{unsyncedLabel}</div>
-              ) : (
-                <div className="font-bold">
-                  {copy("trend.monitor.tooltip.value", {
-                    value: formatFull(hover.value),
-                    unit: tooltipUnit,
-                  })}
-                </div>
-              )}
+              <div className="font-bold">
+                {copy("trend.monitor.tooltip.value", {
+                  value: formatFull(hover.missing ? 0 : hover.value),
+                  unit: tooltipUnit,
+                })}
+              </div>
             </div>
           </>
         ) : null}
