@@ -7,24 +7,25 @@ import React, {
 } from "react";
 
 import { buildActivityHeatmap } from "../../../lib/activity-heatmap.js";
+import { copy } from "../../../lib/copy.js";
 
 const OPACITY_BY_LEVEL = [0.12, 0.32, 0.5, 0.7, 1];
 const CELL_SIZE = 12;
 const CELL_GAP = 3;
 const LABEL_WIDTH = 26;
 const MONTH_LABELS = [
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
-  "May",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dec",
+  copy("heatmap.month.jan"),
+  copy("heatmap.month.feb"),
+  copy("heatmap.month.mar"),
+  copy("heatmap.month.apr"),
+  copy("heatmap.month.may"),
+  copy("heatmap.month.jun"),
+  copy("heatmap.month.jul"),
+  copy("heatmap.month.aug"),
+  copy("heatmap.month.sep"),
+  copy("heatmap.month.oct"),
+  copy("heatmap.month.nov"),
+  copy("heatmap.month.dec"),
 ];
 
 function formatTokenValue(value) {
@@ -139,8 +140,24 @@ export function ActivityHeatmap({ heatmap, timeZoneLabel, timeZoneShortLabel }) 
   const weeks = normalizedHeatmap?.weeks || [];
   const dayLabels =
     weekStartsOn === "mon"
-      ? ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
-      : ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+      ? [
+          copy("heatmap.day.mon"),
+          copy("heatmap.day.tue"),
+          copy("heatmap.day.wed"),
+          copy("heatmap.day.thu"),
+          copy("heatmap.day.fri"),
+          copy("heatmap.day.sat"),
+          copy("heatmap.day.sun"),
+        ]
+      : [
+          copy("heatmap.day.sun"),
+          copy("heatmap.day.mon"),
+          copy("heatmap.day.tue"),
+          copy("heatmap.day.wed"),
+          copy("heatmap.day.thu"),
+          copy("heatmap.day.fri"),
+          copy("heatmap.day.sat"),
+        ];
 
   const monthMarkers = useMemo(
     () =>
@@ -349,7 +366,7 @@ export function ActivityHeatmap({ heatmap, timeZoneLabel, timeZoneShortLabel }) 
   if (!weeks.length) {
     return (
       <div className="text-[10px] opacity-40 font-mono">
-        No activity data yet.
+        {copy("heatmap.empty")}
       </div>
     );
   }
@@ -396,7 +413,7 @@ export function ActivityHeatmap({ heatmap, timeZoneLabel, timeZoneShortLabel }) 
           ref={scrollRef}
           className="w-full max-w-full overflow-x-scroll no-scrollbar select-none pb-2 outline-none"
           tabIndex={0}
-          aria-label="Activity heatmap"
+          aria-label={copy("heatmap.aria_label")}
           onWheel={handleWheel}
           style={{ scrollbarWidth: "none" }} // Firefox
         >
@@ -457,11 +474,17 @@ export function ActivityHeatmap({ heatmap, timeZoneLabel, timeZoneShortLabel }) 
                         ? "rgba(0,255,65,0.08)"
                         : `rgba(0,255,65,${opacity})`;
 
-                    const tzDetail = timeZoneLabel || timeZoneShortLabel || "Local time";
+                    const tzDetail =
+                      timeZoneLabel || timeZoneShortLabel || copy("heatmap.legend.utc");
                     return (
                       <span
                         key={key}
-                        title={`${cell.day} • ${formatTokenValue(cell.value)} tokens • ${tzDetail}`}
+                        title={copy("heatmap.tooltip", {
+                          day: cell.day,
+                          value: formatTokenValue(cell.value),
+                          unit: copy("heatmap.unit.tokens"),
+                          tz: tzDetail,
+                        })}
                         className="rounded-[2px] border border-[#00FF41]/10"
                         style={{
                           width: CELL_SIZE,
@@ -506,7 +529,7 @@ export function ActivityHeatmap({ heatmap, timeZoneLabel, timeZoneShortLabel }) 
 
       <div className="flex justify-between items-center text-[7px] border-t border-[#00FF41]/5 pt-2 opacity-40 font-black uppercase tracking-widest">
         <div className="flex items-center gap-2">
-          <span>Less</span>
+          <span>{copy("heatmap.legend.less")}</span>
           <div className="flex gap-1">
             {[0, 1, 2, 3, 4].map((level) => (
               <span
@@ -523,9 +546,9 @@ export function ActivityHeatmap({ heatmap, timeZoneLabel, timeZoneShortLabel }) 
               ></span>
             ))}
           </div>
-          <span>More</span>
+          <span>{copy("heatmap.legend.more")}</span>
         </div>
-        <span>{timeZoneShortLabel || "LOCAL"}</span>
+        <span>{timeZoneShortLabel || copy("heatmap.legend.utc")}</span>
       </div>
     </div>
   );

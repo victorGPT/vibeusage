@@ -90,6 +90,7 @@ identity_panel.streak_value,ui,IdentityPanel,IdentityPanel,streak_value,"{{days}
 usage.panel.title,ui,UsagePanel,UsagePanel,title,"CORE_INDEX",,active
 usage.summary.total_system_output,ui,UsagePanel,UsagePanel,summary_label_total_system,"TOTAL_SYSTEM_OUTPUT",,active
 usage.summary.total,ui,UsagePanel,UsagePanel,summary_label_total,"TOTAL",,active
+usage.summary.since,ui,UsagePanel,UsagePanel,summary_label_since,"SINCE {{range}} {{tz}}",,active
 usage.metric.total,ui,UsagePanel,UsagePanel,metric_total,"TOTAL",,active
 usage.metric.input,ui,UsagePanel,UsagePanel,metric_input,"INPUT",,active
 usage.metric.output,ui,UsagePanel,UsagePanel,metric_output,"OUTPUT",,active
@@ -99,7 +100,7 @@ usage.metric.cached_short,ui,UsagePanel,UsagePanel,metric_cached_short,"CACHED",
 usage.metric.reasoning_short,ui,UsagePanel,UsagePanel,metric_reasoning_short,"REASONING",,active
 usage.button.loading,ui,UsagePanel,UsagePanel,button_loading,"Loading…",,active
 usage.button.refresh,ui,UsagePanel,UsagePanel,button_refresh,"Refresh",,active
-usage.range_label,ui,UsagePanel,UsagePanel,range_label,"Range: {{range}} (UTC)",,active
+usage.range_label,ui,UsagePanel,UsagePanel,range_label,"Range: {{range}}",,active
 
 leaderboard.panel.title,ui,LeaderboardPanel,LeaderboardPanel,title,"CORE_INDEX",,active
 leaderboard.period.cycle_24h,ui,LeaderboardPanel,LeaderboardPanel,period_label,"Cycle_24h",,active
@@ -150,7 +151,7 @@ heatmap.empty,ui,ActivityHeatmap,ActivityHeatmap,empty_state,"No activity data y
 heatmap.legend.less,ui,ActivityHeatmap,ActivityHeatmap,legend_less,"Less",,active
 heatmap.legend.more,ui,ActivityHeatmap,ActivityHeatmap,legend_more,"More",,active
 heatmap.legend.utc,ui,ActivityHeatmap,ActivityHeatmap,legend_utc,"UTC",,active
-heatmap.tooltip,ui,ActivityHeatmap,ActivityHeatmap,tooltip,"{{day}} • {{value}} {{unit}}",,active
+heatmap.tooltip,ui,ActivityHeatmap,ActivityHeatmap,tooltip,"{{day}} • {{value}} {{unit}} • {{tz}}",,active
 heatmap.unit.tokens,ui,ActivityHeatmap,ActivityHeatmap,unit_tokens,"tokens",,active
 heatmap.month.jan,ui,ActivityHeatmap,ActivityHeatmap,month_label,"Jan",,active
 heatmap.month.feb,ui,ActivityHeatmap,ActivityHeatmap,month_label,"Feb",,active
@@ -201,7 +202,7 @@ dashboard.signed_in.fallback,dashboard,DashboardPage,Header,signed_in_fallback,"
 dashboard.sign_out,dashboard,DashboardPage,Header,sign_out,"Sign out",,active
 dashboard.not_signed_in,dashboard,DashboardPage,Header,not_signed_in,"Not signed in",,active
 
-dashboard.footer.active,dashboard,DashboardPage,Footer,footer_active,"UTC aggregates • click Refresh to reload",,active
+dashboard.footer.active,dashboard,DashboardPage,Footer,footer_active,"{{range}} • click Refresh to reload",,active
 dashboard.footer.auth,dashboard,DashboardPage,Footer,footer_auth,"Sign in to view usage",,active
 dashboard.footer.right,dashboard,DashboardPage,Footer,footer_right,"VibeScore_Dashboard",,active
 
@@ -222,7 +223,7 @@ dashboard.install.step3,dashboard,DashboardPage,AsciiBox,install_step,"3) run",,
 dashboard.install.step3_suffix,dashboard,DashboardPage,AsciiBox,install_step_suffix,"(or wait for auto sync)",,active
 
 dashboard.activity.title,dashboard,DashboardPage,AsciiBox,title,"Activity_Grid",,active
-dashboard.activity.subtitle,dashboard,DashboardPage,AsciiBox,subtitle,"52W_UTC",,active
+dashboard.activity.subtitle,dashboard,DashboardPage,AsciiBox,subtitle,"52W_LOCAL",,active
 dashboard.activity.range,dashboard,DashboardPage,AsciiBox,range_label,"Range: {{from}}..{{to}}",,active
 
 dashboard.daily.title,dashboard,DashboardPage,AsciiBox,title,"Daily_Totals",,active

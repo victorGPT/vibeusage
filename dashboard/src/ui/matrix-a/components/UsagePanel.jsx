@@ -1,5 +1,6 @@
 import React from "react";
 
+import { copy } from "../../../lib/copy.js";
 import { AsciiBox } from "./AsciiBox.jsx";
 import { MatrixButton } from "./MatrixButton.jsx";
 
@@ -14,13 +15,13 @@ function normalizePeriods(periods) {
 }
 
 export function UsagePanel({
-  title = "Zion_Index",
+  title = copy("usage.panel.title"),
   period,
   periods,
   onPeriodChange,
   metrics = [],
   showSummary = false,
-  summaryLabel = "TOTAL_SYSTEM_OUTPUT",
+  summaryLabel = copy("usage.summary.total_system_output"),
   summaryValue = "—",
   summarySubLabel,
   breakdown,
@@ -38,10 +39,13 @@ export function UsagePanel({
     breakdown && breakdown.length
       ? breakdown
       : [
-          { key: "INPUT", label: "INPUT" },
-          { key: "OUTPUT", label: "OUTPUT" },
-          { key: "CACHED_INPUT", label: "CACHED" },
-          { key: "REASONING_OUTPUT", label: "REASONING" },
+          { key: copy("usage.metric.input"), label: copy("usage.metric.input") },
+          { key: copy("usage.metric.output"), label: copy("usage.metric.output") },
+          { key: copy("usage.metric.cached_input"), label: copy("usage.metric.cached_short") },
+          {
+            key: copy("usage.metric.reasoning_output"),
+            label: copy("usage.metric.reasoning_short"),
+          },
         ]
           .map((item) => {
             const match = metrics.find((row) => row.label === item.key);
@@ -78,7 +82,7 @@ export function UsagePanel({
             ) : null}
             {onRefresh ? (
               <MatrixButton primary disabled={loading} onClick={onRefresh}>
-                {loading ? "Loading…" : "Refresh"}
+                {loading ? copy("usage.button.loading") : copy("usage.button.refresh")}
               </MatrixButton>
             ) : null}
           </div>
@@ -86,7 +90,9 @@ export function UsagePanel({
       </div>
 
       {error ? (
-        <div className="text-[10px] text-red-400/90 px-2 py-1">Error: {error}</div>
+        <div className="text-[10px] text-red-400/90 px-2 py-1">
+          {copy("shared.error.prefix", { error })}
+        </div>
       ) : null}
 
       {showSummary || useSummaryLayout ? (
@@ -157,7 +163,7 @@ export function UsagePanel({
 
       {rangeLabel ? (
         <div className="mt-3 text-[8px] opacity-30 uppercase tracking-widest font-black px-2">
-          Range: {rangeLabel}
+          {copy("usage.range_label", { range: rangeLabel })}
           {rangeTimeZoneLabel ? ` ${rangeTimeZoneLabel}` : ""}
         </div>
       ) : null}
