@@ -21,7 +21,12 @@
 - [x] 3.6 事件保留清理脚本与 runbook
   - SQL: `openspec/changes/2025-12-23-add-hourly-client-aggregation/sql/003_purge_events_older_than_30d.sql`
   - Runbook: `openspec/changes/2025-12-23-add-hourly-client-aggregation/runbook.md`
-- [ ] 3.7 执行事件清理（删除 30 天前 events）
+- [x] 3.7 执行事件清理（删除 30 天前 events）
+  - 2025-12-23: GitHub Actions dry-run → deleted=7441 (cutoff=2025-11-23T15:11:55.490Z)
+  - 2025-12-23: GitHub Actions purge → deleted=7441 (cutoff=2025-11-23T15:14:49.399Z)
+  - 2025-12-23: TRUNCATE public.vibescore_tracker_events (manual)
+- [x] 3.9 移除旧事件写入路径（禁用 events 表 INSERT）
+  - 2025-12-23: Dropped policy `vibescore_tracker_events_insert_by_device_token` (public INSERT disabled)
 - [ ] 3.8 自动化清理（Edge Function + GitHub Actions）
   - Function: `vibescore-events-retention` (insforge2) ✅
   - SQL RPC: `openspec/changes/2025-12-23-add-hourly-client-aggregation/sql/004_create_retention_rpc.sql` ✅
