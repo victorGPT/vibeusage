@@ -11,11 +11,13 @@ test('init then uninstall restores original Codex notify (when pre-existing noti
   const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'vibescore-init-uninstall-'));
   const prevHome = process.env.HOME;
   const prevCodexHome = process.env.CODEX_HOME;
+  const prevToken = process.env.VIBESCORE_DEVICE_TOKEN;
   const prevWrite = process.stdout.write;
 
   try {
     process.env.HOME = tmp;
     process.env.CODEX_HOME = path.join(tmp, '.codex');
+    delete process.env.VIBESCORE_DEVICE_TOKEN;
     await fs.mkdir(process.env.CODEX_HOME, { recursive: true });
 
     const codexConfigPath = path.join(process.env.CODEX_HOME, 'config.toml');
@@ -28,6 +30,10 @@ test('init then uninstall restores original Codex notify (when pre-existing noti
     const installed = await fs.readFile(codexConfigPath, 'utf8');
     assert.match(installed, /^notify\s*=\s*\[.+\]\s*$/m);
     assert.ok(!installed.includes('["echo", "hello"]'), 'expected init to override notify');
+
+    const cursorsPath = path.join(tmp, '.vibescore', 'tracker', 'cursors.json');
+    const cursors = JSON.parse(await fs.readFile(cursorsPath, 'utf8'));
+    assert.ok(typeof cursors.updatedAt === 'string' && cursors.updatedAt.length > 0);
 
     await cmdUninstall([]);
 
@@ -42,6 +48,8 @@ test('init then uninstall restores original Codex notify (when pre-existing noti
     else process.env.HOME = prevHome;
     if (prevCodexHome === undefined) delete process.env.CODEX_HOME;
     else process.env.CODEX_HOME = prevCodexHome;
+    if (prevToken === undefined) delete process.env.VIBESCORE_DEVICE_TOKEN;
+    else process.env.VIBESCORE_DEVICE_TOKEN = prevToken;
     await fs.rm(tmp, { recursive: true, force: true });
   }
 });
@@ -50,11 +58,13 @@ test('init then uninstall removes notify when none existed', async () => {
   const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'vibescore-init-uninstall-'));
   const prevHome = process.env.HOME;
   const prevCodexHome = process.env.CODEX_HOME;
+  const prevToken = process.env.VIBESCORE_DEVICE_TOKEN;
   const prevWrite = process.stdout.write;
 
   try {
     process.env.HOME = tmp;
     process.env.CODEX_HOME = path.join(tmp, '.codex');
+    delete process.env.VIBESCORE_DEVICE_TOKEN;
     await fs.mkdir(process.env.CODEX_HOME, { recursive: true });
 
     const codexConfigPath = path.join(process.env.CODEX_HOME, 'config.toml');
@@ -76,6 +86,8 @@ test('init then uninstall removes notify when none existed', async () => {
     else process.env.HOME = prevHome;
     if (prevCodexHome === undefined) delete process.env.CODEX_HOME;
     else process.env.CODEX_HOME = prevCodexHome;
+    if (prevToken === undefined) delete process.env.VIBESCORE_DEVICE_TOKEN;
+    else process.env.VIBESCORE_DEVICE_TOKEN = prevToken;
     await fs.rm(tmp, { recursive: true, force: true });
   }
 });

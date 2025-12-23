@@ -31,14 +31,8 @@ class DatabaseStub {
   }
 
   lt() {
-    if (this._table !== 'vibescore_tracker_events') {
+    if (this._table !== 'vibescore_tracker_hourly') {
       return { data: [], error: null };
-    }
-
-    const select = String(this._select || '');
-    const isAggregate = select.includes('date_trunc') || select.includes('sum_total_tokens');
-    if (!isAggregate) {
-      return { data: this.eventRows, error: null };
     }
 
     return this;
@@ -49,18 +43,11 @@ class DatabaseStub {
       return this;
     }
 
-    if (this._table !== 'vibescore_tracker_events') {
+    if (this._table !== 'vibescore_tracker_hourly') {
       return { data: [], error: null };
     }
 
-    const select = String(this._select || '');
-    const isAggregate = select.includes('date_trunc') || select.includes('sum_total_tokens');
-
-    if (isAggregate) {
-      return { data: this.aggregateRows, error: null };
-    }
-
-    return { data: this.eventRows, error: null };
+    return { data: this.aggregateRows, error: null };
   }
 
   limit(n) {
@@ -114,11 +101,11 @@ async function main() {
   assert.equal(body.sync.last_sync_at, '2025-12-22T10:30:00.000Z', 'last_sync_at');
   assert.equal(body.sync.min_interval_minutes, 30, 'min_interval_minutes');
 
-  const row10 = body.data.find((row) => row.hour === '2025-12-22T10:00:00');
+  const row1030 = body.data.find((row) => row.hour === '2025-12-22T10:30:00');
   const row11 = body.data.find((row) => row.hour === '2025-12-22T11:00:00');
-  assert.ok(row10, 'row10');
+  assert.ok(row1030, 'row1030');
   assert.ok(row11, 'row11');
-  assert.ok(!row10.missing, '10:00 not missing');
+  assert.ok(!row1030.missing, '10:30 not missing');
   assert.ok(row11.missing, '11:00 missing');
 }
 

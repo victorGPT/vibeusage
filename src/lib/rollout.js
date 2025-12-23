@@ -2,7 +2,6 @@ const fs = require('node:fs/promises');
 const fssync = require('node:fs');
 const path = require('node:path');
 const readline = require('node:readline');
-const crypto = require('node:crypto');
 
 const { ensureDir } = require('./fs');
 
@@ -37,10 +36,16 @@ async function listRolloutFiles(sessionsDir) {
 async function parseRolloutIncremental({ rolloutFiles, cursors, queuePath, onProgress }) {
   await ensureDir(path.dirname(queuePath));
   let filesProcessed = 0;
-  let eventsQueued = 0;
+  let eventsAggregated = 0;
 
   const cb = typeof onProgress === 'function' ? onProgress : null;
   const totalFiles = Array.isArray(rolloutFiles) ? rolloutFiles.length : 0;
+  const hourlyState = normalizeHourlyState(cursors?.hourly);
+  const touchedBuckets = new Set();
+
+  if (!cursors.files || typeof cursors.files !== 'object') {
+    cursors.files = {};
+  }
 
   for (let idx = 0; idx < rolloutFiles.length; idx++) {
     const filePath = rolloutFiles[idx];
@@ -59,7 +64,8 @@ async function parseRolloutIncremental({ rolloutFiles, cursors, queuePath, onPro
       startOffset,
       lastTotal,
       lastModel,
-      queuePath
+      hourlyState,
+      touchedBuckets
     });
 
     cursors.files[key] = {
@@ -71,7 +77,7 @@ async function parseRolloutIncremental({ rolloutFiles, cursors, queuePath, onPro
     };
 
     filesProcessed += 1;
-    eventsQueued += result.eventsQueued;
+    eventsAggregated += result.eventsAggregated;
 
     if (cb) {
       cb({
@@ -79,28 +85,32 @@ async function parseRolloutIncremental({ rolloutFiles, cursors, queuePath, onPro
         total: totalFiles,
         filePath,
         filesProcessed,
-        eventsQueued
+        eventsAggregated,
+        bucketsQueued: touchedBuckets.size
       });
     }
   }
 
-  return { filesProcessed, eventsQueued };
+  const bucketsQueued = await enqueueTouchedBuckets({ queuePath, hourlyState, touchedBuckets });
+  hourlyState.updatedAt = new Date().toISOString();
+  cursors.hourly = hourlyState;
+
+  return { filesProcessed, eventsAggregated, bucketsQueued };
 }
 
-async function parseRolloutFile({ filePath, startOffset, lastTotal, lastModel, queuePath }) {
+async function parseRolloutFile({ filePath, startOffset, lastTotal, lastModel, hourlyState, touchedBuckets }) {
   const st = await fs.stat(filePath);
   const endOffset = st.size;
   if (startOffset >= endOffset) {
-    return { endOffset, lastTotal, lastModel, eventsQueued: 0 };
+    return { endOffset, lastTotal, lastModel, eventsAggregated: 0 };
   }
 
   const stream = fssync.createReadStream(filePath, { encoding: 'utf8', start: startOffset });
   const rl = readline.createInterface({ input: stream, crlfDelay: Infinity });
 
-  const toAppend = [];
   let model = typeof lastModel === 'string' ? lastModel : null;
   let totals = lastTotal && typeof lastTotal === 'object' ? lastTotal : null;
-  let eventsQueued = 0;
+  let eventsAggregated = 0;
 
   for await (const line of rl) {
     if (!line) continue;
@@ -139,26 +149,122 @@ async function parseRolloutFile({ filePath, startOffset, lastTotal, lastModel, q
       totals = totalUsage;
     }
 
-    const event = {
-      event_id: sha256Hex(line),
-      token_timestamp: tokenTimestamp,
-      model: model || null,
-      input_tokens: delta.input_tokens || 0,
-      cached_input_tokens: delta.cached_input_tokens || 0,
-      output_tokens: delta.output_tokens || 0,
-      reasoning_output_tokens: delta.reasoning_output_tokens || 0,
-      total_tokens: delta.total_tokens || 0
-    };
+    const bucketStart = toUtcHalfHourStart(tokenTimestamp);
+    if (!bucketStart) continue;
 
-    toAppend.push(JSON.stringify(event));
-    eventsQueued += 1;
+    const bucket = getHourlyBucket(hourlyState, bucketStart);
+    addTotals(bucket.totals, delta);
+    touchedBuckets.add(bucketStart);
+    eventsAggregated += 1;
+  }
+
+  return { endOffset, lastTotal: totals, lastModel: model, eventsAggregated };
+}
+
+async function enqueueTouchedBuckets({ queuePath, hourlyState, touchedBuckets }) {
+  if (!touchedBuckets || touchedBuckets.size === 0) return 0;
+
+  const toAppend = [];
+  for (const bucketStart of touchedBuckets) {
+    const bucket = hourlyState.buckets[bucketStart];
+    if (!bucket || !bucket.totals) continue;
+    const key = totalsKey(bucket.totals);
+    if (bucket.queuedKey === key) continue;
+    toAppend.push(
+      JSON.stringify({
+        hour_start: bucketStart,
+        input_tokens: bucket.totals.input_tokens,
+        cached_input_tokens: bucket.totals.cached_input_tokens,
+        output_tokens: bucket.totals.output_tokens,
+        reasoning_output_tokens: bucket.totals.reasoning_output_tokens,
+        total_tokens: bucket.totals.total_tokens
+      })
+    );
+    bucket.queuedKey = key;
   }
 
   if (toAppend.length > 0) {
     await fs.appendFile(queuePath, toAppend.join('\n') + '\n', 'utf8');
   }
 
-  return { endOffset, lastTotal: totals, lastModel: model, eventsQueued };
+  return toAppend.length;
+}
+
+function normalizeHourlyState(raw) {
+  const state = raw && typeof raw === 'object' ? raw : {};
+  const buckets = state.buckets && typeof state.buckets === 'object' ? state.buckets : {};
+  return {
+    version: 1,
+    buckets,
+    updatedAt: typeof state.updatedAt === 'string' ? state.updatedAt : null
+  };
+}
+
+function getHourlyBucket(state, hourStart) {
+  const buckets = state.buckets;
+  let bucket = buckets[hourStart];
+  if (!bucket || typeof bucket !== 'object') {
+    bucket = { totals: initTotals(), queuedKey: null };
+    buckets[hourStart] = bucket;
+    return bucket;
+  }
+
+  if (!bucket.totals || typeof bucket.totals !== 'object') {
+    bucket.totals = initTotals();
+  }
+
+  if (bucket.queuedKey != null && typeof bucket.queuedKey !== 'string') {
+    bucket.queuedKey = null;
+  }
+
+  return bucket;
+}
+
+function initTotals() {
+  return {
+    input_tokens: 0,
+    cached_input_tokens: 0,
+    output_tokens: 0,
+    reasoning_output_tokens: 0,
+    total_tokens: 0
+  };
+}
+
+function addTotals(target, delta) {
+  target.input_tokens += delta.input_tokens || 0;
+  target.cached_input_tokens += delta.cached_input_tokens || 0;
+  target.output_tokens += delta.output_tokens || 0;
+  target.reasoning_output_tokens += delta.reasoning_output_tokens || 0;
+  target.total_tokens += delta.total_tokens || 0;
+}
+
+function totalsKey(totals) {
+  return [
+    totals.input_tokens || 0,
+    totals.cached_input_tokens || 0,
+    totals.output_tokens || 0,
+    totals.reasoning_output_tokens || 0,
+    totals.total_tokens || 0
+  ].join('|');
+}
+
+function toUtcHalfHourStart(ts) {
+  const dt = new Date(ts);
+  if (!Number.isFinite(dt.getTime())) return null;
+  const minutes = dt.getUTCMinutes();
+  const halfMinute = minutes >= 30 ? 30 : 0;
+  const bucketStart = new Date(
+    Date.UTC(
+      dt.getUTCFullYear(),
+      dt.getUTCMonth(),
+      dt.getUTCDate(),
+      dt.getUTCHours(),
+      halfMinute,
+      0,
+      0
+    )
+  );
+  return bucketStart.toISOString();
 }
 
 function pickDelta(lastUsage, totalUsage, prevTotals) {
@@ -207,10 +313,6 @@ function normalizeUsage(u) {
     out[k] = Number.isFinite(n) && n >= 0 ? Math.floor(n) : 0;
   }
   return out;
-}
-
-function sha256Hex(s) {
-  return crypto.createHash('sha256').update(s, 'utf8').digest('hex');
 }
 
 function isNonEmptyObject(v) {

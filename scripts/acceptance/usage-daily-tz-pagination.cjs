@@ -39,7 +39,7 @@ class DatabaseStub {
 
   range(from, to) {
     this.calls.ranges.push([from, to]);
-    if (this._table !== 'vibescore_tracker_events') {
+    if (this._table !== 'vibescore_tracker_hourly') {
       return { data: [], error: null };
     }
 
@@ -66,7 +66,7 @@ function createClientStub(database) {
 
 function buildRows(count, tokenTimestamp, totalTokens) {
   return Array.from({ length: count }, () => ({
-    token_timestamp: tokenTimestamp,
+    hour_start: tokenTimestamp,
     total_tokens: totalTokens,
     input_tokens: '1',
     cached_input_tokens: '0',

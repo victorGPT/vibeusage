@@ -35,13 +35,13 @@ async function issueDeviceToken({ baseUrl, accessToken, deviceName, platform = '
   return { token, deviceId };
 }
 
-async function ingestEvents({ baseUrl, deviceToken, events }) {
+async function ingestHourly({ baseUrl, deviceToken, hourly }) {
   const data = await invokeFunctionWithRetry({
     baseUrl,
     accessToken: deviceToken,
     slug: 'vibescore-ingest',
     method: 'POST',
-    body: { events },
+    body: { hourly },
     errorPrefix: 'Ingest failed',
     retry: { maxRetries: 3, baseDelayMs: 500, maxDelayMs: 5000 }
   });
@@ -72,7 +72,7 @@ async function syncHeartbeat({ baseUrl, deviceToken }) {
 module.exports = {
   signInWithPassword,
   issueDeviceToken,
-  ingestEvents,
+  ingestHourly,
   syncHeartbeat
 };
 

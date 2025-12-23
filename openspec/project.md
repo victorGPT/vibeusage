@@ -2,7 +2,7 @@
 
 ## 0. 一句话简介
 
-面向 **Codex CLI** 用户的 token 消耗统计：本地增量解析 `~/.codex/sessions/**/rollout-*.jsonl` 的 `token_count` 事件 → 本地队列 → 云端聚合 → Dashboard 展示（按 UTC 日聚合为主）。
+面向 **Codex CLI** 用户的 token 消耗统计：本地增量解析 `~/.codex/sessions/**/rollout-*.jsonl` 的 `token_count` 事件 → 本地按 UTC 半小时聚合 → 云端存储半小时桶 → Dashboard 汇总展示。
 
 ## 1. 背景与目标
 
@@ -28,7 +28,8 @@
 - **rollout JSONL**：`~/.codex/sessions/**/rollout-*.jsonl`，按行 JSON 记录（包含 `token_count`、对话内容等）。
 - **token_count event**：`payload.type == "token_count"` 的记录；本项目只允许读取 `payload.info.*` 的 token 数字字段。
 - **cursor**：每个 rollout 文件的解析位置（`path + inode + byte_offset`）及上次 totals，用于增量解析与差分兜底。
-- **event_id**：客户端生成的稳定事件标识（当前实现：对原始 JSONL 行 `sha256`）。
+- **hour_start**：UTC 半小时桶起点（ISO timestamp，分钟为 `00` 或 `30`），作为幂等键之一。
+- **half-hour bucket**：某设备某 UTC 半小时的 token 聚合（含各 token 字段总和）。
 - **device token**：用于 ingest 的长效设备级 token（客户端持有；服务端仅存 hash）。
 - **user_jwt / accessToken**：用户登录态 token（Dashboard/CLI 仅短暂使用获取 device token；CLI 不持久化）。
 - **InsForge**：云端后端（Auth + Database + Edge Functions）。
@@ -41,8 +42,8 @@
 
 1. Codex CLI 在 turn 完成时触发 `notify`（payload 类型 `agent-turn-complete`）
 2. 本地 `notify-handler` 快速落盘并退出 0（写入信号 + 节流触发后台 `sync --auto`），不得阻塞 Codex
-3. `sync` 增量扫描 `~/.codex/sessions/**/rollout-*.jsonl`，只提取 `token_count` 的白名单字段，写入本地 append-only 队列
-4. 批量上传到 InsForge（鉴权 + 幂等去重 + 聚合）
+3. `sync` 增量扫描 `~/.codex/sessions/**/rollout-*.jsonl`，只提取 `token_count` 白名单字段并按 UTC 半小时聚合，写入本地 append-only 队列
+4. 批量上传到 InsForge（鉴权 + 幂等去重 + 聚合；`sync --auto` 上传节流 ≤ 1 次 / 30 分钟，`init`/手动 `sync` 立即上传）
 5. Dashboard 以 user_jwt 查询聚合结果并展示（UTC）
 
 ## 5. 数据与接口契约（高层）
@@ -53,17 +54,15 @@
 
 - `~/.vibescore/tracker/config.json`：`baseUrl`、`deviceToken`、`deviceId`、`installedAt`
 - `~/.vibescore/tracker/cursors.json`：解析游标（按文件）+ 上次 totals（用于 totals 差分）
-- `~/.vibescore/tracker/queue.jsonl`：待上传事件（append-only）
+- `~/.vibescore/tracker/queue.jsonl`：待上传半小时聚合桶（append-only）
 - `~/.vibescore/tracker/queue.state.json`：已上传 offset（用于幂等、断点续传）
 - `~/.vibescore/bin/notify.cjs`：notify handler（依赖 Node built-ins；快速返回）
 
-### 5.2 事件模型（白名单字段）
+### 5.2 半小时桶模型（白名单字段）
 
-允许上传的事件字段（客户端 → 云端 ingest）：
+允许上传的半小时桶字段（客户端 → 云端 ingest）：
 
-- `event_id`（string）
-- `token_timestamp`（ISO timestamp string，UTC）
-- `model`（string|null）
+- `hour_start`（ISO timestamp string，UTC half-hour boundary）
 - `input_tokens` / `cached_input_tokens` / `output_tokens` / `reasoning_output_tokens` / `total_tokens`（non-negative integer）
 
 硬约束：客户端解析 rollout 时 **不得** 持久化或上传任何对话/工具输出文本。
@@ -82,7 +81,7 @@
   - Out：`{ device_id: string, token: string, created_at: string }`
 - `POST /functions/vibescore-ingest`
   - Auth：`Authorization: Bearer <device_token>`
-  - In：`{ events: Event[] }` 或 `Event[]`
+  - In：`{ hourly: HalfHourBucket[] }` 或 `HalfHourBucket[]`
   - Out：`{ success: true, inserted: number, skipped: number }`
 - `GET /functions/vibescore-usage-daily?from=YYYY-MM-DD&to=YYYY-MM-DD`
   - Auth：`Authorization: Bearer <user_jwt>`
@@ -107,8 +106,9 @@
 
 - `vibescore_tracker_devices`：设备元信息（含 `last_seen_at`）
 - `vibescore_tracker_device_tokens`：设备 token hash（含 `revoked_at`、`last_used_at`）
-- `vibescore_tracker_events`：明细事件（幂等去重以 `event_id` 为核心；包含 `device_token_id` 便于无 service role key 写入鉴权）
-- `vibescore_tracker_daily`：按 UTC 日聚合（SQL view，普通视图；定义与演进不在本仓库）
+- `vibescore_tracker_hourly`：按 UTC 半小时聚合（幂等键：`user_id + device_id + hour_start`）
+- `vibescore_tracker_events`：明细事件（legacy；新路径不再写入）
+- `vibescore_tracker_daily`：按 UTC 日聚合（legacy 视图/表；使用时从 half-hour 汇总）
 
 ## 6. 配置与环境变量
 

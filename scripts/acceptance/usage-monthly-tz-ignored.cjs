@@ -129,7 +129,7 @@ async function main() {
   const body = await res.json();
 
   assert.equal(res.status, 200);
-  assert.ok(calls.events >= 1, 'expected events table query');
+  assert.ok(calls.hourly >= 1, 'expected hourly table query');
   assert.equal(calls.daily, 0, 'expected no daily table query');
   assert.equal(body.from, '2025-11-01');
   assert.equal(body.to, '2025-12-15');
@@ -147,7 +147,7 @@ async function main() {
       {
         ok: true,
         daily_queries: calls.daily,
-        events_queries: calls.events
+        hourly_queries: calls.hourly
       },
       null,
       2
@@ -156,7 +156,7 @@ async function main() {
 }
 
 function buildFetchStub() {
-  const calls = { daily: 0, events: 0 };
+  const calls = { daily: 0, hourly: 0 };
 
   async function handler(input, init = {}) {
     const url = new URL(typeof input === 'string' ? input : input.url);
@@ -171,11 +171,11 @@ function buildFetchStub() {
       return jsonResponse(200, []);
     }
 
-    if (url.pathname === '/api/database/records/vibescore_tracker_events') {
-      calls.events += 1;
+    if (url.pathname === '/api/database/records/vibescore_tracker_hourly') {
+      calls.hourly += 1;
       return jsonResponse(200, [
         {
-          token_timestamp: '2025-11-10T18:00:00.000Z',
+          hour_start: '2025-11-10T18:00:00.000Z',
           total_tokens: '10',
           input_tokens: '4',
           cached_input_tokens: '1',
@@ -183,7 +183,7 @@ function buildFetchStub() {
           reasoning_output_tokens: '0'
         },
         {
-          token_timestamp: '2025-12-02T18:00:00.000Z',
+          hour_start: '2025-12-02T18:00:00.000Z',
           total_tokens: '20',
           input_tokens: '8',
           cached_input_tokens: '2',

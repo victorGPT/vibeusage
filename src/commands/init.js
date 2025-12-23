@@ -7,6 +7,7 @@ const { prompt, promptHidden } = require('../lib/prompt');
 const { upsertCodexNotify, loadCodexNotifyOriginal } = require('../lib/codex-config');
 const { beginBrowserAuth } = require('../lib/browser-auth');
 const { issueDeviceTokenWithPassword, issueDeviceTokenWithAccessToken } = require('../lib/insforge');
+const { cmdSync } = require('./sync');
 
 async function cmdInit(argv) {
   const opts = parseArgs(argv);
@@ -104,6 +105,13 @@ async function cmdInit(argv) {
       ''
     ].join('\n')
   );
+
+  try {
+    await cmdSync([]);
+  } catch (err) {
+    const msg = err && err.message ? err.message : 'unknown error';
+    process.stderr.write(`Initial sync failed: ${msg}\n`);
+  }
 }
 
 function parseArgs(argv) {

@@ -34,9 +34,19 @@ Source: `openspec/specs/vibescore-tracker/spec.md`
 - Status: Implemented
 
 ### Requirement: Client-side idempotency
-- Implementation: `src/lib/rollout.js` (event_id hash + cursors), `src/commands/sync.js` (cursor persistence)
+- Implementation: `src/lib/rollout.js` (half-hour bucket aggregation + queuedKey + cursors), `src/commands/sync.js` (cursor persistence)
 - Verification: `node --test test/rollout-parser.test.js`; manual run `tracker sync` twice with no new events
 - Status: Implemented (manual)
+
+### Requirement: Auto sync uploads are throttled to half-hour cadence
+- Implementation: `src/lib/upload-throttle.js` (30 min interval), `src/commands/sync.js` (auto-only throttle), `src/commands/init.js` (init triggers sync)
+- Verification: `node --test test/upload-throttle.test.js`; `node --test test/init-uninstall.test.js`
+- Status: Implemented
+
+### Requirement: Raw event retention is capped
+- Implementation: `insforge-src/functions/vibescore-events-retention.js`, `openspec/changes/2025-12-23-add-hourly-client-aggregation/sql/003_purge_events_older_than_30d.sql`, `openspec/changes/2025-12-23-add-hourly-client-aggregation/runbook.md`, `.github/workflows/vibescore-events-retention.yml`
+- Verification: manual SQL purge or run the GitHub Actions workflow with service role token
+- Status: Implemented (manual + scheduled if secrets configured)
 
 ### Requirement: Device token authentication boundary
 - Implementation: `src/commands/init.js` (stores device token), `src/lib/insforge.js`, `src/lib/insforge-client.js`

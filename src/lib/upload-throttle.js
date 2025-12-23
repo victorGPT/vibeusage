@@ -1,6 +1,6 @@
 const DEFAULTS = {
-  intervalMs: 10 * 60_000,
-  jitterMsMax: 120_000,
+  intervalMs: 30 * 60_000,
+  jitterMsMax: 60_000,
   backlogBytes: 1_000_000,
   batchSize: 300,
   maxBatchesSmall: 2,

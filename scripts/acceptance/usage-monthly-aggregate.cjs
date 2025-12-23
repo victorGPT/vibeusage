@@ -4,12 +4,9 @@
 const assert = require('node:assert/strict');
 
 class DatabaseStub {
-  constructor({ aggregateError = false, aggregateRows = [], dailyRows = [] } = {}) {
-    this.aggregateError = aggregateError;
-    this.aggregateRows = aggregateRows;
-    this.dailyRows = dailyRows;
+  constructor({ calls }) {
+    this.calls = calls;
     this._table = null;
-    this._select = null;
   }
 
   from(table) {
@@ -17,8 +14,7 @@ class DatabaseStub {
     return this;
   }
 
-  select(columns) {
-    this._select = columns;
+  select() {
     return this;
   }
 
@@ -30,26 +26,49 @@ class DatabaseStub {
     return this;
   }
 
-  lte() {
+  lt() {
     return this;
   }
 
   order() {
-    if (this._table !== 'vibescore_tracker_daily') {
+    return this;
+  }
+
+  range(from, to) {
+    this.calls.ranges.push([from, to]);
+    if (this._table !== 'vibescore_tracker_hourly') {
       return { data: [], error: null };
     }
-
-    const select = String(this._select || '');
-    const isAggregate = select.includes('date_trunc') || select.includes('sum_total_tokens');
-
-    if (isAggregate) {
-      if (this.aggregateError) {
-        return { data: null, error: new Error('aggregate not supported') };
-      }
-      return { data: this.aggregateRows, error: null };
-    }
-
-    return { data: this.dailyRows, error: null };
+    if (from > 0) return { data: [], error: null };
+    return {
+      data: [
+        {
+          hour_start: '2025-11-10T08:00:00.000Z',
+          total_tokens: '10',
+          input_tokens: '6',
+          cached_input_tokens: '1',
+          output_tokens: '3',
+          reasoning_output_tokens: '0'
+        },
+        {
+          hour_start: '2025-11-20T12:30:00.000Z',
+          total_tokens: '5',
+          input_tokens: '2',
+          cached_input_tokens: '1',
+          output_tokens: '2',
+          reasoning_output_tokens: '0'
+        },
+        {
+          hour_start: '2025-12-02T18:00:00.000Z',
+          total_tokens: '7',
+          input_tokens: '3',
+          cached_input_tokens: '1',
+          output_tokens: '3',
+          reasoning_output_tokens: '0'
+        }
+      ],
+      error: null
+    };
   }
 }
 
@@ -62,50 +81,6 @@ function createClientStub(database) {
     },
     database
   };
-}
-
-function expectMonthlyTotals(body, expectedTotals) {
-  const lookup = new Map(body.data.map((row) => [row.month, row]));
-
-  for (const [month, expected] of Object.entries(expectedTotals)) {
-    const row = lookup.get(month);
-    assert.ok(row, `missing month ${month}`);
-    assert.equal(row.total_tokens, expected.total_tokens);
-    assert.equal(row.input_tokens, expected.input_tokens);
-    assert.equal(row.cached_input_tokens, expected.cached_input_tokens);
-    assert.equal(row.output_tokens, expected.output_tokens);
-    assert.equal(row.reasoning_output_tokens, expected.reasoning_output_tokens);
-  }
-}
-
-async function runScenario({
-  name,
-  aggregateError,
-  aggregateRows,
-  dailyRows,
-  expectedTotals
-}) {
-  global.createClient = () =>
-    createClientStub(new DatabaseStub({ aggregateError, aggregateRows, dailyRows }));
-
-  const usageMonthly = require('../../insforge-src/functions/vibescore-usage-monthly.js');
-  const query = 'months=2&to=2025-12-15';
-
-  const res = await usageMonthly(
-    new Request(`http://local/functions/vibescore-usage-monthly?${query}`, {
-      method: 'GET',
-      headers: { Authorization: 'Bearer user-jwt' }
-    })
-  );
-
-  const body = await res.json();
-
-  assert.equal(res.status, 200, `${name}: status`);
-  assert.equal(body.months, 2, `${name}: months`);
-  assert.equal(body.data.length, 2, `${name}: data length`);
-  expectMonthlyTotals(body, expectedTotals);
-
-  return body;
 }
 
 async function main() {
@@ -122,100 +97,47 @@ async function main() {
     }
   };
 
-  const aggregateRows = [
-    {
-      month: '2025-11-01T00:00:00',
-      sum_total_tokens: '120',
-      sum_input_tokens: '70',
-      sum_cached_input_tokens: '10',
-      sum_output_tokens: '40',
-      sum_reasoning_output_tokens: '0'
-    }
-  ];
+  const calls = { ranges: [] };
+  global.createClient = () => createClientStub(new DatabaseStub({ calls }));
 
-  const aggregateExpected = {
-    '2025-11': {
-      total_tokens: '120',
-      input_tokens: '70',
-      cached_input_tokens: '10',
-      output_tokens: '40',
-      reasoning_output_tokens: '0'
-    },
-    '2025-12': {
-      total_tokens: '0',
-      input_tokens: '0',
-      cached_input_tokens: '0',
-      output_tokens: '0',
-      reasoning_output_tokens: '0'
-    }
-  };
+  const usageMonthly = require('../../insforge-src/functions/vibescore-usage-monthly.js');
+  const query = 'months=2&to=2025-12-15';
 
-  const aggregateBody = await runScenario({
-    name: 'aggregate',
-    aggregateError: false,
-    aggregateRows,
-    dailyRows: [],
-    expectedTotals: aggregateExpected
-  });
+  const res = await usageMonthly(
+    new Request(`http://local/functions/vibescore-usage-monthly?${query}`, {
+      method: 'GET',
+      headers: { Authorization: 'Bearer user-jwt' }
+    })
+  );
 
-  const dailyRows = [
-    {
-      day: '2025-11-02',
-      total_tokens: '10',
-      input_tokens: '6',
-      cached_input_tokens: '1',
-      output_tokens: '3',
-      reasoning_output_tokens: '0'
-    },
-    {
-      day: '2025-11-10',
-      total_tokens: '5',
-      input_tokens: '2',
-      cached_input_tokens: '1',
-      output_tokens: '2',
-      reasoning_output_tokens: '0'
-    },
-    {
-      day: '2025-12-01',
-      total_tokens: '7',
-      input_tokens: '3',
-      cached_input_tokens: '1',
-      output_tokens: '3',
-      reasoning_output_tokens: '0'
-    }
-  ];
+  const body = await res.json();
 
-  const fallbackExpected = {
-    '2025-11': {
-      total_tokens: '15',
-      input_tokens: '8',
-      cached_input_tokens: '2',
-      output_tokens: '5',
-      reasoning_output_tokens: '0'
-    },
-    '2025-12': {
-      total_tokens: '7',
-      input_tokens: '3',
-      cached_input_tokens: '1',
-      output_tokens: '3',
-      reasoning_output_tokens: '0'
-    }
-  };
+  assert.equal(res.status, 200, 'status');
+  assert.equal(body.months, 2, 'months');
+  assert.equal(body.data.length, 2, 'data length');
 
-  const fallbackBody = await runScenario({
-    name: 'fallback',
-    aggregateError: true,
-    aggregateRows: [],
-    dailyRows,
-    expectedTotals: fallbackExpected
-  });
+  const nov = body.data.find((row) => row.month === '2025-11');
+  const dec = body.data.find((row) => row.month === '2025-12');
+
+  assert.ok(nov && dec, 'missing month rows');
+  assert.equal(nov.total_tokens, '15');
+  assert.equal(nov.input_tokens, '8');
+  assert.equal(nov.cached_input_tokens, '2');
+  assert.equal(nov.output_tokens, '5');
+  assert.equal(nov.reasoning_output_tokens, '0');
+
+  assert.equal(dec.total_tokens, '7');
+  assert.equal(dec.input_tokens, '3');
+  assert.equal(dec.cached_input_tokens, '1');
+  assert.equal(dec.output_tokens, '3');
+  assert.equal(dec.reasoning_output_tokens, '0');
 
   process.stdout.write(
     JSON.stringify(
       {
         ok: true,
-        aggregate: aggregateBody.data,
-        fallback: fallbackBody.data
+        ranges: calls.ranges,
+        data: body.data
       },
       null,
       2

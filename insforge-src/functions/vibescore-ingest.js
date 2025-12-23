@@ -1,5 +1,5 @@
 // Edge function: vibescore-ingest
-// Accepts token usage events from a device token and stores them idempotently.
+// Accepts half-hour token usage aggregates from a device token and stores them idempotently.
 //
 // Auth:
 // - Authorization: Bearer <device_token> (opaque, stored as sha256 hash server-side)
@@ -11,8 +11,7 @@ const { getBearerToken } = require('../shared/auth');
 const { getAnonKey, getBaseUrl, getServiceRoleKey } = require('../shared/env');
 const { sha256Hex } = require('../shared/crypto');
 
-const MAX_EVENTS = 500;
-const MAX_EVENT_ID_LEN = 256;
+const MAX_BUCKETS = 500;
 
 module.exports = async function(request) {
   const opt = handleOptions(request);
@@ -49,63 +48,71 @@ module.exports = async function(request) {
   const body = await readJson(request);
   if (body.error) return json({ error: body.error }, body.status);
 
-  const events = normalizeEvents(body.data);
-  if (!Array.isArray(events)) return json({ error: 'Invalid payload: expected {events:[...] } or [...]' }, 400);
-  if (events.length > MAX_EVENTS) return json({ error: `Too many events (max ${MAX_EVENTS})` }, 413);
+  const hourly = normalizeHourly(body.data);
+  if (!Array.isArray(hourly)) {
+    return json({ error: 'Invalid payload: expected {hourly:[...]} or [...]' }, 400);
+  }
+  if (hourly.length > MAX_BUCKETS) return json({ error: `Too many buckets (max ${MAX_BUCKETS})` }, 413);
 
   const nowIso = new Date().toISOString();
-  const rows = [];
-  const seen = new Set();
+  const rows = buildRows({ hourly, tokenRow, nowIso });
+  if (rows.error) return json({ error: rows.error }, 400);
 
-  for (const ev of events) {
-    const parsed = parseEvent(ev);
-    if (!parsed.ok) return json({ error: parsed.error }, 400);
-    if (seen.has(parsed.value.event_id)) continue;
-    seen.add(parsed.value.event_id);
-
-    rows.push({
-      user_id: tokenRow.user_id,
-      device_id: tokenRow.device_id,
-      device_token_id: tokenRow.id,
-      event_id: parsed.value.event_id,
-      token_timestamp: parsed.value.token_timestamp,
-      model: parsed.value.model,
-      input_tokens: parsed.value.input_tokens,
-      cached_input_tokens: parsed.value.cached_input_tokens,
-      output_tokens: parsed.value.output_tokens,
-      reasoning_output_tokens: parsed.value.reasoning_output_tokens,
-      total_tokens: parsed.value.total_tokens,
-      meta: null,
-      created_at: nowIso
-    });
-  }
-
-  if (rows.length === 0) {
+  if (rows.data.length === 0) {
     return json({ success: true, inserted: 0, skipped: 0 }, 200);
   }
 
-  const ingest = serviceClient
-    ? await ingestWithServiceClient({
+  const upsert = serviceClient
+    ? await upsertWithServiceClient({
         serviceClient,
         tokenRow,
-        rows,
+        rows: rows.data,
         nowIso,
         baseUrl,
         serviceRoleKey,
         tokenHash
       })
-    : await ingestWithAnonKey({ baseUrl, anonKey, tokenHash, tokenRow, rows });
-  if (!ingest.ok) return json({ error: ingest.error }, 500);
+    : await upsertWithAnonKey({ baseUrl, anonKey, tokenHash, tokenRow, rows: rows.data, nowIso });
+
+  if (!upsert.ok) return json({ error: upsert.error }, 500);
 
   return json(
     {
       success: true,
-      inserted: ingest.inserted,
-      skipped: ingest.skipped
+      inserted: upsert.inserted,
+      skipped: upsert.skipped
     },
     200
   );
 };
+
+function buildRows({ hourly, tokenRow, nowIso }) {
+  const byHour = new Map();
+
+  for (const raw of hourly) {
+    const parsed = parseHourlyBucket(raw);
+    if (!parsed.ok) return { error: parsed.error, data: [] };
+    byHour.set(parsed.value.hour_start, parsed.value);
+  }
+
+  const rows = [];
+  for (const bucket of byHour.values()) {
+    rows.push({
+      user_id: tokenRow.user_id,
+      device_id: tokenRow.device_id,
+      device_token_id: tokenRow.id,
+      hour_start: bucket.hour_start,
+      input_tokens: bucket.input_tokens,
+      cached_input_tokens: bucket.cached_input_tokens,
+      output_tokens: bucket.output_tokens,
+      reasoning_output_tokens: bucket.reasoning_output_tokens,
+      total_tokens: bucket.total_tokens,
+      updated_at: nowIso
+    });
+  }
+
+  return { error: null, data: rows };
+}
 
 async function getTokenRowWithServiceClient(serviceClient, tokenHash) {
   const { data: tokenRow, error: tokenErr } = await serviceClient.database
@@ -138,7 +145,7 @@ async function getTokenRowWithAnonKey({ baseUrl, anonKey, tokenHash }) {
   return tokenRow;
 }
 
-async function ingestWithServiceClient({
+async function upsertWithServiceClient({
   serviceClient,
   tokenRow,
   rows,
@@ -148,114 +155,68 @@ async function ingestWithServiceClient({
   tokenHash
 }) {
   if (serviceRoleKey && baseUrl) {
-    const url = new URL('/api/database/records/vibescore_tracker_events', baseUrl);
-    const ignore = await recordsInsert({
+    const url = new URL('/api/database/records/vibescore_tracker_hourly', baseUrl);
+    const res = await recordsUpsert({
       url,
       anonKey: serviceRoleKey,
       tokenHash,
       rows,
-      onConflict: 'user_id,event_id',
+      onConflict: 'user_id,device_id,hour_start',
       prefer: 'return=representation',
-      resolution: 'ignore-duplicates',
-      select: 'event_id'
+      resolution: 'merge-duplicates',
+      select: 'hour_start'
     });
 
-    if (ignore.ok) {
-      const insertedRows = normalizeRows(ignore.data);
+    if (res.ok) {
+      const insertedRows = normalizeRows(res.data);
       const inserted = Array.isArray(insertedRows) ? insertedRows.length : rows.length;
-      const skipped = Math.max(0, rows.length - inserted);
       await bestEffortTouchWithServiceClient(serviceClient, tokenRow, nowIso);
-      return { ok: true, inserted, skipped };
+      return { ok: true, inserted, skipped: 0 };
     }
 
-    if (!isUpsertUnsupported(ignore)) {
-      if (ignore.status !== 409 || ignore.code !== '23505') {
-        return { ok: false, error: ignore.error || `HTTP ${ignore.status}`, inserted: 0, skipped: 0 };
-      }
+    if (!isUpsertUnsupported(res)) {
+      return { ok: false, error: res.error || `HTTP ${res.status}`, inserted: 0, skipped: 0 };
     }
   }
 
-  const eventIds = rows.map((r) => r.event_id);
-  const { data: existingRows, error: existingErr } = await serviceClient.database
-    .from('vibescore_tracker_events')
-    .select('event_id')
-    .eq('user_id', tokenRow.user_id)
-    .in('event_id', eventIds);
-  if (existingErr) return { ok: false, error: existingErr.message, inserted: 0, skipped: 0 };
-
-  const existing = new Set((existingRows || []).map((r) => r.event_id).filter((v) => typeof v === 'string'));
-  const toInsert = rows.filter((r) => !existing.has(r.event_id));
-
-  if (toInsert.length > 0) {
-    const { error: insertErr } = await serviceClient.database.from('vibescore_tracker_events').insert(toInsert);
-    if (insertErr) return { ok: false, error: insertErr.message, inserted: 0, skipped: 0 };
+  const table = serviceClient.database.from('vibescore_tracker_hourly');
+  if (typeof table?.upsert === 'function') {
+    const { error } = await table.upsert(rows, { onConflict: 'user_id,device_id,hour_start' });
+    if (error) return { ok: false, error: error.message, inserted: 0, skipped: 0 };
+    await bestEffortTouchWithServiceClient(serviceClient, tokenRow, nowIso);
+    return { ok: true, inserted: rows.length, skipped: 0 };
   }
 
-  await bestEffortTouchWithServiceClient(serviceClient, tokenRow, nowIso);
-
-  return { ok: true, inserted: toInsert.length, skipped: rows.length - toInsert.length };
+  return { ok: false, error: 'Half-hour upsert unsupported', inserted: 0, skipped: 0 };
 }
 
-async function ingestWithAnonKey({ baseUrl, anonKey, tokenHash, rows }) {
+async function upsertWithAnonKey({ baseUrl, anonKey, tokenHash, tokenRow, rows, nowIso }) {
   if (!anonKey) return { ok: false, error: 'Anon key missing', inserted: 0, skipped: 0 };
 
-  const url = new URL('/api/database/records/vibescore_tracker_events', baseUrl);
-
-  // Fast path: bulk insert with duplicate ignore (if supported by records API).
-  const ignore = await recordsInsert({
+  const url = new URL('/api/database/records/vibescore_tracker_hourly', baseUrl);
+  const res = await recordsUpsert({
     url,
     anonKey,
     tokenHash,
     rows,
-    onConflict: 'user_id,event_id',
+    onConflict: 'user_id,device_id,hour_start',
     prefer: 'return=representation',
-    resolution: 'ignore-duplicates',
-    select: 'event_id'
+    resolution: 'merge-duplicates',
+    select: 'hour_start'
   });
-  if (ignore.ok) {
-    const insertedRows = normalizeRows(ignore.data);
+
+  if (res.ok) {
+    const insertedRows = normalizeRows(res.data);
     const inserted = Array.isArray(insertedRows) ? insertedRows.length : rows.length;
-    const skipped = Math.max(0, rows.length - inserted);
-    await bestEffortTouchWithAnonKey({ baseUrl, anonKey, tokenHash });
-    return { ok: true, inserted, skipped };
+    await bestEffortTouchWithAnonKey({ baseUrl, anonKey, tokenHash, nowIso });
+    return { ok: true, inserted, skipped: 0 };
   }
 
-  if (!isUpsertUnsupported(ignore)) {
-    if (ignore.status !== 409 || ignore.code !== '23505') {
-      return { ok: false, error: ignore.error || `HTTP ${ignore.status}`, inserted: 0, skipped: 0 };
-    }
+  if (isUpsertUnsupported(res)) {
+    return { ok: false, error: res.error || 'Half-hour upsert unsupported', inserted: 0, skipped: 0 };
   }
 
-  // Legacy fast path: bulk insert. If any duplicates exist, Postgres will reject the whole batch with 23505.
-  const bulk = await recordsInsert({ url, anonKey, tokenHash, rows, prefer: 'return=minimal' });
-  if (bulk.ok) {
-    await bestEffortTouchWithAnonKey({ baseUrl, anonKey, tokenHash });
-    return { ok: true, inserted: rows.length, skipped: 0 };
-  }
-
-  if (bulk.status !== 409 || bulk.code !== '23505') {
-    return { ok: false, error: bulk.error || `HTTP ${bulk.status}`, inserted: 0, skipped: 0 };
-  }
-
-  // Slow path: retry row-by-row to preserve new events even if some are duplicates.
-  let inserted = 0;
-  let skipped = 0;
-
-  for (const row of rows) {
-    const one = await recordsInsert({ url, anonKey, tokenHash, rows: [row], prefer: 'return=minimal' });
-    if (one.ok) {
-      inserted += 1;
-      continue;
-    }
-    if (one.status === 409 && one.code === '23505') {
-      skipped += 1;
-      continue;
-    }
-    return { ok: false, error: one.error || `HTTP ${one.status}`, inserted: 0, skipped: 0 };
-  }
-
-  await bestEffortTouchWithAnonKey({ baseUrl, anonKey, tokenHash });
-  return { ok: true, inserted, skipped };
+  return { ok: false, error: res.error || `HTTP ${res.status}`, inserted: 0, skipped: 0 };
 }
 
 async function bestEffortTouchWithServiceClient(serviceClient, tokenRow, nowIso) {
@@ -268,7 +229,10 @@ async function bestEffortTouchWithServiceClient(serviceClient, tokenRow, nowIso)
       .eq('id', tokenRow.id);
   } catch (_e) {}
   try {
-    await serviceClient.database.from('vibescore_tracker_devices').update({ last_seen_at: nowIso }).eq('id', tokenRow.device_id);
+    await serviceClient.database
+      .from('vibescore_tracker_devices')
+      .update({ last_seen_at: nowIso })
+      .eq('id', tokenRow.device_id);
   } catch (_e) {}
 }
 
@@ -293,6 +257,29 @@ function buildAnonHeaders({ anonKey, tokenHash }) {
     Authorization: `Bearer ${anonKey}`,
     'x-vibescore-device-token-hash': tokenHash
   };
+}
+
+async function recordsUpsert({ url, anonKey, tokenHash, rows, onConflict, prefer, resolution, select }) {
+  const target = new URL(url.toString());
+  if (onConflict) target.searchParams.set('on_conflict', onConflict);
+  if (select) target.searchParams.set('select', select);
+  const preferParts = [];
+  if (prefer) preferParts.push(prefer);
+  if (resolution) preferParts.push(`resolution=${resolution}`);
+  const preferHeader = preferParts.filter(Boolean).join(',');
+
+  const res = await fetch(target.toString(), {
+    method: 'POST',
+    headers: {
+      ...buildAnonHeaders({ anonKey, tokenHash }),
+      ...(preferHeader ? { Prefer: preferHeader } : {}),
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(rows)
+  });
+
+  const { data, error, code } = await readApiJson(res);
+  return { ok: res.ok, status: res.status, data, error, code };
 }
 
 async function readApiJson(res) {
@@ -326,29 +313,6 @@ function isWithinInterval(lastSyncAt, minutes) {
   return windowMs > 0 && Date.now() - lastMs < windowMs;
 }
 
-async function recordsInsert({ url, anonKey, tokenHash, rows, prefer, onConflict, resolution, select }) {
-  const target = new URL(url.toString());
-  if (onConflict) target.searchParams.set('on_conflict', onConflict);
-  if (select) target.searchParams.set('select', select);
-  const preferParts = [];
-  if (prefer) preferParts.push(prefer);
-  if (resolution) preferParts.push(`resolution=${resolution}`);
-  const preferHeader = preferParts.filter(Boolean).join(',');
-
-  const res = await fetch(target.toString(), {
-    method: 'POST',
-    headers: {
-      ...buildAnonHeaders({ anonKey, tokenHash }),
-      ...(preferHeader ? { Prefer: preferHeader } : {}),
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(rows)
-  });
-
-  const { data, error, code } = await readApiJson(res);
-  return { ok: res.ok, status: res.status, data, error, code };
-}
-
 function isUpsertUnsupported(result) {
   const status = Number(result?.status || 0);
   if (status !== 400 && status !== 404 && status !== 405 && status !== 409 && status !== 422) return false;
@@ -363,41 +327,37 @@ function isUpsertUnsupported(result) {
   );
 }
 
-function normalizeEvents(data) {
+function normalizeHourly(data) {
   if (Array.isArray(data)) return data;
-  if (data && typeof data === 'object' && Array.isArray(data.events)) return data.events;
+  if (data && typeof data === 'object') {
+    if (Array.isArray(data.hourly)) return data.hourly;
+    if (Array.isArray(data.data)) return data.data;
+  }
   return null;
 }
 
-function parseEvent(ev) {
-  if (!ev || typeof ev !== 'object') return { ok: false, error: 'Invalid event' };
+function parseHourlyBucket(raw) {
+  if (!raw || typeof raw !== 'object') return { ok: false, error: 'Invalid half-hour bucket' };
 
-  const eventId = typeof ev.event_id === 'string' ? ev.event_id.trim() : '';
-  if (!eventId) return { ok: false, error: 'event_id is required' };
-  if (eventId.length > MAX_EVENT_ID_LEN) return { ok: false, error: `event_id too long (max ${MAX_EVENT_ID_LEN})` };
+  const hourStart = parseUtcHalfHourStart(raw.hour_start);
+  if (!hourStart) {
+    return { ok: false, error: 'hour_start must be an ISO timestamp at UTC half-hour boundary' };
+  }
 
-  const tsRaw = typeof ev.token_timestamp === 'string' ? ev.token_timestamp : '';
-  const ts = parseIsoTimestamp(tsRaw);
-  if (!ts) return { ok: false, error: 'token_timestamp must be a valid ISO timestamp' };
+  const input = toNonNegativeInt(raw.input_tokens);
+  const cached = toNonNegativeInt(raw.cached_input_tokens);
+  const output = toNonNegativeInt(raw.output_tokens);
+  const reasoning = toNonNegativeInt(raw.reasoning_output_tokens);
+  const total = toNonNegativeInt(raw.total_tokens);
 
-  const model = typeof ev.model === 'string' ? ev.model.slice(0, 128) : null;
-
-  const input = toNonNegativeInt(ev.input_tokens);
-  const cached = toNonNegativeInt(ev.cached_input_tokens);
-  const output = toNonNegativeInt(ev.output_tokens);
-  const reasoning = toNonNegativeInt(ev.reasoning_output_tokens);
-  const total = toNonNegativeInt(ev.total_tokens);
-
-  if ([input, cached, output, reasoning, total].some((n) => n === null)) {
+  if ([input, cached, output, reasoning, total].some((n) => n == null)) {
     return { ok: false, error: 'Token fields must be non-negative integers' };
   }
 
   return {
     ok: true,
     value: {
-      event_id: eventId,
-      token_timestamp: ts,
-      model,
+      hour_start: hourStart,
       input_tokens: input,
       cached_input_tokens: cached,
       output_tokens: output,
@@ -407,17 +367,32 @@ function parseEvent(ev) {
   };
 }
 
-function parseIsoTimestamp(s) {
-  if (typeof s !== 'string' || s.length === 0) return null;
-  const d = new Date(s);
-  if (Number.isNaN(d.getTime())) return null;
-  return d.toISOString();
+function parseUtcHalfHourStart(value) {
+  if (typeof value !== 'string' || value.trim() === '') return null;
+  const dt = new Date(value);
+  if (!Number.isFinite(dt.getTime())) return null;
+  const minutes = dt.getUTCMinutes();
+  if ((minutes !== 0 && minutes !== 30) || dt.getUTCSeconds() !== 0 || dt.getUTCMilliseconds() !== 0) {
+    return null;
+  }
+  const hourStart = new Date(
+    Date.UTC(
+      dt.getUTCFullYear(),
+      dt.getUTCMonth(),
+      dt.getUTCDate(),
+      dt.getUTCHours(),
+      minutes >= 30 ? 30 : 0,
+      0,
+      0
+    )
+  );
+  return hourStart.toISOString();
 }
 
 function toNonNegativeInt(n) {
   if (typeof n !== 'number') return null;
   if (!Number.isFinite(n)) return null;
+  if (!Number.isInteger(n)) return null;
   if (n < 0) return null;
-  const i = Math.floor(n);
-  return i === n ? i : null;
+  return n;
 }

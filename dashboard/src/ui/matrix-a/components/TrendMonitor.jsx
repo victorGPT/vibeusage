@@ -17,7 +17,7 @@ export function TrendMonitor({
   showTimeZoneLabel = true,
 }) {
   const series = Array.isArray(rows) && rows.length ? rows : null;
-  const fallbackValues = data.length > 0 ? data : Array.from({ length: 24 }, () => 0);
+  const fallbackValues = data.length > 0 ? data : Array.from({ length: 48 }, () => 0);
   const seriesValues = series
     ? series.map((row) => {
         if (row?.missing || row?.future) return null;
@@ -50,7 +50,7 @@ export function TrendMonitor({
   const axisWidth = 8;
   const plotWidth = width - axisWidth;
   const pointCount = Math.max(seriesValues.length, 1);
-  const DAY_AXIS_POINT_COUNT = 24;
+  const DAY_AXIS_POINT_COUNT = 48;
   const dayStep =
     DAY_AXIS_POINT_COUNT > 1 ? plotWidth / (DAY_AXIS_POINT_COUNT - 1) : 0;
   const dayPadding = Math.min(dayStep / 2, plotWidth * 0.12);
@@ -199,7 +199,7 @@ export function TrendMonitor({
 
     if (isoHour.test(label)) {
       const [date, time] = label.split("T");
-      const hh = time.slice(0, 2);
+      const hh = time.slice(0, 5);
       if (!showTimeZoneLabel) {
         return copy("trend.monitor.tooltip.hour_no_tz", { date, hour: hh });
       }

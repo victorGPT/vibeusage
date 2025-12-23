@@ -360,7 +360,7 @@ function markHourlyFuture(rows, { timeZone, offsetMinutes } = {}) {
     }
     const isFuture =
       parsed.dayNum > nowParts.dayNum ||
-      (parsed.dayNum === nowParts.dayNum && parsed.hour > nowParts.hour);
+      (parsed.dayNum === nowParts.dayNum && parsed.slot > nowParts.slot);
     return { ...row, future: isFuture };
   });
 }
@@ -393,6 +393,7 @@ function getNowParts({ timeZone, offsetMinutes } = {}) {
         month: "2-digit",
         day: "2-digit",
         hour: "2-digit",
+        minute: "2-digit",
         hourCycle: "h23",
       });
       const parts = formatter.formatToParts(now);
@@ -404,18 +405,23 @@ function getNowParts({ timeZone, offsetMinutes } = {}) {
       const month = Number(values.month);
       const day = Number(values.day);
       const hour = Number(values.hour);
+      const minute = Number(values.minute);
       if (
         Number.isFinite(year) &&
         Number.isFinite(month) &&
         Number.isFinite(day) &&
-        Number.isFinite(hour)
+        Number.isFinite(hour) &&
+        Number.isFinite(minute)
       ) {
+        const slot = hour * 2 + (minute >= 30 ? 1 : 0);
         return {
           year,
           month,
           day,
           hour,
+          minute,
           dayNum: year * 10000 + month * 100 + day,
+          slot,
         };
       }
     } catch (_e) {
@@ -429,12 +435,16 @@ function getNowParts({ timeZone, offsetMinutes } = {}) {
     const month = shifted.getUTCMonth() + 1;
     const day = shifted.getUTCDate();
     const hour = shifted.getUTCHours();
+    const minute = shifted.getUTCMinutes();
+    const slot = hour * 2 + (minute >= 30 ? 1 : 0);
     return {
       year,
       month,
       day,
       hour,
+      minute,
       dayNum: year * 10000 + month * 100 + day,
+      slot,
     };
   }
 
@@ -442,12 +452,16 @@ function getNowParts({ timeZone, offsetMinutes } = {}) {
   const month = now.getMonth() + 1;
   const day = now.getDate();
   const hour = now.getHours();
+  const minute = now.getMinutes();
+  const slot = hour * 2 + (minute >= 30 ? 1 : 0);
   return {
     year,
     month,
     day,
     hour,
+    minute,
     dayNum: year * 10000 + month * 100 + day,
+    slot,
   };
 }
 
@@ -464,11 +478,15 @@ function parseHourLabel(label) {
   if (!Number.isFinite(year) || !Number.isFinite(month) || !Number.isFinite(day)) {
     return null;
   }
-  const hour = Number(timePart.slice(0, 2));
+  const timeParts = timePart.split(":");
+  const hour = Number(timeParts[0]);
+  const minute = Number(timeParts[1]);
   if (!Number.isFinite(hour) || hour < 0 || hour > 23) return null;
+  if (!Number.isFinite(minute) || minute < 0 || minute > 59) return null;
+  const slot = hour * 2 + (minute >= 30 ? 1 : 0);
   return {
     dayNum: year * 10000 + month * 100 + day,
-    hour,
+    slot,
   };
 }
 

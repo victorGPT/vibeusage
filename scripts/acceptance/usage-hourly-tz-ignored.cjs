@@ -128,19 +128,19 @@ async function main() {
   const body = await res.json();
 
   assert.equal(res.status, 200);
-  assert.equal(calls.events, 1, 'expected events table query');
+  assert.equal(calls.hourly, 1, 'expected hourly table query');
   assert.equal(calls.daily, 0, 'expected no daily table query');
   assert.equal(calls.rangeStart, '2025-12-02T08:00:00.000Z');
   assert.equal(calls.rangeEnd, '2025-12-03T08:00:00.000Z');
   assert.equal(body.day, '2025-12-02');
   assert.equal(Array.isArray(body.data), true);
-  assert.equal(body.data.length, 24);
+  assert.equal(body.data.length, 48);
 
   process.stdout.write(
     JSON.stringify(
       {
         ok: true,
-        events_queries: calls.events,
+        hourly_queries: calls.hourly,
         range_start: calls.rangeStart,
         range_end: calls.rangeEnd
       },
@@ -151,7 +151,7 @@ async function main() {
 }
 
 function buildFetchStub() {
-  const calls = { daily: 0, events: 0, rangeStart: null, rangeEnd: null };
+  const calls = { daily: 0, hourly: 0, rangeStart: null, rangeEnd: null };
 
   async function handler(input, init = {}) {
     const url = new URL(typeof input === 'string' ? input : input.url);
@@ -166,16 +166,16 @@ function buildFetchStub() {
       return jsonResponse(200, []);
     }
 
-    if (url.pathname === '/api/database/records/vibescore_tracker_events' && method === 'GET') {
-      calls.events += 1;
-      const filters = url.searchParams.getAll('token_timestamp');
+    if (url.pathname === '/api/database/records/vibescore_tracker_hourly' && method === 'GET') {
+      calls.hourly += 1;
+      const filters = url.searchParams.getAll('hour_start');
       const startFilter = filters.find((f) => f.startsWith('gte.')) || '';
       const endFilter = filters.find((f) => f.startsWith('lt.')) || '';
       calls.rangeStart = startFilter.slice(4) || null;
       calls.rangeEnd = endFilter.slice(3) || null;
       return jsonResponse(200, [
         {
-          token_timestamp: '2025-12-02T18:00:00.000Z',
+          hour_start: '2025-12-02T18:00:00.000Z',
           total_tokens: '3',
           input_tokens: '1',
           cached_input_tokens: '0',
@@ -183,7 +183,7 @@ function buildFetchStub() {
           reasoning_output_tokens: '0'
         },
         {
-          token_timestamp: '2025-12-03T01:00:00.000Z',
+          hour_start: '2025-12-03T01:30:00.000Z',
           total_tokens: '6',
           input_tokens: '2',
           cached_input_tokens: '1',

@@ -40,21 +40,72 @@ The notify handler MUST be non-blocking, MUST exit with status code `0` even on 
 - **AND** the handler SHALL NOT emit sensitive content to stdout/stderr
 
 ### Requirement: Incremental parsing with a strict data allowlist
-The system SHALL incrementally parse `~/.codex/sessions/**/rollout-*.jsonl` and MUST only extract token usage from `payload.type == "token_count"` using an explicit allowlist of numeric fields.
+The system SHALL incrementally parse `~/.codex/sessions/**/rollout-*.jsonl` and MUST only extract token usage from `payload.type == "token_count"` using an explicit allowlist of numeric fields, aggregating into UTC half-hour buckets.
 
 #### Scenario: Parser ignores non-token_count records
 - **GIVEN** a rollout file contains non-`token_count` records (including conversational content)
 - **WHEN** the user runs `npx @vibescore/tracker sync`
-- **THEN** only `token_count`-derived numeric fields SHALL be queued for upload
+- **THEN** only `token_count`-derived numeric fields SHALL be aggregated into UTC half-hour buckets and queued for upload
 - **AND** no conversational content SHALL be persisted or uploaded
+
+### Requirement: Client uploads only half-hour aggregates
+The system SHALL aggregate `token_count` records into UTC half-hour buckets and SHALL upload only half-hour aggregates (no per-event rows).
+
+#### Scenario: Half-hour aggregation payload
+- **GIVEN** multiple `token_count` events occur within the same UTC half-hour
+- **WHEN** the user runs `npx @vibescore/tracker sync`
+- **THEN** the upload payload SHALL contain one row per UTC half-hour with summed token totals
+- **AND** the payload SHALL NOT include per-event rows
+
+### Requirement: Half-hour buckets are device-scoped and UTC-aligned
+The ingest pipeline SHALL treat half-hour aggregates as keyed by `user_id + device_id + hour_start` where `hour_start` is a UTC half-hour boundary.
+
+#### Scenario: Bucket key uses UTC hour
+- **GIVEN** a device uploads usage for `2025-12-23T06:30:00Z`
+- **WHEN** the backend stores the aggregate
+- **THEN** it SHALL key the row by the UTC half-hour boundary and the device id
 
 ### Requirement: Client-side idempotency
 The system MUST be safe to re-run. Upload retries and repeated `sync` executions MUST NOT double-count usage in the cloud.
 
-#### Scenario: Re-running sync does not duplicate events
+#### Scenario: Re-running sync does not duplicate half-hour buckets
 - **GIVEN** a user ran `npx @vibescore/tracker sync` successfully once
 - **WHEN** the user runs `npx @vibescore/tracker sync` again without new Codex events
-- **THEN** the ingest result SHOULD report `0` inserted events (or otherwise indicate no new events)
+- **THEN** the ingest result SHOULD report `0` inserted buckets (or otherwise indicate no new data)
+
+### Requirement: Half-hour aggregate upsert is idempotent
+The ingest endpoint SHALL upsert half-hour aggregates without double-counting when the same bucket is re-sent.
+
+#### Scenario: Re-sending the same bucket does not increase totals
+- **GIVEN** a half-hour aggregate bucket has already been stored
+- **WHEN** the same bucket is uploaded again with the same totals
+- **THEN** the stored totals SHALL remain unchanged
+
+### Requirement: Auto sync uploads are throttled to half-hour cadence
+The CLI auto sync path SHALL rate-limit uploads to at most one upload attempt per device every 30 minutes, while manual sync and init-triggered sync run immediately without upload throttling.
+
+#### Scenario: Auto sync enforces half-hour throttle
+- **GIVEN** a device ran `sync --auto` less than 30 minutes ago
+- **WHEN** `sync --auto` runs again with pending data
+- **THEN** the upload SHOULD be skipped until the next allowed window
+
+#### Scenario: Manual sync uploads immediately
+- **GIVEN** pending half-hour buckets exist
+- **WHEN** the user runs `npx @vibescore/tracker sync`
+- **THEN** the upload SHOULD proceed immediately (no auto throttle)
+
+#### Scenario: Init triggers an immediate sync
+- **GIVEN** the user completes `npx @vibescore/tracker init`
+- **WHEN** the command finishes
+- **THEN** the CLI SHALL run a sync to upload pending half-hour buckets
+
+### Requirement: Raw event retention is capped
+The system MUST NOT retain per-event token usage data beyond 30 days (if any event data is stored).
+
+#### Scenario: Event rows older than 30 days are purged
+- **GIVEN** event rows older than 30 days exist
+- **WHEN** the retention job runs
+- **THEN** those rows SHALL be removed
 
 ### Requirement: Device token authentication boundary
 The ingest API MUST authenticate devices using a long-lived device token, and MUST NOT require the CLI to store a user JWT long-term.
@@ -65,21 +116,29 @@ The ingest API MUST authenticate devices using a long-lived device token, and MU
 - **AND** the CLI SHALL NOT persist any user JWT long-term
 
 ### Requirement: Sync heartbeat records freshness
-The system SHALL record a device sync heartbeat even when no events are uploaded, so that the backend can distinguish "unsynced" from "no usage".
+The system SHALL record a device sync heartbeat even when no half-hour buckets are uploaded, so that the backend can distinguish "unsynced" from "no usage".
 
-#### Scenario: Sync with no new events still updates heartbeat
+#### Scenario: Sync with no new buckets still updates heartbeat
 - **GIVEN** a device token is valid
-- **WHEN** the CLI runs `npx @vibescore/tracker sync` with zero new events
+- **WHEN** the CLI runs `npx @vibescore/tracker sync` with zero new half-hour buckets
 - **THEN** the backend SHALL update the device's `last_sync_at` (or equivalent) within the configured min interval
 
+### Requirement: Usage endpoints derive from half-hour aggregates
+The usage summary, daily, monthly, and heatmap endpoints SHALL derive totals from half-hour aggregate data.
+
+#### Scenario: Daily total equals sum of half-hour buckets
+- **GIVEN** half-hour aggregates exist for a day
+- **WHEN** the user requests daily usage for that day
+- **THEN** the total SHALL equal the sum of half-hour bucket totals
+
 ### Requirement: Hourly usage marks unsynced buckets
-The hourly usage endpoint SHALL mark buckets after the latest sync timestamp as `missing: true` so the UI can distinguish unsynced hours.
+The hourly usage endpoint SHALL mark half-hour buckets after the latest sync timestamp as `missing: true` so the UI can distinguish unsynced hours.
 
 #### Scenario: Latest sync timestamp splits the day
 - **GIVEN** the user's latest sync is at `2025-12-22T12:30:00Z`
 - **WHEN** the user calls `GET /functions/vibescore-usage-hourly?day=2025-12-22`
-- **THEN** buckets after `12:00` UTC SHALL include `missing: true`
-- **AND** buckets at or before `12:00` UTC SHALL NOT be marked missing
+- **THEN** buckets after `12:30` UTC SHALL include `missing: true`
+- **AND** buckets at or before `12:30` UTC SHALL NOT be marked missing
 
 ### Requirement: Dashboard UI is retro-TUI themed (visual only)
 The Dashboard UI SHALL adopt the "Matrix UI A" visual system (based on `copy.jsx`) while preserving standard web interaction patterns (mouse clicks, form inputs, link navigation).
@@ -149,7 +208,7 @@ The dashboard TREND chart SHALL NOT render the trend line into future local-cale
 - **AND** future buckets SHALL remain without a line
 
 #### Scenario: Unsynced buckets show missing markers
-- **GIVEN** hourly data includes `missing: true` for recent hours
+- **GIVEN** half-hour data includes `missing: true` for recent hours
 - **WHEN** the dashboard renders the day trend
 - **THEN** it SHALL render missing markers (no line) for those hours
 - **AND** it SHALL keep zero-usage buckets (`missing=false`) on the line

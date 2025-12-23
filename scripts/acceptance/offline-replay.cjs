@@ -21,9 +21,9 @@ async function main() {
 
   const queuePath = path.join(tmp, 'queue.jsonl');
   const queueStatePath = path.join(tmp, 'queue.state.json');
-  const events = buildEvents();
+  const buckets = buildBuckets();
 
-  await fs.writeFile(queuePath, events.map((e) => JSON.stringify(e)).join('\n') + '\n', 'utf8');
+  await fs.writeFile(queuePath, buckets.map((e) => JSON.stringify(e)).join('\n') + '\n', 'utf8');
   await writeJson(queueStatePath, { offset: 0 });
 
   let offlineError = null;
@@ -60,7 +60,7 @@ async function main() {
     const queueSize = (await fs.stat(queuePath)).size;
     const afterFirst = await readJson(queueStatePath);
     assert.equal(Number(afterFirst?.offset || 0), queueSize);
-    assert.equal(first.inserted, events.length);
+    assert.equal(first.inserted, buckets.length);
     assert.equal(first.skipped, 0);
 
     await writeJson(queueStatePath, { offset: 0 });
@@ -74,7 +74,7 @@ async function main() {
     });
 
     assert.equal(second.inserted, 0);
-    assert.equal(second.skipped, events.length);
+    assert.equal(second.skipped, buckets.length);
 
     process.stdout.write(
       JSON.stringify(
@@ -104,14 +104,11 @@ function parseArgs(argv) {
   return out;
 }
 
-function buildEvents() {
-  const now = new Date('2025-12-19T00:00:00.000Z');
-  const iso = now.toISOString();
+function buildBuckets() {
+  const iso = new Date('2025-12-19T00:00:00.000Z').toISOString();
   return [
     {
-      event_id: `offline_replay_${iso}_1`,
-      token_timestamp: iso,
-      model: 'offline-replay',
+      hour_start: iso,
       input_tokens: 1,
       cached_input_tokens: 0,
       output_tokens: 2,
@@ -119,9 +116,7 @@ function buildEvents() {
       total_tokens: 3
     },
     {
-      event_id: `offline_replay_${iso}_2`,
-      token_timestamp: iso,
-      model: 'offline-replay',
+      hour_start: '2025-12-19T00:30:00.000Z',
       input_tokens: 2,
       cached_input_tokens: 0,
       output_tokens: 4,
@@ -159,16 +154,16 @@ async function startIngestStub() {
         return respond(res, 400, { error: 'Invalid JSON' });
       }
 
-      const events = Array.isArray(data?.events) ? data.events : [];
+      const events = Array.isArray(data?.hourly) ? data.hourly : [];
       let inserted = 0;
       let skipped = 0;
 
       for (const ev of events) {
-        const id = typeof ev?.event_id === 'string' ? ev.event_id : null;
-        if (!id) continue;
-        if (seen.has(id)) skipped += 1;
+        const hourStart = typeof ev?.hour_start === 'string' ? ev.hour_start : null;
+        if (!hourStart) continue;
+        if (seen.has(hourStart)) skipped += 1;
         else {
-          seen.add(id);
+          seen.add(hourStart);
           inserted += 1;
         }
       }
@@ -189,4 +184,3 @@ function respond(res, status, body) {
   res.setHeader('Content-Type', 'application/json');
   res.end(JSON.stringify(body));
 }
-

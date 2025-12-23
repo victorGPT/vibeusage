@@ -7,7 +7,6 @@ class DatabaseStub {
   constructor() {
     this._table = null;
     this._select = null;
-    this._filters = [];
   }
 
   from(table) {
@@ -20,41 +19,48 @@ class DatabaseStub {
     return this;
   }
 
-  eq(column, value) {
-    this._filters.push({ op: 'eq', column, value });
+  eq() {
     return this;
   }
 
-  gte(column, value) {
-    this._filters.push({ op: 'gte', column, value });
+  gte() {
     return this;
   }
 
-  lte(column, value) {
-    this._filters.push({ op: 'lte', column, value });
+  lt() {
     return this;
   }
 
-  maybeSingle() {
-    if (this._table !== 'vibescore_tracker_daily') {
-      return { data: null, error: null };
+  order() {
+    return this;
+  }
+
+  range(from, to) {
+    if (this._table !== 'vibescore_tracker_hourly') {
+      return { data: [], error: null };
     }
-
-    if (String(this._select || '').includes('sum_total_tokens')) {
-      return {
-        data: {
-          days: '2',
-          sum_total_tokens: '30',
-          sum_input_tokens: '12',
-          sum_cached_input_tokens: '3',
-          sum_output_tokens: '15',
-          sum_reasoning_output_tokens: '0'
+    if (from > 0) return { data: [], error: null };
+    return {
+      data: [
+        {
+          hour_start: '2025-12-01T18:00:00.000Z',
+          total_tokens: '10',
+          input_tokens: '4',
+          cached_input_tokens: '1',
+          output_tokens: '5',
+          reasoning_output_tokens: '0'
         },
-        error: null
-      };
-    }
-
-    return { data: null, error: new Error('unexpected select') };
+        {
+          hour_start: '2025-12-02T18:00:00.000Z',
+          total_tokens: '20',
+          input_tokens: '8',
+          cached_input_tokens: '2',
+          output_tokens: '10',
+          reasoning_output_tokens: '0'
+        }
+      ],
+      error: null
+    };
   }
 }
 
@@ -116,13 +122,6 @@ async function main() {
       2
     ) + '\n'
   );
-}
-
-function jsonResponse(status, body) {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { 'Content-Type': 'application/json' }
-  });
 }
 
 main().catch((err) => {

@@ -265,7 +265,7 @@ async function upsertWithServiceClient({
     await bestEffortTouchWithServiceClient(serviceClient, tokenRow, nowIso);
     return { ok: true, inserted: rows.length, skipped: 0 };
   }
-  return { ok: false, error: "Hourly upsert unsupported", inserted: 0, skipped: 0 };
+  return { ok: false, error: "Half-hour upsert unsupported", inserted: 0, skipped: 0 };
 }
 async function upsertWithAnonKey({ baseUrl, anonKey, tokenHash, tokenRow, rows, nowIso }) {
   if (!anonKey) return { ok: false, error: "Anon key missing", inserted: 0, skipped: 0 };
@@ -287,7 +287,7 @@ async function upsertWithAnonKey({ baseUrl, anonKey, tokenHash, tokenRow, rows, 
     return { ok: true, inserted, skipped: 0 };
   }
   if (isUpsertUnsupported(res)) {
-    return { ok: false, error: res.error || "Hourly upsert unsupported", inserted: 0, skipped: 0 };
+    return { ok: false, error: res.error || "Half-hour upsert unsupported", inserted: 0, skipped: 0 };
   }
   return { ok: false, error: res.error || `HTTP ${res.status}`, inserted: 0, skipped: 0 };
 }
@@ -388,10 +388,10 @@ function normalizeHourly(data) {
   return null;
 }
 function parseHourlyBucket(raw) {
-  if (!raw || typeof raw !== "object") return { ok: false, error: "Invalid hourly bucket" };
-  const hourStart = parseUtcHourStart(raw.hour_start);
+  if (!raw || typeof raw !== "object") return { ok: false, error: "Invalid half-hour bucket" };
+  const hourStart = parseUtcHalfHourStart(raw.hour_start);
   if (!hourStart) {
-    return { ok: false, error: "hour_start must be an ISO timestamp at UTC hour boundary" };
+    return { ok: false, error: "hour_start must be an ISO timestamp at UTC half-hour boundary" };
   }
   const input = toNonNegativeInt(raw.input_tokens);
   const cached = toNonNegativeInt(raw.cached_input_tokens);
@@ -413,13 +413,24 @@ function parseHourlyBucket(raw) {
     }
   };
 }
-function parseUtcHourStart(value) {
+function parseUtcHalfHourStart(value) {
   if (typeof value !== "string" || value.trim() === "") return null;
   const dt = new Date(value);
   if (!Number.isFinite(dt.getTime())) return null;
-  if (dt.getUTCMinutes() !== 0 || dt.getUTCSeconds() !== 0 || dt.getUTCMilliseconds() !== 0) return null;
+  const minutes = dt.getUTCMinutes();
+  if (minutes !== 0 && minutes !== 30 || dt.getUTCSeconds() !== 0 || dt.getUTCMilliseconds() !== 0) {
+    return null;
+  }
   const hourStart = new Date(
-    Date.UTC(dt.getUTCFullYear(), dt.getUTCMonth(), dt.getUTCDate(), dt.getUTCHours(), 0, 0, 0)
+    Date.UTC(
+      dt.getUTCFullYear(),
+      dt.getUTCMonth(),
+      dt.getUTCDate(),
+      dt.getUTCHours(),
+      minutes >= 30 ? 30 : 0,
+      0,
+      0
+    )
   );
   return hourStart.toISOString();
 }

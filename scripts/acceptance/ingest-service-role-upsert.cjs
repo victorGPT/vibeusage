@@ -82,14 +82,14 @@ async function main() {
   global.fetch = handler;
 
   const ingest = require('../../insforge-src/functions/vibescore-ingest.js');
-  const events = buildEvents();
+  const hourly = buildBuckets();
   const req = new Request('http://local/functions/vibescore-ingest', {
     method: 'POST',
     headers: {
       Authorization: 'Bearer device-token',
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ events })
+    body: JSON.stringify({ hourly })
   });
 
   const res = await ingest(req);
@@ -98,10 +98,10 @@ async function main() {
   assert.equal(res.status, 200);
   assert.equal(data.success, true);
   assert.equal(data.inserted, 2);
-  assert.equal(data.skipped, 1);
-  assert.equal(calls.eventInsert, 1, 'expected a single records insert');
-  assert.equal(calls.eventSelect, 0, 'expected no pre-read select');
-  assert.ok(calls.preferIgnore, 'expected ignore-duplicates prefer');
+  assert.equal(data.skipped, 0);
+  assert.equal(calls.hourlyInsert, 1, 'expected a single records insert');
+  assert.equal(calls.hourlySelect, 0, 'expected no pre-read select');
+  assert.ok(calls.preferMerge, 'expected merge-duplicates prefer');
 
   process.stdout.write(
     JSON.stringify(
@@ -109,8 +109,8 @@ async function main() {
         ok: true,
         inserted: data.inserted,
         skipped: data.skipped,
-        event_insert_calls: calls.eventInsert,
-        event_select_calls: calls.eventSelect
+        hourly_insert_calls: calls.hourlyInsert,
+        hourly_select_calls: calls.hourlySelect
       },
       null,
       2
@@ -118,13 +118,11 @@ async function main() {
   );
 }
 
-function buildEvents() {
+function buildBuckets() {
   const ts = new Date('2025-12-21T00:00:00.000Z').toISOString();
   return [
     {
-      event_id: 'dup_event_1',
-      token_timestamp: ts,
-      model: 'dup-test',
+      hour_start: ts,
       input_tokens: 1,
       cached_input_tokens: 0,
       output_tokens: 2,
@@ -132,9 +130,7 @@ function buildEvents() {
       total_tokens: 3
     },
     {
-      event_id: 'dup_event_2',
-      token_timestamp: ts,
-      model: 'dup-test',
+      hour_start: ts,
       input_tokens: 2,
       cached_input_tokens: 0,
       output_tokens: 4,
@@ -142,9 +138,7 @@ function buildEvents() {
       total_tokens: 6
     },
     {
-      event_id: 'dup_event_3',
-      token_timestamp: ts,
-      model: 'dup-test',
+      hour_start: '2025-12-21T00:30:00.000Z',
       input_tokens: 3,
       cached_input_tokens: 0,
       output_tokens: 6,
@@ -155,19 +149,19 @@ function buildEvents() {
 }
 
 function buildFetchStub() {
-  const calls = { eventInsert: 0, eventSelect: 0, preferIgnore: false };
+  const calls = { hourlyInsert: 0, hourlySelect: 0, preferMerge: false };
 
   async function handler(input, init = {}) {
     const url = new URL(typeof input === 'string' ? input : input.url);
     const method = (init.method || 'GET').toUpperCase();
 
-    if (url.pathname === '/api/database/records/vibescore_tracker_events' && method === 'POST') {
-      calls.eventInsert += 1;
+    if (url.pathname === '/api/database/records/vibescore_tracker_hourly' && method === 'POST') {
+      calls.hourlyInsert += 1;
       const prefer = String(init.headers?.Prefer || init.headers?.prefer || '');
-      if (prefer.includes('resolution=ignore-duplicates')) {
-        calls.preferIgnore = true;
+      if (prefer.includes('resolution=merge-duplicates')) {
+        calls.preferMerge = true;
       }
-      if (url.searchParams.get('on_conflict') !== 'user_id,event_id') {
+      if (url.searchParams.get('on_conflict') !== 'user_id,device_id,hour_start') {
         return jsonResponse(400, { error: 'missing on_conflict' });
       }
       if (!url.searchParams.get('select')) {
@@ -176,16 +170,15 @@ function buildFetchStub() {
       const raw = init.body ? JSON.parse(init.body) : [];
       const inserted = [];
       for (const row of Array.isArray(raw) ? raw : []) {
-        const id = row?.event_id;
-        if (!id) continue;
-        if (id === 'dup_event_2') continue;
-        inserted.push({ event_id: id });
+        const hourStart = row?.hour_start;
+        if (!hourStart) continue;
+        inserted.push({ hour_start: hourStart });
       }
       return jsonResponse(201, inserted);
     }
 
-    if (url.pathname === '/api/database/records/vibescore_tracker_events' && method === 'GET') {
-      calls.eventSelect += 1;
+    if (url.pathname === '/api/database/records/vibescore_tracker_hourly' && method === 'GET') {
+      calls.hourlySelect += 1;
       return jsonResponse(200, []);
     }
 

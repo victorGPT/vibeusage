@@ -1,0 +1,71 @@
+name: Purge Legacy Tracker Events
+
+on:
+  schedule:
+    - cron: '30 2 * * *'
+  workflow_dispatch:
+    inputs:
+      days:
+        description: 'Retention window in days'
+        required: false
+        default: '30'
+      dry_run:
+        description: 'Dry run (true/false)'
+        required: false
+        default: 'false'
+
+jobs:
+  purge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Call retention endpoint
+        env:
+          BASE_URL: ${{ secrets.INSFORGE_BASE_URL }}
+          SERVICE_ROLE_KEY: ${{ secrets.INSFORGE_SERVICE_ROLE_KEY }}
+          API_KEY: ${{ secrets.INSFORGE_API_KEY }}
+          RETENTION_DAYS: ${{ github.event.inputs.days }}
+          RETENTION_DRY_RUN: ${{ github.event.inputs.dry_run }}
+        run: |
+          TOKEN="${API_KEY:-$SERVICE_ROLE_KEY}"
+          TOKEN_SOURCE="INSFORGE_API_KEY"
+          if [ -z "$API_KEY" ]; then
+            TOKEN_SOURCE="INSFORGE_SERVICE_ROLE_KEY"
+          fi
+          if [ -z "$BASE_URL" ] || [ -z "$TOKEN" ]; then
+            echo "Missing INSFORGE_BASE_URL or INSFORGE_API_KEY/INSFORGE_SERVICE_ROLE_KEY" >&2
+            exit 1
+          fi
+          echo "Using token from ${TOKEN_SOURCE}"
+
+          DAYS="${RETENTION_DAYS:-30}"
+          DRY_RUN="${RETENTION_DRY_RUN:-false}"
+          DRY_RUN=$(echo "$DRY_RUN" | tr '[:upper:]' '[:lower:]')
+          if ! echo "$DAYS" | grep -Eq '^[0-9]+$'; then
+            echo "RETENTION_DAYS must be an integer" >&2
+            exit 1
+          fi
+          if [ "$DRY_RUN" != "true" ] && [ "$DRY_RUN" != "false" ]; then
+            echo "RETENTION_DRY_RUN must be true or false" >&2
+            exit 1
+          fi
+
+          payload=$(printf '{"days":%s,"dry_run":%s}' "$DAYS" "$DRY_RUN")
+          response_file=$(mktemp)
+          status=$(curl --show-error --silent \
+            --retry 3 \
+            --retry-all-errors \
+            --retry-delay 2 \
+            -X POST "$BASE_URL/functions/vibescore-events-retention" \
+            -H "Authorization: Bearer $TOKEN" \
+            -H "Content-Type: application/json" \
+            --data "$payload" \
+            -o "$response_file" \
+            -w "%{http_code}")
+          echo "HTTP ${status}"
+          cat "$response_file"
+          rm -f "$response_file"
+
+          if [ "$status" -lt 200 ] || [ "$status" -ge 300 ]; then
+            exit 1
+          fi

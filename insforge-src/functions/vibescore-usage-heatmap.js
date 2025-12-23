@@ -61,22 +61,34 @@ module.exports = async function(request) {
     const auth = await getEdgeClientAndUserId({ baseUrl, bearer });
     if (!auth.ok) return json({ error: 'Unauthorized' }, 401);
 
-    const { data, error } = await auth.edgeClient.database
-      .from('vibescore_tracker_daily')
-      .select('day,total_tokens')
-      .eq('user_id', auth.userId)
-      .gte('day', from)
-      .lte('day', to)
-      .order('day', { ascending: true });
-
-    if (error) return json({ error: error.message }, 500);
+    const startIso = gridStart.toISOString();
+    const endUtc = addUtcDays(end, 1);
+    const endIso = endUtc.toISOString();
 
     const valuesByDay = new Map();
-    for (const row of Array.isArray(data) ? data : []) {
-      const day = typeof row?.day === 'string' ? row.day : null;
-      if (!day) continue;
-      valuesByDay.set(day, toBigInt(row?.total_tokens));
-    }
+    const { error } = await forEachPage({
+      createQuery: () =>
+        auth.edgeClient.database
+          .from('vibescore_tracker_hourly')
+          .select('hour_start,total_tokens')
+          .eq('user_id', auth.userId)
+          .gte('hour_start', startIso)
+          .lt('hour_start', endIso)
+          .order('hour_start', { ascending: true }),
+      onPage: (rows) => {
+        for (const row of rows) {
+          const ts = row?.hour_start;
+          if (!ts) continue;
+          const dt = new Date(ts);
+          if (!Number.isFinite(dt.getTime())) continue;
+          const day = formatDateUTC(dt);
+          const prev = valuesByDay.get(day) || 0n;
+          valuesByDay.set(day, prev + toBigInt(row?.total_tokens));
+        }
+      }
+    });
+
+    if (error) return json({ error: error.message }, 500);
 
     const nz = [];
     let activeDays = 0;
@@ -173,15 +185,15 @@ module.exports = async function(request) {
   const { error } = await forEachPage({
     createQuery: () =>
       auth.edgeClient.database
-        .from('vibescore_tracker_events')
-        .select('token_timestamp,total_tokens')
+        .from('vibescore_tracker_hourly')
+        .select('hour_start,total_tokens')
         .eq('user_id', auth.userId)
-        .gte('token_timestamp', startIso)
-        .lt('token_timestamp', endIso)
-        .order('token_timestamp', { ascending: true }),
+        .gte('hour_start', startIso)
+        .lt('hour_start', endIso)
+        .order('hour_start', { ascending: true }),
     onPage: (rows) => {
       for (const row of rows) {
-        const ts = row?.token_timestamp;
+        const ts = row?.hour_start;
         if (!ts) continue;
         const dt = new Date(ts);
         if (!Number.isFinite(dt.getTime())) continue;

@@ -18,8 +18,8 @@ npx --yes @vibescore/tracker uninstall
 
 ## Notes
 
-- `init` installs a Codex CLI notify hook and issues a device token.
-- `sync` parses `~/.codex/sessions/**/rollout-*.jsonl` and uploads token_count deltas.
+- `init` installs a Codex CLI notify hook, issues a device token, and runs an initial sync.
+- `sync` parses `~/.codex/sessions/**/rollout-*.jsonl` and uploads token_count deltas (auto sync is throttled to a 30-minute cadence).
 
 ## License
 

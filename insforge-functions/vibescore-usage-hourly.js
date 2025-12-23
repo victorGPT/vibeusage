@@ -534,7 +534,7 @@ module.exports = async function(request) {
       return json(
         {
           day: dayLabel,
-          data: buildHourlyResponse(hourKeys2, bucketMap2, syncMeta2?.missingAfterHour),
+          data: buildHourlyResponse(hourKeys2, bucketMap2, syncMeta2?.missingAfterSlot),
           sync: buildSyncResponse(syncMeta2)
         },
         200
@@ -549,8 +549,10 @@ module.exports = async function(request) {
           const dt = new Date(ts);
           if (!Number.isFinite(dt.getTime())) continue;
           const hour = dt.getUTCHours();
-          if (hour < 0 || hour > 23) continue;
-          const bucket = buckets2[hour];
+          const minute = dt.getUTCMinutes();
+          const slot = hour * 2 + (minute >= 30 ? 1 : 0);
+          if (slot < 0 || slot > 47) continue;
+          const bucket = buckets2[slot];
           bucket.total += toBigInt(row?.total_tokens);
           bucket.input += toBigInt(row?.input_tokens);
           bucket.cached += toBigInt(row?.cached_input_tokens);
@@ -563,7 +565,7 @@ module.exports = async function(request) {
     return json(
       {
         day: dayLabel,
-        data: buildHourlyResponse(hourKeys2, bucketMap2, syncMeta2?.missingAfterHour),
+        data: buildHourlyResponse(hourKeys2, bucketMap2, syncMeta2?.missingAfterSlot),
         sync: buildSyncResponse(syncMeta2)
       },
       200
@@ -599,8 +601,11 @@ module.exports = async function(request) {
         const localDay = formatDateParts(localParts);
         if (localDay !== dayKey) continue;
         const hour = Number(localParts.hour);
-        if (!Number.isFinite(hour) || hour < 0 || hour > 23) continue;
-        const bucket = buckets[hour];
+        const minute = Number(localParts.minute);
+        if (!Number.isFinite(hour) || !Number.isFinite(minute)) continue;
+        const slot = hour * 2 + (minute >= 30 ? 1 : 0);
+        if (slot < 0 || slot > 47) continue;
+        const bucket = buckets[slot];
         bucket.total += toBigInt(row?.total_tokens);
         bucket.input += toBigInt(row?.input_tokens);
         bucket.cached += toBigInt(row?.cached_input_tokens);
@@ -613,7 +618,7 @@ module.exports = async function(request) {
   return json(
     {
       day: dayKey,
-      data: buildHourlyResponse(hourKeys, bucketMap, syncMeta?.missingAfterHour),
+      data: buildHourlyResponse(hourKeys, bucketMap, syncMeta?.missingAfterSlot),
       sync: buildSyncResponse(syncMeta)
     },
     200
@@ -621,7 +626,7 @@ module.exports = async function(request) {
 };
 function initHourlyBuckets(dayLabel) {
   const hourKeys = [];
-  const buckets = Array.from({ length: 24 }, () => ({
+  const buckets = Array.from({ length: 48 }, () => ({
     total: 0n,
     input: 0n,
     cached: 0n,
@@ -630,13 +635,19 @@ function initHourlyBuckets(dayLabel) {
   }));
   const bucketMap = /* @__PURE__ */ new Map();
   for (let hour = 0; hour < 24; hour += 1) {
-    const key = `${dayLabel}T${String(hour).padStart(2, "0")}:00:00`;
-    hourKeys.push(key);
-    bucketMap.set(key, buckets[hour]);
+    for (const minute of [0, 30]) {
+      const key = `${dayLabel}T${String(hour).padStart(2, "0")}:${String(minute).padStart(
+        2,
+        "0"
+      )}:00`;
+      hourKeys.push(key);
+      const slot = hour * 2 + (minute >= 30 ? 1 : 0);
+      bucketMap.set(key, buckets[slot]);
+    }
   }
   return { hourKeys, buckets, bucketMap };
 }
-function buildHourlyResponse(hourKeys, bucketMap, missingAfterHour) {
+function buildHourlyResponse(hourKeys, bucketMap, missingAfterSlot) {
   return hourKeys.map((key) => {
     const bucket = bucketMap.get(key);
     const row = {
@@ -647,11 +658,9 @@ function buildHourlyResponse(hourKeys, bucketMap, missingAfterHour) {
       output_tokens: bucket.output.toString(),
       reasoning_output_tokens: bucket.reasoning.toString()
     };
-    if (typeof missingAfterHour === "number") {
-      const hour = Number(key.slice(11, 13));
-      if (Number.isFinite(hour) && hour > missingAfterHour) {
-        row.missing = true;
-      }
+    if (typeof missingAfterSlot === "number") {
+      const slot = parseHalfHourSlotFromKey(key);
+      if (Number.isFinite(slot) && slot > missingAfterSlot) row.missing = true;
     }
     return row;
   });
@@ -659,10 +668,13 @@ function buildHourlyResponse(hourKeys, bucketMap, missingAfterHour) {
 function formatHourKeyFromValue(value) {
   if (!value) return null;
   if (typeof value === "string") {
-    if (value.length >= 13) {
+    if (value.length >= 16) {
       const day2 = value.slice(0, 10);
       const hour2 = value.slice(11, 13);
-      if (day2 && hour2) return `${day2}T${hour2}:00:00`;
+      const minute2 = value.slice(14, 16);
+      const minuteNum = Number(minute2);
+      if (!Number.isFinite(minuteNum) || minuteNum !== 0 && minuteNum !== 30) return null;
+      if (day2 && hour2 && minute2) return `${day2}T${hour2}:${minute2}:00`;
     }
   }
   const dt = value instanceof Date ? value : new Date(value);
@@ -671,7 +683,17 @@ function formatHourKeyFromValue(value) {
     dt.getUTCDate()
   ).padStart(2, "0")}`;
   const hour = String(dt.getUTCHours()).padStart(2, "0");
-  return `${day}T${hour}:00:00`;
+  const minute = String(dt.getUTCMinutes() >= 30 ? 30 : 0).padStart(2, "0");
+  return `${day}T${hour}:${minute}:00`;
+}
+function parseHalfHourSlotFromKey(key) {
+  if (typeof key !== "string" || key.length < 16) return null;
+  const hour = Number(key.slice(11, 13));
+  const minute = Number(key.slice(14, 16));
+  if (!Number.isFinite(hour) || !Number.isFinite(minute)) return null;
+  if (hour < 0 || hour > 23) return null;
+  if (minute !== 0 && minute !== 30) return null;
+  return hour * 2 + (minute >= 30 ? 1 : 0);
 }
 async function tryAggregateHourlyTotals({ edgeClient, userId, startIso, endIso }) {
   try {
@@ -688,26 +710,28 @@ async function getSyncMeta({ edgeClient, userId, startUtc, endUtc, tzContext }) 
   const lastSyncAt = await getLastSyncAt({ edgeClient, userId });
   const lastSyncIso = normalizeIso(lastSyncAt);
   if (!lastSyncIso || !(startUtc instanceof Date) || !(endUtc instanceof Date) || !Number.isFinite(startUtc.getTime()) || !Number.isFinite(endUtc.getTime())) {
-    return { lastSyncAt: lastSyncIso, missingAfterHour: null };
+    return { lastSyncAt: lastSyncIso, missingAfterSlot: null };
   }
   const dayStartMs = startUtc.getTime();
   const dayEndMs = endUtc.getTime();
   const lastMs = Date.parse(lastSyncIso);
   if (!Number.isFinite(lastMs)) {
-    return { lastSyncAt: lastSyncIso, missingAfterHour: null };
+    return { lastSyncAt: lastSyncIso, missingAfterSlot: null };
   }
   if (lastMs < dayStartMs) {
-    return { lastSyncAt: lastSyncIso, missingAfterHour: -1 };
+    return { lastSyncAt: lastSyncIso, missingAfterSlot: -1 };
   }
   if (lastMs >= dayEndMs) {
-    return { lastSyncAt: lastSyncIso, missingAfterHour: 23 };
+    return { lastSyncAt: lastSyncIso, missingAfterSlot: 47 };
   }
   const lastParts = getLocalParts(new Date(lastMs), tzContext);
   const lastHour = Number(lastParts?.hour);
-  if (!Number.isFinite(lastHour)) {
-    return { lastSyncAt: lastSyncIso, missingAfterHour: null };
+  const lastMinute = Number(lastParts?.minute || 0);
+  if (!Number.isFinite(lastHour) || !Number.isFinite(lastMinute)) {
+    return { lastSyncAt: lastSyncIso, missingAfterSlot: null };
   }
-  return { lastSyncAt: lastSyncIso, missingAfterHour: lastHour };
+  const slot = lastHour * 2 + (lastMinute >= 30 ? 1 : 0);
+  return { lastSyncAt: lastSyncIso, missingAfterSlot: slot };
 }
 async function getLastSyncAt({ edgeClient, userId }) {
   try {

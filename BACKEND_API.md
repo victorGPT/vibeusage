@@ -399,6 +399,27 @@ Response:
 
 ---
 
+### POST /functions/vibescore-events-retention
+
+Purge legacy tracker events older than a cutoff (admin only).
+
+Auth:
+- `Authorization: Bearer <service_role_key>`
+
+Request body:
+
+```json
+{ "days": 30, "dry_run": false }
+```
+
+Response:
+
+```json
+{ "ok": true, "dry_run": false, "days": 30, "cutoff": "iso", "deleted": 123 }
+```
+
+---
+
 ### GET /functions/vibescore-debug-auth
 
 Diagnostic endpoint that reports whether the function runtime has the anon key

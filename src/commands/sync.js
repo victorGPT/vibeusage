@@ -45,7 +45,7 @@ async function cmdSync(argv) {
     const rolloutFiles = await listRolloutFiles(sessionsDir);
 
     if (progress?.enabled) {
-      progress.start(`Parsing ${renderBar(0)} 0/${formatNumber(rolloutFiles.length)} files | queued 0`);
+      progress.start(`Parsing ${renderBar(0)} 0/${formatNumber(rolloutFiles.length)} files | buckets 0`);
     }
 
     const parseResult = await parseRolloutIncremental({
@@ -56,7 +56,9 @@ async function cmdSync(argv) {
         if (!progress?.enabled) return;
         const pct = p.total > 0 ? p.index / p.total : 1;
         progress.update(
-          `Parsing ${renderBar(pct)} ${formatNumber(p.index)}/${formatNumber(p.total)} files | queued ${formatNumber(p.eventsQueued)}`
+          `Parsing ${renderBar(pct)} ${formatNumber(p.index)}/${formatNumber(p.total)} files | buckets ${formatNumber(
+            p.bucketsQueued
+          )}`
         );
       }
     });
@@ -148,7 +150,7 @@ async function cmdSync(argv) {
         [
           'Sync finished:',
           `- Parsed files: ${parseResult.filesProcessed}`,
-          `- New events queued: ${parseResult.eventsQueued}`,
+          `- New 30-min buckets queued: ${parseResult.bucketsQueued}`,
           deviceToken
             ? `- Uploaded: ${uploadResult.inserted} inserted, ${uploadResult.skipped} skipped`
             : '- Uploaded: skipped (no device token)',

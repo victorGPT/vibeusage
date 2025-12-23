@@ -119,10 +119,13 @@ function buildHourlyRows({ day, seed }) {
   const dayKey = formatDateUTC(base);
   const seedValue = toSeed(seed);
 
-  return Array.from({ length: 24 }, (_, hour) => {
-    const hash = hashString(`${seedValue}:${dayKey}:${hour}`);
+  return Array.from({ length: 48 }, (_, index) => {
+    const hour = Math.floor(index / 2);
+    const minute = index % 2 === 0 ? 0 : 30;
+    const hash = hashString(`${seedValue}:${dayKey}:${hour}:${minute}`);
     const jitter = (hash % 1000) / 1000;
-    const wave = 0.4 + 0.6 * Math.sin((hour / 24) * Math.PI * 2);
+    const hourFraction = (hour + minute / 60) / 24;
+    const wave = 0.4 + 0.6 * Math.sin(hourFraction * Math.PI * 2);
     const baseValue = 900 + Math.round(700 * jitter);
     const total = Math.max(0, Math.round(baseValue * wave));
 
@@ -132,7 +135,7 @@ function buildHourlyRows({ day, seed }) {
     const reasoning = Math.max(0, total - input - output - cached);
 
     return {
-      hour: `${dayKey}T${String(hour).padStart(2, "0")}:00:00`,
+      hour: `${dayKey}T${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}:00`,
       total_tokens: total,
       input_tokens: input,
       output_tokens: output,

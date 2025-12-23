@@ -39,15 +39,15 @@ class DatabaseStub {
 
   range(from, to) {
     this.calls.ranges.push([from, to]);
-    if (this._table !== 'vibescore_tracker_events') {
+    if (this._table !== 'vibescore_tracker_hourly') {
       return { data: [], error: null };
     }
 
     if (from === 0 && to === 999) {
-      return { data: buildRows(1000, '2025-12-01T18:00:00.000Z', '1'), error: null };
+      return { data: buildRows(1000, '2025-12-01T18:00:00.000Z', '1', '1'), error: null };
     }
     if (from === 1000 && to === 1999) {
-      return { data: buildRows(1, '2025-12-02T18:00:00.000Z', '7'), error: null };
+      return { data: buildRows(1, '2025-12-02T18:00:00.000Z', '7', '1'), error: null };
     }
     return { data: [], error: null };
   }
@@ -64,11 +64,11 @@ function createClientStub(database) {
   };
 }
 
-function buildRows(count, tokenTimestamp, totalTokens) {
+function buildRows(count, tokenTimestamp, totalTokens, inputTokens) {
   return Array.from({ length: count }, () => ({
-    token_timestamp: tokenTimestamp,
+    hour_start: tokenTimestamp,
     total_tokens: totalTokens,
-    input_tokens: '1',
+    input_tokens: inputTokens,
     cached_input_tokens: '0',
     output_tokens: '0',
     reasoning_output_tokens: '0'

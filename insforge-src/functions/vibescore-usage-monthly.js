@@ -10,13 +10,10 @@ const {
   addDatePartsDays,
   addDatePartsMonths,
   formatDateParts,
-  formatDateUTC,
   getLocalParts,
-  isUtcTimeZone,
   getUsageTimeZoneContext,
   localDatePartsToUtc,
-  parseDateParts,
-  parseUtcDateString
+  parseDateParts
 } = require('../shared/date');
 const { toBigInt, toPositiveIntOrNull } = require('../shared/numbers');
 const { forEachPage } = require('../shared/pagination');
@@ -45,75 +42,10 @@ module.exports = async function(request) {
   if (months < 1 || months > MAX_MONTHS) return json({ error: 'Invalid months' }, 400);
 
   const toRaw = url.searchParams.get('to');
-  if (isUtcTimeZone(tzContext)) {
-    const today = parseUtcDateString(formatDateUTC(new Date()));
-    const toDate = toRaw ? parseUtcDateString(toRaw) : today;
-    if (!toDate) return json({ error: 'Invalid to date' }, 400);
-
-    const startMonth = new Date(
-      Date.UTC(toDate.getUTCFullYear(), toDate.getUTCMonth() - (months - 1), 1)
-    );
-    const from = formatDateUTC(startMonth);
-    const to = formatDateUTC(toDate);
-
-    const { monthKeys, buckets } = initMonthlyBuckets(startMonth, months);
-
-    const aggregateRows = await tryAggregateMonthlyTotals({
-      edgeClient: auth.edgeClient,
-      userId: auth.userId,
-      from,
-      to
-    });
-
-    if (aggregateRows) {
-      for (const row of aggregateRows) {
-        const key = formatMonthKeyFromValue(row?.month);
-        const bucket = key ? buckets.get(key) : null;
-        if (!bucket) continue;
-
-        bucket.total += toBigInt(row?.sum_total_tokens);
-        bucket.input += toBigInt(row?.sum_input_tokens);
-        bucket.cached += toBigInt(row?.sum_cached_input_tokens);
-        bucket.output += toBigInt(row?.sum_output_tokens);
-        bucket.reasoning += toBigInt(row?.sum_reasoning_output_tokens);
-      }
-
-      return json({ from, to, months, data: buildMonthlyResponse(monthKeys, buckets) }, 200);
-    }
-
-    const { data, error } = await auth.edgeClient.database
-      .from('vibescore_tracker_daily')
-      .select('day,total_tokens,input_tokens,cached_input_tokens,output_tokens,reasoning_output_tokens')
-      .eq('user_id', auth.userId)
-      .gte('day', from)
-      .lte('day', to)
-      .order('day', { ascending: true });
-
-    if (error) return json({ error: error.message }, 500);
-
-    for (const row of data || []) {
-      const day = row?.day;
-      if (typeof day !== 'string' || day.length < 7) continue;
-      const key = day.slice(0, 7);
-      const bucket = buckets.get(key);
-      if (!bucket) continue;
-
-      bucket.total += toBigInt(row?.total_tokens);
-      bucket.input += toBigInt(row?.input_tokens);
-      bucket.cached += toBigInt(row?.cached_input_tokens);
-      bucket.output += toBigInt(row?.output_tokens);
-      bucket.reasoning += toBigInt(row?.reasoning_output_tokens);
-    }
-
-    return json({ from, to, months, data: buildMonthlyResponse(monthKeys, buckets) }, 200);
-  }
-
   const todayParts = getLocalParts(new Date(), tzContext);
-  const toParts = toRaw ? parseDateParts(toRaw) : {
-    year: todayParts.year,
-    month: todayParts.month,
-    day: todayParts.day
-  };
+  const toParts = toRaw
+    ? parseDateParts(toRaw)
+    : { year: todayParts.year, month: todayParts.month, day: todayParts.day };
   if (!toParts) return json({ error: 'Invalid to date' }, 400);
 
   const startMonthParts = addDatePartsMonths(
@@ -152,15 +84,15 @@ module.exports = async function(request) {
   const { error } = await forEachPage({
     createQuery: () =>
       auth.edgeClient.database
-        .from('vibescore_tracker_events')
-        .select('token_timestamp,total_tokens,input_tokens,cached_input_tokens,output_tokens,reasoning_output_tokens')
+        .from('vibescore_tracker_hourly')
+        .select('hour_start,total_tokens,input_tokens,cached_input_tokens,output_tokens,reasoning_output_tokens')
         .eq('user_id', auth.userId)
-        .gte('token_timestamp', startIso)
-        .lt('token_timestamp', endIso)
-        .order('token_timestamp', { ascending: true }),
+        .gte('hour_start', startIso)
+        .lt('hour_start', endIso)
+        .order('hour_start', { ascending: true }),
     onPage: (rows) => {
       for (const row of rows) {
-        const ts = row?.token_timestamp;
+        const ts = row?.hour_start;
         if (!ts) continue;
         const dt = new Date(ts);
         if (!Number.isFinite(dt.getTime())) continue;
@@ -193,67 +125,3 @@ module.exports = async function(request) {
 
   return json({ from, to, months, data: monthly }, 200);
 };
-
-function initMonthlyBuckets(startMonth, months) {
-  const monthKeys = [];
-  const buckets = new Map();
-
-  for (let i = 0; i < months; i += 1) {
-    const dt = new Date(Date.UTC(startMonth.getUTCFullYear(), startMonth.getUTCMonth() + i, 1));
-    const key = `${dt.getUTCFullYear()}-${String(dt.getUTCMonth() + 1).padStart(2, '0')}`;
-    monthKeys.push(key);
-    buckets.set(key, {
-      total: 0n,
-      input: 0n,
-      cached: 0n,
-      output: 0n,
-      reasoning: 0n
-    });
-  }
-
-  return { monthKeys, buckets };
-}
-
-function buildMonthlyResponse(monthKeys, buckets) {
-  return monthKeys.map((key) => {
-    const bucket = buckets.get(key);
-    return {
-      month: key,
-      total_tokens: bucket.total.toString(),
-      input_tokens: bucket.input.toString(),
-      cached_input_tokens: bucket.cached.toString(),
-      output_tokens: bucket.output.toString(),
-      reasoning_output_tokens: bucket.reasoning.toString()
-    };
-  });
-}
-
-function formatMonthKeyFromValue(value) {
-  if (!value) return null;
-  if (typeof value === 'string') {
-    if (value.length >= 7) return value.slice(0, 7);
-    return null;
-  }
-  const dt = value instanceof Date ? value : new Date(value);
-  if (!Number.isFinite(dt.getTime())) return null;
-  return `${dt.getUTCFullYear()}-${String(dt.getUTCMonth() + 1).padStart(2, '0')}`;
-}
-
-async function tryAggregateMonthlyTotals({ edgeClient, userId, from, to }) {
-  try {
-    const { data, error } = await edgeClient.database
-      .from('vibescore_tracker_daily')
-      .select(
-        "month:date_trunc('month', day),sum_total_tokens:sum(total_tokens),sum_input_tokens:sum(input_tokens),sum_cached_input_tokens:sum(cached_input_tokens),sum_output_tokens:sum(output_tokens),sum_reasoning_output_tokens:sum(reasoning_output_tokens)"
-      )
-      .eq('user_id', userId)
-      .gte('day', from)
-      .lte('day', to)
-      .order('month', { ascending: true });
-
-    if (error) return null;
-    return data || [];
-  } catch (_e) {
-    return null;
-  }
-}

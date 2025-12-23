@@ -4,10 +4,10 @@
 const assert = require('node:assert/strict');
 
 class DatabaseStub {
-  constructor({ aggregateError = false, aggregateRows = [], eventRows = [] } = {}) {
+  constructor({ aggregateError = false, aggregateRows = [], bucketRows = [] } = {}) {
     this.aggregateError = aggregateError;
     this.aggregateRows = aggregateRows;
-    this.eventRows = eventRows;
+    this.bucketRows = bucketRows;
     this._table = null;
     this._select = null;
   }
@@ -35,12 +35,12 @@ class DatabaseStub {
   }
 
   order() {
-    if (this._table !== 'vibescore_tracker_events') {
+    if (this._table !== 'vibescore_tracker_hourly') {
       return { data: [], error: null };
     }
 
     const select = String(this._select || '');
-    const isAggregate = select.includes('date_trunc') || select.includes('sum_total_tokens');
+    const isAggregate = select.includes('sum_total_tokens');
 
     if (isAggregate) {
       if (this.aggregateError) {
@@ -49,7 +49,7 @@ class DatabaseStub {
       return { data: this.aggregateRows, error: null };
     }
 
-    return { data: this.eventRows, error: null };
+    return { data: this.bucketRows, error: null };
   }
 }
 
@@ -81,10 +81,10 @@ async function runScenario({
   name,
   aggregateError,
   aggregateRows,
-  eventRows,
+  bucketRows,
   expectedTotals
 }) {
-  global.createClient = () => createClientStub(new DatabaseStub({ aggregateError, aggregateRows, eventRows }));
+  global.createClient = () => createClientStub(new DatabaseStub({ aggregateError, aggregateRows, bucketRows }));
   delete require.cache[require.resolve('../../insforge-src/functions/vibescore-usage-hourly.js')];
   const usageHourly = require('../../insforge-src/functions/vibescore-usage-hourly.js');
 
@@ -98,7 +98,7 @@ async function runScenario({
   const body = await res.json();
   assert.equal(res.status, 200, `${name}: status`);
   assert.equal(body.day, '2025-12-01', `${name}: day`);
-  assert.equal(body.data.length, 24, `${name}: data length`);
+  assert.equal(body.data.length, 48, `${name}: data length`);
   expectHourlyTotals(body, expectedTotals);
 
   return body;
@@ -120,7 +120,7 @@ async function main() {
 
   const aggregateRows = [
     {
-      hour: '2025-12-01T00:00:00',
+      hour: '2025-12-01T00:30:00',
       sum_total_tokens: '12',
       sum_input_tokens: '7',
       sum_cached_input_tokens: '1',
@@ -138,7 +138,7 @@ async function main() {
   ];
 
   const aggregateExpected = {
-    '2025-12-01T00:00:00': {
+    '2025-12-01T00:30:00': {
       total_tokens: '12',
       input_tokens: '7',
       cached_input_tokens: '1',
@@ -158,13 +158,13 @@ async function main() {
     name: 'aggregate',
     aggregateError: false,
     aggregateRows,
-    eventRows: [],
+    bucketRows: [],
     expectedTotals: aggregateExpected
   });
 
-  const eventRows = [
+  const bucketRows = [
     {
-      token_timestamp: '2025-12-01T00:15:00Z',
+      hour_start: '2025-12-01T00:00:00Z',
       total_tokens: '5',
       input_tokens: '2',
       cached_input_tokens: '1',
@@ -172,7 +172,7 @@ async function main() {
       reasoning_output_tokens: '0'
     },
     {
-      token_timestamp: '2025-12-01T13:42:00Z',
+      hour_start: '2025-12-01T13:30:00Z',
       total_tokens: '7',
       input_tokens: '3',
       cached_input_tokens: '1',
@@ -189,7 +189,7 @@ async function main() {
       output_tokens: '2',
       reasoning_output_tokens: '0'
     },
-    '2025-12-01T13:00:00': {
+    '2025-12-01T13:30:00': {
       total_tokens: '7',
       input_tokens: '3',
       cached_input_tokens: '1',
@@ -202,7 +202,7 @@ async function main() {
     name: 'fallback',
     aggregateError: true,
     aggregateRows: [],
-    eventRows,
+    bucketRows,
     expectedTotals: fallbackExpected
   });
 

@@ -9,7 +9,6 @@ const { getBaseUrl } = require('../shared/env');
 const {
   addDatePartsDays,
   formatLocalDateKey,
-  isUtcTimeZone,
   getUsageTimeZoneContext,
   listDateStrings,
   localDatePartsToUtc,
@@ -41,20 +40,6 @@ module.exports = async function(request) {
     tzContext
   );
 
-  if (isUtcTimeZone(tzContext)) {
-    const { data, error } = await auth.edgeClient.database
-      .from('vibescore_tracker_daily')
-      .select('day,total_tokens,input_tokens,cached_input_tokens,output_tokens,reasoning_output_tokens')
-      .eq('user_id', auth.userId)
-      .gte('day', from)
-      .lte('day', to)
-      .order('day', { ascending: true });
-
-    if (error) return json({ error: error.message }, 500);
-
-    return json({ from, to, data: data || [] }, 200);
-  }
-
   const dayKeys = listDateStrings(from, to);
 
   const startParts = parseDateParts(from);
@@ -82,15 +67,15 @@ module.exports = async function(request) {
   const { error } = await forEachPage({
     createQuery: () =>
       auth.edgeClient.database
-        .from('vibescore_tracker_events')
-        .select('token_timestamp,total_tokens,input_tokens,cached_input_tokens,output_tokens,reasoning_output_tokens')
+        .from('vibescore_tracker_hourly')
+        .select('hour_start,total_tokens,input_tokens,cached_input_tokens,output_tokens,reasoning_output_tokens')
         .eq('user_id', auth.userId)
-        .gte('token_timestamp', startIso)
-        .lt('token_timestamp', endIso)
-        .order('token_timestamp', { ascending: true }),
+        .gte('hour_start', startIso)
+        .lt('hour_start', endIso)
+        .order('hour_start', { ascending: true }),
     onPage: (rows) => {
       for (const row of rows) {
-        const ts = row?.token_timestamp;
+        const ts = row?.hour_start;
         if (!ts) continue;
         const dt = new Date(ts);
         if (!Number.isFinite(dt.getTime())) continue;
