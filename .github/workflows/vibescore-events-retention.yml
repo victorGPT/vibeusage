@@ -27,10 +27,10 @@ jobs:
           RETENTION_DAYS: ${{ github.event.inputs.days }}
           RETENTION_DRY_RUN: ${{ github.event.inputs.dry_run }}
         run: |
-          TOKEN="${SERVICE_ROLE_KEY:-$API_KEY}"
-          TOKEN_SOURCE="INSFORGE_SERVICE_ROLE_KEY"
-          if [ -z "$SERVICE_ROLE_KEY" ]; then
-            TOKEN_SOURCE="INSFORGE_API_KEY"
+          TOKEN="${API_KEY:-$SERVICE_ROLE_KEY}"
+          TOKEN_SOURCE="INSFORGE_API_KEY"
+          if [ -z "$API_KEY" ]; then
+            TOKEN_SOURCE="INSFORGE_SERVICE_ROLE_KEY"
           fi
           if [ -z "$BASE_URL" ] || [ -z "$TOKEN" ]; then
             echo "Missing INSFORGE_BASE_URL or INSFORGE_API_KEY/INSFORGE_SERVICE_ROLE_KEY" >&2

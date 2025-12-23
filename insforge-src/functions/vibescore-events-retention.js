@@ -40,21 +40,35 @@ module.exports = async function(request) {
     edgeFunctionToken: serviceRoleKey
   });
 
+  const cutoffIso = cutoff.toISOString();
   let deleted = 0;
   if (dryRun) {
     const { count, error } = await serviceClient.database
       .from('vibescore_tracker_events')
       .select('id', { count: 'exact', head: true })
-      .lt('token_timestamp', cutoff.toISOString());
-    if (error) return json({ error: error.message }, 500);
+      .lt('token_timestamp', cutoffIso);
+    if (error) return json({ error: formatError(error) }, 500);
     deleted = toSafeInt(count);
   } else {
-    const { data, count, error } = await serviceClient.database
+    const before = await serviceClient.database
       .from('vibescore_tracker_events')
-      .delete({ count: 'exact' })
-      .lt('token_timestamp', cutoff.toISOString());
-    if (error) return json({ error: error.message }, 500);
-    deleted = typeof count === 'number' ? count : Array.isArray(data) ? data.length : 0;
+      .select('id', { count: 'exact', head: true })
+      .lt('token_timestamp', cutoffIso);
+    if (before.error) return json({ error: formatError(before.error) }, 500);
+
+    const { error: deleteErr } = await serviceClient.database
+      .from('vibescore_tracker_events')
+      .delete()
+      .lt('token_timestamp', cutoffIso);
+    if (deleteErr) return json({ error: formatError(deleteErr) }, 500);
+
+    const after = await serviceClient.database
+      .from('vibescore_tracker_events')
+      .select('id', { count: 'exact', head: true })
+      .lt('token_timestamp', cutoffIso);
+    if (after.error) return json({ error: formatError(after.error) }, 500);
+
+    deleted = Math.max(0, toSafeInt(before.count) - toSafeInt(after.count));
   }
 
   return json(
@@ -73,6 +87,12 @@ function toSafeInt(value) {
   const n = Number(value);
   if (!Number.isFinite(n) || n < 0) return 0;
   return Math.floor(n);
+}
+
+function formatError(error) {
+  if (!error) return 'Unknown error';
+  if (typeof error === 'string') return error;
+  return error.message || error.details || error.hint || JSON.stringify(error);
 }
 
 function clampDays(value) {
