@@ -10,6 +10,7 @@ const { handleOptions, json, requireMethod, readJson } = require('../shared/http
 const { getBearerToken } = require('../shared/auth');
 const { getAnonKey, getBaseUrl, getServiceRoleKey } = require('../shared/env');
 const { sha256Hex } = require('../shared/crypto');
+const { normalizeSource } = require('../shared/source');
 
 const MAX_BUCKETS = 500;
 
@@ -92,7 +93,9 @@ function buildRows({ hourly, tokenRow, nowIso }) {
   for (const raw of hourly) {
     const parsed = parseHourlyBucket(raw);
     if (!parsed.ok) return { error: parsed.error, data: [] };
-    byHour.set(parsed.value.hour_start, parsed.value);
+    const source = parsed.value.source || 'codex';
+    const dedupeKey = `${parsed.value.hour_start}::${source}`;
+    byHour.set(dedupeKey, { ...parsed.value, source });
   }
 
   const rows = [];
@@ -101,6 +104,7 @@ function buildRows({ hourly, tokenRow, nowIso }) {
       user_id: tokenRow.user_id,
       device_id: tokenRow.device_id,
       device_token_id: tokenRow.id,
+      source: bucket.source,
       hour_start: bucket.hour_start,
       input_tokens: bucket.input_tokens,
       cached_input_tokens: bucket.cached_input_tokens,
@@ -161,7 +165,7 @@ async function upsertWithServiceClient({
       anonKey: serviceRoleKey,
       tokenHash,
       rows,
-      onConflict: 'user_id,device_id,hour_start',
+      onConflict: 'user_id,device_id,source,hour_start',
       prefer: 'return=representation',
       resolution: 'merge-duplicates',
       select: 'hour_start'
@@ -181,7 +185,7 @@ async function upsertWithServiceClient({
 
   const table = serviceClient.database.from('vibescore_tracker_hourly');
   if (typeof table?.upsert === 'function') {
-    const { error } = await table.upsert(rows, { onConflict: 'user_id,device_id,hour_start' });
+    const { error } = await table.upsert(rows, { onConflict: 'user_id,device_id,source,hour_start' });
     if (error) return { ok: false, error: error.message, inserted: 0, skipped: 0 };
     await bestEffortTouchWithServiceClient(serviceClient, tokenRow, nowIso);
     return { ok: true, inserted: rows.length, skipped: 0 };
@@ -199,7 +203,7 @@ async function upsertWithAnonKey({ baseUrl, anonKey, tokenHash, tokenRow, rows, 
     anonKey,
     tokenHash,
     rows,
-    onConflict: 'user_id,device_id,hour_start',
+    onConflict: 'user_id,device_id,source,hour_start',
     prefer: 'return=representation',
     resolution: 'merge-duplicates',
     select: 'hour_start'
@@ -347,6 +351,7 @@ function parseHourlyBucket(raw) {
     return { ok: false, error: 'hour_start must be an ISO timestamp at UTC half-hour boundary' };
   }
 
+  const source = normalizeSource(raw.source);
   const input = toNonNegativeInt(raw.input_tokens);
   const cached = toNonNegativeInt(raw.cached_input_tokens);
   const output = toNonNegativeInt(raw.output_tokens);
@@ -360,6 +365,7 @@ function parseHourlyBucket(raw) {
   return {
     ok: true,
     value: {
+      source,
       hour_start: hourStart,
       input_tokens: input,
       cached_input_tokens: cached,

@@ -38,6 +38,21 @@ Source: `openspec/specs/vibescore-tracker/spec.md`
 - Verification: `node --test test/rollout-parser.test.js`; manual run `tracker sync` twice with no new events
 - Status: Implemented (manual)
 
+### Requirement: Multi-source usage ingestion
+- Implementation: `insforge-src/functions/vibescore-ingest.js`, `insforge-src/shared/source.js`, `openspec/changes/2025-12-24-add-usage-source-dimension/sql/001_add_source.sql`
+- Verification: `node --test test/edge-functions.test.js` (ingest default `source=codex`)
+- Status: Implemented
+
+### Requirement: Multi-source deduplication
+- Implementation: `insforge-src/functions/vibescore-ingest.js` (`on_conflict` includes `source`), `openspec/changes/2025-12-24-add-usage-source-dimension/sql/001_add_source.sql`
+- Verification: `node scripts/acceptance/ingest-duplicate-replay.cjs`
+- Status: Implemented
+
+### Requirement: Usage queries support source filtering
+- Implementation: `insforge-src/functions/vibescore-usage-daily.js`, `insforge-src/functions/vibescore-usage-summary.js`, `insforge-src/functions/vibescore-usage-hourly.js`, `insforge-src/functions/vibescore-usage-monthly.js`, `insforge-src/functions/vibescore-usage-heatmap.js`
+- Verification: `node --test test/edge-functions.test.js` (usage daily source filter)
+- Status: Implemented
+
 ### Requirement: Auto sync uploads are throttled to half-hour cadence
 - Implementation: `src/lib/upload-throttle.js` (30 min interval), `src/commands/sync.js` (auto-only throttle), `src/commands/init.js` (init triggers sync)
 - Verification: `node --test test/upload-throttle.test.js`; `node --test test/init-uninstall.test.js`

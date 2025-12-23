@@ -104,6 +104,36 @@ var require_auth = __commonJS({
   }
 });
 
+// insforge-src/shared/source.js
+var require_source = __commonJS({
+  "insforge-src/shared/source.js"(exports2, module2) {
+    "use strict";
+    var MAX_SOURCE_LENGTH = 64;
+    function normalizeSource(value) {
+      if (typeof value !== "string") return null;
+      const normalized = value.trim().toLowerCase();
+      if (!normalized) return null;
+      if (normalized.length > MAX_SOURCE_LENGTH) return normalized.slice(0, MAX_SOURCE_LENGTH);
+      return normalized;
+    }
+    function getSourceParam2(url) {
+      if (!url || typeof url.searchParams?.get !== "function") {
+        return { ok: false, error: "Invalid request URL" };
+      }
+      const raw = url.searchParams.get("source");
+      if (raw == null) return { ok: true, source: null };
+      const normalized = normalizeSource(raw);
+      if (!normalized) return { ok: false, error: "Invalid source" };
+      return { ok: true, source: normalized };
+    }
+    module2.exports = {
+      MAX_SOURCE_LENGTH,
+      normalizeSource,
+      getSourceParam: getSourceParam2
+    };
+  }
+});
+
 // insforge-src/shared/date.js
 var require_date = __commonJS({
   "insforge-src/shared/date.js"(exports2, module2) {
@@ -464,6 +494,7 @@ var require_pagination = __commonJS({
 var { handleOptions, json, requireMethod } = require_http();
 var { getBearerToken, getEdgeClientAndUserId } = require_auth();
 var { getBaseUrl } = require_env();
+var { getSourceParam } = require_source();
 var {
   addDatePartsDays,
   addUtcDays,
@@ -490,6 +521,9 @@ module.exports = async function(request) {
   if (!bearer) return json({ error: "Missing bearer token" }, 401);
   const url = new URL(request.url);
   const tzContext = getUsageTimeZoneContext(url);
+  const sourceResult = getSourceParam(url);
+  if (!sourceResult.ok) return json({ error: sourceResult.error }, 400);
+  const source = sourceResult.source;
   const weeksRaw = url.searchParams.get("weeks");
   const weeks = normalizeWeeks(weeksRaw);
   if (!weeks) return json({ error: "Invalid weeks" }, 400);
@@ -513,7 +547,11 @@ module.exports = async function(request) {
     const endIso2 = endUtc2.toISOString();
     const valuesByDay2 = /* @__PURE__ */ new Map();
     const { error: error2 } = await forEachPage({
-      createQuery: () => auth2.edgeClient.database.from("vibescore_tracker_hourly").select("hour_start,total_tokens").eq("user_id", auth2.userId).gte("hour_start", startIso2).lt("hour_start", endIso2).order("hour_start", { ascending: true }),
+      createQuery: () => {
+        let query = auth2.edgeClient.database.from("vibescore_tracker_hourly").select("hour_start,total_tokens").eq("user_id", auth2.userId);
+        if (source) query = query.eq("source", source);
+        return query.gte("hour_start", startIso2).lt("hour_start", endIso2).order("hour_start", { ascending: true });
+      },
       onPage: (rows) => {
         for (const row of rows) {
           const ts = row?.hour_start;
@@ -607,7 +645,11 @@ module.exports = async function(request) {
   if (!auth.ok) return json({ error: "Unauthorized" }, 401);
   const valuesByDay = /* @__PURE__ */ new Map();
   const { error } = await forEachPage({
-    createQuery: () => auth.edgeClient.database.from("vibescore_tracker_hourly").select("hour_start,total_tokens").eq("user_id", auth.userId).gte("hour_start", startIso).lt("hour_start", endIso).order("hour_start", { ascending: true }),
+    createQuery: () => {
+      let query = auth.edgeClient.database.from("vibescore_tracker_hourly").select("hour_start,total_tokens").eq("user_id", auth.userId);
+      if (source) query = query.eq("source", source);
+      return query.gte("hour_start", startIso).lt("hour_start", endIso).order("hour_start", { ascending: true });
+    },
     onPage: (rows) => {
       for (const row of rows) {
         const ts = row?.hour_start;

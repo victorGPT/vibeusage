@@ -118,9 +118,9 @@ function buildFetchStub() {
       if (!prefer.includes('return=representation')) {
         return jsonResponse(400, { error: 'missing return=representation' });
       }
-      if (url.searchParams.get('on_conflict') !== 'user_id,device_id,hour_start') {
-        return jsonResponse(400, { error: 'missing on_conflict' });
-      }
+    if (url.searchParams.get('on_conflict') !== 'user_id,device_id,source,hour_start') {
+      return jsonResponse(400, { error: 'missing on_conflict' });
+    }
       const raw = init.body ? JSON.parse(init.body) : [];
       const inserted = [];
       for (const row of Array.isArray(raw) ? raw : []) {

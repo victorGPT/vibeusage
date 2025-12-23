@@ -6,6 +6,7 @@
 const { handleOptions, json, requireMethod } = require('../shared/http');
 const { getBearerToken, getEdgeClientAndUserId } = require('../shared/auth');
 const { getBaseUrl } = require('../shared/env');
+const { getSourceParam } = require('../shared/source');
 const {
   addDatePartsDays,
   addUtcDays,
@@ -36,6 +37,9 @@ module.exports = async function(request) {
 
   const url = new URL(request.url);
   const tzContext = getUsageTimeZoneContext(url);
+  const sourceResult = getSourceParam(url);
+  if (!sourceResult.ok) return json({ error: sourceResult.error }, 400);
+  const source = sourceResult.source;
 
   const weeksRaw = url.searchParams.get('weeks');
   const weeks = normalizeWeeks(weeksRaw);
@@ -67,14 +71,14 @@ module.exports = async function(request) {
 
     const valuesByDay = new Map();
     const { error } = await forEachPage({
-      createQuery: () =>
-        auth.edgeClient.database
+      createQuery: () => {
+        let query = auth.edgeClient.database
           .from('vibescore_tracker_hourly')
           .select('hour_start,total_tokens')
-          .eq('user_id', auth.userId)
-          .gte('hour_start', startIso)
-          .lt('hour_start', endIso)
-          .order('hour_start', { ascending: true }),
+          .eq('user_id', auth.userId);
+        if (source) query = query.eq('source', source);
+        return query.gte('hour_start', startIso).lt('hour_start', endIso).order('hour_start', { ascending: true });
+      },
       onPage: (rows) => {
         for (const row of rows) {
           const ts = row?.hour_start;
@@ -183,14 +187,14 @@ module.exports = async function(request) {
   const valuesByDay = new Map();
 
   const { error } = await forEachPage({
-    createQuery: () =>
-      auth.edgeClient.database
+    createQuery: () => {
+      let query = auth.edgeClient.database
         .from('vibescore_tracker_hourly')
         .select('hour_start,total_tokens')
-        .eq('user_id', auth.userId)
-        .gte('hour_start', startIso)
-        .lt('hour_start', endIso)
-        .order('hour_start', { ascending: true }),
+        .eq('user_id', auth.userId);
+      if (source) query = query.eq('source', source);
+      return query.gte('hour_start', startIso).lt('hour_start', endIso).order('hour_start', { ascending: true });
+    },
     onPage: (rows) => {
       for (const row of rows) {
         const ts = row?.hour_start;

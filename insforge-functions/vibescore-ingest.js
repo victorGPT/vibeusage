@@ -119,11 +119,42 @@ var require_crypto = __commonJS({
   }
 });
 
+// insforge-src/shared/source.js
+var require_source = __commonJS({
+  "insforge-src/shared/source.js"(exports2, module2) {
+    "use strict";
+    var MAX_SOURCE_LENGTH = 64;
+    function normalizeSource2(value) {
+      if (typeof value !== "string") return null;
+      const normalized = value.trim().toLowerCase();
+      if (!normalized) return null;
+      if (normalized.length > MAX_SOURCE_LENGTH) return normalized.slice(0, MAX_SOURCE_LENGTH);
+      return normalized;
+    }
+    function getSourceParam(url) {
+      if (!url || typeof url.searchParams?.get !== "function") {
+        return { ok: false, error: "Invalid request URL" };
+      }
+      const raw = url.searchParams.get("source");
+      if (raw == null) return { ok: true, source: null };
+      const normalized = normalizeSource2(raw);
+      if (!normalized) return { ok: false, error: "Invalid source" };
+      return { ok: true, source: normalized };
+    }
+    module2.exports = {
+      MAX_SOURCE_LENGTH,
+      normalizeSource: normalizeSource2,
+      getSourceParam
+    };
+  }
+});
+
 // insforge-src/functions/vibescore-ingest.js
 var { handleOptions, json, requireMethod, readJson } = require_http();
 var { getBearerToken } = require_auth();
 var { getAnonKey, getBaseUrl, getServiceRoleKey } = require_env();
 var { sha256Hex } = require_crypto();
+var { normalizeSource } = require_source();
 var MAX_BUCKETS = 500;
 module.exports = async function(request) {
   const opt = handleOptions(request);
@@ -185,7 +216,9 @@ function buildRows({ hourly, tokenRow, nowIso }) {
   for (const raw of hourly) {
     const parsed = parseHourlyBucket(raw);
     if (!parsed.ok) return { error: parsed.error, data: [] };
-    byHour.set(parsed.value.hour_start, parsed.value);
+    const source = parsed.value.source || "codex";
+    const dedupeKey = `${parsed.value.hour_start}::${source}`;
+    byHour.set(dedupeKey, { ...parsed.value, source });
   }
   const rows = [];
   for (const bucket of byHour.values()) {
@@ -193,6 +226,7 @@ function buildRows({ hourly, tokenRow, nowIso }) {
       user_id: tokenRow.user_id,
       device_id: tokenRow.device_id,
       device_token_id: tokenRow.id,
+      source: bucket.source,
       hour_start: bucket.hour_start,
       input_tokens: bucket.input_tokens,
       cached_input_tokens: bucket.cached_input_tokens,
@@ -243,7 +277,7 @@ async function upsertWithServiceClient({
       anonKey: serviceRoleKey,
       tokenHash,
       rows,
-      onConflict: "user_id,device_id,hour_start",
+      onConflict: "user_id,device_id,source,hour_start",
       prefer: "return=representation",
       resolution: "merge-duplicates",
       select: "hour_start"
@@ -260,7 +294,7 @@ async function upsertWithServiceClient({
   }
   const table = serviceClient.database.from("vibescore_tracker_hourly");
   if (typeof table?.upsert === "function") {
-    const { error } = await table.upsert(rows, { onConflict: "user_id,device_id,hour_start" });
+    const { error } = await table.upsert(rows, { onConflict: "user_id,device_id,source,hour_start" });
     if (error) return { ok: false, error: error.message, inserted: 0, skipped: 0 };
     await bestEffortTouchWithServiceClient(serviceClient, tokenRow, nowIso);
     return { ok: true, inserted: rows.length, skipped: 0 };
@@ -275,7 +309,7 @@ async function upsertWithAnonKey({ baseUrl, anonKey, tokenHash, tokenRow, rows, 
     anonKey,
     tokenHash,
     rows,
-    onConflict: "user_id,device_id,hour_start",
+    onConflict: "user_id,device_id,source,hour_start",
     prefer: "return=representation",
     resolution: "merge-duplicates",
     select: "hour_start"
@@ -396,6 +430,7 @@ function parseHourlyBucket(raw) {
   if (!hourStart) {
     return { ok: false, error: "hour_start must be an ISO timestamp at UTC half-hour boundary" };
   }
+  const source = normalizeSource(raw.source);
   const input = toNonNegativeInt(raw.input_tokens);
   const cached = toNonNegativeInt(raw.cached_input_tokens);
   const output = toNonNegativeInt(raw.output_tokens);
@@ -407,6 +442,7 @@ function parseHourlyBucket(raw) {
   return {
     ok: true,
     value: {
+      source,
       hour_start: hourStart,
       input_tokens: input,
       cached_input_tokens: cached,

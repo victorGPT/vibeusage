@@ -6,6 +6,7 @@
 const { handleOptions, json, requireMethod } = require('../shared/http');
 const { getBearerToken, getEdgeClientAndUserId } = require('../shared/auth');
 const { getBaseUrl } = require('../shared/env');
+const { getSourceParam } = require('../shared/source');
 const {
   addDatePartsDays,
   addUtcDays,
@@ -39,6 +40,9 @@ module.exports = async function(request) {
 
   const url = new URL(request.url);
   const tzContext = getUsageTimeZoneContext(url);
+  const sourceResult = getSourceParam(url);
+  if (!sourceResult.ok) return json({ error: sourceResult.error }, 400);
+  const source = sourceResult.source;
 
   if (isUtcTimeZone(tzContext)) {
     const dayRaw = url.searchParams.get('day');
@@ -70,7 +74,8 @@ module.exports = async function(request) {
       edgeClient: auth.edgeClient,
       userId: auth.userId,
       startIso,
-      endIso
+      endIso,
+      source
     });
 
     if (aggregateRows) {
@@ -97,14 +102,14 @@ module.exports = async function(request) {
     }
 
     const { error } = await forEachPage({
-      createQuery: () =>
-        auth.edgeClient.database
+      createQuery: () => {
+        let query = auth.edgeClient.database
           .from('vibescore_tracker_hourly')
           .select('hour_start,total_tokens,input_tokens,cached_input_tokens,output_tokens,reasoning_output_tokens')
-          .eq('user_id', auth.userId)
-          .gte('hour_start', startIso)
-          .lt('hour_start', endIso)
-          .order('hour_start', { ascending: true }),
+          .eq('user_id', auth.userId);
+        if (source) query = query.eq('source', source);
+        return query.gte('hour_start', startIso).lt('hour_start', endIso).order('hour_start', { ascending: true });
+      },
       onPage: (rows) => {
         for (const row of rows) {
           const ts = row?.hour_start;
@@ -160,14 +165,14 @@ module.exports = async function(request) {
   });
 
   const { error } = await forEachPage({
-    createQuery: () =>
-      auth.edgeClient.database
+    createQuery: () => {
+      let query = auth.edgeClient.database
         .from('vibescore_tracker_hourly')
         .select('hour_start,total_tokens,input_tokens,cached_input_tokens,output_tokens,reasoning_output_tokens')
-        .eq('user_id', auth.userId)
-        .gte('hour_start', startIso)
-        .lt('hour_start', endIso)
-        .order('hour_start', { ascending: true }),
+        .eq('user_id', auth.userId);
+      if (source) query = query.eq('source', source);
+      return query.gte('hour_start', startIso).lt('hour_start', endIso).order('hour_start', { ascending: true });
+    },
     onPage: (rows) => {
       for (const row of rows) {
         const ts = row?.hour_start;
@@ -282,17 +287,16 @@ function parseHalfHourSlotFromKey(key) {
   return hour * 2 + (minute >= 30 ? 1 : 0);
 }
 
-async function tryAggregateHourlyTotals({ edgeClient, userId, startIso, endIso }) {
+async function tryAggregateHourlyTotals({ edgeClient, userId, startIso, endIso, source }) {
   try {
-    const { data, error } = await edgeClient.database
+    let query = edgeClient.database
       .from('vibescore_tracker_hourly')
       .select(
         'hour:hour_start,sum_total_tokens:sum(total_tokens),sum_input_tokens:sum(input_tokens),sum_cached_input_tokens:sum(cached_input_tokens),sum_output_tokens:sum(output_tokens),sum_reasoning_output_tokens:sum(reasoning_output_tokens)'
       )
-      .eq('user_id', userId)
-      .gte('hour_start', startIso)
-      .lt('hour_start', endIso)
-      .order('hour', { ascending: true });
+      .eq('user_id', userId);
+    if (source) query = query.eq('source', source);
+    const { data, error } = await query.gte('hour_start', startIso).lt('hour_start', endIso).order('hour', { ascending: true });
 
     if (error) return null;
     return data || [];

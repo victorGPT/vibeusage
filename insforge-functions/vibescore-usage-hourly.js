@@ -104,6 +104,36 @@ var require_auth = __commonJS({
   }
 });
 
+// insforge-src/shared/source.js
+var require_source = __commonJS({
+  "insforge-src/shared/source.js"(exports2, module2) {
+    "use strict";
+    var MAX_SOURCE_LENGTH = 64;
+    function normalizeSource(value) {
+      if (typeof value !== "string") return null;
+      const normalized = value.trim().toLowerCase();
+      if (!normalized) return null;
+      if (normalized.length > MAX_SOURCE_LENGTH) return normalized.slice(0, MAX_SOURCE_LENGTH);
+      return normalized;
+    }
+    function getSourceParam2(url) {
+      if (!url || typeof url.searchParams?.get !== "function") {
+        return { ok: false, error: "Invalid request URL" };
+      }
+      const raw = url.searchParams.get("source");
+      if (raw == null) return { ok: true, source: null };
+      const normalized = normalizeSource(raw);
+      if (!normalized) return { ok: false, error: "Invalid source" };
+      return { ok: true, source: normalized };
+    }
+    module2.exports = {
+      MAX_SOURCE_LENGTH,
+      normalizeSource,
+      getSourceParam: getSourceParam2
+    };
+  }
+});
+
 // insforge-src/shared/date.js
 var require_date = __commonJS({
   "insforge-src/shared/date.js"(exports2, module2) {
@@ -464,6 +494,7 @@ var require_pagination = __commonJS({
 var { handleOptions, json, requireMethod } = require_http();
 var { getBearerToken, getEdgeClientAndUserId } = require_auth();
 var { getBaseUrl } = require_env();
+var { getSourceParam } = require_source();
 var {
   addDatePartsDays,
   addUtcDays,
@@ -491,6 +522,9 @@ module.exports = async function(request) {
   if (!auth.ok) return json({ error: "Unauthorized" }, 401);
   const url = new URL(request.url);
   const tzContext = getUsageTimeZoneContext(url);
+  const sourceResult = getSourceParam(url);
+  if (!sourceResult.ok) return json({ error: sourceResult.error }, 400);
+  const source = sourceResult.source;
   if (isUtcTimeZone(tzContext)) {
     const dayRaw2 = url.searchParams.get("day");
     const today = parseUtcDateString(formatDateUTC(/* @__PURE__ */ new Date()));
@@ -518,7 +552,8 @@ module.exports = async function(request) {
       edgeClient: auth.edgeClient,
       userId: auth.userId,
       startIso: startIso2,
-      endIso: endIso2
+      endIso: endIso2,
+      source
     });
     if (aggregateRows) {
       for (const row of aggregateRows) {
@@ -541,7 +576,11 @@ module.exports = async function(request) {
       );
     }
     const { error: error2 } = await forEachPage({
-      createQuery: () => auth.edgeClient.database.from("vibescore_tracker_hourly").select("hour_start,total_tokens,input_tokens,cached_input_tokens,output_tokens,reasoning_output_tokens").eq("user_id", auth.userId).gte("hour_start", startIso2).lt("hour_start", endIso2).order("hour_start", { ascending: true }),
+      createQuery: () => {
+        let query = auth.edgeClient.database.from("vibescore_tracker_hourly").select("hour_start,total_tokens,input_tokens,cached_input_tokens,output_tokens,reasoning_output_tokens").eq("user_id", auth.userId);
+        if (source) query = query.eq("source", source);
+        return query.gte("hour_start", startIso2).lt("hour_start", endIso2).order("hour_start", { ascending: true });
+      },
       onPage: (rows) => {
         for (const row of rows) {
           const ts = row?.hour_start;
@@ -590,7 +629,11 @@ module.exports = async function(request) {
     tzContext
   });
   const { error } = await forEachPage({
-    createQuery: () => auth.edgeClient.database.from("vibescore_tracker_hourly").select("hour_start,total_tokens,input_tokens,cached_input_tokens,output_tokens,reasoning_output_tokens").eq("user_id", auth.userId).gte("hour_start", startIso).lt("hour_start", endIso).order("hour_start", { ascending: true }),
+    createQuery: () => {
+      let query = auth.edgeClient.database.from("vibescore_tracker_hourly").select("hour_start,total_tokens,input_tokens,cached_input_tokens,output_tokens,reasoning_output_tokens").eq("user_id", auth.userId);
+      if (source) query = query.eq("source", source);
+      return query.gte("hour_start", startIso).lt("hour_start", endIso).order("hour_start", { ascending: true });
+    },
     onPage: (rows) => {
       for (const row of rows) {
         const ts = row?.hour_start;
@@ -695,11 +738,13 @@ function parseHalfHourSlotFromKey(key) {
   if (minute !== 0 && minute !== 30) return null;
   return hour * 2 + (minute >= 30 ? 1 : 0);
 }
-async function tryAggregateHourlyTotals({ edgeClient, userId, startIso, endIso }) {
+async function tryAggregateHourlyTotals({ edgeClient, userId, startIso, endIso, source }) {
   try {
-    const { data, error } = await edgeClient.database.from("vibescore_tracker_hourly").select(
+    let query = edgeClient.database.from("vibescore_tracker_hourly").select(
       "hour:hour_start,sum_total_tokens:sum(total_tokens),sum_input_tokens:sum(input_tokens),sum_cached_input_tokens:sum(cached_input_tokens),sum_output_tokens:sum(output_tokens),sum_reasoning_output_tokens:sum(reasoning_output_tokens)"
-    ).eq("user_id", userId).gte("hour_start", startIso).lt("hour_start", endIso).order("hour", { ascending: true });
+    ).eq("user_id", userId);
+    if (source) query = query.eq("source", source);
+    const { data, error } = await query.gte("hour_start", startIso).lt("hour_start", endIso).order("hour", { ascending: true });
     if (error) return null;
     return data || [];
   } catch (_e) {

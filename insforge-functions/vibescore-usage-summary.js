@@ -104,6 +104,36 @@ var require_auth = __commonJS({
   }
 });
 
+// insforge-src/shared/source.js
+var require_source = __commonJS({
+  "insforge-src/shared/source.js"(exports2, module2) {
+    "use strict";
+    var MAX_SOURCE_LENGTH = 64;
+    function normalizeSource(value) {
+      if (typeof value !== "string") return null;
+      const normalized = value.trim().toLowerCase();
+      if (!normalized) return null;
+      if (normalized.length > MAX_SOURCE_LENGTH) return normalized.slice(0, MAX_SOURCE_LENGTH);
+      return normalized;
+    }
+    function getSourceParam2(url) {
+      if (!url || typeof url.searchParams?.get !== "function") {
+        return { ok: false, error: "Invalid request URL" };
+      }
+      const raw = url.searchParams.get("source");
+      if (raw == null) return { ok: true, source: null };
+      const normalized = normalizeSource(raw);
+      if (!normalized) return { ok: false, error: "Invalid source" };
+      return { ok: true, source: normalized };
+    }
+    module2.exports = {
+      MAX_SOURCE_LENGTH,
+      normalizeSource,
+      getSourceParam: getSourceParam2
+    };
+  }
+});
+
 // insforge-src/shared/date.js
 var require_date = __commonJS({
   "insforge-src/shared/date.js"(exports2, module2) {
@@ -581,6 +611,7 @@ var require_pricing = __commonJS({
 var { handleOptions, json, requireMethod } = require_http();
 var { getBearerToken, getEdgeClientAndUserId } = require_auth();
 var { getBaseUrl } = require_env();
+var { getSourceParam } = require_source();
 var {
   addDatePartsDays,
   getUsageTimeZoneContext,
@@ -609,6 +640,9 @@ module.exports = async function(request) {
   if (!auth.ok) return json({ error: "Unauthorized" }, 401);
   const url = new URL(request.url);
   const tzContext = getUsageTimeZoneContext(url);
+  const sourceResult = getSourceParam(url);
+  if (!sourceResult.ok) return json({ error: sourceResult.error }, 400);
+  const source = sourceResult.source;
   const { from, to } = normalizeDateRangeLocal(
     url.searchParams.get("from"),
     url.searchParams.get("to"),
@@ -628,7 +662,11 @@ module.exports = async function(request) {
   let outputTokens = 0n;
   let reasoningOutputTokens = 0n;
   const { error } = await forEachPage({
-    createQuery: () => auth.edgeClient.database.from("vibescore_tracker_hourly").select("hour_start,total_tokens,input_tokens,cached_input_tokens,output_tokens,reasoning_output_tokens").eq("user_id", auth.userId).gte("hour_start", startIso).lt("hour_start", endIso).order("hour_start", { ascending: true }),
+    createQuery: () => {
+      let query = auth.edgeClient.database.from("vibescore_tracker_hourly").select("hour_start,total_tokens,input_tokens,cached_input_tokens,output_tokens,reasoning_output_tokens").eq("user_id", auth.userId);
+      if (source) query = query.eq("source", source);
+      return query.gte("hour_start", startIso).lt("hour_start", endIso).order("hour_start", { ascending: true });
+    },
     onPage: (rows) => {
       for (const row of rows) {
         totalTokens += toBigInt(row?.total_tokens);

@@ -249,12 +249,13 @@ test('vibescore-ingest uses serviceRoleKey as edgeFunctionToken and ingests hour
   assert.equal(postCall.init?.headers?.apikey, SERVICE_ROLE_KEY);
   assert.equal(postCall.init?.headers?.Authorization, `Bearer ${SERVICE_ROLE_KEY}`);
   assert.equal(postCall.init?.headers?.Prefer, 'return=representation,resolution=merge-duplicates');
-  assert.equal(postUrl.searchParams.get('on_conflict'), 'user_id,device_id,hour_start');
+  assert.equal(postUrl.searchParams.get('on_conflict'), 'user_id,device_id,source,hour_start');
   assert.equal(postUrl.searchParams.get('select'), 'hour_start');
 
   const postBody = JSON.parse(postCall.init?.body || '[]');
   assert.equal(postBody.length, 1);
   assert.equal(postBody[0]?.hour_start, bucket.hour_start);
+  assert.equal(postBody[0]?.source, 'codex');
 
   const serviceClientCall = calls.find((c) => c && c.edgeFunctionToken === SERVICE_ROLE_KEY);
   assert.ok(serviceClientCall, 'service client not created');
@@ -342,6 +343,9 @@ test('vibescore-ingest accepts wrapped payload with data.hourly', async () => {
   assert.equal(fetchCalls.length, 1);
   const postCall = fetchCalls[0];
   assert.ok(String(postCall.url).includes('/api/database/records/vibescore_tracker_hourly'));
+  const postBody = JSON.parse(postCall.init?.body || '[]');
+  assert.equal(postBody.length, 1);
+  assert.equal(postBody[0]?.source, 'codex');
 
   const serviceClientCall = calls.find((c) => c && c.edgeFunctionToken === SERVICE_ROLE_KEY);
   assert.ok(serviceClientCall, 'service client not created');
@@ -416,7 +420,7 @@ test('vibescore-ingest works without serviceRoleKey via anonKey records API', as
   assert.equal(postCall.init?.method, 'POST');
   assert.equal(postCall.init?.headers?.Prefer, 'return=representation,resolution=merge-duplicates');
   const postUrl = new URL(postCall.url);
-  assert.equal(postUrl.searchParams.get('on_conflict'), 'user_id,device_id,hour_start');
+  assert.equal(postUrl.searchParams.get('on_conflict'), 'user_id,device_id,source,hour_start');
   assert.equal(postUrl.searchParams.get('select'), 'hour_start');
 
   assert.ok(String(touchCall.url).includes('/api/database/rpc/vibescore_touch_device_token_sync'));
@@ -589,6 +593,62 @@ test('vibescore-usage-heatmap rejects invalid parameters', async () => {
 
   const res = await fn(req);
   assert.equal(res.status, 400);
+});
+
+test('vibescore-usage-daily applies optional source filter', async () => {
+  const fn = require('../insforge-functions/vibescore-usage-daily');
+
+  const userId = '66666666-6666-6666-6666-666666666666';
+  const userJwt = 'user_jwt_test';
+  const filters = [];
+
+  globalThis.createClient = (args) => {
+    if (args && args.edgeFunctionToken === userJwt) {
+      return {
+        auth: {
+          getCurrentUser: async () => ({ data: { user: { id: userId } }, error: null })
+        },
+        database: {
+          from: (table) => {
+            assert.equal(table, 'vibescore_tracker_hourly');
+            const query = {
+              eq: (col, value) => {
+                filters.push({ op: 'eq', col, value });
+                return query;
+              },
+              gte: (col, value) => {
+                filters.push({ op: 'gte', col, value });
+                return query;
+              },
+              lt: (col, value) => {
+                filters.push({ op: 'lt', col, value });
+                return query;
+              },
+              order: async (col, opts) => {
+                filters.push({ op: 'order', col, opts });
+                return { data: [], error: null };
+              }
+            };
+            return { select: () => query };
+          }
+        }
+      };
+    }
+    throw new Error(`Unexpected createClient args: ${JSON.stringify(args)}`);
+  };
+
+  const req = new Request(
+    'http://localhost/functions/vibescore-usage-daily?from=2025-12-20&to=2025-12-21&source=every-code',
+    {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${userJwt}` }
+    }
+  );
+
+  const res = await fn(req);
+  assert.equal(res.status, 200);
+  assert.ok(filters.some((f) => f.op === 'eq' && f.col === 'user_id' && f.value === userId));
+  assert.ok(filters.some((f) => f.op === 'eq' && f.col === 'source' && f.value === 'every-code'));
 });
 
 test('vibescore-usage-hourly aggregates half-hour buckets into half-hour totals', async () => {
