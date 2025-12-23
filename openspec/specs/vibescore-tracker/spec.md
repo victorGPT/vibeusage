@@ -148,14 +148,6 @@ The Dashboard UI SHALL adopt the "Matrix UI A" visual system (based on `copy.jsx
 - **THEN** the UI SHALL be composed from reusable Matrix UI A components (e.g., framed boxes, compact data rows, trend charts)
 - **AND** the underlying data flow (auth callback, usage queries) SHALL remain unchanged
 
-### Requirement: Connect CLI page matches the theme
-The `/connect` page SHALL share the same Matrix UI A theme and component system as the main dashboard.
-
-#### Scenario: Connect CLI page uses Matrix UI A shell
-- **WHEN** a user opens `/connect`
-- **THEN** the page SHALL render in the same Matrix UI A visual system
-- **AND** invalid redirect errors SHALL remain readable
-
 ### Requirement: UI and data logic are decoupled
 The dashboard frontend MUST keep data logic decoupled from the UI layer so future theme swaps do not require touching auth/storage/fetch logic.
 

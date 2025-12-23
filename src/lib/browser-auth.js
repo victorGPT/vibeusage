@@ -10,7 +10,7 @@ async function beginBrowserAuth({ baseUrl, dashboardUrl, timeoutMs, open }) {
 
   const { callbackUrl, waitForCallback } = await startLocalCallbackServer({ callbackPath, timeoutMs });
 
-  const authUrl = dashboardUrl ? new URL('/connect', dashboardUrl) : new URL('/auth/sign-up', baseUrl);
+  const authUrl = dashboardUrl ? new URL('/', dashboardUrl) : new URL('/auth/sign-up', baseUrl);
   authUrl.searchParams.set('redirect', callbackUrl);
   if (dashboardUrl && baseUrl && baseUrl !== DEFAULT_BASE_URL) authUrl.searchParams.set('base_url', baseUrl);
 

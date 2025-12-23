@@ -53,7 +53,7 @@
 账号绑定（推荐 UX）：
 
 - `init` 默认不要求用户在终端输入邮箱/密码；而是引导用户在浏览器完成注册/登录
-- 具体做法：优先打开我们自己的 Dashboard `/connect?redirect=<local_callback_url>`（若配置了 dashboard url）；当 CLI 使用的 `baseUrl` 非默认值时，额外传 `base_url=<backend_base_url>`；否则直接打开 InsForge 内置页面 `/auth/sign-up`（或 `/auth/sign-in`），并携带 `redirect=<local_callback_url>`
+- 具体做法：优先打开我们自己的 Dashboard landing page `/?redirect=<local_callback_url>`（若配置了 dashboard url）；当 CLI 使用的 `baseUrl` 非默认值时，额外传 `base_url=<backend_base_url>`；否则直接打开 InsForge 内置页面 `/auth/sign-up`（或 `/auth/sign-in`），并携带 `redirect=<local_callback_url>`
   - `local_callback_url` 由 CLI 临时启动的本地回调服务提供（仅监听 `127.0.0.1`），形式：`http://127.0.0.1:<port>/vibescore/callback/<nonce>`
   - 登录成功后浏览器会跳转回 `local_callback_url`，并附带 `access_token`（及 user 信息）给 CLI
 - CLI 用 `access_token` 调用 `POST /functions/vibescore-device-token-issue` 获取 **device token**，随后只持有 device token（不持久化 user_jwt）
@@ -147,7 +147,7 @@ Dashboard（MVP）：
 - 前端（React）只做最小展示：登录/注册 → 拉取 daily/summary → 表格/简易曲线
 - UI 视觉风格：Dashboard UI SHALL 采用“复古 TUI 皮肤”（monospace、窗口化边框、终端配色等），但交互保持标准 Web 方式（鼠标点击、表单输入、链接跳转），不引入真实终端 raw-mode 输入模型
 - 动效降级：必须尊重 `prefers-reduced-motion`，自动禁用闪烁/持续动效（如 CRT flicker、背景雨等）
-- 统一性：`/connect` 页面与主 Dashboard 使用同一主题与可用性规则（错误提示、按钮、焦点态）
+- 统一性：landing page 与主 Dashboard 使用同一主题与可用性规则（错误提示、按钮、焦点态）
 - 登录方式：跳转 InsForge 内置页面 `/auth/sign-in`/`/auth/sign-up`，携带 `redirect=<dashboard>/auth/callback`
   - 登录成功后，`/auth/callback` 从 URL 参数中读取 `access_token` 并在前端持久化（MVP：localStorage），再用于调用上述查询接口
   - 后续可升级为更安全的会话方案（例如 HttpOnly cookie/BFF），但不属于 MVP 目标

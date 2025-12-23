@@ -67,7 +67,7 @@ Object.keys(localStorage)
 location.reload();
 ```
 
-- 刷新后重新走一遍 `/connect` 登录流程。
+- 刷新后重新走一遍 landing page 的登录流程。
 - 说明：Dashboard 不使用 `insforge-auth-token`，实际存储在 `vibescore.dashboard.auth.v1`。
 
 ## 🏗️ 系统架构

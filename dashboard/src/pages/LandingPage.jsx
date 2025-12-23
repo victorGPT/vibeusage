@@ -1,21 +1,49 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { MatrixRain } from "../ui/matrix-a/components/MatrixRain.jsx";
+import React, { Suspense, useEffect, useMemo, useState } from "react";
 import { DecodingText } from "../ui/matrix-a/components/DecodingText.jsx";
-import { MatrixAvatar } from "../ui/matrix-a/components/MatrixAvatar.jsx";
-import { LiveSniffer } from "../ui/matrix-a/components/LiveSniffer.jsx";
-import { SignalBox } from "../ui/matrix-a/components/SignalBox.jsx";
 import { copy } from "../lib/copy.js";
+
+const MatrixRain = React.lazy(() =>
+  import("../ui/matrix-a/components/MatrixRain.jsx").then((mod) => ({
+    default: mod.MatrixRain,
+  }))
+);
+const LandingExtras = React.lazy(() =>
+  import("./LandingExtras.jsx").then((mod) => ({
+    default: mod.LandingExtras,
+  }))
+);
+
+function useDeferredMount(delayMs = 0) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    let timer = null;
+    let idleId = null;
+    const run = () => setMounted(true);
+
+    if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+      idleId = window.requestIdleCallback(run, { timeout: delayMs || 200 });
+      return () => {
+        if (typeof window.cancelIdleCallback === "function" && idleId != null) {
+          window.cancelIdleCallback(idleId);
+        }
+      };
+    }
+
+    timer = window.setTimeout(run, delayMs);
+    return () => {
+      if (timer != null) window.clearTimeout(timer);
+    };
+  }, [delayMs]);
+
+  return mounted;
+}
 
 export function LandingPage({ signInUrl }) {
   const specialHandle = copy("landing.handle.special");
   const defaultHandle = copy("landing.handle.default");
   const [handle, setHandle] = useState(defaultHandle);
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setIsLoaded(true), 200);
-    return () => clearTimeout(timer);
-  }, []);
+  const effectsReady = useDeferredMount(250);
 
   const handlePlaceholder = useMemo(
     () => copy("landing.handle.placeholder", { handle: specialHandle }),
@@ -30,12 +58,25 @@ export function LandingPage({ signInUrl }) {
     return copy("landing.rank.expectation", { rank });
   }, [handle, specialHandle]);
 
-  if (!isLoaded) return <div className="min-h-screen bg-black" />;
+  const handleChange = (event) => {
+    setHandle(event.target.value.toUpperCase());
+  };
+
+  const extrasSkeleton = (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-3xl">
+      <div className="h-44 border border-[#00FF41]/15 bg-[#00FF41]/5"></div>
+      <div className="h-44 border border-[#00FF41]/15 bg-[#00FF41]/5"></div>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-[#050505] font-mono text-[#00FF41] flex flex-col items-center justify-center p-6 relative overflow-hidden">
       {/* 视觉层 */}
-      <MatrixRain />
+      {effectsReady ? (
+        <Suspense fallback={null}>
+          <MatrixRain />
+        </Suspense>
+      ) : null}
       <div className="pointer-events-none fixed inset-0 z-50 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.1)_50%)] bg-[length:100%_4px]"></div>
 
       {/* 主面板 */}
@@ -65,39 +106,19 @@ export function LandingPage({ signInUrl }) {
         </div>
 
         {/* 演示区域 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-3xl">
-          {/* 身份探测 */}
-          <SignalBox title={copy("landing.signal.identity_probe")} className="h-44">
-            <div className="flex items-center space-x-6 h-full">
-              <MatrixAvatar
-                name={handle}
-                size={80}
-                isTheOne={handle === specialHandle}
-              />
-              <div className="flex-1 text-left space-y-3">
-                <div className="flex flex-col">
-                  <label className="text-[8px] opacity-40 uppercase tracking-widest mb-1 font-bold">
-                    {copy("landing.handle.label")}
-                  </label>
-                  <input
-                    type="text"
-                    value={handle}
-                    onChange={(e) => setHandle(e.target.value.toUpperCase())}
-                    className="w-full bg-transparent border-b border-[#00FF41]/50 text-white font-black text-xl p-1 focus:outline-none focus:border-[#00FF41] transition-colors"
-                    maxLength={10}
-                    placeholder={handlePlaceholder}
-                  />
-                </div>
-                <div className="text-[8px] opacity-60">{rankLabel}</div>
-              </div>
-            </div>
-          </SignalBox>
-
-          {/* 实时抓包 */}
-          <SignalBox title={copy("landing.signal.live_sniffer")} className="h-44">
-            <LiveSniffer />
-          </SignalBox>
-        </div>
+        {effectsReady ? (
+          <Suspense fallback={extrasSkeleton}>
+            <LandingExtras
+              handle={handle}
+              onHandleChange={handleChange}
+              specialHandle={specialHandle}
+              handlePlaceholder={handlePlaceholder}
+              rankLabel={rankLabel}
+            />
+          </Suspense>
+        ) : (
+          extrasSkeleton
+        )}
 
         {/* 核心操作区域 */}
         <div className="w-full max-w-sm flex flex-col items-center space-y-4">

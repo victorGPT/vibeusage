@@ -33,17 +33,6 @@ landing.footer.link.docs,landing,LandingPage,LandingPage,footer_link_docs,"Docs"
 landing.footer.link.security,landing,LandingPage,LandingPage,footer_link_security,"Security",,active
 landing.footer.system_ready,landing,LandingPage,LandingPage,footer_system_ready,"System_Ready // 2024 VibeScore OS",,active
 
-connect.header.right,connect,ConnectCliPage,MatrixShell,header_right,"Connect_CLI",,active
-connect.footer.left,connect,ConnectCliPage,MatrixShell,footer_left,"Click sign-in/sign-up • browser returns to local CLI callback",,active
-connect.footer.right,connect,ConnectCliPage,MatrixShell,footer_right,"/connect",,active
-connect.box.title,connect,ConnectCliPage,AsciiBox,title,"LINK_YOUR_CLI",,active
-connect.box.subtitle,connect,ConnectCliPage,AsciiBox,subtitle,"Local_Callback",,active
-connect.box.body,connect,ConnectCliPage,AsciiBox,body,"Sign in or sign up. When finished, the browser will return to your local CLI to complete setup.",,active
-connect.error.prefix,connect,ConnectCliPage,AsciiBox,error_prefix,"Invalid or missing",,active
-connect.error.redirect_label,connect,ConnectCliPage,AsciiBox,error_label,"redirect",,active
-connect.error.suffix,connect,ConnectCliPage,AsciiBox,error_suffix,"URL. This page must be opened from the CLI.",,active
-connect.button.sign_in,connect,ConnectCliPage,MatrixButton,label,"$ sign-in",,active
-connect.button.sign_up,connect,ConnectCliPage,MatrixButton,label,"$ sign-up",,active
 
 shell.header.title,ui,MatrixShell,MatrixShell,header_title,"VIBE SCORE",,active
 shell.header.link_active,ui,MatrixShell,MatrixShell,header_link_active,"LINK_ACTIVE",,active

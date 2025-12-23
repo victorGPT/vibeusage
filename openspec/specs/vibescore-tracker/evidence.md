@@ -68,11 +68,6 @@ Source: `openspec/specs/vibescore-tracker/spec.md`
 - Verification: manual visual check of dashboard
 - Status: Implemented (manual)
 
-### Requirement: Connect CLI page matches the theme
-- Implementation: `dashboard/src/pages/ConnectCliPage.jsx`, `dashboard/src/ui/matrix-a/layout/MatrixShell.jsx`
-- Verification: manual visit `/connect`
-- Status: Implemented (manual)
-
 ### Requirement: UI and data logic are decoupled
 - Implementation: data hooks under `dashboard/src/hooks/**`, UI components under `dashboard/src/ui/**`
 - Verification: manual code review

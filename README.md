@@ -67,7 +67,7 @@ Object.keys(localStorage)
 location.reload();
 ```
 
-- Complete the `/connect` login flow again after reload.
+- Complete the landing page sign-in flow again after reload.
 - Note: `insforge-auth-token` is not used by the dashboard; use `vibescore.dashboard.auth.v1`.
 
 ## 🏗️ Architecture
