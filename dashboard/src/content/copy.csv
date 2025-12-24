@@ -6,7 +6,7 @@ shared.button.sign_up,shared,*,MatrixButton,label,"$ sign-up",,active
 shared.range.simple,shared,*,*,label,"Range: {{range}}",,active
 shared.data_source,shared,*,*,label,"DATA_SOURCE: {{source}}",,active
 shared.error.prefix,shared,*,*,label,"Error: {{error}}",,active
-shared.status.unsynced,shared,*,*,status,"未同步",,active
+shared.status.unsynced,shared,*,*,status,"WAIT_AUTO_SYNC",,active
 error.boundary.title,shared,*,ErrorBoundary,title,"SYSTEM_FAULT",,active
 error.boundary.subtitle,shared,*,ErrorBoundary,subtitle,"RENDER_FAILURE",,active
 error.boundary.hint,shared,*,ErrorBoundary,hint,"OPEN_CONSOLE // THEN RELOAD",,active

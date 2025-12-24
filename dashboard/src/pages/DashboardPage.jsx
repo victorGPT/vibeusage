@@ -222,9 +222,7 @@ export function DashboardPage({ baseUrl, auth, signedIn, signOut }) {
 
   function renderDetailCell(row, key) {
     if (row?.future) return "—";
-    if (row?.missing) {
-      return key === "total_tokens" ? "未同步" : "—";
-    }
+    if (row?.missing) return copy("shared.status.unsynced");
     return toDisplayNumber(row?.[key]);
   }
 

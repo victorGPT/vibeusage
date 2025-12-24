@@ -33,6 +33,21 @@ function readMockSeed() {
   return DEFAULT_MOCK_SEED;
 }
 
+function readMockMissingCount() {
+  if (typeof import.meta !== "undefined" && import.meta.env) {
+    const raw = String(import.meta.env.VITE_VIBESCORE_MOCK_MISSING || "").trim();
+    const n = Number(raw);
+    if (Number.isFinite(n) && n > 0) return Math.floor(n);
+  }
+  if (typeof window !== "undefined") {
+    const params = new URLSearchParams(window.location.search);
+    const raw = String(params.get("mock_missing") || "").trim();
+    const n = Number(raw);
+    if (Number.isFinite(n) && n > 0) return Math.floor(n);
+  }
+  return 0;
+}
+
 function toSeed(seed) {
   const raw = seed == null ? readMockSeed() : String(seed);
   return raw.trim() || DEFAULT_MOCK_SEED;
@@ -118,8 +133,7 @@ function buildHourlyRows({ day, seed }) {
   const base = parseUtcDate(day) || parseUtcDate(formatDateLocal(new Date())) || new Date();
   const dayKey = formatDateUTC(base);
   const seedValue = toSeed(seed);
-
-  return Array.from({ length: 48 }, (_, index) => {
+  const rows = Array.from({ length: 48 }, (_, index) => {
     const hour = Math.floor(index / 2);
     const minute = index % 2 === 0 ? 0 : 30;
     const hash = hashString(`${seedValue}:${dayKey}:${hour}:${minute}`);
@@ -143,6 +157,24 @@ function buildHourlyRows({ day, seed }) {
       reasoning_output_tokens: reasoning,
     };
   });
+
+  const missingCount = Math.max(0, Math.min(48, readMockMissingCount()));
+  if (missingCount > 0) {
+    const nowMs = Date.now();
+    const candidates = rows
+      .map((row, index) => {
+        const ts = Date.parse(row.hour);
+        return Number.isFinite(ts) && ts <= nowMs ? { index, ts } : null;
+      })
+      .filter(Boolean);
+    const sliceStart = Math.max(0, candidates.length - missingCount);
+    const targets = candidates.slice(sliceStart);
+    for (const target of targets) {
+      rows[target.index] = { ...rows[target.index], missing: true };
+    }
+  }
+
+  return rows;
 }
 
 function buildMonthlyRows({ months = 24, to, seed }) {
