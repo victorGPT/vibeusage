@@ -122,6 +122,7 @@ var require_source = __commonJS({
       }
       const raw = url.searchParams.get("source");
       if (raw == null) return { ok: true, source: null };
+      if (raw.trim() === "") return { ok: true, source: null };
       const normalized = normalizeSource(raw);
       if (!normalized) return { ok: false, error: "Invalid source" };
       return { ok: true, source: normalized };
