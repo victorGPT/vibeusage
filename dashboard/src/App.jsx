@@ -7,6 +7,8 @@ import { ErrorBoundary } from "./components/ErrorBoundary.jsx";
 import { LandingPage } from "./pages/LandingPage.jsx";
 import { isMockEnabled } from "./lib/mock-data.js";
 
+import { UpgradeAlertModal } from "./ui/matrix-a/components/UpgradeAlertModal.jsx";
+
 const DashboardPage = React.lazy(() =>
   import("./pages/DashboardPage.jsx").then((mod) => ({
     default: mod.DashboardPage,
@@ -64,6 +66,7 @@ export default function App() {
   } else {
     content = (
       <Suspense fallback={loadingShell}>
+        <UpgradeAlertModal currentVersion="0.0.7" requiredVersion="0.0.9" />
         <DashboardPage
           baseUrl={baseUrl}
           auth={auth}
