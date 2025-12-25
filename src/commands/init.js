@@ -1,6 +1,8 @@
 const os = require('node:os');
 const path = require('node:path');
 const fs = require('node:fs/promises');
+const fssync = require('node:fs');
+const cp = require('node:child_process');
 
 const { ensureDir, writeFileAtomic, readJson, writeJson, chmod600IfPossible } = require('../lib/fs');
 const { prompt, promptHidden } = require('../lib/prompt');
@@ -12,7 +14,6 @@ const {
 } = require('../lib/codex-config');
 const { beginBrowserAuth } = require('../lib/browser-auth');
 const { issueDeviceTokenWithPassword, issueDeviceTokenWithAccessToken } = require('../lib/insforge');
-const { cmdSync } = require('./sync');
 
 async function cmdInit(argv) {
   const opts = parseArgs(argv);
@@ -138,10 +139,10 @@ async function cmdInit(argv) {
   );
 
   try {
-    await cmdSync([]);
+    spawnInitSync({ trackerBinPath, packageName: '@vibescore/tracker' });
   } catch (err) {
     const msg = err && err.message ? err.message : 'unknown error';
-    process.stderr.write(`Initial sync failed: ${msg}\n`);
+    process.stderr.write(`Initial sync spawn failed: ${msg}\n`);
   }
 }
 
@@ -343,6 +344,21 @@ async function installLocalTrackerApp({ appDir }) {
   await fs.copyFile(binFrom, binTo);
   await fs.chmod(binTo, 0o755).catch(() => {});
   await copyRuntimeDependencies({ from: nodeModulesFrom, to: nodeModulesTo });
+}
+
+function spawnInitSync({ trackerBinPath, packageName }) {
+  const fallbackPkg = packageName || '@vibescore/tracker';
+  const argv = ['sync'];
+  const hasLocalRuntime = typeof trackerBinPath === 'string' && fssync.existsSync(trackerBinPath);
+  const cmd = hasLocalRuntime
+    ? [process.execPath, trackerBinPath, ...argv]
+    : ['npx', '--yes', fallbackPkg, ...argv];
+  const child = cp.spawn(cmd[0], cmd.slice(1), {
+    detached: true,
+    stdio: 'ignore',
+    env: process.env
+  });
+  child.unref();
 }
 
 async function copyRuntimeDependencies({ from, to }) {
