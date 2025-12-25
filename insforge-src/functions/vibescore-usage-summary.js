@@ -4,7 +4,7 @@
 'use strict';
 
 const { handleOptions, json, requireMethod } = require('../shared/http');
-const { getBearerToken, getEdgeClientAndUserId } = require('../shared/auth');
+const { getBearerToken, getEdgeClientAndUserIdFast } = require('../shared/auth');
 const { getBaseUrl } = require('../shared/env');
 const { getSourceParam } = require('../shared/source');
 const {
@@ -35,7 +35,7 @@ module.exports = async function(request) {
   if (!bearer) return json({ error: 'Missing bearer token' }, 401);
 
   const baseUrl = getBaseUrl();
-  const auth = await getEdgeClientAndUserId({ baseUrl, bearer });
+  const auth = await getEdgeClientAndUserIdFast({ baseUrl, bearer });
   if (!auth.ok) return json({ error: 'Unauthorized' }, 401);
 
   const url = new URL(request.url);

@@ -13,6 +13,10 @@ on:
         description: 'Dry run (true/false)'
         required: false
         default: 'false'
+      include_ingest_batches:
+        description: 'Purge ingest batch metrics (true/false)'
+        required: false
+        default: 'true'
 
 jobs:
   purge:
@@ -26,6 +30,7 @@ jobs:
           API_KEY: ${{ secrets.INSFORGE_API_KEY }}
           RETENTION_DAYS: ${{ github.event.inputs.days }}
           RETENTION_DRY_RUN: ${{ github.event.inputs.dry_run }}
+          RETENTION_INCLUDE_INGEST_BATCHES: ${{ github.event.inputs.include_ingest_batches }}
         run: |
           TOKEN="${API_KEY:-$SERVICE_ROLE_KEY}"
           TOKEN_SOURCE="INSFORGE_API_KEY"
@@ -40,7 +45,9 @@ jobs:
 
           DAYS="${RETENTION_DAYS:-30}"
           DRY_RUN="${RETENTION_DRY_RUN:-false}"
+          INCLUDE_INGEST_BATCHES="${RETENTION_INCLUDE_INGEST_BATCHES:-true}"
           DRY_RUN=$(echo "$DRY_RUN" | tr '[:upper:]' '[:lower:]')
+          INCLUDE_INGEST_BATCHES=$(echo "$INCLUDE_INGEST_BATCHES" | tr '[:upper:]' '[:lower:]')
           if ! echo "$DAYS" | grep -Eq '^[0-9]+$'; then
             echo "RETENTION_DAYS must be an integer" >&2
             exit 1
@@ -49,8 +56,12 @@ jobs:
             echo "RETENTION_DRY_RUN must be true or false" >&2
             exit 1
           fi
+          if [ "$INCLUDE_INGEST_BATCHES" != "true" ] && [ "$INCLUDE_INGEST_BATCHES" != "false" ]; then
+            echo "RETENTION_INCLUDE_INGEST_BATCHES must be true or false" >&2
+            exit 1
+          fi
 
-          payload=$(printf '{"days":%s,"dry_run":%s}' "$DAYS" "$DRY_RUN")
+          payload=$(printf '{"days":%s,"dry_run":%s,"include_ingest_batches":%s}' "$DAYS" "$DRY_RUN" "$INCLUDE_INGEST_BATCHES")
           response_file=$(mktemp)
           status=$(curl --show-error --silent \
             --retry 3 \
