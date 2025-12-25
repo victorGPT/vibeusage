@@ -5,7 +5,7 @@
 ## 2. Backend Recovery
 - [x] 2.1 Re-deploy `vibescore-usage-*`, `vibescore-ingest`, and `vibescore-sync-ping` from `insforge-functions/`.
 - [x] 2.2 Verify usage endpoints respond within the timeout window (summary/daily/heatmap).
-- [ ] 2.4 Verify ingest responds within the timeout window (write path).
+- [x] 2.4 Verify ingest responds within the timeout window (write path).
 - [x] 2.3 Avoid auth roundtrip in usage endpoints by reading JWT payload (fallback to auth on decode failure).
 
 ## 3. Client Resilience
