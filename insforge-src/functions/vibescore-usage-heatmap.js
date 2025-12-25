@@ -7,6 +7,7 @@ const { handleOptions, json, requireMethod } = require('../shared/http');
 const { getBearerToken, getEdgeClientAndUserIdFast } = require('../shared/auth');
 const { getBaseUrl } = require('../shared/env');
 const { getSourceParam } = require('../shared/source');
+const { getModelParam } = require('../shared/model');
 const {
   addDatePartsDays,
   addUtcDays,
@@ -40,6 +41,9 @@ module.exports = async function(request) {
   const sourceResult = getSourceParam(url);
   if (!sourceResult.ok) return json({ error: sourceResult.error }, 400);
   const source = sourceResult.source;
+  const modelResult = getModelParam(url);
+  if (!modelResult.ok) return json({ error: modelResult.error }, 400);
+  const model = modelResult.model;
 
   const weeksRaw = url.searchParams.get('weeks');
   const weeks = normalizeWeeks(weeksRaw);
@@ -77,6 +81,7 @@ module.exports = async function(request) {
           .select('hour_start,total_tokens')
           .eq('user_id', auth.userId);
         if (source) query = query.eq('source', source);
+        if (model) query = query.eq('model', model);
         return query.gte('hour_start', startIso).lt('hour_start', endIso).order('hour_start', { ascending: true });
       },
       onPage: (rows) => {
@@ -193,6 +198,7 @@ module.exports = async function(request) {
         .select('hour_start,total_tokens')
         .eq('user_id', auth.userId);
       if (source) query = query.eq('source', source);
+      if (model) query = query.eq('model', model);
       return query.gte('hour_start', startIso).lt('hour_start', endIso).order('hour_start', { ascending: true });
     },
     onPage: (rows) => {

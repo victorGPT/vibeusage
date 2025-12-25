@@ -122,6 +122,7 @@ function buildBuckets() {
   const ts = new Date('2025-12-21T00:00:00.000Z').toISOString();
   return [
     {
+      model: 'unknown',
       hour_start: ts,
       input_tokens: 1,
       cached_input_tokens: 0,
@@ -138,6 +139,7 @@ function buildBuckets() {
       total_tokens: 6
     },
     {
+      model: 'unknown',
       hour_start: '2025-12-21T00:30:00.000Z',
       input_tokens: 3,
       cached_input_tokens: 0,
@@ -161,7 +163,7 @@ function buildFetchStub() {
       if (prefer.includes('resolution=merge-duplicates')) {
         calls.preferMerge = true;
       }
-    if (url.searchParams.get('on_conflict') !== 'user_id,device_id,source,hour_start') {
+    if (url.searchParams.get('on_conflict') !== 'user_id,device_id,source,model,hour_start') {
       return jsonResponse(400, { error: 'missing on_conflict' });
     }
       if (!url.searchParams.get('select')) {

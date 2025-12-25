@@ -182,6 +182,33 @@ var require_source = __commonJS({
   }
 });
 
+// insforge-src/shared/model.js
+var require_model = __commonJS({
+  "insforge-src/shared/model.js"(exports2, module2) {
+    "use strict";
+    function normalizeModel(value) {
+      if (typeof value !== "string") return null;
+      const trimmed = value.trim();
+      return trimmed.length > 0 ? trimmed : null;
+    }
+    function getModelParam2(url) {
+      if (!url || typeof url.searchParams?.get !== "function") {
+        return { ok: false, error: "Invalid request URL" };
+      }
+      const raw = url.searchParams.get("model");
+      if (raw == null) return { ok: true, model: null };
+      if (raw.trim() === "") return { ok: true, model: null };
+      const normalized = normalizeModel(raw);
+      if (!normalized) return { ok: false, error: "Invalid model" };
+      return { ok: true, model: normalized };
+    }
+    module2.exports = {
+      normalizeModel,
+      getModelParam: getModelParam2
+    };
+  }
+});
+
 // insforge-src/shared/date.js
 var require_date = __commonJS({
   "insforge-src/shared/date.js"(exports2, module2) {
@@ -543,6 +570,7 @@ var { handleOptions, json, requireMethod } = require_http();
 var { getBearerToken, getEdgeClientAndUserIdFast } = require_auth();
 var { getBaseUrl } = require_env();
 var { getSourceParam } = require_source();
+var { getModelParam } = require_model();
 var {
   addDatePartsDays,
   addUtcDays,
@@ -573,6 +601,9 @@ module.exports = async function(request) {
   const sourceResult = getSourceParam(url);
   if (!sourceResult.ok) return json({ error: sourceResult.error }, 400);
   const source = sourceResult.source;
+  const modelResult = getModelParam(url);
+  if (!modelResult.ok) return json({ error: modelResult.error }, 400);
+  const model = modelResult.model;
   if (isUtcTimeZone(tzContext)) {
     const dayRaw2 = url.searchParams.get("day");
     const today = parseUtcDateString(formatDateUTC(/* @__PURE__ */ new Date()));
@@ -601,7 +632,8 @@ module.exports = async function(request) {
       userId: auth.userId,
       startIso: startIso2,
       endIso: endIso2,
-      source
+      source,
+      model
     });
     if (aggregateRows) {
       for (const row of aggregateRows) {
@@ -627,6 +659,7 @@ module.exports = async function(request) {
       createQuery: () => {
         let query = auth.edgeClient.database.from("vibescore_tracker_hourly").select("hour_start,total_tokens,input_tokens,cached_input_tokens,output_tokens,reasoning_output_tokens").eq("user_id", auth.userId);
         if (source) query = query.eq("source", source);
+        if (model) query = query.eq("model", model);
         return query.gte("hour_start", startIso2).lt("hour_start", endIso2).order("hour_start", { ascending: true });
       },
       onPage: (rows) => {
@@ -680,6 +713,7 @@ module.exports = async function(request) {
     createQuery: () => {
       let query = auth.edgeClient.database.from("vibescore_tracker_hourly").select("hour_start,total_tokens,input_tokens,cached_input_tokens,output_tokens,reasoning_output_tokens").eq("user_id", auth.userId);
       if (source) query = query.eq("source", source);
+      if (model) query = query.eq("model", model);
       return query.gte("hour_start", startIso).lt("hour_start", endIso).order("hour_start", { ascending: true });
     },
     onPage: (rows) => {
@@ -786,12 +820,13 @@ function parseHalfHourSlotFromKey(key) {
   if (minute !== 0 && minute !== 30) return null;
   return hour * 2 + (minute >= 30 ? 1 : 0);
 }
-async function tryAggregateHourlyTotals({ edgeClient, userId, startIso, endIso, source }) {
+async function tryAggregateHourlyTotals({ edgeClient, userId, startIso, endIso, source, model }) {
   try {
     let query = edgeClient.database.from("vibescore_tracker_hourly").select(
       "hour:hour_start,sum_total_tokens:sum(total_tokens),sum_input_tokens:sum(input_tokens),sum_cached_input_tokens:sum(cached_input_tokens),sum_output_tokens:sum(output_tokens),sum_reasoning_output_tokens:sum(reasoning_output_tokens)"
     ).eq("user_id", userId);
     if (source) query = query.eq("source", source);
+    if (model) query = query.eq("model", model);
     const { data, error } = await query.gte("hour_start", startIso).lt("hour_start", endIso).order("hour", { ascending: true });
     if (error) return null;
     return data || [];

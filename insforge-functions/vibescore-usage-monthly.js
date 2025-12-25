@@ -182,6 +182,33 @@ var require_source = __commonJS({
   }
 });
 
+// insforge-src/shared/model.js
+var require_model = __commonJS({
+  "insforge-src/shared/model.js"(exports2, module2) {
+    "use strict";
+    function normalizeModel(value) {
+      if (typeof value !== "string") return null;
+      const trimmed = value.trim();
+      return trimmed.length > 0 ? trimmed : null;
+    }
+    function getModelParam2(url) {
+      if (!url || typeof url.searchParams?.get !== "function") {
+        return { ok: false, error: "Invalid request URL" };
+      }
+      const raw = url.searchParams.get("model");
+      if (raw == null) return { ok: true, model: null };
+      if (raw.trim() === "") return { ok: true, model: null };
+      const normalized = normalizeModel(raw);
+      if (!normalized) return { ok: false, error: "Invalid model" };
+      return { ok: true, model: normalized };
+    }
+    module2.exports = {
+      normalizeModel,
+      getModelParam: getModelParam2
+    };
+  }
+});
+
 // insforge-src/shared/date.js
 var require_date = __commonJS({
   "insforge-src/shared/date.js"(exports2, module2) {
@@ -543,6 +570,7 @@ var { handleOptions, json, requireMethod } = require_http();
 var { getBearerToken, getEdgeClientAndUserIdFast } = require_auth();
 var { getBaseUrl } = require_env();
 var { getSourceParam } = require_source();
+var { getModelParam } = require_model();
 var {
   addDatePartsDays,
   addDatePartsMonths,
@@ -570,6 +598,9 @@ module.exports = async function(request) {
   const sourceResult = getSourceParam(url);
   if (!sourceResult.ok) return json({ error: sourceResult.error }, 400);
   const source = sourceResult.source;
+  const modelResult = getModelParam(url);
+  if (!modelResult.ok) return json({ error: modelResult.error }, 400);
+  const model = modelResult.model;
   const monthsRaw = url.searchParams.get("months");
   const monthsParsed = toPositiveIntOrNull(monthsRaw);
   const months = monthsParsed == null ? MAX_MONTHS : monthsParsed;
@@ -610,6 +641,7 @@ module.exports = async function(request) {
     createQuery: () => {
       let query = auth.edgeClient.database.from("vibescore_tracker_hourly").select("hour_start,total_tokens,input_tokens,cached_input_tokens,output_tokens,reasoning_output_tokens").eq("user_id", auth.userId);
       if (source) query = query.eq("source", source);
+      if (model) query = query.eq("model", model);
       return query.gte("hour_start", startIso).lt("hour_start", endIso).order("hour_start", { ascending: true });
     },
     onPage: (rows) => {
