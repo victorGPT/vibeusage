@@ -7,6 +7,19 @@ const { test } = require('node:test');
 const { cmdInit } = require('../src/commands/init');
 const { cmdUninstall } = require('../src/commands/uninstall');
 
+async function waitForFile(filePath, { timeoutMs = 1500, intervalMs = 50 } = {}) {
+  const start = Date.now();
+  while (Date.now() - start < timeoutMs) {
+    try {
+      return await fs.readFile(filePath, 'utf8');
+    } catch (err) {
+      if (err?.code !== 'ENOENT') throw err;
+    }
+    await new Promise((resolve) => setTimeout(resolve, intervalMs));
+  }
+  return null;
+}
+
 test('init then uninstall restores original Codex notify (when pre-existing notify exists)', async () => {
   const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'vibescore-init-uninstall-'));
   const prevHome = process.env.HOME;
@@ -32,7 +45,9 @@ test('init then uninstall restores original Codex notify (when pre-existing noti
     assert.ok(!installed.includes('["echo", "hello"]'), 'expected init to override notify');
 
     const cursorsPath = path.join(tmp, '.vibescore', 'tracker', 'cursors.json');
-    const cursors = JSON.parse(await fs.readFile(cursorsPath, 'utf8'));
+    const cursorsRaw = await waitForFile(cursorsPath);
+    assert.ok(cursorsRaw, 'expected init to trigger sync and write cursors');
+    const cursors = JSON.parse(cursorsRaw);
     assert.ok(typeof cursors.updatedAt === 'string' && cursors.updatedAt.length > 0);
 
     await cmdUninstall([]);
