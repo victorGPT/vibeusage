@@ -51,6 +51,26 @@ Examples:
 VIBESCORE_HTTP_TIMEOUT_MS=60000 npx --yes @vibescore/tracker sync --debug
 ```
 
+## Pricing configuration
+
+Pricing metadata is resolved from `vibescore_pricing_profiles`. The default pricing profile is selected by:
+
+- `VIBESCORE_PRICING_SOURCE` (default `openrouter`)
+- `VIBESCORE_PRICING_MODEL` (default `gpt-5.2-codex`; exact match or `*/<model>` suffix match)
+
+OpenRouter sync requires these environment variables in InsForge:
+
+- `OPENROUTER_API_KEY` (required)
+- `OPENROUTER_HTTP_REFERER` (optional, for attribution)
+- `OPENROUTER_APP_TITLE` (optional, for attribution)
+
+Health check:
+- See `docs/ops/pricing-sync-health.md` and `scripts/ops/pricing-sync-health.sql`.
+
+Alias mapping:
+- `vibescore_pricing_model_aliases` maps `usage_model` -> `pricing_model` with `effective_from`.
+- Resolver checks alias mapping before suffix matching.
+
 ## Client backpressure defaults
 
 To keep low-tier backends stable, the CLI and dashboard apply conservative defaults:
@@ -100,6 +120,7 @@ Request body:
     {
       "hour_start": "2025-12-23T06:00:00.000Z",
       "source": "codex",
+      "model": "unknown",
       "input_tokens": 0,
       "cached_input_tokens": 0,
       "output_tokens": 0,
@@ -119,8 +140,12 @@ Response:
 Notes:
 - `hour_start` must be a UTC half-hour boundary ISO timestamp (`:00` or `:30`).
 - `source` is optional; when missing or empty, it defaults to `codex`.
-- Uploads are upserts keyed by `user_id + device_id + source + hour_start`.
+- `model` is optional; when missing or empty, it defaults to `unknown`.
+- Uploads are upserts keyed by `user_id + device_id + source + model + hour_start`.
 - Backward compatibility: `{ "data": { "hourly": [...] } }` is accepted, but `{ "hourly": [...] }` remains canonical.
+- `hour_start` is the usage-time bucket. Database `created_at`/`updated_at` reflect ingest/upsert time, so many rows can share the same timestamp when a batch is uploaded.
+- Internal observability: ingest requests also write a best-effort metrics row to `vibescore_tracker_ingest_batches` (project_admin only). Fields include `bucket_count`, `inserted`, `skipped`, `source`, `user_id`, `device_id`, and `created_at`. No prompt/response content is stored.
+- Retention: `POST /functions/vibescore-events-retention` supports `include_ingest_batches` to purge ingest batch metrics older than the cutoff.
 
 ---
 
@@ -155,6 +180,7 @@ Query:
 - `from=YYYY-MM-DD` (optional; default last 30 days)
 - `to=YYYY-MM-DD` (optional; default today in requested timezone)
 - `source=codex|every-code|...` (optional; filter by source; omit to aggregate all sources)
+- `model=<model-id>` (optional; filter by model; omit to aggregate all models)
 - `tz=IANA` (optional; e.g. `America/Los_Angeles`)
 - `tz_offset_minutes` (optional; fixed offset minutes from UTC to local, e.g. `-480`)
 
@@ -176,7 +202,79 @@ Response (bigints as strings):
   "pricing": {
     "model": "gpt-5.2-codex",
     "pricing_mode": "overlap",
-    "source": "gpt-5.2",
+    "source": "openrouter",
+    "effective_from": "2025-12-23",
+    "rates_per_million_usd": {
+      "input": "1.750000",
+      "cached_input": "0.175000",
+      "output": "14.000000",
+      "reasoning_output": "14.000000"
+    }
+  }
+}
+```
+
+Notes:
+- Pricing metadata is resolved from `vibescore_pricing_profiles` using the configured default model/source and the latest `effective_from` not in the future (`active=true`).
+- If no pricing rows exist, the endpoint falls back to the built-in default profile.
+
+---
+
+### GET /functions/vibescore-usage-model-breakdown
+
+Return per-source and per-model aggregates for a date range. This endpoint is intended for model mix and cost breakdown UI.
+
+Auth:
+- `Authorization: Bearer <user_jwt>`
+
+Query:
+- `from=YYYY-MM-DD` (optional; default last 30 days)
+- `to=YYYY-MM-DD` (optional; default today in requested timezone)
+- `source=codex|every-code|...` (optional; filter by source; omit to aggregate all sources)
+- `tz=IANA` (optional; e.g. `America/Los_Angeles`)
+- `tz_offset_minutes` (optional; fixed offset minutes from UTC to local, e.g. `-480`)
+
+Notes:
+- `model` is not accepted because this endpoint already returns per-model groups.
+- Pricing metadata is resolved from `vibescore_pricing_profiles`. If the range contains exactly one non-`unknown` model, pricing is resolved for that model; otherwise it falls back to the configured default profile.
+
+Response (bigints as strings):
+
+```json
+{
+  "from": "YYYY-MM-DD",
+  "to": "YYYY-MM-DD",
+  "days": 30,
+  "sources": [
+    {
+      "source": "codex",
+      "totals": {
+        "total_tokens": "0",
+        "input_tokens": "0",
+        "cached_input_tokens": "0",
+        "output_tokens": "0",
+        "reasoning_output_tokens": "0",
+        "total_cost_usd": "0.000000"
+      },
+      "models": [
+        {
+          "model": "gpt-5.2-codex",
+          "totals": {
+            "total_tokens": "0",
+            "input_tokens": "0",
+            "cached_input_tokens": "0",
+            "output_tokens": "0",
+            "reasoning_output_tokens": "0",
+            "total_cost_usd": "0.000000"
+          }
+        }
+      ]
+    }
+  ],
+  "pricing": {
+    "model": "gpt-5.2-codex",
+    "pricing_mode": "overlap",
+    "source": "openrouter",
     "effective_from": "2025-12-23",
     "rates_per_million_usd": {
       "input": "1.750000",
@@ -201,6 +299,7 @@ Query:
 - `from=YYYY-MM-DD` (optional; default last 30 days)
 - `to=YYYY-MM-DD` (optional; default today in requested timezone)
 - `source=codex|every-code|...` (optional; filter by source; omit to aggregate all sources)
+- `model=<model-id>` (optional; filter by model; omit to aggregate all models)
 - `tz=IANA` (optional; e.g. `America/Los_Angeles`)
 - `tz_offset_minutes` (optional; fixed offset minutes from UTC to local, e.g. `-480`)
 
@@ -222,6 +321,7 @@ Auth:
 Query:
 - `day=YYYY-MM-DD` (optional; default today in requested timezone)
 - `source=codex|every-code|...` (optional; filter by source; omit to aggregate all sources)
+- `model=<model-id>` (optional; filter by model; omit to aggregate all models)
 - `tz=IANA` (optional; e.g. `America/Los_Angeles`)
 - `tz_offset_minutes` (optional; fixed offset minutes from UTC to local, e.g. `-480`)
 
@@ -261,6 +361,7 @@ Query:
 - `months=1..24` (optional; default `24`)
 - `to=YYYY-MM-DD` (optional; default today in requested timezone)
 - `source=codex|every-code|...` (optional; filter by source; omit to aggregate all sources)
+- `model=<model-id>` (optional; filter by model; omit to aggregate all models)
 - `tz=IANA` (optional; e.g. `America/Los_Angeles`)
 - `tz_offset_minutes` (optional; fixed offset minutes from UTC to local, e.g. `-480`)
 
@@ -298,6 +399,7 @@ Query:
 - `to=YYYY-MM-DD` (optional; default today in requested timezone)
 - `week_starts_on=sun|mon` (optional; default `sun`)
 - `source=codex|every-code|...` (optional; filter by source; omit to aggregate all sources)
+- `model=<model-id>` (optional; filter by model; omit to aggregate all models)
 - `tz=IANA` (optional; e.g. `America/Los_Angeles`)
 - `tz_offset_minutes` (optional; fixed offset minutes from UTC to local, e.g. `-480`)
 
@@ -403,6 +505,45 @@ Response:
 
 ```json
 { "leaderboard_public": true, "updated_at": "iso" }
+```
+
+---
+
+### POST /functions/vibescore-pricing-sync
+
+Sync OpenRouter Models API pricing into `vibescore_pricing_profiles` (admin only).
+
+Auth:
+- `Authorization: Bearer <service_role_key>`
+
+Request body:
+
+```json
+{ "retention_days": 90, "effective_from": "2025-12-25", "allow_models": ["gpt-5.2-codex"] }
+```
+
+Notes:
+- `retention_days` is optional; when provided, rows older than the cutoff are soft-deactivated (`active=false`).
+- `effective_from` defaults to today (UTC).
+- `allow_models` is optional; when omitted, all models from OpenRouter are processed.
+- Alias generation: unmatched usage models are mapped via vendor rules (`claude-*` -> `anthropic/*`, `gpt-*` -> `openai/*`) and frozen by `effective_from`.
+
+Response:
+
+```json
+{
+  "success": true,
+  "source": "openrouter",
+  "effective_from": "2025-12-25",
+  "models_total": 300,
+  "models_processed": 280,
+  "models_skipped": 20,
+  "rows_upserted": 280,
+  "usage_models_total": 42,
+  "aliases_generated": 5,
+  "aliases_upserted": 5,
+  "retention": { "retention_days": 90, "cutoff_date": "2025-09-26" }
+}
 ```
 
 ---

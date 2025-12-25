@@ -1,13 +1,14 @@
 'use strict';
 
 const { toBigInt } = require('./numbers');
+const { normalizeModel } = require('./model');
 
 const TOKENS_PER_MILLION = 1000000n;
 const MICROS_PER_DOLLAR = 1000000n;
 
 const DEFAULT_PROFILE = {
   model: 'gpt-5.2-codex',
-  source: 'gpt-5.2',
+  source: 'openrouter',
   effective_from: '2025-12-23',
   rates_micro_per_million: {
     input: 1750000,
@@ -24,6 +25,119 @@ function getDefaultPricingProfile() {
     effective_from: DEFAULT_PROFILE.effective_from,
     rates_micro_per_million: { ...DEFAULT_PROFILE.rates_micro_per_million }
   };
+}
+
+function getEnvValue(key) {
+  try {
+    if (typeof Deno !== 'undefined' && Deno?.env?.get) {
+      return Deno.env.get(key);
+    }
+  } catch (_) {
+    // Ignore Deno env lookup failures.
+  }
+  if (typeof process !== 'undefined' && process?.env) {
+    return process.env[key];
+  }
+  return null;
+}
+
+function normalizeSource(value) {
+  if (typeof value !== 'string') return null;
+  const trimmed = value.trim().toLowerCase();
+  return trimmed.length > 0 ? trimmed : null;
+}
+
+function normalizeModelValue(value) {
+  const normalized = normalizeModel(value);
+  if (!normalized || normalized.toLowerCase() === 'unknown') return null;
+  return normalized;
+}
+
+function getPricingDefaults() {
+  return {
+    model: normalizeModelValue(getEnvValue('VIBESCORE_PRICING_MODEL')) || DEFAULT_PROFILE.model,
+    source: normalizeSource(getEnvValue('VIBESCORE_PRICING_SOURCE')) || DEFAULT_PROFILE.source
+  };
+}
+
+async function resolvePricingProfile({ edgeClient, effectiveDate, model, source } = {}) {
+  const fallback = getDefaultPricingProfile();
+  if (!edgeClient || !edgeClient.database) return fallback;
+
+  const defaults = getPricingDefaults();
+  const requestedModel = normalizeModelValue(model) || defaults.model;
+  const requestedModelLower = requestedModel ? requestedModel.toLowerCase() : null;
+  const requestedSource = normalizeSource(source) || defaults.source;
+
+  const dateKey =
+    typeof effectiveDate === 'string' && effectiveDate.trim()
+      ? effectiveDate.trim()
+      : new Date().toISOString().slice(0, 10);
+
+  try {
+    let resolvedModel = requestedModel;
+
+    if (requestedModelLower) {
+      const { data: aliasRows, error: aliasError } = await edgeClient.database
+        .from('vibescore_pricing_model_aliases')
+        .select('pricing_model,effective_from')
+        .eq('active', true)
+        .eq('pricing_source', requestedSource)
+        .eq('usage_model', requestedModelLower)
+        .lte('effective_from', dateKey)
+        .order('effective_from', { ascending: false })
+        .limit(1);
+
+      if (!aliasError && Array.isArray(aliasRows) && aliasRows.length > 0) {
+        const aliasModel = normalizeModelValue(aliasRows[0]?.pricing_model);
+        if (aliasModel) resolvedModel = aliasModel;
+      }
+    }
+
+    let query = edgeClient.database
+      .from('vibescore_pricing_profiles')
+      .select(
+        [
+          'model',
+          'source',
+          'effective_from',
+          'input_rate_micro_per_million',
+          'cached_input_rate_micro_per_million',
+          'output_rate_micro_per_million',
+          'reasoning_output_rate_micro_per_million'
+        ].join(',')
+      )
+      .eq('active', true)
+      .eq('source', requestedSource)
+      .lte('effective_from', dateKey);
+
+    if (resolvedModel) {
+      if (resolvedModel.includes('/')) {
+        query = query.eq('model', resolvedModel);
+      } else {
+        query = query.or(`model.eq.${resolvedModel},model.like.%/${resolvedModel}`);
+      }
+    }
+
+    const { data, error } = await query.order('effective_from', { ascending: false }).limit(1);
+
+    if (error || !Array.isArray(data) || data.length === 0) return fallback;
+
+    const row = data[0];
+    return normalizeProfile({
+      model: row?.model,
+      source: row?.source,
+      effective_from: row?.effective_from,
+      rates_micro_per_million: {
+        input: row?.input_rate_micro_per_million,
+        cached_input: row?.cached_input_rate_micro_per_million,
+        output: row?.output_rate_micro_per_million,
+        reasoning_output: row?.reasoning_output_rate_micro_per_million
+      }
+    });
+  } catch (_err) {
+    return fallback;
+  }
 }
 
 function computeUsageCost(totals, profile) {
@@ -127,5 +241,6 @@ module.exports = {
   buildPricingMetadata,
   computeUsageCost,
   formatUsdFromMicros,
-  getDefaultPricingProfile
+  getDefaultPricingProfile,
+  resolvePricingProfile
 };

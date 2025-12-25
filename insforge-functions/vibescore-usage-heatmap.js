@@ -89,7 +89,41 @@ var require_auth = __commonJS({
       const token = headerValue.slice(prefix.length).trim();
       return token.length > 0 ? token : null;
     }
-    async function getEdgeClientAndUserId2({ baseUrl, bearer }) {
+    function decodeBase64Url(value) {
+      if (typeof value !== "string") return null;
+      let s = value.replace(/-/g, "+").replace(/_/g, "/");
+      const pad = s.length % 4;
+      if (pad) s += "=".repeat(4 - pad);
+      try {
+        if (typeof atob === "function") return atob(s);
+      } catch (_e) {
+      }
+      try {
+        if (typeof Buffer !== "undefined") {
+          return Buffer.from(s, "base64").toString("utf8");
+        }
+      } catch (_e) {
+      }
+      return null;
+    }
+    function decodeJwtPayload(token) {
+      if (typeof token !== "string") return null;
+      const parts = token.split(".");
+      if (parts.length < 2) return null;
+      const raw = decodeBase64Url(parts[1]);
+      if (!raw) return null;
+      try {
+        return JSON.parse(raw);
+      } catch (_e) {
+        return null;
+      }
+    }
+    function isJwtExpired(payload) {
+      const exp = Number(payload?.exp);
+      if (!Number.isFinite(exp)) return false;
+      return exp * 1e3 <= Date.now();
+    }
+    async function getEdgeClientAndUserId({ baseUrl, bearer }) {
       const anonKey = getAnonKey();
       const edgeClient = createClient({ baseUrl, anonKey: anonKey || void 0, edgeFunctionToken: bearer });
       const { data: userData, error: userErr } = await edgeClient.auth.getCurrentUser();
@@ -97,9 +131,22 @@ var require_auth = __commonJS({
       if (userErr || !userId) return { ok: false, edgeClient: null, userId: null };
       return { ok: true, edgeClient, userId };
     }
+    async function getEdgeClientAndUserIdFast2({ baseUrl, bearer }) {
+      const anonKey = getAnonKey();
+      const edgeClient = createClient({ baseUrl, anonKey: anonKey || void 0, edgeFunctionToken: bearer });
+      const payload = decodeJwtPayload(bearer);
+      if (payload && isJwtExpired(payload)) {
+        return { ok: false, edgeClient: null, userId: null };
+      }
+      const { data: userData, error: userErr } = await edgeClient.auth.getCurrentUser();
+      const resolvedUserId = userData?.user?.id;
+      if (userErr || !resolvedUserId) return { ok: false, edgeClient: null, userId: null };
+      return { ok: true, edgeClient, userId: resolvedUserId };
+    }
     module2.exports = {
       getBearerToken: getBearerToken2,
-      getEdgeClientAndUserId: getEdgeClientAndUserId2
+      getEdgeClientAndUserId,
+      getEdgeClientAndUserIdFast: getEdgeClientAndUserIdFast2
     };
   }
 });
@@ -493,7 +540,7 @@ var require_pagination = __commonJS({
 
 // insforge-src/functions/vibescore-usage-heatmap.js
 var { handleOptions, json, requireMethod } = require_http();
-var { getBearerToken, getEdgeClientAndUserId } = require_auth();
+var { getBearerToken, getEdgeClientAndUserIdFast } = require_auth();
 var { getBaseUrl } = require_env();
 var { getSourceParam } = require_source();
 var {
@@ -541,7 +588,7 @@ module.exports = async function(request) {
       to: to2
     });
     const baseUrl2 = getBaseUrl();
-    const auth2 = await getEdgeClientAndUserId({ baseUrl: baseUrl2, bearer });
+    const auth2 = await getEdgeClientAndUserIdFast({ baseUrl: baseUrl2, bearer });
     if (!auth2.ok) return json({ error: "Unauthorized" }, 401);
     const startIso2 = gridStart2.toISOString();
     const endUtc2 = addUtcDays(end2, 1);
@@ -642,7 +689,7 @@ module.exports = async function(request) {
   const startIso = startUtc.toISOString();
   const endIso = endUtc.toISOString();
   const baseUrl = getBaseUrl();
-  const auth = await getEdgeClientAndUserId({ baseUrl, bearer });
+  const auth = await getEdgeClientAndUserIdFast({ baseUrl, bearer });
   if (!auth.ok) return json({ error: "Unauthorized" }, 401);
   const valuesByDay = /* @__PURE__ */ new Map();
   const { error } = await forEachPage({

@@ -89,7 +89,41 @@ var require_auth = __commonJS({
       const token = headerValue.slice(prefix.length).trim();
       return token.length > 0 ? token : null;
     }
-    async function getEdgeClientAndUserId2({ baseUrl, bearer }) {
+    function decodeBase64Url(value) {
+      if (typeof value !== "string") return null;
+      let s = value.replace(/-/g, "+").replace(/_/g, "/");
+      const pad = s.length % 4;
+      if (pad) s += "=".repeat(4 - pad);
+      try {
+        if (typeof atob === "function") return atob(s);
+      } catch (_e) {
+      }
+      try {
+        if (typeof Buffer !== "undefined") {
+          return Buffer.from(s, "base64").toString("utf8");
+        }
+      } catch (_e) {
+      }
+      return null;
+    }
+    function decodeJwtPayload(token) {
+      if (typeof token !== "string") return null;
+      const parts = token.split(".");
+      if (parts.length < 2) return null;
+      const raw = decodeBase64Url(parts[1]);
+      if (!raw) return null;
+      try {
+        return JSON.parse(raw);
+      } catch (_e) {
+        return null;
+      }
+    }
+    function isJwtExpired(payload) {
+      const exp = Number(payload?.exp);
+      if (!Number.isFinite(exp)) return false;
+      return exp * 1e3 <= Date.now();
+    }
+    async function getEdgeClientAndUserId({ baseUrl, bearer }) {
       const anonKey = getAnonKey();
       const edgeClient = createClient({ baseUrl, anonKey: anonKey || void 0, edgeFunctionToken: bearer });
       const { data: userData, error: userErr } = await edgeClient.auth.getCurrentUser();
@@ -97,9 +131,22 @@ var require_auth = __commonJS({
       if (userErr || !userId) return { ok: false, edgeClient: null, userId: null };
       return { ok: true, edgeClient, userId };
     }
+    async function getEdgeClientAndUserIdFast2({ baseUrl, bearer }) {
+      const anonKey = getAnonKey();
+      const edgeClient = createClient({ baseUrl, anonKey: anonKey || void 0, edgeFunctionToken: bearer });
+      const payload = decodeJwtPayload(bearer);
+      if (payload && isJwtExpired(payload)) {
+        return { ok: false, edgeClient: null, userId: null };
+      }
+      const { data: userData, error: userErr } = await edgeClient.auth.getCurrentUser();
+      const resolvedUserId = userData?.user?.id;
+      if (userErr || !resolvedUserId) return { ok: false, edgeClient: null, userId: null };
+      return { ok: true, edgeClient, userId: resolvedUserId };
+    }
     module2.exports = {
       getBearerToken: getBearerToken2,
-      getEdgeClientAndUserId: getEdgeClientAndUserId2
+      getEdgeClientAndUserId,
+      getEdgeClientAndUserIdFast: getEdgeClientAndUserIdFast2
     };
   }
 });
@@ -131,6 +178,33 @@ var require_source = __commonJS({
       MAX_SOURCE_LENGTH,
       normalizeSource,
       getSourceParam: getSourceParam2
+    };
+  }
+});
+
+// insforge-src/shared/model.js
+var require_model = __commonJS({
+  "insforge-src/shared/model.js"(exports2, module2) {
+    "use strict";
+    function normalizeModel2(value) {
+      if (typeof value !== "string") return null;
+      const trimmed = value.trim();
+      return trimmed.length > 0 ? trimmed : null;
+    }
+    function getModelParam2(url) {
+      if (!url || typeof url.searchParams?.get !== "function") {
+        return { ok: false, error: "Invalid request URL" };
+      }
+      const raw = url.searchParams.get("model");
+      if (raw == null) return { ok: true, model: null };
+      if (raw.trim() === "") return { ok: true, model: null };
+      const normalized = normalizeModel2(raw);
+      if (!normalized) return { ok: false, error: "Invalid model" };
+      return { ok: true, model: normalized };
+    }
+    module2.exports = {
+      normalizeModel: normalizeModel2,
+      getModelParam: getModelParam2
     };
   }
 });
@@ -496,11 +570,12 @@ var require_pricing = __commonJS({
   "insforge-src/shared/pricing.js"(exports2, module2) {
     "use strict";
     var { toBigInt: toBigInt2 } = require_numbers();
+    var { normalizeModel: normalizeModel2 } = require_model();
     var TOKENS_PER_MILLION = 1000000n;
     var MICROS_PER_DOLLAR = 1000000n;
     var DEFAULT_PROFILE = {
       model: "gpt-5.2-codex",
-      source: "gpt-5.2",
+      source: "openrouter",
       effective_from: "2025-12-23",
       rates_micro_per_million: {
         input: 175e4,
@@ -509,13 +584,94 @@ var require_pricing = __commonJS({
         reasoning_output: 14e6
       }
     };
-    function getDefaultPricingProfile2() {
+    function getDefaultPricingProfile() {
       return {
         model: DEFAULT_PROFILE.model,
         source: DEFAULT_PROFILE.source,
         effective_from: DEFAULT_PROFILE.effective_from,
         rates_micro_per_million: { ...DEFAULT_PROFILE.rates_micro_per_million }
       };
+    }
+    function getEnvValue(key) {
+      try {
+        if (typeof Deno !== "undefined" && Deno?.env?.get) {
+          return Deno.env.get(key);
+        }
+      } catch (_) {
+      }
+      if (typeof process !== "undefined" && process?.env) {
+        return process.env[key];
+      }
+      return null;
+    }
+    function normalizeSource(value) {
+      if (typeof value !== "string") return null;
+      const trimmed = value.trim().toLowerCase();
+      return trimmed.length > 0 ? trimmed : null;
+    }
+    function normalizeModelValue(value) {
+      const normalized = normalizeModel2(value);
+      if (!normalized || normalized.toLowerCase() === "unknown") return null;
+      return normalized;
+    }
+    function getPricingDefaults() {
+      return {
+        model: normalizeModelValue(getEnvValue("VIBESCORE_PRICING_MODEL")) || DEFAULT_PROFILE.model,
+        source: normalizeSource(getEnvValue("VIBESCORE_PRICING_SOURCE")) || DEFAULT_PROFILE.source
+      };
+    }
+    async function resolvePricingProfile2({ edgeClient, effectiveDate, model, source } = {}) {
+      const fallback = getDefaultPricingProfile();
+      if (!edgeClient || !edgeClient.database) return fallback;
+      const defaults = getPricingDefaults();
+      const requestedModel = normalizeModelValue(model) || defaults.model;
+      const requestedModelLower = requestedModel ? requestedModel.toLowerCase() : null;
+      const requestedSource = normalizeSource(source) || defaults.source;
+      const dateKey = typeof effectiveDate === "string" && effectiveDate.trim() ? effectiveDate.trim() : (/* @__PURE__ */ new Date()).toISOString().slice(0, 10);
+      try {
+        let resolvedModel = requestedModel;
+        if (requestedModelLower) {
+          const { data: aliasRows, error: aliasError } = await edgeClient.database.from("vibescore_pricing_model_aliases").select("pricing_model,effective_from").eq("active", true).eq("pricing_source", requestedSource).eq("usage_model", requestedModelLower).lte("effective_from", dateKey).order("effective_from", { ascending: false }).limit(1);
+          if (!aliasError && Array.isArray(aliasRows) && aliasRows.length > 0) {
+            const aliasModel = normalizeModelValue(aliasRows[0]?.pricing_model);
+            if (aliasModel) resolvedModel = aliasModel;
+          }
+        }
+        let query = edgeClient.database.from("vibescore_pricing_profiles").select(
+          [
+            "model",
+            "source",
+            "effective_from",
+            "input_rate_micro_per_million",
+            "cached_input_rate_micro_per_million",
+            "output_rate_micro_per_million",
+            "reasoning_output_rate_micro_per_million"
+          ].join(",")
+        ).eq("active", true).eq("source", requestedSource).lte("effective_from", dateKey);
+        if (resolvedModel) {
+          if (resolvedModel.includes("/")) {
+            query = query.eq("model", resolvedModel);
+          } else {
+            query = query.or(`model.eq.${resolvedModel},model.like.%/${resolvedModel}`);
+          }
+        }
+        const { data, error } = await query.order("effective_from", { ascending: false }).limit(1);
+        if (error || !Array.isArray(data) || data.length === 0) return fallback;
+        const row = data[0];
+        return normalizeProfile({
+          model: row?.model,
+          source: row?.source,
+          effective_from: row?.effective_from,
+          rates_micro_per_million: {
+            input: row?.input_rate_micro_per_million,
+            cached_input: row?.cached_input_rate_micro_per_million,
+            output: row?.output_rate_micro_per_million,
+            reasoning_output: row?.reasoning_output_rate_micro_per_million
+          }
+        });
+      } catch (_err) {
+        return fallback;
+      }
     }
     function computeUsageCost2(totals, profile) {
       const pricing = normalizeProfile(profile || DEFAULT_PROFILE);
@@ -576,7 +732,7 @@ var require_pricing = __commonJS({
       return value < 0n ? -value : value;
     }
     function normalizeProfile(profile) {
-      if (!profile || typeof profile !== "object") return getDefaultPricingProfile2();
+      if (!profile || typeof profile !== "object") return getDefaultPricingProfile();
       return {
         model: typeof profile.model === "string" ? profile.model : DEFAULT_PROFILE.model,
         source: typeof profile.source === "string" ? profile.source : DEFAULT_PROFILE.source,
@@ -603,16 +759,18 @@ var require_pricing = __commonJS({
       buildPricingMetadata: buildPricingMetadata2,
       computeUsageCost: computeUsageCost2,
       formatUsdFromMicros: formatUsdFromMicros2,
-      getDefaultPricingProfile: getDefaultPricingProfile2
+      getDefaultPricingProfile,
+      resolvePricingProfile: resolvePricingProfile2
     };
   }
 });
 
 // insforge-src/functions/vibescore-usage-summary.js
 var { handleOptions, json, requireMethod } = require_http();
-var { getBearerToken, getEdgeClientAndUserId } = require_auth();
+var { getBearerToken, getEdgeClientAndUserIdFast } = require_auth();
 var { getBaseUrl } = require_env();
 var { getSourceParam } = require_source();
+var { getModelParam, normalizeModel } = require_model();
 var {
   addDatePartsDays,
   getUsageTimeZoneContext,
@@ -627,7 +785,7 @@ var {
   buildPricingMetadata,
   computeUsageCost,
   formatUsdFromMicros,
-  getDefaultPricingProfile
+  resolvePricingProfile
 } = require_pricing();
 module.exports = async function(request) {
   const opt = handleOptions(request);
@@ -637,13 +795,16 @@ module.exports = async function(request) {
   const bearer = getBearerToken(request.headers.get("Authorization"));
   if (!bearer) return json({ error: "Missing bearer token" }, 401);
   const baseUrl = getBaseUrl();
-  const auth = await getEdgeClientAndUserId({ baseUrl, bearer });
+  const auth = await getEdgeClientAndUserIdFast({ baseUrl, bearer });
   if (!auth.ok) return json({ error: "Unauthorized" }, 401);
   const url = new URL(request.url);
   const tzContext = getUsageTimeZoneContext(url);
   const sourceResult = getSourceParam(url);
   if (!sourceResult.ok) return json({ error: sourceResult.error }, 400);
   const source = sourceResult.source;
+  const modelResult = getModelParam(url);
+  if (!modelResult.ok) return json({ error: modelResult.error }, 400);
+  const model = modelResult.model;
   const { from, to } = normalizeDateRangeLocal(
     url.searchParams.get("from"),
     url.searchParams.get("to"),
@@ -662,10 +823,12 @@ module.exports = async function(request) {
   let cachedInputTokens = 0n;
   let outputTokens = 0n;
   let reasoningOutputTokens = 0n;
+  const distinctModels = /* @__PURE__ */ new Set();
   const { error } = await forEachPage({
     createQuery: () => {
       let query = auth.edgeClient.database.from("vibescore_tracker_hourly").select("hour_start,total_tokens,input_tokens,cached_input_tokens,output_tokens,reasoning_output_tokens").eq("user_id", auth.userId);
       if (source) query = query.eq("source", source);
+      if (model) query = query.eq("model", model);
       return query.gte("hour_start", startIso).lt("hour_start", endIso).order("hour_start", { ascending: true });
     },
     onPage: (rows) => {
@@ -675,11 +838,20 @@ module.exports = async function(request) {
         cachedInputTokens += toBigInt(row?.cached_input_tokens);
         outputTokens += toBigInt(row?.output_tokens);
         reasoningOutputTokens += toBigInt(row?.reasoning_output_tokens);
+        const normalizedModel = normalizeModel(row?.model);
+        if (normalizedModel && normalizedModel.toLowerCase() !== "unknown") {
+          distinctModels.add(normalizedModel);
+        }
       }
     }
   });
   if (error) return json({ error: error.message }, 500);
-  const pricingProfile = getDefaultPricingProfile();
+  const impliedModel = model || (distinctModels.size === 1 ? Array.from(distinctModels)[0] : null);
+  const pricingProfile = await resolvePricingProfile({
+    edgeClient: auth.edgeClient,
+    model: impliedModel,
+    effectiveDate: to
+  });
   const cost = computeUsageCost(
     {
       total_tokens: totalTokens,

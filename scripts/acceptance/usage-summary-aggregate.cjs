@@ -23,6 +23,14 @@ class DatabaseStub {
     return this;
   }
 
+  or() {
+    return this;
+  }
+
+  lte() {
+    return this;
+  }
+
   gte() {
     return this;
   }
@@ -33,6 +41,16 @@ class DatabaseStub {
 
   order() {
     return this;
+  }
+
+  limit() {
+    if (this._table === 'vibescore_pricing_model_aliases') {
+      return { data: [], error: null };
+    }
+    if (this._table === 'vibescore_pricing_profiles') {
+      return { data: [buildPricingRow()], error: null };
+    }
+    return { data: [], error: null };
   }
 
   range(from, to) {
@@ -62,6 +80,18 @@ class DatabaseStub {
       error: null
     };
   }
+}
+
+function buildPricingRow() {
+  return {
+    model: 'gpt-5.2-codex',
+    source: 'openrouter',
+    effective_from: '2025-12-23',
+    input_rate_micro_per_million: 1750000,
+    cached_input_rate_micro_per_million: 175000,
+    output_rate_micro_per_million: 14000000,
+    reasoning_output_rate_micro_per_million: 14000000
+  };
 }
 
 function createClientStub() {

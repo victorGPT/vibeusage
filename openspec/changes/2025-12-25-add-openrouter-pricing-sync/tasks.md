@@ -1,0 +1,11 @@
+## 1. Implementation
+- [x] 1.1 Confirm OpenRouter pricing field mapping and units.
+- [x] 1.2 Add OpenRouter pricing normalization helper (USD/token -> micro USD per million).
+- [x] 1.3 Add `vibescore-pricing-sync` edge function.
+- [x] 1.4 Add pricing resolver support for configured model/source.
+- [x] 1.5 Add optional retention handling (default disabled).
+- [x] 1.6 Add GitHub Actions schedule (6-hour cron) to trigger sync.
+- [x] 1.7 Add acceptance tests for sync + idempotency.
+- [x] 1.8 Update docs (BACKEND_API.md, env vars).
+- [x] 1.9 Add ops health check SQL/script.
+- [x] 1.10 Update verification report with evidence.

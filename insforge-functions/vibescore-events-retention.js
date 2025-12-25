@@ -89,6 +89,40 @@ var require_auth = __commonJS({
       const token = headerValue.slice(prefix.length).trim();
       return token.length > 0 ? token : null;
     }
+    function decodeBase64Url(value) {
+      if (typeof value !== "string") return null;
+      let s = value.replace(/-/g, "+").replace(/_/g, "/");
+      const pad = s.length % 4;
+      if (pad) s += "=".repeat(4 - pad);
+      try {
+        if (typeof atob === "function") return atob(s);
+      } catch (_e) {
+      }
+      try {
+        if (typeof Buffer !== "undefined") {
+          return Buffer.from(s, "base64").toString("utf8");
+        }
+      } catch (_e) {
+      }
+      return null;
+    }
+    function decodeJwtPayload(token) {
+      if (typeof token !== "string") return null;
+      const parts = token.split(".");
+      if (parts.length < 2) return null;
+      const raw = decodeBase64Url(parts[1]);
+      if (!raw) return null;
+      try {
+        return JSON.parse(raw);
+      } catch (_e) {
+        return null;
+      }
+    }
+    function isJwtExpired(payload) {
+      const exp = Number(payload?.exp);
+      if (!Number.isFinite(exp)) return false;
+      return exp * 1e3 <= Date.now();
+    }
     async function getEdgeClientAndUserId({ baseUrl, bearer }) {
       const anonKey = getAnonKey2();
       const edgeClient = createClient({ baseUrl, anonKey: anonKey || void 0, edgeFunctionToken: bearer });
@@ -97,9 +131,22 @@ var require_auth = __commonJS({
       if (userErr || !userId) return { ok: false, edgeClient: null, userId: null };
       return { ok: true, edgeClient, userId };
     }
+    async function getEdgeClientAndUserIdFast({ baseUrl, bearer }) {
+      const anonKey = getAnonKey2();
+      const edgeClient = createClient({ baseUrl, anonKey: anonKey || void 0, edgeFunctionToken: bearer });
+      const payload = decodeJwtPayload(bearer);
+      if (payload && isJwtExpired(payload)) {
+        return { ok: false, edgeClient: null, userId: null };
+      }
+      const { data: userData, error: userErr } = await edgeClient.auth.getCurrentUser();
+      const resolvedUserId = userData?.user?.id;
+      if (userErr || !resolvedUserId) return { ok: false, edgeClient: null, userId: null };
+      return { ok: true, edgeClient, userId: resolvedUserId };
+    }
     module2.exports = {
       getBearerToken: getBearerToken2,
-      getEdgeClientAndUserId
+      getEdgeClientAndUserId,
+      getEdgeClientAndUserIdFast
     };
   }
 });
@@ -123,6 +170,7 @@ module.exports = async function(request) {
   if (body.error) return json({ error: body.error }, body.status);
   const days = clampDays(body.data?.days);
   const dryRun = Boolean(body.data?.dry_run);
+  const includeIngestBatches = Boolean(body.data?.include_ingest_batches);
   const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1e3);
   if (!Number.isFinite(cutoff.getTime())) return json({ error: "Invalid cutoff" }, 400);
   const baseUrl = getBaseUrl();
@@ -133,19 +181,26 @@ module.exports = async function(request) {
     edgeFunctionToken: serviceRoleKey
   });
   const cutoffIso = cutoff.toISOString();
-  let deleted = 0;
-  if (dryRun) {
-    const { count, error } = await serviceClient.database.from("vibescore_tracker_events").select("event_id", { count: "exact" }).lt("token_timestamp", cutoffIso).limit(1);
-    if (error) return json({ error: formatError(error) }, 500);
-    deleted = toSafeInt(count);
-  } else {
-    const before = await serviceClient.database.from("vibescore_tracker_events").select("event_id", { count: "exact" }).lt("token_timestamp", cutoffIso).limit(1);
-    if (before.error) return json({ error: formatError(before.error) }, 500);
-    const { error: deleteErr } = await serviceClient.database.from("vibescore_tracker_events").delete().lt("token_timestamp", cutoffIso);
-    if (deleteErr) return json({ error: formatError(deleteErr) }, 500);
-    const after = await serviceClient.database.from("vibescore_tracker_events").select("event_id", { count: "exact" }).lt("token_timestamp", cutoffIso).limit(1);
-    if (after.error) return json({ error: formatError(after.error) }, 500);
-    deleted = Math.max(0, toSafeInt(before.count) - toSafeInt(after.count));
+  const eventsResult = await purgeTable({
+    serviceClient,
+    table: "vibescore_tracker_events",
+    cutoffColumn: "token_timestamp",
+    cutoffIso,
+    dryRun,
+    countColumn: "event_id"
+  });
+  if (eventsResult.error) return json({ error: eventsResult.error }, 500);
+  let ingestResult = { deleted: 0 };
+  if (includeIngestBatches) {
+    ingestResult = await purgeTable({
+      serviceClient,
+      table: "vibescore_tracker_ingest_batches",
+      cutoffColumn: "created_at",
+      cutoffIso,
+      dryRun,
+      countColumn: "batch_id"
+    });
+    if (ingestResult.error) return json({ error: ingestResult.error }, 500);
   }
   return json(
     {
@@ -153,11 +208,29 @@ module.exports = async function(request) {
       dry_run: dryRun,
       days,
       cutoff: cutoff.toISOString(),
-      deleted
+      deleted: eventsResult.deleted,
+      deleted_ingest_batches: ingestResult.deleted,
+      ingest_batches_enabled: includeIngestBatches
     },
     200
   );
 };
+async function purgeTable({ serviceClient, table, cutoffColumn, cutoffIso, dryRun, countColumn }) {
+  if (!serviceClient) return { deleted: 0, error: "Service client missing" };
+  const countSelect = countColumn || "*";
+  if (dryRun) {
+    const { count, error } = await serviceClient.database.from(table).select(countSelect, { count: "exact" }).lt(cutoffColumn, cutoffIso).limit(1);
+    if (error) return { deleted: 0, error: formatError(error) };
+    return { deleted: toSafeInt(count), error: null };
+  }
+  const before = await serviceClient.database.from(table).select(countSelect, { count: "exact" }).lt(cutoffColumn, cutoffIso).limit(1);
+  if (before.error) return { deleted: 0, error: formatError(before.error) };
+  const { error: deleteErr } = await serviceClient.database.from(table).delete().lt(cutoffColumn, cutoffIso);
+  if (deleteErr) return { deleted: 0, error: formatError(deleteErr) };
+  const after = await serviceClient.database.from(table).select(countSelect, { count: "exact" }).lt(cutoffColumn, cutoffIso).limit(1);
+  if (after.error) return { deleted: 0, error: formatError(after.error) };
+  return { deleted: Math.max(0, toSafeInt(before.count) - toSafeInt(after.count)), error: null };
+}
 function toSafeInt(value) {
   const n = Number(value);
   if (!Number.isFinite(n) || n < 0) return 0;

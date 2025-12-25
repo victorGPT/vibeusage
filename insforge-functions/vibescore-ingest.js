@@ -89,6 +89,40 @@ var require_auth = __commonJS({
       const token = headerValue.slice(prefix.length).trim();
       return token.length > 0 ? token : null;
     }
+    function decodeBase64Url(value) {
+      if (typeof value !== "string") return null;
+      let s = value.replace(/-/g, "+").replace(/_/g, "/");
+      const pad = s.length % 4;
+      if (pad) s += "=".repeat(4 - pad);
+      try {
+        if (typeof atob === "function") return atob(s);
+      } catch (_e) {
+      }
+      try {
+        if (typeof Buffer !== "undefined") {
+          return Buffer.from(s, "base64").toString("utf8");
+        }
+      } catch (_e) {
+      }
+      return null;
+    }
+    function decodeJwtPayload(token) {
+      if (typeof token !== "string") return null;
+      const parts = token.split(".");
+      if (parts.length < 2) return null;
+      const raw = decodeBase64Url(parts[1]);
+      if (!raw) return null;
+      try {
+        return JSON.parse(raw);
+      } catch (_e) {
+        return null;
+      }
+    }
+    function isJwtExpired(payload) {
+      const exp = Number(payload?.exp);
+      if (!Number.isFinite(exp)) return false;
+      return exp * 1e3 <= Date.now();
+    }
     async function getEdgeClientAndUserId({ baseUrl, bearer }) {
       const anonKey = getAnonKey2();
       const edgeClient = createClient({ baseUrl, anonKey: anonKey || void 0, edgeFunctionToken: bearer });
@@ -97,9 +131,22 @@ var require_auth = __commonJS({
       if (userErr || !userId) return { ok: false, edgeClient: null, userId: null };
       return { ok: true, edgeClient, userId };
     }
+    async function getEdgeClientAndUserIdFast({ baseUrl, bearer }) {
+      const anonKey = getAnonKey2();
+      const edgeClient = createClient({ baseUrl, anonKey: anonKey || void 0, edgeFunctionToken: bearer });
+      const payload = decodeJwtPayload(bearer);
+      if (payload && isJwtExpired(payload)) {
+        return { ok: false, edgeClient: null, userId: null };
+      }
+      const { data: userData, error: userErr } = await edgeClient.auth.getCurrentUser();
+      const resolvedUserId = userData?.user?.id;
+      if (userErr || !resolvedUserId) return { ok: false, edgeClient: null, userId: null };
+      return { ok: true, edgeClient, userId: resolvedUserId };
+    }
     module2.exports = {
       getBearerToken: getBearerToken2,
-      getEdgeClientAndUserId
+      getEdgeClientAndUserId,
+      getEdgeClientAndUserIdFast
     };
   }
 });
@@ -191,6 +238,17 @@ module.exports = async function(request) {
   const rows = buildRows({ hourly, tokenRow, nowIso });
   if (rows.error) return json({ error: rows.error }, 400);
   if (rows.data.length === 0) {
+    await recordIngestBatchMetrics({
+      serviceClient,
+      baseUrl,
+      anonKey,
+      tokenHash,
+      tokenRow,
+      bucketCount: 0,
+      inserted: 0,
+      skipped: 0,
+      source: null
+    });
     return json({ success: true, inserted: 0, skipped: 0 }, 200);
   }
   const upsert = serviceClient ? await upsertWithServiceClient({
@@ -203,6 +261,17 @@ module.exports = async function(request) {
     tokenHash
   }) : await upsertWithAnonKey({ baseUrl, anonKey, tokenHash, tokenRow, rows: rows.data, nowIso });
   if (!upsert.ok) return json({ error: upsert.error }, 500);
+  await recordIngestBatchMetrics({
+    serviceClient,
+    baseUrl,
+    anonKey,
+    tokenHash,
+    tokenRow,
+    bucketCount: rows.data.length,
+    inserted: upsert.inserted,
+    skipped: upsert.skipped,
+    source: deriveMetricsSource(rows.data)
+  });
   return json(
     {
       success: true,
@@ -238,6 +307,17 @@ function buildRows({ hourly, tokenRow, nowIso }) {
     });
   }
   return { error: null, data: rows };
+}
+function deriveMetricsSource(rows) {
+  if (!Array.isArray(rows) || rows.length === 0) return null;
+  const sources = /* @__PURE__ */ new Set();
+  for (const row of rows) {
+    const source = typeof row?.source === "string" ? row.source.trim() : "";
+    if (source) sources.add(source);
+  }
+  if (sources.size === 1) return Array.from(sources)[0];
+  if (sources.size > 1) return "mixed";
+  return null;
 }
 async function getTokenRowWithServiceClient(serviceClient, tokenHash) {
   const { data: tokenRow, error: tokenErr } = await serviceClient.database.from("vibescore_tracker_device_tokens").select("id,user_id,device_id,revoked_at,last_sync_at").eq("token_hash", tokenHash).maybeSingle();
@@ -325,6 +405,50 @@ async function upsertWithAnonKey({ baseUrl, anonKey, tokenHash, tokenRow, rows, 
     return { ok: false, error: res.error || "Half-hour upsert unsupported", inserted: 0, skipped: 0 };
   }
   return { ok: false, error: res.error || `HTTP ${res.status}`, inserted: 0, skipped: 0 };
+}
+async function recordIngestBatchMetrics({
+  serviceClient,
+  baseUrl,
+  anonKey,
+  tokenHash,
+  tokenRow,
+  bucketCount,
+  inserted,
+  skipped,
+  source
+}) {
+  if (!tokenRow) return;
+  const row = {
+    user_id: tokenRow.user_id,
+    device_id: tokenRow.device_id,
+    device_token_id: tokenRow.id,
+    source: typeof source === "string" ? source : null,
+    bucket_count: toNonNegativeInt(bucketCount) ?? 0,
+    inserted: toNonNegativeInt(inserted) ?? 0,
+    skipped: toNonNegativeInt(skipped) ?? 0
+  };
+  try {
+    if (serviceClient) {
+      const { error } = await serviceClient.database.from("vibescore_tracker_ingest_batches").insert(row);
+      if (error) throw new Error(error.message);
+      return;
+    }
+    if (!anonKey || !baseUrl) return;
+    const url = new URL("/api/database/records/vibescore_tracker_ingest_batches", baseUrl);
+    const res = await fetch(url.toString(), {
+      method: "POST",
+      headers: {
+        ...buildAnonHeaders({ anonKey, tokenHash }),
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(row)
+    });
+    if (!res.ok) {
+      const { error } = await readApiJson(res);
+      throw new Error(error || `HTTP ${res.status}`);
+    }
+  } catch (_e) {
+  }
 }
 async function bestEffortTouchWithServiceClient(serviceClient, tokenRow, nowIso) {
   const lastSyncAt = normalizeIso(tokenRow?.last_sync_at);

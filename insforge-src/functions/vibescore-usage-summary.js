@@ -4,9 +4,10 @@
 'use strict';
 
 const { handleOptions, json, requireMethod } = require('../shared/http');
-const { getBearerToken, getEdgeClientAndUserId } = require('../shared/auth');
+const { getBearerToken, getEdgeClientAndUserIdFast } = require('../shared/auth');
 const { getBaseUrl } = require('../shared/env');
 const { getSourceParam } = require('../shared/source');
+const { getModelParam, normalizeModel } = require('../shared/model');
 const {
   addDatePartsDays,
   getUsageTimeZoneContext,
@@ -21,7 +22,7 @@ const {
   buildPricingMetadata,
   computeUsageCost,
   formatUsdFromMicros,
-  getDefaultPricingProfile
+  resolvePricingProfile
 } = require('../shared/pricing');
 
 module.exports = async function(request) {
@@ -35,7 +36,7 @@ module.exports = async function(request) {
   if (!bearer) return json({ error: 'Missing bearer token' }, 401);
 
   const baseUrl = getBaseUrl();
-  const auth = await getEdgeClientAndUserId({ baseUrl, bearer });
+  const auth = await getEdgeClientAndUserIdFast({ baseUrl, bearer });
   if (!auth.ok) return json({ error: 'Unauthorized' }, 401);
 
   const url = new URL(request.url);
@@ -43,6 +44,9 @@ module.exports = async function(request) {
   const sourceResult = getSourceParam(url);
   if (!sourceResult.ok) return json({ error: sourceResult.error }, 400);
   const source = sourceResult.source;
+  const modelResult = getModelParam(url);
+  if (!modelResult.ok) return json({ error: modelResult.error }, 400);
+  const model = modelResult.model;
   const { from, to } = normalizeDateRangeLocal(
     url.searchParams.get('from'),
     url.searchParams.get('to'),
@@ -65,6 +69,7 @@ module.exports = async function(request) {
   let cachedInputTokens = 0n;
   let outputTokens = 0n;
   let reasoningOutputTokens = 0n;
+  const distinctModels = new Set();
 
   const { error } = await forEachPage({
     createQuery: () => {
@@ -73,6 +78,7 @@ module.exports = async function(request) {
         .select('hour_start,total_tokens,input_tokens,cached_input_tokens,output_tokens,reasoning_output_tokens')
         .eq('user_id', auth.userId);
       if (source) query = query.eq('source', source);
+      if (model) query = query.eq('model', model);
       return query.gte('hour_start', startIso).lt('hour_start', endIso).order('hour_start', { ascending: true });
     },
     onPage: (rows) => {
@@ -82,13 +88,23 @@ module.exports = async function(request) {
         cachedInputTokens += toBigInt(row?.cached_input_tokens);
         outputTokens += toBigInt(row?.output_tokens);
         reasoningOutputTokens += toBigInt(row?.reasoning_output_tokens);
+        const normalizedModel = normalizeModel(row?.model);
+        if (normalizedModel && normalizedModel.toLowerCase() !== 'unknown') {
+          distinctModels.add(normalizedModel);
+        }
       }
     }
   });
 
   if (error) return json({ error: error.message }, 500);
 
-  const pricingProfile = getDefaultPricingProfile();
+  const impliedModel =
+    model || (distinctModels.size === 1 ? Array.from(distinctModels)[0] : null);
+  const pricingProfile = await resolvePricingProfile({
+    edgeClient: auth.edgeClient,
+    model: impliedModel,
+    effectiveDate: to
+  });
   const cost = computeUsageCost(
     {
       total_tokens: totalTokens,

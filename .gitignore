@@ -18,3 +18,5 @@ pnpm-debug.log*
 /copy2.jsx
 
 # Local-only docs
+.vercel
+.env*.local
