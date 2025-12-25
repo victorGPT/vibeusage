@@ -1,6 +1,7 @@
 import { createClient } from "@insforge/sdk";
 
 import { getInsforgeAnonKey } from "./config.js";
+import { createTimeoutFetch } from "./http-timeout.js";
 
 function createMemoryStorage() {
   const store = new Map();
@@ -25,5 +26,6 @@ export function createInsforgeClient({ baseUrl, accessToken } = {}) {
     anonKey: anonKey || undefined,
     edgeFunctionToken: accessToken || undefined,
     storage: createMemoryStorage(),
+    fetch: createTimeoutFetch(globalThis.fetch),
   });
 }

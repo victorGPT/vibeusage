@@ -404,11 +404,21 @@ test('vibescore-ingest works without serviceRoleKey via anonKey records API', as
   const data = await res.json();
   assert.deepEqual(data, { success: true, inserted: 1, skipped: 0 });
 
-  assert.equal(fetchCalls.length, 3);
-  const getCall = fetchCalls[0];
-  const postCall = fetchCalls[1];
-  const touchCall = fetchCalls[2];
+  assert.equal(fetchCalls.length, 4);
+  const getCall = fetchCalls.find((call) =>
+    String(call.url).includes('/api/database/records/vibescore_tracker_device_tokens')
+  );
+  const postCall = fetchCalls.find((call) =>
+    String(call.url).includes('/api/database/records/vibescore_tracker_hourly')
+  );
+  const touchCall = fetchCalls.find((call) =>
+    String(call.url).includes('/api/database/rpc/vibescore_touch_device_token_sync')
+  );
+  const metricsCall = fetchCalls.find((call) =>
+    String(call.url).includes('/api/database/records/vibescore_tracker_ingest_batches')
+  );
 
+  assert.ok(getCall, 'device token fetch not found');
   assert.ok(String(getCall.url).includes('/api/database/records/vibescore_tracker_device_tokens'));
   assert.equal(getCall.init?.method, 'GET');
   assert.equal(getCall.init?.headers?.apikey, ANON_KEY);
@@ -416,6 +426,7 @@ test('vibescore-ingest works without serviceRoleKey via anonKey records API', as
   assert.equal(typeof getCall.init?.headers?.['x-vibescore-device-token-hash'], 'string');
   assert.equal(getCall.init?.headers?.['x-vibescore-device-token-hash'].length, 64);
 
+  assert.ok(postCall, 'hourly upsert call not found');
   assert.ok(String(postCall.url).includes('/api/database/records/vibescore_tracker_hourly'));
   assert.equal(postCall.init?.method, 'POST');
   assert.equal(postCall.init?.headers?.Prefer, 'return=representation,resolution=merge-duplicates');
@@ -423,11 +434,18 @@ test('vibescore-ingest works without serviceRoleKey via anonKey records API', as
   assert.equal(postUrl.searchParams.get('on_conflict'), 'user_id,device_id,source,hour_start');
   assert.equal(postUrl.searchParams.get('select'), 'hour_start');
 
+  assert.ok(touchCall, 'touch RPC call not found');
   assert.ok(String(touchCall.url).includes('/api/database/rpc/vibescore_touch_device_token_sync'));
   assert.equal(touchCall.init?.method, 'POST');
   assert.equal(touchCall.init?.headers?.apikey, ANON_KEY);
   assert.equal(touchCall.init?.headers?.Authorization, `Bearer ${ANON_KEY}`);
   assert.equal(typeof touchCall.init?.headers?.['x-vibescore-device-token-hash'], 'string');
+
+  assert.ok(metricsCall, 'ingest batch metrics call not found');
+  assert.ok(String(metricsCall.url).includes('/api/database/records/vibescore_tracker_ingest_batches'));
+  assert.equal(metricsCall.init?.method, 'POST');
+  assert.equal(metricsCall.init?.headers?.apikey, ANON_KEY);
+  assert.equal(metricsCall.init?.headers?.Authorization, `Bearer ${ANON_KEY}`);
 });
 
 test('vibescore-ingest anonKey path errors when hourly upsert unsupported', async () => {
@@ -988,6 +1006,75 @@ test('vibescore-usage-summary returns total_cost_usd and pricing metadata', asyn
   assert.equal(body.pricing.model, 'gpt-5.2-codex');
   assert.equal(body.pricing.pricing_mode, 'overlap');
   assert.equal(body.pricing.rates_per_million_usd.cached_input, '0.175000');
+});
+
+test('vibescore-usage-summary prefers jwt payload to avoid auth roundtrip', async () => {
+  const fn = require('../insforge-functions/vibescore-usage-summary');
+
+  const userId = '77777777-7777-7777-7777-777777777777';
+  const payload = Buffer.from(JSON.stringify({ sub: userId, exp: 1893456000 })).toString('base64url');
+  const userJwt = `header.${payload}.sig`;
+
+  const rows = [
+    {
+      hour_start: '2025-12-21T01:00:00.000Z',
+      total_tokens: '10',
+      input_tokens: '6',
+      cached_input_tokens: '2',
+      output_tokens: '4',
+      reasoning_output_tokens: '1'
+    }
+  ];
+
+  let authCalls = 0;
+
+  globalThis.createClient = (args) => {
+    if (args && args.edgeFunctionToken === userJwt) {
+      assert.equal(args.anonKey, ANON_KEY);
+      return {
+        auth: {
+          getCurrentUser: async () => {
+            authCalls += 1;
+            return { data: { user: { id: 'should-not-be-used' } }, error: null };
+          }
+        },
+        database: {
+          from: (table) => {
+            assert.equal(table, 'vibescore_tracker_hourly');
+            return {
+              select: () => ({
+                eq: (col, value) => {
+                  assert.equal(col, 'user_id');
+                  assert.equal(value, userId);
+                  return {
+                    gte: () => ({
+                      lt: () => ({
+                        order: async () => ({ data: rows, error: null })
+                      })
+                    })
+                  };
+                }
+              })
+            };
+          }
+        }
+      };
+    }
+    throw new Error(`Unexpected createClient args: ${JSON.stringify(args)}`);
+  };
+
+  const req = new Request(
+    'http://localhost/functions/vibescore-usage-summary?from=2025-12-21&to=2025-12-21',
+    {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${userJwt}` }
+    }
+  );
+
+  const res = await fn(req);
+  assert.equal(res.status, 200);
+
+  assert.equal(authCalls, 0, 'expected jwt payload to skip auth.getCurrentUser');
 });
 
 test('vibescore-leaderboard returns a week window and slices entries to limit', async () => {
