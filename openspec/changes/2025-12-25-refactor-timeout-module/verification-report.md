@@ -8,6 +8,7 @@
 ## Commands & Results
 - `node --test test/http-timeout.test.js` ✅
 - `node --test test/*.test.js` ✅
+- `openspec validate 2025-12-25-refactor-timeout-module --strict` ✅ (2025-12-25T06:31:00Z)
 - Manual: open `https://www.vibescore.space` → 页面正常加载，`LINK: STABLE` 显示 `http=200`（2025-12-25T04:14:27.856Z）。
 
 ## Notes / Gaps
