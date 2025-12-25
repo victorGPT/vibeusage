@@ -99,6 +99,7 @@ function buildBuckets() {
     {
       hour_start: ts,
       source: 'codex',
+      model: 'unknown',
       input_tokens: 1,
       cached_input_tokens: 0,
       output_tokens: 2,
@@ -108,6 +109,7 @@ function buildBuckets() {
     {
       hour_start: ts,
       source: 'codex',
+      model: 'unknown',
       input_tokens: 2,
       cached_input_tokens: 0,
       output_tokens: 4,
@@ -117,6 +119,7 @@ function buildBuckets() {
     {
       hour_start: '2025-12-21T00:30:00.000Z',
       source: 'every-code',
+      model: 'unknown',
       input_tokens: 3,
       cached_input_tokens: 0,
       output_tokens: 6,
@@ -153,7 +156,7 @@ function buildFetchStub() {
       if (!prefer.includes('return=representation')) {
         return jsonResponse(400, { error: 'missing return=representation' });
       }
-      if (url.searchParams.get('on_conflict') !== 'user_id,device_id,source,hour_start') {
+      if (url.searchParams.get('on_conflict') !== 'user_id,device_id,source,model,hour_start') {
         return jsonResponse(400, { error: 'missing on_conflict' });
       }
       const raw = init.body ? JSON.parse(init.body) : [];

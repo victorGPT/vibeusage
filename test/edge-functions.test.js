@@ -249,13 +249,15 @@ test('vibescore-ingest uses serviceRoleKey as edgeFunctionToken and ingests hour
   assert.equal(postCall.init?.headers?.apikey, SERVICE_ROLE_KEY);
   assert.equal(postCall.init?.headers?.Authorization, `Bearer ${SERVICE_ROLE_KEY}`);
   assert.equal(postCall.init?.headers?.Prefer, 'return=representation,resolution=merge-duplicates');
-  assert.equal(postUrl.searchParams.get('on_conflict'), 'user_id,device_id,source,hour_start');
+  assert.equal(postUrl.searchParams.get('on_conflict'), 'user_id,device_id,source,model,hour_start');
   assert.equal(postUrl.searchParams.get('select'), 'hour_start');
 
   const postBody = JSON.parse(postCall.init?.body || '[]');
   assert.equal(postBody.length, 1);
   assert.equal(postBody[0]?.hour_start, bucket.hour_start);
   assert.equal(postBody[0]?.source, 'codex');
+  assert.equal(postBody[0]?.model, 'unknown');
+  assert.equal(postBody[0]?.model, 'unknown');
 
   const serviceClientCall = calls.find((c) => c && c.edgeFunctionToken === SERVICE_ROLE_KEY);
   assert.ok(serviceClientCall, 'service client not created');
@@ -431,7 +433,7 @@ test('vibescore-ingest works without serviceRoleKey via anonKey records API', as
   assert.equal(postCall.init?.method, 'POST');
   assert.equal(postCall.init?.headers?.Prefer, 'return=representation,resolution=merge-duplicates');
   const postUrl = new URL(postCall.url);
-  assert.equal(postUrl.searchParams.get('on_conflict'), 'user_id,device_id,source,hour_start');
+  assert.equal(postUrl.searchParams.get('on_conflict'), 'user_id,device_id,source,model,hour_start');
   assert.equal(postUrl.searchParams.get('select'), 'hour_start');
 
   assert.ok(touchCall, 'touch RPC call not found');
@@ -667,6 +669,62 @@ test('vibescore-usage-daily applies optional source filter', async () => {
   assert.equal(res.status, 200);
   assert.ok(filters.some((f) => f.op === 'eq' && f.col === 'user_id' && f.value === userId));
   assert.ok(filters.some((f) => f.op === 'eq' && f.col === 'source' && f.value === 'every-code'));
+});
+
+test('vibescore-usage-daily applies optional model filter', async () => {
+  const fn = require('../insforge-functions/vibescore-usage-daily');
+
+  const userId = '66666666-6666-6666-6666-666666666666';
+  const userJwt = 'user_jwt_test';
+  const filters = [];
+
+  globalThis.createClient = (args) => {
+    if (args && args.edgeFunctionToken === userJwt) {
+      return {
+        auth: {
+          getCurrentUser: async () => ({ data: { user: { id: userId } }, error: null })
+        },
+        database: {
+          from: (table) => {
+            assert.equal(table, 'vibescore_tracker_hourly');
+            const query = {
+              eq: (col, value) => {
+                filters.push({ op: 'eq', col, value });
+                return query;
+              },
+              gte: (col, value) => {
+                filters.push({ op: 'gte', col, value });
+                return query;
+              },
+              lt: (col, value) => {
+                filters.push({ op: 'lt', col, value });
+                return query;
+              },
+              order: async (col, opts) => {
+                filters.push({ op: 'order', col, opts });
+                return { data: [], error: null };
+              }
+            };
+            return { select: () => query };
+          }
+        }
+      };
+    }
+    throw new Error(`Unexpected createClient args: ${JSON.stringify(args)}`);
+  };
+
+  const req = new Request(
+    'http://localhost/functions/vibescore-usage-daily?from=2025-12-20&to=2025-12-21&model=claude-3-5-sonnet',
+    {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${userJwt}` }
+    }
+  );
+
+  const res = await fn(req);
+  assert.equal(res.status, 200);
+  assert.ok(filters.some((f) => f.op === 'eq' && f.col === 'user_id' && f.value === userId));
+  assert.ok(filters.some((f) => f.op === 'eq' && f.col === 'model' && f.value === 'claude-3-5-sonnet'));
 });
 
 test('vibescore-usage-daily treats empty source as missing', async () => {
@@ -1008,7 +1066,7 @@ test('vibescore-usage-summary returns total_cost_usd and pricing metadata', asyn
   assert.equal(body.pricing.rates_per_million_usd.cached_input, '0.175000');
 });
 
-test('vibescore-usage-summary prefers jwt payload to avoid auth roundtrip', async () => {
+test('vibescore-usage-summary uses auth lookup even with jwt payload', async () => {
   const fn = require('../insforge-functions/vibescore-usage-summary');
 
   const userId = '77777777-7777-7777-7777-777777777777';
@@ -1035,7 +1093,7 @@ test('vibescore-usage-summary prefers jwt payload to avoid auth roundtrip', asyn
         auth: {
           getCurrentUser: async () => {
             authCalls += 1;
-            return { data: { user: { id: 'should-not-be-used' } }, error: null };
+            return { data: { user: { id: userId } }, error: null };
           }
         },
         database: {
@@ -1074,7 +1132,7 @@ test('vibescore-usage-summary prefers jwt payload to avoid auth roundtrip', asyn
   const res = await fn(req);
   assert.equal(res.status, 200);
 
-  assert.equal(authCalls, 0, 'expected jwt payload to skip auth.getCurrentUser');
+  assert.equal(authCalls, 1, 'expected auth.getCurrentUser to validate jwt payload');
 });
 
 test('vibescore-leaderboard returns a week window and slices entries to limit', async () => {

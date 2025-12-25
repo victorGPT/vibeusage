@@ -197,13 +197,42 @@ var require_source = __commonJS({
   }
 });
 
+// insforge-src/shared/model.js
+var require_model = __commonJS({
+  "insforge-src/shared/model.js"(exports2, module2) {
+    "use strict";
+    function normalizeModel2(value) {
+      if (typeof value !== "string") return null;
+      const trimmed = value.trim();
+      return trimmed.length > 0 ? trimmed : null;
+    }
+    function getModelParam(url) {
+      if (!url || typeof url.searchParams?.get !== "function") {
+        return { ok: false, error: "Invalid request URL" };
+      }
+      const raw = url.searchParams.get("model");
+      if (raw == null) return { ok: true, model: null };
+      if (raw.trim() === "") return { ok: true, model: null };
+      const normalized = normalizeModel2(raw);
+      if (!normalized) return { ok: false, error: "Invalid model" };
+      return { ok: true, model: normalized };
+    }
+    module2.exports = {
+      normalizeModel: normalizeModel2,
+      getModelParam
+    };
+  }
+});
+
 // insforge-src/functions/vibescore-ingest.js
 var { handleOptions, json, requireMethod, readJson } = require_http();
 var { getBearerToken } = require_auth();
 var { getAnonKey, getBaseUrl, getServiceRoleKey } = require_env();
 var { sha256Hex } = require_crypto();
 var { normalizeSource } = require_source();
+var { normalizeModel } = require_model();
 var MAX_BUCKETS = 500;
+var DEFAULT_MODEL = "unknown";
 module.exports = async function(request) {
   const opt = handleOptions(request);
   if (opt) return opt;
@@ -287,8 +316,9 @@ function buildRows({ hourly, tokenRow, nowIso }) {
     const parsed = parseHourlyBucket(raw);
     if (!parsed.ok) return { error: parsed.error, data: [] };
     const source = parsed.value.source || "codex";
-    const dedupeKey = `${parsed.value.hour_start}::${source}`;
-    byHour.set(dedupeKey, { ...parsed.value, source });
+    const model = parsed.value.model || DEFAULT_MODEL;
+    const dedupeKey = `${parsed.value.hour_start}::${source}::${model}`;
+    byHour.set(dedupeKey, { ...parsed.value, source, model });
   }
   const rows = [];
   for (const bucket of byHour.values()) {
@@ -297,6 +327,7 @@ function buildRows({ hourly, tokenRow, nowIso }) {
       device_id: tokenRow.device_id,
       device_token_id: tokenRow.id,
       source: bucket.source,
+      model: bucket.model,
       hour_start: bucket.hour_start,
       input_tokens: bucket.input_tokens,
       cached_input_tokens: bucket.cached_input_tokens,
@@ -358,7 +389,7 @@ async function upsertWithServiceClient({
       anonKey: serviceRoleKey,
       tokenHash,
       rows,
-      onConflict: "user_id,device_id,source,hour_start",
+      onConflict: "user_id,device_id,source,model,hour_start",
       prefer: "return=representation",
       resolution: "merge-duplicates",
       select: "hour_start"
@@ -375,7 +406,7 @@ async function upsertWithServiceClient({
   }
   const table = serviceClient.database.from("vibescore_tracker_hourly");
   if (typeof table?.upsert === "function") {
-    const { error } = await table.upsert(rows, { onConflict: "user_id,device_id,source,hour_start" });
+    const { error } = await table.upsert(rows, { onConflict: "user_id,device_id,source,model,hour_start" });
     if (error) return { ok: false, error: error.message, inserted: 0, skipped: 0 };
     await bestEffortTouchWithServiceClient(serviceClient, tokenRow, nowIso);
     return { ok: true, inserted: rows.length, skipped: 0 };
@@ -390,7 +421,7 @@ async function upsertWithAnonKey({ baseUrl, anonKey, tokenHash, tokenRow, rows, 
     anonKey,
     tokenHash,
     rows,
-    onConflict: "user_id,device_id,source,hour_start",
+    onConflict: "user_id,device_id,source,model,hour_start",
     prefer: "return=representation",
     resolution: "merge-duplicates",
     select: "hour_start"
@@ -556,6 +587,7 @@ function parseHourlyBucket(raw) {
     return { ok: false, error: "hour_start must be an ISO timestamp at UTC half-hour boundary" };
   }
   const source = normalizeSource(raw.source);
+  const model = normalizeModel(raw.model) || DEFAULT_MODEL;
   const input = toNonNegativeInt(raw.input_tokens);
   const cached = toNonNegativeInt(raw.cached_input_tokens);
   const output = toNonNegativeInt(raw.output_tokens);
@@ -568,6 +600,7 @@ function parseHourlyBucket(raw) {
     ok: true,
     value: {
       source,
+      model,
       hour_start: hourStart,
       input_tokens: input,
       cached_input_tokens: cached,

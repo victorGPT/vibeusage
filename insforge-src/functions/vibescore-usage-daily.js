@@ -7,6 +7,7 @@ const { handleOptions, json, requireMethod } = require('../shared/http');
 const { getBearerToken, getEdgeClientAndUserIdFast } = require('../shared/auth');
 const { getBaseUrl } = require('../shared/env');
 const { getSourceParam } = require('../shared/source');
+const { getModelParam } = require('../shared/model');
 const {
   addDatePartsDays,
   formatLocalDateKey,
@@ -38,6 +39,9 @@ module.exports = async function(request) {
   const sourceResult = getSourceParam(url);
   if (!sourceResult.ok) return json({ error: sourceResult.error }, 400);
   const source = sourceResult.source;
+  const modelResult = getModelParam(url);
+  if (!modelResult.ok) return json({ error: modelResult.error }, 400);
+  const model = modelResult.model;
   const { from, to } = normalizeDateRangeLocal(
     url.searchParams.get('from'),
     url.searchParams.get('to'),
@@ -75,6 +79,7 @@ module.exports = async function(request) {
         .select('hour_start,total_tokens,input_tokens,cached_input_tokens,output_tokens,reasoning_output_tokens')
         .eq('user_id', auth.userId);
       if (source) query = query.eq('source', source);
+      if (model) query = query.eq('model', model);
       return query.gte('hour_start', startIso).lt('hour_start', endIso).order('hour_start', { ascending: true });
     },
     onPage: (rows) => {
