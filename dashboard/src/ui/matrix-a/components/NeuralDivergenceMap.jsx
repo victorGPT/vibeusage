@@ -19,10 +19,9 @@ export const NeuralDivergenceMap = React.memo(function NeuralDivergenceMap({
     <AsciiBox title={title} className={className}>
       <div className={`${gridClass} gap-6 py-1 overflow-y-auto no-scrollbar`}>
         {fleetData.map((fleet, index) => {
-          // 如果总数是奇数且大于1，且是最后一个元素，则让它横跨两列
-          const isLastAndOdd =
-            count > 1 && count % 2 !== 0 && index === count - 1;
-          const itemClass = isLastAndOdd ? "md:col-span-2" : "";
+          // 如果总数是奇数且大于1，则让第一个元素（主要的主力CLI）横跨两列，做Hero展示
+          const isFirstAndOdd = count > 1 && count % 2 !== 0 && index === 0;
+          const itemClass = isFirstAndOdd ? "md:col-span-2" : "";
 
           return (
             <div key={`${fleet.label}-${index}`} className={itemClass}>
