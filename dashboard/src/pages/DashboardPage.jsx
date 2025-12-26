@@ -415,41 +415,39 @@ export function DashboardPage({ baseUrl, auth, signedIn, signOut }) {
         ? modelBreakdown.pricing.pricing_mode.toUpperCase()
         : null;
 
-    return (
-      sources
-        .map((entry) => {
-          const label = entry.source
-            ? String(entry.source).toUpperCase()
-            : copy("shared.placeholder.short");
-          const totalPercentRaw =
-            grandTotal > 0 ? (entry.totalTokens / grandTotal) * 100 : 0;
-          const totalPercent = Number.isFinite(totalPercentRaw)
-            ? totalPercentRaw.toFixed(1)
-            : "0.0";
-          const models = entry.models
-            .map((model) => {
-              const modelTokens = toFiniteNumber(model?.totals?.total_tokens);
-              if (!Number.isFinite(modelTokens) || modelTokens <= 0)
-                return null;
-              const share =
-                entry.totalTokens > 0
-                  ? Math.round((modelTokens / entry.totalTokens) * 1000) / 10
-                  : 0;
-              const name = model?.model
-                ? String(model.model)
-                : copy("shared.placeholder.short");
-              return { name, share, calc: pricingMode };
-            })
-            .filter(Boolean);
-          return {
-            label,
-            totalPercent: String(totalPercent),
-            usd: entry.totalCost,
-            models,
-            _tokens: entry.totalTokens,
-          };
-        })
-        .sort((a, b) => b._tokens - a._tokens)
+    return sources
+      .map((entry) => {
+        const label = entry.source
+          ? String(entry.source).toUpperCase()
+          : copy("shared.placeholder.short");
+        const totalPercentRaw =
+          grandTotal > 0 ? (entry.totalTokens / grandTotal) * 100 : 0;
+        const totalPercent = Number.isFinite(totalPercentRaw)
+          ? totalPercentRaw.toFixed(1)
+          : "0.0";
+        const models = entry.models
+          .map((model) => {
+            const modelTokens = toFiniteNumber(model?.totals?.total_tokens);
+            if (!Number.isFinite(modelTokens) || modelTokens <= 0) return null;
+            const share =
+              entry.totalTokens > 0
+                ? Math.round((modelTokens / entry.totalTokens) * 1000) / 10
+                : 0;
+            const name = model?.model
+              ? String(model.model)
+              : copy("shared.placeholder.short");
+            return { name, share, usage: modelTokens, calc: pricingMode };
+          })
+          .filter(Boolean);
+        return {
+          label,
+          totalPercent: String(totalPercent),
+          usd: entry.totalCost,
+          models,
+          _tokens: entry.totalTokens,
+        };
+      })
+      .sort((a, b) => b._tokens - a._tokens)
       .map(({ _tokens, ...rest }) => rest);
   }, [modelBreakdown?.pricing?.pricing_mode, modelBreakdownSources]);
 
