@@ -41,7 +41,7 @@ _Codex CLI 实时 AI 分析工具_
 ## 🚀 核心功能
 
 - 📡 **自动嗅探与同步 (Auto-Sync)**: 实时监听 Codex CLI 管道并具备**全自动后台同步**功能。初始化后，你的 Token 产出将自动追踪并同步，无需手动执行脚本。
-- 🧭 **多来源采集**: 支持 Codex CLI 与 Every Code（标记为 `source=every-code`），无需修改 Every Code 客户端。
+- 🧭 **全能采集 (Universal-Sync)**: 原生支持 **Codex CLI**, **Every Code** 以及最新的 **Claude Code**。无论是 GPT-4, Claude 3.5 Sonnet 还是 o1/Gemini，所有模型的 Token 消耗均可被统一捕获与统计。
 - 📊 **Matrix Dashboard (矩阵控制台)**: 基于 React + Vite 的高性能仪表盘，采用全新的 **Matrix-A** 设计语言。
   - **Neural Divergence Map (神经发散图谱)**: 可视化多引擎负载均衡状态，直观展示算力分布。
   - **Cost Intelligence (成本智能)**: 实时、多维度的成本分解与预测。
