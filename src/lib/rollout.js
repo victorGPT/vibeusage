@@ -469,49 +469,90 @@ async function enqueueTouchedBuckets({ queuePath, hourlyState, touchedBuckets })
   }
   if (touchedGroups.size === 0) return 0;
 
-  const grouped = new Map();
-  for (const [key, bucket] of Object.entries(hourlyState.buckets || {})) {
-    if (!bucket || !bucket.totals) continue;
-    const parsed = parseBucketKey(key);
-    const hourStart = parsed.hourStart;
-    if (!hourStart) continue;
-    const groupKey = groupBucketKey(parsed.source, hourStart);
-    if (!touchedGroups.has(groupKey)) continue;
-
-    let group = grouped.get(groupKey);
-    if (!group) {
-      group = {
-        source: normalizeSourceInput(parsed.source) || DEFAULT_SOURCE,
-        hourStart,
-        models: new Set(),
-        totals: initTotals()
-      };
-      grouped.set(groupKey, group);
+  const groupQueued = hourlyState.groupQueued && typeof hourlyState.groupQueued === 'object' ? hourlyState.groupQueued : {};
+  const legacyGroups = new Set();
+  for (const groupKey of touchedGroups) {
+    if (Object.prototype.hasOwnProperty.call(groupQueued, groupKey)) {
+      legacyGroups.add(groupKey);
     }
-    group.models.add(parsed.model || DEFAULT_MODEL);
-    addTotals(group.totals, bucket.totals);
   }
 
   const toAppend = [];
-  const groupQueued = hourlyState.groupQueued && typeof hourlyState.groupQueued === 'object' ? hourlyState.groupQueued : {};
-  for (const group of grouped.values()) {
-    const model = group.models.size === 1 ? [...group.models][0] : DEFAULT_MODEL;
-    const key = totalsKey(group.totals);
-    const groupKey = groupBucketKey(group.source, group.hourStart);
-    if (groupQueued[groupKey] === key) continue;
+  for (const bucketStart of touchedBuckets) {
+    const parsed = parseBucketKey(bucketStart);
+    const hourStart = parsed.hourStart;
+    if (!hourStart) continue;
+    const groupKey = groupBucketKey(parsed.source, hourStart);
+    if (legacyGroups.has(groupKey)) continue;
+
+    const normalizedKey = bucketKey(parsed.source, parsed.model, hourStart);
+    const bucket = hourlyState.buckets ? hourlyState.buckets[normalizedKey] : null;
+    if (!bucket || !bucket.totals) continue;
+    if (bucket.queuedKey != null && typeof bucket.queuedKey !== 'string') {
+      bucket.queuedKey = null;
+    }
+    const key = totalsKey(bucket.totals);
+    if (bucket.queuedKey === key) continue;
+    const source = normalizeSourceInput(parsed.source) || DEFAULT_SOURCE;
+    const model = normalizeModelInput(parsed.model) || DEFAULT_MODEL;
     toAppend.push(
       JSON.stringify({
-        source: group.source,
+        source,
         model,
-        hour_start: group.hourStart,
-        input_tokens: group.totals.input_tokens,
-        cached_input_tokens: group.totals.cached_input_tokens,
-        output_tokens: group.totals.output_tokens,
-        reasoning_output_tokens: group.totals.reasoning_output_tokens,
-        total_tokens: group.totals.total_tokens
+        hour_start: hourStart,
+        input_tokens: bucket.totals.input_tokens,
+        cached_input_tokens: bucket.totals.cached_input_tokens,
+        output_tokens: bucket.totals.output_tokens,
+        reasoning_output_tokens: bucket.totals.reasoning_output_tokens,
+        total_tokens: bucket.totals.total_tokens
       })
     );
-    groupQueued[groupKey] = key;
+    bucket.queuedKey = key;
+  }
+
+  if (legacyGroups.size > 0) {
+    const grouped = new Map();
+    for (const [key, bucket] of Object.entries(hourlyState.buckets || {})) {
+      if (!bucket || !bucket.totals) continue;
+      const parsed = parseBucketKey(key);
+      const hourStart = parsed.hourStart;
+      if (!hourStart) continue;
+      const groupKey = groupBucketKey(parsed.source, hourStart);
+      if (!legacyGroups.has(groupKey)) continue;
+
+      let group = grouped.get(groupKey);
+      if (!group) {
+        group = {
+          source: normalizeSourceInput(parsed.source) || DEFAULT_SOURCE,
+          hourStart,
+          models: new Set(),
+          totals: initTotals()
+        };
+        grouped.set(groupKey, group);
+      }
+      group.models.add(parsed.model || DEFAULT_MODEL);
+      addTotals(group.totals, bucket.totals);
+    }
+
+    for (const group of grouped.values()) {
+      const model = group.models.size === 1 ? [...group.models][0] : DEFAULT_MODEL;
+      const key = totalsKey(group.totals);
+      const groupKey = groupBucketKey(group.source, group.hourStart);
+      if (groupQueued[groupKey] === key) continue;
+      toAppend.push(
+        JSON.stringify({
+          source: group.source,
+          model,
+          hour_start: group.hourStart,
+          input_tokens: group.totals.input_tokens,
+          cached_input_tokens: group.totals.cached_input_tokens,
+          output_tokens: group.totals.output_tokens,
+          reasoning_output_tokens: group.totals.reasoning_output_tokens,
+          total_tokens: group.totals.total_tokens
+        })
+      );
+      groupQueued[groupKey] = key;
+    }
   }
 
   hourlyState.groupQueued = groupQueued;

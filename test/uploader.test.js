@@ -68,7 +68,7 @@ test('drainQueueToCloud defaults missing source to codex', async () => {
   }
 });
 
-test('drainQueueToCloud dedupes by source and hour when model changes', async () => {
+test('drainQueueToCloud keeps buckets separate per model when hour/source match', async () => {
   const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'vibescore-uploader-'));
   const queuePath = path.join(tmp, 'queue.jsonl');
   const queueStatePath = path.join(tmp, 'queue.state.json');
@@ -111,9 +111,12 @@ test('drainQueueToCloud dedupes by source and hour when model changes', async ()
     });
 
     assert.equal(stub.calls.length, 1);
-    assert.equal(stub.calls[0].length, 1);
-    assert.equal(stub.calls[0][0].model, 'unknown');
-    assert.equal(stub.calls[0][0].total_tokens, 4);
+    assert.equal(stub.calls[0].length, 2);
+    const byModel = new Map(stub.calls[0].map((row) => [row.model, row]));
+    assert.ok(byModel.has('gpt-4o'));
+    assert.ok(byModel.has('unknown'));
+    assert.equal(byModel.get('gpt-4o').total_tokens, 2);
+    assert.equal(byModel.get('unknown').total_tokens, 4);
   } finally {
     stub.restore();
     await fs.rm(tmp, { recursive: true, force: true });

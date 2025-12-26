@@ -10,9 +10,13 @@
 ## 3. CLI
 - [x] Parse `message.model` from Claude JSONL and attach to buckets.
 - [x] Apply fallback model `unknown` when model is missing.
+- [x] Queue half-hour buckets per model (avoid collapsing multi-model hours to `unknown`).
+- [x] Deduplicate uploads by `source + model + hour_start`.
 
 ## 4. Tests
 - [x] Unit: Claude parser extracts model + fallback.
+- [x] Unit: queue keeps per-model buckets within the same hour.
+- [x] Unit: uploader keeps buckets separate per model when hour/source match.
 - [x] Integration: ingest upserts with model dimension.
 - [x] Integration: usage endpoints filter by model.
 - [x] Regression: existing usage endpoints behavior unchanged without model.

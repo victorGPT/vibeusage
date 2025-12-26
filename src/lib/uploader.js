@@ -78,7 +78,7 @@ async function readBatch(queuePath, startOffset, maxBuckets) {
     const model = normalizeModel(bucket?.model) || DEFAULT_MODEL;
     bucket.source = source;
     bucket.model = model;
-    bucketMap.set(bucketKey(source, hourStart), bucket);
+    bucketMap.set(bucketKey(source, model, hourStart), bucket);
     linesRead += 1;
     if (linesRead >= maxBuckets) break;
   }
@@ -97,8 +97,8 @@ async function safeFileSize(p) {
   }
 }
 
-function bucketKey(source, hourStart) {
-  return `${source}${BUCKET_SEPARATOR}${hourStart}`;
+function bucketKey(source, model, hourStart) {
+  return `${source}${BUCKET_SEPARATOR}${model}${BUCKET_SEPARATOR}${hourStart}`;
 }
 
 function normalizeSource(value) {

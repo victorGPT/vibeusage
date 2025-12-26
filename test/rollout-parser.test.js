@@ -456,7 +456,7 @@ test('parseRolloutIncremental keeps buckets separate per source', async () => {
   }
 });
 
-test('parseRolloutIncremental aggregates multiple models within the same hour', async () => {
+test('parseRolloutIncremental keeps buckets separate per model within the same hour', async () => {
   const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'vibescore-rollout-'));
   try {
     const rolloutPath = path.join(tmp, 'rollout-test.jsonl');
@@ -498,12 +498,15 @@ test('parseRolloutIncremental aggregates multiple models within the same hour', 
     const res = await parseRolloutIncremental({ rolloutFiles: [rolloutPath], cursors, queuePath });
     assert.equal(res.filesProcessed, 1);
     assert.equal(res.eventsAggregated, 2);
-    assert.equal(res.bucketsQueued, 1);
+    assert.equal(res.bucketsQueued, 2);
 
     const queued = await readJsonLines(queuePath);
-    assert.equal(queued.length, 1);
-    assert.equal(queued[0].model, 'unknown');
-    assert.equal(queued[0].total_tokens, usage1.total_tokens + usage2.total_tokens);
+    assert.equal(queued.length, 2);
+    const byModel = new Map(queued.map((row) => [row.model, row]));
+    assert.ok(byModel.has('gpt-4o'));
+    assert.ok(byModel.has('gpt-4o-mini'));
+    assert.equal(byModel.get('gpt-4o').total_tokens, usage1.total_tokens);
+    assert.equal(byModel.get('gpt-4o-mini').total_tokens, usage2.total_tokens);
   } finally {
     await fs.rm(tmp, { recursive: true, force: true });
   }
