@@ -66,7 +66,7 @@ export default function App() {
   } else {
     content = (
       <Suspense fallback={loadingShell}>
-        <UpgradeAlertModal currentVersion="0.0.9" requiredVersion="0.1" />
+        <UpgradeAlertModal currentVersion="0.1" requiredVersion="0.1.1" />
         <DashboardPage
           baseUrl={baseUrl}
           auth={auth}

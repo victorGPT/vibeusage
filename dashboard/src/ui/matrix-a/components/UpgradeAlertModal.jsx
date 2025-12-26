@@ -4,8 +4,8 @@ import { MatrixButton } from "./MatrixButton.jsx";
 import { copy } from "../../../lib/copy.js"; // 假设有copy文件，或者这里直接写死文本
 
 export function UpgradeAlertModal({
-  currentVersion = "0.0.9",
-  requiredVersion = "0.1",
+  currentVersion = "0.1",
+  requiredVersion = "0.1.1",
   installCommand = "npx --yes @vibescore/tracker init",
   onClose,
 }) {
