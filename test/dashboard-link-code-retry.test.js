@@ -34,6 +34,7 @@ test("DashboardPage resets linkCode when auth changes", () => {
   );
   const src = fs.readFileSync(filePath, "utf8");
   assert.match(src, /setLinkCode\(null\)/);
+  assert.match(src, /setLinkCodeLoading\(false\)/);
   assert.match(
     src,
     /useEffect\(\(\)\s*=>\s*\{[\s\S]*linkCodeRequestKeyRef\.current\s*!==\s*requestKey[\s\S]*setLinkCode\(null\)/m

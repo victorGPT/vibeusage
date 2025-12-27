@@ -64,6 +64,7 @@ export function DashboardPage({ baseUrl, auth, signedIn, signOut }) {
     if (linkCodeRequestKeyRef.current !== requestKey) {
       linkCodeRequestKeyRef.current = requestKey;
       setLinkCode(null);
+      setLinkCodeLoading(false);
     }
   }, [signedIn, auth?.accessToken, baseUrl]);
 
