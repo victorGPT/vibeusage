@@ -470,10 +470,14 @@ async function enqueueTouchedBuckets({ queuePath, hourlyState, touchedBuckets })
   if (touchedGroups.size === 0) return 0;
 
   const groupQueued = hourlyState.groupQueued && typeof hourlyState.groupQueued === 'object' ? hourlyState.groupQueued : {};
+  let codexTouched = false;
   const legacyGroups = new Set();
   for (const groupKey of touchedGroups) {
     if (Object.prototype.hasOwnProperty.call(groupQueued, groupKey)) {
       legacyGroups.add(groupKey);
+    }
+    if (!codexTouched && groupKey.startsWith(`${DEFAULT_SOURCE}${BUCKET_SEPARATOR}`)) {
+      codexTouched = true;
     }
   }
 
@@ -498,6 +502,45 @@ async function enqueueTouchedBuckets({ queuePath, hourlyState, touchedBuckets })
       bucket.queuedKey = null;
     }
     group.buckets.set(model, bucket);
+  }
+
+  if (codexTouched) {
+    const recomputeGroups = new Set();
+    for (const [key, bucket] of Object.entries(hourlyState.buckets || {})) {
+      if (!bucket || !bucket.totals) continue;
+      const parsed = parseBucketKey(key);
+      const hourStart = parsed.hourStart;
+      if (!hourStart) continue;
+      const source = normalizeSourceInput(parsed.source) || DEFAULT_SOURCE;
+      if (source !== 'every-code') continue;
+      const groupKey = groupBucketKey(source, hourStart);
+      if (legacyGroups.has(groupKey) || groupedBuckets.has(groupKey)) continue;
+      const model = normalizeModelInput(parsed.model) || DEFAULT_MODEL;
+      if (model !== DEFAULT_MODEL) continue;
+      recomputeGroups.add(groupKey);
+    }
+
+    if (recomputeGroups.size > 0) {
+      for (const [key, bucket] of Object.entries(hourlyState.buckets || {})) {
+        if (!bucket || !bucket.totals) continue;
+        const parsed = parseBucketKey(key);
+        const hourStart = parsed.hourStart;
+        if (!hourStart) continue;
+        const source = normalizeSourceInput(parsed.source) || DEFAULT_SOURCE;
+        const groupKey = groupBucketKey(source, hourStart);
+        if (!recomputeGroups.has(groupKey)) continue;
+        let group = groupedBuckets.get(groupKey);
+        if (!group) {
+          group = { source, hourStart, buckets: new Map() };
+          groupedBuckets.set(groupKey, group);
+        }
+        if (bucket.queuedKey != null && typeof bucket.queuedKey !== 'string') {
+          bucket.queuedKey = null;
+        }
+        const model = normalizeModelInput(parsed.model) || DEFAULT_MODEL;
+        group.buckets.set(model, bucket);
+      }
+    }
   }
 
   const codexDominants = collectCodexDominantModels(hourlyState);

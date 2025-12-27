@@ -8,6 +8,7 @@
 - [x] Align every-code unknown buckets to nearest codex dominant model (past or future).
 - [x] Retract prior every-code alignment when the nearest codex model changes.
 - [x] Retract unknown bucket when a known model appears later in the same half-hour.
+- [x] Recompute every-code alignment when codex buckets update without new every-code events.
 
 ## 3. Tests
 - [x] Add unit tests for backfill and tie-breaker in test/rollout-parser.test.js.
@@ -15,6 +16,7 @@
 - [x] Run parser regression tests and record results.
 - [x] Add unit test coverage for alignment change retractions.
 - [x] Add unit test coverage for unknown retraction after known appears.
+- [x] Add unit test coverage for codex-only alignment recomputation.
 
 ## 4. Docs
 - [x] Link design doc and backfill notes (optional) if needed.

@@ -32,6 +32,12 @@ The system SHALL set `model = "unknown"` only when no known model exists within 
 - **THEN** the previously aligned model bucket SHALL be updated to zero totals
 - **AND** the newly aligned model bucket SHALL be queued with the current totals
 
+#### Scenario: Every Code alignment recomputes after codex-only updates
+- **GIVEN** an every-code half-hour bucket is aligned to a codex model
+- **AND** a later sync adds new codex buckets without new every-code events
+- **WHEN** the user runs `npx @vibescore/tracker sync`
+- **THEN** the every-code bucket SHALL be re-aligned to the nearest codex dominant model
+
 ### Requirement: Known models remain separate during unknown backfill
 The system SHALL NOT merge known models when reassigning unknown totals.
 

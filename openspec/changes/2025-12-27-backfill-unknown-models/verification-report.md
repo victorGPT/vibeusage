@@ -10,13 +10,13 @@
 - openspec validate 2025-12-27-backfill-unknown-models --strict
 
 ## Results
-- PASS (20 tests) for rollout parser suite.
-- PASS (80 tests) for full test suite.
+- PASS (21 tests) for rollout parser suite.
+- PASS (81 tests) for full test suite.
 - PASS (openspec validate strict).
 
 ## Evidence
-- node --test test/rollout-parser.test.js → 20/20 passing
-- node --test test/*.test.js → 80/80 passing
+- node --test test/rollout-parser.test.js → 21/21 passing
+- node --test test/*.test.js → 81/81 passing
 - openspec validate 2025-12-27-backfill-unknown-models --strict → valid
 
 ## Remaining Risks
