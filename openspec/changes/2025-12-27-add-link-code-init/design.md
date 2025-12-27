@@ -24,6 +24,7 @@
 - Interfaces:
   - `POST /functions/vibescore-link-code-issue` (Auth: `Bearer <user_jwt>`).
   - `POST /functions/vibescore-link-code-exchange` (Auth: none; body includes `link_code`, `device_name`, `platform`).
+  - `public.vibescore_exchange_link_code(...)` (RPC, security definer; atomic claim + insert).
   - CLI flag: `--link-code <code>`.
 - Data flow & constraints:
   - Server stores only `link_code` hash with `expires_at`, `used_at`, `user_id`.
@@ -51,6 +52,7 @@
 ## Decisions
 - Decision: Add a dedicated link code table (`hash`, `expires_at`, `used_at`, `user_id`).
 - Decision: Use two new endpoints for issue/exchange instead of overloading `vibescore-device-token-issue`.
+- Decision: Exchange uses a DB RPC to atomically claim the link code and insert device/token rows.
 - Decision: CLI falls back to browser auth on link-code failure (unless `--no-auth`).
 - Decision: Dashboard displays masked command and provides a copy button that copies full command.
 

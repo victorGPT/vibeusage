@@ -12,6 +12,57 @@ class LinkCodeDb {
     this.state = state;
   }
 
+  async rpc(name, args) {
+    if (name !== 'vibescore_exchange_link_code') {
+      throw new Error(`Unexpected rpc: ${name}`);
+    }
+
+    const linkRow = this.state.linkCodes.find((r) => r.code_hash === args.p_code_hash) || null;
+    if (!linkRow) return { data: null, error: null };
+    if (linkRow.used_at) return { data: null, error: null };
+    if (!linkRow.expires_at || Date.parse(linkRow.expires_at) <= Date.now()) {
+      return { data: null, error: null };
+    }
+
+    const usedAt = new Date().toISOString();
+    linkRow.used_at = usedAt;
+    linkRow.device_id = args.p_device_id;
+    this.state.updates.push({ table: 'vibescore_tracker_link_codes', values: { used_at: usedAt } });
+
+    this.state.inserts.push({
+      table: 'vibescore_tracker_devices',
+      rows: [
+        {
+          id: args.p_device_id,
+          user_id: linkRow.user_id,
+          device_name: args.p_device_name,
+          platform: args.p_platform
+        }
+      ]
+    });
+
+    this.state.inserts.push({
+      table: 'vibescore_tracker_device_tokens',
+      rows: [
+        {
+          id: args.p_token_id,
+          user_id: linkRow.user_id,
+          device_id: args.p_device_id,
+          token_hash: args.p_token_hash
+        }
+      ]
+    });
+
+    return {
+      data: {
+        user_id: linkRow.user_id,
+        device_id: args.p_device_id,
+        used_at: usedAt
+      },
+      error: null
+    };
+  }
+
   from(table) {
     if (table === 'vibescore_tracker_link_codes') {
       return {
@@ -19,14 +70,6 @@ class LinkCodeDb {
           this.state.linkCodes.push(...rows);
           return { error: null };
         },
-        select: (columns) => ({
-          eq: (col, value) => ({
-            maybeSingle: async () => {
-              const row = this.state.linkCodes.find((r) => r.code_hash === value) || null;
-              return { data: row, error: null };
-            }
-          })
-        }),
         update: (values) => ({
           eq: async (col, value) => {
             const row = this.state.linkCodes.find((r) => r[col] === value);

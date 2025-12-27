@@ -120,48 +120,32 @@ module.exports = async function(request) {
     edgeFunctionToken: serviceRoleKey
   });
   const codeHash = await sha256Hex(linkCode);
-  const { data: linkRow, error: linkErr } = await serviceClient.database.from("vibescore_tracker_link_codes").select("id,user_id,expires_at,used_at").eq("code_hash", codeHash).maybeSingle();
-  if (linkErr) return json({ error: EXCHANGE_ERROR_MESSAGE }, 500);
-  if (!linkRow || isExpired(linkRow.expires_at) || linkRow.used_at) {
-    return json({ error: "Invalid or expired link code" }, 401);
-  }
   const deviceName = sanitizeText(payload.device_name, 128) || (Deno.env.get("HOSTNAME") ? `macOS (${Deno.env.get("HOSTNAME")})` : "macOS");
   const platform = sanitizeText(payload.platform, 32) || "macos";
   const deviceId = crypto.randomUUID();
   const tokenId = crypto.randomUUID();
   const token = generateToken();
   const tokenHash = await sha256Hex(token);
-  const { error: deviceErr } = await serviceClient.database.from("vibescore_tracker_devices").insert([
+  const { data: exchangeData, error: exchangeErr } = await serviceClient.database.rpc(
+    "vibescore_exchange_link_code",
     {
-      id: deviceId,
-      user_id: linkRow.user_id,
-      device_name: deviceName,
-      platform
+      p_code_hash: codeHash,
+      p_device_id: deviceId,
+      p_device_name: deviceName,
+      p_platform: platform,
+      p_token_id: tokenId,
+      p_token_hash: tokenHash
     }
-  ]);
-  if (deviceErr) {
-    console.error(`link code exchange device insert failed: ${EXCHANGE_ERROR_MESSAGE}`);
+  );
+  if (exchangeErr) {
+    console.error(`link code exchange rpc failed: ${EXCHANGE_ERROR_MESSAGE}`);
     return json({ error: EXCHANGE_ERROR_MESSAGE }, 500);
   }
-  const { error: tokenErr } = await serviceClient.database.from("vibescore_tracker_device_tokens").insert([
-    {
-      id: tokenId,
-      user_id: linkRow.user_id,
-      device_id: deviceId,
-      token_hash: tokenHash
-    }
-  ]);
-  if (tokenErr) {
-    await bestEffortDeleteDevice({ dbClient: serviceClient, deviceId, userId: linkRow.user_id });
-    console.error(`link code exchange token insert failed: ${EXCHANGE_ERROR_MESSAGE}`);
-    return json({ error: EXCHANGE_ERROR_MESSAGE }, 500);
+  const exchangeRow = Array.isArray(exchangeData) ? exchangeData[0] : exchangeData;
+  if (!exchangeRow?.user_id) {
+    return json({ error: "Invalid or expired link code" }, 401);
   }
-  const usedAt = (/* @__PURE__ */ new Date()).toISOString();
-  const { error: updateErr } = await serviceClient.database.from("vibescore_tracker_link_codes").update({ used_at: usedAt, device_id: deviceId }).eq("id", linkRow.id);
-  if (updateErr) {
-    console.error(`link code exchange update failed: ${EXCHANGE_ERROR_MESSAGE}`);
-    return json({ error: EXCHANGE_ERROR_MESSAGE }, 500);
-  }
+  const usedAt = exchangeRow.used_at || (/* @__PURE__ */ new Date()).toISOString();
   return json(
     {
       device_id: deviceId,
@@ -177,24 +161,6 @@ function sanitizeText(value, maxLen) {
   if (s.length === 0) return null;
   return s.length > maxLen ? s.slice(0, maxLen) : s;
 }
-function isExpired(expiresAt) {
-  if (!expiresAt) return true;
-  const ts = Date.parse(expiresAt);
-  if (!Number.isFinite(ts)) return true;
-  return ts <= Date.now();
-}
 function generateToken() {
   return crypto.randomUUID().replace(/-/g, "") + crypto.randomUUID().replace(/-/g, "");
-}
-async function bestEffortDeleteDevice({ dbClient, deviceId, userId }) {
-  try {
-    let query = dbClient.database.from("vibescore_tracker_devices").delete().eq("id", deviceId);
-    if (userId) query = query.eq("user_id", userId);
-    const { error } = await query;
-    if (error) {
-      console.error(`link code exchange compensation delete failed: ${EXCHANGE_ERROR_MESSAGE}`);
-    }
-  } catch (_err) {
-    console.error(`link code exchange compensation delete threw: ${EXCHANGE_ERROR_MESSAGE}`);
-  }
 }

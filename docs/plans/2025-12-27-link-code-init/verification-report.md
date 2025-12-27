@@ -2,6 +2,7 @@
 
 ## Scope
 - link code 签发与兑换
+- link code 兑换 RPC 原子化占用
 - CLI `init --link-code`
 - Dashboard 安装命令复制与遮罩
 
@@ -18,9 +19,10 @@
 - Copy registry validation emits existing unused-key warnings (non-blocking).
 
 ## Evidence
-- Edge tests include `vibescore-link-code-issue` and `vibescore-link-code-exchange` pass.
+- Edge tests include `vibescore-link-code-issue` and link-code RPC exchange cases.
 - Acceptance script output includes `{ "ok": true }`.
-- `npm test` reports 84 passing tests.
+- `npm test` reports 85 passing tests.
 
 ## Remaining Risks
 - Edge runtime missing service role key will block link-code exchange (returns 500).
+- Missing RPC deployment will block link-code exchange (returns 500).
