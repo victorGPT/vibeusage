@@ -13,7 +13,7 @@
 
 ## 4. Docs
 - [x] Update `docs/dashboard/api.md` to note preferred `/functions` path and 404 fallback.
-- [ ] If needed, align `BACKEND_API.md` with gateway path guidance.
+- [x] Align `BACKEND_API.md` with gateway path guidance.
 
 ## 5. Verification
 - [x] `node --test test/dashboard-function-path.test.js`.

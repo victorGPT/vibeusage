@@ -38,6 +38,12 @@ insforge2 update-function --slug vibescore-usage-summary --codeFile insforge-fun
 
 All endpoints support CORS `OPTIONS` preflight.
 
+## Endpoint base paths
+
+- Public edge functions are served at `/functions/<slug>` (CORS enabled).
+- Admin API path `/api/functions/<slug>` requires a project admin API key and is **not** suitable for browser clients.
+- Dashboard uses `/functions` and only falls back to `/api/functions` on 404 in privileged contexts.
+
 ## CLI troubleshooting (timeouts + debug)
 
 When ingestion hangs or fails, use these client-side controls:
