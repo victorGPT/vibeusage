@@ -450,7 +450,8 @@ export function DashboardPage({ baseUrl, auth, signedIn, signOut }) {
           };
         })
         .sort((a, b) => b._tokens - a._tokens)
-      .map(({ _tokens, ...rest }) => rest);
+        .map(({ _tokens, ...rest }) => rest)
+    );
   }, [modelBreakdown?.pricing?.pricing_mode, modelBreakdownSources]);
 
   const openCostModal = useCallback(() => setCostModalOpen(true), []);
