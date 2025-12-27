@@ -36,7 +36,7 @@
 - `pro.expires_at` uses the maximum expiry of active sources.
 
 ## Assumptions
-- `created_at` is accessible for authenticated users (via auth or service-role/RPC).
+- If `created_at` is missing in the auth payload, a service-role key is available to query `public.users`.
 - Server time is authoritative for `now_utc`.
 
 ## Dependencies
@@ -44,6 +44,6 @@
 - Edge function runtime for new endpoints.
 
 ## Risks
-- `created_at` not available under user_jwt -> needs RPC/service-role fallback.
+- Service-role key missing prevents fallback lookup for `created_at`.
 - Timezone misinterpretation on cutoff boundary.
 - Increased read latency from extra queries.

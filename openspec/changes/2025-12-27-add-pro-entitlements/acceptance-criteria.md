@@ -10,6 +10,11 @@
 - THEN the response returns `pro.active = true`
 - AND `pro.expires_at` equals `created_at + 99 years`
 
+#### Scenario: Missing created_at uses fallback lookup
+- WHEN the auth payload omits `created_at` and a service-role key is configured
+- THEN the endpoint resolves `created_at` from `public.users`
+- AND returns a computed Pro status
+
 ### Requirement: Entitlement windows control Pro status
 - Rationale: Paid/override entitlements should grant Pro only within effective windows.
 
