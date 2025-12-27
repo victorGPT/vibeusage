@@ -1,16 +1,16 @@
 # Verification Report
 
 ## Scope
-- Pro status computation and entitlement endpoints (not yet executed).
+- Pro status computation and entitlement endpoints.
 
 ## Tests Run
-- Not run yet.
+- `node --test test/edge-functions.test.js`
 
 ## Results
-- Pending.
+- PASS
 
 ## Evidence
-- Pending.
+- Edge function tests: 25 passed, 0 failed (see command output in shell history).
 
 ## Remaining Risks
-- `created_at` availability under user_jwt is unverified.
+- `created_at` availability under user_jwt is unverified in production; fallback may be required.
