@@ -16,4 +16,9 @@ test("DashboardPage avoids tight retry loop for link code issue", () => {
   assert.match(src, /linkCodeRequestKeyRef/);
   assert.match(src, /const\s+requestKey\s*=\s*`\$\{baseUrl\}:/);
   assert.match(src, /linkCodeRequestKeyRef\.current\s*===\s*requestKey/);
+  assert.match(
+    src,
+    /\[signedIn,\s*auth\?\.\s*accessToken,\s*baseUrl,\s*linkCode\]/
+  );
+  assert.doesNotMatch(src, /linkCodeLoading\s*\]/);
 });

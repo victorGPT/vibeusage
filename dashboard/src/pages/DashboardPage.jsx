@@ -79,7 +79,7 @@ export function DashboardPage({ baseUrl, auth, signedIn, signOut }) {
     return () => {
       cancelled = true;
     };
-  }, [signedIn, auth?.accessToken, baseUrl, linkCode, linkCodeLoading]);
+  }, [signedIn, auth?.accessToken, baseUrl, linkCode]);
 
   const timeZone = useMemo(() => getBrowserTimeZone(), []);
   const tzOffsetMinutes = useMemo(() => getBrowserTimeZoneOffsetMinutes(), []);
