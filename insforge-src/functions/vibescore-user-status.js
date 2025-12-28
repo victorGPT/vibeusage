@@ -7,8 +7,9 @@ const { handleOptions, json, requireMethod } = require('../shared/http');
 const { getBearerToken, getEdgeClientAndUserId } = require('../shared/auth');
 const { getAnonKey, getBaseUrl, getServiceRoleKey } = require('../shared/env');
 const { computeProStatus } = require('../shared/pro-status');
+const { withRequestLogging } = require('../shared/logging');
 
-module.exports = async function(request) {
+module.exports = withRequestLogging('vibescore-user-status', async function(request) {
   const opt = handleOptions(request);
   if (opt) return opt;
 
@@ -79,4 +80,4 @@ module.exports = async function(request) {
     },
     200
   );
-};
+});

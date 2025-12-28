@@ -24,11 +24,12 @@ const {
   formatUsdFromMicros,
   resolvePricingProfile
 } = require('../shared/pricing');
+const { withRequestLogging } = require('../shared/logging');
 
 const DEFAULT_SOURCE = 'codex';
 const DEFAULT_MODEL = 'unknown';
 
-module.exports = async function(request) {
+module.exports = withRequestLogging('vibescore-usage-model-breakdown', async function(request) {
   const opt = handleOptions(request);
   if (opt) return opt;
 
@@ -134,7 +135,7 @@ module.exports = async function(request) {
     },
     200
   );
-};
+});
 
 function createTotals() {
   return {

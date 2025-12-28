@@ -6,10 +6,11 @@
 const { handleOptions, json, requireMethod, readJson } = require('../shared/http');
 const { getBearerToken, isProjectAdminBearer } = require('../shared/auth');
 const { getBaseUrl, getAnonKey, getServiceRoleKey } = require('../shared/env');
+const { withRequestLogging } = require('../shared/logging');
 
 const ALLOWED_SOURCES = new Set(['paid', 'override', 'manual']);
 
-module.exports = async function(request) {
+module.exports = withRequestLogging('vibescore-entitlements', async function(request) {
   const opt = handleOptions(request);
   if (opt) return opt;
 
@@ -71,7 +72,7 @@ module.exports = async function(request) {
   if (error) return json({ error: error.message }, 500);
 
   return json(row, 200);
-};
+});
 
 function isValidIso(value) {
   if (typeof value !== 'string' || value.length === 0) return false;

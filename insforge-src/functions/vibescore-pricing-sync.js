@@ -12,6 +12,7 @@ const { toPositiveIntOrNull } = require('../shared/numbers');
 const { normalizeSource } = require('../shared/source');
 const { normalizeModel } = require('../shared/model');
 const { forEachPage } = require('../shared/pagination');
+const { withRequestLogging } = require('../shared/logging');
 
 const OPENROUTER_MODELS_URL = 'https://openrouter.ai/api/v1/models';
 const MAX_RATE_MICROS_PER_MILLION = 2147483647n;
@@ -19,7 +20,7 @@ const SCALE_MICROS_PER_MILLION = 12; // USD per token -> micro USD per million t
 const UPSERT_BATCH_SIZE = 500;
 const USAGE_MODEL_WINDOW_DAYS = 30;
 
-module.exports = async function(request) {
+module.exports = withRequestLogging('vibescore-pricing-sync', async function(request, logger) {
   const opt = handleOptions(request);
   if (opt) return opt;
 
@@ -60,7 +61,7 @@ module.exports = async function(request) {
   const title = getEnvValue('OPENROUTER_APP_TITLE');
   if (title) headers['X-Title'] = title;
 
-  const openrouterRes = await fetch(OPENROUTER_MODELS_URL, { headers });
+  const openrouterRes = await logger.fetch(OPENROUTER_MODELS_URL, { headers });
   if (!openrouterRes.ok) {
     return json({
       error: 'OpenRouter fetch failed',
@@ -209,7 +210,7 @@ module.exports = async function(request) {
     aliases_upserted: aliasesUpserted,
     retention
   }, 200);
-};
+});
 
 function getEnvValue(key) {
   try {
