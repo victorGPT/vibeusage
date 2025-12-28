@@ -22,11 +22,13 @@ Enable a single-login onboarding flow by letting a logged-in Dashboard session m
 ## Data Model
 Table: `public.vibescore_link_codes`
 - `id` (uuid pk)
+- `user_id` (uuid, fk -> auth.users)
 - `code_hash` (text, unique)
 - `session_id` (text)
 - `expires_at` (timestamptz)
 - `used_at` (timestamptz, nullable)
 - `request_id` (text, nullable)
+- `device_id` (uuid, nullable)
 - `created_at` (timestamptz)
 
 ## Endpoints
