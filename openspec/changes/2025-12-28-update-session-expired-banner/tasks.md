@@ -17,7 +17,7 @@
 ## 4. Verification
 - [x] Run `npm test`
 - [x] Run `node scripts/validate-copy-registry.cjs`
-- [ ] Manual check: force 401 and confirm banner appears without full-page gate
+- [x] Manual check: force 401 and confirm banner appears without full-page gate
 
 ## 5. Docs & Spec
 - [x] Update spec delta under `openspec/changes/2025-12-28-update-session-expired-banner/specs/vibescore-tracker/spec.md`
