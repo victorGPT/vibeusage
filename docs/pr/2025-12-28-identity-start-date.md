@@ -12,7 +12,7 @@ Replace IdentityCard rank display with earliest usage date (yyyy-mm-dd) and rend
 - Dashboard IdentityCard label/value rendering and copy registry.
 
 ### Verification method (choose at least one)
-- [x] Existing automated tests did not fail (commands: `node --test test/dashboard-identity-start-date.test.js test/identity-card-rank-color.test.js`, `node scripts/validate-copy-registry.cjs` => PASS; copy registry warnings unchanged: `landing.meta.*`, `usage.summary.since`, `dashboard.session.label`)
+- [x] Existing automated tests did not fail (commands: `node --test test/dashboard-identity-start-date.test.js`, `node scripts/validate-copy-registry.cjs` => PASS; copy registry warnings unchanged: `landing.meta.*`, `usage.summary.since`, `dashboard.session.label`)
 - [ ] Manual regression path executed
 
 ### Uncovered scope
