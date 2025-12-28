@@ -11,6 +11,7 @@
 - `node --test test/init-uninstall.test.js`
 - `node --test test/dashboard-link-code-install.test.js`
 - `node scripts/validate-copy-registry.cjs`
+- `node scripts/acceptance/link-code-e2e-manual.cjs --help`
 
 ## Results
 - All listed tests passed.
@@ -18,6 +19,7 @@
   - `landing.meta.*` (title/description/og/twitter)
   - `usage.summary.since`
   - `dashboard.session.label`
+- Manual E2E script requires a live link code; `--help` was used to verify usage output.
 
 ## Evidence
 - Local test outputs recorded in this session.
