@@ -17,3 +17,9 @@ create index if not exists vibescore_link_codes_expires_at_idx
   on public.vibescore_link_codes (expires_at);
 
 alter table public.vibescore_link_codes enable row level security;
+
+do $$ begin
+  create policy vibescore_link_codes_insert_self on public.vibescore_link_codes
+    for insert to authenticated
+    with check (auth.uid() = user_id);
+exception when duplicate_object then null; end $$;

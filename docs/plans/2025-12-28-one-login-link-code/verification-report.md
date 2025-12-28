@@ -14,6 +14,7 @@
 - `node --test test/dashboard-link-code-expiry.test.js`
 - `node --test test/dashboard-render-order.test.js`
 - `node --test test/insforge-src-shared.test.js`
+- `node --test test/link-code-rls.test.js`
 - `node scripts/validate-copy-registry.cjs`
 - `node scripts/acceptance/link-code-e2e-manual.cjs --help`
 
