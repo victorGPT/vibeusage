@@ -615,12 +615,7 @@ export function DashboardPage({
         link_code: linkCodeMasked,
       })
     : installInitCmdBase;
-  const installInitCmdCopy = resolvedLinkCode
-    ? copy("dashboard.install.cmd.init_link_code", {
-        link_code: resolvedLinkCode,
-      })
-    : installInitCmdBase;
-  const installSyncCmd = copy("dashboard.install.cmd.sync");
+  const installInitCmdCopy = installInitCmdBase;
   const installCopyLabel = resolvedLinkCode
     ? copy("dashboard.install.copy")
     : copy("dashboard.install.copy_base");
@@ -665,15 +660,10 @@ export function DashboardPage({
       {
         text: `\n${copy("dashboard.install.step2")}\n${copy(
           "dashboard.install.step3"
-        )} `,
+        )}`,
       },
-      {
-        text: installSyncCmd,
-        className: "px-1 py-0.5 bg-black/40 border border-[#00FF41]/20",
-      },
-      { text: copy("dashboard.install.step3_suffix") },
     ],
-    [installInitCmdDisplay, installSyncCmd]
+    [installInitCmdDisplay]
   );
   const handleCopyInstall = useCallback(async () => {
     if (!installInitCmdCopy) return;
