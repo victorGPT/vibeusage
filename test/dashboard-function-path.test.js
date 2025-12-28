@@ -100,3 +100,36 @@ test('usage summary does not fall back on 401', async () => {
   assert.equal(calls.length, 1);
   assert.ok(calls[0]?.includes('/functions/'));
 });
+
+test('link code init posts to /functions', async () => {
+  const { requestInstallLinkCode } = await loadVibescoreApi();
+  const calls = [];
+
+  globalThis.fetch = async (input, init = {}) => {
+    const target = typeof input === 'string' ? input : input?.url || '';
+    const method = init?.method || input?.method;
+    calls.push({ target, method });
+
+    if (target.includes('/functions/vibescore-link-code-init')) {
+      return jsonResponse(
+        {
+          link_code: 'link_code_example',
+          expires_at: '2025-01-01T00:00:00.000Z'
+        },
+        200
+      );
+    }
+
+    return jsonResponse({ error: 'Unexpected', message: 'Unexpected' }, 500);
+  };
+
+  const res = await requestInstallLinkCode({
+    baseUrl: 'https://example.test',
+    accessToken: 'token'
+  });
+
+  assert.equal(res?.link_code, 'link_code_example');
+  assert.equal(calls.length, 1);
+  assert.ok(calls[0]?.target?.includes('/functions/vibescore-link-code-init'));
+  assert.equal(calls[0]?.method, 'POST');
+});

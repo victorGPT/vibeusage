@@ -35,6 +35,33 @@ async function issueDeviceToken({ baseUrl, accessToken, deviceName, platform = '
   return { token, deviceId };
 }
 
+async function exchangeLinkCode({ baseUrl, linkCode, requestId, deviceName, platform = 'macos' }) {
+  const data = await invokeFunction({
+    baseUrl,
+    accessToken: null,
+    slug: 'vibescore-link-code-exchange',
+    method: 'POST',
+    body: {
+      link_code: linkCode,
+      request_id: requestId,
+      device_name: deviceName,
+      platform
+    },
+    errorPrefix: 'Link code exchange failed'
+  });
+
+  const token = data?.token;
+  const deviceId = data?.device_id;
+  if (typeof token !== 'string' || token.length === 0) {
+    throw new Error('Link code exchange failed: missing token');
+  }
+  if (typeof deviceId !== 'string' || deviceId.length === 0) {
+    throw new Error('Link code exchange failed: missing device_id');
+  }
+
+  return { token, deviceId, userId: data?.user_id || null };
+}
+
 async function ingestHourly({ baseUrl, deviceToken, hourly }) {
   const data = await invokeFunctionWithRetry({
     baseUrl,
@@ -72,6 +99,7 @@ async function syncHeartbeat({ baseUrl, deviceToken }) {
 module.exports = {
   signInWithPassword,
   issueDeviceToken,
+  exchangeLinkCode,
   ingestHourly,
   syncHeartbeat
 };

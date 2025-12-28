@@ -20,6 +20,7 @@ const PATHS = {
   usageMonthly: "vibescore-usage-monthly",
   usageHeatmap: "vibescore-usage-heatmap",
   usageModelBreakdown: "vibescore-usage-model-breakdown",
+  linkCodeInit: "vibescore-link-code-init",
 };
 
 const FUNCTION_PREFIX = "/functions";
@@ -191,6 +192,21 @@ export async function getUsageHeatmap({
   });
 }
 
+export async function requestInstallLinkCode({ baseUrl, accessToken } = {}) {
+  if (isMockEnabled()) {
+    return {
+      link_code: "mock_link_code",
+      expires_at: new Date(Date.now() + 10 * 60_000).toISOString(),
+    };
+  }
+  return requestPostJson({
+    baseUrl,
+    accessToken,
+    slug: PATHS.linkCodeInit,
+    body: {},
+  });
+}
+
 function buildTimeZoneParams({ timeZone, tzOffsetMinutes } = {}) {
   const params = {};
   const tz = typeof timeZone === "string" ? timeZone.trim() : "";
@@ -245,6 +261,41 @@ async function requestJson({
   }
 }
 
+async function requestPostJson({
+  baseUrl,
+  accessToken,
+  slug,
+  body,
+  fetchOptions,
+  errorPrefix,
+  retry,
+}) {
+  const client = createInsforgeClient({ baseUrl, accessToken });
+  const http = client.getHttpClient();
+  const retryOptions = normalizeRetryOptions(retry, "POST");
+  let attempt = 0;
+  const { primaryPath, fallbackPath } = buildFunctionPaths(slug);
+
+  while (true) {
+    try {
+      return await requestWithFallbackPost({
+        http,
+        primaryPath,
+        fallbackPath,
+        body,
+        fetchOptions,
+      });
+    } catch (e) {
+      if (e?.name === "AbortError") throw e;
+      const err = normalizeSdkError(e, errorPrefix);
+      if (!shouldRetry({ err, attempt, retryOptions })) throw err;
+      const delayMs = computeRetryDelayMs({ retryOptions, attempt });
+      await sleep(delayMs);
+      attempt += 1;
+    }
+  }
+}
+
 function buildFunctionPaths(slug) {
   const normalized = normalizeFunctionSlug(slug);
   const primaryPath = `${normalizePrefix(FUNCTION_PREFIX)}/${normalized}`;
@@ -275,6 +326,40 @@ async function requestWithFallback({
     if (!shouldFallbackToLegacy(err, primaryPath)) throw err;
     return await http.get(fallbackPath, { params, ...(fetchOptions || {}) });
   }
+}
+
+async function requestWithFallbackPost({
+  http,
+  primaryPath,
+  fallbackPath,
+  body,
+  fetchOptions,
+}) {
+  try {
+    return await requestWithAuthRetryPost({
+      http,
+      path: primaryPath,
+      body,
+      fetchOptions,
+    });
+  } catch (err) {
+    if (!shouldFallbackToLegacy(err, primaryPath)) throw err;
+    return await requestWithAuthRetryPost({
+      http,
+      path: fallbackPath,
+      body,
+      fetchOptions,
+    });
+  }
+}
+
+async function requestWithAuthRetryPost({
+  http,
+  path,
+  body,
+  fetchOptions,
+}) {
+  return await http.post(path, body, { ...(fetchOptions || {}) });
 }
 
 function shouldFallbackToLegacy(error, primaryPath) {

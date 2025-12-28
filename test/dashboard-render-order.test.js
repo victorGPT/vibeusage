@@ -23,3 +23,24 @@ test("DashboardPage declares timeZone before use in range computation", () => {
     "timeZone should be declared before getRangeForPeriod call"
   );
 });
+
+test("DashboardPage declares mockEnabled before link code effect uses it", () => {
+  const filePath = path.join(
+    __dirname,
+    "..",
+    "dashboard",
+    "src",
+    "pages",
+    "DashboardPage.jsx"
+  );
+  const src = fs.readFileSync(filePath, "utf8");
+  const mockEnabledDeclIndex = src.search(/\bconst\s+mockEnabled\b/);
+  const effectUseIndex = src.indexOf("if (!signedIn || mockEnabled)");
+
+  assert.ok(mockEnabledDeclIndex !== -1, "mockEnabled declaration not found");
+  assert.ok(effectUseIndex !== -1, "mockEnabled usage in effect not found");
+  assert.ok(
+    mockEnabledDeclIndex < effectUseIndex,
+    "mockEnabled should be declared before useEffect references it"
+  );
+});

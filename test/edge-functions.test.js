@@ -1,4 +1,5 @@
 const assert = require('node:assert/strict');
+const { createHash } = require('node:crypto');
 const { test, beforeEach, afterEach } = require('node:test');
 
 const SERVICE_ROLE_KEY = 'srk_test_123';
@@ -1816,4 +1817,96 @@ test('vibescore-entitlements-revoke accepts project_admin token', async () => {
 
   const res = await fn(req);
   assert.equal(res.status, 200);
+});
+
+test('vibescore-link-code-init issues a short-lived link code', async () => {
+  const fn = require('../insforge-functions/vibescore-link-code-init');
+
+  const db = createServiceDbMock();
+  const userId = '66666666-6666-6666-6666-666666666666';
+  const userJwt = 'user_jwt_test';
+
+  globalThis.createClient = (args) => {
+    if (args && args.edgeFunctionToken === userJwt) {
+      return {
+        auth: {
+          getCurrentUser: async () => ({ data: { user: { id: userId } }, error: null })
+        },
+        database: db.db
+      };
+    }
+    if (args && args.edgeFunctionToken === SERVICE_ROLE_KEY) {
+      return { database: db.db };
+    }
+    throw new Error(`Unexpected createClient args: ${JSON.stringify(args)}`);
+  };
+
+  const req = new Request('http://localhost/functions/vibescore-link-code-init', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${userJwt}` },
+    body: JSON.stringify({})
+  });
+
+  const res = await fn(req);
+  assert.equal(res.status, 200);
+  const body = await res.json();
+
+  assert.equal(typeof body.link_code, 'string');
+  assert.ok(body.link_code.length > 0);
+  assert.equal(typeof body.expires_at, 'string');
+
+  const insert = db.inserts.find((i) => i.table === 'vibescore_link_codes');
+  assert.ok(insert, 'link code insert missing');
+  const row = insert.rows?.[0] || {};
+
+  assert.equal(typeof row.code_hash, 'string');
+  assert.equal(row.code_hash.length, 64);
+  assert.equal(typeof row.session_id, 'string');
+  assert.equal(row.session_id.length, 64);
+  assert.notEqual(row.session_id, userJwt);
+  assert.equal(row.used_at, null);
+});
+
+test('vibescore-link-code-exchange calls rpc with hash and returns device token', async () => {
+  const fn = require('../insforge-functions/vibescore-link-code-exchange');
+
+  const linkCode = 'link_code_test';
+  const requestId = 'req_123';
+  const deviceId = 'device_abc';
+  const userId = '77777777-7777-7777-7777-777777777777';
+
+  const calls = [];
+  globalThis.fetch = async (url, init) => {
+    calls.push({ url, init });
+    return new Response(JSON.stringify({ device_id: deviceId, user_id: userId }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  };
+
+  const req = new Request('http://localhost/functions/vibescore-link-code-exchange', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ link_code: linkCode, request_id: requestId })
+  });
+
+  const res = await fn(req);
+  assert.equal(res.status, 200);
+  const body = await res.json();
+
+  const codeHash = createHash('sha256').update(linkCode).digest('hex');
+  const expectedToken = createHash('sha256')
+    .update(`${SERVICE_ROLE_KEY}:${codeHash}:${requestId}`)
+    .digest('hex');
+  const expectedTokenHash = createHash('sha256').update(expectedToken).digest('hex');
+  assert.equal(body.token, expectedToken);
+  assert.equal(body.device_id, deviceId);
+  assert.equal(body.user_id, userId);
+
+  assert.equal(calls.length, 1);
+  assert.ok(String(calls[0].url).includes('/api/database/rpc/vibescore_exchange_link_code'));
+  const payload = JSON.parse(calls[0].init?.body || '{}');
+  assert.equal(payload.p_code_hash, codeHash);
+  assert.equal(payload.p_request_id, requestId);
+  assert.equal(payload.p_token_hash, expectedTokenHash);
 });

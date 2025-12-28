@@ -14,7 +14,9 @@ import {
   formatUsdCurrency,
   toDisplayNumber,
 } from "../lib/format.js";
+import { requestInstallLinkCode } from "../lib/vibescore-api.js";
 import { buildFleetData } from "../lib/model-breakdown.js";
+import { safeWriteClipboard } from "../lib/safe-browser.js";
 import { useActivityHeatmap } from "../hooks/use-activity-heatmap.js";
 import { useTrendData } from "../hooks/use-trend-data.js";
 import { useUsageData } from "../hooks/use-usage-data.js";
@@ -48,10 +50,104 @@ const DETAILS_PAGED_PERIODS = new Set(["day", "total"]);
 export function DashboardPage({ baseUrl, auth, signedIn, signOut }) {
   const [booted, setBooted] = useState(false);
   const [costModalOpen, setCostModalOpen] = useState(false);
+  const [linkCode, setLinkCode] = useState(null);
+  const [linkCodeExpiresAt, setLinkCodeExpiresAt] = useState(null);
+  const [linkCodeLoading, setLinkCodeLoading] = useState(false);
+  const [linkCodeError, setLinkCodeError] = useState(null);
+  const [linkCodeExpiryTick, setLinkCodeExpiryTick] = useState(0);
+  const [linkCodeRefreshToken, setLinkCodeRefreshToken] = useState(0);
+  const [installCopied, setInstallCopied] = useState(false);
+  const [userIdCopied, setUserIdCopied] = useState(false);
+  const mockEnabled = isMockEnabled();
+  const accessEnabled = signedIn || mockEnabled;
   useEffect(() => {
     const t = window.setTimeout(() => setBooted(true), 900);
     return () => window.clearTimeout(t);
   }, []);
+
+  useEffect(() => {
+    if (!signedIn || mockEnabled) {
+      setLinkCode(null);
+      setLinkCodeExpiresAt(null);
+      setLinkCodeLoading(false);
+      setLinkCodeError(null);
+      return;
+    }
+    let active = true;
+    setLinkCodeLoading(true);
+    setLinkCodeError(null);
+    requestInstallLinkCode({ baseUrl, accessToken: auth?.accessToken || null })
+      .then((data) => {
+        if (!active) return;
+        setLinkCode(typeof data?.link_code === "string" ? data.link_code : null);
+        setLinkCodeExpiresAt(
+          typeof data?.expires_at === "string" ? data.expires_at : null
+        );
+      })
+      .catch((err) => {
+        if (!active) return;
+        setLinkCode(null);
+        setLinkCodeExpiresAt(null);
+        setLinkCodeError(err?.message || "Failed to load link code");
+      })
+      .finally(() => {
+        if (!active) return;
+        setLinkCodeLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [baseUrl, mockEnabled, signedIn, auth?.accessToken, linkCodeRefreshToken]);
+  const linkCodeExpired = useMemo(() => {
+    if (!linkCodeExpiresAt) return false;
+    const ts = Date.parse(linkCodeExpiresAt);
+    if (!Number.isFinite(ts)) return false;
+    const now = linkCodeExpiryTick || Date.now();
+    return ts <= now;
+  }, [linkCodeExpiresAt, linkCodeExpiryTick]);
+  useEffect(() => {
+    if (!signedIn || mockEnabled) return;
+    if (!linkCodeExpiresAt || !linkCodeExpired) return;
+    if (linkCodeLoading) return;
+    setLinkCode(null);
+    setLinkCodeExpiresAt(null);
+    setLinkCodeError(null);
+    setLinkCodeRefreshToken((value) => value + 1);
+  }, [
+    linkCodeExpired,
+    linkCodeExpiresAt,
+    linkCodeLoading,
+    mockEnabled,
+    signedIn,
+  ]);
+  useEffect(() => {
+    if (!linkCodeExpiresAt) return;
+    const ts = Date.parse(linkCodeExpiresAt);
+    if (!Number.isFinite(ts)) return;
+    const now = Date.now();
+    setLinkCodeExpiryTick(now);
+    if (ts <= now) return;
+    const timeoutId = window.setTimeout(
+      () => setLinkCodeExpiryTick(Date.now()),
+      ts - now
+    );
+    const handleVisibilityChange = () => {
+      if (typeof document === "undefined") return;
+      if (document.visibilityState !== "visible") return;
+      setLinkCodeExpiryTick(Date.now());
+    };
+    if (typeof document !== "undefined") {
+      document.addEventListener("visibilitychange", handleVisibilityChange);
+    }
+    window.addEventListener("focus", handleVisibilityChange);
+    return () => {
+      window.clearTimeout(timeoutId);
+      if (typeof document !== "undefined") {
+        document.removeEventListener("visibilitychange", handleVisibilityChange);
+      }
+      window.removeEventListener("focus", handleVisibilityChange);
+    };
+  }, [linkCodeExpiresAt]);
 
   const timeZone = useMemo(() => getBrowserTimeZone(), []);
   const tzOffsetMinutes = useMemo(() => getBrowserTimeZoneOffsetMinutes(), []);
@@ -63,8 +159,6 @@ export function DashboardPage({ baseUrl, auth, signedIn, signOut }) {
   );
   const from = range.from;
   const to = range.to;
-  const mockEnabled = isMockEnabled();
-  const accessEnabled = signedIn || mockEnabled;
   const timeZoneLabel = useMemo(
     () => formatTimeZoneLabel({ timeZone, offsetMinutes: tzOffsetMinutes }),
     [timeZone, tzOffsetMinutes]
@@ -396,8 +490,25 @@ export function DashboardPage({ baseUrl, auth, signedIn, signOut }) {
   const costInfoEnabled =
     summaryCostValue && summaryCostValue !== "-" && fleetData.length > 0;
 
-  const installInitCmd = copy("dashboard.install.cmd.init");
+  const installInitCmdBase = copy("dashboard.install.cmd.init");
+  const resolvedLinkCode = !linkCodeExpired ? linkCode : null;
+  const linkCodeMasked = resolvedLinkCode ? maskSecret(resolvedLinkCode) : null;
+  const installInitCmdDisplay = resolvedLinkCode
+    ? copy("dashboard.install.cmd.init_link_code", {
+        link_code: linkCodeMasked,
+      })
+    : installInitCmdBase;
+  const installInitCmdCopy = resolvedLinkCode
+    ? copy("dashboard.install.cmd.init_link_code", {
+        link_code: resolvedLinkCode,
+      })
+    : installInitCmdBase;
   const installSyncCmd = copy("dashboard.install.cmd.sync");
+  const installCopyLabel = copy("dashboard.install.copy");
+  const installCopiedLabel = copy("dashboard.install.copied");
+  const userIdLabel = copy("dashboard.install.user_id.label");
+  const userIdCopyLabel = copy("dashboard.install.user_id.copy");
+  const userIdCopiedLabel = copy("dashboard.install.user_id.copied");
   const installSeenKey = "vibescore.dashboard.install.seen.v1";
   const [installSeen] = useState(() => {
     if (typeof window === "undefined") return true;
@@ -430,7 +541,7 @@ export function DashboardPage({ baseUrl, auth, signedIn, signOut }) {
     () => [
       { text: `${copy("dashboard.install.step1")} ` },
       {
-        text: installInitCmd,
+        text: installInitCmdDisplay,
         className: "px-1 py-0.5 bg-black/40 border border-[#00FF41]/20",
       },
       {
@@ -444,8 +555,25 @@ export function DashboardPage({ baseUrl, auth, signedIn, signOut }) {
       },
       { text: copy("dashboard.install.step3_suffix") },
     ],
-    [installInitCmd, installSyncCmd]
+    [installInitCmdDisplay, installSyncCmd]
   );
+  const userIdMasked = auth?.userId ? maskSecret(auth.userId) : null;
+
+  const handleCopyInstall = useCallback(async () => {
+    if (!installInitCmdCopy) return;
+    const didCopy = await safeWriteClipboard(installInitCmdCopy);
+    if (!didCopy) return;
+    setInstallCopied(true);
+    window.setTimeout(() => setInstallCopied(false), 2000);
+  }, [installInitCmdCopy]);
+
+  const handleCopyUserId = useCallback(async () => {
+    if (!auth?.userId) return;
+    const didCopy = await safeWriteClipboard(auth.userId);
+    if (!didCopy) return;
+    setUserIdCopied(true);
+    window.setTimeout(() => setUserIdCopied(false), 2000);
+  }, [auth?.userId]);
 
   const redirectUrl = useMemo(
     () => `${window.location.origin}/auth/callback`,
@@ -595,6 +723,31 @@ export function DashboardPage({ baseUrl, auth, signedIn, signOut }) {
                   wrap
                   active={shouldAnimateInstall}
                 />
+                <div className="mt-4 flex flex-col gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <MatrixButton onClick={handleCopyInstall}>
+                      {installCopied ? installCopiedLabel : installCopyLabel}
+                    </MatrixButton>
+                    {linkCodeLoading ? (
+                      <span className="text-[9px] opacity-40">
+                        {copy("dashboard.install.link_code.loading")}
+                      </span>
+                    ) : linkCodeError ? (
+                      <span className="text-[9px] opacity-40">
+                        {copy("dashboard.install.link_code.failed")}
+                      </span>
+                    ) : null}
+                  </div>
+                  {signedIn && userIdMasked ? (
+                    <div className="flex flex-wrap items-center gap-2 text-[9px] opacity-60">
+                      <span className="font-mono">{userIdLabel}</span>
+                      <span className="font-mono">{userIdMasked}</span>
+                      <MatrixButton onClick={handleCopyUserId}>
+                        {userIdCopied ? userIdCopiedLabel : userIdCopyLabel}
+                      </MatrixButton>
+                    </div>
+                  ) : null}
+                </div>
               </AsciiBox>
 
               <AsciiBox
@@ -782,4 +935,11 @@ export function DashboardPage({ baseUrl, auth, signedIn, signOut }) {
       />
     </>
   );
+}
+
+function maskSecret(value) {
+  if (typeof value !== "string") return "";
+  const s = value.trim();
+  if (s.length <= 8) return "***";
+  return `${s.slice(0, 4)}...${s.slice(-4)}`;
 }

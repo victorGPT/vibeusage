@@ -3,6 +3,7 @@ const path = require('node:path');
 const fs = require('node:fs/promises');
 const fssync = require('node:fs');
 const cp = require('node:child_process');
+const crypto = require('node:crypto');
 
 const { ensureDir, writeFileAtomic, readJson, writeJson, chmod600IfPossible } = require('../lib/fs');
 const { prompt, promptHidden } = require('../lib/prompt');
@@ -14,7 +15,11 @@ const {
 } = require('../lib/codex-config');
 const { upsertClaudeHook, buildClaudeHookCommand } = require('../lib/claude-config');
 const { beginBrowserAuth } = require('../lib/browser-auth');
-const { issueDeviceTokenWithPassword, issueDeviceTokenWithAccessToken } = require('../lib/insforge');
+const {
+  issueDeviceTokenWithPassword,
+  issueDeviceTokenWithAccessToken,
+  issueDeviceTokenWithLinkCode
+} = require('../lib/insforge');
 
 async function cmdInit(argv) {
   const opts = parseArgs(argv);
@@ -29,6 +34,7 @@ async function cmdInit(argv) {
 
   const configPath = path.join(trackerDir, 'config.json');
   const notifyOriginalPath = path.join(trackerDir, 'codex_notify_original.json');
+  const linkCodeStatePath = path.join(trackerDir, 'link_code_state.json');
 
   const baseUrl = opts.baseUrl || process.env.VIBESCORE_INSFORGE_BASE_URL || 'https://5tmappuk.us-east.insforge.app';
   let dashboardUrl = opts.dashboardUrl || process.env.VIBESCORE_DASHBOARD_URL || null;
@@ -44,7 +50,36 @@ async function cmdInit(argv) {
 
   await installLocalTrackerApp({ appDir });
 
-  if (!deviceToken && !opts.noAuth) {
+  if (!deviceToken && opts.linkCode) {
+    const deviceName = opts.deviceName || os.hostname();
+    const platform = normalizePlatform(process.platform);
+    const linkCode = String(opts.linkCode);
+    const linkCodeHash = crypto.createHash('sha256').update(linkCode).digest('hex');
+    const existingLinkState = await readJson(linkCodeStatePath);
+    let requestId =
+      existingLinkState?.linkCodeHash === linkCodeHash && existingLinkState?.requestId
+        ? existingLinkState.requestId
+        : null;
+    if (!requestId) {
+      requestId = crypto.randomUUID();
+      await writeJson(linkCodeStatePath, {
+        linkCodeHash,
+        requestId,
+        createdAt: new Date().toISOString()
+      });
+      await chmod600IfPossible(linkCodeStatePath);
+    }
+    const issued = await issueDeviceTokenWithLinkCode({
+      baseUrl,
+      linkCode,
+      requestId,
+      deviceName,
+      platform
+    });
+    deviceToken = issued.token;
+    deviceId = issued.deviceId;
+    await fs.rm(linkCodeStatePath, { force: true });
+  } else if (!deviceToken && !opts.noAuth) {
     const deviceName = opts.deviceName || os.hostname();
 
     if (opts.email || opts.password) {
@@ -171,6 +206,7 @@ function parseArgs(argv) {
     email: null,
     password: null,
     deviceName: null,
+    linkCode: null,
     noAuth: false,
     noOpen: false
   };
@@ -182,6 +218,7 @@ function parseArgs(argv) {
     else if (a === '--email') out.email = argv[++i] || null;
     else if (a === '--password') out.password = argv[++i] || null;
     else if (a === '--device-name') out.deviceName = argv[++i] || null;
+    else if (a === '--link-code') out.linkCode = argv[++i] || null;
     else if (a === '--no-auth') out.noAuth = true;
     else if (a === '--no-open') out.noOpen = true;
     else throw new Error(`Unknown option: ${a}`);
@@ -192,6 +229,13 @@ function parseArgs(argv) {
 function maskSecret(s) {
   if (typeof s !== 'string' || s.length < 8) return '***';
   return `${s.slice(0, 4)}…${s.slice(-4)}`;
+}
+
+function normalizePlatform(value) {
+  if (value === 'darwin') return 'macos';
+  if (value === 'win32') return 'windows';
+  if (value === 'linux') return 'linux';
+  return 'unknown';
 }
 
 function buildNotifyHandler({ trackerDir, packageName }) {
