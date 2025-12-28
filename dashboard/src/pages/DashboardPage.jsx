@@ -108,7 +108,22 @@ export function DashboardPage({ baseUrl, auth, signedIn, signOut }) {
       () => setLinkCodeExpiryTick(Date.now()),
       ts - now
     );
-    return () => window.clearTimeout(timeoutId);
+    const handleVisibilityChange = () => {
+      if (typeof document === "undefined") return;
+      if (document.visibilityState !== "visible") return;
+      setLinkCodeExpiryTick(Date.now());
+    };
+    if (typeof document !== "undefined") {
+      document.addEventListener("visibilitychange", handleVisibilityChange);
+    }
+    window.addEventListener("focus", handleVisibilityChange);
+    return () => {
+      window.clearTimeout(timeoutId);
+      if (typeof document !== "undefined") {
+        document.removeEventListener("visibilitychange", handleVisibilityChange);
+      }
+      window.removeEventListener("focus", handleVisibilityChange);
+    };
   }, [linkCodeExpiresAt]);
 
   const timeZone = useMemo(() => getBrowserTimeZone(), []);

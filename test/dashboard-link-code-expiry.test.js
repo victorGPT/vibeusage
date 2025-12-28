@@ -30,4 +30,8 @@ test('DashboardPage schedules link code expiry tick', () => {
     src.includes('setTimeout') || src.includes('setTimeout(') || src.includes('setTimeout ('),
     'expected expiry timer to re-evaluate link code expiration'
   );
+  assert.ok(
+    src.includes('visibilitychange'),
+    'expected expiry refresh on visibility change'
+  );
 });
