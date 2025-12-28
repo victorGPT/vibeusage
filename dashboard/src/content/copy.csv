@@ -243,7 +243,10 @@ dashboard.auth_required.body,dashboard,DashboardPage,AsciiBox,body,"Sign in / si
 
 dashboard.session_expired.title,dashboard,DashboardPage,AsciiBox,title,"Session_Expired",,active
 dashboard.session_expired.subtitle,dashboard,DashboardPage,AsciiBox,subtitle,"REAUTH_REQUIRED",,active
-dashboard.session_expired.body,dashboard,DashboardPage,AsciiBox,body,"Your session expired. Sign in again to refresh private usage data.",,active
+dashboard.session_expired.body,dashboard,DashboardPage,AsciiBox,body,"Your session expired.",,active
+dashboard.session_expired.body_tail,dashboard,DashboardPage,AsciiBox,body,"Sign in again to refresh private usage data.",,active
+dashboard.session_expired.copy_label,dashboard,DashboardPage,AsciiBox,body,"run npx --yes @vibescore/tracker init",,active
+dashboard.session_expired.copied,dashboard,DashboardPage,AsciiBox,body,"copied",,active
 
 dashboard.auth_optional.title,dashboard,DashboardPage,AsciiBox,title,"Auth_Optional",,active
 dashboard.auth_optional.subtitle,dashboard,DashboardPage,AsciiBox,subtitle,"Connect",,active

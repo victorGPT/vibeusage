@@ -21,6 +21,8 @@
 - `node --test test/dashboard-session-expired-banner.test.js`: pass (post border color update)
 - `node --test test/dashboard-session-expired-banner.test.js`: pass (PR gate doc)
 - `node --test test/dashboard-session-expired-banner.test.js`: pass (guard session-expired on access token)
+- `node --test test/dashboard-session-expired-banner.test.js`: pass (session-expired copy button)
+- `node scripts/validate-copy-registry.cjs`: ok (warnings about existing unused keys)
 
 ## Evidence
 - Test output captured in session logs (see run timestamps in shell history).

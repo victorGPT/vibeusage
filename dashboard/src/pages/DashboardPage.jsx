@@ -62,6 +62,7 @@ export function DashboardPage({
   const [linkCodeError, setLinkCodeError] = useState(null);
   const [installCopied, setInstallCopied] = useState(false);
   const [userIdCopied, setUserIdCopied] = useState(false);
+  const [sessionExpiredCopied, setSessionExpiredCopied] = useState(false);
   const mockEnabled = isMockEnabled();
   const accessEnabled = signedIn || mockEnabled;
   useEffect(() => {
@@ -466,6 +467,8 @@ export function DashboardPage({
   const installSyncCmd = copy("dashboard.install.cmd.sync");
   const installCopyLabel = copy("dashboard.install.copy");
   const installCopiedLabel = copy("dashboard.install.copied");
+  const sessionExpiredCopyLabel = copy("dashboard.session_expired.copy_label");
+  const sessionExpiredCopiedLabel = copy("dashboard.session_expired.copied");
   const userIdLabel = copy("dashboard.install.user_id.label");
   const userIdCopyLabel = copy("dashboard.install.user_id.copy");
   const userIdCopiedLabel = copy("dashboard.install.user_id.copied");
@@ -534,6 +537,14 @@ export function DashboardPage({
     setUserIdCopied(true);
     window.setTimeout(() => setUserIdCopied(false), 2000);
   }, [auth?.userId]);
+
+  const handleCopySessionExpired = useCallback(async () => {
+    if (!installInitCmdBase) return;
+    const didCopy = await safeWriteClipboard(installInitCmdBase);
+    if (!didCopy) return;
+    setSessionExpiredCopied(true);
+    window.setTimeout(() => setSessionExpiredCopied(false), 2000);
+  }, [installInitCmdBase]);
 
   const redirectUrl = useMemo(
     () => `${window.location.origin}/auth/callback`,
@@ -615,8 +626,21 @@ export function DashboardPage({
               subtitle={copy("dashboard.session_expired.subtitle")}
               className="border-[#00FF41]/40"
             >
-              <p className="text-[10px] opacity-50 mt-0">
-                {copy("dashboard.session_expired.body")}
+              <p className="text-[10px] mt-0 flex flex-wrap items-center gap-2">
+                <span className="opacity-50">
+                  {copy("dashboard.session_expired.body")}
+                </span>
+                <MatrixButton
+                  className="px-2 py-1 text-[9px] normal-case"
+                  onClick={handleCopySessionExpired}
+                >
+                  {sessionExpiredCopied
+                    ? sessionExpiredCopiedLabel
+                    : sessionExpiredCopyLabel}
+                </MatrixButton>
+                <span className="opacity-50">
+                  {copy("dashboard.session_expired.body_tail")}
+                </span>
               </p>
               <div className="flex flex-wrap gap-3 mt-4">
                 <MatrixButton as="a" primary href={signInUrl}>

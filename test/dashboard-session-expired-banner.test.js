@@ -48,4 +48,7 @@ test("copy registry includes session expired strings", () => {
   assert.ok(src.includes("dashboard.session_expired.title"));
   assert.ok(src.includes("dashboard.session_expired.subtitle"));
   assert.ok(src.includes("dashboard.session_expired.body"));
+  assert.ok(src.includes("dashboard.session_expired.body_tail"));
+  assert.ok(src.includes("dashboard.session_expired.copy_label"));
+  assert.ok(src.includes("dashboard.session_expired.copied"));
 });
