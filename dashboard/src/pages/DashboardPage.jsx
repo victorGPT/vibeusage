@@ -54,6 +54,7 @@ export function DashboardPage({ baseUrl, auth, signedIn, signOut }) {
   const [linkCodeExpiresAt, setLinkCodeExpiresAt] = useState(null);
   const [linkCodeLoading, setLinkCodeLoading] = useState(false);
   const [linkCodeError, setLinkCodeError] = useState(null);
+  const [linkCodeExpiryTick, setLinkCodeExpiryTick] = useState(0);
   const [installCopied, setInstallCopied] = useState(false);
   const [userIdCopied, setUserIdCopied] = useState(false);
   const mockEnabled = isMockEnabled();
@@ -96,6 +97,19 @@ export function DashboardPage({ baseUrl, auth, signedIn, signOut }) {
       active = false;
     };
   }, [baseUrl, mockEnabled, signedIn, auth?.accessToken]);
+  useEffect(() => {
+    if (!linkCodeExpiresAt) return;
+    const ts = Date.parse(linkCodeExpiresAt);
+    if (!Number.isFinite(ts)) return;
+    const now = Date.now();
+    setLinkCodeExpiryTick(now);
+    if (ts <= now) return;
+    const timeoutId = window.setTimeout(
+      () => setLinkCodeExpiryTick(Date.now()),
+      ts - now
+    );
+    return () => window.clearTimeout(timeoutId);
+  }, [linkCodeExpiresAt]);
 
   const timeZone = useMemo(() => getBrowserTimeZone(), []);
   const tzOffsetMinutes = useMemo(() => getBrowserTimeZoneOffsetMinutes(), []);
@@ -443,8 +457,9 @@ export function DashboardPage({ baseUrl, auth, signedIn, signOut }) {
     if (!linkCodeExpiresAt) return false;
     const ts = Date.parse(linkCodeExpiresAt);
     if (!Number.isFinite(ts)) return false;
-    return ts <= Date.now();
-  }, [linkCodeExpiresAt]);
+    const now = linkCodeExpiryTick || Date.now();
+    return ts <= now;
+  }, [linkCodeExpiresAt, linkCodeExpiryTick]);
   const resolvedLinkCode = !linkCodeExpired ? linkCode : null;
   const linkCodeMasked = resolvedLinkCode ? maskSecret(resolvedLinkCode) : null;
   const installInitCmdDisplay = resolvedLinkCode
