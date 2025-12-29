@@ -3,6 +3,35 @@
 
 const assert = require('node:assert/strict');
 
+const {
+  computeUsageCost,
+  formatUsdFromMicros,
+  getDefaultPricingProfile
+} = require('../../insforge-src/shared/pricing');
+
+const ROWS = [
+  {
+    hour_start: '2025-12-01T18:00:00.000Z',
+    source: 'alpha',
+    model: 'gpt-5.2-codex',
+    total_tokens: '300',
+    input_tokens: '100',
+    cached_input_tokens: '50',
+    output_tokens: '200',
+    reasoning_output_tokens: '20'
+  },
+  {
+    hour_start: '2025-12-02T18:00:00.000Z',
+    source: 'beta',
+    model: 'gpt-5.2-codex',
+    total_tokens: '220',
+    input_tokens: '100',
+    cached_input_tokens: '10',
+    output_tokens: '100',
+    reasoning_output_tokens: '10'
+  }
+];
+
 class DatabaseStub {
   constructor() {
     this._table = null;
@@ -59,38 +88,22 @@ class DatabaseStub {
     }
     if (from > 0) return { data: [], error: null };
     return {
-      data: [
-        {
-          hour_start: '2025-12-01T18:00:00.000Z',
-          total_tokens: '10',
-          input_tokens: '4',
-          cached_input_tokens: '1',
-          output_tokens: '5',
-          reasoning_output_tokens: '0'
-        },
-        {
-          hour_start: '2025-12-02T18:00:00.000Z',
-          total_tokens: '20',
-          input_tokens: '8',
-          cached_input_tokens: '2',
-          output_tokens: '10',
-          reasoning_output_tokens: '0'
-        }
-      ],
+      data: ROWS,
       error: null
     };
   }
 }
 
 function buildPricingRow() {
+  const profile = getDefaultPricingProfile();
   return {
-    model: 'gpt-5.2-codex',
-    source: 'openrouter',
-    effective_from: '2025-12-23',
-    input_rate_micro_per_million: 1750000,
-    cached_input_rate_micro_per_million: 175000,
-    output_rate_micro_per_million: 14000000,
-    reasoning_output_rate_micro_per_million: 14000000
+    model: profile.model,
+    source: profile.source,
+    effective_from: profile.effective_from,
+    input_rate_micro_per_million: profile.rates_micro_per_million.input,
+    cached_input_rate_micro_per_million: profile.rates_micro_per_million.cached_input,
+    output_rate_micro_per_million: profile.rates_micro_per_million.output,
+    reasoning_output_rate_micro_per_million: profile.rates_micro_per_million.reasoning_output
   };
 }
 
@@ -135,11 +148,34 @@ async function main() {
 
   assert.equal(res.status, 200);
   assert.equal(body.days, 2);
-  assert.equal(body.totals.total_tokens, '30');
-  assert.equal(body.totals.input_tokens, '12');
-  assert.equal(body.totals.cached_input_tokens, '3');
-  assert.equal(body.totals.output_tokens, '15');
-  assert.equal(body.totals.reasoning_output_tokens, '0');
+  assert.equal(body.totals.total_tokens, '520');
+  assert.equal(body.totals.input_tokens, '200');
+  assert.equal(body.totals.cached_input_tokens, '60');
+  assert.equal(body.totals.output_tokens, '300');
+  assert.equal(body.totals.reasoning_output_tokens, '30');
+  const expectedCost = formatUsdFromMicros(
+    computeUsageCost(
+      {
+        total_tokens: ROWS[0].total_tokens,
+        input_tokens: ROWS[0].input_tokens,
+        cached_input_tokens: ROWS[0].cached_input_tokens,
+        output_tokens: ROWS[0].output_tokens,
+        reasoning_output_tokens: ROWS[0].reasoning_output_tokens
+      },
+      getDefaultPricingProfile()
+    ).cost_micros +
+      computeUsageCost(
+        {
+          total_tokens: ROWS[1].total_tokens,
+          input_tokens: ROWS[1].input_tokens,
+          cached_input_tokens: ROWS[1].cached_input_tokens,
+          output_tokens: ROWS[1].output_tokens,
+          reasoning_output_tokens: ROWS[1].reasoning_output_tokens
+        },
+        getDefaultPricingProfile()
+      ).cost_micros
+  );
+  assert.equal(body.totals.total_cost_usd, expectedCost);
 
   process.stdout.write(
     JSON.stringify(

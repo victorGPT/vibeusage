@@ -6,7 +6,7 @@
 const { handleOptions, json, requireMethod } = require('../shared/http');
 const { getBearerToken, getEdgeClientAndUserIdFast } = require('../shared/auth');
 const { getBaseUrl } = require('../shared/env');
-const { getSourceParam } = require('../shared/source');
+const { getSourceParam, normalizeSource } = require('../shared/source');
 const { getModelParam, normalizeModel } = require('../shared/model');
 const {
   addDatePartsDays,
@@ -24,6 +24,8 @@ const {
   formatUsdFromMicros,
   resolvePricingProfile
 } = require('../shared/pricing');
+
+const DEFAULT_SOURCE = 'codex';
 
 module.exports = async function(request) {
   const opt = handleOptions(request);
@@ -70,12 +72,15 @@ module.exports = async function(request) {
   let outputTokens = 0n;
   let reasoningOutputTokens = 0n;
   const distinctModels = new Set();
+  const sourcesMap = new Map();
 
   const { error } = await forEachPage({
     createQuery: () => {
       let query = auth.edgeClient.database
         .from('vibescore_tracker_hourly')
-        .select('hour_start,total_tokens,input_tokens,cached_input_tokens,output_tokens,reasoning_output_tokens')
+        .select(
+          'hour_start,source,model,total_tokens,input_tokens,cached_input_tokens,output_tokens,reasoning_output_tokens'
+        )
         .eq('user_id', auth.userId);
       if (source) query = query.eq('source', source);
       if (model) query = query.eq('model', model);
@@ -88,6 +93,9 @@ module.exports = async function(request) {
         cachedInputTokens += toBigInt(row?.cached_input_tokens);
         outputTokens += toBigInt(row?.output_tokens);
         reasoningOutputTokens += toBigInt(row?.reasoning_output_tokens);
+        const sourceKey = normalizeSource(row?.source) || DEFAULT_SOURCE;
+        const sourceEntry = getSourceEntry(sourcesMap, sourceKey);
+        addTotals(sourceEntry.totals, row);
         const normalizedModel = normalizeModel(row?.model);
         if (normalizedModel && normalizedModel.toLowerCase() !== 'unknown') {
           distinctModels.add(normalizedModel);
@@ -105,7 +113,13 @@ module.exports = async function(request) {
     model: impliedModel,
     effectiveDate: to
   });
-  const cost = computeUsageCost(
+  let totalCostMicros = 0n;
+  for (const entry of sourcesMap.values()) {
+    const sourceCost = computeUsageCost(entry.totals, pricingProfile);
+    totalCostMicros += sourceCost.cost_micros;
+  }
+
+  const overallCost = computeUsageCost(
     {
       total_tokens: totalTokens,
       input_tokens: inputTokens,
@@ -122,7 +136,7 @@ module.exports = async function(request) {
     cached_input_tokens: cachedInputTokens.toString(),
     output_tokens: outputTokens.toString(),
     reasoning_output_tokens: reasoningOutputTokens.toString(),
-    total_cost_usd: formatUsdFromMicros(cost.cost_micros)
+    total_cost_usd: formatUsdFromMicros(totalCostMicros)
   };
 
   return json(
@@ -132,10 +146,41 @@ module.exports = async function(request) {
       days: dayKeys.length,
       totals,
       pricing: buildPricingMetadata({
-        profile: cost.profile,
-        pricingMode: cost.pricing_mode
+        profile: overallCost.profile,
+        pricingMode: overallCost.pricing_mode
       })
     },
     200
   );
 };
+
+function createTotals() {
+  return {
+    total_tokens: 0n,
+    input_tokens: 0n,
+    cached_input_tokens: 0n,
+    output_tokens: 0n,
+    reasoning_output_tokens: 0n
+  };
+}
+
+function addTotals(target, row) {
+  if (!target || !row) return;
+  target.total_tokens = toBigInt(target.total_tokens) + toBigInt(row.total_tokens);
+  target.input_tokens = toBigInt(target.input_tokens) + toBigInt(row.input_tokens);
+  target.cached_input_tokens =
+    toBigInt(target.cached_input_tokens) + toBigInt(row.cached_input_tokens);
+  target.output_tokens = toBigInt(target.output_tokens) + toBigInt(row.output_tokens);
+  target.reasoning_output_tokens =
+    toBigInt(target.reasoning_output_tokens) + toBigInt(row.reasoning_output_tokens);
+}
+
+function getSourceEntry(map, source) {
+  if (map.has(source)) return map.get(source);
+  const entry = {
+    source,
+    totals: createTotals()
+  };
+  map.set(source, entry);
+  return entry;
+}
