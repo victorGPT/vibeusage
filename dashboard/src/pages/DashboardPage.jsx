@@ -612,12 +612,20 @@ export function DashboardPage({
 
   const installInitCmdBase = copy("dashboard.install.cmd.init");
   const resolvedLinkCode = !linkCodeExpired ? linkCode : null;
-  const installInitCmdDisplay = installInitCmdBase;
-  const installInitCmdCopy = resolvedLinkCode
-    ? copy("dashboard.install.cmd.init_link_code", {
-        link_code: resolvedLinkCode,
-      })
-    : installInitCmdBase;
+  const installOpencodeCmd = copy("dashboard.install.opencode_cmd");
+  const installInitCmdDisplay = [installOpencodeCmd, installInitCmdBase]
+    .filter(Boolean)
+    .join(" && ");
+  const installInitCmdCopy = [
+    installOpencodeCmd,
+    resolvedLinkCode
+      ? copy("dashboard.install.cmd.init_link_code", {
+          link_code: resolvedLinkCode,
+        })
+      : installInitCmdBase,
+  ]
+    .filter(Boolean)
+    .join(" && ");
   const installSyncCmd = copy("dashboard.install.cmd.sync");
   const installCopyLabel = resolvedLinkCode
     ? copy("dashboard.install.copy")

@@ -263,6 +263,7 @@ dashboard.install.headline,dashboard,DashboardPage,AsciiBox,headline,">> START_H
 dashboard.install.step1,dashboard,DashboardPage,AsciiBox,install_step,"1) run",,active
 dashboard.install.cmd.init,dashboard,DashboardPage,AsciiBox,install_cmd,"npx --yes @vibescore/tracker init",,active
 dashboard.install.cmd.init_link_code,dashboard,DashboardPage,AsciiBox,install_cmd,"npx --yes @vibescore/tracker init --link-code {{link_code}}",,active
+dashboard.install.opencode_cmd,dashboard,DashboardPage,AsciiBox,install_step,"brew install opencode",,active
 dashboard.install.copy,dashboard,DashboardPage,AsciiBox,install_copy,"Copy install script",,active
 dashboard.install.copy_base,dashboard,DashboardPage,AsciiBox,install_copy,"Copy base command",,active
 dashboard.install.copied,dashboard,DashboardPage,AsciiBox,install_copy,"Copied",,active
