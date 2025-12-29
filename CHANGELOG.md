@@ -3,6 +3,8 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+### Changed
+- Dashboard install panel temporarily hides the copy button and link code fetch flow.
 
 ## [0.2.0] - 2025-12-28
 ### Added
