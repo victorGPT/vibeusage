@@ -205,10 +205,8 @@ var require_logging = __commonJS({
       let upstreamStatus = null;
       let upstreamLatencyMs = null;
       function recordUpstream(status, latencyMs) {
-        if (typeof status === "number") upstreamStatus = status;
-        else upstreamStatus = null;
-        if (typeof latencyMs === "number") upstreamLatencyMs = latencyMs;
-        else upstreamLatencyMs = null;
+        upstreamStatus = typeof status === "number" ? status : null;
+        upstreamLatencyMs = typeof latencyMs === "number" ? latencyMs : null;
       }
       async function fetchWithUpstream(url, init) {
         const upstreamStart = Date.now();

@@ -23,3 +23,9 @@
 - Change IDs: `2025-12-25-add-pricing-table`, `2025-12-25-add-openrouter-pricing-sync`
 - Freeze artifact: update `insforge-functions/` via `npm run build:insforge`
 - Cold regression step: `node scripts/acceptance/openrouter-pricing-sync.cjs`
+
+## 2025-12-29-link-code-exchange-rpc
+- Scope: link code exchange RPC path aligned to PostgREST `/rpc`
+- Change ID: `fix-link-code-exchange-rpc-path` (bug fix; no OpenSpec change)
+- Freeze artifact: `insforge-functions/vibescore-link-code-exchange.js` (built via `npm run build:insforge`)
+- Cold regression step: `node scripts/acceptance/link-code-exchange.cjs`

@@ -112,10 +112,8 @@ var require_logging = __commonJS({
       let upstreamStatus = null;
       let upstreamLatencyMs = null;
       function recordUpstream(status, latencyMs) {
-        if (typeof status === "number") upstreamStatus = status;
-        else upstreamStatus = null;
-        if (typeof latencyMs === "number") upstreamLatencyMs = latencyMs;
-        else upstreamLatencyMs = null;
+        upstreamStatus = typeof status === "number" ? status : null;
+        upstreamLatencyMs = typeof latencyMs === "number" ? latencyMs : null;
       }
       async function fetchWithUpstream(url, init) {
         const upstreamStart = Date.now();
@@ -195,7 +193,7 @@ module.exports = withRequestLogging("vibescore-link-code-exchange", async functi
   const codeHash = await sha256Hex(linkCode);
   const token = await deriveToken({ secret: serviceRoleKey, codeHash, requestId });
   const tokenHash = await sha256Hex(token);
-  const url = new URL("/api/database/rpc/vibescore_exchange_link_code", baseUrl);
+  const url = new URL("/rpc/vibescore_exchange_link_code", baseUrl);
   const res = await ctx.fetch(url.toString(), {
     method: "POST",
     headers: {

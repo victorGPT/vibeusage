@@ -1904,7 +1904,7 @@ test('vibescore-link-code-exchange calls rpc with hash and returns device token'
   assert.equal(body.user_id, userId);
 
   assert.equal(calls.length, 1);
-  assert.ok(String(calls[0].url).includes('/api/database/rpc/vibescore_exchange_link_code'));
+  assert.ok(String(calls[0].url).includes('/rpc/vibescore_exchange_link_code'));
   const payload = JSON.parse(calls[0].init?.body || '{}');
   assert.equal(payload.p_code_hash, codeHash);
   assert.equal(payload.p_request_id, requestId);
