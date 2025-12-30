@@ -30,7 +30,7 @@ function buildOpencodePlugin({ notifyPath }) {
     `      if (!event || event.type !== ${JSON.stringify(DEFAULT_EVENT)}) return;\n` +
     `      try {\n` +
     `        if (!notifyPath) return;\n` +
-    `        const proc = $\\\`/usr/bin/env node ${'${notifyPath}'} --source=opencode\\\`;\n` +
+    `        const proc = $\`/usr/bin/env node ${'${notifyPath}'} --source=opencode\`;\n` +
     `        if (proc && typeof proc.catch === 'function') proc.catch(() => {});\n` +
     `      } catch (_) {}\n` +
     `    }\n` +

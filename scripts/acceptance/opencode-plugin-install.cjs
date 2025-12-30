@@ -38,6 +38,14 @@ async function main() {
     console.error('Missing or invalid opencode plugin file.');
     process.exit(1);
   }
+  if (!pluginBody.includes('const proc = $`/usr/bin/env node ')) {
+    console.error('Expected opencode plugin to use an unescaped `$` template command.');
+    process.exit(1);
+  }
+  if (pluginBody.includes('const proc = $\\`/usr/bin/env node ')) {
+    console.error('Unexpected escaped backtick in opencode plugin command.');
+    process.exit(1);
+  }
 
   const uninstall = spawnSync(process.execPath, [path.join(repoRoot, 'bin', 'tracker.js'), 'uninstall'], {
     env,

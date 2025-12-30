@@ -11,6 +11,7 @@
 - `node bin/tracker.js status`
 - `node bin/tracker.js sync --auto`
 - `node --test test/init-uninstall.test.js` (2025-12-30)
+- `node scripts/acceptance/opencode-plugin-install.cjs` (2025-12-30; asserts unescaped `$` command)
 
 ## Results
 - Passed.
@@ -18,6 +19,7 @@
 - Copy registry check passed with warnings for unused keys.
 - Opencode plugin acceptance passed.
 - Local smoke: Opencode notify triggered parsing; queue grew; auto upload was throttled and a retry was scheduled.
+- Opencode plugin acceptance passed with unescaped `$` command assertion (2025-12-30).
 
 ## Evidence
 - Added Opencode parser coverage and plugin install/uninstall coverage in the test suite.
