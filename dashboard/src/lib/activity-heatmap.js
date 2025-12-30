@@ -45,13 +45,20 @@ function clampLevel(level) {
 
 export function getHeatmapRangeLocal({
   weeks = 52,
-  now = new Date(),
+  now,
   weekStartsOn = "sun",
 } = {}) {
-  const to = formatDateLocal(now);
+  const baseDate = now instanceof Date && Number.isFinite(now.getTime()) ? now : new Date();
+  const to = formatDateLocal(baseDate);
   const end =
     parseDateString(to) ||
-    new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+    new Date(
+      Date.UTC(
+        baseDate.getFullYear(),
+        baseDate.getMonth(),
+        baseDate.getDate()
+      )
+    );
 
   const desired = weekStartsOn === "mon" ? 1 : 0;
   const endDow = end.getUTCDay();
