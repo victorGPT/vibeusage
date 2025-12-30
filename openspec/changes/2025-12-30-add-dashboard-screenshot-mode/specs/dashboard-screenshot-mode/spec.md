@@ -92,3 +92,10 @@
 #### Scenario: Header replaced
 - **WHEN** 截图模式启用
 - **THEN** 顶部栏不显示，页面顶部展示截图标题
+
+### Requirement: X share button
+系统 SHALL 在截图模式标题右侧提供 X 分享按钮，并跳转到 X Web Intent 页面以分享当前页面链接。
+
+#### Scenario: Share to X
+- **WHEN** 用户点击 X 分享按钮
+- **THEN** 页面跳转到 X Web Intent 分享窗口，并带上当前页面 URL

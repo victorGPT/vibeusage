@@ -285,6 +285,9 @@ dashboard.identity.title,dashboard,DashboardPage,IdentityCard,title,"Identity_Co
 dashboard.identity.subtitle,dashboard,DashboardPage,IdentityCard,subtitle,"Authorized",,active
 dashboard.identity.fallback,dashboard,DashboardPage,IdentityCard,handle_fallback,"ANONYMOUS",,active
 dashboard.screenshot.title,dashboard,DashboardPage,ScreenshotTitle,title,"Coding Agent Wrapped 2025",,active
+dashboard.screenshot.share_button,dashboard,DashboardPage,ScreenshotShare,button_label,"X",,active
+dashboard.screenshot.share_label,dashboard,DashboardPage,ScreenshotShare,aria_label,"Share on X",,active
+dashboard.screenshot.share_text,dashboard,DashboardPage,ScreenshotShare,share_text,"Coding Agent Wrapped 2025",,active
 dashboard.poster.title,dashboard,AnnualPosterPage,Poster,title,"我的2025总结",,active
 
 live_sniffer.log.system,ui,LiveSniffer,LiveSniffer,log,"[SYSTEM] KERNEL_LINK_ESTABLISHED",,active

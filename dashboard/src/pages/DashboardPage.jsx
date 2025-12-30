@@ -604,6 +604,25 @@ export function DashboardPage({
   const coreIndexCollapseAria = copy("dashboard.core_index.collapse_aria");
   const coreIndexExpandAria = copy("dashboard.core_index.expand_aria");
   const allowBreakdownToggle = !screenshotMode;
+  const screenshotShareText = copy("dashboard.screenshot.share_text");
+  const screenshotShareLabel = copy("dashboard.screenshot.share_label");
+  const screenshotShareUrl = useMemo(() => {
+    if (!screenshotMode || typeof window === "undefined") return "";
+    const intentUrl = new URL("https://twitter.com/intent/tweet");
+    intentUrl.searchParams.set("text", screenshotShareText);
+    intentUrl.searchParams.set("url", window.location.href);
+    return intentUrl.toString();
+  }, [screenshotMode, screenshotShareText]);
+  const handleShareToX = useCallback(() => {
+    if (!screenshotShareUrl || typeof window === "undefined") return;
+    const popup = window.open(
+      screenshotShareUrl,
+      "x-share",
+      "width=550,height=420,noopener,noreferrer"
+    );
+    if (popup) return;
+    window.location.href = screenshotShareUrl;
+  }, [screenshotShareUrl]);
   const footerLeftContent = screenshotMode
     ? null
     : accessEnabled
@@ -860,8 +879,19 @@ export function DashboardPage({
         ) : (
           <>
             {screenshotMode ? (
-              <div className="mb-6 text-3xl md:text-4xl font-black text-white tracking-[-0.03em] glow-text">
-                {copy("dashboard.screenshot.title")}
+              <div className="mb-6 flex items-center justify-between gap-3">
+                <h1 className="text-3xl md:text-4xl font-black text-white tracking-[-0.03em] glow-text">
+                  {copy("dashboard.screenshot.title")}
+                </h1>
+                <MatrixButton
+                  type="button"
+                  onClick={handleShareToX}
+                  aria-label={screenshotShareLabel}
+                  title={screenshotShareLabel}
+                  className="h-10 w-10 px-0 text-base"
+                >
+                  {copy("dashboard.screenshot.share_button")}
+                </MatrixButton>
               </div>
             ) : null}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
