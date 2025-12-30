@@ -10,6 +10,7 @@ export function MatrixShell({
   footerLeft,
   footerRight,
   contentClassName = "",
+  rootClassName = "",
   hideHeader = false,
 }) {
   const headerTitle = copy("shell.header.title");
@@ -18,9 +19,11 @@ export function MatrixShell({
   const titleSecondary = titleParts.slice(1).join(" ");
 
   return (
-    <div className="min-h-screen bg-matrix-dark text-matrix-primary font-matrix p-4 md:p-8 flex flex-col leading-tight text-body selection:bg-matrix-primary selection:text-black overflow-hidden">
+    <div
+      className={`min-h-screen bg-matrix-dark text-matrix-primary font-matrix p-4 md:p-8 flex flex-col leading-tight text-body selection:bg-matrix-primary selection:text-black overflow-hidden ${rootClassName}`}
+    >
       <MatrixRain />
-      <div className="pointer-events-none fixed inset-0 z-50 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.1)_50%)] bg-[length:100%_4px]"></div>
+      <div className="matrix-scanline-overlay pointer-events-none fixed inset-0 z-50 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.1)_50%)] bg-[length:100%_4px]"></div>
 
       <div
         className={`relative z-10 flex flex-col min-h-screen ${contentClassName}`}

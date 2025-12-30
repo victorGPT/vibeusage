@@ -206,6 +206,31 @@ body {
   }
 }
 
+.screenshot-mode .matrix-rain {
+  display: none !important;
+}
+
+html.screenshot-capture,
+body.screenshot-capture {
+  scroll-behavior: auto;
+}
+
+body.screenshot-capture *,
+html.screenshot-capture * {
+  animation: none !important;
+  transition: none !important;
+}
+
+body.screenshot-capture .matrix-scanlines,
+body.screenshot-capture .matrix-scan-sweep,
+body.screenshot-capture .matrix-scanline-overlay {
+  opacity: 0 !important;
+}
+
+body.screenshot-capture .matrix-rain {
+  opacity: 0 !important;
+}
+
 @keyframes matrix-scan {
   0% {
     background-position: 0 0;

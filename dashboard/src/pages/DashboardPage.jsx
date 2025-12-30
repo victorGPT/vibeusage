@@ -17,7 +17,7 @@ import {
 } from "../lib/format.js";
 import { requestInstallLinkCode } from "../lib/vibescore-api.js";
 import { buildFleetData } from "../lib/model-breakdown.js";
-import { safeWriteClipboard } from "../lib/safe-browser.js";
+import { safeWriteClipboard, safeWriteClipboardImage } from "../lib/safe-browser.js";
 import { useActivityHeatmap } from "../hooks/use-activity-heatmap.js";
 import { useTrendData } from "../hooks/use-trend-data.js";
 import { useUsageData } from "../hooks/use-usage-data.js";
@@ -596,10 +596,7 @@ export function DashboardPage({
     return `${from}..${to}`;
   }, [from, period, to]);
 
-  const summaryLabel =
-    period === "total"
-      ? copy("usage.summary.total_system_output")
-      : copy("usage.summary.total");
+  const summaryLabel = copy("usage.summary.total");
   const thousandSuffix = copy("shared.unit.thousand_abbrev");
   const millionSuffix = copy("shared.unit.million_abbrev");
   const billionSuffix = copy("shared.unit.billion_abbrev");
@@ -630,62 +627,136 @@ export function DashboardPage({
   const allowBreakdownToggle = !screenshotMode;
   const screenshotTitleLine1 = copy("dashboard.screenshot.title_line1");
   const screenshotTitleLine2 = copy("dashboard.screenshot.title_line2");
-  const screenshotDownloadLabel = copy("dashboard.screenshot.download_label");
-  const screenshotDownloadButton = copy("dashboard.screenshot.download_button");
   const screenshotTwitterLabel = copy("dashboard.screenshot.twitter_label");
   const screenshotTwitterButton = copy("dashboard.screenshot.twitter_button");
-  const screenshotTwitterText = copy("dashboard.screenshot.twitter_text");
+  const screenshotTwitterHint = copy("dashboard.screenshot.twitter_hint");
+  const placeholderShort = copy("shared.placeholder.short");
+  const agentSummary = useMemo(() => {
+    const sources = Array.isArray(modelBreakdown?.sources)
+      ? modelBreakdown.sources
+      : [];
+    let topSource = null;
+    let topSourceTokens = 0;
+
+    for (const source of sources) {
+      const tokens = toFiniteNumber(source?.totals?.total_tokens);
+      if (!Number.isFinite(tokens) || tokens <= 0) continue;
+      if (tokens > topSourceTokens) {
+        topSourceTokens = tokens;
+        topSource = source;
+      }
+    }
+
+    let agentName = placeholderShort;
+    let modelName = placeholderShort;
+    let modelPercent = "0.0";
+
+    if (topSource && topSourceTokens > 0) {
+      agentName = topSource?.source
+        ? String(topSource.source).toUpperCase()
+        : placeholderShort;
+      const models = Array.isArray(topSource?.models) ? topSource.models : [];
+      let topModelTokens = 0;
+      for (const model of models) {
+        const tokens = toFiniteNumber(model?.totals?.total_tokens);
+        if (!Number.isFinite(tokens) || tokens <= 0) continue;
+        if (tokens > topModelTokens) {
+          topModelTokens = tokens;
+          modelName = model?.model ? String(model.model) : placeholderShort;
+        }
+      }
+      if (topModelTokens > 0) {
+        modelPercent = ((topModelTokens / topSourceTokens) * 100).toFixed(1);
+      }
+    }
+
+    return { agentName, modelName, modelPercent };
+  }, [modelBreakdown, placeholderShort]);
+  const displayTotalTokens = toDisplayNumber(summary?.total_tokens);
+  const twitterTotalTokens =
+    displayTotalTokens === "-" ? placeholderShort : displayTotalTokens;
+  const screenshotTwitterText = copy("dashboard.screenshot.twitter_text", {
+    total_tokens: twitterTotalTokens,
+    agent_name: agentSummary.agentName,
+    model_name: agentSummary.modelName,
+    model_percent: agentSummary.modelPercent,
+  });
   const screenshotTwitterUrl = useMemo(() => {
     if (typeof window === "undefined") return "";
     const intentUrl = new URL("https://twitter.com/intent/tweet");
     intentUrl.searchParams.set("text", screenshotTwitterText);
     return intentUrl.toString();
   }, [screenshotTwitterText]);
-  const handleShareToX = useCallback(() => {
-    if (!screenshotTwitterUrl || typeof window === "undefined") return;
-    const popup = window.open(
-      screenshotTwitterUrl,
-      "x-share",
-      "width=550,height=420,noopener,noreferrer"
-    );
-    if (popup) return;
-    window.location.href = screenshotTwitterUrl;
-  }, [screenshotTwitterUrl]);
-  const handleDownloadScreenshot = useCallback(async () => {
+  const captureScreenshotBlob = useCallback(async () => {
+    if (typeof window === "undefined") return null;
+    const root = document.querySelector("#root") || document.body;
+    const docEl = document.documentElement;
+    const { scrollWidth, scrollHeight } = document.documentElement;
+    docEl?.classList.add("screenshot-capture");
+    document.body?.classList.add("screenshot-capture");
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+    try {
+      const { toBlob, toPng } = await import("html-to-image");
+      const blob = await toBlob(root, {
+        backgroundColor: "#050505",
+        pixelRatio: 2,
+        cacheBust: true,
+        width: scrollWidth,
+        height: scrollHeight,
+        style: {
+          width: `${scrollWidth}px`,
+          height: `${scrollHeight}px`,
+        },
+        filter: (node) =>
+          !(node instanceof HTMLElement) ||
+          node.dataset?.screenshotExclude !== "true",
+      });
+      if (blob) return blob;
+      const dataUrl = await toPng(root, {
+        backgroundColor: "#050505",
+        pixelRatio: 2,
+        cacheBust: true,
+        width: scrollWidth,
+        height: scrollHeight,
+        style: {
+          width: `${scrollWidth}px`,
+          height: `${scrollHeight}px`,
+        },
+        filter: (node) =>
+          !(node instanceof HTMLElement) ||
+          node.dataset?.screenshotExclude !== "true",
+      });
+      if (!dataUrl) return null;
+      const response = await fetch(dataUrl);
+      return await response.blob();
+    } finally {
+      docEl?.classList.remove("screenshot-capture");
+      document.body?.classList.remove("screenshot-capture");
+    }
+  }, []);
+  const handleShareToX = useCallback(async () => {
     if (typeof window === "undefined" || isCapturing) return;
     setIsCapturing(true);
     try {
-      await new Promise((resolve) => requestAnimationFrame(resolve));
-      const { default: html2canvas } = await import("html2canvas");
-      const root = document.querySelector("#root") || document.body;
-      const { scrollWidth, scrollHeight } = document.documentElement;
-      const canvas = await html2canvas(root, {
-        backgroundColor: null,
-        scale: 2,
-        useCORS: true,
-        scrollX: 0,
-        scrollY: -window.scrollY,
-        windowWidth: scrollWidth,
-        windowHeight: scrollHeight,
-        ignoreElements: (element) =>
-          element?.dataset?.screenshotExclude === "true",
-      });
-      const blob = await new Promise((resolve) =>
-        canvas.toBlob(resolve, "image/png", 1)
-      );
-      if (!blob) return;
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = "wrapped-2025.png";
-      link.click();
-      URL.revokeObjectURL(url);
+      const blob = await captureScreenshotBlob();
+      if (blob) {
+        if (typeof document !== "undefined" && !document.hasFocus()) {
+          window.focus?.();
+        }
+        const copied = await safeWriteClipboardImage(blob);
+        if (!copied) {
+          console.warn("Failed to write screenshot to clipboard.");
+        }
+      }
     } catch (error) {
       console.error("Failed to capture screenshot", error);
     } finally {
       setIsCapturing(false);
+      if (screenshotTwitterUrl) {
+        window.location.href = screenshotTwitterUrl;
+      }
     }
-  }, [isCapturing]);
+  }, [captureScreenshotBlob, isCapturing, screenshotTwitterUrl]);
   const footerLeftContent = screenshotMode
     ? null
     : accessEnabled
@@ -848,8 +919,8 @@ export function DashboardPage({
           size="header"
           aria-label={wrappedEntryLabel}
           title={wrappedEntryLabel}
-          className="text-[#D8B45A] border-[#D8B45A]/60 hover:border-[#F6D788]"
-          style={{ "--matrix-header-corner": "#D8B45A" }}
+          className="bg-gold text-black border-gold hover:bg-gold/90 hover:border-gold"
+          style={{ "--matrix-header-corner": "#000000" }}
         >
           {wrappedEntryLabel}
         </MatrixButton>
@@ -894,6 +965,7 @@ export function DashboardPage({
           <span className="font-bold">{copy("dashboard.footer.right")}</span>
         }
         contentClassName=""
+        rootClassName={screenshotMode ? "screenshot-mode" : ""}
       >
         {sessionExpired ? (
           <div className="mb-6">
@@ -963,32 +1035,6 @@ export function DashboardPage({
                     <span className="text-2xl md:text-3xl font-black text-white tracking-[-0.03em] leading-none glow-text">
                       {screenshotTitleLine2}
                     </span>
-                  </div>
-                  <div
-                    className="flex items-center gap-2"
-                    data-screenshot-exclude="true"
-                    style={isCapturing ? { display: "none" } : undefined}
-                  >
-                    <MatrixButton
-                      type="button"
-                      onClick={handleDownloadScreenshot}
-                      aria-label={screenshotDownloadLabel}
-                      title={screenshotDownloadLabel}
-                      className="h-10 px-3 text-xs"
-                      disabled={isCapturing}
-                    >
-                      {screenshotDownloadButton}
-                    </MatrixButton>
-                    <MatrixButton
-                      type="button"
-                      onClick={handleShareToX}
-                      aria-label={screenshotTwitterLabel}
-                      title={screenshotTwitterLabel}
-                      className="h-10 px-3 text-xs"
-                      disabled={isCapturing}
-                    >
-                      {screenshotTwitterButton}
-                    </MatrixButton>
                   </div>
                 </div>
               ) : null}
@@ -1066,6 +1112,28 @@ export function DashboardPage({
               ) : null}
 
               {activityHeatmapBlock}
+              {screenshotMode ? (
+                <div
+                  className="mt-4 flex flex-col items-center gap-2"
+                  data-screenshot-exclude="true"
+                  style={isCapturing ? { display: "none" } : undefined}
+                >
+                  <MatrixButton
+                    type="button"
+                    onClick={handleShareToX}
+                    aria-label={screenshotTwitterLabel}
+                    title={screenshotTwitterLabel}
+                    className="h-12 md:h-14 px-6 text-base tracking-[0.25em]"
+                    primary
+                    disabled={isCapturing}
+                  >
+                    {screenshotTwitterButton}
+                  </MatrixButton>
+                  <span className="text-[10px] uppercase tracking-[0.2em] text-matrix-muted">
+                    {screenshotTwitterHint}
+                  </span>
+                </div>
+              ) : null}
             </div>
 
             <div className="lg:col-span-8 flex flex-col gap-6 min-w-0">

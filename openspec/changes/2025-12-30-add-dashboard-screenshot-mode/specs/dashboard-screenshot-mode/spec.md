@@ -100,16 +100,20 @@
 - **WHEN** 截图模式启用
 - **THEN** 左侧顶部显示两行标题，Identity 与热力图位于其下方
 
-### Requirement: Screenshot action buttons
-系统 SHALL 在截图模式标题旁提供下载图片与 X 分享按钮，下载图片时按钮不应出现在截图中。
-
-#### Scenario: Download image
-- **WHEN** 用户点击下载按钮
-- **THEN** 下载当前宽屏截图，且按钮不出现在截图里
+### Requirement: Screenshot share control
+系统 SHALL 在截图模式的热力图下方提供 X 分享按钮（绿色、大按钮），并展示自动复制提示；按钮与提示不应出现在截图中。
 
 #### Scenario: Share to X
 - **WHEN** 用户点击 X 按钮
 - **THEN** 跳转到 X Web Intent 并携带文本 “wrapped”
+
+#### Scenario: Copy screenshot to clipboard before share
+- **WHEN** 用户点击 X 按钮
+- **THEN** 先将截图写入剪贴板，再跳转到 X Web Intent（文本预填）
+
+#### Scenario: Freeze animated overlays during capture
+- **WHEN** 系统进行截图捕获
+- **THEN** 临时停用扫描线/代码雨等动效，避免截图重影
 
 ### Requirement: Share page with OG image
 系统 SHALL 提供用于分享的静态页面，并通过 OG/Twitter Card 指向截图图片。
@@ -117,6 +121,13 @@
 #### Scenario: Share page metadata
 - **WHEN** X 抓取分享页元数据
 - **THEN** 返回包含截图图片的 OG/Twitter Card 元数据
+
+### Requirement: Playwright capture script
+系统 SHALL 提供 Playwright 脚本用于生成与浏览器一致的截图，并可选择隐藏截图模式按钮。
+
+#### Scenario: Capture screenshot via Playwright
+- **WHEN** 运行截图脚本
+- **THEN** 输出图片与浏览器显示一致，且截图按钮不会出现在结果中
 
 ### Requirement: Non-production entry for screenshot mode
 系统 SHALL 在非生产环境的 Dashboard 顶部栏提供 “Wrapped 2025” 入口按钮，按钮为金色并指向截图模式 URL，生产环境不显示该入口。

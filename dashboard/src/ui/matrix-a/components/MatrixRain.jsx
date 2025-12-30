@@ -126,7 +126,7 @@ export const MatrixRain = () => {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 z-0 pointer-events-none opacity-20"
+      className="matrix-rain fixed inset-0 z-0 pointer-events-none opacity-20"
       style={{ width: "100%", height: "100%" }}
     />
   );

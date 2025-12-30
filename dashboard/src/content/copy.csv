@@ -134,7 +134,7 @@ dashboard.upgrade_alert.subtitle,ui,UpgradeAlertModal,UpgradeAlertModal,subtitle
 dashboard.upgrade_alert.subtitle_generic,ui,UpgradeAlertModal,UpgradeAlertModal,subtitle_generic,"A new version of VibeScore Tracker is available.",,active
 dashboard.upgrade_alert.prompt,ui,UpgradeAlertModal,UpgradeAlertModal,prompt,"$",,active
 dashboard.upgrade_alert.sparkle,ui,UpgradeAlertModal,UpgradeAlertModal,sparkle,"✨",,active
-dashboard.upgrade_alert.install_command,ui,UpgradeAlertModal,UpgradeAlertModal,install_command,"npx --yes @vibescore/tracker init",,active
+dashboard.upgrade_alert.install_command,ui,UpgradeAlertModal,UpgradeAlertModal,install_command,"npx --yes @​vibescore/tracker init",,active
 dashboard.upgrade_alert.copy,ui,UpgradeAlertModal,UpgradeAlertModal,copy,"[ COPY ]",,active
 dashboard.upgrade_alert.copied,ui,UpgradeAlertModal,UpgradeAlertModal,copied,"[ COPIED ]",,active
 dashboard.upgrade_alert.ignore,ui,UpgradeAlertModal,UpgradeAlertModal,ignore,"Dismiss",,active
@@ -299,9 +299,10 @@ dashboard.screenshot.title_line1,dashboard,DashboardPage,ScreenshotTitle,title_l
 dashboard.screenshot.title_line2,dashboard,DashboardPage,ScreenshotTitle,title_line,"2025 Wrapped",,active
 dashboard.screenshot.download_button,dashboard,DashboardPage,ScreenshotShare,button_label,"Download",,active
 dashboard.screenshot.download_label,dashboard,DashboardPage,ScreenshotShare,aria_label,"Download image",,active
-dashboard.screenshot.twitter_button,dashboard,DashboardPage,ScreenshotShare,button_label,"X",,active
+dashboard.screenshot.twitter_button,dashboard,DashboardPage,ScreenshotShare,button_label,"Share on X",,active
 dashboard.screenshot.twitter_label,dashboard,DashboardPage,ScreenshotShare,aria_label,"Share on X",,active
-dashboard.screenshot.twitter_text,dashboard,DashboardPage,ScreenshotShare,share_text,"wrapped",,active
+dashboard.screenshot.twitter_hint,dashboard,DashboardPage,ScreenshotShare,helper_text,"Auto-copies image to clipboard",,active
+dashboard.screenshot.twitter_text,dashboard,DashboardPage,ScreenshotShare,share_text,"This year\nI handed {{total_tokens}} tokens to Coding Agent\n\nThe one that stayed with me until the end\nwas {{agent_name}}\n\n{{model_name}} usage: {{model_percent}}%\n\nData: vibeScore @victor_wu_eth\n\nRun in your terminal:\nnpx --yes @vibescore/tracker init\n(Paste Image Stats with CMD / CTRL + V)",,active
 dashboard.wrapped.entry,dashboard,DashboardPage,Header,button_label,"Wrapped 2025",,active
 dashboard.poster.title,dashboard,AnnualPosterPage,Poster,title,"我的2025总结",,active
 
