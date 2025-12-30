@@ -3,6 +3,8 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+
+## [0.2.4] - 2025-12-30
 ### Fixed
 - Skip Codex notify install when Codex config is missing.
 - Uninstall now respects CODEX_HOME when restoring Codex notify.
