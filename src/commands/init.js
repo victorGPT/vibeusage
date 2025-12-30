@@ -164,14 +164,10 @@ async function cmdInit(argv) {
   }
 
   const opencodeConfigDir = resolveOpencodeConfigDir({ home, env: process.env });
-  const opencodeConfigExists = await isDir(opencodeConfigDir);
-  let opencodeResult = null;
-  if (opencodeConfigExists) {
-    opencodeResult = await upsertOpencodePlugin({
-      configDir: opencodeConfigDir,
-      notifyPath
-    });
-  }
+  const opencodeResult = await upsertOpencodePlugin({
+    configDir: opencodeConfigDir,
+    notifyPath
+  });
 
   process.stdout.write(
     [
@@ -197,11 +193,11 @@ async function cmdInit(argv) {
           ? `- Claude hooks: updated (${claudeSettingsPath})`
           : `- Claude hooks: already set (${claudeSettingsPath})`
         : '- Claude hooks: skipped (~/.claude not found)',
-      opencodeConfigExists
-        ? opencodeResult?.changed
+      opencodeResult?.skippedReason === 'config-missing'
+        ? '- Opencode plugin: skipped (config dir missing)'
+        : opencodeResult?.changed
           ? `- Opencode plugin: updated (${opencodeConfigDir})`
-          : `- Opencode plugin: already set (${opencodeConfigDir})`
-        : `- Opencode plugin: skipped (${opencodeConfigDir} not found)`,
+          : `- Opencode plugin: already set (${opencodeConfigDir})`,
       deviceToken ? `- Device token: stored (${maskSecret(deviceToken)})` : '- Device token: not configured (set VIBESCORE_DEVICE_TOKEN and re-run init)',
       ''
     ].join('\n')

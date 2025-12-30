@@ -368,3 +368,41 @@ test('init then uninstall manages Opencode plugin without removing other plugins
     await fs.rm(tmp, { recursive: true, force: true });
   }
 });
+
+test('init installs Opencode plugin when config dir is missing', async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'vibescore-init-uninstall-'));
+  const prevHome = process.env.HOME;
+  const prevCodexHome = process.env.CODEX_HOME;
+  const prevToken = process.env.VIBESCORE_DEVICE_TOKEN;
+  const prevOpencodeConfigDir = process.env.OPENCODE_CONFIG_DIR;
+  const prevWrite = process.stdout.write;
+
+  try {
+    process.env.HOME = tmp;
+    process.env.CODEX_HOME = path.join(tmp, '.codex');
+    delete process.env.VIBESCORE_DEVICE_TOKEN;
+    process.env.OPENCODE_CONFIG_DIR = path.join(tmp, '.config', 'opencode');
+    await fs.mkdir(process.env.CODEX_HOME, { recursive: true });
+
+    const codexConfigPath = path.join(process.env.CODEX_HOME, 'config.toml');
+    await fs.writeFile(codexConfigPath, '# empty\n', 'utf8');
+
+    process.stdout.write = () => true;
+    await cmdInit(['--no-auth', '--no-open', '--base-url', 'https://example.invalid']);
+
+    const pluginPath = path.join(process.env.OPENCODE_CONFIG_DIR, 'plugin', 'vibescore-tracker.js');
+    const installed = await fs.readFile(pluginPath, 'utf8');
+    assert.match(installed, /VIBESCORE_TRACKER_PLUGIN/);
+  } finally {
+    process.stdout.write = prevWrite;
+    if (prevHome === undefined) delete process.env.HOME;
+    else process.env.HOME = prevHome;
+    if (prevCodexHome === undefined) delete process.env.CODEX_HOME;
+    else process.env.CODEX_HOME = prevCodexHome;
+    if (prevToken === undefined) delete process.env.VIBESCORE_DEVICE_TOKEN;
+    else process.env.VIBESCORE_DEVICE_TOKEN = prevToken;
+    if (prevOpencodeConfigDir === undefined) delete process.env.OPENCODE_CONFIG_DIR;
+    else process.env.OPENCODE_CONFIG_DIR = prevOpencodeConfigDir;
+    await fs.rm(tmp, { recursive: true, force: true });
+  }
+});
