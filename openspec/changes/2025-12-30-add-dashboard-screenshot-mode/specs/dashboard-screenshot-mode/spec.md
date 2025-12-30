@@ -100,6 +100,17 @@
 - **WHEN** 截图模式启用
 - **THEN** 左侧顶部显示两行标题，Identity 与热力图位于其下方
 
+### Requirement: Screenshot action buttons
+系统 SHALL 在截图模式标题旁提供下载图片与 X 分享按钮，下载图片时按钮不应出现在截图中。
+
+#### Scenario: Download image
+- **WHEN** 用户点击下载按钮
+- **THEN** 下载当前宽屏截图，且按钮不出现在截图里
+
+#### Scenario: Share to X
+- **WHEN** 用户点击 X 按钮
+- **THEN** 跳转到 X Web Intent 并携带文本 “wrapped”
+
 ### Requirement: Share page with OG image
 系统 SHALL 提供用于分享的静态页面，并通过 OG/Twitter Card 指向截图图片。
 

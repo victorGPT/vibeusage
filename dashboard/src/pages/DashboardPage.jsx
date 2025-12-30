@@ -105,6 +105,7 @@ export function DashboardPage({
     return window.matchMedia("(max-width: 640px)").matches;
   });
   const screenshotMode = useMemo(() => isScreenshotModeEnabled(), []);
+  const [isCapturing, setIsCapturing] = useState(false);
   const wrappedEntryLabel = copy("dashboard.wrapped.entry");
   const wrappedEntryEnabled = useMemo(() => {
     if (typeof window === "undefined") return false;
@@ -629,6 +630,62 @@ export function DashboardPage({
   const allowBreakdownToggle = !screenshotMode;
   const screenshotTitleLine1 = copy("dashboard.screenshot.title_line1");
   const screenshotTitleLine2 = copy("dashboard.screenshot.title_line2");
+  const screenshotDownloadLabel = copy("dashboard.screenshot.download_label");
+  const screenshotDownloadButton = copy("dashboard.screenshot.download_button");
+  const screenshotTwitterLabel = copy("dashboard.screenshot.twitter_label");
+  const screenshotTwitterButton = copy("dashboard.screenshot.twitter_button");
+  const screenshotTwitterText = copy("dashboard.screenshot.twitter_text");
+  const screenshotTwitterUrl = useMemo(() => {
+    if (typeof window === "undefined") return "";
+    const intentUrl = new URL("https://twitter.com/intent/tweet");
+    intentUrl.searchParams.set("text", screenshotTwitterText);
+    return intentUrl.toString();
+  }, [screenshotTwitterText]);
+  const handleShareToX = useCallback(() => {
+    if (!screenshotTwitterUrl || typeof window === "undefined") return;
+    const popup = window.open(
+      screenshotTwitterUrl,
+      "x-share",
+      "width=550,height=420,noopener,noreferrer"
+    );
+    if (popup) return;
+    window.location.href = screenshotTwitterUrl;
+  }, [screenshotTwitterUrl]);
+  const handleDownloadScreenshot = useCallback(async () => {
+    if (typeof window === "undefined" || isCapturing) return;
+    setIsCapturing(true);
+    try {
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+      const { default: html2canvas } = await import("html2canvas");
+      const root = document.querySelector("#root") || document.body;
+      const { scrollWidth, scrollHeight } = document.documentElement;
+      const canvas = await html2canvas(root, {
+        backgroundColor: null,
+        scale: 2,
+        useCORS: true,
+        scrollX: 0,
+        scrollY: -window.scrollY,
+        windowWidth: scrollWidth,
+        windowHeight: scrollHeight,
+        ignoreElements: (element) =>
+          element?.dataset?.screenshotExclude === "true",
+      });
+      const blob = await new Promise((resolve) =>
+        canvas.toBlob(resolve, "image/png", 1)
+      );
+      if (!blob) return;
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "wrapped-2025.png";
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Failed to capture screenshot", error);
+    } finally {
+      setIsCapturing(false);
+    }
+  }, [isCapturing]);
   const footerLeftContent = screenshotMode
     ? null
     : accessEnabled
@@ -898,13 +955,41 @@ export function DashboardPage({
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div className="lg:col-span-4 flex flex-col gap-6 min-w-0">
               {screenshotMode ? (
-                <div className="flex flex-col gap-1">
-                  <span className="text-3xl md:text-4xl font-black text-white tracking-[-0.03em] leading-none glow-text">
-                    {screenshotTitleLine1}
-                  </span>
-                  <span className="text-2xl md:text-3xl font-black text-white tracking-[-0.03em] leading-none glow-text">
-                    {screenshotTitleLine2}
-                  </span>
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-3xl md:text-4xl font-black text-white tracking-[-0.03em] leading-none glow-text">
+                      {screenshotTitleLine1}
+                    </span>
+                    <span className="text-2xl md:text-3xl font-black text-white tracking-[-0.03em] leading-none glow-text">
+                      {screenshotTitleLine2}
+                    </span>
+                  </div>
+                  <div
+                    className="flex items-center gap-2"
+                    data-screenshot-exclude="true"
+                    style={isCapturing ? { display: "none" } : undefined}
+                  >
+                    <MatrixButton
+                      type="button"
+                      onClick={handleDownloadScreenshot}
+                      aria-label={screenshotDownloadLabel}
+                      title={screenshotDownloadLabel}
+                      className="h-10 px-3 text-xs"
+                      disabled={isCapturing}
+                    >
+                      {screenshotDownloadButton}
+                    </MatrixButton>
+                    <MatrixButton
+                      type="button"
+                      onClick={handleShareToX}
+                      aria-label={screenshotTwitterLabel}
+                      title={screenshotTwitterLabel}
+                      className="h-10 px-3 text-xs"
+                      disabled={isCapturing}
+                    >
+                      {screenshotTwitterButton}
+                    </MatrixButton>
+                  </div>
                 </div>
               ) : null}
               <IdentityCard

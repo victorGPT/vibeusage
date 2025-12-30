@@ -12,6 +12,7 @@
 - 截图模式调整为横向两列，仅保留 Identity/热力图/Core/Model。
 - 截图模式仅在非生产环境启用。
 - 截图模式左上角新增两行标题（Coding Agent / 2025 Wrapped）。
+- 截图模式标题旁新增下载与 X 分享按钮，下载截图需排除按钮。
 
 ## Impact
 - Affected specs: `dashboard-screenshot-mode`
