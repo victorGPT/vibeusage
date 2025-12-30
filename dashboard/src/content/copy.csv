@@ -295,6 +295,8 @@ dashboard.screenshot.title,dashboard,DashboardPage,ScreenshotTitle,title,"Coding
 dashboard.screenshot.share_button,dashboard,DashboardPage,ScreenshotShare,button_label,"X",,active
 dashboard.screenshot.share_label,dashboard,DashboardPage,ScreenshotShare,aria_label,"Share on X",,active
 dashboard.screenshot.share_text,dashboard,DashboardPage,ScreenshotShare,share_text,"Coding Agent Wrapped 2025",,active
+dashboard.screenshot.title_line1,dashboard,DashboardPage,ScreenshotTitle,title_line,"Coding Agent",,active
+dashboard.screenshot.title_line2,dashboard,DashboardPage,ScreenshotTitle,title_line,"2025 Wrapped",,active
 dashboard.wrapped.entry,dashboard,DashboardPage,Header,button_label,"Wrapped 2025",,active
 dashboard.poster.title,dashboard,AnnualPosterPage,Poster,title,"我的2025总结",,active
 

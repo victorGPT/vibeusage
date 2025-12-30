@@ -11,6 +11,7 @@
 - 在非生产环境的 Dashboard 顶部栏新增截图入口（Wrapped 2025）。
 - 截图模式调整为横向两列，仅保留 Identity/热力图/Core/Model。
 - 截图模式仅在非生产环境启用。
+- 截图模式左上角新增两行标题（Coding Agent / 2025 Wrapped）。
 
 ## Impact
 - Affected specs: `dashboard-screenshot-mode`

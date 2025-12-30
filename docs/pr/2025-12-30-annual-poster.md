@@ -10,6 +10,7 @@ Add a static 2025 annual summary poster view and export a shareable image.
 - `npm --prefix dashboard run build` => PASS (vite build, after adding Wrapped 2025 entry + screenshot)
 - `npm --prefix dashboard run build` => PASS (vite build, after adding wrapped static page)
 - `npm --prefix dashboard run build` => PASS (vite build, after updating screenshot layout to 2-column mode)
+- `npm --prefix dashboard run build` => PASS (vite build, after adding screenshot title block)
 
 ## Poster Export
 - Dev server: `npm --prefix dashboard run dev -- --host 127.0.0.1 --port 4173`

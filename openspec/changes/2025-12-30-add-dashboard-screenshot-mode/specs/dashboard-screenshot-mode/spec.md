@@ -93,6 +93,13 @@
 - **WHEN** 截图模式启用
 - **THEN** 顶部栏不显示
 
+### Requirement: Screenshot title block
+系统 SHALL 在截图模式左上角展示两行标题：“Coding Agent” 与 “2025 Wrapped”，并将内容区下移。
+
+#### Scenario: Title shown in top-left
+- **WHEN** 截图模式启用
+- **THEN** 左侧顶部显示两行标题，Identity 与热力图位于其下方
+
 ### Requirement: Share page with OG image
 系统 SHALL 提供用于分享的静态页面，并通过 OG/Twitter Card 指向截图图片。
 

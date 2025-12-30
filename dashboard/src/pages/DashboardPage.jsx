@@ -627,6 +627,8 @@ export function DashboardPage({
   const coreIndexCollapseAria = copy("dashboard.core_index.collapse_aria");
   const coreIndexExpandAria = copy("dashboard.core_index.expand_aria");
   const allowBreakdownToggle = !screenshotMode;
+  const screenshotTitleLine1 = copy("dashboard.screenshot.title_line1");
+  const screenshotTitleLine2 = copy("dashboard.screenshot.title_line2");
   const footerLeftContent = screenshotMode
     ? null
     : accessEnabled
@@ -895,6 +897,16 @@ export function DashboardPage({
           <>
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div className="lg:col-span-4 flex flex-col gap-6 min-w-0">
+              {screenshotMode ? (
+                <div className="flex flex-col gap-1">
+                  <span className="text-3xl md:text-4xl font-black text-white tracking-[-0.03em] leading-none glow-text">
+                    {screenshotTitleLine1}
+                  </span>
+                  <span className="text-2xl md:text-3xl font-black text-white tracking-[-0.03em] leading-none glow-text">
+                    {screenshotTitleLine2}
+                  </span>
+                </div>
+              ) : null}
               <IdentityCard
                 title={copy("dashboard.identity.title")}
                 subtitle={copy("dashboard.identity.subtitle")}
