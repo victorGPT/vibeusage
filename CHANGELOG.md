@@ -3,8 +3,6 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
-### Added
-- Install Gemini CLI SessionEnd hook and enable Gemini hooks automatically for auto sync.
 
 ## [0.2.2] - 2025-12-30
 ### Added
