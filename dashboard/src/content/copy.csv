@@ -19,10 +19,10 @@ error.boundary.action.reload,shared,*,ErrorBoundary,action_reload,"RELOAD",,acti
 
 landing.handle.default,landing,LandingPage,LandingPage,handle_default,"VIBE_USER",,active
 landing.handle.special,landing,LandingPage,LandingPage,handle_special,"VOLT",,active
-landing.hero.title_primary,landing,LandingPage,LandingPage,hero_title_primary,"VIBESCORE",,active
-landing.hero.title_secondary,landing,LandingPage,LandingPage,hero_title_secondary,"CODEX, CLAUDE CODE & GEMINI CLI TOKEN TRACKER",,active
-landing.hero.tagline,landing,LandingPage,LandingPage,hero_tagline,"REAL-TIME TOKEN INTELLIGENCE FOR AI CLI TEAMS",,active
-landing.hero.subtagline,landing,LandingPage,LandingPage,hero_subtagline,"Auto-track usage, surface spend signals, and compare rankings in one Matrix-style dashboard.",,active
+landing.hero.title_primary,landing,LandingPage,LandingPage,hero_title_primary,"MORE_TOKENS.",,active
+landing.hero.title_secondary,landing,LandingPage,LandingPage,hero_title_secondary,"MORE_VIBE.",,active
+landing.hero.tagline,landing,LandingPage,LandingPage,hero_tagline,"CODEX / CLAUDE CODE / GEMINI CLI TRACKER",,active
+landing.hero.subtagline,landing,LandingPage,LandingPage,hero_subtagline,"Track Codex, Claude Code & Gemini CLI usage in real time.",,active
 landing.meta.title,landing,LandingPage,Meta,title,"VibeScore | Codex, Claude Code & Gemini CLI Token Tracker",,active
 landing.meta.description,landing,LandingPage,Meta,description,"VibeScore is a token tracker for Codex, Claude Code & Gemini CLI. Auto-track usage, visualize in a Matrix-style UI, and compare rankings.",,active
 landing.meta.og_site_name,landing,LandingPage,Meta,og_site_name,"VibeScore",,active
@@ -49,46 +49,6 @@ landing.footer.link.manifesto,landing,LandingPage,LandingPage,footer_link_manife
 landing.footer.link.docs,landing,LandingPage,LandingPage,footer_link_docs,"Docs",,active
 landing.footer.link.security,landing,LandingPage,LandingPage,footer_link_security,"Security",,active
 landing.footer.system_ready,landing,LandingPage,LandingPage,footer_system_ready,"System_Ready // 2024 VibeScore OS",,active
-landing.meta.canonical_url,landing,LandingPage,Meta,canonical_url,"https://www.vibescore.space/",,active
-landing.meta.favicon,landing,LandingPage,Meta,favicon,"/favicon.png",,active
-landing.meta.apple_touch_icon,landing,LandingPage,Meta,apple_touch_icon,"/apple-touch-icon.png",,active
-landing.seo.nav.features,landing,LandingPage,LandingPage,seo_nav_features,"Features",,active
-landing.seo.nav.how,landing,LandingPage,LandingPage,seo_nav_how,"How It Works",,active
-landing.seo.nav.manifesto,landing,LandingPage,LandingPage,seo_nav_manifesto,"Manifesto",,active
-landing.seo.nav.docs,landing,LandingPage,LandingPage,seo_nav_docs,"Docs",,active
-landing.seo.nav.security,landing,LandingPage,LandingPage,seo_nav_security,"Security",,active
-landing.seo.detail1,landing,LandingPage,LandingPage,seo_detail_1,"VibeScore is built for engineers who live in the terminal. It captures token usage across sessions and turns raw events into daily, weekly, and monthly signals so you can see cost drift early and tune prompts before the bill spikes.",,active
-landing.seo.detail2,landing,LandingPage,LandingPage,seo_detail_2,"From solo builders to fast-moving teams, VibeScore highlights which models and tools dominate your usage, where spikes appear, and how your rank evolves over time. The goal is a single, reliable control room for AI CLI spend.",,active
-landing.seo.image.src,landing,LandingPage,LandingPage,seo_image_src,"/og-image.png",,active
-landing.seo.image.alt,landing,LandingPage,LandingPage,seo_image_alt,"Matrix-style VibeScore dashboard preview with token usage and leaderboard panels.",,active
-landing.seo.image.caption,landing,LandingPage,LandingPage,seo_image_caption,"VibeScore unifies token usage, spend signals, and rankings in a Matrix-inspired interface.",,active
-landing.seo.how.title,landing,LandingPage,LandingPage,seo_how_title,"How VibeScore Works",,active
-landing.seo.how.step1.title,landing,LandingPage,LandingPage,seo_how_step1_title,"Connect once",,active
-landing.seo.how.step1.body,landing,LandingPage,LandingPage,seo_how_step1_body,"Install the tracker and authenticate with GitHub. Usage events are captured automatically while you work in Codex, Claude Code, and Gemini CLI.",,active
-landing.seo.how.step2.title,landing,LandingPage,LandingPage,seo_how_step2_title,"See the signals",,active
-landing.seo.how.step2.body,landing,LandingPage,LandingPage,seo_how_step2_body,"Daily, weekly, and monthly views reveal token trends, spikes, and top models so you can adjust workflows before spend drifts.",,active
-landing.seo.how.step3.title,landing,LandingPage,LandingPage,seo_how_step3_title,"Compare and rank",,active
-landing.seo.how.step3.body,landing,LandingPage,LandingPage,seo_how_step3_body,"Leaderboard views normalize usage so you can compare patterns across tools, teammates, or sessions without manual spreadsheets.",,active
-landing.seo.manifesto.title,landing,LandingPage,LandingPage,seo_manifesto_title,"Manifesto",,active
-landing.seo.manifesto.body,landing,LandingPage,LandingPage,seo_manifesto_body,"VibeScore exists so AI engineers can treat token usage like a first-class metric. The mission is clarity: fast feedback, honest rankings, and a shared view of how tools behave in the wild. If you ship from the terminal, you deserve visibility that keeps pace.",,active
-landing.seo.docs.title,landing,LandingPage,LandingPage,seo_docs_title,"Docs & Setup",,active
-landing.seo.docs.body,landing,LandingPage,LandingPage,seo_docs_body,"Get started in minutes. Install the CLI tracker, link your account, and open the dashboard to verify the live feed.",,active
-landing.seo.docs.step1,landing,LandingPage,LandingPage,seo_docs_step1,"Install the tracker package in your CLI environment.",,active
-landing.seo.docs.step2,landing,LandingPage,LandingPage,seo_docs_step2,"Run the initialize flow to link your GitHub identity.",,active
-landing.seo.docs.step3,landing,LandingPage,LandingPage,seo_docs_step3,"Open the dashboard and confirm that usage events are streaming.",,active
-landing.seo.security.title,landing,LandingPage,LandingPage,seo_security_title,"Security & Control",,active
-landing.seo.security.body,landing,LandingPage,LandingPage,seo_security_body,"VibeScore is designed for teams who care about operational safety. Keep access scoped, review usage regularly, and rotate tokens on a cadence that matches your risk profile.",,active
-landing.seo.security.point1,landing,LandingPage,LandingPage,seo_security_point1,"Use dedicated org accounts for shared tracking.",,active
-landing.seo.security.point2,landing,LandingPage,LandingPage,seo_security_point2,"Treat device tokens like credentials and rotate them.",,active
-landing.seo.security.point3,landing,LandingPage,LandingPage,seo_security_point3,"Review sync status and activity trends for anomalies.",,active
-landing.seo.references.title,landing,LandingPage,LandingPage,seo_references_title,"Authoritative Sources",,active
-landing.seo.references.body,landing,LandingPage,LandingPage,seo_references_body,"Learn more about the official CLI tools VibeScore tracks:",,active
-landing.seo.references.link_openai.label,landing,LandingPage,LandingPage,seo_references_openai_label,"OpenAI",,active
-landing.seo.references.link_openai.url,landing,LandingPage,LandingPage,seo_references_openai_url,"https://openai.com/",,active
-landing.seo.references.link_anthropic.label,landing,LandingPage,LandingPage,seo_references_anthropic_label,"Anthropic",,active
-landing.seo.references.link_anthropic.url,landing,LandingPage,LandingPage,seo_references_anthropic_url,"https://www.anthropic.com/",,active
-landing.seo.references.link_google.label,landing,LandingPage,LandingPage,seo_references_google_label,"Google AI",,active
-landing.seo.references.link_google.url,landing,LandingPage,LandingPage,seo_references_google_url,"https://ai.google.dev/",,active
 
 
 shell.header.title,ui,MatrixShell,MatrixShell,header_title,"VIBE SCORE",,active

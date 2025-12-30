@@ -115,38 +115,6 @@ export function LandingPage({ signInUrl }) {
             </p>
           </div>
         </div>
-        <nav className="flex flex-wrap justify-center gap-4 text-caption uppercase tracking-widest text-matrix-dim">
-          <a
-            href="#features"
-            className="hover:text-matrix-bright transition-colors"
-          >
-            {copy("landing.seo.nav.features")}
-          </a>
-          <a
-            href="#how"
-            className="hover:text-matrix-bright transition-colors"
-          >
-            {copy("landing.seo.nav.how")}
-          </a>
-          <a
-            href="#manifesto"
-            className="hover:text-matrix-bright transition-colors"
-          >
-            {copy("landing.seo.nav.manifesto")}
-          </a>
-          <a
-            href="#docs"
-            className="hover:text-matrix-bright transition-colors"
-          >
-            {copy("landing.seo.nav.docs")}
-          </a>
-          <a
-            href="#security"
-            className="hover:text-matrix-bright transition-colors"
-          >
-            {copy("landing.seo.nav.security")}
-          </a>
-        </nav>
 
         {/* 演示区域 */}
         {effectsReady ? (
@@ -163,36 +131,13 @@ export function LandingPage({ signInUrl }) {
           extrasSkeleton
         )}
 
-        <section
-          id="features"
-          className="w-full max-w-3xl border border-matrix-ghost bg-matrix-panel px-6 py-6 space-y-4"
-        >
-          <h2
-            id="features-title"
-            className="text-2xl md:text-3xl font-bold text-matrix-bright tracking-tight"
-          >
+        <section className="w-full max-w-3xl border border-matrix-ghost bg-matrix-panel px-6 py-6 space-y-4">
+          <h2 className="text-2xl md:text-3xl font-bold text-matrix-bright tracking-tight">
             {copy("landing.seo.title")}
           </h2>
           <p className="text-body text-matrix-muted">
             {copy("landing.seo.summary")}
           </p>
-          <p className="text-body text-matrix-muted">
-            {copy("landing.seo.detail1")}
-          </p>
-          <p className="text-body text-matrix-muted">
-            {copy("landing.seo.detail2")}
-          </p>
-          <figure className="space-y-3">
-            <img
-              src={copy("landing.seo.image.src")}
-              alt={copy("landing.seo.image.alt")}
-              className="w-full border border-matrix-ghost bg-matrix-panelStrong"
-              loading="lazy"
-            />
-            <figcaption className="text-caption text-matrix-dim">
-              {copy("landing.seo.image.caption")}
-            </figcaption>
-          </figure>
           <ul className="space-y-2 text-body text-matrix-muted">
             <li className="flex gap-2">
               <span className="text-matrix-primary">-</span>
@@ -210,134 +155,6 @@ export function LandingPage({ signInUrl }) {
           <p className="text-caption text-matrix-dim uppercase">
             {copy("landing.seo.roadmap")}
           </p>
-        </section>
-
-        <section
-          id="how"
-          className="w-full max-w-3xl border border-matrix-ghost bg-matrix-panel px-6 py-6 space-y-4"
-        >
-          <h2 className="text-2xl md:text-3xl font-bold text-matrix-bright tracking-tight">
-            {copy("landing.seo.how.title")}
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="space-y-2">
-              <h3 className="text-heading font-bold text-matrix-bright">
-                {copy("landing.seo.how.step1.title")}
-              </h3>
-              <p className="text-body text-matrix-muted">
-                {copy("landing.seo.how.step1.body")}
-              </p>
-            </div>
-            <div className="space-y-2">
-              <h3 className="text-heading font-bold text-matrix-bright">
-                {copy("landing.seo.how.step2.title")}
-              </h3>
-              <p className="text-body text-matrix-muted">
-                {copy("landing.seo.how.step2.body")}
-              </p>
-            </div>
-            <div className="space-y-2">
-              <h3 className="text-heading font-bold text-matrix-bright">
-                {copy("landing.seo.how.step3.title")}
-              </h3>
-              <p className="text-body text-matrix-muted">
-                {copy("landing.seo.how.step3.body")}
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <section
-          id="manifesto"
-          className="w-full max-w-3xl border border-matrix-ghost bg-matrix-panel px-6 py-6 space-y-3"
-        >
-          <h2 className="text-2xl md:text-3xl font-bold text-matrix-bright tracking-tight">
-            {copy("landing.seo.manifesto.title")}
-          </h2>
-          <p className="text-body text-matrix-muted">
-            {copy("landing.seo.manifesto.body")}
-          </p>
-        </section>
-
-        <section
-          id="docs"
-          className="w-full max-w-3xl border border-matrix-ghost bg-matrix-panel px-6 py-6 space-y-4"
-        >
-          <h2 className="text-2xl md:text-3xl font-bold text-matrix-bright tracking-tight">
-            {copy("landing.seo.docs.title")}
-          </h2>
-          <p className="text-body text-matrix-muted">
-            {copy("landing.seo.docs.body")}
-          </p>
-          <ol className="space-y-2 text-body text-matrix-muted list-decimal list-inside">
-            <li>{copy("landing.seo.docs.step1")}</li>
-            <li>{copy("landing.seo.docs.step2")}</li>
-            <li>{copy("landing.seo.docs.step3")}</li>
-          </ol>
-        </section>
-
-        <section
-          id="security"
-          className="w-full max-w-3xl border border-matrix-ghost bg-matrix-panel px-6 py-6 space-y-4"
-        >
-          <h2 className="text-2xl md:text-3xl font-bold text-matrix-bright tracking-tight">
-            {copy("landing.seo.security.title")}
-          </h2>
-          <p className="text-body text-matrix-muted">
-            {copy("landing.seo.security.body")}
-          </p>
-          <ul className="space-y-2 text-body text-matrix-muted">
-            <li className="flex gap-2">
-              <span className="text-matrix-primary">-</span>
-              <span>{copy("landing.seo.security.point1")}</span>
-            </li>
-            <li className="flex gap-2">
-              <span className="text-matrix-primary">-</span>
-              <span>{copy("landing.seo.security.point2")}</span>
-            </li>
-            <li className="flex gap-2">
-              <span className="text-matrix-primary">-</span>
-              <span>{copy("landing.seo.security.point3")}</span>
-            </li>
-          </ul>
-        </section>
-
-        <section
-          id="references"
-          className="w-full max-w-3xl border border-matrix-ghost bg-matrix-panel px-6 py-6 space-y-3"
-        >
-          <h2 className="text-2xl md:text-3xl font-bold text-matrix-bright tracking-tight">
-            {copy("landing.seo.references.title")}
-          </h2>
-          <p className="text-body text-matrix-muted">
-            {copy("landing.seo.references.body")}
-          </p>
-          <div className="flex flex-wrap gap-4 text-caption uppercase tracking-widest text-matrix-primary">
-            <a
-              href={copy("landing.seo.references.link_openai.url")}
-              className="hover:text-matrix-bright transition-colors"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {copy("landing.seo.references.link_openai.label")}
-            </a>
-            <a
-              href={copy("landing.seo.references.link_anthropic.url")}
-              className="hover:text-matrix-bright transition-colors"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {copy("landing.seo.references.link_anthropic.label")}
-            </a>
-            <a
-              href={copy("landing.seo.references.link_google.url")}
-              className="hover:text-matrix-bright transition-colors"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {copy("landing.seo.references.link_google.label")}
-            </a>
-          </div>
         </section>
 
         {/* 核心操作区域 */}
@@ -360,24 +177,15 @@ export function LandingPage({ signInUrl }) {
           </div>
 
           <div className="flex space-x-8 text-caption uppercase tracking-widest text-matrix-dim pt-4">
-            <a
-              href="#manifesto"
-              className="hover:text-matrix-bright transition-colors"
-            >
+            <span className="hover:text-matrix-bright cursor-pointer transition-colors">
               {copy("landing.footer.link.manifesto")}
-            </a>
-            <a
-              href="#docs"
-              className="hover:text-matrix-bright transition-colors"
-            >
+            </span>
+            <span className="hover:text-matrix-bright cursor-pointer transition-colors">
               {copy("landing.footer.link.docs")}
-            </a>
-            <a
-              href="#security"
-              className="hover:text-matrix-bright transition-colors"
-            >
+            </span>
+            <span className="hover:text-matrix-bright cursor-pointer transition-colors">
               {copy("landing.footer.link.security")}
-            </a>
+            </span>
           </div>
         </div>
       </main>

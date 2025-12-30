@@ -11,10 +11,7 @@ const COPY_REQUIRED_KEYS = [
   'landing.meta.og_type',
   'landing.meta.og_image',
   'landing.meta.og_url',
-  'landing.meta.twitter_card',
-  'landing.meta.canonical_url',
-  'landing.meta.favicon',
-  'landing.meta.apple_touch_icon'
+  'landing.meta.twitter_card'
 ];
 
 const ROOT_DIR = path.dirname(fileURLToPath(import.meta.url));
@@ -135,45 +132,8 @@ function buildMeta() {
     ogType: read('landing.meta.og_type'),
     ogImage: read('landing.meta.og_image'),
     ogUrl: read('landing.meta.og_url'),
-    twitterCard: read('landing.meta.twitter_card'),
-    canonicalUrl: read('landing.meta.canonical_url'),
-    favicon: read('landing.meta.favicon'),
-    appleTouchIcon: read('landing.meta.apple_touch_icon')
+    twitterCard: read('landing.meta.twitter_card')
   };
-}
-
-function buildSchema(meta) {
-  const siteUrl = meta.canonicalUrl || meta.ogUrl;
-  const name = meta.ogSiteName || meta.title;
-  if (!siteUrl || !name) return '';
-
-  const organization = {
-    '@type': 'Organization',
-    '@id': `${siteUrl}#organization`,
-    name,
-    url: siteUrl
-  };
-
-  if (meta.ogImage) {
-    organization.logo = meta.ogImage;
-  }
-
-  const website = {
-    '@type': 'WebSite',
-    '@id': `${siteUrl}#website`,
-    name,
-    url: siteUrl,
-    publisher: { '@id': `${siteUrl}#organization` }
-  };
-
-  if (meta.description) {
-    website.description = meta.description;
-  }
-
-  return JSON.stringify({
-    '@context': 'https://schema.org',
-    '@graph': [organization, website]
-  });
 }
 
 function injectRichMeta(html) {
@@ -190,25 +150,13 @@ function injectRichMeta(html) {
     '__VIBESCORE_TWITTER_CARD__': meta.twitterCard,
     '__VIBESCORE_TWITTER_TITLE__': meta.title,
     '__VIBESCORE_TWITTER_DESCRIPTION__': meta.description,
-    '__VIBESCORE_TWITTER_IMAGE__': meta.ogImage,
-    '__VIBESCORE_CANONICAL__': meta.canonicalUrl,
-    '__VIBESCORE_FAVICON__': meta.favicon,
-    '__VIBESCORE_APPLE_TOUCH_ICON__': meta.appleTouchIcon
+    '__VIBESCORE_TWITTER_IMAGE__': meta.ogImage
   };
 
   let output = html;
   for (const [token, value] of Object.entries(replacements)) {
     output = output.replaceAll(token, escapeHtml(value));
   }
-
-  const schema = buildSchema(meta);
-  if (schema) {
-    output = output.replace(
-      '</head>',
-      `    <script type="application/ld+json">${schema}</script>\n  </head>`
-    );
-  }
-
   return output;
 }
 
