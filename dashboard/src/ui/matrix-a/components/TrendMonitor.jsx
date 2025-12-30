@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
 import { copy } from "../../../lib/copy.js";
 import { ASCII_CHARS } from "./AsciiBox.jsx";
@@ -48,8 +48,9 @@ export function TrendMonitor({
 
   const width = 100;
   const height = 100;
-  const axisWidth = 8;
-  const plotWidth = width - axisWidth;
+  const axisWidthFallback = 8;
+  const [axisWidthView, setAxisWidthView] = useState(axisWidthFallback);
+  const plotWidth = width - axisWidthView;
   const pointCount = Math.max(seriesValues.length, 1);
   const DAY_AXIS_POINT_COUNT = 48;
   const dayStep =
@@ -295,13 +296,37 @@ export function TrendMonitor({
   const axisRef = useRef(null);
   const [hover, setHover] = useState(null);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+    const measure = () => {
+      const plotEl = plotRef.current;
+      const axisEl = axisRef.current;
+      if (!plotEl || !axisEl) return;
+      const plotRect = plotEl.getBoundingClientRect();
+      const axisRect = axisEl.getBoundingClientRect();
+      if (!plotRect.width) return;
+      const next = (axisRect.width / plotRect.width) * width;
+      const clamped = Math.max(4, Math.min(width - 1, next));
+      setAxisWidthView((prev) => (Math.abs(prev - clamped) > 0.2 ? clamped : prev));
+    };
+    measure();
+    if (typeof ResizeObserver !== "undefined") {
+      const observer = new ResizeObserver(measure);
+      if (plotRef.current) observer.observe(plotRef.current);
+      if (axisRef.current) observer.observe(axisRef.current);
+      return () => observer.disconnect();
+    }
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, [width]);
+
   function handleMove(e) {
     const el = plotRef.current;
     if (!el || seriesValues.length === 0) return;
     const rect = el.getBoundingClientRect();
     const axisWidthPx =
       axisRef.current?.getBoundingClientRect().width ??
-      (axisWidth / width) * rect.width;
+      (axisWidthView / width) * rect.width;
     const plotWidthPx = rect.width - axisWidthPx;
     const rawX = Math.min(Math.max(e.clientX - rect.left, 0), plotWidthPx);
     const xPaddingPx = plotWidth > 0 ? (xPadding / plotWidth) * plotWidthPx : 0;
