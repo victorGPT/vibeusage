@@ -5,6 +5,12 @@ const fs = require('node:fs/promises');
 const { readJson } = require('./fs');
 const { readCodexNotify, readEveryCodeNotify } = require('./codex-config');
 const { isClaudeHookConfigured, buildClaudeHookCommand } = require('./claude-config');
+const {
+  resolveGeminiConfigDir,
+  resolveGeminiSettingsPath,
+  buildGeminiHookCommand,
+  isGeminiHookConfigured
+} = require('./gemini-config');
 const { resolveOpencodeConfigDir, isOpencodePluginInstalled } = require('./opencode-config');
 const { normalizeState: normalizeUploadState } = require('./upload-throttle');
 
@@ -25,6 +31,8 @@ async function collectTrackerDiagnostics({
   const codexConfigPath = path.join(codexHome, 'config.toml');
   const codeConfigPath = path.join(codeHome, 'config.toml');
   const claudeConfigPath = path.join(home, '.claude', 'settings.json');
+  const geminiConfigDir = resolveGeminiConfigDir({ home, env: process.env });
+  const geminiSettingsPath = resolveGeminiSettingsPath({ configDir: geminiConfigDir });
   const opencodeConfigDir = resolveOpencodeConfigDir({ home, env: process.env });
 
   const config = await readJson(configPath);
@@ -51,6 +59,11 @@ async function collectTrackerDiagnostics({
     settingsPath: claudeConfigPath,
     hookCommand: claudeHookCommand
   });
+  const geminiHookCommand = buildGeminiHookCommand(path.join(home, '.vibescore', 'bin', 'notify.cjs'));
+  const geminiHookConfigured = await isGeminiHookConfigured({
+    settingsPath: geminiSettingsPath,
+    hookCommand: geminiHookCommand
+  });
   const opencodePluginConfigured = await isOpencodePluginInstalled({ configDir: opencodeConfigDir });
 
   const lastSuccessAt = uploadThrottle.lastSuccessMs ? new Date(uploadThrottle.lastSuccessMs).toISOString() : null;
@@ -72,6 +85,7 @@ async function collectTrackerDiagnostics({
       code_home: redactValue(codeHome, home),
       code_config: redactValue(codeConfigPath, home),
       claude_config: redactValue(claudeConfigPath, home),
+      gemini_config: redactValue(geminiSettingsPath, home),
       opencode_config: redactValue(opencodeConfigDir, home)
     },
     config: {
@@ -98,6 +112,7 @@ async function collectTrackerDiagnostics({
       every_code_notify_configured: everyCodeConfigured,
       every_code_notify: everyCodeNotify,
       claude_hook_configured: claudeHookConfigured,
+      gemini_hook_configured: geminiHookConfigured,
       opencode_plugin_configured: opencodePluginConfigured
     },
     upload: {

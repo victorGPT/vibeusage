@@ -14,6 +14,12 @@ const {
   loadEveryCodeNotifyOriginal
 } = require('../lib/codex-config');
 const { upsertClaudeHook, buildClaudeHookCommand } = require('../lib/claude-config');
+const {
+  resolveGeminiConfigDir,
+  resolveGeminiSettingsPath,
+  buildGeminiHookCommand,
+  upsertGeminiHook
+} = require('../lib/gemini-config');
 const { resolveOpencodeConfigDir, upsertOpencodePlugin } = require('../lib/opencode-config');
 const { beginBrowserAuth } = require('../lib/browser-auth');
 const {
@@ -163,6 +169,18 @@ async function cmdInit(argv) {
     });
   }
 
+  const geminiConfigDir = resolveGeminiConfigDir({ home, env: process.env });
+  const geminiConfigExists = await isDir(geminiConfigDir);
+  const geminiSettingsPath = resolveGeminiSettingsPath({ configDir: geminiConfigDir });
+  let geminiResult = null;
+  if (geminiConfigExists) {
+    const geminiHookCommand = buildGeminiHookCommand(notifyPath);
+    geminiResult = await upsertGeminiHook({
+      settingsPath: geminiSettingsPath,
+      hookCommand: geminiHookCommand
+    });
+  }
+
   const opencodeConfigDir = resolveOpencodeConfigDir({ home, env: process.env });
   const opencodeResult = await upsertOpencodePlugin({
     configDir: opencodeConfigDir,
@@ -193,6 +211,11 @@ async function cmdInit(argv) {
           ? `- Claude hooks: updated (${claudeSettingsPath})`
           : `- Claude hooks: already set (${claudeSettingsPath})`
         : '- Claude hooks: skipped (~/.claude not found)',
+      geminiConfigExists
+        ? geminiResult?.changed
+          ? `- Gemini hooks: updated (${geminiSettingsPath})`
+          : `- Gemini hooks: already set (${geminiSettingsPath})`
+        : `- Gemini hooks: skipped (${geminiConfigDir} not found)`,
       opencodeResult?.skippedReason === 'config-missing'
         ? '- Opencode plugin: skipped (config dir missing)'
         : opencodeResult?.changed
@@ -321,7 +344,7 @@ try {
   const originalPath =
     source === 'every-code'
       ? codeOriginalPath
-      : source === 'claude' || source === 'opencode'
+      : source === 'claude' || source === 'opencode' || source === 'gemini'
         ? null
         : codexOriginalPath;
   if (originalPath) {

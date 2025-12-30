@@ -7,6 +7,7 @@ const { test } = require('node:test');
 const { cmdInit } = require('../src/commands/init');
 const { cmdUninstall } = require('../src/commands/uninstall');
 const { buildClaudeHookCommand } = require('../src/lib/claude-config');
+const { buildGeminiHookCommand } = require('../src/lib/gemini-config');
 
 async function waitForFile(filePath, { timeoutMs = 1500, intervalMs = 50 } = {}) {
   const start = Date.now();
@@ -19,6 +20,10 @@ async function waitForFile(filePath, { timeoutMs = 1500, intervalMs = 50 } = {})
     await new Promise((resolve) => setTimeout(resolve, intervalMs));
   }
   return null;
+}
+
+function flattenHookEntries(entries) {
+  return entries.flatMap((entry) => (Array.isArray(entry?.hooks) ? entry.hooks : [entry]));
 }
 
 test('init then uninstall restores original Codex notify (when pre-existing notify exists)', async () => {
@@ -315,6 +320,174 @@ test('init then uninstall manages Claude hooks without removing existing hooks',
     else process.env.VIBESCORE_DEVICE_TOKEN = prevToken;
     if (prevOpencodeConfigDir === undefined) delete process.env.OPENCODE_CONFIG_DIR;
     else process.env.OPENCODE_CONFIG_DIR = prevOpencodeConfigDir;
+    await fs.rm(tmp, { recursive: true, force: true });
+  }
+});
+
+test('init then uninstall manages Gemini hooks without removing existing hooks', async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'vibescore-init-uninstall-'));
+  const prevHome = process.env.HOME;
+  const prevCodexHome = process.env.CODEX_HOME;
+  const prevToken = process.env.VIBESCORE_DEVICE_TOKEN;
+  const prevOpencodeConfigDir = process.env.OPENCODE_CONFIG_DIR;
+  const prevGeminiHome = process.env.GEMINI_HOME;
+  const prevWrite = process.stdout.write;
+
+  try {
+    process.env.HOME = tmp;
+    process.env.CODEX_HOME = path.join(tmp, '.codex');
+    process.env.GEMINI_HOME = path.join(tmp, '.gemini');
+    delete process.env.VIBESCORE_DEVICE_TOKEN;
+    process.env.OPENCODE_CONFIG_DIR = path.join(tmp, '.config', 'opencode');
+    await fs.mkdir(process.env.CODEX_HOME, { recursive: true });
+    await fs.mkdir(process.env.GEMINI_HOME, { recursive: true });
+
+    const codexConfigPath = path.join(process.env.CODEX_HOME, 'config.toml');
+    await fs.writeFile(codexConfigPath, '# empty\n', 'utf8');
+
+    const settingsPath = path.join(process.env.GEMINI_HOME, 'settings.json');
+    const existingCommand = 'echo existing-gemini';
+    const settings = {
+      tools: { enableHooks: false },
+      hooks: {
+        disabled: ['existing-disabled'],
+        SessionEnd: [
+          {
+            matcher: 'exit',
+            hooks: [{ name: 'existing-gemini', type: 'command', command: existingCommand }]
+          }
+        ]
+      }
+    };
+    await fs.writeFile(settingsPath, JSON.stringify(settings, null, 2) + '\n', 'utf8');
+
+    process.stdout.write = () => true;
+    await cmdInit(['--no-auth', '--no-open', '--base-url', 'https://example.invalid']);
+
+    const installedRaw = await fs.readFile(settingsPath, 'utf8');
+    const installed = JSON.parse(installedRaw);
+    assert.equal(installed?.tools?.enableHooks, true);
+    assert.deepEqual(installed?.hooks?.disabled, ['existing-disabled']);
+    const hookCommand = buildGeminiHookCommand(path.join(tmp, '.vibescore', 'bin', 'notify.cjs'));
+    const sessionEnd = installed?.hooks?.SessionEnd || [];
+    const hooks = flattenHookEntries(sessionEnd);
+    const allCommands = hooks.map((h) => h?.command);
+    assert.ok(allCommands.includes(existingCommand), 'expected existing Gemini hook to remain');
+    assert.ok(allCommands.includes(hookCommand), 'expected tracker Gemini hook to be added');
+
+    await cmdUninstall([]);
+
+    const restoredRaw = await fs.readFile(settingsPath, 'utf8');
+    const restored = JSON.parse(restoredRaw);
+    assert.equal(restored?.tools?.enableHooks, true);
+    assert.deepEqual(restored?.hooks?.disabled, ['existing-disabled']);
+    const restoredSessionEnd = restored?.hooks?.SessionEnd || [];
+    const restoredHooks = flattenHookEntries(restoredSessionEnd);
+    const restoredCommands = restoredHooks.map((h) => h?.command);
+    assert.ok(restoredCommands.includes(existingCommand), 'expected existing Gemini hook to remain');
+    assert.ok(!restoredCommands.includes(hookCommand), 'expected tracker Gemini hook to be removed');
+  } finally {
+    process.stdout.write = prevWrite;
+    if (prevHome === undefined) delete process.env.HOME;
+    else process.env.HOME = prevHome;
+    if (prevCodexHome === undefined) delete process.env.CODEX_HOME;
+    else process.env.CODEX_HOME = prevCodexHome;
+    if (prevToken === undefined) delete process.env.VIBESCORE_DEVICE_TOKEN;
+    else process.env.VIBESCORE_DEVICE_TOKEN = prevToken;
+    if (prevOpencodeConfigDir === undefined) delete process.env.OPENCODE_CONFIG_DIR;
+    else process.env.OPENCODE_CONFIG_DIR = prevOpencodeConfigDir;
+    if (prevGeminiHome === undefined) delete process.env.GEMINI_HOME;
+    else process.env.GEMINI_HOME = prevGeminiHome;
+    await fs.rm(tmp, { recursive: true, force: true });
+  }
+});
+
+test('init skips Gemini hooks when config directory is missing', async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'vibescore-init-uninstall-'));
+  const prevHome = process.env.HOME;
+  const prevCodexHome = process.env.CODEX_HOME;
+  const prevToken = process.env.VIBESCORE_DEVICE_TOKEN;
+  const prevOpencodeConfigDir = process.env.OPENCODE_CONFIG_DIR;
+  const prevGeminiHome = process.env.GEMINI_HOME;
+  const prevWrite = process.stdout.write;
+
+  try {
+    process.env.HOME = tmp;
+    process.env.CODEX_HOME = path.join(tmp, '.codex');
+    process.env.GEMINI_HOME = path.join(tmp, '.gemini-missing');
+    delete process.env.VIBESCORE_DEVICE_TOKEN;
+    process.env.OPENCODE_CONFIG_DIR = path.join(tmp, '.config', 'opencode');
+    await fs.mkdir(process.env.CODEX_HOME, { recursive: true });
+
+    const codexConfigPath = path.join(process.env.CODEX_HOME, 'config.toml');
+    await fs.writeFile(codexConfigPath, '# empty\n', 'utf8');
+
+    process.stdout.write = () => true;
+    await cmdInit(['--no-auth', '--no-open', '--base-url', 'https://example.invalid']);
+
+    await assert.rejects(fs.stat(process.env.GEMINI_HOME), /ENOENT/);
+  } finally {
+    process.stdout.write = prevWrite;
+    if (prevHome === undefined) delete process.env.HOME;
+    else process.env.HOME = prevHome;
+    if (prevCodexHome === undefined) delete process.env.CODEX_HOME;
+    else process.env.CODEX_HOME = prevCodexHome;
+    if (prevToken === undefined) delete process.env.VIBESCORE_DEVICE_TOKEN;
+    else process.env.VIBESCORE_DEVICE_TOKEN = prevToken;
+    if (prevOpencodeConfigDir === undefined) delete process.env.OPENCODE_CONFIG_DIR;
+    else process.env.OPENCODE_CONFIG_DIR = prevOpencodeConfigDir;
+    if (prevGeminiHome === undefined) delete process.env.GEMINI_HOME;
+    else process.env.GEMINI_HOME = prevGeminiHome;
+    await fs.rm(tmp, { recursive: true, force: true });
+  }
+});
+
+test('init creates Gemini settings when directory exists but file is missing', async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'vibescore-init-uninstall-'));
+  const prevHome = process.env.HOME;
+  const prevCodexHome = process.env.CODEX_HOME;
+  const prevToken = process.env.VIBESCORE_DEVICE_TOKEN;
+  const prevOpencodeConfigDir = process.env.OPENCODE_CONFIG_DIR;
+  const prevGeminiHome = process.env.GEMINI_HOME;
+  const prevWrite = process.stdout.write;
+
+  try {
+    process.env.HOME = tmp;
+    process.env.CODEX_HOME = path.join(tmp, '.codex');
+    process.env.GEMINI_HOME = path.join(tmp, '.gemini');
+    delete process.env.VIBESCORE_DEVICE_TOKEN;
+    process.env.OPENCODE_CONFIG_DIR = path.join(tmp, '.config', 'opencode');
+    await fs.mkdir(process.env.CODEX_HOME, { recursive: true });
+    await fs.mkdir(process.env.GEMINI_HOME, { recursive: true });
+
+    const codexConfigPath = path.join(process.env.CODEX_HOME, 'config.toml');
+    await fs.writeFile(codexConfigPath, '# empty\n', 'utf8');
+
+    const settingsPath = path.join(process.env.GEMINI_HOME, 'settings.json');
+
+    process.stdout.write = () => true;
+    await cmdInit(['--no-auth', '--no-open', '--base-url', 'https://example.invalid']);
+
+    const createdRaw = await fs.readFile(settingsPath, 'utf8');
+    const created = JSON.parse(createdRaw);
+    assert.equal(created?.tools?.enableHooks, true);
+    const sessionEnd = created?.hooks?.SessionEnd || [];
+    const hooks = flattenHookEntries(sessionEnd);
+    const hookCommand = buildGeminiHookCommand(path.join(tmp, '.vibescore', 'bin', 'notify.cjs'));
+    const hasTracker = hooks.some((hook) => hook?.command === hookCommand);
+    assert.ok(hasTracker, 'expected tracker Gemini hook to be created in settings.json');
+  } finally {
+    process.stdout.write = prevWrite;
+    if (prevHome === undefined) delete process.env.HOME;
+    else process.env.HOME = prevHome;
+    if (prevCodexHome === undefined) delete process.env.CODEX_HOME;
+    else process.env.CODEX_HOME = prevCodexHome;
+    if (prevToken === undefined) delete process.env.VIBESCORE_DEVICE_TOKEN;
+    else process.env.VIBESCORE_DEVICE_TOKEN = prevToken;
+    if (prevOpencodeConfigDir === undefined) delete process.env.OPENCODE_CONFIG_DIR;
+    else process.env.OPENCODE_CONFIG_DIR = prevOpencodeConfigDir;
+    if (prevGeminiHome === undefined) delete process.env.GEMINI_HOME;
+    else process.env.GEMINI_HOME = prevGeminiHome;
     await fs.rm(tmp, { recursive: true, force: true });
   }
 });

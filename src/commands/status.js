@@ -5,6 +5,12 @@ const fs = require('node:fs/promises');
 const { readJson } = require('../lib/fs');
 const { readCodexNotify, readEveryCodeNotify } = require('../lib/codex-config');
 const { isClaudeHookConfigured, buildClaudeHookCommand } = require('../lib/claude-config');
+const {
+  resolveGeminiConfigDir,
+  resolveGeminiSettingsPath,
+  isGeminiHookConfigured,
+  buildGeminiHookCommand
+} = require('../lib/gemini-config');
 const { resolveOpencodeConfigDir, isOpencodePluginInstalled } = require('../lib/opencode-config');
 const { normalizeState: normalizeUploadState } = require('../lib/upload-throttle');
 const { collectTrackerDiagnostics } = require('../lib/diagnostics');
@@ -32,8 +38,11 @@ async function cmdStatus(argv = []) {
   const codeHome = process.env.CODE_HOME || path.join(home, '.code');
   const codeConfigPath = path.join(codeHome, 'config.toml');
   const claudeSettingsPath = path.join(home, '.claude', 'settings.json');
+  const geminiConfigDir = resolveGeminiConfigDir({ home, env: process.env });
+  const geminiSettingsPath = resolveGeminiSettingsPath({ configDir: geminiConfigDir });
   const opencodeConfigDir = resolveOpencodeConfigDir({ home, env: process.env });
   const claudeHookCommand = buildClaudeHookCommand(path.join(home, '.vibescore', 'bin', 'notify.cjs'));
+  const geminiHookCommand = buildGeminiHookCommand(path.join(home, '.vibescore', 'bin', 'notify.cjs'));
 
   const config = await readJson(configPath);
   const cursors = await readJson(cursorsPath);
@@ -54,6 +63,10 @@ async function cmdStatus(argv = []) {
   const claudeHookConfigured = await isClaudeHookConfigured({
     settingsPath: claudeSettingsPath,
     hookCommand: claudeHookCommand
+  });
+  const geminiHookConfigured = await isGeminiHookConfigured({
+    settingsPath: geminiSettingsPath,
+    hookCommand: geminiHookCommand
   });
   const opencodePluginConfigured = await isOpencodePluginInstalled({ configDir: opencodeConfigDir });
 
@@ -91,6 +104,7 @@ async function cmdStatus(argv = []) {
       `- Codex notify: ${notifyConfigured ? JSON.stringify(codexNotify) : 'unset'}`,
       `- Every Code notify: ${everyCodeConfigured ? JSON.stringify(everyCodeNotify) : 'unset'}`,
       `- Claude hooks: ${claudeHookConfigured ? 'set' : 'unset'}`,
+      `- Gemini hooks: ${geminiHookConfigured ? 'set' : 'unset'}`,
       `- Opencode plugin: ${opencodePluginConfigured ? 'set' : 'unset'}`,
       ''
     ]
