@@ -634,26 +634,25 @@ export function DashboardPage({
   const installCopiedLabel = copy("dashboard.install.copied");
   const sessionExpiredCopyLabel = copy("dashboard.session_expired.copy_label");
   const sessionExpiredCopiedLabel = copy("dashboard.session_expired.copied");
-  const installSeenKey = "vibescore.dashboard.install.seen.v1";
-  const [installSeen] = useState(() => {
-    if (typeof window === "undefined") return true;
+  const installEntryKey = "vibescore.dashboard.from_landing.v1";
+  const [installFromLanding] = useState(() => {
+    if (typeof window === "undefined") return false;
     try {
-      return window.localStorage.getItem(installSeenKey) === "1";
+      return window.sessionStorage.getItem(installEntryKey) === "1";
     } catch (_e) {
       return false;
     }
   });
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (installSeen) return;
+    if (!installFromLanding) return;
     try {
-      window.localStorage.setItem(installSeenKey, "1");
+      window.sessionStorage.removeItem(installEntryKey);
     } catch (_e) {
       // ignore write errors (quota/private mode)
     }
-  }, [installSeen, installSeenKey]);
-  const installIsEmpty = visibleDaily.length === 0;
-  const shouldAnimateInstall = installIsEmpty || !installSeen;
+  }, [installEntryKey, installFromLanding]);
+  const shouldAnimateInstall = installFromLanding;
   const installHeadline = copy("dashboard.install.headline");
   const installHeadlineDelayMs = 240;
   const installHeadlineSpeedMs = 45;

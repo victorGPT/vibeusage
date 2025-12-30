@@ -45,6 +45,16 @@ export function LandingPage({ signInUrl }) {
   const defaultHandle = copy("landing.handle.default");
   const [handle, setHandle] = useState(defaultHandle);
   const effectsReady = useDeferredMount(250);
+  const installEntryKey = "vibescore.dashboard.from_landing.v1";
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      window.sessionStorage.setItem(installEntryKey, "1");
+    } catch (_e) {
+      // ignore write errors (private mode/quota)
+    }
+  }, [installEntryKey]);
 
   const handlePlaceholder = useMemo(
     () => copy("landing.handle.placeholder", { handle: specialHandle }),
