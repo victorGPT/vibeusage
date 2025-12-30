@@ -41,3 +41,9 @@
 - Change ID: `2025-12-29-add-opencode-usage`
 - Freeze artifact: CLI package `@vibescore/tracker` (publish from this commit)
 - Cold regression step: `node scripts/acceptance/opencode-plugin-install.cjs`
+
+## 2025-12-30-add-gemini-cli-hooks
+- Scope: Gemini CLI SessionEnd hook + auto hook enablement + status/diagnostics
+- Change ID: `2025-12-30-add-gemini-cli-hooks`
+- Freeze artifact: CLI package `@vibescore/tracker` (publish from this commit)
+- Cold regression step: `node scripts/acceptance/gemini-hook-install.cjs`
