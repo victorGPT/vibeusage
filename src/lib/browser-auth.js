@@ -7,10 +7,13 @@ const DEFAULT_BASE_URL = 'https://5tmappuk.us-east.insforge.app';
 async function beginBrowserAuth({ baseUrl, dashboardUrl, timeoutMs, open }) {
   const nonce = crypto.randomBytes(16).toString('hex');
   const callbackPath = `/vibescore/callback/${nonce}`;
-
-  const { callbackUrl, waitForCallback } = await startLocalCallbackServer({ callbackPath, timeoutMs });
-
   const authUrl = dashboardUrl ? new URL('/', dashboardUrl) : new URL('/auth/sign-up', baseUrl);
+  const postAuthRedirect = resolvePostAuthRedirect({ dashboardUrl, authUrl });
+  const { callbackUrl, waitForCallback } = await startLocalCallbackServer({
+    callbackPath,
+    timeoutMs,
+    redirectUrl: postAuthRedirect
+  });
   authUrl.searchParams.set('redirect', callbackUrl);
   if (dashboardUrl && baseUrl && baseUrl !== DEFAULT_BASE_URL) authUrl.searchParams.set('base_url', baseUrl);
 
@@ -19,7 +22,7 @@ async function beginBrowserAuth({ baseUrl, dashboardUrl, timeoutMs, open }) {
   return { authUrl: authUrl.toString(), waitForCallback };
 }
 
-async function startLocalCallbackServer({ callbackPath, timeoutMs }) {
+async function startLocalCallbackServer({ callbackPath, timeoutMs, redirectUrl }) {
   let resolved = false;
   let resolveResult;
   let rejectResult;
@@ -58,17 +61,34 @@ async function startLocalCallbackServer({ callbackPath, timeoutMs }) {
     }
 
     resolved = true;
-    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-    res.end(
-      [
-        '<!doctype html>',
-        '<html><head><meta charset="utf-8"><title>VibeScore</title></head>',
-        '<body>',
-        '<h2>Login succeeded</h2>',
-        '<p>You can close this tab and return to the CLI.</p>',
-        '</body></html>'
-      ].join('')
-    );
+    if (redirectUrl) {
+      res.writeHead(302, {
+        Location: redirectUrl,
+        'Content-Type': 'text/html; charset=utf-8'
+      });
+      res.end(
+        [
+          '<!doctype html>',
+          '<html><head><meta charset="utf-8"><title>VibeScore</title></head>',
+          '<body>',
+          '<h2>Login succeeded</h2>',
+          `<p>Redirecting to <a href="${redirectUrl}">dashboard</a>...</p>`,
+          '</body></html>'
+        ].join('')
+      );
+    } else {
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+      res.end(
+        [
+          '<!doctype html>',
+          '<html><head><meta charset="utf-8"><title>VibeScore</title></head>',
+          '<body>',
+          '<h2>Login succeeded</h2>',
+          '<p>You can close this tab and return to the CLI.</p>',
+          '</body></html>'
+        ].join('')
+      );
+    }
 
     resolveResult({
       accessToken,
@@ -132,6 +152,27 @@ function openInBrowser(url) {
     const child = cp.spawn(cmd, args, { stdio: 'ignore', detached: true });
     child.unref();
   } catch (_e) {}
+}
+
+function resolvePostAuthRedirect({ dashboardUrl, authUrl }) {
+  try {
+    if (dashboardUrl) {
+      const target = new URL('/', dashboardUrl);
+      if (target.protocol === 'http:' || target.protocol === 'https:') {
+        return target.toString();
+      }
+      return null;
+    }
+    if (authUrl) {
+      const target = new URL('/', authUrl);
+      if (target.protocol === 'http:' || target.protocol === 'https:') {
+        return target.toString();
+      }
+    }
+  } catch (_e) {
+    return null;
+  }
+  return null;
 }
 
 module.exports = {
