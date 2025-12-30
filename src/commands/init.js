@@ -21,7 +21,7 @@ const {
   upsertGeminiHook
 } = require('../lib/gemini-config');
 const { resolveOpencodeConfigDir, upsertOpencodePlugin } = require('../lib/opencode-config');
-const { beginBrowserAuth } = require('../lib/browser-auth');
+const { beginBrowserAuth, openInBrowser } = require('../lib/browser-auth');
 const {
   issueDeviceTokenWithPassword,
   issueDeviceTokenWithAccessToken,
@@ -49,11 +49,23 @@ async function cmdInit(argv) {
   const appDir = path.join(trackerDir, 'app');
   const trackerBinPath = path.join(appDir, 'bin', 'tracker.js');
 
+  process.stdout.write(
+    [
+      'Starting VibeScore setup:',
+      'Open-source. No conversation uploads. GitHub: https://github.com/victorGPT/vibescore',
+      '- Install local runtime + hooks.',
+      '- Browser sign-in runs last if needed.',
+      ''
+    ].join('\n')
+  );
+
   const existingConfig = await readJson(configPath);
   const deviceTokenFromEnv = process.env.VIBESCORE_DEVICE_TOKEN || null;
 
   let deviceToken = deviceTokenFromEnv || existingConfig?.deviceToken || null;
   let deviceId = existingConfig?.deviceId || null;
+  const installedAt = existingConfig?.installedAt || new Date().toISOString();
+  let pendingBrowserAuth = false;
 
   await installLocalTrackerApp({ appDir });
 
@@ -96,21 +108,7 @@ async function cmdInit(argv) {
       deviceToken = issued.token;
       deviceId = issued.deviceId;
     } else {
-      if (!dashboardUrl) dashboardUrl = await detectLocalDashboardUrl();
-      const flow = await beginBrowserAuth({ baseUrl, dashboardUrl, timeoutMs: 10 * 60_000, open: !opts.noOpen });
-      process.stdout.write(
-        [
-          '',
-          'Connect your account:',
-          `- Open: ${flow.authUrl}`,
-          '- Finish sign in/up in your browser, then come back here.',
-          ''
-        ].join('\n')
-      );
-      const callback = await flow.waitForCallback();
-      const issued = await issueDeviceTokenWithAccessToken({ baseUrl, accessToken: callback.accessToken, deviceName });
-      deviceToken = issued.token;
-      deviceId = issued.deviceId;
+      pendingBrowserAuth = true;
     }
   }
 
@@ -118,7 +116,7 @@ async function cmdInit(argv) {
     baseUrl,
     deviceToken,
     deviceId,
-    installedAt: existingConfig?.installedAt || new Date().toISOString()
+    installedAt
   };
 
   await writeJson(configPath, config);
@@ -196,8 +194,8 @@ async function cmdInit(argv) {
 
   process.stdout.write(
     [
-      'Installed:',
-      `- Tracker config: ${configPath}`,
+      'Local setup done:',
+      `- Config: ${configPath}`,
       `- Notify handler: ${notifyPath}`,
       codexConfigExists
         ? `- Codex config: ${codexConfigPath}`
@@ -205,41 +203,75 @@ async function cmdInit(argv) {
       codexConfigExists
         ? result?.changed
           ? '- Codex notify: updated'
-          : '- Codex notify: already set'
+          : '- Codex notify: set'
         : null,
-      codexConfigExists ? (chained ? '- Codex notify: chained (original preserved)' : '- Codex notify: no original') : null,
+      codexConfigExists ? (chained ? '- Codex notify: chained (kept original)' : '- Codex notify: no original') : null,
       codeConfigExists
         ? `- Every Code config: ${codeConfigPath}`
         : `- Every Code notify: skipped (${renderProbeSkip(codeConfigPath, codeProbe)})`,
       codeConfigExists && codeResult
         ? codeResult.changed
           ? '- Every Code notify: updated'
-          : '- Every Code notify: already set'
+          : '- Every Code notify: set'
         : null,
       codeConfigExists
         ? codeChained
-          ? '- Every Code notify: chained (original preserved)'
+          ? '- Every Code notify: chained (kept original)'
           : '- Every Code notify: no original'
         : null,
       claudeDirExists
         ? claudeResult?.changed
           ? `- Claude hooks: updated (${claudeSettingsPath})`
-          : `- Claude hooks: already set (${claudeSettingsPath})`
+          : `- Claude hooks: set (${claudeSettingsPath})`
         : '- Claude hooks: skipped (~/.claude not found)',
       geminiConfigExists
         ? geminiResult?.changed
           ? `- Gemini hooks: updated (${geminiSettingsPath})`
-          : `- Gemini hooks: already set (${geminiSettingsPath})`
+          : `- Gemini hooks: set (${geminiSettingsPath})`
         : `- Gemini hooks: skipped (${geminiConfigDir} not found)`,
       opencodeResult?.skippedReason === 'config-missing'
         ? '- Opencode plugin: skipped (config dir missing)'
         : opencodeResult?.changed
           ? `- Opencode plugin: updated (${opencodeConfigDir})`
-          : `- Opencode plugin: already set (${opencodeConfigDir})`,
-      deviceToken ? `- Device token: stored (${maskSecret(deviceToken)})` : '- Device token: not configured (set VIBESCORE_DEVICE_TOKEN and re-run init)',
+          : `- Opencode plugin: set (${opencodeConfigDir})`,
+      pendingBrowserAuth
+        ? '- Account: pending (browser sign-in last)'
+        : deviceToken
+          ? `- Account: linked (token saved: ${maskSecret(deviceToken)})`
+          : '- Account: not set (set VIBESCORE_DEVICE_TOKEN then re-run init)',
       ''
     ].join('\n')
   );
+
+  if (pendingBrowserAuth) {
+    const deviceName = opts.deviceName || os.hostname();
+    if (!dashboardUrl) dashboardUrl = await detectLocalDashboardUrl();
+    const flow = await beginBrowserAuth({ baseUrl, dashboardUrl, timeoutMs: 10 * 60_000, open: false });
+    process.stdout.write(
+      [
+        '',
+        'Next: link your account (last step).',
+        `- Open: ${flow.authUrl}`,
+        '- Sign in/up, then return.',
+        "- If it doesn't open, copy the link.",
+        '- After linking, wait ~2 minutes for first sync.',
+        ''
+      ].join('\n')
+    );
+    if (!opts.noOpen) {
+      await sleep(5000);
+      openInBrowser(flow.authUrl);
+    }
+    const callback = await flow.waitForCallback();
+    const issued = await issueDeviceTokenWithAccessToken({ baseUrl, accessToken: callback.accessToken, deviceName });
+    deviceToken = issued.token;
+    deviceId = issued.deviceId;
+    await writeJson(configPath, { baseUrl, deviceToken, deviceId, installedAt });
+    await chmod600IfPossible(configPath);
+    process.stdout.write(
+      ['', 'Account linked.', `- Token saved: ${maskSecret(deviceToken)}`, '- Initial sync runs in background.', ''].join('\n')
+    );
+  }
 
   try {
     spawnInitSync({ trackerBinPath, packageName: '@vibescore/tracker' });
@@ -279,6 +311,11 @@ function parseArgs(argv) {
 function maskSecret(s) {
   if (typeof s !== 'string' || s.length < 8) return '***';
   return `${s.slice(0, 4)}…${s.slice(-4)}`;
+}
+
+function sleep(ms) {
+  if (!ms || ms <= 0) return Promise.resolve();
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function normalizePlatform(value) {
@@ -326,7 +363,8 @@ const signalPath = ${JSON.stringify(queueSignalPath)};
 const codexOriginalPath = ${JSON.stringify(originalPath)};
 const codeOriginalPath = ${JSON.stringify(path.join(trackerDir, 'code_notify_original.json'))};
 const trackerBinPath = ${JSON.stringify(trackerBinPath)};
-const depsMarkerPath = path.join(trackerDir, 'app', 'node_modules', '@insforge', 'sdk', 'package.json');
+  const depsMarkerPath = path.join(trackerDir, 'app', 'node_modules', '@insforge', 'sdk', 'package.json');
+  const configPath = path.join(trackerDir, 'config.json');
 const fallbackPkg = ${JSON.stringify(fallbackPkg)};
 const selfPath = path.resolve(__filename);
 const home = os.homedir();
@@ -338,11 +376,19 @@ try {
 
 // Throttle spawn: at most once per 20 seconds.
 try {
-  const throttlePath = path.join(trackerDir, 'sync.throttle');
-  const now = Date.now();
-  let last = 0;
-  try { last = Number(fs.readFileSync(throttlePath, 'utf8')) || 0; } catch (_) {}
-  if (now - last > 20_000) {
+    const throttlePath = path.join(trackerDir, 'sync.throttle');
+    let deviceToken = process.env.VIBESCORE_DEVICE_TOKEN || null;
+    if (!deviceToken) {
+      try {
+        const cfg = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+        if (cfg && typeof cfg.deviceToken === 'string') deviceToken = cfg.deviceToken;
+      } catch (_) {}
+    }
+    const canSync = Boolean(deviceToken && deviceToken.length > 0);
+    const now = Date.now();
+    let last = 0;
+    try { last = Number(fs.readFileSync(throttlePath, 'utf8')) || 0; } catch (_) {}
+    if (canSync && now - last > 20_000) {
     try { fs.writeFileSync(throttlePath, String(now), 'utf8'); } catch (_) {}
     const hasLocalRuntime = fs.existsSync(trackerBinPath);
     const hasLocalDeps = fs.existsSync(depsMarkerPath);

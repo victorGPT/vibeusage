@@ -170,5 +170,6 @@ function resolvePostAuthRedirect({ dashboardUrl, authUrl }) {
 }
 
 module.exports = {
-  beginBrowserAuth
+  beginBrowserAuth,
+  openInBrowser
 };
