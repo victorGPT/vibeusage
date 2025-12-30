@@ -21,7 +21,7 @@ Add a static 2025 annual summary poster view and export a shareable image.
 - Dev server: `npm --prefix dashboard run dev -- --host 127.0.0.1 --port 4173`
 - Capture URL: `http://127.0.0.1:4173/?screenshot=1&mock=1`
 - Export path: `docs/screenshots/wrapped-2025.png`
-- Capture command: `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome --headless --disable-gpu --window-size=1200,6000 --hide-scrollbars --screenshot=docs/screenshots/wrapped-2025.png "http://127.0.0.1:4173/?screenshot=1&mock=1"`
+- Capture command: `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome --headless --disable-gpu --window-size=1200,6000 --hide-scrollbars --virtual-time-budget=8000 --run-all-compositor-stages-before-draw --screenshot=docs/screenshots/wrapped-2025.png "http://127.0.0.1:4173/?screenshot=1&mock=1"`
 
 ## Wrapped Static Page
 - Entry URL: `/wrapped-2025.html` (non-production only)
