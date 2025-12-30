@@ -124,6 +124,7 @@ dashboard.model_breakdown.footer,ui,NeuralDivergenceMap,NeuralDivergenceMap,foot
 dashboard.model_breakdown.usage_label,ui,NeuralAdaptiveFleet,NeuralAdaptiveFleet,usage_label,"USAGE: {{value}}",,active
 dashboard.upgrade_alert.title,ui,UpgradeAlertModal,UpgradeAlertModal,title,"Update available",,active
 dashboard.upgrade_alert.subtitle,ui,UpgradeAlertModal,UpgradeAlertModal,subtitle,"VibeScore Tracker v{{required}} is now available.",,active
+dashboard.upgrade_alert.subtitle_generic,ui,UpgradeAlertModal,UpgradeAlertModal,subtitle_generic,"A new version of VibeScore Tracker is available.",,active
 dashboard.upgrade_alert.prompt,ui,UpgradeAlertModal,UpgradeAlertModal,prompt,"$",,active
 dashboard.upgrade_alert.sparkle,ui,UpgradeAlertModal,UpgradeAlertModal,sparkle,"✨",,active
 dashboard.upgrade_alert.install_command,ui,UpgradeAlertModal,UpgradeAlertModal,install_command,"npx --yes @vibescore/tracker init",,active

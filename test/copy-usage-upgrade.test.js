@@ -38,6 +38,7 @@ test("dashboard copy registry covers fleet usage and upgrade alert text", () => 
     "dashboard.model_breakdown.usage_label",
     "dashboard.upgrade_alert.title",
     "dashboard.upgrade_alert.subtitle",
+    "dashboard.upgrade_alert.subtitle_generic",
     "dashboard.upgrade_alert.copy",
     "dashboard.upgrade_alert.copied",
     "dashboard.upgrade_alert.ignore",
@@ -69,6 +70,7 @@ test("fleet usage and upgrade alert components use copy keys", () => {
   const requiredUpgradeKeys = [
     "dashboard.upgrade_alert.title",
     "dashboard.upgrade_alert.subtitle",
+    "dashboard.upgrade_alert.subtitle_generic",
     "dashboard.upgrade_alert.copy",
     "dashboard.upgrade_alert.copied",
     "dashboard.upgrade_alert.ignore",
