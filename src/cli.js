@@ -47,12 +47,13 @@ function printHelp() {
       '  npx @vibescore/tracker [--debug] uninstall [--purge]',
       '',
       'Notes:',
-      '  - init installs a Codex notify hook and issues a device token (default: browser sign in/up).',
-      '  - optional: pass --link-code <code> to skip browser login when provided by Dashboard.',
-      '  - when ~/.code/config.toml exists, init also installs an Every Code notify hook.',
-      '  - optional: set VIBESCORE_DASHBOARD_URL (or --dashboard-url) to use a hosted landing page.',
-      '  - sync parses ~/.codex/sessions/**/rollout-*.jsonl and ~/.code/sessions/**/rollout-*.jsonl (Every Code), then uploads token_count deltas.',
-      '  - --debug prints original backend errors when they are normalized.',
+      '  - init: local setup first, browser sign-in last.',
+      '  - optional: --link-code <code> skips browser login when provided by Dashboard.',
+      '  - Every Code notify installs when ~/.code/config.toml exists.',
+      '  - auto sync waits for a device token.',
+      '  - optional: VIBESCORE_DASHBOARD_URL or --dashboard-url for hosted landing.',
+      '  - sync parses ~/.codex/sessions/**/rollout-*.jsonl and ~/.code/sessions/**/rollout-*.jsonl, then uploads token deltas.',
+      '  - --debug shows original backend errors.',
       ''
     ].join('\n')
   );

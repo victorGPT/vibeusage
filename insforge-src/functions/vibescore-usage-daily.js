@@ -11,6 +11,7 @@ const { getModelParam } = require('../shared/model');
 const {
   addDatePartsDays,
   formatLocalDateKey,
+  getUsageMaxDays,
   getUsageTimeZoneContext,
   listDateStrings,
   localDatePartsToUtc,
@@ -19,8 +20,9 @@ const {
 } = require('../shared/date');
 const { toBigInt } = require('../shared/numbers');
 const { forEachPage } = require('../shared/pagination');
+const { logSlowQuery, withRequestLogging } = require('../shared/logging');
 
-module.exports = async function(request) {
+module.exports = withRequestLogging('vibescore-usage-daily', async function(request, logger) {
   const opt = handleOptions(request);
   if (opt) return opt;
 
@@ -49,6 +51,10 @@ module.exports = async function(request) {
   );
 
   const dayKeys = listDateStrings(from, to);
+  const maxDays = getUsageMaxDays();
+  if (dayKeys.length > maxDays) {
+    return json({ error: `Date range too large (max ${maxDays} days)` }, 400);
+  }
 
   const startParts = parseDateParts(from);
   const endParts = parseDateParts(to);
@@ -72,6 +78,8 @@ module.exports = async function(request) {
     ])
   );
 
+  const queryStartMs = Date.now();
+  let rowCount = 0;
   const { error } = await forEachPage({
     createQuery: () => {
       let query = auth.edgeClient.database
@@ -83,7 +91,9 @@ module.exports = async function(request) {
       return query.gte('hour_start', startIso).lt('hour_start', endIso).order('hour_start', { ascending: true });
     },
     onPage: (rows) => {
-      for (const row of rows) {
+      const pageRows = Array.isArray(rows) ? rows : [];
+      rowCount += pageRows.length;
+      for (const row of pageRows) {
         const ts = row?.hour_start;
         if (!ts) continue;
         const dt = new Date(ts);
@@ -98,6 +108,17 @@ module.exports = async function(request) {
         bucket.reasoning += toBigInt(row?.reasoning_output_tokens);
       }
     }
+  });
+  const queryDurationMs = Date.now() - queryStartMs;
+  logSlowQuery(logger, {
+    query_label: 'usage_daily',
+    duration_ms: queryDurationMs,
+    row_count: rowCount,
+    range_days: dayKeys.length,
+    source: source || null,
+    model: model || null,
+    tz: tzContext?.timeZone || null,
+    tz_offset_minutes: Number.isFinite(tzContext?.offsetMinutes) ? tzContext.offsetMinutes : null
   });
 
   if (error) return json({ error: error.message }, 500);
@@ -115,4 +136,4 @@ module.exports = async function(request) {
   });
 
   return json({ from, to, data: rows }, 200);
-};
+});

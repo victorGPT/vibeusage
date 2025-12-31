@@ -1,0 +1,47 @@
+direction: down
+
+Start: "Start"
+InitCmd: "Run: npx --yes @vibescore/tracker init"
+PrepareDirs: "Prepare dirs (~/.vibescore/...)"
+InstallRuntime: "Install local runtime (~/.vibescore/tracker/app)"
+ReadConfig: "Read config + env (device token?)"
+
+HasToken: "Device token present?"
+HasLinkCode: "Link code provided?"
+HasEmailPw: "Email/password provided?"
+NoAuth: "--no-auth?"
+BrowserAuth: "Browser auth flow"
+DetectDashboard: "Detect local dashboard (5173..5177)"
+StartCallback: "Start local callback server"
+OpenBrowser: "Open browser (unless --no-open)"
+PrintConnect: "Print login instructions"
+WaitCallback: "Wait for callback"
+IssueToken: "Issue device token (access token)"
+ExchangeLink: "Exchange link code -> device token"
+SignInPw: "Sign in with password -> access token -> device token"
+
+WriteConfig: "Write ~/.vibescore/tracker/config.json"
+WriteNotify: "Write ~/.vibescore/bin/notify.cjs"
+UpdateHooks: "Update hooks (Codex/Every Code/Claude/Gemini/Opencode)"
+PrintSummary: "Print Installed summary"
+SpawnSync: "Spawn sync --drain (detached)"
+End: "End"
+
+Start -> InitCmd -> PrepareDirs -> InstallRuntime -> ReadConfig -> HasToken
+HasToken -> WriteConfig: "Yes"
+HasToken -> HasLinkCode: "No"
+
+HasLinkCode -> ExchangeLink: "Yes"
+ExchangeLink -> WriteConfig
+
+HasLinkCode -> HasEmailPw: "No"
+HasEmailPw -> SignInPw: "Yes"
+SignInPw -> WriteConfig
+
+HasEmailPw -> NoAuth: "No"
+NoAuth -> WriteConfig: "Yes (no token)"
+NoAuth -> BrowserAuth: "No"
+
+BrowserAuth -> DetectDashboard -> StartCallback -> OpenBrowser -> PrintConnect -> WaitCallback -> IssueToken -> WriteConfig
+
+WriteConfig -> WriteNotify -> UpdateHooks -> PrintSummary -> SpawnSync -> End

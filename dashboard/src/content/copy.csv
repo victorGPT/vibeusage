@@ -23,20 +23,6 @@ landing.hero.title_primary,landing,LandingPage,LandingPage,hero_title_primary,"M
 landing.hero.title_secondary,landing,LandingPage,LandingPage,hero_title_secondary,"MORE_VIBE.",,active
 landing.hero.tagline,landing,LandingPage,LandingPage,hero_tagline,"CODEX / CLAUDE CODE / GEMINI CLI TRACKER",,active
 landing.hero.subtagline,landing,LandingPage,LandingPage,hero_subtagline,"Track Codex, Claude Code & Gemini CLI usage in real time.",,active
-landing.meta.title,landing,LandingPage,Meta,title,"VibeScore | Codex, Claude Code & Gemini CLI Token Tracker",,active
-landing.meta.description,landing,LandingPage,Meta,description,"VibeScore is a token tracker for Codex, Claude Code & Gemini CLI. Auto-track usage, visualize in a Matrix-style UI, and compare rankings.",,active
-landing.meta.og_site_name,landing,LandingPage,Meta,og_site_name,"VibeScore",,active
-landing.meta.og_type,landing,LandingPage,Meta,og_type,"website",,active
-landing.meta.og_url,landing,LandingPage,Meta,og_url,"https://www.vibescore.space",,active
-landing.meta.og_image,landing,LandingPage,Meta,og_image,"https://www.vibescore.space/og-image.png",,active
-landing.meta.twitter_card,landing,LandingPage,Meta,twitter_card,"summary_large_image",,active
-share.meta.title,share,SharePage,Meta,title,"Coding Agent Wrapped 2025",,active
-share.meta.description,share,SharePage,Meta,description,"Your Coding Agent Wrapped 2025 dashboard snapshot.",,active
-share.meta.og_site_name,share,SharePage,Meta,og_site_name,"VibeScore",,active
-share.meta.og_type,share,SharePage,Meta,og_type,"website",,active
-share.meta.og_url,share,SharePage,Meta,og_url,"/share.html",,active
-share.meta.og_image,share,SharePage,Meta,og_image,"/share-dashboard.png",,active
-share.meta.twitter_card,share,SharePage,Meta,twitter_card,"summary_large_image",,active
 landing.seo.title,landing,LandingPage,LandingPage,seo_title,"Quantify Codex, Claude Code & Gemini CLI Usage",,active
 landing.seo.summary,landing,LandingPage,LandingPage,seo_summary,"VibeScore is a token usage tracker built for AI CLI users (Codex, Claude, Gemini) who want a fast, reliable view of token spend.",,active
 landing.seo.point1,landing,LandingPage,LandingPage,seo_point_1,"Auto-track AI CLI token usage with zero manual steps.",,active
@@ -89,7 +75,6 @@ sparkline.aria_label,components,Sparkline,Sparkline,aria_label,"Daily token usag
 identity_card.title_default,ui,IdentityCard,IdentityCard,title_default,"Identity_Core",,active
 identity_card.name_default,ui,IdentityCard,IdentityCard,name_default,"VOLT.SYS_3M",,active
 identity_card.unknown,ui,IdentityCard,IdentityCard,unknown_label,"UNKNOWN_GHOST",,active
-identity_card.operator_label,ui,IdentityCard,IdentityCard,operator_label,"Handle",,active
 identity_card.decrypt,ui,IdentityCard,IdentityCard,decrypt_label,"[ ! ] DECRYPT_IDENTITY",,active
 identity_card.rank_label,ui,IdentityCard,IdentityCard,rank_label,"START",,active
 identity_card.streak_label,ui,IdentityCard,IdentityCard,streak_label,"ACTIVE",,active
@@ -98,7 +83,6 @@ identity_card.streak_value,ui,IdentityCard,IdentityCard,streak_value,"{{days}} D
 
 identity_panel.badge,ui,IdentityPanel,IdentityPanel,badge,"VS",,active
 identity_panel.level,ui,IdentityPanel,IdentityPanel,level,"Lvl_05",,active
-identity_panel.access_label,ui,IdentityPanel,IdentityPanel,access_label,"Handle",,active
 identity_panel.rank_label,ui,IdentityPanel,IdentityPanel,rank_label,"START",,active
 identity_panel.streak_label,ui,IdentityPanel,IdentityPanel,streak_label,"ACTIVE",,active
 identity_panel.rank_placeholder,ui,IdentityPanel,IdentityPanel,rank_placeholder,"—",,active
@@ -109,9 +93,8 @@ dashboard.core_index.collapse_label,dashboard,DashboardPage,UsagePanel,toggle,"�
 dashboard.core_index.expand_label,dashboard,DashboardPage,UsagePanel,toggle,"▸",,active
 dashboard.core_index.collapse_aria,dashboard,DashboardPage,UsagePanel,toggle_aria,"Collapse CORE_INDEX breakdown",,active
 dashboard.core_index.expand_aria,dashboard,DashboardPage,UsagePanel,toggle_aria,"Expand CORE_INDEX breakdown",,active
-usage.summary.total_system_output,ui,UsagePanel,UsagePanel,summary_label_total_system,"TOTAL_SYSTEM_OUTPUT",,active
+usage.summary.total_system_output,ui,UsagePanel,UsagePanel,summary_label_total_system,"Total Tokens",,active
 usage.summary.total,ui,UsagePanel,UsagePanel,summary_label_total,"TOTAL_TOKENS",,active
-usage.summary.since,ui,UsagePanel,UsagePanel,summary_label_since,"SINCE {{range}} {{tz}}",,active
 usage.metric.total,ui,UsagePanel,UsagePanel,metric_total,"TOTAL",,active
 usage.metric.total_cost,ui,UsagePanel,UsagePanel,metric_total_cost,"TOTAL_COST_USD",,active
 usage.metric.input,ui,UsagePanel,UsagePanel,metric_input,"INPUT",,active
@@ -242,7 +225,6 @@ details.pagination.next,dashboard,DashboardPage,DailyTable,pagination_next,"Next
 details.pagination.page,dashboard,DashboardPage,DailyTable,pagination_label,"Page {{page}}/{{total}}",,active
 
 
-dashboard.session.label,dashboard,DashboardPage,Header,session_label,"Session_Time:",,active
 dashboard.sign_out,dashboard,DashboardPage,Header,sign_out,"Sign out",,active
 dashboard.not_signed_in,dashboard,DashboardPage,Header,not_signed_in,"Not signed in",,active
 
@@ -291,14 +273,9 @@ dashboard.daily.empty,dashboard,DashboardPage,AsciiBox,empty_state,"No data yet.
 dashboard.identity.title,dashboard,DashboardPage,IdentityCard,title,"Identity_Core",,active
 dashboard.identity.subtitle,dashboard,DashboardPage,IdentityCard,subtitle,"Authorized",,active
 dashboard.identity.fallback,dashboard,DashboardPage,IdentityCard,handle_fallback,"ANONYMOUS",,active
-dashboard.screenshot.title,dashboard,DashboardPage,ScreenshotTitle,title,"Coding Agent Wrapped 2025",,active
-dashboard.screenshot.share_button,dashboard,DashboardPage,ScreenshotShare,button_label,"X",,active
-dashboard.screenshot.share_label,dashboard,DashboardPage,ScreenshotShare,aria_label,"Share on X",,active
-dashboard.screenshot.share_text,dashboard,DashboardPage,ScreenshotShare,share_text,"Coding Agent Wrapped 2025",,active
+
 dashboard.screenshot.title_line1,dashboard,DashboardPage,ScreenshotTitle,title_line,"Coding Agent",,active
 dashboard.screenshot.title_line2,dashboard,DashboardPage,ScreenshotTitle,title_line,"2025 Wrapped",,active
-dashboard.screenshot.download_button,dashboard,DashboardPage,ScreenshotShare,button_label,"Download",,active
-dashboard.screenshot.download_label,dashboard,DashboardPage,ScreenshotShare,aria_label,"Download image",,active
 dashboard.screenshot.twitter_button,dashboard,DashboardPage,ScreenshotShare,button_label,"Share on X",,active
 dashboard.screenshot.twitter_label,dashboard,DashboardPage,ScreenshotShare,aria_label,"Share on X",,active
 dashboard.screenshot.twitter_hint,dashboard,DashboardPage,ScreenshotShare,helper_text,"Auto-copies image to clipboard",,active

@@ -39,7 +39,7 @@ test('DashboardPage uses active days for identity stats', () => {
   assert.ok(src.includes('active_days'), 'expected active days usage');
 });
 
-test('IdentityCard renders rank value in yellow', () => {
+test('IdentityCard renders rank value in gold', () => {
   const componentPath = path.join(
     __dirname,
     '..',
@@ -56,8 +56,8 @@ test('IdentityCard renders rank value in yellow', () => {
   );
   assert.ok(match, 'expected rank value class');
   assert.ok(
-    match[1].includes('text-yellow-400'),
-    'expected rank value to use yellow color'
+    match[1].includes('text-gold'),
+    'expected rank value to use gold color'
   );
 });
 

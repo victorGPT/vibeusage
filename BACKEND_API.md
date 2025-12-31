@@ -77,6 +77,13 @@ Alias mapping:
 - `vibescore_pricing_model_aliases` maps `usage_model` -> `pricing_model` with `effective_from`.
 - Resolver checks alias mapping before suffix matching.
 
+## Usage guardrails & observability
+
+To reduce runaway scans and runtime resets, usage read endpoints enforce bounded ranges and emit slow-query logs.
+
+- `VIBESCORE_USAGE_MAX_DAYS`: max day span for `GET /functions/vibescore-usage-summary`, `.../vibescore-usage-daily`, and `.../vibescore-usage-model-breakdown`. Default `370`. Oversized ranges return `400` with `Date range too large (max N days)`.
+- `VIBESCORE_SLOW_QUERY_MS`: slow-query log threshold in milliseconds. Default `2000`. When exceeded, a `stage: slow_query` log is emitted with `query_label`, `duration_ms`, and `row_count`.
+
 ## Client backpressure defaults
 
 To keep low-tier backends stable, the CLI and dashboard apply conservative defaults:

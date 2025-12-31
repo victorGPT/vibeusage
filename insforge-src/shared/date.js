@@ -266,6 +266,36 @@ function listDateStrings(from, to) {
   return days;
 }
 
+function getUsageMaxDays() {
+  const raw = readEnvValue('VIBESCORE_USAGE_MAX_DAYS');
+  if (raw == null || raw === '') return 370;
+  const n = Number(raw);
+  if (!Number.isFinite(n)) return 370;
+  if (n <= 0) return 370;
+  return clampInt(n, 1, 5000);
+}
+
+function readEnvValue(key) {
+  try {
+    if (typeof Deno !== 'undefined' && Deno?.env?.get) {
+      const value = Deno.env.get(key);
+      if (value !== undefined) return value;
+    }
+  } catch (_e) {}
+  try {
+    if (typeof process !== 'undefined' && process?.env) {
+      return process.env[key];
+    }
+  } catch (_e) {}
+  return null;
+}
+
+function clampInt(value, min, max) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return min;
+  return Math.min(max, Math.max(min, Math.floor(n)));
+}
+
 module.exports = {
   isDate,
   toUtcDay,
@@ -288,5 +318,6 @@ module.exports = {
   formatLocalDateKey,
   localDatePartsToUtc,
   normalizeDateRangeLocal,
-  listDateStrings
+  listDateStrings,
+  getUsageMaxDays
 };

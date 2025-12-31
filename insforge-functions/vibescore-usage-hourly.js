@@ -468,6 +468,35 @@ var require_date = __commonJS({
       }
       return days;
     }
+    function getUsageMaxDays() {
+      const raw = readEnvValue("VIBESCORE_USAGE_MAX_DAYS");
+      if (raw == null || raw === "") return 370;
+      const n = Number(raw);
+      if (!Number.isFinite(n)) return 370;
+      if (n <= 0) return 370;
+      return clampInt(n, 1, 5e3);
+    }
+    function readEnvValue(key) {
+      try {
+        if (typeof Deno !== "undefined" && Deno?.env?.get) {
+          const value = Deno.env.get(key);
+          if (value !== void 0) return value;
+        }
+      } catch (_e) {
+      }
+      try {
+        if (typeof process !== "undefined" && process?.env) {
+          return process.env[key];
+        }
+      } catch (_e) {
+      }
+      return null;
+    }
+    function clampInt(value, min, max) {
+      const n = Number(value);
+      if (!Number.isFinite(n)) return min;
+      return Math.min(max, Math.max(min, Math.floor(n)));
+    }
     module2.exports = {
       isDate,
       toUtcDay,
@@ -490,7 +519,8 @@ var require_date = __commonJS({
       formatLocalDateKey,
       localDatePartsToUtc: localDatePartsToUtc2,
       normalizeDateRangeLocal,
-      listDateStrings
+      listDateStrings,
+      getUsageMaxDays
     };
   }
 });
@@ -584,6 +614,127 @@ var require_pagination = __commonJS({
   }
 });
 
+// insforge-src/shared/logging.js
+var require_logging = __commonJS({
+  "insforge-src/shared/logging.js"(exports2, module2) {
+    "use strict";
+    function createRequestId() {
+      if (globalThis?.crypto?.randomUUID) return globalThis.crypto.randomUUID();
+      return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+    }
+    function errorCodeFromStatus(status) {
+      if (typeof status !== "number") return "UNKNOWN_ERROR";
+      if (status >= 500) return "SERVER_ERROR";
+      if (status >= 400) return "CLIENT_ERROR";
+      return null;
+    }
+    function createLogger({ functionName }) {
+      const requestId = createRequestId();
+      const startMs = Date.now();
+      let upstreamStatus = null;
+      let upstreamLatencyMs = null;
+      function recordUpstream(status, latencyMs) {
+        upstreamStatus = typeof status === "number" ? status : null;
+        upstreamLatencyMs = typeof latencyMs === "number" ? latencyMs : null;
+      }
+      async function fetchWithUpstream(url, init) {
+        const upstreamStart = Date.now();
+        try {
+          const res = await fetch(url, init);
+          recordUpstream(res.status, Date.now() - upstreamStart);
+          return res;
+        } catch (err) {
+          recordUpstream(null, Date.now() - upstreamStart);
+          throw err;
+        }
+      }
+      function log({ stage, status, errorCode, ...extra }) {
+        const payload = {
+          ...extra || {},
+          request_id: requestId,
+          function: functionName,
+          stage: stage || "response",
+          status: typeof status === "number" ? status : null,
+          latency_ms: Date.now() - startMs,
+          error_code: errorCode ?? errorCodeFromStatus(status),
+          upstream_status: upstreamStatus ?? null,
+          upstream_latency_ms: upstreamLatencyMs ?? null
+        };
+        console.log(JSON.stringify(payload));
+      }
+      return {
+        requestId,
+        log,
+        fetch: fetchWithUpstream
+      };
+    }
+    function getResponseStatus(response) {
+      if (response && typeof response.status === "number") return response.status;
+      return null;
+    }
+    function withRequestLogging2(functionName, handler) {
+      return async function(request) {
+        const logger = createLogger({ functionName });
+        try {
+          const response = await handler(request, logger);
+          const status = getResponseStatus(response);
+          logger.log({ stage: "response", status });
+          return response;
+        } catch (err) {
+          logger.log({ stage: "exception", status: 500, errorCode: "UNHANDLED_EXCEPTION" });
+          throw err;
+        }
+      };
+    }
+    module2.exports = {
+      withRequestLogging: withRequestLogging2,
+      logSlowQuery: logSlowQuery2
+    };
+    function logSlowQuery2(logger, fields) {
+      if (!logger || typeof logger.log !== "function") return;
+      const durationMs = Number(fields?.duration_ms ?? fields?.durationMs);
+      if (!Number.isFinite(durationMs)) return;
+      const thresholdMs = getSlowQueryThresholdMs();
+      if (durationMs < thresholdMs) return;
+      logger.log({
+        stage: "slow_query",
+        status: 200,
+        ...fields || {},
+        duration_ms: Math.round(durationMs)
+      });
+    }
+    function getSlowQueryThresholdMs() {
+      const raw = readEnvValue("VIBESCORE_SLOW_QUERY_MS");
+      if (raw == null || raw === "") return 2e3;
+      const n = Number(raw);
+      if (!Number.isFinite(n)) return 2e3;
+      if (n <= 0) return 0;
+      return clampInt(n, 1, 6e4);
+    }
+    function readEnvValue(key) {
+      try {
+        if (typeof Deno !== "undefined" && Deno?.env?.get) {
+          const value = Deno.env.get(key);
+          if (value !== void 0) return value;
+        }
+      } catch (_e) {
+      }
+      try {
+        if (typeof process !== "undefined" && process?.env) {
+          return process.env[key];
+        }
+      } catch (_e) {
+      }
+      return null;
+    }
+    function clampInt(value, min, max) {
+      const n = Number(value);
+      if (!Number.isFinite(n)) return min;
+      return Math.min(max, Math.max(min, Math.floor(n)));
+    }
+  }
+});
+
 // insforge-src/functions/vibescore-usage-hourly.js
 var { handleOptions, json, requireMethod } = require_http();
 var { getBearerToken, getEdgeClientAndUserIdFast } = require_auth();
@@ -604,8 +755,9 @@ var {
 } = require_date();
 var { toBigInt } = require_numbers();
 var { forEachPage } = require_pagination();
+var { logSlowQuery, withRequestLogging } = require_logging();
 var MIN_INTERVAL_MINUTES = 30;
-module.exports = async function(request) {
+module.exports = withRequestLogging("vibescore-usage-hourly", async function(request, logger) {
   const opt = handleOptions(request);
   if (opt) return opt;
   const methodErr = requireMethod(request, "GET");
@@ -646,6 +798,7 @@ module.exports = async function(request) {
       endUtc: endUtc2,
       tzContext
     });
+    const aggregateStartMs = Date.now();
     const aggregateRows = await tryAggregateHourlyTotals({
       edgeClient: auth.edgeClient,
       userId: auth.userId,
@@ -653,6 +806,18 @@ module.exports = async function(request) {
       endIso: endIso2,
       source,
       model
+    });
+    const aggregateDurationMs = Date.now() - aggregateStartMs;
+    logSlowQuery(logger, {
+      query_label: "usage_hourly_aggregate",
+      duration_ms: aggregateDurationMs,
+      row_count: Array.isArray(aggregateRows) ? aggregateRows.length : 0,
+      range_days: 1,
+      source: source || null,
+      model: model || null,
+      tz: tzContext?.timeZone || null,
+      tz_offset_minutes: Number.isFinite(tzContext?.offsetMinutes) ? tzContext.offsetMinutes : null,
+      agg_hit: Boolean(aggregateRows)
     });
     if (aggregateRows) {
       for (const row of aggregateRows) {
@@ -674,6 +839,8 @@ module.exports = async function(request) {
         200
       );
     }
+    const queryStartMs2 = Date.now();
+    let rowCount2 = 0;
     const { error: error2 } = await forEachPage({
       createQuery: () => {
         let query = auth.edgeClient.database.from("vibescore_tracker_hourly").select("hour_start,total_tokens,input_tokens,cached_input_tokens,output_tokens,reasoning_output_tokens").eq("user_id", auth.userId);
@@ -682,7 +849,9 @@ module.exports = async function(request) {
         return query.gte("hour_start", startIso2).lt("hour_start", endIso2).order("hour_start", { ascending: true });
       },
       onPage: (rows) => {
-        for (const row of rows) {
+        const pageRows = Array.isArray(rows) ? rows : [];
+        rowCount2 += pageRows.length;
+        for (const row of pageRows) {
           const ts = row?.hour_start;
           if (!ts) continue;
           const dt = new Date(ts);
@@ -699,6 +868,17 @@ module.exports = async function(request) {
           bucket.reasoning += toBigInt(row?.reasoning_output_tokens);
         }
       }
+    });
+    const queryDurationMs2 = Date.now() - queryStartMs2;
+    logSlowQuery(logger, {
+      query_label: "usage_hourly_raw",
+      duration_ms: queryDurationMs2,
+      row_count: rowCount2,
+      range_days: 1,
+      source: source || null,
+      model: model || null,
+      tz: tzContext?.timeZone || null,
+      tz_offset_minutes: Number.isFinite(tzContext?.offsetMinutes) ? tzContext.offsetMinutes : null
     });
     if (error2) return json({ error: error2.message }, 500);
     return json(
@@ -728,6 +908,8 @@ module.exports = async function(request) {
     endUtc,
     tzContext
   });
+  const queryStartMs = Date.now();
+  let rowCount = 0;
   const { error } = await forEachPage({
     createQuery: () => {
       let query = auth.edgeClient.database.from("vibescore_tracker_hourly").select("hour_start,total_tokens,input_tokens,cached_input_tokens,output_tokens,reasoning_output_tokens").eq("user_id", auth.userId);
@@ -736,7 +918,9 @@ module.exports = async function(request) {
       return query.gte("hour_start", startIso).lt("hour_start", endIso).order("hour_start", { ascending: true });
     },
     onPage: (rows) => {
-      for (const row of rows) {
+      const pageRows = Array.isArray(rows) ? rows : [];
+      rowCount += pageRows.length;
+      for (const row of pageRows) {
         const ts = row?.hour_start;
         if (!ts) continue;
         const dt = new Date(ts);
@@ -758,6 +942,17 @@ module.exports = async function(request) {
       }
     }
   });
+  const queryDurationMs = Date.now() - queryStartMs;
+  logSlowQuery(logger, {
+    query_label: "usage_hourly_raw",
+    duration_ms: queryDurationMs,
+    row_count: rowCount,
+    range_days: 1,
+    source: source || null,
+    model: model || null,
+    tz: tzContext?.timeZone || null,
+    tz_offset_minutes: Number.isFinite(tzContext?.offsetMinutes) ? tzContext.offsetMinutes : null
+  });
   if (error) return json({ error: error.message }, 500);
   return json(
     {
@@ -767,7 +962,7 @@ module.exports = async function(request) {
     },
     200
   );
-};
+});
 function initHourlyBuckets(dayLabel) {
   const hourKeys = [];
   const buckets = Array.from({ length: 48 }, () => ({

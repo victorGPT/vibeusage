@@ -1246,6 +1246,141 @@ test('vibescore-usage-summary uses auth lookup even with jwt payload', async () 
   assert.equal(authCalls, 1, 'expected auth.getCurrentUser to validate jwt payload');
 });
 
+test('vibescore-usage-summary rejects oversized ranges', { concurrency: 1 }, async () => {
+  const fn = require('../insforge-functions/vibescore-usage-summary');
+  const prevMaxDays = process.env.VIBESCORE_USAGE_MAX_DAYS;
+  const userId = '55555555-5555-5555-5555-555555555555';
+  const userJwt = 'user_jwt_test';
+  let dbTouched = false;
+
+  try {
+    process.env.VIBESCORE_USAGE_MAX_DAYS = '30';
+    globalThis.createClient = (args) => {
+      if (args && args.edgeFunctionToken === userJwt) {
+        return {
+          auth: {
+            getCurrentUser: async () => ({ data: { user: { id: userId } }, error: null })
+          },
+          database: {
+            from: () => {
+              dbTouched = true;
+              throw new Error('database should not be queried for oversized ranges');
+            }
+          }
+        };
+      }
+      throw new Error(`Unexpected createClient args: ${JSON.stringify(args)}`);
+    };
+
+    const req = new Request(
+      'http://localhost/functions/vibescore-usage-summary?from=2025-01-01&to=2025-02-15',
+      {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${userJwt}` }
+      }
+    );
+
+    const res = await fn(req);
+    assert.equal(res.status, 400);
+    const body = await res.json();
+    assert.match(String(body.error || ''), /max/i);
+    assert.equal(dbTouched, false);
+  } finally {
+    if (prevMaxDays === undefined) delete process.env.VIBESCORE_USAGE_MAX_DAYS;
+    else process.env.VIBESCORE_USAGE_MAX_DAYS = prevMaxDays;
+  }
+});
+
+test('vibescore-usage-daily rejects oversized ranges', { concurrency: 1 }, async () => {
+  const fn = require('../insforge-functions/vibescore-usage-daily');
+  const prevMaxDays = process.env.VIBESCORE_USAGE_MAX_DAYS;
+  const userId = '55555555-5555-5555-5555-555555555555';
+  const userJwt = 'user_jwt_test';
+  let dbTouched = false;
+
+  try {
+    process.env.VIBESCORE_USAGE_MAX_DAYS = '30';
+    globalThis.createClient = (args) => {
+      if (args && args.edgeFunctionToken === userJwt) {
+        return {
+          auth: {
+            getCurrentUser: async () => ({ data: { user: { id: userId } }, error: null })
+          },
+          database: {
+            from: () => {
+              dbTouched = true;
+              throw new Error('database should not be queried for oversized ranges');
+            }
+          }
+        };
+      }
+      throw new Error(`Unexpected createClient args: ${JSON.stringify(args)}`);
+    };
+
+    const req = new Request(
+      'http://localhost/functions/vibescore-usage-daily?from=2025-01-01&to=2025-02-15',
+      {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${userJwt}` }
+      }
+    );
+
+    const res = await fn(req);
+    assert.equal(res.status, 400);
+    const body = await res.json();
+    assert.match(String(body.error || ''), /max/i);
+    assert.equal(dbTouched, false);
+  } finally {
+    if (prevMaxDays === undefined) delete process.env.VIBESCORE_USAGE_MAX_DAYS;
+    else process.env.VIBESCORE_USAGE_MAX_DAYS = prevMaxDays;
+  }
+});
+
+test('vibescore-usage-model-breakdown rejects oversized ranges', { concurrency: 1 }, async () => {
+  const fn = require('../insforge-functions/vibescore-usage-model-breakdown');
+  const prevMaxDays = process.env.VIBESCORE_USAGE_MAX_DAYS;
+  const userId = '55555555-5555-5555-5555-555555555555';
+  const userJwt = 'user_jwt_test';
+  let dbTouched = false;
+
+  try {
+    process.env.VIBESCORE_USAGE_MAX_DAYS = '30';
+    globalThis.createClient = (args) => {
+      if (args && args.edgeFunctionToken === userJwt) {
+        return {
+          auth: {
+            getCurrentUser: async () => ({ data: { user: { id: userId } }, error: null })
+          },
+          database: {
+            from: () => {
+              dbTouched = true;
+              throw new Error('database should not be queried for oversized ranges');
+            }
+          }
+        };
+      }
+      throw new Error(`Unexpected createClient args: ${JSON.stringify(args)}`);
+    };
+
+    const req = new Request(
+      'http://localhost/functions/vibescore-usage-model-breakdown?from=2025-01-01&to=2025-02-15',
+      {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${userJwt}` }
+      }
+    );
+
+    const res = await fn(req);
+    assert.equal(res.status, 400);
+    const body = await res.json();
+    assert.match(String(body.error || ''), /max/i);
+    assert.equal(dbTouched, false);
+  } finally {
+    if (prevMaxDays === undefined) delete process.env.VIBESCORE_USAGE_MAX_DAYS;
+    else process.env.VIBESCORE_USAGE_MAX_DAYS = prevMaxDays;
+  }
+});
+
 test('vibescore-leaderboard returns a week window and slices entries to limit', async () => {
   setDenoEnv({
     INSFORGE_INTERNAL_URL: BASE_URL,
