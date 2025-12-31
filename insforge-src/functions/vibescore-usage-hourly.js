@@ -22,10 +22,11 @@ const {
 } = require('../shared/date');
 const { toBigInt } = require('../shared/numbers');
 const { forEachPage } = require('../shared/pagination');
+const { logSlowQuery, withRequestLogging } = require('../shared/logging');
 
 const MIN_INTERVAL_MINUTES = 30;
 
-module.exports = async function(request) {
+module.exports = withRequestLogging('vibescore-usage-hourly', async function(request, logger) {
   const opt = handleOptions(request);
   if (opt) return opt;
 
@@ -74,6 +75,7 @@ module.exports = async function(request) {
       tzContext
     });
 
+    const aggregateStartMs = Date.now();
     const aggregateRows = await tryAggregateHourlyTotals({
       edgeClient: auth.edgeClient,
       userId: auth.userId,
@@ -81,6 +83,18 @@ module.exports = async function(request) {
       endIso,
       source,
       model
+    });
+    const aggregateDurationMs = Date.now() - aggregateStartMs;
+    logSlowQuery(logger, {
+      query_label: 'usage_hourly_aggregate',
+      duration_ms: aggregateDurationMs,
+      row_count: Array.isArray(aggregateRows) ? aggregateRows.length : 0,
+      range_days: 1,
+      source: source || null,
+      model: model || null,
+      tz: tzContext?.timeZone || null,
+      tz_offset_minutes: Number.isFinite(tzContext?.offsetMinutes) ? tzContext.offsetMinutes : null,
+      agg_hit: Boolean(aggregateRows)
     });
 
     if (aggregateRows) {
@@ -106,6 +120,8 @@ module.exports = async function(request) {
       );
     }
 
+    const queryStartMs = Date.now();
+    let rowCount = 0;
     const { error } = await forEachPage({
       createQuery: () => {
         let query = auth.edgeClient.database
@@ -117,7 +133,9 @@ module.exports = async function(request) {
         return query.gte('hour_start', startIso).lt('hour_start', endIso).order('hour_start', { ascending: true });
       },
       onPage: (rows) => {
-        for (const row of rows) {
+        const pageRows = Array.isArray(rows) ? rows : [];
+        rowCount += pageRows.length;
+        for (const row of pageRows) {
           const ts = row?.hour_start;
           if (!ts) continue;
           const dt = new Date(ts);
@@ -135,6 +153,17 @@ module.exports = async function(request) {
           bucket.reasoning += toBigInt(row?.reasoning_output_tokens);
         }
       }
+    });
+    const queryDurationMs = Date.now() - queryStartMs;
+    logSlowQuery(logger, {
+      query_label: 'usage_hourly_raw',
+      duration_ms: queryDurationMs,
+      row_count: rowCount,
+      range_days: 1,
+      source: source || null,
+      model: model || null,
+      tz: tzContext?.timeZone || null,
+      tz_offset_minutes: Number.isFinite(tzContext?.offsetMinutes) ? tzContext.offsetMinutes : null
     });
 
     if (error) return json({ error: error.message }, 500);
@@ -170,6 +199,8 @@ module.exports = async function(request) {
     tzContext
   });
 
+  const queryStartMs = Date.now();
+  let rowCount = 0;
   const { error } = await forEachPage({
     createQuery: () => {
       let query = auth.edgeClient.database
@@ -181,7 +212,9 @@ module.exports = async function(request) {
       return query.gte('hour_start', startIso).lt('hour_start', endIso).order('hour_start', { ascending: true });
     },
     onPage: (rows) => {
-      for (const row of rows) {
+      const pageRows = Array.isArray(rows) ? rows : [];
+      rowCount += pageRows.length;
+      for (const row of pageRows) {
         const ts = row?.hour_start;
         if (!ts) continue;
         const dt = new Date(ts);
@@ -204,6 +237,17 @@ module.exports = async function(request) {
       }
     }
   });
+  const queryDurationMs = Date.now() - queryStartMs;
+  logSlowQuery(logger, {
+    query_label: 'usage_hourly_raw',
+    duration_ms: queryDurationMs,
+    row_count: rowCount,
+    range_days: 1,
+    source: source || null,
+    model: model || null,
+    tz: tzContext?.timeZone || null,
+    tz_offset_minutes: Number.isFinite(tzContext?.offsetMinutes) ? tzContext.offsetMinutes : null
+  });
 
   if (error) return json({ error: error.message }, 500);
 
@@ -215,7 +259,7 @@ module.exports = async function(request) {
     },
     200
   );
-};
+});
 
 function initHourlyBuckets(dayLabel) {
   const hourKeys = [];

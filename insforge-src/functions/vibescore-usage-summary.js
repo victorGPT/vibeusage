@@ -10,6 +10,7 @@ const { getSourceParam, normalizeSource } = require('../shared/source');
 const { getModelParam, normalizeModel } = require('../shared/model');
 const {
   addDatePartsDays,
+  getUsageMaxDays,
   getUsageTimeZoneContext,
   listDateStrings,
   localDatePartsToUtc,
@@ -24,11 +25,11 @@ const {
   formatUsdFromMicros,
   resolvePricingProfile
 } = require('../shared/pricing');
-const { withRequestLogging } = require('../shared/logging');
+const { logSlowQuery, withRequestLogging } = require('../shared/logging');
 
 const DEFAULT_SOURCE = 'codex';
 
-module.exports = withRequestLogging('vibescore-usage-summary', async function(request) {
+module.exports = withRequestLogging('vibescore-usage-summary', async function(request, logger) {
   const opt = handleOptions(request);
   if (opt) return opt;
 
@@ -57,6 +58,10 @@ module.exports = withRequestLogging('vibescore-usage-summary', async function(re
   );
 
   const dayKeys = listDateStrings(from, to);
+  const maxDays = getUsageMaxDays();
+  if (dayKeys.length > maxDays) {
+    return json({ error: `Date range too large (max ${maxDays} days)` }, 400);
+  }
 
   const startParts = parseDateParts(from);
   const endParts = parseDateParts(to);
@@ -75,6 +80,8 @@ module.exports = withRequestLogging('vibescore-usage-summary', async function(re
   const distinctModels = new Set();
   const sourcesMap = new Map();
 
+  const queryStartMs = Date.now();
+  let rowCount = 0;
   const { error } = await forEachPage({
     createQuery: () => {
       let query = auth.edgeClient.database
@@ -88,7 +95,9 @@ module.exports = withRequestLogging('vibescore-usage-summary', async function(re
       return query.gte('hour_start', startIso).lt('hour_start', endIso).order('hour_start', { ascending: true });
     },
     onPage: (rows) => {
-      for (const row of rows) {
+      const pageRows = Array.isArray(rows) ? rows : [];
+      rowCount += pageRows.length;
+      for (const row of pageRows) {
         totalTokens += toBigInt(row?.total_tokens);
         inputTokens += toBigInt(row?.input_tokens);
         cachedInputTokens += toBigInt(row?.cached_input_tokens);
@@ -103,6 +112,17 @@ module.exports = withRequestLogging('vibescore-usage-summary', async function(re
         }
       }
     }
+  });
+  const queryDurationMs = Date.now() - queryStartMs;
+  logSlowQuery(logger, {
+    query_label: 'usage_summary',
+    duration_ms: queryDurationMs,
+    row_count: rowCount,
+    range_days: dayKeys.length,
+    source: source || null,
+    model: model || null,
+    tz: tzContext?.timeZone || null,
+    tz_offset_minutes: Number.isFinite(tzContext?.offsetMinutes) ? tzContext.offsetMinutes : null
   });
 
   if (error) return json({ error: error.message }, 500);

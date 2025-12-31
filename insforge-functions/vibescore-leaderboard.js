@@ -410,6 +410,35 @@ var require_date = __commonJS({
       }
       return days;
     }
+    function getUsageMaxDays() {
+      const raw = readEnvValue("VIBESCORE_USAGE_MAX_DAYS");
+      if (raw == null || raw === "") return 370;
+      const n = Number(raw);
+      if (!Number.isFinite(n)) return 370;
+      if (n <= 0) return 370;
+      return clampInt(n, 1, 5e3);
+    }
+    function readEnvValue(key) {
+      try {
+        if (typeof Deno !== "undefined" && Deno?.env?.get) {
+          const value = Deno.env.get(key);
+          if (value !== void 0) return value;
+        }
+      } catch (_e) {
+      }
+      try {
+        if (typeof process !== "undefined" && process?.env) {
+          return process.env[key];
+        }
+      } catch (_e) {
+      }
+      return null;
+    }
+    function clampInt(value, min, max) {
+      const n = Number(value);
+      if (!Number.isFinite(n)) return min;
+      return Math.min(max, Math.max(min, Math.floor(n)));
+    }
     module2.exports = {
       isDate: isDate2,
       toUtcDay: toUtcDay2,
@@ -432,7 +461,8 @@ var require_date = __commonJS({
       formatLocalDateKey,
       localDatePartsToUtc,
       normalizeDateRangeLocal,
-      listDateStrings
+      listDateStrings,
+      getUsageMaxDays
     };
   }
 });

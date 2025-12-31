@@ -468,6 +468,35 @@ var require_date = __commonJS({
       }
       return days;
     }
+    function getUsageMaxDays2() {
+      const raw = readEnvValue("VIBESCORE_USAGE_MAX_DAYS");
+      if (raw == null || raw === "") return 370;
+      const n = Number(raw);
+      if (!Number.isFinite(n)) return 370;
+      if (n <= 0) return 370;
+      return clampInt(n, 1, 5e3);
+    }
+    function readEnvValue(key) {
+      try {
+        if (typeof Deno !== "undefined" && Deno?.env?.get) {
+          const value = Deno.env.get(key);
+          if (value !== void 0) return value;
+        }
+      } catch (_e) {
+      }
+      try {
+        if (typeof process !== "undefined" && process?.env) {
+          return process.env[key];
+        }
+      } catch (_e) {
+      }
+      return null;
+    }
+    function clampInt(value, min, max) {
+      const n = Number(value);
+      if (!Number.isFinite(n)) return min;
+      return Math.min(max, Math.max(min, Math.floor(n)));
+    }
     module2.exports = {
       isDate,
       toUtcDay,
@@ -490,7 +519,8 @@ var require_date = __commonJS({
       formatLocalDateKey,
       localDatePartsToUtc: localDatePartsToUtc2,
       normalizeDateRangeLocal: normalizeDateRangeLocal2,
-      listDateStrings: listDateStrings2
+      listDateStrings: listDateStrings2,
+      getUsageMaxDays: getUsageMaxDays2
     };
   }
 });
@@ -818,8 +848,9 @@ var require_logging = __commonJS({
           throw err;
         }
       }
-      function log({ stage, status, errorCode }) {
+      function log({ stage, status, errorCode, ...extra }) {
         const payload = {
+          ...extra || {},
           request_id: requestId,
           function: functionName,
           stage: stage || "response",
@@ -856,8 +887,51 @@ var require_logging = __commonJS({
       };
     }
     module2.exports = {
-      withRequestLogging: withRequestLogging2
+      withRequestLogging: withRequestLogging2,
+      logSlowQuery: logSlowQuery2
     };
+    function logSlowQuery2(logger, fields) {
+      if (!logger || typeof logger.log !== "function") return;
+      const durationMs = Number(fields?.duration_ms ?? fields?.durationMs);
+      if (!Number.isFinite(durationMs)) return;
+      const thresholdMs = getSlowQueryThresholdMs();
+      if (durationMs < thresholdMs) return;
+      logger.log({
+        stage: "slow_query",
+        status: 200,
+        ...fields || {},
+        duration_ms: Math.round(durationMs)
+      });
+    }
+    function getSlowQueryThresholdMs() {
+      const raw = readEnvValue("VIBESCORE_SLOW_QUERY_MS");
+      if (raw == null || raw === "") return 2e3;
+      const n = Number(raw);
+      if (!Number.isFinite(n)) return 2e3;
+      if (n <= 0) return 0;
+      return clampInt(n, 1, 6e4);
+    }
+    function readEnvValue(key) {
+      try {
+        if (typeof Deno !== "undefined" && Deno?.env?.get) {
+          const value = Deno.env.get(key);
+          if (value !== void 0) return value;
+        }
+      } catch (_e) {
+      }
+      try {
+        if (typeof process !== "undefined" && process?.env) {
+          return process.env[key];
+        }
+      } catch (_e) {
+      }
+      return null;
+    }
+    function clampInt(value, min, max) {
+      const n = Number(value);
+      if (!Number.isFinite(n)) return min;
+      return Math.min(max, Math.max(min, Math.floor(n)));
+    }
   }
 });
 
@@ -869,6 +943,7 @@ var { getSourceParam, normalizeSource } = require_source();
 var { getModelParam, normalizeModel } = require_model();
 var {
   addDatePartsDays,
+  getUsageMaxDays,
   getUsageTimeZoneContext,
   listDateStrings,
   localDatePartsToUtc,
@@ -883,9 +958,9 @@ var {
   formatUsdFromMicros,
   resolvePricingProfile
 } = require_pricing();
-var { withRequestLogging } = require_logging();
+var { logSlowQuery, withRequestLogging } = require_logging();
 var DEFAULT_SOURCE = "codex";
-module.exports = withRequestLogging("vibescore-usage-summary", async function(request) {
+module.exports = withRequestLogging("vibescore-usage-summary", async function(request, logger) {
   const opt = handleOptions(request);
   if (opt) return opt;
   const methodErr = requireMethod(request, "GET");
@@ -909,6 +984,10 @@ module.exports = withRequestLogging("vibescore-usage-summary", async function(re
     tzContext
   );
   const dayKeys = listDateStrings(from, to);
+  const maxDays = getUsageMaxDays();
+  if (dayKeys.length > maxDays) {
+    return json({ error: `Date range too large (max ${maxDays} days)` }, 400);
+  }
   const startParts = parseDateParts(from);
   const endParts = parseDateParts(to);
   if (!startParts || !endParts) return json({ error: "Invalid date range" }, 400);
@@ -923,6 +1002,8 @@ module.exports = withRequestLogging("vibescore-usage-summary", async function(re
   let reasoningOutputTokens = 0n;
   const distinctModels = /* @__PURE__ */ new Set();
   const sourcesMap = /* @__PURE__ */ new Map();
+  const queryStartMs = Date.now();
+  let rowCount = 0;
   const { error } = await forEachPage({
     createQuery: () => {
       let query = auth.edgeClient.database.from("vibescore_tracker_hourly").select(
@@ -933,7 +1014,9 @@ module.exports = withRequestLogging("vibescore-usage-summary", async function(re
       return query.gte("hour_start", startIso).lt("hour_start", endIso).order("hour_start", { ascending: true });
     },
     onPage: (rows) => {
-      for (const row of rows) {
+      const pageRows = Array.isArray(rows) ? rows : [];
+      rowCount += pageRows.length;
+      for (const row of pageRows) {
         totalTokens += toBigInt(row?.total_tokens);
         inputTokens += toBigInt(row?.input_tokens);
         cachedInputTokens += toBigInt(row?.cached_input_tokens);
@@ -948,6 +1031,17 @@ module.exports = withRequestLogging("vibescore-usage-summary", async function(re
         }
       }
     }
+  });
+  const queryDurationMs = Date.now() - queryStartMs;
+  logSlowQuery(logger, {
+    query_label: "usage_summary",
+    duration_ms: queryDurationMs,
+    row_count: rowCount,
+    range_days: dayKeys.length,
+    source: source || null,
+    model: model || null,
+    tz: tzContext?.timeZone || null,
+    tz_offset_minutes: Number.isFinite(tzContext?.offsetMinutes) ? tzContext.offsetMinutes : null
   });
   if (error) return json({ error: error.message }, 500);
   const impliedModel = model || (distinctModels.size === 1 ? Array.from(distinctModels)[0] : null);

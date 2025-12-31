@@ -10,6 +10,7 @@ const { getSourceParam, normalizeSource } = require('../shared/source');
 const { normalizeModel } = require('../shared/model');
 const {
   addDatePartsDays,
+  getUsageMaxDays,
   getUsageTimeZoneContext,
   listDateStrings,
   localDatePartsToUtc,
@@ -24,12 +25,12 @@ const {
   formatUsdFromMicros,
   resolvePricingProfile
 } = require('../shared/pricing');
-const { withRequestLogging } = require('../shared/logging');
+const { logSlowQuery, withRequestLogging } = require('../shared/logging');
 
 const DEFAULT_SOURCE = 'codex';
 const DEFAULT_MODEL = 'unknown';
 
-module.exports = withRequestLogging('vibescore-usage-model-breakdown', async function(request) {
+module.exports = withRequestLogging('vibescore-usage-model-breakdown', async function(request, logger) {
   const opt = handleOptions(request);
   if (opt) return opt;
 
@@ -56,6 +57,10 @@ module.exports = withRequestLogging('vibescore-usage-model-breakdown', async fun
   );
 
   const dayKeys = listDateStrings(from, to);
+  const maxDays = getUsageMaxDays();
+  if (dayKeys.length > maxDays) {
+    return json({ error: `Date range too large (max ${maxDays} days)` }, 400);
+  }
 
   const startParts = parseDateParts(from);
   const endParts = parseDateParts(to);
@@ -69,6 +74,8 @@ module.exports = withRequestLogging('vibescore-usage-model-breakdown', async fun
   const sourcesMap = new Map();
   const distinctModels = new Set();
 
+  const queryStartMs = Date.now();
+  let rowCount = 0;
   const { error } = await forEachPage({
     createQuery: () => {
       let query = auth.edgeClient.database
@@ -81,7 +88,9 @@ module.exports = withRequestLogging('vibescore-usage-model-breakdown', async fun
       return query.gte('hour_start', startIso).lt('hour_start', endIso).order('hour_start', { ascending: true });
     },
     onPage: (rows) => {
-      for (const row of rows || []) {
+      const pageRows = Array.isArray(rows) ? rows : [];
+      rowCount += pageRows.length;
+      for (const row of pageRows) {
         const source = normalizeSource(row?.source) || DEFAULT_SOURCE;
         const model = normalizeModel(row?.model) || DEFAULT_MODEL;
         const entry = getSourceEntry(sourcesMap, source);
@@ -93,6 +102,16 @@ module.exports = withRequestLogging('vibescore-usage-model-breakdown', async fun
         }
       }
     }
+  });
+  const queryDurationMs = Date.now() - queryStartMs;
+  logSlowQuery(logger, {
+    query_label: 'usage_model_breakdown',
+    duration_ms: queryDurationMs,
+    row_count: rowCount,
+    range_days: dayKeys.length,
+    source: sourceFilter || null,
+    tz: tzContext?.timeZone || null,
+    tz_offset_minutes: Number.isFinite(tzContext?.offsetMinutes) ? tzContext.offsetMinutes : null
   });
 
   if (error) return json({ error: error.message }, 500);

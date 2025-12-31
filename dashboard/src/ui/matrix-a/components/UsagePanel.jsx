@@ -140,7 +140,7 @@ export const UsagePanel = React.memo(function UsagePanel({
       {showSummary || useSummaryLayout ? (
         <div className="flex-1 flex flex-col items-center justify-center space-y-6 opacity-90 py-4">
           <div className="text-center relative">
-            <div className="text-caption uppercase text-matrix-muted mb-2">
+            <div className="text-heading text-matrix-muted mb-2">
               {summaryLabel}
             </div>
             <div className="text-5xl md:text-8xl font-black text-white tracking-[-0.06em] tabular-nums leading-none glow-text select-none">
@@ -162,7 +162,7 @@ export const UsagePanel = React.memo(function UsagePanel({
               )}
             </div>
             {summaryCostValue ? (
-              <div className="flex items-center justify-center gap-3">
+              <div className="flex items-center justify-center gap-3 mt-4 md:mt-6">
                 <span className="sr-only">
                   {copy("usage.metric.total_cost")}
                 </span>

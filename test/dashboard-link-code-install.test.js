@@ -43,8 +43,8 @@ test("DashboardPage wires link code install copy flow", () => {
     "expected link code install command usage for copy"
   );
   assert.ok(
-    src.includes("const installInitCmdDisplay = installInitCmdBase;"),
-    "expected install display to stay on base command"
+    src.includes("const installInitCmdDisplay = installInitCmdCopy;"),
+    "expected install display to use link code command"
   );
   assert.ok(
     src.includes("safeWriteClipboard"),

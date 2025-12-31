@@ -142,7 +142,7 @@ dashboard.core_index.collapse_label,dashboard,DashboardPage,UsagePanel,toggle,"â
 dashboard.core_index.expand_label,dashboard,DashboardPage,UsagePanel,toggle,"â–¸",,active
 dashboard.core_index.collapse_aria,dashboard,DashboardPage,UsagePanel,toggle_aria,"Collapse CORE_INDEX breakdown",,active
 dashboard.core_index.expand_aria,dashboard,DashboardPage,UsagePanel,toggle_aria,"Expand CORE_INDEX breakdown",,active
-usage.summary.total_system_output,ui,UsagePanel,UsagePanel,summary_label_total_system,"TOTAL_SYSTEM_OUTPUT",,active
+usage.summary.total_system_output,ui,UsagePanel,UsagePanel,summary_label_total_system,"Total Tokens",,active
 usage.summary.total,ui,UsagePanel,UsagePanel,summary_label_total,"TOTAL_TOKENS",,active
 usage.summary.since,ui,UsagePanel,UsagePanel,summary_label_since,"SINCE {{range}} {{tz}}",,active
 usage.metric.total,ui,UsagePanel,UsagePanel,metric_total,"TOTAL",,active

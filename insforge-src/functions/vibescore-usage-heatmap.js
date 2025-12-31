@@ -25,8 +25,9 @@ const {
 } = require('../shared/date');
 const { toBigInt } = require('../shared/numbers');
 const { forEachPage } = require('../shared/pagination');
+const { logSlowQuery, withRequestLogging } = require('../shared/logging');
 
-module.exports = async function(request) {
+module.exports = withRequestLogging('vibescore-usage-heatmap', async function(request, logger) {
   const opt = handleOptions(request);
   if (opt) return opt;
 
@@ -74,6 +75,8 @@ module.exports = async function(request) {
     const endIso = endUtc.toISOString();
 
     const valuesByDay = new Map();
+    const queryStartMs = Date.now();
+    let rowCount = 0;
     const { error } = await forEachPage({
       createQuery: () => {
         let query = auth.edgeClient.database
@@ -85,7 +88,9 @@ module.exports = async function(request) {
         return query.gte('hour_start', startIso).lt('hour_start', endIso).order('hour_start', { ascending: true });
       },
       onPage: (rows) => {
-        for (const row of rows) {
+        const pageRows = Array.isArray(rows) ? rows : [];
+        rowCount += pageRows.length;
+        for (const row of pageRows) {
           const ts = row?.hour_start;
           if (!ts) continue;
           const dt = new Date(ts);
@@ -95,6 +100,18 @@ module.exports = async function(request) {
           valuesByDay.set(day, prev + toBigInt(row?.total_tokens));
         }
       }
+    });
+    const queryDurationMs = Date.now() - queryStartMs;
+    logSlowQuery(logger, {
+      query_label: 'usage_heatmap',
+      duration_ms: queryDurationMs,
+      row_count: rowCount,
+      range_weeks: weeks,
+      range_days: weeks * 7,
+      source: source || null,
+      model: model || null,
+      tz: tzContext?.timeZone || null,
+      tz_offset_minutes: Number.isFinite(tzContext?.offsetMinutes) ? tzContext.offsetMinutes : null
     });
 
     if (error) return json({ error: error.message }, 500);
@@ -190,7 +207,8 @@ module.exports = async function(request) {
   if (!auth.ok) return json({ error: 'Unauthorized' }, 401);
 
   const valuesByDay = new Map();
-
+  const queryStartMs = Date.now();
+  let rowCount = 0;
   const { error } = await forEachPage({
     createQuery: () => {
       let query = auth.edgeClient.database
@@ -202,7 +220,9 @@ module.exports = async function(request) {
       return query.gte('hour_start', startIso).lt('hour_start', endIso).order('hour_start', { ascending: true });
     },
     onPage: (rows) => {
-      for (const row of rows) {
+      const pageRows = Array.isArray(rows) ? rows : [];
+      rowCount += pageRows.length;
+      for (const row of pageRows) {
         const ts = row?.hour_start;
         if (!ts) continue;
         const dt = new Date(ts);
@@ -212,6 +232,18 @@ module.exports = async function(request) {
         valuesByDay.set(key, prev + toBigInt(row?.total_tokens));
       }
     }
+  });
+  const queryDurationMs = Date.now() - queryStartMs;
+  logSlowQuery(logger, {
+    query_label: 'usage_heatmap',
+    duration_ms: queryDurationMs,
+    row_count: rowCount,
+    range_weeks: weeks,
+    range_days: weeks * 7,
+    source: source || null,
+    model: model || null,
+    tz: tzContext?.timeZone || null,
+    tz_offset_minutes: Number.isFinite(tzContext?.offsetMinutes) ? tzContext.offsetMinutes : null
   });
 
   if (error) return json({ error: error.message }, 500);
@@ -274,7 +306,7 @@ module.exports = async function(request) {
     },
     200
   );
-};
+});
 
 function normalizeWeeks(raw) {
   if (raw == null || raw === '') return 52;
