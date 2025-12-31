@@ -305,6 +305,7 @@ dashboard.screenshot.twitter_hint,dashboard,DashboardPage,ScreenshotShare,helper
 dashboard.screenshot.twitter_text,dashboard,DashboardPage,ScreenshotShare,share_text,"This year\nI handed {{total_tokens}} tokens to Coding Agent\n\nThe one that stayed with me until the end\nwas {{agent_name}}\n\n{{model_name}} usage: {{model_percent}}%\n\nData: VibeScore @victor_wu_eth\n\nRun in your terminal:\nnpx --yes @vibescore/tracker init\n(Paste Image Stats with CMD / CTRL + V)",,active
 dashboard.wrapped.entry,dashboard,DashboardPage,Header,button_label,"Wrapped 2025",,active
 dashboard.poster.title,dashboard,AnnualPosterPage,Poster,title,"我的2025总结",,active
+dashboard.poster.aria_label,dashboard,AnnualPosterPage,Poster,aria_label,"Annual poster 2025",,active
 
 live_sniffer.log.system,ui,LiveSniffer,LiveSniffer,log,"[SYSTEM] KERNEL_LINK_ESTABLISHED",,active
 live_sniffer.log.socket,ui,LiveSniffer,LiveSniffer,log,"[SOCKET] LISTENING_ON_LOCAL_CLI_PIPE...",,active

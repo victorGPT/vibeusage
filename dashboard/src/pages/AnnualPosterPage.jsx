@@ -20,6 +20,53 @@ import { UsagePanel } from "../ui/matrix-a/components/UsagePanel.jsx";
 const POSTER_YEAR = 2025;
 const POSTER_FROM = `${POSTER_YEAR}-01-01`;
 const POSTER_TO = `${POSTER_YEAR}-12-31`;
+const POSTER_WEEK_START = "mon";
+
+function parseIsoDate(yyyyMmDd) {
+  if (typeof yyyyMmDd !== "string") return null;
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(yyyyMmDd.trim());
+  if (!match) return null;
+  const year = Number(match[1]);
+  const month = Number(match[2]) - 1;
+  const day = Number(match[3]);
+  const date = new Date(Date.UTC(year, month, day));
+  return Number.isFinite(date.getTime()) ? date : null;
+}
+
+function addUtcDays(date, days) {
+  return new Date(
+    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate() + days)
+  );
+}
+
+function diffUtcDays(a, b) {
+  const ms =
+    Date.UTC(b.getUTCFullYear(), b.getUTCMonth(), b.getUTCDate()) -
+    Date.UTC(a.getUTCFullYear(), a.getUTCMonth(), a.getUTCDate());
+  return Math.floor(ms / 86400000);
+}
+
+function startOfWeekUtc(date, weekStartsOn) {
+  const desired = weekStartsOn === "mon" ? 1 : 0;
+  const dow = date.getUTCDay();
+  return addUtcDays(date, -((dow - desired + 7) % 7));
+}
+
+function getWeeksForRange({ from, to, weekStartsOn }) {
+  const start = parseIsoDate(from);
+  const end = parseIsoDate(to);
+  if (!start || !end) return 52;
+  const startWeek = startOfWeekUtc(start, weekStartsOn);
+  const endWeek = startOfWeekUtc(end, weekStartsOn);
+  const diffDays = diffUtcDays(startWeek, endWeek);
+  return Math.max(1, Math.floor(diffDays / 7) + 1);
+}
+
+const POSTER_WEEKS = getWeeksForRange({
+  from: POSTER_FROM,
+  to: POSTER_TO,
+  weekStartsOn: POSTER_WEEK_START,
+});
 
 function hasUsageValue(value, level) {
   if (typeof level === "number" && level > 0) return true;
@@ -45,6 +92,7 @@ export function AnnualPosterPage({ baseUrl, auth, signedIn }) {
   const mockEnabled = isMockEnabled();
   const accessEnabled = signedIn || mockEnabled;
   const posterTitle = copy("dashboard.poster.title");
+  const posterAriaLabel = copy("dashboard.poster.aria_label");
   const timeZone = useMemo(() => getBrowserTimeZone(), []);
   const tzOffsetMinutes = useMemo(() => getBrowserTimeZoneOffsetMinutes(), []);
   const posterNow = useMemo(() => new Date(POSTER_YEAR, 11, 31, 12), []);
@@ -87,8 +135,8 @@ export function AnnualPosterPage({ baseUrl, auth, signedIn }) {
   } = useActivityHeatmap({
     baseUrl,
     accessToken: auth?.accessToken || null,
-    weeks: 52,
-    weekStartsOn: "mon",
+    weeks: POSTER_WEEKS,
+    weekStartsOn: POSTER_WEEK_START,
     cacheKey: auth?.userId || auth?.email || "default",
     timeZone,
     tzOffsetMinutes,
@@ -206,7 +254,7 @@ export function AnnualPosterPage({ baseUrl, auth, signedIn }) {
       <div
         id="annual-poster"
         role="img"
-        aria-label="Annual poster 2025"
+        aria-label={posterAriaLabel}
         className="poster-mode w-[1080px] h-[1350px] relative overflow-hidden rounded-3xl border border-matrix-ghost bg-[radial-gradient(circle_at_top,_rgba(0,255,65,0.12),_rgba(0,10,0,0.82)_45%,_rgba(0,0,0,0.96)_100%)] shadow-[0_40px_120px_rgba(0,0,0,0.6)]"
       >
         <div className="absolute inset-0 opacity-35 bg-[linear-gradient(rgba(0,255,65,0.05)_1px,transparent_1px)] bg-[length:100%_6px]" />
