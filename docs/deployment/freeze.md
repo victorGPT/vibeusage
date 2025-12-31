@@ -47,3 +47,9 @@
 - Change ID: `2025-12-30-add-gemini-cli-hooks`
 - Freeze artifact: CLI package `@vibescore/tracker` (publish from this commit)
 - Cold regression step: `node scripts/acceptance/gemini-hook-install.cjs`
+
+## 2025-12-31-dashboard-screenshot-share
+- Scope: dashboard screenshot capture + clipboard write + X share gate
+- Change ID: `2025-12-30-add-dashboard-screenshot-mode`
+- Freeze artifact: dashboard build (`npm --prefix dashboard run build`)
+- Cold regression step: `node dashboard/scripts/verify-share-clipboard.mjs "http://localhost:5173/?screenshot=1"`
