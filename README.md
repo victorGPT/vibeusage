@@ -134,6 +134,30 @@ npm install
 npm run dev
 ```
 
+### Debug Payload (Usage Endpoints)
+
+When `debug=1` is included in a usage endpoint request, the response adds a `debug` object that helps the dashboard attribute slow queries without relying on response headers.
+
+```ts
+const res = await fetch(
+  `${baseUrl}/functions/vibescore-usage-summary?from=2025-12-30&to=2025-12-30&debug=1`,
+  {
+    headers: { Authorization: `Bearer ${userJwt}` }
+  }
+);
+const data = await res.json();
+
+if (data.debug) {
+  console.debug('usage debug', {
+    requestId: data.debug.request_id,
+    status: data.debug.status,
+    queryMs: data.debug.query_ms,
+    slowThresholdMs: data.debug.slow_threshold_ms,
+    slowQuery: data.debug.slow_query
+  });
+}
+```
+
 ### Architecture Validation
 
 ```bash

@@ -7,6 +7,7 @@
 ## 2. Tests
 - [x] 2.1 Add unit test for debug payload on a usage endpoint.
 - [x] 2.2 Run regression tests (at least the updated test file).
+- [x] 2.3 Add acceptance script verifying debug payload gating.
 
 ## 3. Verification
 - [x] 3.1 Verify debug payload appears only when `debug=1` and is absent otherwise.

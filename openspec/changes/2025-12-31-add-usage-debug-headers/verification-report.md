@@ -5,6 +5,8 @@ Date: 2025-12-31
 ## Automated Tests
 - Command: `node --test test/edge-functions.test.js`
 - Result: pass (39 tests)
+- Command: `node scripts/acceptance/usage-debug-payload-gating.cjs`
+- Result: pass (debug payload present with `debug=1`, absent otherwise)
 
 ## Functional Verification
 - Debug payload gating verified by unit test: `vibescore-usage-summary emits debug payload when requested` asserts `debug` exists with `debug=1` and is absent without it.

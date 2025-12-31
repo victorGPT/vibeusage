@@ -134,6 +134,30 @@ npm install
 npm run dev
 ```
 
+### 调试字段（Usage 接口）
+
+当请求包含 `debug=1` 时，usage 接口会在响应体中附带 `debug` 对象，方便前端定位慢查询而不依赖响应头。
+
+```ts
+const res = await fetch(
+  `${baseUrl}/functions/vibescore-usage-summary?from=2025-12-30&to=2025-12-30&debug=1`,
+  {
+    headers: { Authorization: `Bearer ${userJwt}` }
+  }
+);
+const data = await res.json();
+
+if (data.debug) {
+  console.debug('usage debug', {
+    requestId: data.debug.request_id,
+    status: data.debug.status,
+    queryMs: data.debug.query_ms,
+    slowThresholdMs: data.debug.slow_threshold_ms,
+    slowQuery: data.debug.slow_query
+  });
+}
+```
+
 ### 整体架构验证
 
 ```bash
