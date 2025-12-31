@@ -8,13 +8,14 @@
 'use strict';
 
 const { handleOptions, json, requireMethod, readJson } = require('../shared/http');
+const { withRequestLogging } = require('../shared/logging');
 const { getBearerToken, getEdgeClientAndUserId } = require('../shared/auth');
 const { getBaseUrl, getAnonKey, getServiceRoleKey } = require('../shared/env');
 const { sha256Hex } = require('../shared/crypto');
 
 const ISSUE_ERROR_MESSAGE = 'Failed to issue device token';
 
-module.exports = async function(request) {
+module.exports = withRequestLogging('vibescore-device-token-issue', async function(request) {
   const opt = handleOptions(request);
   if (opt) return opt;
 
@@ -99,7 +100,7 @@ module.exports = async function(request) {
     },
     200
   );
-};
+});
 
 function sanitizeText(value, maxLen) {
   if (typeof value !== 'string') return null;
