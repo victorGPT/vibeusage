@@ -11,6 +11,7 @@ const { formatDateUTC, isDate } = require('../shared/date');
 const { toPositiveIntOrNull } = require('../shared/numbers');
 const { normalizeSource } = require('../shared/source');
 const { normalizeModel } = require('../shared/model');
+const { applyCanaryFilter } = require('../shared/canary');
 const { forEachPage } = require('../shared/pagination');
 const { withRequestLogging } = require('../shared/logging');
 
@@ -261,10 +262,13 @@ async function listUsageModels({ serviceClient, windowDays }) {
 
   const { error } = await forEachPage({
     createQuery: () =>
-      serviceClient.database
-        .from('vibescore_tracker_hourly')
-        .select('model')
-        .gte('hour_start', since),
+      applyCanaryFilter(
+        serviceClient.database
+          .from('vibescore_tracker_hourly')
+          .select('model')
+          .gte('hour_start', since),
+        { source: null, model: null }
+      ),
     onPage: (rows) => {
       for (const row of rows || []) {
         const normalized = normalizeUsageModel(row?.model);

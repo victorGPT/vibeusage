@@ -8,6 +8,7 @@ const { getBearerToken, getEdgeClientAndUserIdFast } = require('../shared/auth')
 const { getBaseUrl } = require('../shared/env');
 const { getSourceParam } = require('../shared/source');
 const { getModelParam } = require('../shared/model');
+const { applyCanaryFilter } = require('../shared/canary');
 const {
   addDatePartsDays,
   addDatePartsMonths,
@@ -100,6 +101,7 @@ module.exports = withRequestLogging('vibescore-usage-monthly', async function(re
         .eq('user_id', auth.userId);
       if (source) query = query.eq('source', source);
       if (model) query = query.eq('model', model);
+      query = applyCanaryFilter(query, { source, model });
       return query.gte('hour_start', startIso).lt('hour_start', endIso).order('hour_start', { ascending: true });
     },
     onPage: (rows) => {

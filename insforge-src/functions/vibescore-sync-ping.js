@@ -7,13 +7,14 @@
 'use strict';
 
 const { handleOptions, json, requireMethod } = require('../shared/http');
+const { withRequestLogging } = require('../shared/logging');
 const { getBearerToken } = require('../shared/auth');
 const { getAnonKey, getBaseUrl, getServiceRoleKey } = require('../shared/env');
 const { sha256Hex } = require('../shared/crypto');
 
 const MIN_INTERVAL_MINUTES = 30;
 
-module.exports = async function(request) {
+module.exports = withRequestLogging('vibescore-sync-ping', async function(request, logger) {
   const opt = handleOptions(request);
   if (opt) return opt;
 
@@ -26,6 +27,7 @@ module.exports = async function(request) {
   const baseUrl = getBaseUrl();
   const serviceRoleKey = getServiceRoleKey();
   const anonKey = getAnonKey();
+  const fetcher = logger?.fetch || fetch;
 
   if (!serviceRoleKey && !anonKey) {
     return json({ error: 'Missing anon key' }, 500);
@@ -82,7 +84,7 @@ module.exports = async function(request) {
   }
 
   try {
-    const touch = await touchSyncWithAnonKey({ baseUrl, anonKey, tokenHash });
+    const touch = await touchSyncWithAnonKey({ baseUrl, anonKey, tokenHash, fetcher });
     if (!touch) return json({ error: 'Unauthorized' }, 401);
 
     return json(
@@ -97,11 +99,11 @@ module.exports = async function(request) {
   } catch (e) {
     return json({ error: e?.message || 'Internal error' }, 500);
   }
-};
+});
 
-async function touchSyncWithAnonKey({ baseUrl, anonKey, tokenHash }) {
+async function touchSyncWithAnonKey({ baseUrl, anonKey, tokenHash, fetcher }) {
   const url = new URL('/api/database/rpc/vibescore_touch_device_token_sync', baseUrl);
-  const res = await fetch(url.toString(), {
+  const res = await (fetcher || fetch)(url.toString(), {
     method: 'POST',
     headers: {
       apikey: anonKey,

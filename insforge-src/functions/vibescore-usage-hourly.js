@@ -8,6 +8,7 @@ const { getBearerToken, getEdgeClientAndUserIdFast } = require('../shared/auth')
 const { getBaseUrl } = require('../shared/env');
 const { getSourceParam } = require('../shared/source');
 const { getModelParam } = require('../shared/model');
+const { applyCanaryFilter } = require('../shared/canary');
 const {
   addDatePartsDays,
   addUtcDays,
@@ -130,6 +131,7 @@ module.exports = withRequestLogging('vibescore-usage-hourly', async function(req
           .eq('user_id', auth.userId);
         if (source) query = query.eq('source', source);
         if (model) query = query.eq('model', model);
+        query = applyCanaryFilter(query, { source, model });
         return query.gte('hour_start', startIso).lt('hour_start', endIso).order('hour_start', { ascending: true });
       },
       onPage: (rows) => {
@@ -203,14 +205,15 @@ module.exports = withRequestLogging('vibescore-usage-hourly', async function(req
   let rowCount = 0;
   const { error } = await forEachPage({
     createQuery: () => {
-      let query = auth.edgeClient.database
-        .from('vibescore_tracker_hourly')
-        .select('hour_start,total_tokens,input_tokens,cached_input_tokens,output_tokens,reasoning_output_tokens')
-        .eq('user_id', auth.userId);
-      if (source) query = query.eq('source', source);
-      if (model) query = query.eq('model', model);
-      return query.gte('hour_start', startIso).lt('hour_start', endIso).order('hour_start', { ascending: true });
-    },
+        let query = auth.edgeClient.database
+          .from('vibescore_tracker_hourly')
+          .select('hour_start,total_tokens,input_tokens,cached_input_tokens,output_tokens,reasoning_output_tokens')
+          .eq('user_id', auth.userId);
+        if (source) query = query.eq('source', source);
+        if (model) query = query.eq('model', model);
+        query = applyCanaryFilter(query, { source, model });
+        return query.gte('hour_start', startIso).lt('hour_start', endIso).order('hour_start', { ascending: true });
+      },
     onPage: (rows) => {
       const pageRows = Array.isArray(rows) ? rows : [];
       rowCount += pageRows.length;
@@ -348,6 +351,7 @@ async function tryAggregateHourlyTotals({ edgeClient, userId, startIso, endIso, 
       .eq('user_id', userId);
     if (source) query = query.eq('source', source);
     if (model) query = query.eq('model', model);
+    query = applyCanaryFilter(query, { source, model });
     const { data, error } = await query.gte('hour_start', startIso).lt('hour_start', endIso).order('hour', { ascending: true });
 
     if (error) return null;

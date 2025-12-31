@@ -228,6 +228,26 @@ var require_model = __commonJS({
   }
 });
 
+// insforge-src/shared/canary.js
+var require_canary = __commonJS({
+  "insforge-src/shared/canary.js"(exports2, module2) {
+    "use strict";
+    function isCanaryTag(value) {
+      if (typeof value !== "string") return false;
+      return value.trim().toLowerCase() === "canary";
+    }
+    function applyCanaryFilter2(query, { source, model } = {}) {
+      if (!query || typeof query.neq !== "function") return query;
+      if (isCanaryTag(source) || isCanaryTag(model)) return query;
+      return query.neq("source", "canary").neq("model", "canary");
+    }
+    module2.exports = {
+      applyCanaryFilter: applyCanaryFilter2,
+      isCanaryTag
+    };
+  }
+});
+
 // insforge-src/shared/date.js
 var require_date = __commonJS({
   "insforge-src/shared/date.js"(exports2, module2) {
@@ -941,6 +961,7 @@ var { getBearerToken, getEdgeClientAndUserIdFast } = require_auth();
 var { getBaseUrl } = require_env();
 var { getSourceParam, normalizeSource } = require_source();
 var { getModelParam, normalizeModel } = require_model();
+var { applyCanaryFilter } = require_canary();
 var {
   addDatePartsDays,
   getUsageMaxDays,
@@ -1011,6 +1032,7 @@ module.exports = withRequestLogging("vibescore-usage-summary", async function(re
       ).eq("user_id", auth.userId);
       if (source) query = query.eq("source", source);
       if (model) query = query.eq("model", model);
+      query = applyCanaryFilter(query, { source, model });
       return query.gte("hour_start", startIso).lt("hour_start", endIso).order("hour_start", { ascending: true });
     },
     onPage: (rows) => {

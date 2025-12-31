@@ -56,6 +56,127 @@ var require_http = __commonJS({
   }
 });
 
+// insforge-src/shared/logging.js
+var require_logging = __commonJS({
+  "insforge-src/shared/logging.js"(exports2, module2) {
+    "use strict";
+    function createRequestId() {
+      if (globalThis?.crypto?.randomUUID) return globalThis.crypto.randomUUID();
+      return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+    }
+    function errorCodeFromStatus(status) {
+      if (typeof status !== "number") return "UNKNOWN_ERROR";
+      if (status >= 500) return "SERVER_ERROR";
+      if (status >= 400) return "CLIENT_ERROR";
+      return null;
+    }
+    function createLogger({ functionName }) {
+      const requestId = createRequestId();
+      const startMs = Date.now();
+      let upstreamStatus = null;
+      let upstreamLatencyMs = null;
+      function recordUpstream(status, latencyMs) {
+        upstreamStatus = typeof status === "number" ? status : null;
+        upstreamLatencyMs = typeof latencyMs === "number" ? latencyMs : null;
+      }
+      async function fetchWithUpstream(url, init) {
+        const upstreamStart = Date.now();
+        try {
+          const res = await fetch(url, init);
+          recordUpstream(res.status, Date.now() - upstreamStart);
+          return res;
+        } catch (err) {
+          recordUpstream(null, Date.now() - upstreamStart);
+          throw err;
+        }
+      }
+      function log({ stage, status, errorCode, ...extra }) {
+        const payload = {
+          ...extra || {},
+          request_id: requestId,
+          function: functionName,
+          stage: stage || "response",
+          status: typeof status === "number" ? status : null,
+          latency_ms: Date.now() - startMs,
+          error_code: errorCode ?? errorCodeFromStatus(status),
+          upstream_status: upstreamStatus ?? null,
+          upstream_latency_ms: upstreamLatencyMs ?? null
+        };
+        console.log(JSON.stringify(payload));
+      }
+      return {
+        requestId,
+        log,
+        fetch: fetchWithUpstream
+      };
+    }
+    function getResponseStatus(response) {
+      if (response && typeof response.status === "number") return response.status;
+      return null;
+    }
+    function withRequestLogging2(functionName, handler) {
+      return async function(request) {
+        const logger = createLogger({ functionName });
+        try {
+          const response = await handler(request, logger);
+          const status = getResponseStatus(response);
+          logger.log({ stage: "response", status });
+          return response;
+        } catch (err) {
+          logger.log({ stage: "exception", status: 500, errorCode: "UNHANDLED_EXCEPTION" });
+          throw err;
+        }
+      };
+    }
+    module2.exports = {
+      withRequestLogging: withRequestLogging2,
+      logSlowQuery
+    };
+    function logSlowQuery(logger, fields) {
+      if (!logger || typeof logger.log !== "function") return;
+      const durationMs = Number(fields?.duration_ms ?? fields?.durationMs);
+      if (!Number.isFinite(durationMs)) return;
+      const thresholdMs = getSlowQueryThresholdMs();
+      if (durationMs < thresholdMs) return;
+      logger.log({
+        stage: "slow_query",
+        status: 200,
+        ...fields || {},
+        duration_ms: Math.round(durationMs)
+      });
+    }
+    function getSlowQueryThresholdMs() {
+      const raw = readEnvValue("VIBESCORE_SLOW_QUERY_MS");
+      if (raw == null || raw === "") return 2e3;
+      const n = Number(raw);
+      if (!Number.isFinite(n)) return 2e3;
+      if (n <= 0) return 0;
+      return clampInt(n, 1, 6e4);
+    }
+    function readEnvValue(key) {
+      try {
+        if (typeof Deno !== "undefined" && Deno?.env?.get) {
+          const value = Deno.env.get(key);
+          if (value !== void 0) return value;
+        }
+      } catch (_e) {
+      }
+      try {
+        if (typeof process !== "undefined" && process?.env) {
+          return process.env[key];
+        }
+      } catch (_e) {
+      }
+      return null;
+    }
+    function clampInt(value, min, max) {
+      const n = Number(value);
+      if (!Number.isFinite(n)) return min;
+      return Math.min(max, Math.max(min, Math.floor(n)));
+    }
+  }
+});
+
 // insforge-src/shared/env.js
 var require_env = __commonJS({
   "insforge-src/shared/env.js"(exports2, module2) {
@@ -187,11 +308,12 @@ var require_crypto = __commonJS({
 
 // insforge-src/functions/vibescore-sync-ping.js
 var { handleOptions, json, requireMethod } = require_http();
+var { withRequestLogging } = require_logging();
 var { getBearerToken } = require_auth();
 var { getAnonKey, getBaseUrl, getServiceRoleKey } = require_env();
 var { sha256Hex } = require_crypto();
 var MIN_INTERVAL_MINUTES = 30;
-module.exports = async function(request) {
+module.exports = withRequestLogging("vibescore-sync-ping", async function(request, logger) {
   const opt = handleOptions(request);
   if (opt) return opt;
   const methodErr = requireMethod(request, "POST");
@@ -201,6 +323,7 @@ module.exports = async function(request) {
   const baseUrl = getBaseUrl();
   const serviceRoleKey = getServiceRoleKey();
   const anonKey = getAnonKey();
+  const fetcher = logger?.fetch || fetch;
   if (!serviceRoleKey && !anonKey) {
     return json({ error: "Missing anon key" }, 500);
   }
@@ -240,7 +363,7 @@ module.exports = async function(request) {
     );
   }
   try {
-    const touch = await touchSyncWithAnonKey({ baseUrl, anonKey, tokenHash });
+    const touch = await touchSyncWithAnonKey({ baseUrl, anonKey, tokenHash, fetcher });
     if (!touch) return json({ error: "Unauthorized" }, 401);
     return json(
       {
@@ -254,10 +377,10 @@ module.exports = async function(request) {
   } catch (e) {
     return json({ error: e?.message || "Internal error" }, 500);
   }
-};
-async function touchSyncWithAnonKey({ baseUrl, anonKey, tokenHash }) {
+});
+async function touchSyncWithAnonKey({ baseUrl, anonKey, tokenHash, fetcher }) {
   const url = new URL("/api/database/rpc/vibescore_touch_device_token_sync", baseUrl);
-  const res = await fetch(url.toString(), {
+  const res = await (fetcher || fetch)(url.toString(), {
     method: "POST",
     headers: {
       apikey: anonKey,

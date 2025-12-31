@@ -573,6 +573,26 @@ var require_model = __commonJS({
   }
 });
 
+// insforge-src/shared/canary.js
+var require_canary = __commonJS({
+  "insforge-src/shared/canary.js"(exports2, module2) {
+    "use strict";
+    function isCanaryTag(value) {
+      if (typeof value !== "string") return false;
+      return value.trim().toLowerCase() === "canary";
+    }
+    function applyCanaryFilter2(query, { source, model } = {}) {
+      if (!query || typeof query.neq !== "function") return query;
+      if (isCanaryTag(source) || isCanaryTag(model)) return query;
+      return query.neq("source", "canary").neq("model", "canary");
+    }
+    module2.exports = {
+      applyCanaryFilter: applyCanaryFilter2,
+      isCanaryTag
+    };
+  }
+});
+
 // insforge-src/shared/pagination.js
 var require_pagination = __commonJS({
   "insforge-src/shared/pagination.js"(exports2, module2) {
@@ -743,6 +763,7 @@ var { formatDateUTC, isDate } = require_date();
 var { toPositiveIntOrNull } = require_numbers();
 var { normalizeSource } = require_source();
 var { normalizeModel } = require_model();
+var { applyCanaryFilter } = require_canary();
 var { forEachPage } = require_pagination();
 var { withRequestLogging } = require_logging();
 var OPENROUTER_MODELS_URL = "https://openrouter.ai/api/v1/models";
@@ -933,7 +954,10 @@ async function listUsageModels({ serviceClient, windowDays }) {
   cutoff.setUTCDate(cutoff.getUTCDate() - windowDays);
   const since = cutoff.toISOString();
   const { error } = await forEachPage({
-    createQuery: () => serviceClient.database.from("vibescore_tracker_hourly").select("model").gte("hour_start", since),
+    createQuery: () => applyCanaryFilter(
+      serviceClient.database.from("vibescore_tracker_hourly").select("model").gte("hour_start", since),
+      { source: null, model: null }
+    ),
     onPage: (rows) => {
       for (const row of rows || []) {
         const normalized = normalizeUsageModel(row?.model);

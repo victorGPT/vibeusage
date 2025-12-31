@@ -18,6 +18,7 @@ codex-pr-review-loop.skill
 # Local-only snapshots and experiments
 /backups/
 /copy2.jsx
+/vibescore-flowchart/
 
 # Local-only docs
 .vercel

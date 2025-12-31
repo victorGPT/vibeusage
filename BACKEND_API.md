@@ -96,6 +96,8 @@ To keep low-tier backends stable, the CLI and dashboard apply conservative defau
 
 **Timezone note:** Usage endpoints accept `tz` (IANA) or `tz_offset_minutes` (fixed offset). When provided and non-UTC, date boundaries are interpreted in that timezone. When omitted, usage endpoints default to UTC behavior.
 
+**Canary note:** Usage endpoints exclude `source=model=canary` buckets by default unless explicitly requested via `source=canary` or `model=canary`.
+
 ### POST /functions/vibescore-device-token-issue
 
 Issue a long-lived device token for the current user.
@@ -159,6 +161,7 @@ Notes:
 - `hour_start` is the usage-time bucket. Database `created_at`/`updated_at` reflect ingest/upsert time, so many rows can share the same timestamp when a batch is uploaded.
 - Internal observability: ingest requests also write a best-effort metrics row to `vibescore_tracker_ingest_batches` (project_admin only). Fields include `bucket_count`, `inserted`, `skipped`, `source`, `user_id`, `device_id`, and `created_at`. No prompt/response content is stored.
 - Retention: `POST /functions/vibescore-events-retention` supports `include_ingest_batches` to purge ingest batch metrics older than the cutoff.
+- When concurrency limits are exceeded, the endpoint may return `429` with `Retry-After` to signal backoff. The guard is opt-in via `VIBESCORE_INGEST_MAX_INFLIGHT`.
 
 ---
 

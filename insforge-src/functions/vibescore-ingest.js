@@ -7,6 +7,8 @@
 'use strict';
 
 const { handleOptions, json, requireMethod, readJson } = require('../shared/http');
+const { withRequestLogging } = require('../shared/logging');
+const { createConcurrencyGuard } = require('../shared/concurrency');
 const { getBearerToken } = require('../shared/auth');
 const { getAnonKey, getBaseUrl, getServiceRoleKey } = require('../shared/env');
 const { sha256Hex } = require('../shared/crypto');
@@ -16,7 +18,15 @@ const { normalizeModel } = require('../shared/model');
 const MAX_BUCKETS = 500;
 const DEFAULT_MODEL = 'unknown';
 
-module.exports = async function(request) {
+const ingestGuard = createConcurrencyGuard({
+  name: 'vibescore-ingest',
+  envKey: 'VIBESCORE_INGEST_MAX_INFLIGHT',
+  defaultMax: 0,
+  retryAfterEnvKey: 'VIBESCORE_INGEST_RETRY_AFTER_MS',
+  defaultRetryAfterMs: 1000
+});
+
+module.exports = withRequestLogging('vibescore-ingest', async function(request, logger) {
   const opt = handleOptions(request);
   if (opt) return opt;
 
@@ -26,6 +36,12 @@ module.exports = async function(request) {
   const deviceToken = getBearerToken(request.headers.get('Authorization'));
   if (!deviceToken) return json({ error: 'Missing bearer token' }, 401);
 
+  const guard = ingestGuard?.acquire();
+  if (guard && !guard.ok) {
+    return json({ error: 'Too many requests' }, 429, guard.headers);
+  }
+
+  const fetcher = logger?.fetch || fetch;
   const baseUrl = getBaseUrl();
   const serviceRoleKey = getServiceRoleKey();
   const anonKey = getAnonKey();
@@ -37,80 +53,87 @@ module.exports = async function(request) {
       })
     : null;
 
-  const tokenHash = await sha256Hex(deviceToken);
-  let tokenRow = null;
   try {
-    tokenRow = serviceClient
-      ? await getTokenRowWithServiceClient(serviceClient, tokenHash)
-      : await getTokenRowWithAnonKey({ baseUrl, anonKey, tokenHash });
-  } catch (e) {
-    return json({ error: e?.message || 'Internal error' }, 500);
-  }
-  if (!tokenRow) return json({ error: 'Unauthorized' }, 401);
+    const tokenHash = await sha256Hex(deviceToken);
+    let tokenRow = null;
+    try {
+      tokenRow = serviceClient
+        ? await getTokenRowWithServiceClient(serviceClient, tokenHash)
+        : await getTokenRowWithAnonKey({ baseUrl, anonKey, tokenHash, fetcher });
+    } catch (e) {
+      return json({ error: e?.message || 'Internal error' }, 500);
+    }
+    if (!tokenRow) return json({ error: 'Unauthorized' }, 401);
 
-  const body = await readJson(request);
-  if (body.error) return json({ error: body.error }, body.status);
+    const body = await readJson(request);
+    if (body.error) return json({ error: body.error }, body.status);
 
-  const hourly = normalizeHourly(body.data);
-  if (!Array.isArray(hourly)) {
-    return json({ error: 'Invalid payload: expected {hourly:[...]} or [...]' }, 400);
-  }
-  if (hourly.length > MAX_BUCKETS) return json({ error: `Too many buckets (max ${MAX_BUCKETS})` }, 413);
+    const hourly = normalizeHourly(body.data);
+    if (!Array.isArray(hourly)) {
+      return json({ error: 'Invalid payload: expected {hourly:[...]} or [...]' }, 400);
+    }
+    if (hourly.length > MAX_BUCKETS) return json({ error: `Too many buckets (max ${MAX_BUCKETS})` }, 413);
 
-  const nowIso = new Date().toISOString();
-  const rows = buildRows({ hourly, tokenRow, nowIso });
-  if (rows.error) return json({ error: rows.error }, 400);
+    const nowIso = new Date().toISOString();
+    const rows = buildRows({ hourly, tokenRow, nowIso });
+    if (rows.error) return json({ error: rows.error }, 400);
 
-  if (rows.data.length === 0) {
+    if (rows.data.length === 0) {
+      await recordIngestBatchMetrics({
+        serviceClient,
+        baseUrl,
+        anonKey,
+        tokenHash,
+        tokenRow,
+        bucketCount: 0,
+        inserted: 0,
+        skipped: 0,
+        source: null,
+        fetcher
+      });
+      return json({ success: true, inserted: 0, skipped: 0 }, 200);
+    }
+
+    const upsert = serviceClient
+      ? await upsertWithServiceClient({
+          serviceClient,
+          tokenRow,
+          rows: rows.data,
+          nowIso,
+          baseUrl,
+          serviceRoleKey,
+          tokenHash,
+          fetcher
+        })
+      : await upsertWithAnonKey({ baseUrl, anonKey, tokenHash, tokenRow, rows: rows.data, nowIso, fetcher });
+
+    if (!upsert.ok) return json({ error: upsert.error }, 500);
+
     await recordIngestBatchMetrics({
       serviceClient,
       baseUrl,
       anonKey,
       tokenHash,
       tokenRow,
-      bucketCount: 0,
-      inserted: 0,
-      skipped: 0,
-      source: null
-    });
-    return json({ success: true, inserted: 0, skipped: 0 }, 200);
-  }
-
-  const upsert = serviceClient
-    ? await upsertWithServiceClient({
-        serviceClient,
-        tokenRow,
-        rows: rows.data,
-        nowIso,
-        baseUrl,
-        serviceRoleKey,
-        tokenHash
-      })
-    : await upsertWithAnonKey({ baseUrl, anonKey, tokenHash, tokenRow, rows: rows.data, nowIso });
-
-  if (!upsert.ok) return json({ error: upsert.error }, 500);
-
-  await recordIngestBatchMetrics({
-    serviceClient,
-    baseUrl,
-    anonKey,
-    tokenHash,
-    tokenRow,
-    bucketCount: rows.data.length,
-    inserted: upsert.inserted,
-    skipped: upsert.skipped,
-    source: deriveMetricsSource(rows.data)
-  });
-
-  return json(
-    {
-      success: true,
+      bucketCount: rows.data.length,
       inserted: upsert.inserted,
-      skipped: upsert.skipped
-    },
-    200
-  );
-};
+      skipped: upsert.skipped,
+      source: deriveMetricsSource(rows.data),
+      fetcher
+    });
+
+    return json(
+      {
+        success: true,
+        inserted: upsert.inserted,
+        skipped: upsert.skipped
+      },
+      200
+    );
+  } finally {
+    if (guard && typeof guard.release === 'function') guard.release();
+  }
+});
 
 function buildRows({ hourly, tokenRow, nowIso }) {
   const byHour = new Map();
@@ -168,14 +191,14 @@ async function getTokenRowWithServiceClient(serviceClient, tokenHash) {
   return tokenRow;
 }
 
-async function getTokenRowWithAnonKey({ baseUrl, anonKey, tokenHash }) {
+async function getTokenRowWithAnonKey({ baseUrl, anonKey, tokenHash, fetcher }) {
   if (!anonKey) throw new Error('Anon key missing');
   const url = new URL('/api/database/records/vibescore_tracker_device_tokens', baseUrl);
   url.searchParams.set('select', 'id,user_id,device_id,revoked_at,last_sync_at');
   url.searchParams.set('token_hash', `eq.${tokenHash}`);
   url.searchParams.set('limit', '1');
 
-  const res = await fetch(url.toString(), {
+  const res = await (fetcher || fetch)(url.toString(), {
     method: 'GET',
     headers: buildAnonHeaders({ anonKey, tokenHash })
   });
@@ -195,7 +218,8 @@ async function upsertWithServiceClient({
   nowIso,
   baseUrl,
   serviceRoleKey,
-  tokenHash
+  tokenHash,
+  fetcher
 }) {
   if (serviceRoleKey && baseUrl) {
     const url = new URL('/api/database/records/vibescore_tracker_hourly', baseUrl);
@@ -207,7 +231,8 @@ async function upsertWithServiceClient({
       onConflict: 'user_id,device_id,source,model,hour_start',
       prefer: 'return=representation',
       resolution: 'merge-duplicates',
-      select: 'hour_start'
+      select: 'hour_start',
+      fetcher
     });
 
     if (res.ok) {
@@ -233,7 +258,7 @@ async function upsertWithServiceClient({
   return { ok: false, error: 'Half-hour upsert unsupported', inserted: 0, skipped: 0 };
 }
 
-async function upsertWithAnonKey({ baseUrl, anonKey, tokenHash, tokenRow, rows, nowIso }) {
+async function upsertWithAnonKey({ baseUrl, anonKey, tokenHash, tokenRow, rows, nowIso, fetcher }) {
   if (!anonKey) return { ok: false, error: 'Anon key missing', inserted: 0, skipped: 0 };
 
   const url = new URL('/api/database/records/vibescore_tracker_hourly', baseUrl);
@@ -245,13 +270,14 @@ async function upsertWithAnonKey({ baseUrl, anonKey, tokenHash, tokenRow, rows, 
     onConflict: 'user_id,device_id,source,model,hour_start',
     prefer: 'return=representation',
     resolution: 'merge-duplicates',
-    select: 'hour_start'
+    select: 'hour_start',
+    fetcher
   });
 
   if (res.ok) {
     const insertedRows = normalizeRows(res.data);
     const inserted = Array.isArray(insertedRows) ? insertedRows.length : rows.length;
-    await bestEffortTouchWithAnonKey({ baseUrl, anonKey, tokenHash, nowIso });
+    await bestEffortTouchWithAnonKey({ baseUrl, anonKey, tokenHash, fetcher });
     return { ok: true, inserted, skipped: 0 };
   }
 
@@ -271,7 +297,8 @@ async function recordIngestBatchMetrics({
   bucketCount,
   inserted,
   skipped,
-  source
+  source,
+  fetcher
 }) {
   if (!tokenRow) return;
   const row = {
@@ -292,7 +319,7 @@ async function recordIngestBatchMetrics({
     }
     if (!anonKey || !baseUrl) return;
     const url = new URL('/api/database/records/vibescore_tracker_ingest_batches', baseUrl);
-    const res = await fetch(url.toString(), {
+    const res = await (fetcher || fetch)(url.toString(), {
       method: 'POST',
       headers: {
         ...buildAnonHeaders({ anonKey, tokenHash }),
@@ -326,11 +353,11 @@ async function bestEffortTouchWithServiceClient(serviceClient, tokenRow, nowIso)
   } catch (_e) {}
 }
 
-async function bestEffortTouchWithAnonKey({ baseUrl, anonKey, tokenHash }) {
+async function bestEffortTouchWithAnonKey({ baseUrl, anonKey, tokenHash, fetcher }) {
   if (!anonKey) return;
   try {
     const url = new URL('/api/database/rpc/vibescore_touch_device_token_sync', baseUrl);
-    await fetch(url.toString(), {
+    await (fetcher || fetch)(url.toString(), {
       method: 'POST',
       headers: {
         ...buildAnonHeaders({ anonKey, tokenHash }),
@@ -349,7 +376,7 @@ function buildAnonHeaders({ anonKey, tokenHash }) {
   };
 }
 
-async function recordsUpsert({ url, anonKey, tokenHash, rows, onConflict, prefer, resolution, select }) {
+async function recordsUpsert({ url, anonKey, tokenHash, rows, onConflict, prefer, resolution, select, fetcher }) {
   const target = new URL(url.toString());
   if (onConflict) target.searchParams.set('on_conflict', onConflict);
   if (select) target.searchParams.set('select', select);
@@ -358,7 +385,7 @@ async function recordsUpsert({ url, anonKey, tokenHash, rows, onConflict, prefer
   if (resolution) preferParts.push(`resolution=${resolution}`);
   const preferHeader = preferParts.filter(Boolean).join(',');
 
-  const res = await fetch(target.toString(), {
+  const res = await (fetcher || fetch)(target.toString(), {
     method: 'POST',
     headers: {
       ...buildAnonHeaders({ anonKey, tokenHash }),

@@ -8,5 +8,5 @@
 
 ## 2. Verification
 - [x] 2.1 Run unit tests (`npm test`).
-- [ ] 2.2 Run acceptance check for oversized ranges (script or curl).
+- [x] 2.2 Run acceptance check for oversized ranges (script or curl).
 - [ ] 2.3 Validate slow-query logs in InsForge runtime logs.

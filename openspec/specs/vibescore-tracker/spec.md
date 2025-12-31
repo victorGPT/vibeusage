@@ -178,6 +178,13 @@ The usage summary, daily, monthly, and heatmap endpoints SHALL derive totals fro
 - **WHEN** the user requests daily usage for that day
 - **THEN** the total SHALL equal the sum of half-hour bucket totals
 
+### Requirement: Usage endpoints exclude canary buckets by default
+Usage endpoints SHALL exclude `source=model=canary` buckets unless explicitly requested via `source=canary` or `model=canary`.
+
+#### Scenario: Default usage queries ignore canary buckets
+- **WHEN** a user calls a usage endpoint without `source=canary` or `model=canary`
+- **THEN** canary buckets SHALL be excluded from aggregates
+
 ### Requirement: Hourly usage marks unsynced buckets
 The hourly usage endpoint SHALL mark buckets after the latest sync timestamp as `missing: true` so the UI can distinguish unsynced hours. When `tz` or `tz_offset_minutes` is provided, the `day` parameter SHALL be interpreted in that timezone; otherwise it SHALL default to UTC.
 
