@@ -61,19 +61,12 @@ module.exports = withRequestLogging('vibescore-entitlements', async function(req
     edgeFunctionToken: isServiceRole ? serviceRoleKey : bearer
   });
 
+  const nowIso = new Date().toISOString();
   const entitlementId = await resolveEntitlementId({
     userId,
     providedId,
     idempotencyKey
   });
-
-  if (entitlementId) {
-    const existing = await loadEntitlementById({ dbClient, id: entitlementId });
-    if (existing.error) return json({ error: existing.error }, 500);
-    if (existing.row) return json(existing.row, 200);
-  }
-
-  const nowIso = new Date().toISOString();
   const row = {
     id: entitlementId || crypto.randomUUID(),
     user_id: userId,
@@ -87,10 +80,21 @@ module.exports = withRequestLogging('vibescore-entitlements', async function(req
     created_by: null
   };
 
-  const { error } = await dbClient.database.from('vibescore_user_entitlements').insert([row]);
-  if (error) return json({ error: error.message }, 500);
+  const { error: insertError } = await dbClient.database.from('vibescore_user_entitlements').insert([row]);
+  if (!insertError) return json(row, 200);
 
-  return json(row, 200);
+  if (entitlementId && isConflictError(insertError)) {
+    const existing = await loadEntitlementById({ dbClient, id: entitlementId });
+    if (existing.error) return json({ error: existing.error }, 500);
+    if (existing.row) {
+      if (existing.row.user_id !== userId) {
+        return json({ error: 'entitlement id already exists for a different user' }, 409);
+      }
+      return json(existing.row, 200);
+    }
+  }
+
+  return json({ error: insertError.message || 'Insert failed' }, 500);
 });
 
 function isValidIso(value) {
@@ -125,6 +129,14 @@ function formatUuidFromHash(hex) {
   if (typeof hex !== 'string' || hex.length < 32) return null;
   const s = hex.slice(0, 32).toLowerCase();
   return `${s.slice(0, 8)}-${s.slice(8, 12)}-${s.slice(12, 16)}-${s.slice(16, 20)}-${s.slice(20, 32)}`;
+}
+
+function isConflictError(error) {
+  if (!error) return false;
+  if (error.code === '23505') return true;
+  if (error.status === 409) return true;
+  const message = String(error.message || error).toLowerCase();
+  return message.includes('duplicate') || message.includes('unique') || message.includes('conflict');
 }
 
 async function loadEntitlementById({ dbClient, id }) {

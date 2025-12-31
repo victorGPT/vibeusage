@@ -74,15 +74,32 @@ function createServiceDbMock() {
   };
 }
 
-function createEntitlementsDbMock() {
+function createEntitlementsDbMock(options = {}) {
   const inserts = [];
   const rows = new Map();
+  const seedRows = Array.isArray(options.seedRows) ? options.seedRows : [];
+  const failOnDuplicate = options.failOnDuplicate !== false;
+  const duplicateError = options.duplicateError || {
+    message: 'duplicate key value violates unique constraint "vibescore_user_entitlements_pkey"',
+    code: '23505'
+  };
+
+  for (const row of seedRows) {
+    if (row && typeof row.id === 'string') rows.set(row.id, row);
+  }
 
   function from(table) {
     if (table === 'vibescore_user_entitlements') {
       return {
         insert: async (newRows) => {
           inserts.push({ table, rows: newRows });
+          if (failOnDuplicate) {
+            for (const row of newRows) {
+              if (row && typeof row.id === 'string' && rows.has(row.id)) {
+                return { error: duplicateError };
+              }
+            }
+          }
           for (const row of newRows) {
             if (row && typeof row.id === 'string') rows.set(row.id, row);
           }
@@ -2246,7 +2263,51 @@ test('vibescore-entitlements replays idempotency_key without duplicate insert', 
   const row2 = await res2.json();
 
   assert.equal(row1.id, row2.id);
-  assert.equal(db.inserts.length, 1);
+  assert.equal(db.rows.size, 1);
+});
+
+test('vibescore-entitlements rejects id reuse across users', async () => {
+  const fn = require('../insforge-functions/vibescore-entitlements');
+
+  const existingId = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
+  const existingRow = {
+    id: existingId,
+    user_id: 'cccccccc-cccc-cccc-cccc-cccccccccccc',
+    source: 'manual',
+    effective_from: '2025-01-01T00:00:00Z',
+    effective_to: '2124-01-01T00:00:00Z',
+    revoked_at: null,
+    note: null,
+    created_at: '2025-01-01T00:00:00Z',
+    updated_at: '2025-01-01T00:00:00Z',
+    created_by: null
+  };
+  const db = createEntitlementsDbMock({ seedRows: [existingRow] });
+
+  globalThis.createClient = (args) => {
+    if (args && args.edgeFunctionToken === SERVICE_ROLE_KEY) {
+      return { database: db.db };
+    }
+    throw new Error(`Unexpected createClient args: ${JSON.stringify(args)}`);
+  };
+
+  const req = new Request('http://localhost/functions/vibescore-entitlements', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${SERVICE_ROLE_KEY}` },
+    body: JSON.stringify({
+      id: existingId,
+      user_id: 'dddddddd-dddd-dddd-dddd-dddddddddddd',
+      source: 'manual',
+      effective_from: '2025-01-01T00:00:00Z',
+      effective_to: '2124-01-01T00:00:00Z',
+      note: 'test'
+    })
+  });
+
+  const res = await fn(req);
+  assert.equal(res.status, 409);
+  const body = await res.json();
+  assert.equal(body.error, 'entitlement id already exists for a different user');
 });
 
 test('vibescore-entitlements accepts project_admin token', async () => {
