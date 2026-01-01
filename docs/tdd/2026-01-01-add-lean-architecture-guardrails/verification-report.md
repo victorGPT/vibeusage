@@ -5,6 +5,7 @@
 
 ## Tests Run
 - `node --test test/architecture-guardrails.test.js`
+- `node --test test/edge-functions.test.js`
 
 ## Results
 - All listed tests passed locally.
