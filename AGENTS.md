@@ -20,6 +20,12 @@ Keep this managed block so 'openspec update' can refresh the instructions.
 
 <!-- OPENSPEC:END -->
 
+# Canvas 规则
+
+- 每次创建/修改/删除前必须先查阅 `architecture.canvas`，确认受影响的节点。
+- 制定计划前必须先更新 Canvas：运行 `node scripts/ops/architecture-canvas.cjs`；若脚本不可用，手动更新并保持节点格式与已有节点一致。
+- 全流程结束后必须再次更新 Canvas，保证节点格式与现有节点保持同步。
+
 # 文案规则（Copy Registry）
 
 - 本项目页面上所有展示文字必须来自 `dashboard/src/content/copy.csv`。
