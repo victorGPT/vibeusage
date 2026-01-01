@@ -11,6 +11,8 @@ const { getModelParam, normalizeModel } = require('../shared/model');
 const { applyCanaryFilter } = require('../shared/canary');
 const {
   addDatePartsDays,
+  addUtcDays,
+  dateFromPartsUTC,
   formatLocalDateKey,
   getUsageMaxDays,
   getUsageTimeZoneContext,
@@ -184,6 +186,24 @@ module.exports = withRequestLogging('vibescore-usage-daily', async function(requ
     return { ok: true, hasRows: Array.isArray(data) && data.length > 0 };
   };
 
+  const findMissingRollupRanges = (keys, daySet) => {
+    const ranges = [];
+    let rangeStart = null;
+    let rangeEnd = null;
+    for (const dayKey of keys) {
+      if (!daySet.has(dayKey)) {
+        if (!rangeStart) rangeStart = dayKey;
+        rangeEnd = dayKey;
+      } else if (rangeStart) {
+        ranges.push({ start: rangeStart, end: rangeEnd });
+        rangeStart = null;
+        rangeEnd = null;
+      }
+    }
+    if (rangeStart) ranges.push({ start: rangeStart, end: rangeEnd });
+    return ranges;
+  };
+
   if (isUtcTimeZone(tzContext)) {
     const rollupRes = await fetchRollupRows({
       edgeClient: auth.edgeClient,
@@ -209,20 +229,31 @@ module.exports = withRequestLogging('vibescore-usage-daily', async function(requ
         ingestRow(row);
       }
 
-      const expectedDays = dayKeys.length;
-      if (expectedDays > 0) {
-        const daySet = new Set();
-        for (const row of rows) {
-          if (row?.day) daySet.add(row.day);
-        }
-        if (daySet.size < expectedDays) {
-          const hourlyCheck = await hasHourlyData(startIso, endIso);
+      const daySet = new Set();
+      for (const row of rows) {
+        if (row?.day) daySet.add(row.day);
+      }
+      const missingRanges = findMissingRollupRanges(dayKeys, daySet);
+      if (missingRanges.length > 0) {
+        for (const range of missingRanges) {
+          const startParts = parseDateParts(range.start);
+          const endParts = parseDateParts(range.end);
+          const startDate = dateFromPartsUTC(startParts);
+          const endDate = dateFromPartsUTC(endParts);
+          if (!startDate || !endDate) continue;
+          const hourlyCheck = await hasHourlyData(
+            startDate.toISOString(),
+            addUtcDays(endDate, 1).toISOString()
+          );
           if (!hourlyCheck.ok) {
             hourlyError = hourlyCheck.error;
-          } else if (hourlyCheck.hasRows) {
+            break;
+          }
+          if (hourlyCheck.hasRows) {
             resetAggregation();
             const hourlyRes = await sumHourlyRange();
             if (!hourlyRes.ok) hourlyError = hourlyRes.error;
+            break;
           }
         }
       }

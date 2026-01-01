@@ -159,23 +159,29 @@ module.exports = withRequestLogging('vibescore-usage-summary', async function(re
     return { ok: true, hasRows: Array.isArray(data) && data.length > 0 };
   };
 
-  const countRollupDays = async (fromDay, toDay) => {
-    let query = auth.edgeClient.database
-      .from('vibescore_tracker_daily_rollup')
-      .select('day')
-      .eq('user_id', auth.userId)
-      .gte('day', fromDay)
-      .lte('day', toDay);
-    if (source) query = query.eq('source', source);
-    if (model) query = query.eq('model', model);
-    query = applyCanaryFilter(query, { source, model });
-    const { data, error } = await query.order('day', { ascending: true });
-    if (error) return { ok: false, error };
-    const daySet = new Set();
-    for (const row of Array.isArray(data) ? data : []) {
-      if (row?.day) daySet.add(row.day);
+  const findMissingRollupRanges = (fromDate, toDate, daySet) => {
+    const ranges = [];
+    let cursor = new Date(fromDate.getTime());
+    let currentStart = null;
+
+    while (cursor.getTime() <= toDate.getTime()) {
+      const dayKey = formatDateUTC(cursor);
+      if (!daySet.has(dayKey)) {
+        if (!currentStart) currentStart = new Date(cursor.getTime());
+      } else if (currentStart) {
+        const endExclusive = addUtcDays(cursor, 0);
+        ranges.push({ start: currentStart, endExclusive });
+        currentStart = null;
+      }
+      cursor = addUtcDays(cursor, 1);
     }
-    return { ok: true, uniqueDays: daySet.size };
+
+    if (currentStart) {
+      const endExclusive = addUtcDays(toDate, 1);
+      ranges.push({ start: currentStart, endExclusive });
+    }
+
+    return ranges;
   };
 
   const sumRollupRange = async (fromDay, toDay) => {
@@ -192,7 +198,7 @@ module.exports = withRequestLogging('vibescore-usage-summary', async function(re
     rowCount += rows.length;
     rollupHit = true;
     for (const row of rows) ingestRow(row);
-    return { ok: true, rowsCount: rows.length };
+    return { ok: true, rowsCount: rows.length, rows };
   };
 
   const startDayUtc = new Date(Date.UTC(
@@ -232,40 +238,41 @@ module.exports = withRequestLogging('vibescore-usage-summary', async function(re
       if (!hourlyRes.ok) hourlyError = hourlyRes.error;
     }
 
-    if (!hourlyError) {
-      if (rollupStartDate.getTime() <= rollupEndDate.getTime()) {
-        const rollupRes = await sumRollupRange(
-          formatDateUTC(rollupStartDate),
-          formatDateUTC(rollupEndDate)
-        );
-        if (!rollupRes.ok) {
-          hourlyError = rollupRes.error;
-        } else {
-          const expectedDays = rollupEndDate.getTime() >= rollupStartDate.getTime()
-            ? Math.floor((rollupEndDate.getTime() - rollupStartDate.getTime()) / 86400000) + 1
-            : 0;
-          if (rollupRes.rowsCount === 0 && expectedDays > 0) {
-            const hourlyCheck = await hasHourlyData(startIso, endIso);
+    if (!hourlyError && rollupStartDate.getTime() <= rollupEndDate.getTime()) {
+      const rollupRes = await sumRollupRange(
+        formatDateUTC(rollupStartDate),
+        formatDateUTC(rollupEndDate)
+      );
+      if (!rollupRes.ok) {
+        hourlyError = rollupRes.error;
+      } else {
+        const daySet = new Set();
+        for (const row of Array.isArray(rollupRes.rows) ? rollupRes.rows : []) {
+          if (row?.day) daySet.add(row.day);
+        }
+        const missingRanges = findMissingRollupRanges(rollupStartDate, rollupEndDate, daySet);
+        if (missingRanges.length > 0) {
+          for (const range of missingRanges) {
+            const hourlyCheck = await hasHourlyData(
+              range.start.toISOString(),
+              range.endExclusive.toISOString()
+            );
             if (!hourlyCheck.ok) {
               hourlyError = hourlyCheck.error;
-            } else if (hourlyCheck.hasRows) {
-              rollupEmptyWithHourly = true;
+              break;
             }
-          } else if (expectedDays > 0) {
-            const rollupCount = await countRollupDays(
-              formatDateUTC(rollupStartDate),
-              formatDateUTC(rollupEndDate)
-            );
-            if (!rollupCount.ok) {
-              hourlyError = rollupCount.error;
-            } else if (rollupCount.uniqueDays < expectedDays) {
-              const hourlyCheck = await hasHourlyData(startIso, endIso);
-              if (!hourlyCheck.ok) {
-                hourlyError = hourlyCheck.error;
-              } else if (hourlyCheck.hasRows) {
-                rollupPartialWithHourly = true;
-              }
+            if (hourlyCheck.hasRows) {
+              rollupPartialWithHourly = true;
+              break;
             }
+          }
+        }
+        if (rollupRes.rowsCount === 0 && missingRanges.length > 0 && !rollupPartialWithHourly) {
+          const hourlyCheck = await hasHourlyData(startIso, endIso);
+          if (!hourlyCheck.ok) {
+            hourlyError = hourlyCheck.error;
+          } else if (hourlyCheck.hasRows) {
+            rollupEmptyWithHourly = true;
           }
         }
       }
