@@ -20,8 +20,8 @@ begin
     sum(coalesce(reasoning_output_tokens, 0))::bigint,
     now()
   from public.vibescore_tracker_hourly
-  where hour_start >= (p_from::timestamp at time zone 'UTC')
-    and hour_start < ((p_to + 1)::timestamp at time zone 'UTC')
+  where hour_start >= (p_from at time zone 'UTC')
+    and hour_start < ((p_to + 1) at time zone 'UTC')
   group by 1,2,3,4;
 end;
 $$ language plpgsql;
