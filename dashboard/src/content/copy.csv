@@ -23,6 +23,8 @@ landing.hero.title_primary,landing,LandingPage,LandingPage,hero_title_primary,"M
 landing.hero.title_secondary,landing,LandingPage,LandingPage,hero_title_secondary,"MORE_VIBE.",,active
 landing.hero.tagline,landing,LandingPage,LandingPage,hero_tagline,"CODEX / CLAUDE CODE / GEMINI CLI TRACKER",,active
 landing.hero.subtagline,landing,LandingPage,LandingPage,hero_subtagline,"Track Codex, Claude Code & Gemini CLI usage in real time.",,active
+landing.nav.login,landing,LandingPage,LandingPage,nav_login,"LOGIN",,active
+landing.nav.signup,landing,LandingPage,LandingPage,nav_signup,"SIGN UP",,active
 landing.seo.title,landing,LandingPage,LandingPage,seo_title,"Quantify Codex, Claude Code & Gemini CLI Usage",,active
 landing.seo.summary,landing,LandingPage,LandingPage,seo_summary,"VibeScore is a token usage tracker built for AI CLI users (Codex, Claude, Gemini) who want a fast, reliable view of token spend.",,active
 landing.seo.point1,landing,LandingPage,LandingPage,seo_point_1,"Auto-track AI CLI token usage with zero manual steps.",,active
