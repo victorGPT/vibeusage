@@ -209,14 +209,21 @@ module.exports = withRequestLogging('vibescore-usage-daily', async function(requ
         ingestRow(row);
       }
 
-      if (rows.length === 0) {
-        const hourlyCheck = await hasHourlyData(startIso, endIso);
-        if (!hourlyCheck.ok) {
-          hourlyError = hourlyCheck.error;
-        } else if (hourlyCheck.hasRows) {
-          resetAggregation();
-          const hourlyRes = await sumHourlyRange();
-          if (!hourlyRes.ok) hourlyError = hourlyRes.error;
+      const expectedDays = dayKeys.length;
+      if (expectedDays > 0) {
+        const daySet = new Set();
+        for (const row of rows) {
+          if (row?.day) daySet.add(row.day);
+        }
+        if (daySet.size < expectedDays) {
+          const hourlyCheck = await hasHourlyData(startIso, endIso);
+          if (!hourlyCheck.ok) {
+            hourlyError = hourlyCheck.error;
+          } else if (hourlyCheck.hasRows) {
+            resetAggregation();
+            const hourlyRes = await sumHourlyRange();
+            if (!hourlyRes.ok) hourlyError = hourlyRes.error;
+          }
         }
       }
     } else {
