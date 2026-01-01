@@ -14,14 +14,29 @@ const IGNORED_DIRS = new Set([
   "dist",
   "build",
   ".tmp",
+  "archive",
 ]);
 
 const CLIENT_IMPORT_PATTERNS = ["insforge-src", "insforge-functions"];
+const CLIENT_INTERNAL_PATTERNS = ["INSFORGE_INTERNAL_URL"];
 const SERVICE_ROLE_PATTERNS = [
   "SERVICE_ROLE_KEY",
   "INSFORGE_SERVICE_ROLE_KEY",
   "service_role_key",
 ];
+const SDK_ALLOWLIST = new Set([
+  path.join("src", "lib", "insforge-client.js"),
+  path.join("src", "lib", "insforge-client.ts"),
+  path.join("dashboard", "src", "lib", "insforge-client.js"),
+  path.join("dashboard", "src", "lib", "insforge-client.ts"),
+]);
+
+const SDK_PACKAGE = "@insforge/sdk";
+
+function isSdkAllowlisted(file, root) {
+  const relativePath = path.normalize(path.relative(root, file));
+  return SDK_ALLOWLIST.has(relativePath);
+}
 
 function walkFiles(dir, options = {}, results = []) {
   if (!fs.existsSync(dir)) return results;
@@ -74,6 +89,7 @@ function scanClientFiles(root, errors) {
   const clientDirs = CLIENT_DIR_NAMES.map((dir) => path.join(root, dir));
   const files = clientDirs.flatMap((dir) => walkFiles(dir, { extensions: CODE_EXTENSIONS }));
   for (const file of files) {
+    const sdkAllowed = isSdkAllowlisted(file, root);
     const content = fs.readFileSync(file, "utf8");
     const lines = content.split(/\r\n|\r|\n/);
     lines.forEach((line, index) => {
@@ -81,6 +97,16 @@ function scanClientFiles(root, errors) {
         if (line.includes(pattern)) {
           errors.push({
             code: "CLIENT_IMPORT",
+            file,
+            line: index + 1,
+            message: `Client code must not reference ${pattern}.`,
+          });
+        }
+      });
+      CLIENT_INTERNAL_PATTERNS.forEach((pattern) => {
+        if (line.includes(pattern)) {
+          errors.push({
+            code: "CLIENT_INTERNAL_URL",
             file,
             line: index + 1,
             message: `Client code must not reference ${pattern}.`,
@@ -97,6 +123,14 @@ function scanClientFiles(root, errors) {
           });
         }
       });
+      if (line.includes(SDK_PACKAGE) && !sdkAllowed) {
+        errors.push({
+          code: "CLIENT_SDK_IMPORT",
+          file,
+          line: index + 1,
+          message: `Client code may only import ${SDK_PACKAGE} from approved wrapper files.`,
+        });
+      }
     });
   }
 }

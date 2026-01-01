@@ -24,6 +24,33 @@ test("guardrails flag client imports and service role keys", () => {
   assert.deepEqual(codes, ["CLIENT_IMPORT", "SERVICE_ROLE_KEY"].sort());
 });
 
+test("guardrails flag internal URL usage and non-wrapper SDK imports", () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "guardrails-"));
+  writeFile(
+    path.join(root, "src", "feature.js"),
+    "import { createClient } from '@insforge/sdk';\n"
+  );
+  writeFile(
+    path.join(root, "dashboard", "page.tsx"),
+    "const baseUrl = process.env.INSFORGE_INTERNAL_URL;\n"
+  );
+
+  const { errors } = runGuardrails({ root });
+  const codes = errors.map((err) => err.code).sort();
+  assert.deepEqual(codes, ["CLIENT_INTERNAL_URL", "CLIENT_SDK_IMPORT"].sort());
+});
+
+test("guardrails allow SDK usage in approved wrapper", () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "guardrails-"));
+  writeFile(
+    path.join(root, "src", "lib", "insforge-client.js"),
+    "import { createClient } from '@insforge/sdk';\n"
+  );
+
+  const { errors } = runGuardrails({ root });
+  assert.equal(errors.length, 0);
+});
+
 test("guardrails flag SQL money and timestamp", () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "guardrails-"));
   writeFile(

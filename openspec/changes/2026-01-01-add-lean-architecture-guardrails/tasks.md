@@ -16,6 +16,9 @@
 - [x] 3.3 Update verification report after implementation
 - [x] 3.4 Add CI guardrail workflow
 - [x] 3.5 Sync stable spec with guardrail requirements
+- [x] 3.6 Extend guardrails for client SDK/internal URL boundaries
+- [x] 3.7 Update guardrail tests and verification report
+- [x] 3.8 Sync spec deltas for client SDK boundaries
 
 ## 4. Canvas Sync
 - [x] 4.1 Refresh canvas before planning

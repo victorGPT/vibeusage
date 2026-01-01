@@ -25,3 +25,11 @@ The system SHALL enforce least-privilege access boundaries between clients and t
 - **WHEN** the dashboard or CLI needs data
 - **THEN** it SHALL authenticate via user or device tokens
 - **AND** it SHALL NOT use service-role credentials directly
+
+### Requirement: Client SDK access is centralized
+The system SHALL restrict InsForge SDK usage in client code to approved wrapper modules and SHALL prevent clients from referencing internal base URLs.
+
+#### Scenario: Client module needs InsForge access
+- **WHEN** the CLI or dashboard needs to call InsForge
+- **THEN** it SHALL import SDK access only via `src/lib/insforge-client` or `dashboard/src/lib/insforge-client`
+- **AND** it SHALL NOT reference `INSFORGE_INTERNAL_URL` directly

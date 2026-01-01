@@ -37,6 +37,7 @@
 - UUIDs are normalized before idempotency comparisons.
 - No prompt/response content is persisted or uploaded.
 - All database writes are mediated by Edge Functions.
+- Client SDK access is centralized via approved `insforge-client` wrappers; client code must not reference `INSFORGE_INTERNAL_URL`.
 
 ## Assumptions
 - Small team (<=5 engineers) and low operational budget.

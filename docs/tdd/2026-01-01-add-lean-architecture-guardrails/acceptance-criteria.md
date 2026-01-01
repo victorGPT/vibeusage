@@ -10,6 +10,14 @@
 - THEN it SHALL call Edge Functions via SDK/HTTP
 - AND it SHALL NOT access the database directly
 
+### Requirement: Centralized client SDK access
+- Rationale: Keep credentials centralized and reduce coupling across client modules.
+
+#### Scenario: Client module needs InsForge access
+- WHEN a CLI or dashboard module needs InsForge data
+- THEN it SHALL use the approved `insforge-client` wrapper
+- AND it SHALL NOT reference `INSFORGE_INTERNAL_URL` directly
+
 ### Requirement: PostgreSQL is the single source of truth
 - Rationale: Reduce redundancy and operational cost while preserving data integrity.
 

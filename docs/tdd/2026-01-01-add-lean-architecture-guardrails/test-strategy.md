@@ -20,6 +20,7 @@
 
 ## Test Matrix
 - Module boundaries -> Integration -> Backend/CLI owners -> API contract tests
+- Client SDK boundary -> Unit -> Frontend/CLI owners -> guardrail script checks
 - Postgres single source of truth -> Regression -> Backend owners -> storage path review checklist
 - Data minimization -> Integration -> Backend owners -> ingest allowlist tests
 - Schema safety -> Unit/Review -> Backend owners -> migration checklist
@@ -32,6 +33,7 @@
 ## Automation Plan
 - Extend `node --test test/edge-functions.test.js` for boundary cases.
 - Add lightweight schema/contract checks in CI (future task).
+- Enforce client SDK/internal URL guardrails via `scripts/validate-architecture-guardrails.cjs`.
 
 ## Entry / Exit Criteria
 - Entry: Requirements + acceptance criteria approved.
