@@ -142,6 +142,23 @@ module.exports = withRequestLogging('vibescore-usage-summary', async function(re
     return { ok: true };
   };
 
+  const hasHourlyData = async (rangeStartIso, rangeEndIso) => {
+    let query = auth.edgeClient.database
+      .from('vibescore_tracker_hourly')
+      .select('hour_start')
+      .eq('user_id', auth.userId);
+    if (source) query = query.eq('source', source);
+    if (model) query = query.eq('model', model);
+    query = applyCanaryFilter(query, { source, model });
+    const { data, error } = await query
+      .gte('hour_start', rangeStartIso)
+      .lt('hour_start', rangeEndIso)
+      .order('hour_start', { ascending: true })
+      .limit(1);
+    if (error) return { ok: false, error };
+    return { ok: true, hasRows: Array.isArray(data) && data.length > 0 };
+  };
+
   const sumRollupRange = async (fromDay, toDay) => {
     const rollupRes = await fetchRollupRows({
       edgeClient: auth.edgeClient,
@@ -156,7 +173,7 @@ module.exports = withRequestLogging('vibescore-usage-summary', async function(re
     rowCount += rows.length;
     rollupHit = true;
     for (const row of rows) ingestRow(row);
-    return { ok: true };
+    return { ok: true, rowsCount: rows.length };
   };
 
   const startDayUtc = new Date(Date.UTC(
@@ -175,6 +192,7 @@ module.exports = withRequestLogging('vibescore-usage-summary', async function(re
   const endIsBoundary = endUtc.getTime() === endDayUtc.getTime();
 
   let hourlyError = null;
+  let rollupEmptyWithHourly = false;
   if (sameUtcDay) {
     const hourlyRes = await sumHourlyRange(startIso, endIso);
     if (!hourlyRes.ok) hourlyError = hourlyRes.error;
@@ -202,12 +220,19 @@ module.exports = withRequestLogging('vibescore-usage-summary', async function(re
         );
         if (!rollupRes.ok) {
           hourlyError = rollupRes.error;
+        } else if (rollupRes.rowsCount === 0) {
+          const hourlyCheck = await hasHourlyData(startIso, endIso);
+          if (!hourlyCheck.ok) {
+            hourlyError = hourlyCheck.error;
+          } else if (hourlyCheck.hasRows) {
+            rollupEmptyWithHourly = true;
+          }
         }
       }
     }
   }
 
-  if (hourlyError) {
+  if (hourlyError || rollupEmptyWithHourly) {
     resetAggregation();
     const fallbackRes = await sumHourlyRange(startIso, endIso);
     if (!fallbackRes.ok) {

@@ -105,6 +105,8 @@ module.exports = withRequestLogging('vibescore-usage-daily', async function(requ
     totals = createTotals();
     sourcesMap = new Map();
     distinctModels = new Set();
+    rowCount = 0;
+    rollupHit = false;
   };
 
   const ingestRow = (row) => {
@@ -165,6 +167,23 @@ module.exports = withRequestLogging('vibescore-usage-daily', async function(requ
     return { ok: true };
   };
 
+  const hasHourlyData = async (rangeStartIso, rangeEndIso) => {
+    let query = auth.edgeClient.database
+      .from('vibescore_tracker_hourly')
+      .select('hour_start')
+      .eq('user_id', auth.userId);
+    if (source) query = query.eq('source', source);
+    if (model) query = query.eq('model', model);
+    query = applyCanaryFilter(query, { source, model });
+    const { data, error } = await query
+      .gte('hour_start', rangeStartIso)
+      .lt('hour_start', rangeEndIso)
+      .order('hour_start', { ascending: true })
+      .limit(1);
+    if (error) return { ok: false, error };
+    return { ok: true, hasRows: Array.isArray(data) && data.length > 0 };
+  };
+
   if (isUtcTimeZone(tzContext)) {
     const rollupRes = await fetchRollupRows({
       edgeClient: auth.edgeClient,
@@ -188,6 +207,17 @@ module.exports = withRequestLogging('vibescore-usage-daily', async function(requ
         bucket.output += toBigInt(row?.output_tokens);
         bucket.reasoning += toBigInt(row?.reasoning_output_tokens);
         ingestRow(row);
+      }
+
+      if (rows.length === 0) {
+        const hourlyCheck = await hasHourlyData(startIso, endIso);
+        if (!hourlyCheck.ok) {
+          hourlyError = hourlyCheck.error;
+        } else if (hourlyCheck.hasRows) {
+          resetAggregation();
+          const hourlyRes = await sumHourlyRange();
+          if (!hourlyRes.ok) hourlyError = hourlyRes.error;
+        }
       }
     } else {
       resetAggregation();
