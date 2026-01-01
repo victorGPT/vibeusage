@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.2.6] - 2026-01-01
+### Changed
+- Refresh CLI init install flow copy (local report → auth transition → success).
+- Update confirmation prompt and success box messaging.
+
 ## [0.2.4] - 2025-12-30
 ### Fixed
 - Skip Codex notify install when Codex config is missing.
