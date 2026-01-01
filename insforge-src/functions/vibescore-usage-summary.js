@@ -159,6 +159,25 @@ module.exports = withRequestLogging('vibescore-usage-summary', async function(re
     return { ok: true, hasRows: Array.isArray(data) && data.length > 0 };
   };
 
+  const countRollupDays = async (fromDay, toDay) => {
+    let query = auth.edgeClient.database
+      .from('vibescore_tracker_daily_rollup')
+      .select('day')
+      .eq('user_id', auth.userId)
+      .gte('day', fromDay)
+      .lte('day', toDay);
+    if (source) query = query.eq('source', source);
+    if (model) query = query.eq('model', model);
+    query = applyCanaryFilter(query, { source, model });
+    const { data, error } = await query.order('day', { ascending: true });
+    if (error) return { ok: false, error };
+    const daySet = new Set();
+    for (const row of Array.isArray(data) ? data : []) {
+      if (row?.day) daySet.add(row.day);
+    }
+    return { ok: true, uniqueDays: daySet.size };
+  };
+
   const sumRollupRange = async (fromDay, toDay) => {
     const rollupRes = await fetchRollupRows({
       edgeClient: auth.edgeClient,
@@ -193,6 +212,7 @@ module.exports = withRequestLogging('vibescore-usage-summary', async function(re
 
   let hourlyError = null;
   let rollupEmptyWithHourly = false;
+  let rollupPartialWithHourly = false;
   if (sameUtcDay) {
     const hourlyRes = await sumHourlyRange(startIso, endIso);
     if (!hourlyRes.ok) hourlyError = hourlyRes.error;
@@ -220,19 +240,39 @@ module.exports = withRequestLogging('vibescore-usage-summary', async function(re
         );
         if (!rollupRes.ok) {
           hourlyError = rollupRes.error;
-        } else if (rollupRes.rowsCount === 0) {
-          const hourlyCheck = await hasHourlyData(startIso, endIso);
-          if (!hourlyCheck.ok) {
-            hourlyError = hourlyCheck.error;
-          } else if (hourlyCheck.hasRows) {
-            rollupEmptyWithHourly = true;
+        } else {
+          const expectedDays = rollupEndDate.getTime() >= rollupStartDate.getTime()
+            ? Math.floor((rollupEndDate.getTime() - rollupStartDate.getTime()) / 86400000) + 1
+            : 0;
+          if (rollupRes.rowsCount === 0 && expectedDays > 0) {
+            const hourlyCheck = await hasHourlyData(startIso, endIso);
+            if (!hourlyCheck.ok) {
+              hourlyError = hourlyCheck.error;
+            } else if (hourlyCheck.hasRows) {
+              rollupEmptyWithHourly = true;
+            }
+          } else if (expectedDays > 0) {
+            const rollupCount = await countRollupDays(
+              formatDateUTC(rollupStartDate),
+              formatDateUTC(rollupEndDate)
+            );
+            if (!rollupCount.ok) {
+              hourlyError = rollupCount.error;
+            } else if (rollupCount.uniqueDays < expectedDays) {
+              const hourlyCheck = await hasHourlyData(startIso, endIso);
+              if (!hourlyCheck.ok) {
+                hourlyError = hourlyCheck.error;
+              } else if (hourlyCheck.hasRows) {
+                rollupPartialWithHourly = true;
+              }
+            }
           }
         }
       }
     }
   }
 
-  if (hourlyError || rollupEmptyWithHourly) {
+  if (hourlyError || rollupEmptyWithHourly || rollupPartialWithHourly) {
     resetAggregation();
     const fallbackRes = await sumHourlyRange(startIso, endIso);
     if (!fallbackRes.ok) {
