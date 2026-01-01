@@ -44,6 +44,8 @@ function useDeferredMount(delayMs = 0) {
 export function LandingPage({ signInUrl, signUpUrl }) {
   const specialHandle = copy("landing.handle.special");
   const defaultHandle = copy("landing.handle.default");
+  const loginLabel = copy("landing.nav.login");
+  const signupLabel = copy("landing.nav.signup");
   const [handle, setHandle] = useState(defaultHandle);
   const effectsReady = useDeferredMount(250);
   const installEntryKey = "vibescore.dashboard.from_landing.v1";
@@ -88,18 +90,27 @@ export function LandingPage({ signInUrl, signUpUrl }) {
           <MatrixRain />
         </Suspense>
       ) : null}
-      <GithubStar />
-      <div className="absolute top-6 right-6 z-20 flex flex-col items-end gap-3 sm:flex-row sm:items-center">
-        <MatrixButton as="a" size="header" href={signInUrl}>
-          {copy("landing.nav.login")}
+      <div className="fixed top-6 right-6 z-[70] flex flex-col items-end space-y-3 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-3">
+        <GithubStar isFixed={false} size="header" />
+        <MatrixButton
+          as="a"
+          href={signInUrl}
+          size="header"
+          className="matrix-header-action--ghost"
+        >
+          <span className="font-matrix font-black text-caption tracking-[0.12em] text-matrix-primary">
+            {loginLabel}
+          </span>
         </MatrixButton>
         <MatrixButton
           as="a"
-          size="header"
           href={signUpUrl}
-          className="bg-matrix-primary text-black border-matrix-primary hover:bg-white hover:border-white"
+          size="header"
+          className="matrix-header-chip--solid"
         >
-          {copy("landing.nav.signup")}
+          <span className="font-matrix font-black text-caption tracking-[0.12em] text-black">
+            {signupLabel}
+          </span>
         </MatrixButton>
       </div>
       <div className="pointer-events-none fixed inset-0 z-50 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.1)_50%)] bg-[length:100%_4px]"></div>
