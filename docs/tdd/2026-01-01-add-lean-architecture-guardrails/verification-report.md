@@ -14,6 +14,7 @@
 - Guardrail script: `scripts/validate-architecture-guardrails.cjs`.
 - Test coverage: `test/architecture-guardrails.test.js`.
 - CI gate: `.github/workflows/guardrails.yml`.
+- Stable spec updated: `openspec/specs/vibescore-tracker/spec.md`.
 
 ## Remaining Risks
 - Guardrails are documented but not yet enforced in code.

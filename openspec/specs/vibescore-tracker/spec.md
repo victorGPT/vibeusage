@@ -154,6 +154,32 @@ The system MUST NOT retain per-event token usage data beyond 30 days (if any eve
 - **WHEN** the retention job runs
 - **THEN** those rows SHALL be removed
 
+### Requirement: PostgreSQL is the single source of truth for aggregates
+The system SHALL treat PostgreSQL as the single source of truth for usage aggregates, and SHALL only introduce redundant stores with explicit justification and rollback documentation.
+
+#### Scenario: Redundant storage proposal
+- **WHEN** a new cache or derived store for aggregates is proposed
+- **THEN** the proposal SHALL document the primary source of truth and a rollback plan
+- **AND** it SHALL include measurable performance justification
+
+### Requirement: Schema guardrails for new tables
+The system SHALL apply PostgreSQL schema guardrails to new tables and columns to minimize long-term performance and correctness debt.
+
+#### Scenario: New table or column is introduced
+- **WHEN** a new schema element is added
+- **THEN** timestamps SHALL use `timestamptz`
+- **AND** money SHALL use `numeric`
+- **AND** required fields SHALL be `NOT NULL` with defaults where appropriate
+- **AND** foreign key columns SHALL be indexed
+
+### Requirement: Least-privilege database access
+The system SHALL enforce least-privilege access boundaries between clients and the database.
+
+#### Scenario: Client reads data
+- **WHEN** the dashboard or CLI needs data
+- **THEN** it SHALL authenticate via user or device tokens
+- **AND** it SHALL NOT use service-role credentials directly
+
 ### Requirement: Device token authentication boundary
 The ingest API MUST authenticate devices using a long-lived device token, and MUST NOT require the CLI to store a user JWT long-term.
 
