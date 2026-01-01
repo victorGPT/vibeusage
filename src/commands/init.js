@@ -34,14 +34,11 @@ const {
   CYAN,
   RESET,
   color,
-  underline,
-  renderBox,
   isInteractive,
   promptMenu,
-  promptEnter,
-  createSpinner,
-  formatSummaryLine
+  createSpinner
 } = require('../lib/cli-ui');
+const { renderLocalReport, renderAuthTransition, renderSuccessBox } = require('../lib/init-flow');
 
 const ASCII_LOGO = [
   '██╗   ██╗██╗██████╗ ███████╗███████╗ ██████╗  ██████╗ ██████╗ ███████╗',
@@ -80,11 +77,12 @@ async function cmdInit(argv) {
 
   if (isInteractive() && !opts.yes && !opts.dryRun) {
     const choice = await promptMenu({
-      message: '? How would you like to proceed?',
-      options: ['Start Setup (Recommended)', 'Exit'],
+      message: '? Proceed with installation?',
+      options: ['Yes, configure my environment', 'No, exit'],
       defaultIndex: 0
     });
-    if (choice.toLowerCase().startsWith('exit')) {
+    const normalizedChoice = String(choice || '').trim().toLowerCase();
+    if (normalizedChoice.startsWith('no') || normalizedChoice.includes('exit')) {
       process.stdout.write('Setup cancelled.\n');
       return;
     }
@@ -98,7 +96,7 @@ async function cmdInit(argv) {
       configPath,
       notifyPath
     });
-    renderTransparencyReport({ summary: preview.summary, isDryRun: true });
+    renderLocalReport({ summary: preview.summary, isDryRun: true });
     if (preview.pendingBrowserAuth) {
       process.stdout.write('Account linking would be required for full setup.\n');
     } else if (!preview.deviceToken) {
@@ -130,11 +128,7 @@ async function cmdInit(argv) {
   }
   spinner.stop();
 
-  renderTransparencyReport({
-    summary: setup.summary,
-    isDryRun: false,
-    includeDivider: setup.pendingBrowserAuth
-  });
+  renderLocalReport({ summary: setup.summary, isDryRun: false });
 
   let deviceToken = setup.deviceToken;
   let deviceId = setup.deviceId;
@@ -144,10 +138,7 @@ async function cmdInit(argv) {
     if (!dashboardUrl) dashboardUrl = await detectLocalDashboardUrl();
     const flow = await beginBrowserAuth({ baseUrl, dashboardUrl, timeoutMs: 10 * 60_000, open: false });
     const canAutoOpen = !opts.noOpen;
-    renderFinalStep({ authUrl: flow.authUrl, canAutoOpen });
-    if (canAutoOpen && isInteractive()) {
-      await promptEnter('');
-    }
+    renderAuthTransition({ authUrl: flow.authUrl, canAutoOpen });
     if (canAutoOpen) {
       if (isInteractive()) await sleep(250);
       openInBrowser(flow.authUrl);
@@ -158,9 +149,12 @@ async function cmdInit(argv) {
     deviceId = issued.deviceId;
     await writeJson(configPath, { baseUrl, deviceToken, deviceId, installedAt: setup.installedAt });
     await chmod600IfPossible(configPath);
-    renderSuccessBox({ deviceId, configPath });
+    const resolvedDashboardUrl = dashboardUrl || null;
+    renderSuccessBox({ configPath, dashboardUrl: resolvedDashboardUrl });
   } else if (deviceToken) {
-    renderSuccessBox({ deviceId, configPath });
+    if (!dashboardUrl) dashboardUrl = await detectLocalDashboardUrl();
+    const resolvedDashboardUrl = dashboardUrl || null;
+    renderSuccessBox({ configPath, dashboardUrl: resolvedDashboardUrl });
   } else {
     renderAccountNotLinked();
   }
@@ -192,39 +186,6 @@ function renderWelcome() {
       ''
     ].join('\n')
   );
-}
-
-function renderTransparencyReport({ summary, isDryRun, includeDivider = false }) {
-  const header = isDryRun ? 'Dry run complete. Preview only; no changes were applied.' : 'Local setup complete.';
-  const lines = [header, '', "We've integrated VibeScore with:"];
-  for (const item of summary) lines.push(formatSummaryLine(item));
-  if (includeDivider) lines.push('', DIVIDER, '');
-  process.stdout.write(`${lines.join('\n')}\n`);
-}
-
-function renderFinalStep({ authUrl, canAutoOpen }) {
-  const lines = [
-    'Final Step: Link your account',
-    '',
-    canAutoOpen ? 'Press [Enter] to open your browser and sign in.' : 'Open the link below to sign in.'
-  ];
-  if (authUrl) lines.push(`(Or visit: ${underline(authUrl)})`);
-  lines.push('');
-  process.stdout.write(lines.join('\n'));
-}
-
-function renderSuccessBox({ deviceId, configPath }) {
-  const identityLine = deviceId ? `Device ID: ${deviceId}` : 'Account linked.';
-  const lines = [
-    'You are all set!',
-    '',
-    identityLine,
-    `Token saved to: ${configPath}`,
-    '',
-    'VibeScore is now running in the background.',
-    'You can close this terminal window.'
-  ];
-  process.stdout.write(`${renderBox(lines)}\n`);
 }
 
 function renderAccountNotLinked({ context } = {}) {

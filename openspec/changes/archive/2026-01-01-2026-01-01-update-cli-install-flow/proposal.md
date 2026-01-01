@@ -6,7 +6,7 @@
 - A brand-consistent, low-noise flow reduces cognitive load during onboarding.
 
 ## What Changes
-- Add a consent-first menu before any filesystem changes (Start Setup / Dry Run / Exit).
+- Add a consent-first menu before any filesystem changes (Yes, configure my environment / No, exit).
 - Suppress verbose logs during setup; show a single spinner instead.
 - Emit a structured “Transparency Report” summary after setup (updated vs skipped integrations).
 - Provide an explicit “Final Step” for account linking (press Enter to open browser).

@@ -58,10 +58,9 @@ This tool will:
 
 (Nothing will be changed until you confirm below)
 
-? How would you like to proceed?
-  ❯ Start Setup       (Recommended)
-    Dry Run           (Preview changes without applying)
-    Exit
+? Proceed with installation?
+  ❯ Yes, configure my environment
+    No, exit
 ```
 
 ### Phase 2: The Elegant Wait
@@ -96,10 +95,8 @@ We've integrated VibeScore with:
 │ 🎉 You're all set!                           │
 │                                              │
 │ Account linked.                              │
-│ Device ID: <device_id>                       │
 │ Token saved to: ~/.vibescore/tracker/config.json │
 │                                              │
-│ VibeScore is now running in the background.  │
 │ You can close this terminal window.          │
 └──────────────────────────────────────────────┘
 ```

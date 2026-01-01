@@ -25,6 +25,9 @@ const EXCLUDED_DIRS = new Set([
   "dist",
   "build",
   ".git",
+  ".worktrees",
+  "worktrees",
+  ".tmp",
   "insforge-functions",
 ]);
 
