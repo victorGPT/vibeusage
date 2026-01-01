@@ -109,7 +109,7 @@
     {
       "id": "test_architecture-guardrails_test_b833cfeb",
       "type": "text",
-      "text": "**architecture-guardrails.test**\n`test/architecture-guardrails.test.js`\n\nTest module.\n\n包含：\n- architecture-guardrails.test (50 行)\n- writeFile (2 个参数)\n\n依赖：1 个模块\n被依赖：0 次",
+      "text": "**architecture-guardrails.test**\n`test/architecture-guardrails.test.js`\n\nTest module.\n\n包含：\n- architecture-guardrails.test (77 行)\n- writeFile (2 个参数)\n\n依赖：1 个模块\n被依赖：0 次",
       "x": 460,
       "y": 9944,
       "width": 280,
@@ -1072,7 +1072,7 @@
     {
       "id": "utils_date_82b9796d",
       "type": "text",
-      "text": "**date**\n`insforge-src/shared/date.js`\n\nShared utilities.\n\n包含：\n- date (324 行)\n- isDate (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+      "text": "**date**\n`insforge-src/shared/date.js`\n\nShared utilities.\n\n包含：\n- date (324 行)\n- isDate (1 个参数)\n\nStatus: Proposed\nNotes: Increase default VIBESCORE_USAGE_MAX_DAYS to 800 days.\n\n依赖：0 个模块\n被依赖：0 次",
       "x": 100,
       "y": 6548,
       "width": 280,
@@ -1480,7 +1480,7 @@
     {
       "id": "edge-function_vibescore-usage-daily_13bc8f2d",
       "type": "text",
-      "text": "**vibescore-usage-daily**\n`insforge-src/functions/vibescore-usage-daily.js`\n\nEdge function handler.\n\n包含：\n- vibescore-usage-daily (148 行)\n- respond (3 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+      "text": "**vibescore-usage-daily**\n`insforge-src/functions/vibescore-usage-daily.js`\n\nEdge function handler.\n\n包含：\n- vibescore-usage-daily (148 行)\n- respond (3 个参数)\n\nStatus: Proposed\nNotes: Increase default VIBESCORE_USAGE_MAX_DAYS to 800 days.\n\n依赖：0 个模块\n被依赖：0 次",
       "x": 460,
       "y": 5828,
       "width": 280,
@@ -1531,7 +1531,7 @@
     {
       "id": "edge-function_vibescore-usage-model-breakdown_846bd53b",
       "type": "text",
-      "text": "**vibescore-usage-model-breakdown**\n`insforge-src/functions/vibescore-usage-model-breakdown.js`\n\nEdge function handler.\n\n包含：\n- vibescore-usage-model-breakdown (231 行)\n- createTotals (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+      "text": "**vibescore-usage-model-breakdown**\n`insforge-src/functions/vibescore-usage-model-breakdown.js`\n\nEdge function handler.\n\n包含：\n- vibescore-usage-model-breakdown (231 行)\n- createTotals (0 个参数)\n\nStatus: Proposed\nNotes: Increase default VIBESCORE_USAGE_MAX_DAYS to 800 days.\n\n依赖：0 个模块\n被依赖：0 次",
       "x": 1540,
       "y": 5828,
       "width": 280,
@@ -1565,7 +1565,7 @@
     {
       "id": "edge-function_vibescore-usage-summary_57a00ab8",
       "type": "text",
-      "text": "**vibescore-usage-summary**\n`insforge-src/functions/vibescore-usage-summary.js`\n\nEdge function handler.\n\n包含：\n- vibescore-usage-summary (226 行)\n- createTotals (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+      "text": "**vibescore-usage-summary**\n`insforge-src/functions/vibescore-usage-summary.js`\n\nEdge function handler.\n\n包含：\n- vibescore-usage-summary (226 行)\n- createTotals (0 个参数)\n\nStatus: Proposed\nNotes: Increase default VIBESCORE_USAGE_MAX_DAYS to 800 days.\n\n依赖：0 个模块\n被依赖：0 次",
       "x": 100,
       "y": 6188,
       "width": 280,
