@@ -1594,6 +1594,18 @@ test('vibescore-usage-summary rejects oversized ranges', { concurrency: 1 }, asy
   }
 });
 
+test('getUsageMaxDays defaults to 800 days', { concurrency: 1 }, () => {
+  const { getUsageMaxDays } = require('../insforge-src/shared/date');
+  const prevMaxDays = process.env.VIBESCORE_USAGE_MAX_DAYS;
+  try {
+    delete process.env.VIBESCORE_USAGE_MAX_DAYS;
+    assert.equal(getUsageMaxDays(), 800);
+  } finally {
+    if (prevMaxDays === undefined) delete process.env.VIBESCORE_USAGE_MAX_DAYS;
+    else process.env.VIBESCORE_USAGE_MAX_DAYS = prevMaxDays;
+  }
+});
+
 test('vibescore-usage-daily rejects oversized ranges', { concurrency: 1 }, async () => {
   const fn = require('../insforge-functions/vibescore-usage-daily');
   const prevMaxDays = process.env.VIBESCORE_USAGE_MAX_DAYS;

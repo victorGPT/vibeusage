@@ -412,10 +412,10 @@ var require_date = __commonJS({
     }
     function getUsageMaxDays() {
       const raw = readEnvValue("VIBESCORE_USAGE_MAX_DAYS");
-      if (raw == null || raw === "") return 370;
+      if (raw == null || raw === "") return 800;
       const n = Number(raw);
-      if (!Number.isFinite(n)) return 370;
-      if (n <= 0) return 370;
+      if (!Number.isFinite(n)) return 800;
+      if (n <= 0) return 800;
       return clampInt(n, 1, 5e3);
     }
     function readEnvValue(key) {
