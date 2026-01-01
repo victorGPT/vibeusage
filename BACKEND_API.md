@@ -310,7 +310,7 @@ Response:
 
 Notes:
 - For idempotent retries, send a stable `id` or `idempotency_key` (the backend derives a deterministic id).
-- If the provided `id` already exists for a different `user_id`, the endpoint returns `409`.
+- If the `id` or `idempotency_key` already exists with a different payload, the endpoint returns `409`.
 
 ---
 
