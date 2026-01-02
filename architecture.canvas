@@ -1,3282 +1,1925 @@
 {
-  "nodes": [
-    {
-      "id": "group_e5883940",
-      "type": "group",
-      "x": 20,
-      "y": 20,
-      "width": 440,
-      "height": 392,
-      "label": "bin"
-    },
-    {
-      "id": "group_ef32b5e1",
-      "type": "group",
-      "x": 20,
-      "y": 552,
-      "width": 3320,
-      "height": 2912,
-      "label": "dashboard"
-    },
-    {
-      "id": "group_ff6083b8",
-      "type": "group",
-      "x": 20,
-      "y": 3604,
-      "width": 800,
-      "height": 752,
-      "label": "external"
-    },
-    {
-      "id": "group_5a3c3cc7",
-      "type": "group",
-      "x": 20,
-      "y": 4496,
-      "width": 2240,
-      "height": 2192,
-      "label": "insforge-src"
-    },
-    {
-      "id": "group_9697fe83",
-      "type": "group",
-      "x": 20,
-      "y": 6828,
-      "width": 440,
-      "height": 392,
-      "label": "root"
-    },
-    {
-      "id": "group_e5885d67",
-      "type": "group",
-      "x": 20,
-      "y": 7360,
-      "width": 1880,
-      "height": 1832,
-      "label": "src"
-    },
-    {
-      "id": "group_9692abd3",
-      "type": "group",
-      "x": 20,
-      "y": 9332,
-      "width": 2600,
-      "height": 2192,
-      "label": "test"
-    },
-    {
-      "id": "frontend_copy_bf33508f",
-      "type": "text",
-      "text": "**copy**\n`copy.jsx`\n\nUI component layer.\n\n包含：\n- copy (526 行)\n- App (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 100,
-      "y": 6908,
-      "width": 280,
-      "height": 232,
-      "color": "6",
-      "meta": {
-        "relPath": "copy.jsx",
-        "category": "frontend",
-        "group": "frontend",
-        "side": "left",
-        "layerIndex": 1
-      }
-    },
-    {
-      "id": "test_architecture-canvas_test_5f2ee083",
-      "type": "text",
-      "text": "**architecture-canvas.test**\n`test/architecture-canvas.test.js`\n\nTest module.\n\n包含：\n- UserController (64 行)\n- helper (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 100,
-      "y": 9412,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "test/architecture-canvas.test.js",
-        "category": "test",
-        "group": "test",
-        "side": "right",
-        "layerIndex": 6
-      }
-    },
-    {
-      "id": "test_architecture-guardrails_test_b833cfeb",
-      "type": "text",
-      "text": "**architecture-guardrails.test**\n`test/architecture-guardrails.test.js`\n\nTest module.\n\n包含：\n- architecture-guardrails.test (77 行)\n- writeFile (2 个参数)\n\n依赖：1 个模块\n被依赖：0 次",
-      "x": 460,
-      "y": 9412,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "test/architecture-guardrails.test.js",
-        "category": "test",
-        "group": "test",
-        "side": "right",
-        "layerIndex": 6
-      }
-    },
-    {
-      "id": "test_auto-retry_test_c3ddea79",
-      "type": "text",
-      "text": "**auto-retry.test**\n`test/auto-retry.test.js`\n\nTest module.\n\n包含：\n- auto-retry.test (67 行)\n- exports (0 个参数)\n\n依赖：1 个模块\n被依赖：0 次",
-      "x": 820,
-      "y": 9412,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "test/auto-retry.test.js",
-        "category": "test",
-        "group": "test",
-        "side": "right",
-        "layerIndex": 6
-      }
-    },
-    {
-      "id": "test_browser-auth_test_f3f470fa",
-      "type": "text",
-      "text": "**browser-auth.test**\n`test/browser-auth.test.js`\n\nTest module.\n\n包含：\n- browser-auth.test (55 行)\n- exports (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 1180,
-      "y": 9412,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "test/browser-auth.test.js",
-        "category": "test",
-        "group": "test",
-        "side": "right",
-        "layerIndex": 6
-      }
-    },
-    {
-      "id": "test_compact-number_test_7da4bcfa",
-      "type": "text",
-      "text": "**compact-number.test**\n`test/compact-number.test.js`\n\nTest module.\n\n包含：\n- compact-number.test (21 行)\n- exports (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 1540,
-      "y": 9412,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "test/compact-number.test.js",
-        "category": "test",
-        "group": "test",
-        "side": "right",
-        "layerIndex": 6
-      }
-    },
-    {
-      "id": "test_copy-usage-upgrade_test_d22d5763",
-      "type": "text",
-      "text": "**copy-usage-upgrade.test**\n`test/copy-usage-upgrade.test.js`\n\nTest module.\n\n包含：\n- copy-usage-upgrade.test (103 行)\n- read (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 1900,
-      "y": 9412,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "test/copy-usage-upgrade.test.js",
-        "category": "test",
-        "group": "test",
-        "side": "right",
-        "layerIndex": 6
-      }
-    },
-    {
-      "id": "test_dashboard-core-index-collapse_test_5bf8c314",
-      "type": "text",
-      "text": "**dashboard-core-index-collapse.test**\n`test/dashboard-core-index-collapse.test.js`\n\nTest module.\n\n包含：\n- dashboard-core-index-collapse.test (34 行)\n- read (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 2260,
-      "y": 9412,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "test/dashboard-core-index-collapse.test.js",
-        "category": "test",
-        "group": "test",
-        "side": "right",
-        "layerIndex": 6
-      }
-    },
-    {
-      "id": "test_dashboard-function-path_test_670b7fb8",
-      "type": "text",
-      "text": "**dashboard-function-path.test**\n`test/dashboard-function-path.test.js`\n\nTest module.\n\n包含：\n- dashboard-function-path.test (136 行)\n- jsonResponse (2 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 100,
-      "y": 9772,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "test/dashboard-function-path.test.js",
-        "category": "test",
-        "group": "test",
-        "side": "right",
-        "layerIndex": 6
-      }
-    },
-    {
-      "id": "test_dashboard-identity-start-date_test_24392bd8",
-      "type": "text",
-      "text": "**dashboard-identity-start-date.test**\n`test/dashboard-identity-start-date.test.js`\n\nTest module.\n\n包含：\n- dashboard-identity-start-date.test (73 行)\n- readFile (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 460,
-      "y": 9772,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "test/dashboard-identity-start-date.test.js",
-        "category": "test",
-        "group": "test",
-        "side": "right",
-        "layerIndex": 6
-      }
-    },
-    {
-      "id": "test_dashboard-link-code-expiry_test_34711098",
-      "type": "text",
-      "text": "**dashboard-link-code-expiry.test**\n`test/dashboard-link-code-expiry.test.js`\n\nTest module.\n\n包含：\n- dashboard-link-code-expiry.test (46 行)\n- readFile (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 820,
-      "y": 9772,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "test/dashboard-link-code-expiry.test.js",
-        "category": "test",
-        "group": "test",
-        "side": "right",
-        "layerIndex": 6
-      }
-    },
-    {
-      "id": "test_dashboard-link-code-install_test_88cee716",
-      "type": "text",
-      "text": "**dashboard-link-code-install.test**\n`test/dashboard-link-code-install.test.js`\n\nTest module.\n\n包含：\n- dashboard-link-code-install.test (54 行)\n- readFile (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 1180,
-      "y": 9772,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "test/dashboard-link-code-install.test.js",
-        "category": "test",
-        "group": "test",
-        "side": "right",
-        "layerIndex": 6
-      }
-    },
-    {
-      "id": "test_dashboard-render-order_test_4a2781b3",
-      "type": "text",
-      "text": "**dashboard-render-order.test**\n`test/dashboard-render-order.test.js`\n\nTest module.\n\n包含：\n- dashboard-render-order.test (47 行)\n- exports (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 1540,
-      "y": 9772,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "test/dashboard-render-order.test.js",
-        "category": "test",
-        "group": "test",
-        "side": "right",
-        "layerIndex": 6
-      }
-    },
-    {
-      "id": "test_dashboard-session-expired-banner_test_12598be7",
-      "type": "text",
-      "text": "**dashboard-session-expired-banner.test**\n`test/dashboard-session-expired-banner.test.js`\n\nTest module.\n\n包含：\n- dashboard-session-expired-banner.test (55 行)\n- read (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 1900,
-      "y": 9772,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "test/dashboard-session-expired-banner.test.js",
-        "category": "test",
-        "group": "test",
-        "side": "right",
-        "layerIndex": 6
-      }
-    },
-    {
-      "id": "test_details-pagination_test_d5f7d3d0",
-      "type": "text",
-      "text": "**details-pagination.test**\n`test/details-pagination.test.js`\n\nTest module.\n\n包含：\n- details-pagination.test (24 行)\n- exports (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 2260,
-      "y": 9772,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "test/details-pagination.test.js",
-        "category": "test",
-        "group": "test",
-        "side": "right",
-        "layerIndex": 6
-      }
-    },
-    {
-      "id": "test_details-sort_test_da4ba0e6",
-      "type": "text",
-      "text": "**details-sort.test**\n`test/details-sort.test.js`\n\nTest module.\n\n包含：\n- details-sort.test (31 行)\n- exports (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 100,
-      "y": 10132,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "test/details-sort.test.js",
-        "category": "test",
-        "group": "test",
-        "side": "right",
-        "layerIndex": 6
-      }
-    },
-    {
-      "id": "test_details-trim_test_28850afe",
-      "type": "text",
-      "text": "**details-trim.test**\n`test/details-trim.test.js`\n\nTest module.\n\n包含：\n- details-trim.test (64 行)\n- exports (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 460,
-      "y": 10132,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "test/details-trim.test.js",
-        "category": "test",
-        "group": "test",
-        "side": "right",
-        "layerIndex": 6
-      }
-    },
-    {
-      "id": "test_diagnostics_test_c18ca227",
-      "type": "text",
-      "text": "**diagnostics.test**\n`test/diagnostics.test.js`\n\nTest module.\n\n包含：\n- diagnostics.test (92 行)\n- exports (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 820,
-      "y": 10132,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "test/diagnostics.test.js",
-        "category": "test",
-        "group": "test",
-        "side": "right",
-        "layerIndex": 6
-      }
-    },
-    {
-      "id": "test_edge-functions_test_deffefcc",
-      "type": "text",
-      "text": "**edge-functions.test**\n`test/edge-functions.test.js`\n\nTest module.\n\n包含：\n- edge-functions.test (2794 行)\n- toBase64Url (1 个参数)\n\n依赖：2 个模块\n被依赖：0 次",
-      "x": 1180,
-      "y": 10132,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "test/edge-functions.test.js",
-        "category": "test",
-        "group": "test",
-        "side": "right",
-        "layerIndex": 6
-      }
-    },
-    {
-      "id": "test_http-timeout_test_d4be419d",
-      "type": "text",
-      "text": "**http-timeout.test**\n`test/http-timeout.test.js`\n\nTest module.\n\n包含：\n- http-timeout.test (148 行)\n- loadModule (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 1540,
-      "y": 10132,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "test/http-timeout.test.js",
-        "category": "test",
-        "group": "test",
-        "side": "right",
-        "layerIndex": 6
-      }
-    },
-    {
-      "id": "test_init-confirm-copy_test_6d91b67e",
-      "type": "text",
-      "text": "**init-confirm-copy.test**\n`test/init-confirm-copy.test.js`\n\nTest module.\n\n包含：\n- init-confirm-copy.test (69 行)\n- loadInitWithStubs (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 1900,
-      "y": 10132,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "test/init-confirm-copy.test.js",
-        "category": "test",
-        "group": "test",
-        "side": "right",
-        "layerIndex": 6
-      }
-    },
-    {
-      "id": "test_init-dry-run_test_a88727af",
-      "type": "text",
-      "text": "**init-dry-run.test**\n`test/init-dry-run.test.js`\n\nTest module.\n\n包含：\n- init-dry-run.test (52 行)\n- stripAnsi (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 2260,
-      "y": 10132,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "test/init-dry-run.test.js",
-        "category": "test",
-        "group": "test",
-        "side": "right",
-        "layerIndex": 6
-      }
-    },
-    {
-      "id": "test_init-flow-copy_test_c9fa97e",
-      "type": "text",
-      "text": "**init-flow-copy.test**\n`test/init-flow-copy.test.js`\n\nTest module.\n\n包含：\n- init-flow-copy.test (112 行)\n- stripAnsi (1 个参数)\n\n依赖：1 个模块\n被依赖：0 次",
-      "x": 100,
-      "y": 10492,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "test/init-flow-copy.test.js",
-        "category": "test",
-        "group": "test",
-        "side": "right",
-        "layerIndex": 6
-      }
-    },
-    {
-      "id": "test_init-spawn-error_test_69948dca",
-      "type": "text",
-      "text": "**init-spawn-error.test**\n`test/init-spawn-error.test.js`\n\nTest module.\n\n包含：\n- init-spawn-error.test (15 行)\n- exports (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 460,
-      "y": 10492,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "test/init-spawn-error.test.js",
-        "category": "test",
-        "group": "test",
-        "side": "right",
-        "layerIndex": 6
-      }
-    },
-    {
-      "id": "test_init-uninstall_test_de3698fe",
-      "type": "text",
-      "text": "**init-uninstall.test**\n`test/init-uninstall.test.js`\n\nTest module.\n\n包含：\n- init-uninstall.test (623 行)\n- waitForFile (3 个参数)\n\n依赖：1 个模块\n被依赖：0 次",
-      "x": 820,
-      "y": 10492,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "test/init-uninstall.test.js",
-        "category": "test",
-        "group": "test",
-        "side": "right",
-        "layerIndex": 6
-      }
-    },
-    {
-      "id": "test_insforge-src-shared_test_110fa035",
-      "type": "text",
-      "text": "**insforge-src-shared.test**\n`test/insforge-src-shared.test.js`\n\nTest module.\n\n包含：\n- insforge-src-shared.test (42 行)\n- exports (0 个参数)\n\n依赖：1 个模块\n被依赖：0 次",
-      "x": 1180,
-      "y": 10492,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "test/insforge-src-shared.test.js",
-        "category": "test",
-        "group": "test",
-        "side": "right",
-        "layerIndex": 6
-      }
-    },
-    {
-      "id": "test_interaction-sequence-canvas_test_33aed5de",
-      "type": "text",
-      "text": "**interaction-sequence-canvas.test**\n`test/interaction-sequence-canvas.test.js`\n\nTest module.\n\n包含：\n- interaction-sequence-canvas.test (99 行)\n- writeFixture (3 个参数)\n\n依赖：1 个模块\n被依赖：0 次",
-      "x": 1540,
-      "y": 10492,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "test/interaction-sequence-canvas.test.js",
-        "category": "test",
-        "group": "test",
-        "side": "right",
-        "layerIndex": 6
-      }
-    },
-    {
-      "id": "test_link-code-exchange-payload_test_900230c6",
-      "type": "text",
-      "text": "**link-code-exchange-payload.test**\n`test/link-code-exchange-payload.test.js`\n\nTest module.\n\n包含：\n- link-code-exchange-payload.test (20 行)\n- exports (0 个参数)\n\n依赖：1 个模块\n被依赖：0 次",
-      "x": 1900,
-      "y": 10492,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "test/link-code-exchange-payload.test.js",
-        "category": "test",
-        "group": "test",
-        "side": "right",
-        "layerIndex": 6
-      }
-    },
-    {
-      "id": "test_link-code-request-id_test_ec56824f",
-      "type": "text",
-      "text": "**link-code-request-id.test**\n`test/link-code-request-id.test.js`\n\nTest module.\n\n包含：\n- link-code-request-id.test (109 行)\n- loadInitWithStubbedInsforge (1 个参数)\n\n依赖：1 个模块\n被依赖：0 次",
-      "x": 2260,
-      "y": 10492,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "test/link-code-request-id.test.js",
-        "category": "test",
-        "group": "test",
-        "side": "right",
-        "layerIndex": 6
-      }
-    },
-    {
-      "id": "test_link-code-rls_test_b5eb0eb3",
-      "type": "text",
-      "text": "**link-code-rls.test**\n`test/link-code-rls.test.js`\n\nTest module.\n\n包含：\n- link-code-rls.test (30 行)\n- exports (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 100,
-      "y": 10852,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "test/link-code-rls.test.js",
-        "category": "test",
-        "group": "test",
-        "side": "right",
-        "layerIndex": 6
-      }
-    },
-    {
-      "id": "test_model-breakdown_test_8dda311c",
-      "type": "text",
-      "text": "**model-breakdown.test**\n`test/model-breakdown.test.js`\n\nTest module.\n\n包含：\n- model-breakdown.test (38 行)\n- exports (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 460,
-      "y": 10852,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "test/model-breakdown.test.js",
-        "category": "test",
-        "group": "test",
-        "side": "right",
-        "layerIndex": 6
-      }
-    },
-    {
-      "id": "test_pro-status_test_b63d1907",
-      "type": "text",
-      "text": "**pro-status.test**\n`test/pro-status.test.js`\n\nTest module.\n\n包含：\n- pro-status.test (32 行)\n- exports (0 个参数)\n\n依赖：1 个模块\n被依赖：0 次",
-      "x": 820,
-      "y": 10852,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "test/pro-status.test.js",
-        "category": "test",
-        "group": "test",
-        "side": "right",
-        "layerIndex": 6
-      }
-    },
-    {
-      "id": "test_rollout-parser_test_e96ece4a",
-      "type": "text",
-      "text": "**rollout-parser.test**\n`test/rollout-parser.test.js`\n\nTest module.\n\n包含：\n- rollout-parser.test (1164 行)\n- buildTurnContextLine (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 1180,
-      "y": 10852,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "test/rollout-parser.test.js",
-        "category": "test",
-        "group": "test",
-        "side": "right",
-        "layerIndex": 6
-      }
-    },
-    {
-      "id": "test_safe-browser_test_3daea783",
-      "type": "text",
-      "text": "**safe-browser.test**\n`test/safe-browser.test.js`\n\nTest module.\n\n包含：\n- safe-browser.test (66 行)\n- exports (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 1540,
-      "y": 10852,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "test/safe-browser.test.js",
-        "category": "test",
-        "group": "test",
-        "side": "right",
-        "layerIndex": 6
-      }
-    },
-    {
-      "id": "test_status_test_16fa5027",
-      "type": "text",
-      "text": "**status.test**\n`test/status.test.js`\n\nTest module.\n\n包含：\n- status.test (66 行)\n- exports (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 1900,
-      "y": 10852,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "test/status.test.js",
-        "category": "test",
-        "group": "test",
-        "side": "right",
-        "layerIndex": 6
-      }
-    },
-    {
-      "id": "test_upload-throttle_test_46c0db95",
-      "type": "text",
-      "text": "**upload-throttle.test**\n`test/upload-throttle.test.js`\n\nTest module.\n\n包含：\n- upload-throttle.test (103 行)\n- exports (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 2260,
-      "y": 10852,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "test/upload-throttle.test.js",
-        "category": "test",
-        "group": "test",
-        "side": "right",
-        "layerIndex": 6
-      }
-    },
-    {
-      "id": "test_uploader_test_2bc50c67",
-      "type": "text",
-      "text": "**uploader.test**\n`test/uploader.test.js`\n\nTest module.\n\n包含：\n- uploader.test (125 行)\n- stubIngestHourly (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 100,
-      "y": 11212,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "test/uploader.test.js",
-        "category": "test",
-        "group": "test",
-        "side": "right",
-        "layerIndex": 6
-      }
-    },
-    {
-      "id": "test_usage-aggregate_test_516e285a",
-      "type": "text",
-      "text": "**usage-aggregate.test**\n`test/usage-aggregate.test.js`\n\nTest module.\n\n包含：\n- usage-aggregate.test (41 行)\n- exports (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 460,
-      "y": 11212,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "test/usage-aggregate.test.js",
-        "category": "test",
-        "group": "test",
-        "side": "right",
-        "layerIndex": 6
-      }
-    },
-    {
-      "id": "test_usage-pagination-order_test_e45c4df4",
-      "type": "text",
-      "text": "**usage-pagination-order.test**\n`test/usage-pagination-order.test.js`\n\nTest module.\n\n包含：\n- usage-pagination-order.test (74 行)\n- readFile (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 820,
-      "y": 11212,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "test/usage-pagination-order.test.js",
-        "category": "test",
-        "group": "test",
-        "side": "right",
-        "layerIndex": 6
-      }
-    },
-    {
-      "id": "test_usage-rollup_test_6eb5afc3",
-      "type": "text",
-      "text": "**usage-rollup.test**\n`test/usage-rollup.test.js`\n\nTest module.\n\n包含：\n- usage-rollup.test (106 行)\n- buildRows (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 1180,
-      "y": 11212,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "test/usage-rollup.test.js",
-        "category": "test",
-        "group": "test",
-        "side": "right",
-        "layerIndex": 6
-      }
-    },
-    {
-      "id": "undefined_cli_16331b99",
-      "type": "text",
-      "text": "**cli**\n`src/cli.js`\n\nGeneral module.\n\n包含：\n- cli (65 行)\n- run (1 个参数)\n\n依赖：1 个模块\n被依赖：0 次",
-      "x": 100,
-      "y": 7440,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "src/cli.js",
-        "group": "misc",
-        "side": "right",
-        "layerIndex": 7
-      }
-    },
-    {
-      "id": "utils_browser-auth_522327e",
-      "type": "text",
-      "text": "**browser-auth**\n`src/lib/browser-auth.js`\n\nShared utilities.\n\n包含：\n- browser-auth (176 行)\n- beginBrowserAuth (4 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 460,
-      "y": 7800,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "src/lib/browser-auth.js",
-        "category": "utils",
-        "group": "utils",
-        "side": "right",
-        "layerIndex": 5
-      }
-    },
-    {
-      "id": "utils_claude-config_11259d2a",
-      "type": "text",
-      "text": "**claude-config**\n`src/lib/claude-config.js`\n\nShared utilities.\n\n包含：\n- claude-config (191 行)\n- upsertClaudeHook (3 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 820,
-      "y": 7800,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "src/lib/claude-config.js",
-        "category": "utils",
-        "group": "utils",
-        "side": "right",
-        "layerIndex": 5
-      }
-    },
-    {
-      "id": "utils_cli-ui_af7307a0",
-      "type": "text",
-      "text": "**cli-ui**\n`src/lib/cli-ui.js`\n\nShared utilities.\n\n包含：\n- cli-ui (180 行)\n- isInteractive (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 1180,
-      "y": 7800,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "src/lib/cli-ui.js",
-        "category": "utils",
-        "group": "utils",
-        "side": "right",
-        "layerIndex": 5
-      }
-    },
-    {
-      "id": "utils_codex-config_942d95c5",
-      "type": "text",
-      "text": "**codex-config**\n`src/lib/codex-config.js`\n\nShared utilities.\n\n包含：\n- codex-config (225 行)\n- upsertNotify (4 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 1540,
-      "y": 7800,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "src/lib/codex-config.js",
-        "category": "utils",
-        "group": "utils",
-        "side": "right",
-        "layerIndex": 5
-      }
-    },
-    {
-      "id": "utils_diagnostics_91ea9e43",
-      "type": "text",
-      "text": "**diagnostics**\n`src/lib/diagnostics.js`\n\nShared utilities.\n\n包含：\n- diagnostics (190 行)\n- collectTrackerDiagnostics (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 100,
-      "y": 8160,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "src/lib/diagnostics.js",
-        "category": "utils",
-        "group": "utils",
-        "side": "right",
-        "layerIndex": 5
-      }
-    },
-    {
-      "id": "utils_fs_59e03a42",
-      "type": "text",
-      "text": "**fs**\n`src/lib/fs.js`\n\nShared utilities.\n\n包含：\n- fs (63 行)\n- ensureDir (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 460,
-      "y": 8160,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "src/lib/fs.js",
-        "category": "utils",
-        "group": "utils",
-        "side": "right",
-        "layerIndex": 5
-      }
-    },
-    {
-      "id": "utils_gemini-config_294040f1",
-      "type": "text",
-      "text": "**gemini-config**\n`src/lib/gemini-config.js`\n\nShared utilities.\n\n包含：\n- gemini-config (285 行)\n- resolveGeminiConfigDir (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 820,
-      "y": 8160,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "src/lib/gemini-config.js",
-        "category": "utils",
-        "group": "utils",
-        "side": "right",
-        "layerIndex": 5
-      }
-    },
-    {
-      "id": "utils_init-flow_cf392f92",
-      "type": "text",
-      "text": "**init-flow**\n`src/lib/init-flow.js`\n\nShared utilities.\n\n包含：\n- init-flow (49 行)\n- renderLocalReport (2 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 1180,
-      "y": 8160,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "src/lib/init-flow.js",
-        "category": "utils",
-        "group": "utils",
-        "side": "right",
-        "layerIndex": 5
-      }
-    },
-    {
-      "id": "utils_insforge-client_62a68f4e",
-      "type": "text",
-      "text": "**insforge-client**\n`src/lib/insforge-client.js`\n\nShared utilities.\n\n包含：\n- insforge-client (60 行)\n- getAnonKey (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 1540,
-      "y": 8160,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "src/lib/insforge-client.js",
-        "category": "utils",
-        "group": "utils",
-        "side": "right",
-        "layerIndex": 5
-      }
-    },
-    {
-      "id": "utils_insforge_1781f5da",
-      "type": "text",
-      "text": "**insforge**\n`src/lib/insforge.js`\n\nShared utilities.\n\n包含：\n- insforge (24 行)\n- issueDeviceTokenWithPassword (4 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 100,
-      "y": 8520,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "src/lib/insforge.js",
-        "category": "utils",
-        "group": "utils",
-        "side": "right",
-        "layerIndex": 5
-      }
-    },
-    {
-      "id": "utils_opencode-config_484c9289",
-      "type": "text",
-      "text": "**opencode-config**\n`src/lib/opencode-config.js`\n\nShared utilities.\n\n包含：\n- opencode-config (99 行)\n- resolveOpencodeConfigDir (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 460,
-      "y": 8520,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "src/lib/opencode-config.js",
-        "category": "utils",
-        "group": "utils",
-        "side": "right",
-        "layerIndex": 5
-      }
-    },
-    {
-      "id": "utils_progress_338db8ca",
-      "type": "text",
-      "text": "**progress**\n`src/lib/progress.js`\n\nShared utilities.\n\n包含：\n- progress (78 行)\n- createProgress (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 820,
-      "y": 8520,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "src/lib/progress.js",
-        "category": "utils",
-        "group": "utils",
-        "side": "right",
-        "layerIndex": 5
-      }
-    },
-    {
-      "id": "utils_prompt_29c3a93",
-      "type": "text",
-      "text": "**prompt**\n`src/lib/prompt.js`\n\nShared utilities.\n\n包含：\n- prompt (21 行)\n- prompt (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 1180,
-      "y": 8520,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "src/lib/prompt.js",
-        "category": "utils",
-        "group": "utils",
-        "side": "right",
-        "layerIndex": 5
-      }
-    },
-    {
-      "id": "utils_rollout_ea37f1e4",
-      "type": "text",
-      "text": "**rollout**\n`src/lib/rollout.js`\n\nShared utilities.\n\n包含：\n- rollout (1318 行)\n- listRolloutFiles (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 1540,
-      "y": 8520,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "src/lib/rollout.js",
-        "category": "utils",
-        "group": "utils",
-        "side": "right",
-        "layerIndex": 5
-      }
-    },
-    {
-      "id": "utils_upload-throttle_756746b1",
-      "type": "text",
-      "text": "**upload-throttle**\n`src/lib/upload-throttle.js`\n\nShared utilities.\n\n包含：\n- upload-throttle (130 行)\n- normalizeState (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 100,
-      "y": 8880,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "src/lib/upload-throttle.js",
-        "category": "utils",
-        "group": "utils",
-        "side": "right",
-        "layerIndex": 5
-      }
-    },
-    {
-      "id": "utils_uploader_21e03343",
-      "type": "text",
-      "text": "**uploader**\n`src/lib/uploader.js`\n\nShared utilities.\n\n包含：\n- uploader (117 行)\n- drainQueueToCloud (7 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 460,
-      "y": 8880,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "src/lib/uploader.js",
-        "category": "utils",
-        "group": "utils",
-        "side": "right",
-        "layerIndex": 5
-      }
-    },
-    {
-      "id": "utils_vibescore-api_ba6a9672",
-      "type": "text",
-      "text": "**vibescore-api**\n`src/lib/vibescore-api.js`\n\nShared utilities.\n\n包含：\n- vibescore-api (223 行)\n- signInWithPassword (3 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 820,
-      "y": 8880,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "src/lib/vibescore-api.js",
-        "category": "utils",
-        "group": "utils",
-        "side": "right",
-        "layerIndex": 5
-      }
-    },
-    {
-      "id": "undefined_diagnostics_ba7fe190",
-      "type": "text",
-      "text": "**diagnostics**\n`src/commands/diagnostics.js`\n\nGeneral module.\n\n包含：\n- diagnostics (40 行)\n- cmdDiagnostics (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 460,
-      "y": 7440,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "src/commands/diagnostics.js",
-        "group": "misc",
-        "side": "right",
-        "layerIndex": 7
-      }
-    },
-    {
-      "id": "undefined_init_8ce62bde",
-      "type": "text",
-      "text": "**init**\n`src/commands/init.js`\n\nGeneral module.\n\n包含：\n- init (790 行)\n- cmdInit (1 个参数)\n\n依赖：0 个模块\n被依赖：1 次",
-      "x": 820,
-      "y": 7440,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "src/commands/init.js",
-        "group": "misc",
-        "side": "right",
-        "layerIndex": 7
-      }
-    },
-    {
-      "id": "undefined_status_ed0fc630",
-      "type": "text",
-      "text": "**status**\n`src/commands/status.js`\n\nGeneral module.\n\n包含：\n- status (154 行)\n- cmdStatus (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 1180,
-      "y": 7440,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "src/commands/status.js",
-        "group": "misc",
-        "side": "right",
-        "layerIndex": 7
-      }
-    },
-    {
-      "id": "undefined_sync_324be1c3",
-      "type": "text",
-      "text": "**sync**\n`src/commands/sync.js`\n\nGeneral module.\n\n包含：\n- sync (477 行)\n- cmdSync (1 个参数)\n\n依赖：0 个模块\n被依赖：1 次",
-      "x": 1540,
-      "y": 7440,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "src/commands/sync.js",
-        "group": "misc",
-        "side": "right",
-        "layerIndex": 7
-      }
-    },
-    {
-      "id": "undefined_uninstall_d39cffde",
-      "type": "text",
-      "text": "**uninstall**\n`src/commands/uninstall.js`\n\nGeneral module.\n\n包含：\n- uninstall (150 行)\n- cmdUninstall (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 100,
-      "y": 7800,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "src/commands/uninstall.js",
-        "group": "misc",
-        "side": "right",
-        "layerIndex": 7
-      }
-    },
-    {
-      "id": "utils_auth_7a311011",
-      "type": "text",
-      "text": "**auth**\n`insforge-src/shared/auth.js`\n\nShared utilities.\n\n包含：\n- auth (100 行)\n- getBearerToken (1 个参数)\n\n依赖：0 个模块\n被依赖：5 次",
-      "x": 820,
-      "y": 5656,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "insforge-src/shared/auth.js",
-        "category": "utils",
-        "group": "utils",
-        "side": "right",
-        "layerIndex": 5
-      }
-    },
-    {
-      "id": "utils_canary_a8ae9a1f",
-      "type": "text",
-      "text": "**canary**\n`insforge-src/shared/canary.js`\n\nShared utilities.\n\n包含：\n- canary (18 行)\n- isCanaryTag (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 1180,
-      "y": 5656,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "insforge-src/shared/canary.js",
-        "category": "utils",
-        "group": "utils",
-        "side": "right",
-        "layerIndex": 5
-      }
-    },
-    {
-      "id": "utils_concurrency_e450ea3c",
-      "type": "text",
-      "text": "**concurrency**\n`insforge-src/shared/concurrency.js`\n\nShared utilities.\n\n包含：\n- concurrency (84 行)\n- createConcurrencyGuard (5 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 1540,
-      "y": 5656,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "insforge-src/shared/concurrency.js",
-        "category": "utils",
-        "group": "utils",
-        "side": "right",
-        "layerIndex": 5
-      }
-    },
-    {
-      "id": "utils_crypto_6f5833da",
-      "type": "text",
-      "text": "**crypto**\n`insforge-src/shared/crypto.js`\n\nShared utilities.\n\n包含：\n- crypto (15 行)\n- sha256Hex (1 个参数)\n\n依赖：0 个模块\n被依赖：2 次",
-      "x": 1900,
-      "y": 5656,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "insforge-src/shared/crypto.js",
-        "category": "utils",
-        "group": "utils",
-        "side": "right",
-        "layerIndex": 5
-      }
-    },
-    {
-      "id": "utils_date_82b9796d",
-      "type": "text",
-      "text": "**date**\n`insforge-src/shared/date.js`\n\nShared utilities.\n\n包含：\n- date (324 行)\n- isDate (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 100,
-      "y": 6016,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "insforge-src/shared/date.js",
-        "category": "utils",
-        "group": "utils",
-        "side": "right",
-        "layerIndex": 5
-      }
-    },
-    {
-      "id": "utils_debug_d2bf3a28",
-      "type": "text",
-      "text": "**debug**\n`insforge-src/shared/debug.js`\n\nShared utilities.\n\n包含：\n- debug (53 行)\n- isDebugEnabled (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 460,
-      "y": 6016,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "insforge-src/shared/debug.js",
-        "category": "utils",
-        "group": "utils",
-        "side": "right",
-        "layerIndex": 5
-      }
-    },
-    {
-      "id": "utils_env_27e9ff64",
-      "type": "text",
-      "text": "**env**\n`insforge-src/shared/env.js`\n\nShared utilities.\n\n包含：\n- env (26 行)\n- getBaseUrl (0 个参数)\n\n依赖：0 个模块\n被依赖：5 次",
-      "x": 820,
-      "y": 6016,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "insforge-src/shared/env.js",
-        "category": "utils",
-        "group": "utils",
-        "side": "right",
-        "layerIndex": 5
-      }
-    },
-    {
-      "id": "utils_http_6ac7f961",
-      "type": "text",
-      "text": "**http**\n`insforge-src/shared/http.js`\n\nShared utilities.\n\n包含：\n- http (52 行)\n- handleOptions (1 个参数)\n\n依赖：0 个模块\n被依赖：6 次",
-      "x": 1180,
-      "y": 6016,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "insforge-src/shared/http.js",
-        "category": "utils",
-        "group": "utils",
-        "side": "right",
-        "layerIndex": 5
-      }
-    },
-    {
-      "id": "utils_logging_951e02fa",
-      "type": "text",
-      "text": "**logging**\n`insforge-src/shared/logging.js`\n\nShared utilities.\n\n包含：\n- logging (129 行)\n- createRequestId (0 个参数)\n\n依赖：0 个模块\n被依赖：3 次",
-      "x": 1540,
-      "y": 6016,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "insforge-src/shared/logging.js",
-        "category": "utils",
-        "group": "utils",
-        "side": "right",
-        "layerIndex": 5
-      }
-    },
-    {
-      "id": "utils_model_516b2f36",
-      "type": "text",
-      "text": "**model**\n`insforge-src/shared/model.js`\n\nShared utilities.\n\n包含：\n- model (25 行)\n- normalizeModel (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 1900,
-      "y": 6016,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "insforge-src/shared/model.js",
-        "category": "utils",
-        "group": "utils",
-        "side": "right",
-        "layerIndex": 5
-      }
-    },
-    {
-      "id": "utils_numbers_b9abfb69",
-      "type": "text",
-      "text": "**numbers**\n`insforge-src/shared/numbers.js`\n\nShared utilities.\n\n包含：\n- numbers (48 行)\n- toBigInt (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 100,
-      "y": 6376,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "insforge-src/shared/numbers.js",
-        "category": "utils",
-        "group": "utils",
-        "side": "right",
-        "layerIndex": 5
-      }
-    },
-    {
-      "id": "utils_pagination_9b6fbff5",
-      "type": "text",
-      "text": "**pagination**\n`insforge-src/shared/pagination.js`\n\nShared utilities.\n\n包含：\n- pagination (44 行)\n- normalizePageSize (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 460,
-      "y": 6376,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "insforge-src/shared/pagination.js",
-        "category": "utils",
-        "group": "utils",
-        "side": "right",
-        "layerIndex": 5
-      }
-    },
-    {
-      "id": "utils_pricing_23c132f1",
-      "type": "text",
-      "text": "**pricing**\n`insforge-src/shared/pricing.js`\n\nShared utilities.\n\n包含：\n- pricing (247 行)\n- getDefaultPricingProfile (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 820,
-      "y": 6376,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "insforge-src/shared/pricing.js",
-        "category": "utils",
-        "group": "utils",
-        "side": "right",
-        "layerIndex": 5
-      }
-    },
-    {
-      "id": "utils_pro-status_10e0e7ed",
-      "type": "text",
-      "text": "**pro-status**\n`insforge-src/shared/pro-status.js`\n\nShared utilities.\n\n包含：\n- pro-status (74 行)\n- toMs (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 1180,
-      "y": 6376,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "insforge-src/shared/pro-status.js",
-        "category": "utils",
-        "group": "utils",
-        "side": "right",
-        "layerIndex": 5
-      }
-    },
-    {
-      "id": "utils_source_8ae561e4",
-      "type": "text",
-      "text": "**source**\n`insforge-src/shared/source.js`\n\nShared utilities.\n\n包含：\n- source (30 行)\n- normalizeSource (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 1540,
-      "y": 6376,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "insforge-src/shared/source.js",
-        "category": "utils",
-        "group": "utils",
-        "side": "right",
-        "layerIndex": 5
-      }
-    },
-    {
-      "id": "utils_usage-rollup_63cc83a9",
-      "type": "text",
-      "text": "**usage-rollup**\n`insforge-src/shared/usage-rollup.js`\n\nShared utilities.\n\n包含：\n- usage-rollup (67 行)\n- createTotals (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 1900,
-      "y": 6376,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "insforge-src/shared/usage-rollup.js",
-        "category": "utils",
-        "group": "utils",
-        "side": "right",
-        "layerIndex": 5
-      }
-    },
-    {
-      "id": "edge-function_vibescore-debug-auth_e899af08",
-      "type": "text",
-      "text": "**vibescore-debug-auth**\n`insforge-src/functions/vibescore-debug-auth.js`\n\nEdge function handler.\n\n包含：\n- vibescore-debug-auth (78 行)\n- exports (0 个参数)\n\n依赖：3 个模块\n被依赖：0 次",
-      "x": 100,
-      "y": 4576,
-      "width": 280,
-      "height": 232,
-      "color": "3",
-      "meta": {
-        "relPath": "insforge-src/functions/vibescore-debug-auth.js",
-        "category": "edge-function",
-        "group": "controller",
-        "side": "right",
-        "layerIndex": 2
-      }
-    },
-    {
-      "id": "edge-function_vibescore-device-token-issue_6ec30e66",
-      "type": "text",
-      "text": "**vibescore-device-token-issue**\n`insforge-src/functions/vibescore-device-token-issue.js`\n\nEdge function handler.\n\n包含：\n- vibescore-device-token-issue (132 行)\n- sanitizeText (2 个参数)\n\n依赖：5 个模块\n被依赖：0 次",
-      "x": 460,
-      "y": 4576,
-      "width": 280,
-      "height": 232,
-      "color": "3",
-      "meta": {
-        "relPath": "insforge-src/functions/vibescore-device-token-issue.js",
-        "category": "edge-function",
-        "group": "controller",
-        "side": "right",
-        "layerIndex": 2
-      }
-    },
-    {
-      "id": "edge-function_vibescore-entitlements-revoke_f41ecebb",
-      "type": "text",
-      "text": "**vibescore-entitlements-revoke**\n`insforge-src/functions/vibescore-entitlements-revoke.js`\n\nEdge function handler.\n\n包含：\n- vibescore-entitlements-revoke (65 行)\n- isValidIso (1 个参数)\n\n依赖：4 个模块\n被依赖：0 次",
-      "x": 820,
-      "y": 4576,
-      "width": 280,
-      "height": 232,
-      "color": "3",
-      "meta": {
-        "relPath": "insforge-src/functions/vibescore-entitlements-revoke.js",
-        "category": "edge-function",
-        "group": "controller",
-        "side": "right",
-        "layerIndex": 2
-      }
-    },
-    {
-      "id": "edge-function_vibescore-entitlements_26527776",
-      "type": "text",
-      "text": "**vibescore-entitlements**\n`insforge-src/functions/vibescore-entitlements.js`\n\nEdge function handler.\n\n包含：\n- vibescore-entitlements (193 行)\n- isValidIso (1 个参数)\n\n依赖：5 个模块\n被依赖：0 次",
-      "x": 1180,
-      "y": 4576,
-      "width": 280,
-      "height": 232,
-      "color": "3",
-      "meta": {
-        "relPath": "insforge-src/functions/vibescore-entitlements.js",
-        "category": "edge-function",
-        "group": "controller",
-        "side": "right",
-        "layerIndex": 2
-      }
-    },
-    {
-      "id": "edge-function_vibescore-events-retention_66e231a",
-      "type": "text",
-      "text": "**vibescore-events-retention**\n`insforge-src/functions/vibescore-events-retention.js`\n\nEdge function handler.\n\n包含：\n- vibescore-events-retention (138 行)\n- purgeTable (6 个参数)\n\n依赖：1 个模块\n被依赖：0 次",
-      "x": 1540,
-      "y": 4576,
-      "width": 280,
-      "height": 232,
-      "color": "3",
-      "meta": {
-        "relPath": "insforge-src/functions/vibescore-events-retention.js",
-        "category": "edge-function",
-        "group": "controller",
-        "side": "right",
-        "layerIndex": 2
-      }
-    },
-    {
-      "id": "edge-function_vibescore-ingest_2e431a7e",
-      "type": "text",
-      "text": "**vibescore-ingest**\n`insforge-src/functions/vibescore-ingest.js`\n\nEdge function handler.\n\n包含：\n- vibescore-ingest (523 行)\n- buildRows (3 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 1900,
-      "y": 4576,
-      "width": 280,
-      "height": 232,
-      "color": "3",
-      "meta": {
-        "relPath": "insforge-src/functions/vibescore-ingest.js",
-        "category": "edge-function",
-        "group": "controller",
-        "side": "right",
-        "layerIndex": 2
-      }
-    },
-    {
-      "id": "edge-function_vibescore-leaderboard-refresh_4af3b98d",
-      "type": "text",
-      "text": "**vibescore-leaderboard-refresh**\n`insforge-src/functions/vibescore-leaderboard-refresh.js`\n\nEdge function handler.\n\n包含：\n- vibescore-leaderboard-refresh (183 行)\n- normalizePeriod (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 100,
-      "y": 4936,
-      "width": 280,
-      "height": 232,
-      "color": "3",
-      "meta": {
-        "relPath": "insforge-src/functions/vibescore-leaderboard-refresh.js",
-        "category": "edge-function",
-        "group": "controller",
-        "side": "right",
-        "layerIndex": 2
-      }
-    },
-    {
-      "id": "config_vibescore-leaderboard-settings_365d3875",
-      "type": "text",
-      "text": "**vibescore-leaderboard-settings**\n`insforge-src/functions/vibescore-leaderboard-settings.js`\n\nConfiguration module.\n\n包含：\n- vibescore-leaderboard-settings (74 行)\n- exports (0 个参数)\n\n依赖：3 个模块\n被依赖：0 次",
-      "x": 460,
-      "y": 4936,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "insforge-src/functions/vibescore-leaderboard-settings.js",
-        "category": "config",
-        "group": "infra",
-        "side": "right",
-        "layerIndex": 3
-      }
-    },
-    {
-      "id": "edge-function_vibescore-leaderboard_ec9b2c7d",
-      "type": "text",
-      "text": "**vibescore-leaderboard**\n`insforge-src/functions/vibescore-leaderboard.js`\n\nEdge function handler.\n\n包含：\n- vibescore-leaderboard (292 行)\n- tryLoadSingleQuery (3 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 820,
-      "y": 4936,
-      "width": 280,
-      "height": 232,
-      "color": "3",
-      "meta": {
-        "relPath": "insforge-src/functions/vibescore-leaderboard.js",
-        "category": "edge-function",
-        "group": "controller",
-        "side": "right",
-        "layerIndex": 2
-      }
-    },
-    {
-      "id": "edge-function_vibescore-link-code-exchange_5e48faa",
-      "type": "text",
-      "text": "**vibescore-link-code-exchange**\n`insforge-src/functions/vibescore-link-code-exchange.js`\n\nEdge function handler.\n\n包含：\n- vibescore-link-code-exchange (195 行)\n- sanitizeText (2 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 1180,
-      "y": 4936,
-      "width": 280,
-      "height": 232,
-      "color": "3",
-      "meta": {
-        "relPath": "insforge-src/functions/vibescore-link-code-exchange.js",
-        "category": "edge-function",
-        "group": "controller",
-        "side": "right",
-        "layerIndex": 2
-      }
-    },
-    {
-      "id": "edge-function_vibescore-link-code-init_13bce0cb",
-      "type": "text",
-      "text": "**vibescore-link-code-init**\n`insforge-src/functions/vibescore-link-code-init.js`\n\nEdge function handler.\n\n包含：\n- vibescore-link-code-init (63 行)\n- generateLinkCode (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 1540,
-      "y": 4936,
-      "width": 280,
-      "height": 232,
-      "color": "3",
-      "meta": {
-        "relPath": "insforge-src/functions/vibescore-link-code-init.js",
-        "category": "edge-function",
-        "group": "controller",
-        "side": "right",
-        "layerIndex": 2
-      }
-    },
-    {
-      "id": "edge-function_vibescore-pricing-sync_76d1c55e",
-      "type": "text",
-      "text": "**vibescore-pricing-sync**\n`insforge-src/functions/vibescore-pricing-sync.js`\n\nEdge function handler.\n\n包含：\n- vibescore-pricing-sync (409 行)\n- getEnvValue (1 个参数)\n\n依赖：2 个模块\n被依赖：0 次",
-      "x": 1900,
-      "y": 4936,
-      "width": 280,
-      "height": 232,
-      "color": "3",
-      "meta": {
-        "relPath": "insforge-src/functions/vibescore-pricing-sync.js",
-        "category": "edge-function",
-        "group": "controller",
-        "side": "right",
-        "layerIndex": 2
-      }
-    },
-    {
-      "id": "edge-function_vibescore-sync-ping_b0285006",
-      "type": "text",
-      "text": "**vibescore-sync-ping**\n`insforge-src/functions/vibescore-sync-ping.js`\n\nEdge function handler.\n\n包含：\n- vibescore-sync-ping (149 行)\n- touchSyncWithAnonKey (4 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 100,
-      "y": 5296,
-      "width": 280,
-      "height": 232,
-      "color": "3",
-      "meta": {
-        "relPath": "insforge-src/functions/vibescore-sync-ping.js",
-        "category": "edge-function",
-        "group": "controller",
-        "side": "right",
-        "layerIndex": 2
-      }
-    },
-    {
-      "id": "edge-function_vibescore-usage-daily_13bc8f2d",
-      "type": "text",
-      "text": "**vibescore-usage-daily**\n`insforge-src/functions/vibescore-usage-daily.js`\n\nEdge function handler.\n\n包含：\n- vibescore-usage-daily (310 行)\n- getSourceEntry (2 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 460,
-      "y": 5296,
-      "width": 280,
-      "height": 232,
-      "color": "3",
-      "meta": {
-        "relPath": "insforge-src/functions/vibescore-usage-daily.js",
-        "category": "edge-function",
-        "group": "controller",
-        "side": "right",
-        "layerIndex": 2
-      }
-    },
-    {
-      "id": "edge-function_vibescore-usage-heatmap_67a4af30",
-      "type": "text",
-      "text": "**vibescore-usage-heatmap**\n`insforge-src/functions/vibescore-usage-heatmap.js`\n\nEdge function handler.\n\n包含：\n- vibescore-usage-heatmap (375 行)\n- normalizeWeeks (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 820,
-      "y": 5296,
-      "width": 280,
-      "height": 232,
-      "color": "3",
-      "meta": {
-        "relPath": "insforge-src/functions/vibescore-usage-heatmap.js",
-        "category": "edge-function",
-        "group": "controller",
-        "side": "right",
-        "layerIndex": 2
-      }
-    },
-    {
-      "id": "edge-function_vibescore-usage-hourly_7f0e1821",
-      "type": "text",
-      "text": "**vibescore-usage-hourly**\n`insforge-src/functions/vibescore-usage-hourly.js`\n\nEdge function handler.\n\n包含：\n- vibescore-usage-hourly (452 行)\n- initHourlyBuckets (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 1180,
-      "y": 5296,
-      "width": 280,
-      "height": 232,
-      "color": "3",
-      "meta": {
-        "relPath": "insforge-src/functions/vibescore-usage-hourly.js",
-        "category": "edge-function",
-        "group": "controller",
-        "side": "right",
-        "layerIndex": 2
-      }
-    },
-    {
-      "id": "edge-function_vibescore-usage-model-breakdown_846bd53b",
-      "type": "text",
-      "text": "**vibescore-usage-model-breakdown**\n`insforge-src/functions/vibescore-usage-model-breakdown.js`\n\nEdge function handler.\n\n包含：\n- vibescore-usage-model-breakdown (237 行)\n- createTotals (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 1540,
-      "y": 5296,
-      "width": 280,
-      "height": 232,
-      "color": "3",
-      "meta": {
-        "relPath": "insforge-src/functions/vibescore-usage-model-breakdown.js",
-        "category": "edge-function",
-        "group": "controller",
-        "side": "right",
-        "layerIndex": 2
-      }
-    },
-    {
-      "id": "edge-function_vibescore-usage-monthly_3f4484b1",
-      "type": "text",
-      "text": "**vibescore-usage-monthly**\n`insforge-src/functions/vibescore-usage-monthly.js`\n\nEdge function handler.\n\n包含：\n- vibescore-usage-monthly (166 行)\n- respond (3 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 1900,
-      "y": 5296,
-      "width": 280,
-      "height": 232,
-      "color": "3",
-      "meta": {
-        "relPath": "insforge-src/functions/vibescore-usage-monthly.js",
-        "category": "edge-function",
-        "group": "controller",
-        "side": "right",
-        "layerIndex": 2
-      }
-    },
-    {
-      "id": "edge-function_vibescore-usage-summary_57a00ab8",
-      "type": "text",
-      "text": "**vibescore-usage-summary**\n`insforge-src/functions/vibescore-usage-summary.js`\n\nEdge function handler.\n\n包含：\n- vibescore-usage-summary (324 行)\n- getSourceEntry (2 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 100,
-      "y": 5656,
-      "width": 280,
-      "height": 232,
-      "color": "3",
-      "meta": {
-        "relPath": "insforge-src/functions/vibescore-usage-summary.js",
-        "category": "edge-function",
-        "group": "controller",
-        "side": "right",
-        "layerIndex": 2
-      }
-    },
-    {
-      "id": "edge-function_vibescore-user-status_7e8be314",
-      "type": "text",
-      "text": "**vibescore-user-status**\n`insforge-src/functions/vibescore-user-status.js`\n\nEdge function handler.\n\n包含：\n- vibescore-user-status (84 行)\n- exports (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 460,
-      "y": 5656,
-      "width": 280,
-      "height": 232,
-      "color": "3",
-      "meta": {
-        "relPath": "insforge-src/functions/vibescore-user-status.js",
-        "category": "edge-function",
-        "group": "controller",
-        "side": "right",
-        "layerIndex": 2
-      }
-    },
-    {
-      "id": "config_vite_config_ed22ad53",
-      "type": "text",
-      "text": "**vite.config**\n`dashboard/vite.config.js`\n\nConfiguration module.\n\n包含：\n- vite.config (205 行)\n- parseCsv (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 820,
-      "y": 3152,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "dashboard/vite.config.js",
-        "category": "config",
-        "group": "infra",
-        "side": "left",
-        "layerIndex": 3
-      }
-    },
-    {
-      "id": "entry_App_50b6270d",
-      "type": "text",
-      "text": "**App**\n`dashboard/src/App.jsx`\n\nEntry module.\n\n包含：\n- App (122 行)\n- getSafeRedirect (1 个参数)\n\n依赖：5 个模块\n被依赖：1 次",
-      "x": 100,
-      "y": 632,
-      "width": 280,
-      "height": 232,
-      "color": "1",
-      "meta": {
-        "relPath": "dashboard/src/App.jsx",
-        "category": "entry",
-        "group": "entry",
-        "side": "left",
-        "layerIndex": 0
-      }
-    },
-    {
-      "id": "entry_main_8ec1de27",
-      "type": "text",
-      "text": "**main**\n`dashboard/src/main.jsx`\n\nEntry module.\n\n包含：\n- main (15 行)\n- exports (0 个参数)\n\n依赖：1 个模块\n被依赖：0 次",
-      "x": 1180,
-      "y": 1712,
-      "width": 280,
-      "height": 232,
-      "color": "1",
-      "meta": {
-        "relPath": "dashboard/src/main.jsx",
-        "category": "entry",
-        "group": "entry",
-        "side": "left",
-        "layerIndex": 0
-      }
-    },
-    {
-      "id": "frontend_MatrixShell_33cf7a77",
-      "type": "text",
-      "text": "**MatrixShell**\n`dashboard/src/ui/matrix-a/layout/MatrixShell.jsx`\n\nUI component layer.\n\n包含：\n- MatrixShell (80 行)\n- MatrixShell (9 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 460,
-      "y": 3152,
-      "width": 280,
-      "height": 232,
-      "color": "6",
-      "meta": {
-        "relPath": "dashboard/src/ui/matrix-a/layout/MatrixShell.jsx",
-        "category": "frontend",
-        "group": "frontend",
-        "side": "left",
-        "layerIndex": 1
-      }
-    },
-    {
-      "id": "frontend_ActivityHeatmap_753263dd",
-      "type": "text",
-      "text": "**ActivityHeatmap**\n`dashboard/src/ui/matrix-a/components/ActivityHeatmap.jsx`\n\nUI component layer.\n\n包含：\n- ActivityHeatmap (599 行)\n- formatTokenValue (1 个参数)\n\n依赖：2 个模块\n被依赖：0 次",
-      "x": 2980,
-      "y": 1712,
-      "width": 280,
-      "height": 232,
-      "color": "6",
-      "meta": {
-        "relPath": "dashboard/src/ui/matrix-a/components/ActivityHeatmap.jsx",
-        "category": "frontend",
-        "group": "frontend",
-        "side": "left",
-        "layerIndex": 1
-      }
-    },
-    {
-      "id": "frontend_ArchiveHeatmap_933d5992",
-      "type": "text",
-      "text": "**ArchiveHeatmap**\n`dashboard/src/ui/matrix-a/components/ArchiveHeatmap.jsx`\n\nUI component layer.\n\n包含：\n- ArchiveHeatmap (36 行)\n- ArchiveHeatmap (2 个参数)\n\n依赖：1 个模块\n被依赖：0 次",
-      "x": 100,
-      "y": 2072,
-      "width": 280,
-      "height": 232,
-      "color": "6",
-      "meta": {
-        "relPath": "dashboard/src/ui/matrix-a/components/ArchiveHeatmap.jsx",
-        "category": "frontend",
-        "group": "frontend",
-        "side": "left",
-        "layerIndex": 1
-      }
-    },
-    {
-      "id": "frontend_AsciiBox_b2f02e50",
-      "type": "text",
-      "text": "**AsciiBox**\n`dashboard/src/ui/matrix-a/components/AsciiBox.jsx`\n\nUI component layer.\n\n包含：\n- AsciiBox (53 行)\n- AsciiBox (4 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 460,
-      "y": 2072,
-      "width": 280,
-      "height": 232,
-      "color": "6",
-      "meta": {
-        "relPath": "dashboard/src/ui/matrix-a/components/AsciiBox.jsx",
-        "category": "frontend",
-        "group": "frontend",
-        "side": "left",
-        "layerIndex": 1
-      }
-    },
-    {
-      "id": "frontend_BootScreen_935b542e",
-      "type": "text",
-      "text": "**BootScreen**\n`dashboard/src/ui/matrix-a/components/BootScreen.jsx`\n\nUI component layer.\n\n包含：\n- BootScreen (43 行)\n- BootScreen (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 820,
-      "y": 2072,
-      "width": 280,
-      "height": 232,
-      "color": "6",
-      "meta": {
-        "relPath": "dashboard/src/ui/matrix-a/components/BootScreen.jsx",
-        "category": "frontend",
-        "group": "frontend",
-        "side": "left",
-        "layerIndex": 1
-      }
-    },
-    {
-      "id": "frontend_ConnectionStatus_7d8f2a16",
-      "type": "text",
-      "text": "**ConnectionStatus**\n`dashboard/src/ui/matrix-a/components/ConnectionStatus.jsx`\n\nUI component layer.\n\n包含：\n- ConnectionStatus (92 行)\n- ConnectionStatus (5 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 1180,
-      "y": 2072,
-      "width": 280,
-      "height": 232,
-      "color": "6",
-      "meta": {
-        "relPath": "dashboard/src/ui/matrix-a/components/ConnectionStatus.jsx",
-        "category": "frontend",
-        "group": "frontend",
-        "side": "left",
-        "layerIndex": 1
-      }
-    },
-    {
-      "id": "frontend_CostAnalysisModal_6aec9906",
-      "type": "text",
-      "text": "**CostAnalysisModal**\n`dashboard/src/ui/matrix-a/components/CostAnalysisModal.jsx`\n\nUI component layer.\n\n包含：\n- CostAnalysisModal (132 行)\n- formatUsdValue (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 1540,
-      "y": 2072,
-      "width": 280,
-      "height": 232,
-      "color": "6",
-      "meta": {
-        "relPath": "dashboard/src/ui/matrix-a/components/CostAnalysisModal.jsx",
-        "category": "frontend",
-        "group": "frontend",
-        "side": "left",
-        "layerIndex": 1
-      }
-    },
-    {
-      "id": "frontend_DataRow_42fc6f2e",
-      "type": "text",
-      "text": "**DataRow**\n`dashboard/src/ui/matrix-a/components/DataRow.jsx`\n\nUI component layer.\n\n包含：\n- DataRow (20 行)\n- DataRow (4 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 1900,
-      "y": 2072,
-      "width": 280,
-      "height": 232,
-      "color": "6",
-      "meta": {
-        "relPath": "dashboard/src/ui/matrix-a/components/DataRow.jsx",
-        "category": "frontend",
-        "group": "frontend",
-        "side": "left",
-        "layerIndex": 1
-      }
-    },
-    {
-      "id": "frontend_DecodingText_b2b88660",
-      "type": "text",
-      "text": "**DecodingText**\n`dashboard/src/ui/matrix-a/components/DecodingText.jsx`\n\nUI component layer.\n\n包含：\n- DecodingText (39 行)\n- DecodingText (2 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 2260,
-      "y": 2072,
-      "width": 280,
-      "height": 232,
-      "color": "6",
-      "meta": {
-        "relPath": "dashboard/src/ui/matrix-a/components/DecodingText.jsx",
-        "category": "frontend",
-        "group": "frontend",
-        "side": "left",
-        "layerIndex": 1
-      }
-    },
-    {
-      "id": "frontend_GithubStar_d05e145",
-      "type": "text",
-      "text": "**GithubStar**\n`dashboard/src/ui/matrix-a/components/GithubStar.jsx`\n\nUI component layer.\n\n包含：\n- GithubStar (81 行)\n- GithubStar (4 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 2620,
-      "y": 2072,
-      "width": 280,
-      "height": 232,
-      "color": "6",
-      "meta": {
-        "relPath": "dashboard/src/ui/matrix-a/components/GithubStar.jsx",
-        "category": "frontend",
-        "group": "frontend",
-        "side": "left",
-        "layerIndex": 1
-      }
-    },
-    {
-      "id": "frontend_IdentityCard_281f9ab6",
-      "type": "text",
-      "text": "**IdentityCard**\n`dashboard/src/ui/matrix-a/components/IdentityCard.jsx`\n\nUI component layer.\n\n包含：\n- IdentityCard (123 行)\n- IdentityCard (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 2980,
-      "y": 2072,
-      "width": 280,
-      "height": 232,
-      "color": "6",
-      "meta": {
-        "relPath": "dashboard/src/ui/matrix-a/components/IdentityCard.jsx",
-        "category": "frontend",
-        "group": "frontend",
-        "side": "left",
-        "layerIndex": 1
-      }
-    },
-    {
-      "id": "frontend_IdentityPanel_27a7e914",
-      "type": "text",
-      "text": "**IdentityPanel**\n`dashboard/src/ui/matrix-a/components/IdentityPanel.jsx`\n\nUI component layer.\n\n包含：\n- IdentityPanel (58 行)\n- toHandle (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 100,
-      "y": 2432,
-      "width": 280,
-      "height": 232,
-      "color": "6",
-      "meta": {
-        "relPath": "dashboard/src/ui/matrix-a/components/IdentityPanel.jsx",
-        "category": "frontend",
-        "group": "frontend",
-        "side": "left",
-        "layerIndex": 1
-      }
-    },
-    {
-      "id": "frontend_LeaderboardPanel_892d3523",
-      "type": "text",
-      "text": "**LeaderboardPanel**\n`dashboard/src/ui/matrix-a/components/LeaderboardPanel.jsx`\n\nUI component layer.\n\n包含：\n- LeaderboardPanel (116 行)\n- LeaderboardPanel (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 460,
-      "y": 2432,
-      "width": 280,
-      "height": 232,
-      "color": "6",
-      "meta": {
-        "relPath": "dashboard/src/ui/matrix-a/components/LeaderboardPanel.jsx",
-        "category": "frontend",
-        "group": "frontend",
-        "side": "left",
-        "layerIndex": 1
-      }
-    },
-    {
-      "id": "frontend_LeaderboardRow_3cdf86df",
-      "type": "text",
-      "text": "**LeaderboardRow**\n`dashboard/src/ui/matrix-a/components/LeaderboardRow.jsx`\n\nUI component layer.\n\n包含：\n- LeaderboardRow (61 行)\n- formatRank (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 820,
-      "y": 2432,
-      "width": 280,
-      "height": 232,
-      "color": "6",
-      "meta": {
-        "relPath": "dashboard/src/ui/matrix-a/components/LeaderboardRow.jsx",
-        "category": "frontend",
-        "group": "frontend",
-        "side": "left",
-        "layerIndex": 1
-      }
-    },
-    {
-      "id": "frontend_LiveSniffer_3b2f77a1",
-      "type": "text",
-      "text": "**LiveSniffer**\n`dashboard/src/ui/matrix-a/components/LiveSniffer.jsx`\n\nUI component layer.\n\n包含：\n- LiveSniffer (45 行)\n- LiveSniffer (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 1180,
-      "y": 2432,
-      "width": 280,
-      "height": 232,
-      "color": "6",
-      "meta": {
-        "relPath": "dashboard/src/ui/matrix-a/components/LiveSniffer.jsx",
-        "category": "frontend",
-        "group": "frontend",
-        "side": "left",
-        "layerIndex": 1
-      }
-    },
-    {
-      "id": "frontend_MatrixAvatar_b8b692fe",
-      "type": "text",
-      "text": "**MatrixAvatar**\n`dashboard/src/ui/matrix-a/components/MatrixAvatar.jsx`\n\nUI component layer.\n\n包含：\n- MatrixAvatar (84 行)\n- hashCode (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 1540,
-      "y": 2432,
-      "width": 280,
-      "height": 232,
-      "color": "6",
-      "meta": {
-        "relPath": "dashboard/src/ui/matrix-a/components/MatrixAvatar.jsx",
-        "category": "frontend",
-        "group": "frontend",
-        "side": "left",
-        "layerIndex": 1
-      }
-    },
-    {
-      "id": "frontend_MatrixButton_4eb75bf9",
-      "type": "text",
-      "text": "**MatrixButton**\n`dashboard/src/ui/matrix-a/components/MatrixButton.jsx`\n\nUI component layer.\n\n包含：\n- MatrixButton (30 行)\n- MatrixButton (6 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 1900,
-      "y": 2432,
-      "width": 280,
-      "height": 232,
-      "color": "6",
-      "meta": {
-        "relPath": "dashboard/src/ui/matrix-a/components/MatrixButton.jsx",
-        "category": "frontend",
-        "group": "frontend",
-        "side": "left",
-        "layerIndex": 1
-      }
-    },
-    {
-      "id": "frontend_MatrixConstants_797f7b7a",
-      "type": "text",
-      "text": "**MatrixConstants**\n`dashboard/src/ui/matrix-a/components/MatrixConstants.js`\n\nUI component layer.\n\n包含：\n- MatrixConstants (28 行)\n- exports (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 2260,
-      "y": 2432,
-      "width": 280,
-      "height": 232,
-      "color": "6",
-      "meta": {
-        "relPath": "dashboard/src/ui/matrix-a/components/MatrixConstants.js",
-        "category": "frontend",
-        "group": "frontend",
-        "side": "left",
-        "layerIndex": 1
-      }
-    },
-    {
-      "id": "frontend_MatrixInput_d7fbc459",
-      "type": "text",
-      "text": "**MatrixInput**\n`dashboard/src/ui/matrix-a/components/MatrixInput.jsx`\n\nUI component layer.\n\n包含：\n- MatrixInput (16 行)\n- MatrixInput (3 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 2620,
-      "y": 2432,
-      "width": 280,
-      "height": 232,
-      "color": "6",
-      "meta": {
-        "relPath": "dashboard/src/ui/matrix-a/components/MatrixInput.jsx",
-        "category": "frontend",
-        "group": "frontend",
-        "side": "left",
-        "layerIndex": 1
-      }
-    },
-    {
-      "id": "frontend_MatrixRain_97f568bb",
-      "type": "text",
-      "text": "**MatrixRain**\n`dashboard/src/ui/matrix-a/components/MatrixRain.jsx`\n\nUI component layer.\n\n包含：\n- MatrixRain (134 行)\n- MatrixRain (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 2980,
-      "y": 2432,
-      "width": 280,
-      "height": 232,
-      "color": "6",
-      "meta": {
-        "relPath": "dashboard/src/ui/matrix-a/components/MatrixRain.jsx",
-        "category": "frontend",
-        "group": "frontend",
-        "side": "left",
-        "layerIndex": 1
-      }
-    },
-    {
-      "id": "frontend_NeuralAdaptiveFleet_9f6d6cf1",
-      "type": "text",
-      "text": "**NeuralAdaptiveFleet**\n`dashboard/src/ui/matrix-a/components/NeuralAdaptiveFleet.jsx`\n\nUI component layer.\n\n包含：\n- NeuralAdaptiveFleet (102 行)\n- NeuralAdaptiveFleet (5 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 100,
-      "y": 2792,
-      "width": 280,
-      "height": 232,
-      "color": "6",
-      "meta": {
-        "relPath": "dashboard/src/ui/matrix-a/components/NeuralAdaptiveFleet.jsx",
-        "category": "frontend",
-        "group": "frontend",
-        "side": "left",
-        "layerIndex": 1
-      }
-    },
-    {
-      "id": "frontend_NeuralDivergenceMap_db27756f",
-      "type": "text",
-      "text": "**NeuralDivergenceMap**\n`dashboard/src/ui/matrix-a/components/NeuralDivergenceMap.jsx`\n\nUI component layer.\n\n包含：\n- NeuralDivergenceMap (46 行)\n- NeuralDivergenceMap (3 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 460,
-      "y": 2792,
-      "width": 280,
-      "height": 232,
-      "color": "6",
-      "meta": {
-        "relPath": "dashboard/src/ui/matrix-a/components/NeuralDivergenceMap.jsx",
-        "category": "frontend",
-        "group": "frontend",
-        "side": "left",
-        "layerIndex": 1
-      }
-    },
-    {
-      "id": "frontend_ScrambleText_18fe834c",
-      "type": "text",
-      "text": "**ScrambleText**\n`dashboard/src/ui/matrix-a/components/ScrambleText.jsx`\n\nUI component layer.\n\n包含：\n- ScrambleText (123 行)\n- usePrefersReducedMotion (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 820,
-      "y": 2792,
-      "width": 280,
-      "height": 232,
-      "color": "6",
-      "meta": {
-        "relPath": "dashboard/src/ui/matrix-a/components/ScrambleText.jsx",
-        "category": "frontend",
-        "group": "frontend",
-        "side": "left",
-        "layerIndex": 1
-      }
-    },
-    {
-      "id": "frontend_SignalBox_7cca5cdf",
-      "type": "text",
-      "text": "**SignalBox**\n`dashboard/src/ui/matrix-a/components/SignalBox.jsx`\n\nUI component layer.\n\n包含：\n- SignalBox (26 行)\n- exports (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 1180,
-      "y": 2792,
-      "width": 280,
-      "height": 232,
-      "color": "6",
-      "meta": {
-        "relPath": "dashboard/src/ui/matrix-a/components/SignalBox.jsx",
-        "category": "frontend",
-        "group": "frontend",
-        "side": "left",
-        "layerIndex": 1
-      }
-    },
-    {
-      "id": "frontend_SystemHeader_96c77b2e",
-      "type": "text",
-      "text": "**SystemHeader**\n`dashboard/src/ui/matrix-a/components/SystemHeader.jsx`\n\nUI component layer.\n\n包含：\n- SystemHeader (33 行)\n- SystemHeader (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 1540,
-      "y": 2792,
-      "width": 280,
-      "height": 232,
-      "color": "6",
-      "meta": {
-        "relPath": "dashboard/src/ui/matrix-a/components/SystemHeader.jsx",
-        "category": "frontend",
-        "group": "frontend",
-        "side": "left",
-        "layerIndex": 1
-      }
-    },
-    {
-      "id": "frontend_TrendChart_9f556d31",
-      "type": "text",
-      "text": "**TrendChart**\n`dashboard/src/ui/matrix-a/components/TrendChart.jsx`\n\nUI component layer.\n\n包含：\n- TrendChart (48 行)\n- TrendChart (2 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 1900,
-      "y": 2792,
-      "width": 280,
-      "height": 232,
-      "color": "6",
-      "meta": {
-        "relPath": "dashboard/src/ui/matrix-a/components/TrendChart.jsx",
-        "category": "frontend",
-        "group": "frontend",
-        "side": "left",
-        "layerIndex": 1
-      }
-    },
-    {
-      "id": "frontend_TrendMonitor_e972b291",
-      "type": "text",
-      "text": "**TrendMonitor**\n`dashboard/src/ui/matrix-a/components/TrendMonitor.jsx`\n\nUI component layer.\n\n包含：\n- TrendMonitor (539 行)\n- TrendMonitor (4 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 2260,
-      "y": 2792,
-      "width": 280,
-      "height": 232,
-      "color": "6",
-      "meta": {
-        "relPath": "dashboard/src/ui/matrix-a/components/TrendMonitor.jsx",
-        "category": "frontend",
-        "group": "frontend",
-        "side": "left",
-        "layerIndex": 1
-      }
-    },
-    {
-      "id": "frontend_TypewriterText_18b887fe",
-      "type": "text",
-      "text": "**TypewriterText**\n`dashboard/src/ui/matrix-a/components/TypewriterText.jsx`\n\nUI component layer.\n\n包含：\n- TypewriterText (123 行)\n- usePrefersReducedMotion (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 2620,
-      "y": 2792,
-      "width": 280,
-      "height": 232,
-      "color": "6",
-      "meta": {
-        "relPath": "dashboard/src/ui/matrix-a/components/TypewriterText.jsx",
-        "category": "frontend",
-        "group": "frontend",
-        "side": "left",
-        "layerIndex": 1
-      }
-    },
-    {
-      "id": "frontend_UpgradeAlertModal_f1827ba1",
-      "type": "text",
-      "text": "**UpgradeAlertModal**\n`dashboard/src/ui/matrix-a/components/UpgradeAlertModal.jsx`\n\nUI component layer.\n\n包含：\n- UpgradeAlertModal (145 行)\n- UpgradeAlertModal (3 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 2980,
-      "y": 2792,
-      "width": 280,
-      "height": 232,
-      "color": "6",
-      "meta": {
-        "relPath": "dashboard/src/ui/matrix-a/components/UpgradeAlertModal.jsx",
-        "category": "frontend",
-        "group": "frontend",
-        "side": "left",
-        "layerIndex": 1
-      }
-    },
-    {
-      "id": "frontend_UsagePanel_cc80bc27",
-      "type": "text",
-      "text": "**UsagePanel**\n`dashboard/src/ui/matrix-a/components/UsagePanel.jsx`\n\nUI component layer.\n\n包含：\n- UsagePanel (268 行)\n- normalizePeriods (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 100,
-      "y": 3152,
-      "width": 280,
-      "height": 232,
-      "color": "6",
-      "meta": {
-        "relPath": "dashboard/src/ui/matrix-a/components/UsagePanel.jsx",
-        "category": "frontend",
-        "group": "frontend",
-        "side": "left",
-        "layerIndex": 1
-      }
-    },
-    {
-      "id": "frontend_AnnualPosterPage_70cafd26",
-      "type": "text",
-      "text": "**AnnualPosterPage**\n`dashboard/src/pages/AnnualPosterPage.jsx`\n\nUI component layer.\n\n包含：\n- AnnualPosterPage (333 行)\n- parseIsoDate (1 个参数)\n\n依赖：5 个模块\n被依赖：0 次",
-      "x": 1540,
-      "y": 1712,
-      "width": 280,
-      "height": 232,
-      "color": "6",
-      "meta": {
-        "relPath": "dashboard/src/pages/AnnualPosterPage.jsx",
-        "category": "frontend",
-        "group": "frontend",
-        "side": "left",
-        "layerIndex": 1
-      }
-    },
-    {
-      "id": "frontend_DashboardPage_9ebda834",
-      "type": "text",
-      "text": "**DashboardPage**\n`dashboard/src/pages/DashboardPage.jsx`\n\nUI component layer.\n\n包含：\n- DashboardPage (1358 行)\n- hasUsageValue (2 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 1900,
-      "y": 1712,
-      "width": 280,
-      "height": 232,
-      "color": "6",
-      "meta": {
-        "relPath": "dashboard/src/pages/DashboardPage.jsx",
-        "category": "frontend",
-        "group": "frontend",
-        "side": "left",
-        "layerIndex": 1
-      }
-    },
-    {
-      "id": "frontend_LandingExtras_d794f96d",
-      "type": "text",
-      "text": "**LandingExtras**\n`dashboard/src/pages/LandingExtras.jsx`\n\nUI component layer.\n\n包含：\n- LandingExtras (49 行)\n- LandingExtras (6 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 2260,
-      "y": 1712,
-      "width": 280,
-      "height": 232,
-      "color": "6",
-      "meta": {
-        "relPath": "dashboard/src/pages/LandingExtras.jsx",
-        "category": "frontend",
-        "group": "frontend",
-        "side": "left",
-        "layerIndex": 1
-      }
-    },
-    {
-      "id": "frontend_LandingPage_8367c397",
-      "type": "text",
-      "text": "**LandingPage**\n`dashboard/src/pages/LandingPage.jsx`\n\nUI component layer.\n\n包含：\n- LandingPage (224 行)\n- useDeferredMount (1 个参数)\n\n依赖：0 个模块\n被依赖：1 次",
-      "x": 2620,
-      "y": 1712,
-      "width": 280,
-      "height": 232,
-      "color": "6",
-      "meta": {
-        "relPath": "dashboard/src/pages/LandingPage.jsx",
-        "category": "frontend",
-        "group": "frontend",
-        "side": "left",
-        "layerIndex": 1
-      }
-    },
-    {
-      "id": "utils_activity-heatmap_9ca62158",
-      "type": "text",
-      "text": "**activity-heatmap**\n`dashboard/src/lib/activity-heatmap.js`\n\nShared utilities.\n\n包含：\n- activity-heatmap (193 行)\n- parseDateString (1 个参数)\n\n依赖：1 个模块\n被依赖：1 次",
-      "x": 460,
-      "y": 992,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "dashboard/src/lib/activity-heatmap.js",
-        "category": "utils",
-        "group": "utils",
-        "side": "left",
-        "layerIndex": 5
-      }
-    },
-    {
-      "id": "utils_auth-storage_f3bd6b20",
-      "type": "text",
-      "text": "**auth-storage**\n`dashboard/src/lib/auth-storage.js`\n\nShared utilities.\n\n包含：\n- auth-storage (110 行)\n- emitAuthStorageChange (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 820,
-      "y": 992,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "dashboard/src/lib/auth-storage.js",
-        "category": "utils",
-        "group": "utils",
-        "side": "left",
-        "layerIndex": 5
-      }
-    },
-    {
-      "id": "utils_auth-url_f938f352",
-      "type": "text",
-      "text": "**auth-url**\n`dashboard/src/lib/auth-url.js`\n\nShared utilities.\n\n包含：\n- auth-url (7 行)\n- buildAuthUrl (3 个参数)\n\n依赖：0 个模块\n被依赖：1 次",
-      "x": 1180,
-      "y": 992,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "dashboard/src/lib/auth-url.js",
-        "category": "utils",
-        "group": "utils",
-        "side": "left",
-        "layerIndex": 5
-      }
-    },
-    {
-      "id": "utils_backend-probe-scheduler_50231065",
-      "type": "text",
-      "text": "**backend-probe-scheduler**\n`dashboard/src/lib/backend-probe-scheduler.js`\n\nShared utilities.\n\n包含：\n- backend-probe-scheduler (105 行)\n- resolveProbeCadenceConfig (5 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 1540,
-      "y": 992,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "dashboard/src/lib/backend-probe-scheduler.js",
-        "category": "utils",
-        "group": "utils",
-        "side": "left",
-        "layerIndex": 5
-      }
-    },
-    {
-      "id": "utils_config_2e57e3d6",
-      "type": "text",
-      "text": "**config**\n`dashboard/src/lib/config.js`\n\nShared utilities.\n\n包含：\n- config (17 行)\n- getInsforgeBaseUrl (0 个参数)\n\n依赖：0 个模块\n被依赖：1 次",
-      "x": 1900,
-      "y": 992,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "dashboard/src/lib/config.js",
-        "category": "utils",
-        "group": "utils",
-        "side": "left",
-        "layerIndex": 5
-      }
-    },
-    {
-      "id": "utils_copy_ca6c3319",
-      "type": "text",
-      "text": "**copy**\n`dashboard/src/lib/copy.js`\n\nShared utilities.\n\n包含：\n- copy (145 行)\n- parseCsv (1 个参数)\n\n依赖：0 个模块\n被依赖：3 次",
-      "x": 2260,
-      "y": 992,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "dashboard/src/lib/copy.js",
-        "category": "utils",
-        "group": "utils",
-        "side": "left",
-        "layerIndex": 5
-      }
-    },
-    {
-      "id": "utils_daily_97e4fb45",
-      "type": "text",
-      "text": "**daily**\n`dashboard/src/lib/daily.js`\n\nShared utilities.\n\n包含：\n- daily (47 行)\n- getDetailsSortColumns (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 2620,
-      "y": 992,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "dashboard/src/lib/daily.js",
-        "category": "utils",
-        "group": "utils",
-        "side": "left",
-        "layerIndex": 5
-      }
-    },
-    {
-      "id": "utils_date-range_f68d83fa",
-      "type": "text",
-      "text": "**date-range**\n`dashboard/src/lib/date-range.js`\n\nShared utilities.\n\n包含：\n- date-range (100 行)\n- formatDateUTC (1 个参数)\n\n依赖：0 个模块\n被依赖：1 次",
-      "x": 2980,
-      "y": 992,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "dashboard/src/lib/date-range.js",
-        "category": "utils",
-        "group": "utils",
-        "side": "left",
-        "layerIndex": 5
-      }
-    },
-    {
-      "id": "utils_detail-sort_7adc0c3a",
-      "type": "text",
-      "text": "**detail-sort**\n`dashboard/src/lib/detail-sort.js`\n\nShared utilities.\n\n包含：\n- detail-sort (148 行)\n- isDetailDateKey (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 100,
-      "y": 1352,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "dashboard/src/lib/detail-sort.js",
-        "category": "utils",
-        "group": "utils",
-        "side": "left",
-        "layerIndex": 5
-      }
-    },
-    {
-      "id": "utils_details_e38a191e",
-      "type": "text",
-      "text": "**details**\n`dashboard/src/lib/details.js`\n\nShared utilities.\n\n包含：\n- details (46 行)\n- isNonZeroToken (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 460,
-      "y": 1352,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "dashboard/src/lib/details.js",
-        "category": "utils",
-        "group": "utils",
-        "side": "left",
-        "layerIndex": 5
-      }
-    },
-    {
-      "id": "utils_format_bfd0859f",
-      "type": "text",
-      "text": "**format**\n`dashboard/src/lib/format.js`\n\nShared utilities.\n\n包含：\n- format (91 行)\n- toDisplayNumber (1 个参数)\n\n依赖：0 个模块\n被依赖：1 次",
-      "x": 820,
-      "y": 1352,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "dashboard/src/lib/format.js",
-        "category": "utils",
-        "group": "utils",
-        "side": "left",
-        "layerIndex": 5
-      }
-    },
-    {
-      "id": "utils_http-timeout_7c54b212",
-      "type": "text",
-      "text": "**http-timeout**\n`dashboard/src/lib/http-timeout.js`\n\nShared utilities.\n\n包含：\n- http-timeout (62 行)\n- getHttpTimeoutMs (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 1180,
-      "y": 1352,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "dashboard/src/lib/http-timeout.js",
-        "category": "utils",
-        "group": "utils",
-        "side": "left",
-        "layerIndex": 5
-      }
-    },
-    {
-      "id": "utils_insforge-client_8b2467c5",
-      "type": "text",
-      "text": "**insforge-client**\n`dashboard/src/lib/insforge-client.js`\n\nShared utilities.\n\n包含：\n- insforge-client (32 行)\n- createMemoryStorage (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 1540,
-      "y": 1352,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "dashboard/src/lib/insforge-client.js",
-        "category": "utils",
-        "group": "utils",
-        "side": "left",
-        "layerIndex": 5
-      }
-    },
-    {
-      "id": "utils_mock-data_85162fab",
-      "type": "text",
-      "text": "**mock-data**\n`dashboard/src/lib/mock-data.js`\n\nShared utilities.\n\n包含：\n- mock-data (419 行)\n- isMockEnabled (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 1900,
-      "y": 1352,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "dashboard/src/lib/mock-data.js",
-        "category": "utils",
-        "group": "utils",
-        "side": "left",
-        "layerIndex": 5
-      }
-    },
-    {
-      "id": "utils_model-breakdown_f4d56253",
-      "type": "text",
-      "text": "**model-breakdown**\n`dashboard/src/lib/model-breakdown.js`\n\nShared utilities.\n\n包含：\n- model-breakdown (67 行)\n- buildFleetData (2 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 2260,
-      "y": 1352,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "dashboard/src/lib/model-breakdown.js",
-        "category": "utils",
-        "group": "utils",
-        "side": "left",
-        "layerIndex": 5
-      }
-    },
-    {
-      "id": "utils_npm-version_8f5fd258",
-      "type": "text",
-      "text": "**npm-version**\n`dashboard/src/lib/npm-version.js`\n\nShared utilities.\n\n包含：\n- npm-version (73 行)\n- isValidVersion (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 2620,
-      "y": 1352,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "dashboard/src/lib/npm-version.js",
-        "category": "utils",
-        "group": "utils",
-        "side": "left",
-        "layerIndex": 5
-      }
-    },
-    {
-      "id": "utils_safe-browser_c0afd4cc",
-      "type": "text",
-      "text": "**safe-browser**\n`dashboard/src/lib/safe-browser.js`\n\nShared utilities.\n\n包含：\n- safe-browser (87 行)\n- getLocalStorage (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 2980,
-      "y": 1352,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "dashboard/src/lib/safe-browser.js",
-        "category": "utils",
-        "group": "utils",
-        "side": "left",
-        "layerIndex": 5
-      }
-    },
-    {
-      "id": "utils_timezone_f8b38e57",
-      "type": "text",
-      "text": "**timezone**\n`dashboard/src/lib/timezone.js`\n\nShared utilities.\n\n包含：\n- timezone (133 行)\n- getBrowserTimeZone (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 100,
-      "y": 1712,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "dashboard/src/lib/timezone.js",
-        "category": "utils",
-        "group": "utils",
-        "side": "left",
-        "layerIndex": 5
-      }
-    },
-    {
-      "id": "utils_usage-aggregate_ae7360d5",
-      "type": "text",
-      "text": "**usage-aggregate**\n`dashboard/src/lib/usage-aggregate.js`\n\nShared utilities.\n\n包含：\n- usage-aggregate (42 行)\n- toBigIntValue (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 460,
-      "y": 1712,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "dashboard/src/lib/usage-aggregate.js",
-        "category": "utils",
-        "group": "utils",
-        "side": "left",
-        "layerIndex": 5
-      }
-    },
-    {
-      "id": "utils_vibescore-api_4e9bf839",
-      "type": "text",
-      "text": "**vibescore-api**\n`dashboard/src/lib/vibescore-api.js`\n\nShared utilities.\n\n包含：\n- vibescore-api (481 行)\n- probeBackend (3 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 820,
-      "y": 1712,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "dashboard/src/lib/vibescore-api.js",
-        "category": "utils",
-        "group": "utils",
-        "side": "left",
-        "layerIndex": 5
-      }
-    },
-    {
-      "id": "undefined_use-activity-heatmap_22649861",
-      "type": "text",
-      "text": "**use-activity-heatmap**\n`dashboard/src/hooks/use-activity-heatmap.js`\n\nGeneral module.\n\n包含：\n- use-activity-heatmap (239 行)\n- useActivityHeatmap (9 个参数)\n\n依赖：0 个模块\n被依赖：1 次",
-      "x": 1540,
-      "y": 632,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "dashboard/src/hooks/use-activity-heatmap.js",
-        "group": "misc",
-        "side": "left",
-        "layerIndex": 7
-      }
-    },
-    {
-      "id": "undefined_use-auth_94cf338d",
-      "type": "text",
-      "text": "**use-auth**\n`dashboard/src/hooks/use-auth.js`\n\nGeneral module.\n\n包含：\n- use-auth (68 行)\n- useAuth (0 个参数)\n\n依赖：0 个模块\n被依赖：1 次",
-      "x": 1900,
-      "y": 632,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "dashboard/src/hooks/use-auth.js",
-        "group": "misc",
-        "side": "left",
-        "layerIndex": 7
-      }
-    },
-    {
-      "id": "undefined_use-backend-status_f6637b78",
-      "type": "text",
-      "text": "**use-backend-status**\n`dashboard/src/hooks/use-backend-status.js`\n\nGeneral module.\n\n包含：\n- use-backend-status (242 行)\n- useBackendStatus (7 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 2260,
-      "y": 632,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "dashboard/src/hooks/use-backend-status.js",
-        "group": "misc",
-        "side": "left",
-        "layerIndex": 7
-      }
-    },
-    {
-      "id": "undefined_use-trend-data_96a42251",
-      "type": "text",
-      "text": "**use-trend-data**\n`dashboard/src/hooks/use-trend-data.js`\n\nGeneral module.\n\n包含：\n- use-trend-data (518 行)\n- useTrendData (13 个参数)\n\n依赖：0 个模块\n被依赖：1 次",
-      "x": 2620,
-      "y": 632,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "dashboard/src/hooks/use-trend-data.js",
-        "group": "misc",
-        "side": "left",
-        "layerIndex": 7
-      }
-    },
-    {
-      "id": "undefined_use-usage-data_a20b1f9d",
-      "type": "text",
-      "text": "**use-usage-data**\n`dashboard/src/hooks/use-usage-data.js`\n\nGeneral module.\n\n包含：\n- use-usage-data (262 行)\n- useUsageData (10 个参数)\n\n依赖：0 个模块\n被依赖：1 次",
-      "x": 2980,
-      "y": 632,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "dashboard/src/hooks/use-usage-data.js",
-        "group": "misc",
-        "side": "left",
-        "layerIndex": 7
-      }
-    },
-    {
-      "id": "undefined_use-usage-model-breakdown_f5d46222",
-      "type": "text",
-      "text": "**use-usage-model-breakdown**\n`dashboard/src/hooks/use-usage-model-breakdown.js`\n\nGeneral module.\n\n包含：\n- use-usage-model-breakdown (123 行)\n- useUsageModelBreakdown (8 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 100,
-      "y": 992,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "dashboard/src/hooks/use-usage-model-breakdown.js",
-        "group": "misc",
-        "side": "left",
-        "layerIndex": 7
-      }
-    },
-    {
-      "id": "frontend_BackendStatus_aa3fa02f",
-      "type": "text",
-      "text": "**BackendStatus**\n`dashboard/src/components/BackendStatus.jsx`\n\nUI component layer.\n\n包含：\n- BackendStatus (59 行)\n- BackendStatus (6 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 460,
-      "y": 632,
-      "width": 280,
-      "height": 232,
-      "color": "6",
-      "meta": {
-        "relPath": "dashboard/src/components/BackendStatus.jsx",
-        "category": "frontend",
-        "group": "frontend",
-        "side": "left",
-        "layerIndex": 1
-      }
-    },
-    {
-      "id": "frontend_ErrorBoundary_a5ae61df",
-      "type": "text",
-      "text": "**ErrorBoundary**\n`dashboard/src/components/ErrorBoundary.jsx`\n\nUI component layer.\n\n包含：\n- ErrorBoundary (65 行)\n- exports (0 个参数)\n\n依赖：0 个模块\n被依赖：1 次",
-      "x": 820,
-      "y": 632,
-      "width": 280,
-      "height": 232,
-      "color": "6",
-      "meta": {
-        "relPath": "dashboard/src/components/ErrorBoundary.jsx",
-        "category": "frontend",
-        "group": "frontend",
-        "side": "left",
-        "layerIndex": 1
-      }
-    },
-    {
-      "id": "frontend_Sparkline_f06d4f6a",
-      "type": "text",
-      "text": "**Sparkline**\n`dashboard/src/components/Sparkline.jsx`\n\nUI component layer.\n\n包含：\n- Sparkline (51 行)\n- Sparkline (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 1180,
-      "y": 632,
-      "width": 280,
-      "height": 232,
-      "color": "6",
-      "meta": {
-        "relPath": "dashboard/src/components/Sparkline.jsx",
-        "category": "frontend",
-        "group": "frontend",
-        "side": "left",
-        "layerIndex": 1
-      }
-    },
-    {
-      "id": "undefined_tracker_c3cb4d80",
-      "type": "text",
-      "text": "**tracker**\n`bin/tracker.js`\n\nGeneral module.\n\n包含：\n- tracker (33 行)\n- stripDebugFlag (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
-      "x": 100,
-      "y": 100,
-      "width": 280,
-      "height": 232,
-      "color": "2",
-      "meta": {
-        "relPath": "bin/tracker.js",
-        "group": "misc",
-        "side": "right",
-        "layerIndex": 7
-      }
-    },
-    {
-      "id": "external_InsForge_f6643588",
-      "type": "text",
-      "text": "**InsForge**\n`external`\n\nThird-party service.\n\n包含：\n- InsForge (integration)\n- api (0 个参数)\n\n依赖：0 个模块\n被依赖：8 次",
-      "x": 100,
-      "y": 3684,
-      "width": 280,
-      "height": 232,
-      "color": "4",
-      "meta": {
-        "relPath": "external",
-        "category": "external",
-        "group": "external",
-        "side": "right",
-        "layerIndex": 4
-      },
-      "externalService": "InsForge"
-    },
-    {
-      "id": "external_Anthropic_fbd19171",
-      "type": "text",
-      "text": "**Anthropic**\n`external`\n\nThird-party service.\n\n包含：\n- Anthropic (integration)\n- api (0 个参数)\n\n依赖：0 个模块\n被依赖：3 次",
-      "x": 460,
-      "y": 3684,
-      "width": 280,
-      "height": 232,
-      "color": "4",
-      "meta": {
-        "relPath": "external",
-        "category": "external",
-        "group": "external",
-        "side": "right",
-        "layerIndex": 4
-      },
-      "externalService": "Anthropic"
-    },
-    {
-      "id": "external_OpenAI_ac6e26d9",
-      "type": "text",
-      "text": "**OpenAI**\n`external`\n\nThird-party service.\n\n包含：\n- OpenAI (integration)\n- api (0 个参数)\n\n依赖：0 个模块\n被依赖：1 次",
-      "x": 100,
-      "y": 4044,
-      "width": 280,
-      "height": 232,
-      "color": "4",
-      "meta": {
-        "relPath": "external",
-        "category": "external",
-        "group": "external",
-        "side": "right",
-        "layerIndex": 4
-      },
-      "externalService": "OpenAI"
-    }
-  ],
-  "edges": [
-    {
-      "id": "edge_edge-function_vibescore-pricing-sync_76d1c55e_external_OpenAI_ac6e26d9",
-      "fromNode": "edge-function_vibescore-pricing-sync_76d1c55e",
-      "fromSide": "bottom",
-      "toNode": "external_OpenAI_ac6e26d9",
-      "toSide": "top"
-    },
-    {
-      "id": "edge_edge-function_vibescore-pricing-sync_76d1c55e_external_Anthropic_fbd19171",
-      "fromNode": "edge-function_vibescore-pricing-sync_76d1c55e",
-      "fromSide": "bottom",
-      "toNode": "external_Anthropic_fbd19171",
-      "toSide": "top"
-    },
-    {
-      "id": "edge_test_architecture-guardrails_test_b833cfeb_external_InsForge_f6643588",
-      "fromNode": "test_architecture-guardrails_test_b833cfeb",
-      "fromSide": "top",
-      "toNode": "external_InsForge_f6643588",
-      "toSide": "bottom"
-    },
-    {
-      "id": "edge_test_edge-functions_test_deffefcc_external_Anthropic_fbd19171",
-      "fromNode": "test_edge-functions_test_deffefcc",
-      "fromSide": "top",
-      "toNode": "external_Anthropic_fbd19171",
-      "toSide": "bottom"
-    },
-    {
-      "id": "edge_test_edge-functions_test_deffefcc_external_InsForge_f6643588",
-      "fromNode": "test_edge-functions_test_deffefcc",
-      "fromSide": "top",
-      "toNode": "external_InsForge_f6643588",
-      "toSide": "bottom"
-    },
-    {
-      "id": "edge_test_init-flow-copy_test_c9fa97e_external_InsForge_f6643588",
-      "fromNode": "test_init-flow-copy_test_c9fa97e",
-      "fromSide": "top",
-      "toNode": "external_InsForge_f6643588",
-      "toSide": "bottom"
-    },
-    {
-      "id": "edge_test_init-uninstall_test_de3698fe_external_Anthropic_fbd19171",
-      "fromNode": "test_init-uninstall_test_de3698fe",
-      "fromSide": "top",
-      "toNode": "external_Anthropic_fbd19171",
-      "toSide": "bottom"
-    },
-    {
-      "id": "edge_test_insforge-src-shared_test_110fa035_external_InsForge_f6643588",
-      "fromNode": "test_insforge-src-shared_test_110fa035",
-      "fromSide": "top",
-      "toNode": "external_InsForge_f6643588",
-      "toSide": "bottom"
-    },
-    {
-      "id": "edge_test_interaction-sequence-canvas_test_33aed5de_external_InsForge_f6643588",
-      "fromNode": "test_interaction-sequence-canvas_test_33aed5de",
-      "fromSide": "top",
-      "toNode": "external_InsForge_f6643588",
-      "toSide": "bottom"
-    },
-    {
-      "id": "edge_test_link-code-exchange-payload_test_900230c6_external_InsForge_f6643588",
-      "fromNode": "test_link-code-exchange-payload_test_900230c6",
-      "fromSide": "top",
-      "toNode": "external_InsForge_f6643588",
-      "toSide": "bottom"
-    },
-    {
-      "id": "edge_test_link-code-request-id_test_ec56824f_external_InsForge_f6643588",
-      "fromNode": "test_link-code-request-id_test_ec56824f",
-      "fromSide": "top",
-      "toNode": "external_InsForge_f6643588",
-      "toSide": "bottom"
-    },
-    {
-      "id": "edge_test_pro-status_test_b63d1907_external_InsForge_f6643588",
-      "fromNode": "test_pro-status_test_b63d1907",
-      "fromSide": "top",
-      "toNode": "external_InsForge_f6643588",
-      "toSide": "bottom"
-    },
-    {
-      "id": "edge_config_vibescore-leaderboard-settings_365d3875_utils_http_6ac7f961",
-      "fromNode": "config_vibescore-leaderboard-settings_365d3875",
-      "fromSide": "bottom",
-      "toNode": "utils_http_6ac7f961",
-      "toSide": "top"
-    },
-    {
-      "id": "edge_edge-function_vibescore-debug-auth_e899af08_utils_http_6ac7f961",
-      "fromNode": "edge-function_vibescore-debug-auth_e899af08",
-      "fromSide": "bottom",
-      "toNode": "utils_http_6ac7f961",
-      "toSide": "top"
-    },
-    {
-      "id": "edge_entry_App_50b6270d_utils_config_2e57e3d6",
-      "fromNode": "entry_App_50b6270d",
-      "fromSide": "bottom",
-      "toNode": "utils_config_2e57e3d6",
-      "toSide": "top"
-    },
-    {
-      "id": "edge_frontend_ActivityHeatmap_753263dd_utils_activity-heatmap_9ca62158",
-      "fromNode": "frontend_ActivityHeatmap_753263dd",
-      "fromSide": "bottom",
-      "toNode": "utils_activity-heatmap_9ca62158",
-      "toSide": "top"
-    },
-    {
-      "id": "edge_test_auto-retry_test_c3ddea79_undefined_sync_324be1c3",
-      "fromNode": "test_auto-retry_test_c3ddea79",
-      "fromSide": "bottom",
-      "toNode": "undefined_sync_324be1c3",
-      "toSide": "top"
-    },
-    {
-      "id": "edge_undefined_cli_16331b99_undefined_init_8ce62bde",
-      "fromNode": "undefined_cli_16331b99",
-      "fromSide": "right",
-      "toNode": "undefined_init_8ce62bde",
-      "toSide": "left"
-    },
-    {
-      "id": "edge_utils_activity-heatmap_9ca62158_utils_date-range_f68d83fa",
-      "fromNode": "utils_activity-heatmap_9ca62158",
-      "fromSide": "right",
-      "toNode": "utils_date-range_f68d83fa",
-      "toSide": "left"
-    },
-    {
-      "id": "edge_config_vibescore-leaderboard-settings_365d3875_utils_auth_7a311011",
-      "fromNode": "config_vibescore-leaderboard-settings_365d3875",
-      "fromSide": "bottom",
-      "toNode": "utils_auth_7a311011",
-      "toSide": "top"
-    },
-    {
-      "id": "edge_config_vibescore-leaderboard-settings_365d3875_utils_env_27e9ff64",
-      "fromNode": "config_vibescore-leaderboard-settings_365d3875",
-      "fromSide": "bottom",
-      "toNode": "utils_env_27e9ff64",
-      "toSide": "top"
-    },
-    {
-      "id": "edge_edge-function_vibescore-debug-auth_e899af08_utils_auth_7a311011",
-      "fromNode": "edge-function_vibescore-debug-auth_e899af08",
-      "fromSide": "bottom",
-      "toNode": "utils_auth_7a311011",
-      "toSide": "top"
-    },
-    {
-      "id": "edge_edge-function_vibescore-debug-auth_e899af08_utils_env_27e9ff64",
-      "fromNode": "edge-function_vibescore-debug-auth_e899af08",
-      "fromSide": "bottom",
-      "toNode": "utils_env_27e9ff64",
-      "toSide": "top"
-    },
-    {
-      "id": "edge_edge-function_vibescore-device-token-issue_6ec30e66_utils_http_6ac7f961",
-      "fromNode": "edge-function_vibescore-device-token-issue_6ec30e66",
-      "fromSide": "bottom",
-      "toNode": "utils_http_6ac7f961",
-      "toSide": "top"
-    },
-    {
-      "id": "edge_edge-function_vibescore-device-token-issue_6ec30e66_utils_logging_951e02fa",
-      "fromNode": "edge-function_vibescore-device-token-issue_6ec30e66",
-      "fromSide": "bottom",
-      "toNode": "utils_logging_951e02fa",
-      "toSide": "top"
-    },
-    {
-      "id": "edge_edge-function_vibescore-device-token-issue_6ec30e66_utils_auth_7a311011",
-      "fromNode": "edge-function_vibescore-device-token-issue_6ec30e66",
-      "fromSide": "bottom",
-      "toNode": "utils_auth_7a311011",
-      "toSide": "top"
-    },
-    {
-      "id": "edge_edge-function_vibescore-device-token-issue_6ec30e66_utils_env_27e9ff64",
-      "fromNode": "edge-function_vibescore-device-token-issue_6ec30e66",
-      "fromSide": "bottom",
-      "toNode": "utils_env_27e9ff64",
-      "toSide": "top"
-    },
-    {
-      "id": "edge_edge-function_vibescore-device-token-issue_6ec30e66_utils_crypto_6f5833da",
-      "fromNode": "edge-function_vibescore-device-token-issue_6ec30e66",
-      "fromSide": "bottom",
-      "toNode": "utils_crypto_6f5833da",
-      "toSide": "top"
-    },
-    {
-      "id": "edge_edge-function_vibescore-entitlements_26527776_utils_http_6ac7f961",
-      "fromNode": "edge-function_vibescore-entitlements_26527776",
-      "fromSide": "bottom",
-      "toNode": "utils_http_6ac7f961",
-      "toSide": "top"
-    },
-    {
-      "id": "edge_edge-function_vibescore-entitlements_26527776_utils_auth_7a311011",
-      "fromNode": "edge-function_vibescore-entitlements_26527776",
-      "fromSide": "bottom",
-      "toNode": "utils_auth_7a311011",
-      "toSide": "top"
-    },
-    {
-      "id": "edge_edge-function_vibescore-entitlements_26527776_utils_env_27e9ff64",
-      "fromNode": "edge-function_vibescore-entitlements_26527776",
-      "fromSide": "bottom",
-      "toNode": "utils_env_27e9ff64",
-      "toSide": "top"
-    },
-    {
-      "id": "edge_edge-function_vibescore-entitlements_26527776_utils_logging_951e02fa",
-      "fromNode": "edge-function_vibescore-entitlements_26527776",
-      "fromSide": "bottom",
-      "toNode": "utils_logging_951e02fa",
-      "toSide": "top"
-    },
-    {
-      "id": "edge_edge-function_vibescore-entitlements_26527776_utils_crypto_6f5833da",
-      "fromNode": "edge-function_vibescore-entitlements_26527776",
-      "fromSide": "bottom",
-      "toNode": "utils_crypto_6f5833da",
-      "toSide": "top"
-    },
-    {
-      "id": "edge_edge-function_vibescore-entitlements-revoke_f41ecebb_utils_http_6ac7f961",
-      "fromNode": "edge-function_vibescore-entitlements-revoke_f41ecebb",
-      "fromSide": "bottom",
-      "toNode": "utils_http_6ac7f961",
-      "toSide": "top"
-    },
-    {
-      "id": "edge_edge-function_vibescore-entitlements-revoke_f41ecebb_utils_auth_7a311011",
-      "fromNode": "edge-function_vibescore-entitlements-revoke_f41ecebb",
-      "fromSide": "bottom",
-      "toNode": "utils_auth_7a311011",
-      "toSide": "top"
-    },
-    {
-      "id": "edge_edge-function_vibescore-entitlements-revoke_f41ecebb_utils_env_27e9ff64",
-      "fromNode": "edge-function_vibescore-entitlements-revoke_f41ecebb",
-      "fromSide": "bottom",
-      "toNode": "utils_env_27e9ff64",
-      "toSide": "top"
-    },
-    {
-      "id": "edge_edge-function_vibescore-entitlements-revoke_f41ecebb_utils_logging_951e02fa",
-      "fromNode": "edge-function_vibescore-entitlements-revoke_f41ecebb",
-      "fromSide": "bottom",
-      "toNode": "utils_logging_951e02fa",
-      "toSide": "top"
-    },
-    {
-      "id": "edge_edge-function_vibescore-events-retention_66e231a_utils_http_6ac7f961",
-      "fromNode": "edge-function_vibescore-events-retention_66e231a",
-      "fromSide": "bottom",
-      "toNode": "utils_http_6ac7f961",
-      "toSide": "top"
-    },
-    {
-      "id": "edge_entry_App_50b6270d_undefined_use-auth_94cf338d",
-      "fromNode": "entry_App_50b6270d",
-      "fromSide": "bottom",
-      "toNode": "undefined_use-auth_94cf338d",
-      "toSide": "top"
-    },
-    {
-      "id": "edge_entry_App_50b6270d_utils_auth-url_f938f352",
-      "fromNode": "entry_App_50b6270d",
-      "fromSide": "bottom",
-      "toNode": "utils_auth-url_f938f352",
-      "toSide": "top"
-    },
-    {
-      "id": "edge_entry_App_50b6270d_frontend_ErrorBoundary_a5ae61df",
-      "fromNode": "entry_App_50b6270d",
-      "fromSide": "bottom",
-      "toNode": "frontend_ErrorBoundary_a5ae61df",
-      "toSide": "top"
-    },
-    {
-      "id": "edge_entry_App_50b6270d_frontend_LandingPage_8367c397",
-      "fromNode": "entry_App_50b6270d",
-      "fromSide": "bottom",
-      "toNode": "frontend_LandingPage_8367c397",
-      "toSide": "top"
-    },
-    {
-      "id": "edge_entry_main_8ec1de27_entry_App_50b6270d",
-      "fromNode": "entry_main_8ec1de27",
-      "fromSide": "right",
-      "toNode": "entry_App_50b6270d",
-      "toSide": "left"
-    },
-    {
-      "id": "edge_frontend_ActivityHeatmap_753263dd_utils_copy_ca6c3319",
-      "fromNode": "frontend_ActivityHeatmap_753263dd",
-      "fromSide": "bottom",
-      "toNode": "utils_copy_ca6c3319",
-      "toSide": "top"
-    },
-    {
-      "id": "edge_frontend_AnnualPosterPage_70cafd26_utils_copy_ca6c3319",
-      "fromNode": "frontend_AnnualPosterPage_70cafd26",
-      "fromSide": "bottom",
-      "toNode": "utils_copy_ca6c3319",
-      "toSide": "top"
-    },
-    {
-      "id": "edge_frontend_AnnualPosterPage_70cafd26_utils_format_bfd0859f",
-      "fromNode": "frontend_AnnualPosterPage_70cafd26",
-      "fromSide": "bottom",
-      "toNode": "utils_format_bfd0859f",
-      "toSide": "top"
-    },
-    {
-      "id": "edge_frontend_AnnualPosterPage_70cafd26_undefined_use-activity-heatmap_22649861",
-      "fromNode": "frontend_AnnualPosterPage_70cafd26",
-      "fromSide": "bottom",
-      "toNode": "undefined_use-activity-heatmap_22649861",
-      "toSide": "top"
-    },
-    {
-      "id": "edge_frontend_AnnualPosterPage_70cafd26_undefined_use-trend-data_96a42251",
-      "fromNode": "frontend_AnnualPosterPage_70cafd26",
-      "fromSide": "bottom",
-      "toNode": "undefined_use-trend-data_96a42251",
-      "toSide": "top"
-    },
-    {
-      "id": "edge_frontend_AnnualPosterPage_70cafd26_undefined_use-usage-data_a20b1f9d",
-      "fromNode": "frontend_AnnualPosterPage_70cafd26",
-      "fromSide": "bottom",
-      "toNode": "undefined_use-usage-data_a20b1f9d",
-      "toSide": "top"
-    },
-    {
-      "id": "edge_frontend_ArchiveHeatmap_933d5992_utils_copy_ca6c3319",
-      "fromNode": "frontend_ArchiveHeatmap_933d5992",
-      "fromSide": "bottom",
-      "toNode": "utils_copy_ca6c3319",
-      "toSide": "top"
-    }
-  ]
+	"nodes":[
+		{"id":"group_e5883940","type":"group","x":20,"y":20,"width":440,"height":392,"label":"bin"},
+		{"id":"group_ef32b5e1","type":"group","x":20,"y":552,"width":3320,"height":2912,"label":"dashboard"},
+		{"id":"group_ff6083b8","type":"group","x":20,"y":3604,"width":800,"height":752,"label":"external"},
+		{"id":"group_5a3c3cc7","type":"group","x":20,"y":4496,"width":2240,"height":2192,"label":"insforge-src"},
+		{"id":"group_9697fe83","type":"group","x":20,"y":6828,"width":440,"height":392,"label":"root"},
+		{"id":"group_e5885d67","type":"group","x":20,"y":7360,"width":1880,"height":1832,"label":"src"},
+		{"id":"group_9692abd3","type":"group","x":20,"y":9332,"width":2600,"height":2192,"label":"test"},
+		{
+			"id":"frontend_copy_bf33508f",
+			"type":"text",
+			"text":"**copy**\n`copy.jsx`\n\nUI component layer.\n\n包含：\n- copy (526 行)\n- App (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":100,
+			"y":6908,
+			"width":280,
+			"height":232,
+			"color":"6",
+			"meta":{"relPath":"copy.jsx","category":"frontend","group":"frontend","side":"left","layerIndex":1}
+		},
+		{
+			"id":"test_architecture-canvas_test_5f2ee083",
+			"type":"text",
+			"text":"**architecture-canvas.test**\n`test/architecture-canvas.test.js`\n\nTest module.\n\n包含：\n- UserController (64 行)\n- helper (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":100,
+			"y":9412,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"test/architecture-canvas.test.js","category":"test","group":"test","side":"right","layerIndex":6}
+		},
+		{
+			"id":"test_architecture-guardrails_test_b833cfeb",
+			"type":"text",
+			"text":"**architecture-guardrails.test**\n`test/architecture-guardrails.test.js`\n\nTest module.\n\n包含：\n- architecture-guardrails.test (77 行)\n- writeFile (2 个参数)\n\n依赖：1 个模块\n被依赖：0 次",
+			"x":460,
+			"y":9412,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"test/architecture-guardrails.test.js","category":"test","group":"test","side":"right","layerIndex":6}
+		},
+		{
+			"id":"test_auto-retry_test_c3ddea79",
+			"type":"text",
+			"text":"**auto-retry.test**\n`test/auto-retry.test.js`\n\nTest module.\n\n包含：\n- auto-retry.test (67 行)\n- exports (0 个参数)\n\n依赖：1 个模块\n被依赖：0 次",
+			"x":820,
+			"y":9412,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"test/auto-retry.test.js","category":"test","group":"test","side":"right","layerIndex":6}
+		},
+		{
+			"id":"test_browser-auth_test_f3f470fa",
+			"type":"text",
+			"text":"**browser-auth.test**\n`test/browser-auth.test.js`\n\nTest module.\n\n包含：\n- browser-auth.test (55 行)\n- exports (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":1180,
+			"y":9412,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"test/browser-auth.test.js","category":"test","group":"test","side":"right","layerIndex":6}
+		},
+		{
+			"id":"test_compact-number_test_7da4bcfa",
+			"type":"text",
+			"text":"**compact-number.test**\n`test/compact-number.test.js`\n\nTest module.\n\n包含：\n- compact-number.test (21 行)\n- exports (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":1540,
+			"y":9412,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"test/compact-number.test.js","category":"test","group":"test","side":"right","layerIndex":6}
+		},
+		{
+			"id":"test_copy-usage-upgrade_test_d22d5763",
+			"type":"text",
+			"text":"**copy-usage-upgrade.test**\n`test/copy-usage-upgrade.test.js`\n\nTest module.\n\n包含：\n- copy-usage-upgrade.test (103 行)\n- read (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":1900,
+			"y":9412,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"test/copy-usage-upgrade.test.js","category":"test","group":"test","side":"right","layerIndex":6}
+		},
+		{
+			"id":"test_dashboard-core-index-collapse_test_5bf8c314",
+			"type":"text",
+			"text":"**dashboard-core-index-collapse.test**\n`test/dashboard-core-index-collapse.test.js`\n\nTest module.\n\n包含：\n- dashboard-core-index-collapse.test (34 行)\n- read (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":2260,
+			"y":9412,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"test/dashboard-core-index-collapse.test.js","category":"test","group":"test","side":"right","layerIndex":6}
+		},
+		{
+			"id":"test_dashboard-function-path_test_670b7fb8",
+			"type":"text",
+			"text":"**dashboard-function-path.test**\n`test/dashboard-function-path.test.js`\n\nTest module.\n\n包含：\n- dashboard-function-path.test (136 行)\n- jsonResponse (2 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":100,
+			"y":9772,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"test/dashboard-function-path.test.js","category":"test","group":"test","side":"right","layerIndex":6}
+		},
+		{
+			"id":"test_dashboard-identity-start-date_test_24392bd8",
+			"type":"text",
+			"text":"**dashboard-identity-start-date.test**\n`test/dashboard-identity-start-date.test.js`\n\nTest module.\n\n包含：\n- dashboard-identity-start-date.test (73 行)\n- readFile (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":460,
+			"y":9772,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"test/dashboard-identity-start-date.test.js","category":"test","group":"test","side":"right","layerIndex":6}
+		},
+		{
+			"id":"test_dashboard-link-code-expiry_test_34711098",
+			"type":"text",
+			"text":"**dashboard-link-code-expiry.test**\n`test/dashboard-link-code-expiry.test.js`\n\nTest module.\n\n包含：\n- dashboard-link-code-expiry.test (46 行)\n- readFile (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":820,
+			"y":9772,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"test/dashboard-link-code-expiry.test.js","category":"test","group":"test","side":"right","layerIndex":6}
+		},
+		{
+			"id":"test_dashboard-link-code-install_test_88cee716",
+			"type":"text",
+			"text":"**dashboard-link-code-install.test**\n`test/dashboard-link-code-install.test.js`\n\nTest module.\n\n包含：\n- dashboard-link-code-install.test (54 行)\n- readFile (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":1180,
+			"y":9772,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"test/dashboard-link-code-install.test.js","category":"test","group":"test","side":"right","layerIndex":6}
+		},
+		{
+			"id":"test_dashboard-render-order_test_4a2781b3",
+			"type":"text",
+			"text":"**dashboard-render-order.test**\n`test/dashboard-render-order.test.js`\n\nTest module.\n\n包含：\n- dashboard-render-order.test (47 行)\n- exports (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":1540,
+			"y":9772,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"test/dashboard-render-order.test.js","category":"test","group":"test","side":"right","layerIndex":6}
+		},
+		{
+			"id":"test_dashboard-session-expired-banner_test_12598be7",
+			"type":"text",
+			"text":"**dashboard-session-expired-banner.test**\n`test/dashboard-session-expired-banner.test.js`\n\nTest module.\n\n包含：\n- dashboard-session-expired-banner.test (55 行)\n- read (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":1900,
+			"y":9772,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"test/dashboard-session-expired-banner.test.js","category":"test","group":"test","side":"right","layerIndex":6}
+		},
+		{
+			"id":"test_details-pagination_test_d5f7d3d0",
+			"type":"text",
+			"text":"**details-pagination.test**\n`test/details-pagination.test.js`\n\nTest module.\n\n包含：\n- details-pagination.test (24 行)\n- exports (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":2260,
+			"y":9772,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"test/details-pagination.test.js","category":"test","group":"test","side":"right","layerIndex":6}
+		},
+		{
+			"id":"test_details-sort_test_da4ba0e6",
+			"type":"text",
+			"text":"**details-sort.test**\n`test/details-sort.test.js`\n\nTest module.\n\n包含：\n- details-sort.test (31 行)\n- exports (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":100,
+			"y":10132,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"test/details-sort.test.js","category":"test","group":"test","side":"right","layerIndex":6}
+		},
+		{
+			"id":"test_details-trim_test_28850afe",
+			"type":"text",
+			"text":"**details-trim.test**\n`test/details-trim.test.js`\n\nTest module.\n\n包含：\n- details-trim.test (64 行)\n- exports (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":460,
+			"y":10132,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"test/details-trim.test.js","category":"test","group":"test","side":"right","layerIndex":6}
+		},
+		{
+			"id":"test_diagnostics_test_c18ca227",
+			"type":"text",
+			"text":"**diagnostics.test**\n`test/diagnostics.test.js`\n\nTest module.\n\n包含：\n- diagnostics.test (92 行)\n- exports (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":820,
+			"y":10132,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"test/diagnostics.test.js","category":"test","group":"test","side":"right","layerIndex":6}
+		},
+		{
+			"id":"test_edge-functions_test_deffefcc",
+			"type":"text",
+			"text":"**edge-functions.test**\n`test/edge-functions.test.js`\n\nTest module.\n\n包含：\n- edge-functions.test (2794 行)\n- toBase64Url (1 个参数)\n\n依赖：2 个模块\n被依赖：0 次",
+			"x":1180,
+			"y":10132,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"test/edge-functions.test.js","category":"test","group":"test","side":"right","layerIndex":6}
+		},
+		{
+			"id":"test_http-timeout_test_d4be419d",
+			"type":"text",
+			"text":"**http-timeout.test**\n`test/http-timeout.test.js`\n\nTest module.\n\n包含：\n- http-timeout.test (148 行)\n- loadModule (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":1540,
+			"y":10132,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"test/http-timeout.test.js","category":"test","group":"test","side":"right","layerIndex":6}
+		},
+		{
+			"id":"test_init-confirm-copy_test_6d91b67e",
+			"type":"text",
+			"text":"**init-confirm-copy.test**\n`test/init-confirm-copy.test.js`\n\nTest module.\n\n包含：\n- init-confirm-copy.test (69 行)\n- loadInitWithStubs (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":1900,
+			"y":10132,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"test/init-confirm-copy.test.js","category":"test","group":"test","side":"right","layerIndex":6}
+		},
+		{
+			"id":"test_init-dry-run_test_a88727af",
+			"type":"text",
+			"text":"**init-dry-run.test**\n`test/init-dry-run.test.js`\n\nTest module.\n\n包含：\n- init-dry-run.test (52 行)\n- stripAnsi (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":2260,
+			"y":10132,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"test/init-dry-run.test.js","category":"test","group":"test","side":"right","layerIndex":6}
+		},
+		{
+			"id":"test_init-flow-copy_test_c9fa97e",
+			"type":"text",
+			"text":"**init-flow-copy.test**\n`test/init-flow-copy.test.js`\n\nTest module.\n\n包含：\n- init-flow-copy.test (112 行)\n- stripAnsi (1 个参数)\n\n依赖：1 个模块\n被依赖：0 次",
+			"x":100,
+			"y":10492,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"test/init-flow-copy.test.js","category":"test","group":"test","side":"right","layerIndex":6}
+		},
+		{
+			"id":"test_init-spawn-error_test_69948dca",
+			"type":"text",
+			"text":"**init-spawn-error.test**\n`test/init-spawn-error.test.js`\n\nTest module.\n\n包含：\n- init-spawn-error.test (15 行)\n- exports (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":460,
+			"y":10492,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"test/init-spawn-error.test.js","category":"test","group":"test","side":"right","layerIndex":6}
+		},
+		{
+			"id":"test_init-uninstall_test_de3698fe",
+			"type":"text",
+			"text":"**init-uninstall.test**\n`test/init-uninstall.test.js`\n\nTest module.\n\n包含：\n- init-uninstall.test (623 行)\n- waitForFile (3 个参数)\n\n依赖：1 个模块\n被依赖：0 次",
+			"x":820,
+			"y":10492,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"test/init-uninstall.test.js","category":"test","group":"test","side":"right","layerIndex":6}
+		},
+		{
+			"id":"test_insforge-src-shared_test_110fa035",
+			"type":"text",
+			"text":"**insforge-src-shared.test**\n`test/insforge-src-shared.test.js`\n\nTest module.\n\n包含：\n- insforge-src-shared.test (42 行)\n- exports (0 个参数)\n\n依赖：1 个模块\n被依赖：0 次",
+			"x":1180,
+			"y":10492,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"test/insforge-src-shared.test.js","category":"test","group":"test","side":"right","layerIndex":6}
+		},
+		{
+			"id":"test_interaction-sequence-canvas_test_33aed5de",
+			"type":"text",
+			"text":"**interaction-sequence-canvas.test**\n`test/interaction-sequence-canvas.test.js`\n\nTest module.\n\n包含：\n- interaction-sequence-canvas.test (99 行)\n- writeFixture (3 个参数)\n\n依赖：1 个模块\n被依赖：0 次",
+			"x":1540,
+			"y":10492,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"test/interaction-sequence-canvas.test.js","category":"test","group":"test","side":"right","layerIndex":6}
+		},
+		{
+			"id":"test_link-code-exchange-payload_test_900230c6",
+			"type":"text",
+			"text":"**link-code-exchange-payload.test**\n`test/link-code-exchange-payload.test.js`\n\nTest module.\n\n包含：\n- link-code-exchange-payload.test (20 行)\n- exports (0 个参数)\n\n依赖：1 个模块\n被依赖：0 次",
+			"x":1900,
+			"y":10492,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"test/link-code-exchange-payload.test.js","category":"test","group":"test","side":"right","layerIndex":6}
+		},
+		{
+			"id":"test_link-code-request-id_test_ec56824f",
+			"type":"text",
+			"text":"**link-code-request-id.test**\n`test/link-code-request-id.test.js`\n\nTest module.\n\n包含：\n- link-code-request-id.test (109 行)\n- loadInitWithStubbedInsforge (1 个参数)\n\n依赖：1 个模块\n被依赖：0 次",
+			"x":2260,
+			"y":10492,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"test/link-code-request-id.test.js","category":"test","group":"test","side":"right","layerIndex":6}
+		},
+		{
+			"id":"test_link-code-rls_test_b5eb0eb3",
+			"type":"text",
+			"text":"**link-code-rls.test**\n`test/link-code-rls.test.js`\n\nTest module.\n\n包含：\n- link-code-rls.test (30 行)\n- exports (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":100,
+			"y":10852,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"test/link-code-rls.test.js","category":"test","group":"test","side":"right","layerIndex":6}
+		},
+		{
+			"id":"test_model-breakdown_test_8dda311c",
+			"type":"text",
+			"text":"**model-breakdown.test**\n`test/model-breakdown.test.js`\n\nTest module.\n\n包含：\n- model-breakdown.test (38 行)\n- exports (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":460,
+			"y":10852,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"test/model-breakdown.test.js","category":"test","group":"test","side":"right","layerIndex":6}
+		},
+		{
+			"id":"test_pro-status_test_b63d1907",
+			"type":"text",
+			"text":"**pro-status.test**\n`test/pro-status.test.js`\n\nTest module.\n\n包含：\n- pro-status.test (32 行)\n- exports (0 个参数)\n\n依赖：1 个模块\n被依赖：0 次",
+			"x":820,
+			"y":10852,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"test/pro-status.test.js","category":"test","group":"test","side":"right","layerIndex":6}
+		},
+		{
+			"id":"test_rollout-parser_test_e96ece4a",
+			"type":"text",
+			"text":"**rollout-parser.test**\n`test/rollout-parser.test.js`\n\nTest module.\n\n包含：\n- rollout-parser.test (1164 行)\n- buildTurnContextLine (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":1180,
+			"y":10852,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"test/rollout-parser.test.js","category":"test","group":"test","side":"right","layerIndex":6}
+		},
+		{
+			"id":"test_safe-browser_test_3daea783",
+			"type":"text",
+			"text":"**safe-browser.test**\n`test/safe-browser.test.js`\n\nTest module.\n\n包含：\n- safe-browser.test (66 行)\n- exports (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":1540,
+			"y":10852,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"test/safe-browser.test.js","category":"test","group":"test","side":"right","layerIndex":6}
+		},
+		{
+			"id":"test_status_test_16fa5027",
+			"type":"text",
+			"text":"**status.test**\n`test/status.test.js`\n\nTest module.\n\n包含：\n- status.test (66 行)\n- exports (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":1900,
+			"y":10852,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"test/status.test.js","category":"test","group":"test","side":"right","layerIndex":6}
+		},
+		{
+			"id":"test_upload-throttle_test_46c0db95",
+			"type":"text",
+			"text":"**upload-throttle.test**\n`test/upload-throttle.test.js`\n\nTest module.\n\n包含：\n- upload-throttle.test (103 行)\n- exports (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":2260,
+			"y":10852,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"test/upload-throttle.test.js","category":"test","group":"test","side":"right","layerIndex":6}
+		},
+		{
+			"id":"test_uploader_test_2bc50c67",
+			"type":"text",
+			"text":"**uploader.test**\n`test/uploader.test.js`\n\nTest module.\n\n包含：\n- uploader.test (125 行)\n- stubIngestHourly (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":100,
+			"y":11212,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"test/uploader.test.js","category":"test","group":"test","side":"right","layerIndex":6}
+		},
+		{
+			"id":"test_usage-aggregate_test_516e285a",
+			"type":"text",
+			"text":"**usage-aggregate.test**\n`test/usage-aggregate.test.js`\n\nTest module.\n\n包含：\n- usage-aggregate.test (41 行)\n- exports (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":460,
+			"y":11212,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"test/usage-aggregate.test.js","category":"test","group":"test","side":"right","layerIndex":6}
+		},
+		{
+			"id":"test_usage-pagination-order_test_e45c4df4",
+			"type":"text",
+			"text":"**usage-pagination-order.test**\n`test/usage-pagination-order.test.js`\n\nTest module.\n\n包含：\n- usage-pagination-order.test (74 行)\n- readFile (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":820,
+			"y":11212,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"test/usage-pagination-order.test.js","category":"test","group":"test","side":"right","layerIndex":6}
+		},
+		{
+			"id":"test_usage-rollup_test_6eb5afc3",
+			"type":"text",
+			"text":"**usage-rollup.test**\n`test/usage-rollup.test.js`\n\nTest module.\n\n包含：\n- usage-rollup.test (106 行)\n- buildRows (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":1180,
+			"y":11212,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"test/usage-rollup.test.js","category":"test","group":"test","side":"right","layerIndex":6}
+		},
+		{
+			"id":"undefined_cli_16331b99",
+			"type":"text",
+			"text":"**cli**\n`src/cli.js`\n\nGeneral module.\n\n包含：\n- cli (65 行)\n- run (1 个参数)\n\n依赖：1 个模块\n被依赖：0 次",
+			"x":100,
+			"y":7440,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"src/cli.js","group":"misc","side":"right","layerIndex":7}
+		},
+		{
+			"id":"utils_browser-auth_522327e",
+			"type":"text",
+			"text":"**browser-auth**\n`src/lib/browser-auth.js`\n\nShared utilities.\n\n包含：\n- browser-auth (176 行)\n- beginBrowserAuth (4 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":460,
+			"y":7800,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"src/lib/browser-auth.js","category":"utils","group":"utils","side":"right","layerIndex":5}
+		},
+		{
+			"id":"utils_claude-config_11259d2a",
+			"type":"text",
+			"text":"**claude-config**\n`src/lib/claude-config.js`\n\nShared utilities.\n\n包含：\n- claude-config (191 行)\n- upsertClaudeHook (3 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":820,
+			"y":7800,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"src/lib/claude-config.js","category":"utils","group":"utils","side":"right","layerIndex":5}
+		},
+		{
+			"id":"utils_cli-ui_af7307a0",
+			"type":"text",
+			"text":"**cli-ui**\n`src/lib/cli-ui.js`\n\nShared utilities.\n\n包含：\n- cli-ui (180 行)\n- isInteractive (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":1180,
+			"y":7800,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"src/lib/cli-ui.js","category":"utils","group":"utils","side":"right","layerIndex":5}
+		},
+		{
+			"id":"utils_codex-config_942d95c5",
+			"type":"text",
+			"text":"**codex-config**\n`src/lib/codex-config.js`\n\nShared utilities.\n\n包含：\n- codex-config (225 行)\n- upsertNotify (4 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":1540,
+			"y":7800,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"src/lib/codex-config.js","category":"utils","group":"utils","side":"right","layerIndex":5}
+		},
+		{
+			"id":"utils_diagnostics_91ea9e43",
+			"type":"text",
+			"text":"**diagnostics**\n`src/lib/diagnostics.js`\n\nShared utilities.\n\n包含：\n- diagnostics (190 行)\n- collectTrackerDiagnostics (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":100,
+			"y":8160,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"src/lib/diagnostics.js","category":"utils","group":"utils","side":"right","layerIndex":5}
+		},
+		{
+			"id":"utils_fs_59e03a42",
+			"type":"text",
+			"text":"**fs**\n`src/lib/fs.js`\n\nShared utilities.\n\n包含：\n- fs (63 行)\n- ensureDir (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":460,
+			"y":8160,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"src/lib/fs.js","category":"utils","group":"utils","side":"right","layerIndex":5}
+		},
+		{
+			"id":"utils_gemini-config_294040f1",
+			"type":"text",
+			"text":"**gemini-config**\n`src/lib/gemini-config.js`\n\nShared utilities.\n\n包含：\n- gemini-config (285 行)\n- resolveGeminiConfigDir (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":820,
+			"y":8160,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"src/lib/gemini-config.js","category":"utils","group":"utils","side":"right","layerIndex":5}
+		},
+		{
+			"id":"utils_init-flow_cf392f92",
+			"type":"text",
+			"text":"**init-flow**\n`src/lib/init-flow.js`\n\nShared utilities.\n\n包含：\n- init-flow (49 行)\n- renderLocalReport (2 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":1180,
+			"y":8160,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"src/lib/init-flow.js","category":"utils","group":"utils","side":"right","layerIndex":5}
+		},
+		{
+			"id":"utils_insforge-client_62a68f4e",
+			"type":"text",
+			"text":"**insforge-client**\n`src/lib/insforge-client.js`\n\nShared utilities.\n\n包含：\n- insforge-client (60 行)\n- getAnonKey (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":1540,
+			"y":8160,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"src/lib/insforge-client.js","category":"utils","group":"utils","side":"right","layerIndex":5}
+		},
+		{
+			"id":"utils_insforge_1781f5da",
+			"type":"text",
+			"text":"**insforge**\n`src/lib/insforge.js`\n\nShared utilities.\n\n包含：\n- insforge (24 行)\n- issueDeviceTokenWithPassword (4 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":100,
+			"y":8520,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"src/lib/insforge.js","category":"utils","group":"utils","side":"right","layerIndex":5}
+		},
+		{
+			"id":"utils_opencode-config_484c9289",
+			"type":"text",
+			"text":"**opencode-config**\n`src/lib/opencode-config.js`\n\nShared utilities.\n\n包含：\n- opencode-config (99 行)\n- resolveOpencodeConfigDir (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":460,
+			"y":8520,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"src/lib/opencode-config.js","category":"utils","group":"utils","side":"right","layerIndex":5}
+		},
+		{
+			"id":"utils_progress_338db8ca",
+			"type":"text",
+			"text":"**progress**\n`src/lib/progress.js`\n\nShared utilities.\n\n包含：\n- progress (78 行)\n- createProgress (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":820,
+			"y":8520,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"src/lib/progress.js","category":"utils","group":"utils","side":"right","layerIndex":5}
+		},
+		{
+			"id":"utils_prompt_29c3a93",
+			"type":"text",
+			"text":"**prompt**\n`src/lib/prompt.js`\n\nShared utilities.\n\n包含：\n- prompt (21 行)\n- prompt (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":1180,
+			"y":8520,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"src/lib/prompt.js","category":"utils","group":"utils","side":"right","layerIndex":5}
+		},
+		{
+			"id":"utils_rollout_ea37f1e4",
+			"type":"text",
+			"text":"**rollout**\n`src/lib/rollout.js`\n\nShared utilities.\n\n包含：\n- rollout (1318 行)\n- listRolloutFiles (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":1540,
+			"y":8520,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"src/lib/rollout.js","category":"utils","group":"utils","side":"right","layerIndex":5}
+		},
+		{
+			"id":"utils_upload-throttle_756746b1",
+			"type":"text",
+			"text":"**upload-throttle**\n`src/lib/upload-throttle.js`\n\nShared utilities.\n\n包含：\n- upload-throttle (130 行)\n- normalizeState (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":100,
+			"y":8880,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"src/lib/upload-throttle.js","category":"utils","group":"utils","side":"right","layerIndex":5}
+		},
+		{
+			"id":"utils_uploader_21e03343",
+			"type":"text",
+			"text":"**uploader**\n`src/lib/uploader.js`\n\nShared utilities.\n\n包含：\n- uploader (117 行)\n- drainQueueToCloud (7 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":460,
+			"y":8880,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"src/lib/uploader.js","category":"utils","group":"utils","side":"right","layerIndex":5}
+		},
+		{
+			"id":"utils_vibescore-api_ba6a9672",
+			"type":"text",
+			"text":"**vibescore-api**\n`src/lib/vibescore-api.js`\n\nShared utilities.\n\n包含：\n- vibescore-api (223 行)\n- signInWithPassword (3 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":820,
+			"y":8880,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"src/lib/vibescore-api.js","category":"utils","group":"utils","side":"right","layerIndex":5}
+		},
+		{
+			"id":"undefined_diagnostics_ba7fe190",
+			"type":"text",
+			"text":"**diagnostics**\n`src/commands/diagnostics.js`\n\nGeneral module.\n\n包含：\n- diagnostics (40 行)\n- cmdDiagnostics (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":460,
+			"y":7440,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"src/commands/diagnostics.js","group":"misc","side":"right","layerIndex":7}
+		},
+		{
+			"id":"undefined_init_8ce62bde",
+			"type":"text",
+			"text":"**init**\n`src/commands/init.js`\n\nGeneral module.\n\n包含：\n- init (790 行)\n- cmdInit (1 个参数)\n\n依赖：0 个模块\n被依赖：1 次",
+			"x":820,
+			"y":7440,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"src/commands/init.js","group":"misc","side":"right","layerIndex":7}
+		},
+		{
+			"id":"undefined_status_ed0fc630",
+			"type":"text",
+			"text":"**status**\n`src/commands/status.js`\n\nGeneral module.\n\n包含：\n- status (154 行)\n- cmdStatus (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":1180,
+			"y":7440,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"src/commands/status.js","group":"misc","side":"right","layerIndex":7}
+		},
+		{
+			"id":"undefined_sync_324be1c3",
+			"type":"text",
+			"text":"**sync**\n`src/commands/sync.js`\n\nGeneral module.\n\n包含：\n- sync (477 行)\n- cmdSync (1 个参数)\n\n依赖：0 个模块\n被依赖：1 次",
+			"x":1540,
+			"y":7440,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"src/commands/sync.js","group":"misc","side":"right","layerIndex":7}
+		},
+		{
+			"id":"undefined_uninstall_d39cffde",
+			"type":"text",
+			"text":"**uninstall**\n`src/commands/uninstall.js`\n\nGeneral module.\n\n包含：\n- uninstall (150 行)\n- cmdUninstall (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":100,
+			"y":7800,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"src/commands/uninstall.js","group":"misc","side":"right","layerIndex":7}
+		},
+		{
+			"id":"utils_auth_7a311011",
+			"type":"text",
+			"text":"**auth**\n`insforge-src/shared/auth.js`\n\nShared utilities.\n\n包含：\n- auth (100 行)\n- getBearerToken (1 个参数)\n\n依赖：0 个模块\n被依赖：5 次",
+			"x":820,
+			"y":5656,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"insforge-src/shared/auth.js","category":"utils","group":"utils","side":"right","layerIndex":5}
+		},
+		{
+			"id":"utils_canary_a8ae9a1f",
+			"type":"text",
+			"text":"**canary**\n`insforge-src/shared/canary.js`\n\nShared utilities.\n\n包含：\n- canary (18 行)\n- isCanaryTag (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":1180,
+			"y":5656,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"insforge-src/shared/canary.js","category":"utils","group":"utils","side":"right","layerIndex":5}
+		},
+		{
+			"id":"utils_concurrency_e450ea3c",
+			"type":"text",
+			"text":"**concurrency**\n`insforge-src/shared/concurrency.js`\n\nShared utilities.\n\n包含：\n- concurrency (84 行)\n- createConcurrencyGuard (5 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":1540,
+			"y":5656,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"insforge-src/shared/concurrency.js","category":"utils","group":"utils","side":"right","layerIndex":5}
+		},
+		{
+			"id":"utils_crypto_6f5833da",
+			"type":"text",
+			"text":"**crypto**\n`insforge-src/shared/crypto.js`\n\nShared utilities.\n\n包含：\n- crypto (15 行)\n- sha256Hex (1 个参数)\n\n依赖：0 个模块\n被依赖：2 次",
+			"x":1900,
+			"y":5656,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"insforge-src/shared/crypto.js","category":"utils","group":"utils","side":"right","layerIndex":5}
+		},
+		{
+			"id":"utils_date_82b9796d",
+			"type":"text",
+			"text":"**date**\n`insforge-src/shared/date.js`\n\nShared utilities.\n\n包含：\n- date (324 行)\n- isDate (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":100,
+			"y":6016,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"insforge-src/shared/date.js","category":"utils","group":"utils","side":"right","layerIndex":5}
+		},
+		{
+			"id":"utils_debug_d2bf3a28",
+			"type":"text",
+			"text":"**debug**\n`insforge-src/shared/debug.js`\n\nShared utilities.\n\n包含：\n- debug (53 行)\n- isDebugEnabled (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":460,
+			"y":6016,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"insforge-src/shared/debug.js","category":"utils","group":"utils","side":"right","layerIndex":5}
+		},
+		{
+			"id":"utils_env_27e9ff64",
+			"type":"text",
+			"text":"**env**\n`insforge-src/shared/env.js`\n\nShared utilities.\n\n包含：\n- env (26 行)\n- getBaseUrl (0 个参数)\n\n依赖：0 个模块\n被依赖：5 次",
+			"x":820,
+			"y":6016,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"insforge-src/shared/env.js","category":"utils","group":"utils","side":"right","layerIndex":5}
+		},
+		{
+			"id":"utils_http_6ac7f961",
+			"type":"text",
+			"text":"**http**\n`insforge-src/shared/http.js`\n\nShared utilities.\n\n包含：\n- http (52 行)\n- handleOptions (1 个参数)\n\n依赖：0 个模块\n被依赖：6 次",
+			"x":1180,
+			"y":6016,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"insforge-src/shared/http.js","category":"utils","group":"utils","side":"right","layerIndex":5}
+		},
+		{
+			"id":"utils_logging_951e02fa",
+			"type":"text",
+			"text":"**logging**\n`insforge-src/shared/logging.js`\n\nShared utilities.\n\n包含：\n- logging (129 行)\n- createRequestId (0 个参数)\n\n依赖：0 个模块\n被依赖：3 次",
+			"x":1540,
+			"y":6016,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"insforge-src/shared/logging.js","category":"utils","group":"utils","side":"right","layerIndex":5}
+		},
+		{
+			"id":"utils_model_516b2f36",
+			"type":"text",
+			"text":"**model**\n`insforge-src/shared/model.js`\n\nShared utilities.\n\n包含：\n- model (25 行)\n- normalizeModel (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":1900,
+			"y":6016,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"insforge-src/shared/model.js","category":"utils","group":"utils","side":"right","layerIndex":5}
+		},
+		{
+			"id":"utils_numbers_b9abfb69",
+			"type":"text",
+			"text":"**numbers**\n`insforge-src/shared/numbers.js`\n\nShared utilities.\n\n包含：\n- numbers (48 行)\n- toBigInt (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":100,
+			"y":6376,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"insforge-src/shared/numbers.js","category":"utils","group":"utils","side":"right","layerIndex":5}
+		},
+		{
+			"id":"utils_pagination_9b6fbff5",
+			"type":"text",
+			"text":"**pagination**\n`insforge-src/shared/pagination.js`\n\nShared utilities.\n\n包含：\n- pagination (44 行)\n- normalizePageSize (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":460,
+			"y":6376,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"insforge-src/shared/pagination.js","category":"utils","group":"utils","side":"right","layerIndex":5}
+		},
+		{
+			"id":"utils_pricing_23c132f1",
+			"type":"text",
+			"text":"**pricing**\n`insforge-src/shared/pricing.js`\n\nShared utilities.\n\n包含：\n- pricing (247 行)\n- getDefaultPricingProfile (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":820,
+			"y":6376,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"insforge-src/shared/pricing.js","category":"utils","group":"utils","side":"right","layerIndex":5}
+		},
+		{
+			"id":"utils_pro-status_10e0e7ed",
+			"type":"text",
+			"text":"**pro-status**\n`insforge-src/shared/pro-status.js`\n\nShared utilities.\n\n包含：\n- pro-status (74 行)\n- toMs (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":1180,
+			"y":6376,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"insforge-src/shared/pro-status.js","category":"utils","group":"utils","side":"right","layerIndex":5}
+		},
+		{
+			"id":"utils_source_8ae561e4",
+			"type":"text",
+			"text":"**source**\n`insforge-src/shared/source.js`\n\nShared utilities.\n\n包含：\n- source (30 行)\n- normalizeSource (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":1540,
+			"y":6376,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"insforge-src/shared/source.js","category":"utils","group":"utils","side":"right","layerIndex":5}
+		},
+		{
+			"id":"utils_usage-rollup_63cc83a9",
+			"type":"text",
+			"text":"**usage-rollup**\n`insforge-src/shared/usage-rollup.js`\n\nShared utilities.\n\n包含：\n- usage-rollup (67 行)\n- createTotals (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":1900,
+			"y":6376,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"insforge-src/shared/usage-rollup.js","category":"utils","group":"utils","side":"right","layerIndex":5}
+		},
+		{
+			"id":"edge-function_vibescore-debug-auth_e899af08",
+			"type":"text",
+			"text":"**vibescore-debug-auth**\n`insforge-src/functions/vibescore-debug-auth.js`\n\nEdge function handler.\n\n包含：\n- vibescore-debug-auth (78 行)\n- exports (0 个参数)\n\n依赖：3 个模块\n被依赖：0 次",
+			"x":100,
+			"y":4576,
+			"width":280,
+			"height":232,
+			"color":"3",
+			"meta":{"relPath":"insforge-src/functions/vibescore-debug-auth.js","category":"edge-function","group":"controller","side":"right","layerIndex":2}
+		},
+		{
+			"id":"edge-function_vibescore-device-token-issue_6ec30e66",
+			"type":"text",
+			"text":"**vibescore-device-token-issue**\n`insforge-src/functions/vibescore-device-token-issue.js`\n\nEdge function handler.\n\n包含：\n- vibescore-device-token-issue (132 行)\n- sanitizeText (2 个参数)\n\n依赖：5 个模块\n被依赖：0 次",
+			"x":460,
+			"y":4576,
+			"width":280,
+			"height":232,
+			"color":"3",
+			"meta":{"relPath":"insforge-src/functions/vibescore-device-token-issue.js","category":"edge-function","group":"controller","side":"right","layerIndex":2}
+		},
+		{
+			"id":"edge-function_vibescore-entitlements-revoke_f41ecebb",
+			"type":"text",
+			"text":"**vibescore-entitlements-revoke**\n`insforge-src/functions/vibescore-entitlements-revoke.js`\n\nEdge function handler.\n\n包含：\n- vibescore-entitlements-revoke (65 行)\n- isValidIso (1 个参数)\n\n依赖：4 个模块\n被依赖：0 次",
+			"x":820,
+			"y":4576,
+			"width":280,
+			"height":232,
+			"color":"3",
+			"meta":{"relPath":"insforge-src/functions/vibescore-entitlements-revoke.js","category":"edge-function","group":"controller","side":"right","layerIndex":2}
+		},
+		{
+			"id":"edge-function_vibescore-entitlements_26527776",
+			"type":"text",
+			"text":"**vibescore-entitlements**\n`insforge-src/functions/vibescore-entitlements.js`\n\nEdge function handler.\n\n包含：\n- vibescore-entitlements (193 行)\n- isValidIso (1 个参数)\n\n依赖：5 个模块\n被依赖：0 次",
+			"x":1180,
+			"y":4576,
+			"width":280,
+			"height":232,
+			"color":"3",
+			"meta":{"relPath":"insforge-src/functions/vibescore-entitlements.js","category":"edge-function","group":"controller","side":"right","layerIndex":2}
+		},
+		{
+			"id":"edge-function_vibescore-events-retention_66e231a",
+			"type":"text",
+			"text":"**vibescore-events-retention**\n`insforge-src/functions/vibescore-events-retention.js`\n\nEdge function handler.\n\n包含：\n- vibescore-events-retention (138 行)\n- purgeTable (6 个参数)\n\n依赖：1 个模块\n被依赖：0 次",
+			"x":1540,
+			"y":4576,
+			"width":280,
+			"height":232,
+			"color":"3",
+			"meta":{"relPath":"insforge-src/functions/vibescore-events-retention.js","category":"edge-function","group":"controller","side":"right","layerIndex":2}
+		},
+		{
+			"id":"edge-function_vibescore-ingest_2e431a7e",
+			"type":"text",
+			"text":"**vibescore-ingest**\n`insforge-src/functions/vibescore-ingest.js`\n\nEdge function handler.\n\n包含：\n- vibescore-ingest (523 行)\n- buildRows (3 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":1900,
+			"y":4576,
+			"width":280,
+			"height":232,
+			"color":"3",
+			"meta":{"relPath":"insforge-src/functions/vibescore-ingest.js","category":"edge-function","group":"controller","side":"right","layerIndex":2}
+		},
+		{
+			"id":"edge-function_vibescore-leaderboard-refresh_4af3b98d",
+			"type":"text",
+			"text":"**vibescore-leaderboard-refresh**\n`insforge-src/functions/vibescore-leaderboard-refresh.js`\n\nEdge function handler.\n\n包含：\n- vibescore-leaderboard-refresh (183 行)\n- normalizePeriod (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":100,
+			"y":4936,
+			"width":280,
+			"height":232,
+			"color":"3",
+			"meta":{"relPath":"insforge-src/functions/vibescore-leaderboard-refresh.js","category":"edge-function","group":"controller","side":"right","layerIndex":2}
+		},
+		{
+			"id":"config_vibescore-leaderboard-settings_365d3875",
+			"type":"text",
+			"text":"**vibescore-leaderboard-settings**\n`insforge-src/functions/vibescore-leaderboard-settings.js`\n\nConfiguration module.\n\n包含：\n- vibescore-leaderboard-settings (74 行)\n- exports (0 个参数)\n\n依赖：3 个模块\n被依赖：0 次",
+			"x":460,
+			"y":4936,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"insforge-src/functions/vibescore-leaderboard-settings.js","category":"config","group":"infra","side":"right","layerIndex":3}
+		},
+		{
+			"id":"edge-function_vibescore-leaderboard_ec9b2c7d",
+			"type":"text",
+			"text":"**vibescore-leaderboard**\n`insforge-src/functions/vibescore-leaderboard.js`\n\nEdge function handler.\n\n包含：\n- vibescore-leaderboard (292 行)\n- tryLoadSingleQuery (3 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":820,
+			"y":4936,
+			"width":280,
+			"height":232,
+			"color":"3",
+			"meta":{"relPath":"insforge-src/functions/vibescore-leaderboard.js","category":"edge-function","group":"controller","side":"right","layerIndex":2}
+		},
+		{
+			"id":"edge-function_vibescore-link-code-exchange_5e48faa",
+			"type":"text",
+			"text":"**vibescore-link-code-exchange**\n`insforge-src/functions/vibescore-link-code-exchange.js`\n\nEdge function handler.\n\n包含：\n- vibescore-link-code-exchange (195 行)\n- sanitizeText (2 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":1180,
+			"y":4936,
+			"width":280,
+			"height":232,
+			"color":"3",
+			"meta":{"relPath":"insforge-src/functions/vibescore-link-code-exchange.js","category":"edge-function","group":"controller","side":"right","layerIndex":2}
+		},
+		{
+			"id":"edge-function_vibescore-link-code-init_13bce0cb",
+			"type":"text",
+			"text":"**vibescore-link-code-init**\n`insforge-src/functions/vibescore-link-code-init.js`\n\nEdge function handler.\n\n包含：\n- vibescore-link-code-init (63 行)\n- generateLinkCode (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":1540,
+			"y":4936,
+			"width":280,
+			"height":232,
+			"color":"3",
+			"meta":{"relPath":"insforge-src/functions/vibescore-link-code-init.js","category":"edge-function","group":"controller","side":"right","layerIndex":2}
+		},
+		{
+			"id":"edge-function_vibescore-pricing-sync_76d1c55e",
+			"type":"text",
+			"text":"**vibescore-pricing-sync**\n`insforge-src/functions/vibescore-pricing-sync.js`\n\nEdge function handler.\n\n包含：\n- vibescore-pricing-sync (409 行)\n- getEnvValue (1 个参数)\n\n依赖：2 个模块\n被依赖：0 次",
+			"x":1900,
+			"y":4936,
+			"width":280,
+			"height":232,
+			"color":"3",
+			"meta":{"relPath":"insforge-src/functions/vibescore-pricing-sync.js","category":"edge-function","group":"controller","side":"right","layerIndex":2}
+		},
+		{
+			"id":"edge-function_vibescore-sync-ping_b0285006",
+			"type":"text",
+			"text":"**vibescore-sync-ping**\n`insforge-src/functions/vibescore-sync-ping.js`\n\nEdge function handler.\n\n包含：\n- vibescore-sync-ping (149 行)\n- touchSyncWithAnonKey (4 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":100,
+			"y":5296,
+			"width":280,
+			"height":232,
+			"color":"3",
+			"meta":{"relPath":"insforge-src/functions/vibescore-sync-ping.js","category":"edge-function","group":"controller","side":"right","layerIndex":2}
+		},
+		{
+			"id":"edge-function_vibescore-usage-daily_13bc8f2d",
+			"type":"text",
+			"text":"**vibescore-usage-daily**\n`insforge-src/functions/vibescore-usage-daily.js`\n\nEdge function handler.\n\n包含：\n- vibescore-usage-daily (310 行)\n- getSourceEntry (2 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":460,
+			"y":5296,
+			"width":280,
+			"height":232,
+			"color":"3",
+			"meta":{"relPath":"insforge-src/functions/vibescore-usage-daily.js","category":"edge-function","group":"controller","side":"right","layerIndex":2}
+		},
+		{
+			"id":"edge-function_vibescore-usage-heatmap_67a4af30",
+			"type":"text",
+			"text":"**vibescore-usage-heatmap**\n`insforge-src/functions/vibescore-usage-heatmap.js`\n\nEdge function handler.\n\n包含：\n- vibescore-usage-heatmap (375 行)\n- normalizeWeeks (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":820,
+			"y":5296,
+			"width":280,
+			"height":232,
+			"color":"3",
+			"meta":{"relPath":"insforge-src/functions/vibescore-usage-heatmap.js","category":"edge-function","group":"controller","side":"right","layerIndex":2}
+		},
+		{
+			"id":"edge-function_vibescore-usage-hourly_7f0e1821",
+			"type":"text",
+			"text":"**vibescore-usage-hourly**\n`insforge-src/functions/vibescore-usage-hourly.js`\n\nEdge function handler.\n\n包含：\n- vibescore-usage-hourly (452 行)\n- initHourlyBuckets (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":1180,
+			"y":5296,
+			"width":280,
+			"height":232,
+			"color":"3",
+			"meta":{"relPath":"insforge-src/functions/vibescore-usage-hourly.js","category":"edge-function","group":"controller","side":"right","layerIndex":2}
+		},
+		{
+			"id":"edge-function_vibescore-usage-model-breakdown_846bd53b",
+			"type":"text",
+			"text":"**vibescore-usage-model-breakdown**\n`insforge-src/functions/vibescore-usage-model-breakdown.js`\n\nEdge function handler.\n\n包含：\n- vibescore-usage-model-breakdown (237 行)\n- createTotals (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":1540,
+			"y":5296,
+			"width":280,
+			"height":232,
+			"color":"3",
+			"meta":{"relPath":"insforge-src/functions/vibescore-usage-model-breakdown.js","category":"edge-function","group":"controller","side":"right","layerIndex":2}
+		},
+		{
+			"id":"edge-function_vibescore-usage-monthly_3f4484b1",
+			"type":"text",
+			"text":"**vibescore-usage-monthly**\n`insforge-src/functions/vibescore-usage-monthly.js`\n\nEdge function handler.\n\n包含：\n- vibescore-usage-monthly (166 行)\n- respond (3 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":1900,
+			"y":5296,
+			"width":280,
+			"height":232,
+			"color":"3",
+			"meta":{"relPath":"insforge-src/functions/vibescore-usage-monthly.js","category":"edge-function","group":"controller","side":"right","layerIndex":2}
+		},
+		{
+			"id":"edge-function_vibescore-usage-summary_57a00ab8",
+			"type":"text",
+			"text":"**vibescore-usage-summary**\n`insforge-src/functions/vibescore-usage-summary.js`\n\nEdge function handler.\n\n包含：\n- vibescore-usage-summary (324 行)\n- getSourceEntry (2 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":100,
+			"y":5656,
+			"width":280,
+			"height":232,
+			"color":"3",
+			"meta":{"relPath":"insforge-src/functions/vibescore-usage-summary.js","category":"edge-function","group":"controller","side":"right","layerIndex":2}
+		},
+		{
+			"id":"edge-function_vibescore-user-status_7e8be314",
+			"type":"text",
+			"text":"**vibescore-user-status**\n`insforge-src/functions/vibescore-user-status.js`\n\nEdge function handler.\n\n包含：\n- vibescore-user-status (84 行)\n- exports (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":460,
+			"y":5656,
+			"width":280,
+			"height":232,
+			"color":"3",
+			"meta":{"relPath":"insforge-src/functions/vibescore-user-status.js","category":"edge-function","group":"controller","side":"right","layerIndex":2}
+		},
+		{
+			"id":"config_vite_config_ed22ad53",
+			"type":"text",
+			"text":"**vite.config**\n`dashboard/vite.config.js`\n\nConfiguration module.\n\n包含：\n- vite.config (205 行)\n- parseCsv (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":820,
+			"y":3152,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"dashboard/vite.config.js","category":"config","group":"infra","side":"left","layerIndex":3}
+		},
+		{
+			"id":"entry_App_50b6270d",
+			"type":"text",
+			"text":"**App**\n`dashboard/src/App.jsx`\n\nEntry module.\n\n包含：\n- App (122 行)\n- getSafeRedirect (1 个参数)\n\n依赖：5 个模块\n被依赖：1 次",
+			"x":100,
+			"y":632,
+			"width":280,
+			"height":232,
+			"color":"1",
+			"meta":{"relPath":"dashboard/src/App.jsx","category":"entry","group":"entry","side":"left","layerIndex":0}
+		},
+		{
+			"id":"entry_main_8ec1de27",
+			"type":"text",
+			"text":"**main**\n`dashboard/src/main.jsx`\n\nEntry module.\n\n包含：\n- main (15 行)\n- exports (0 个参数)\n\n依赖：1 个模块\n被依赖：0 次",
+			"x":1180,
+			"y":1712,
+			"width":280,
+			"height":232,
+			"color":"1",
+			"meta":{"relPath":"dashboard/src/main.jsx","category":"entry","group":"entry","side":"left","layerIndex":0}
+		},
+		{
+			"id":"frontend_MatrixShell_33cf7a77",
+			"type":"text",
+			"text":"**MatrixShell**\n`dashboard/src/ui/matrix-a/layout/MatrixShell.jsx`\n\nUI component layer.\n\n包含：\n- MatrixShell (80 行)\n- MatrixShell (9 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":460,
+			"y":3152,
+			"width":280,
+			"height":232,
+			"color":"6",
+			"meta":{"relPath":"dashboard/src/ui/matrix-a/layout/MatrixShell.jsx","category":"frontend","group":"frontend","side":"left","layerIndex":1}
+		},
+		{
+			"id":"frontend_ActivityHeatmap_753263dd",
+			"type":"text",
+			"text":"**ActivityHeatmap**\n`dashboard/src/ui/matrix-a/components/ActivityHeatmap.jsx`\n\nUI component layer.\n\n包含：\n- ActivityHeatmap (599 行)\n- formatTokenValue (1 个参数)\n\n依赖：2 个模块\n被依赖：0 次",
+			"x":2980,
+			"y":1712,
+			"width":280,
+			"height":232,
+			"color":"6",
+			"meta":{"relPath":"dashboard/src/ui/matrix-a/components/ActivityHeatmap.jsx","category":"frontend","group":"frontend","side":"left","layerIndex":1}
+		},
+		{
+			"id":"frontend_ArchiveHeatmap_933d5992",
+			"type":"text",
+			"text":"**ArchiveHeatmap**\n`dashboard/src/ui/matrix-a/components/ArchiveHeatmap.jsx`\n\nUI component layer.\n\n包含：\n- ArchiveHeatmap (36 行)\n- ArchiveHeatmap (2 个参数)\n\n依赖：1 个模块\n被依赖：0 次",
+			"x":100,
+			"y":2072,
+			"width":280,
+			"height":232,
+			"color":"6",
+			"meta":{"relPath":"dashboard/src/ui/matrix-a/components/ArchiveHeatmap.jsx","category":"frontend","group":"frontend","side":"left","layerIndex":1}
+		},
+		{
+			"id":"frontend_AsciiBox_b2f02e50",
+			"type":"text",
+			"text":"**AsciiBox**\n`dashboard/src/ui/matrix-a/components/AsciiBox.jsx`\n\nUI component layer.\n\n包含：\n- AsciiBox (53 行)\n- AsciiBox (4 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":460,
+			"y":2072,
+			"width":280,
+			"height":232,
+			"color":"6",
+			"meta":{"relPath":"dashboard/src/ui/matrix-a/components/AsciiBox.jsx","category":"frontend","group":"frontend","side":"left","layerIndex":1}
+		},
+		{
+			"id":"frontend_BootScreen_935b542e",
+			"type":"text",
+			"text":"**BootScreen**\n`dashboard/src/ui/matrix-a/components/BootScreen.jsx`\n\nUI component layer.\n\n包含：\n- BootScreen (43 行)\n- BootScreen (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":820,
+			"y":2072,
+			"width":280,
+			"height":232,
+			"color":"6",
+			"meta":{"relPath":"dashboard/src/ui/matrix-a/components/BootScreen.jsx","category":"frontend","group":"frontend","side":"left","layerIndex":1}
+		},
+		{
+			"id":"frontend_ConnectionStatus_7d8f2a16",
+			"type":"text",
+			"text":"**ConnectionStatus**\n`dashboard/src/ui/matrix-a/components/ConnectionStatus.jsx`\n\nUI component layer.\n\n包含：\n- ConnectionStatus (92 行)\n- ConnectionStatus (5 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":1180,
+			"y":2072,
+			"width":280,
+			"height":232,
+			"color":"6",
+			"meta":{"relPath":"dashboard/src/ui/matrix-a/components/ConnectionStatus.jsx","category":"frontend","group":"frontend","side":"left","layerIndex":1}
+		},
+		{
+			"id":"frontend_CostAnalysisModal_6aec9906",
+			"type":"text",
+			"text":"**CostAnalysisModal**\n`dashboard/src/ui/matrix-a/components/CostAnalysisModal.jsx`\n\nUI component layer.\n\n包含：\n- CostAnalysisModal (132 行)\n- formatUsdValue (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":1540,
+			"y":2072,
+			"width":280,
+			"height":232,
+			"color":"6",
+			"meta":{"relPath":"dashboard/src/ui/matrix-a/components/CostAnalysisModal.jsx","category":"frontend","group":"frontend","side":"left","layerIndex":1}
+		},
+		{
+			"id":"frontend_DataRow_42fc6f2e",
+			"type":"text",
+			"text":"**DataRow**\n`dashboard/src/ui/matrix-a/components/DataRow.jsx`\n\nUI component layer.\n\n包含：\n- DataRow (20 行)\n- DataRow (4 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":1900,
+			"y":2072,
+			"width":280,
+			"height":232,
+			"color":"6",
+			"meta":{"relPath":"dashboard/src/ui/matrix-a/components/DataRow.jsx","category":"frontend","group":"frontend","side":"left","layerIndex":1}
+		},
+		{
+			"id":"frontend_DecodingText_b2b88660",
+			"type":"text",
+			"text":"**DecodingText**\n`dashboard/src/ui/matrix-a/components/DecodingText.jsx`\n\nUI component layer.\n\n包含：\n- DecodingText (39 行)\n- DecodingText (2 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":2260,
+			"y":2072,
+			"width":280,
+			"height":232,
+			"color":"6",
+			"meta":{"relPath":"dashboard/src/ui/matrix-a/components/DecodingText.jsx","category":"frontend","group":"frontend","side":"left","layerIndex":1}
+		},
+		{
+			"id":"frontend_GithubStar_d05e145",
+			"type":"text",
+			"text":"**GithubStar**\n`dashboard/src/ui/matrix-a/components/GithubStar.jsx`\n\nUI component layer.\n\n包含：\n- GithubStar (81 行)\n- GithubStar (4 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":2620,
+			"y":2072,
+			"width":280,
+			"height":232,
+			"color":"6",
+			"meta":{"relPath":"dashboard/src/ui/matrix-a/components/GithubStar.jsx","category":"frontend","group":"frontend","side":"left","layerIndex":1}
+		},
+		{
+			"id":"frontend_IdentityCard_281f9ab6",
+			"type":"text",
+			"text":"**IdentityCard**\n`dashboard/src/ui/matrix-a/components/IdentityCard.jsx`\n\nUI component layer.\n\n包含：\n- IdentityCard (123 行)\n- IdentityCard (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":2980,
+			"y":2072,
+			"width":280,
+			"height":232,
+			"color":"6",
+			"meta":{"relPath":"dashboard/src/ui/matrix-a/components/IdentityCard.jsx","category":"frontend","group":"frontend","side":"left","layerIndex":1}
+		},
+		{
+			"id":"frontend_IdentityPanel_27a7e914",
+			"type":"text",
+			"text":"**IdentityPanel**\n`dashboard/src/ui/matrix-a/components/IdentityPanel.jsx`\n\nUI component layer.\n\n包含：\n- IdentityPanel (58 行)\n- toHandle (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":100,
+			"y":2432,
+			"width":280,
+			"height":232,
+			"color":"6",
+			"meta":{"relPath":"dashboard/src/ui/matrix-a/components/IdentityPanel.jsx","category":"frontend","group":"frontend","side":"left","layerIndex":1}
+		},
+		{
+			"id":"frontend_LeaderboardPanel_892d3523",
+			"type":"text",
+			"text":"**LeaderboardPanel**\n`dashboard/src/ui/matrix-a/components/LeaderboardPanel.jsx`\n\nUI component layer.\n\n包含：\n- LeaderboardPanel (116 行)\n- LeaderboardPanel (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":460,
+			"y":2432,
+			"width":280,
+			"height":232,
+			"color":"6",
+			"meta":{"relPath":"dashboard/src/ui/matrix-a/components/LeaderboardPanel.jsx","category":"frontend","group":"frontend","side":"left","layerIndex":1}
+		},
+		{
+			"id":"frontend_LeaderboardRow_3cdf86df",
+			"type":"text",
+			"text":"**LeaderboardRow**\n`dashboard/src/ui/matrix-a/components/LeaderboardRow.jsx`\n\nUI component layer.\n\n包含：\n- LeaderboardRow (61 行)\n- formatRank (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":820,
+			"y":2432,
+			"width":280,
+			"height":232,
+			"color":"6",
+			"meta":{"relPath":"dashboard/src/ui/matrix-a/components/LeaderboardRow.jsx","category":"frontend","group":"frontend","side":"left","layerIndex":1}
+		},
+		{
+			"id":"frontend_LiveSniffer_3b2f77a1",
+			"type":"text",
+			"text":"**LiveSniffer**\n`dashboard/src/ui/matrix-a/components/LiveSniffer.jsx`\n\nUI component layer.\n\n包含：\n- LiveSniffer (45 行)\n- LiveSniffer (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":1180,
+			"y":2432,
+			"width":280,
+			"height":232,
+			"color":"6",
+			"meta":{"relPath":"dashboard/src/ui/matrix-a/components/LiveSniffer.jsx","category":"frontend","group":"frontend","side":"left","layerIndex":1}
+		},
+		{
+			"id":"frontend_MatrixAvatar_b8b692fe",
+			"type":"text",
+			"text":"**MatrixAvatar**\n`dashboard/src/ui/matrix-a/components/MatrixAvatar.jsx`\n\nUI component layer.\n\n包含：\n- MatrixAvatar (84 行)\n- hashCode (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":1540,
+			"y":2432,
+			"width":280,
+			"height":232,
+			"color":"6",
+			"meta":{"relPath":"dashboard/src/ui/matrix-a/components/MatrixAvatar.jsx","category":"frontend","group":"frontend","side":"left","layerIndex":1}
+		},
+		{
+			"id":"frontend_MatrixButton_4eb75bf9",
+			"type":"text",
+			"text":"**MatrixButton**\n`dashboard/src/ui/matrix-a/components/MatrixButton.jsx`\n\nUI component layer.\n\n包含：\n- MatrixButton (30 行)\n- MatrixButton (6 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":1900,
+			"y":2432,
+			"width":280,
+			"height":232,
+			"color":"6",
+			"meta":{"relPath":"dashboard/src/ui/matrix-a/components/MatrixButton.jsx","category":"frontend","group":"frontend","side":"left","layerIndex":1}
+		},
+		{
+			"id":"frontend_MatrixConstants_797f7b7a",
+			"type":"text",
+			"text":"**MatrixConstants**\n`dashboard/src/ui/matrix-a/components/MatrixConstants.js`\n\nUI component layer.\n\n包含：\n- MatrixConstants (28 行)\n- exports (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":2260,
+			"y":2432,
+			"width":280,
+			"height":232,
+			"color":"6",
+			"meta":{"relPath":"dashboard/src/ui/matrix-a/components/MatrixConstants.js","category":"frontend","group":"frontend","side":"left","layerIndex":1}
+		},
+		{
+			"id":"frontend_MatrixInput_d7fbc459",
+			"type":"text",
+			"text":"**MatrixInput**\n`dashboard/src/ui/matrix-a/components/MatrixInput.jsx`\n\nUI component layer.\n\n包含：\n- MatrixInput (16 行)\n- MatrixInput (3 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":2620,
+			"y":2432,
+			"width":280,
+			"height":232,
+			"color":"6",
+			"meta":{"relPath":"dashboard/src/ui/matrix-a/components/MatrixInput.jsx","category":"frontend","group":"frontend","side":"left","layerIndex":1}
+		},
+		{
+			"id":"frontend_MatrixRain_97f568bb",
+			"type":"text",
+			"text":"**MatrixRain**\n`dashboard/src/ui/matrix-a/components/MatrixRain.jsx`\n\nUI component layer.\n\n包含：\n- MatrixRain (134 行)\n- MatrixRain (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":2980,
+			"y":2432,
+			"width":280,
+			"height":232,
+			"color":"6",
+			"meta":{"relPath":"dashboard/src/ui/matrix-a/components/MatrixRain.jsx","category":"frontend","group":"frontend","side":"left","layerIndex":1}
+		},
+		{
+			"id":"frontend_NeuralAdaptiveFleet_9f6d6cf1",
+			"type":"text",
+			"text":"**NeuralAdaptiveFleet**\n`dashboard/src/ui/matrix-a/components/NeuralAdaptiveFleet.jsx`\n\nUI component layer.\n\n包含：\n- NeuralAdaptiveFleet (102 行)\n- NeuralAdaptiveFleet (5 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":100,
+			"y":2792,
+			"width":280,
+			"height":232,
+			"color":"6",
+			"meta":{"relPath":"dashboard/src/ui/matrix-a/components/NeuralAdaptiveFleet.jsx","category":"frontend","group":"frontend","side":"left","layerIndex":1}
+		},
+		{
+			"id":"frontend_NeuralDivergenceMap_db27756f",
+			"type":"text",
+			"text":"**NeuralDivergenceMap**\n`dashboard/src/ui/matrix-a/components/NeuralDivergenceMap.jsx`\n\nUI component layer.\n\n包含：\n- NeuralDivergenceMap (46 行)\n- NeuralDivergenceMap (3 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":460,
+			"y":2792,
+			"width":280,
+			"height":232,
+			"color":"6",
+			"meta":{"relPath":"dashboard/src/ui/matrix-a/components/NeuralDivergenceMap.jsx","category":"frontend","group":"frontend","side":"left","layerIndex":1}
+		},
+		{
+			"id":"frontend_ScrambleText_18fe834c",
+			"type":"text",
+			"text":"**ScrambleText**\n`dashboard/src/ui/matrix-a/components/ScrambleText.jsx`\n\nUI component layer.\n\n包含：\n- ScrambleText (123 行)\n- usePrefersReducedMotion (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":820,
+			"y":2792,
+			"width":280,
+			"height":232,
+			"color":"6",
+			"meta":{"relPath":"dashboard/src/ui/matrix-a/components/ScrambleText.jsx","category":"frontend","group":"frontend","side":"left","layerIndex":1}
+		},
+		{
+			"id":"frontend_SignalBox_7cca5cdf",
+			"type":"text",
+			"text":"**SignalBox**\n`dashboard/src/ui/matrix-a/components/SignalBox.jsx`\n\nUI component layer.\n\n包含：\n- SignalBox (26 行)\n- exports (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":1180,
+			"y":2792,
+			"width":280,
+			"height":232,
+			"color":"6",
+			"meta":{"relPath":"dashboard/src/ui/matrix-a/components/SignalBox.jsx","category":"frontend","group":"frontend","side":"left","layerIndex":1}
+		},
+		{
+			"id":"frontend_SystemHeader_96c77b2e",
+			"type":"text",
+			"text":"**SystemHeader**\n`dashboard/src/ui/matrix-a/components/SystemHeader.jsx`\n\nUI component layer.\n\n包含：\n- SystemHeader (33 行)\n- SystemHeader (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":1540,
+			"y":2792,
+			"width":280,
+			"height":232,
+			"color":"6",
+			"meta":{"relPath":"dashboard/src/ui/matrix-a/components/SystemHeader.jsx","category":"frontend","group":"frontend","side":"left","layerIndex":1}
+		},
+		{
+			"id":"frontend_TrendChart_9f556d31",
+			"type":"text",
+			"text":"**TrendChart**\n`dashboard/src/ui/matrix-a/components/TrendChart.jsx`\n\nUI component layer.\n\n包含：\n- TrendChart (48 行)\n- TrendChart (2 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":1900,
+			"y":2792,
+			"width":280,
+			"height":232,
+			"color":"6",
+			"meta":{"relPath":"dashboard/src/ui/matrix-a/components/TrendChart.jsx","category":"frontend","group":"frontend","side":"left","layerIndex":1}
+		},
+		{
+			"id":"frontend_TrendMonitor_e972b291",
+			"type":"text",
+			"text":"**TrendMonitor**\n`dashboard/src/ui/matrix-a/components/TrendMonitor.jsx`\n\nUI component layer.\n\n包含：\n- TrendMonitor (539 行)\n- TrendMonitor (4 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":2260,
+			"y":2792,
+			"width":280,
+			"height":232,
+			"color":"6",
+			"meta":{"relPath":"dashboard/src/ui/matrix-a/components/TrendMonitor.jsx","category":"frontend","group":"frontend","side":"left","layerIndex":1}
+		},
+		{
+			"id":"frontend_TypewriterText_18b887fe",
+			"type":"text",
+			"text":"**TypewriterText**\n`dashboard/src/ui/matrix-a/components/TypewriterText.jsx`\n\nUI component layer.\n\n包含：\n- TypewriterText (123 行)\n- usePrefersReducedMotion (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":2620,
+			"y":2792,
+			"width":280,
+			"height":232,
+			"color":"6",
+			"meta":{"relPath":"dashboard/src/ui/matrix-a/components/TypewriterText.jsx","category":"frontend","group":"frontend","side":"left","layerIndex":1}
+		},
+		{
+			"id":"frontend_UpgradeAlertModal_f1827ba1",
+			"type":"text",
+			"text":"**UpgradeAlertModal**\n`dashboard/src/ui/matrix-a/components/UpgradeAlertModal.jsx`\n\nUI component layer.\n\n包含：\n- UpgradeAlertModal (145 行)\n- UpgradeAlertModal (3 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":2980,
+			"y":2792,
+			"width":280,
+			"height":232,
+			"color":"6",
+			"meta":{"relPath":"dashboard/src/ui/matrix-a/components/UpgradeAlertModal.jsx","category":"frontend","group":"frontend","side":"left","layerIndex":1}
+		},
+		{
+			"id":"frontend_UsagePanel_cc80bc27",
+			"type":"text",
+			"text":"**UsagePanel**\n`dashboard/src/ui/matrix-a/components/UsagePanel.jsx`\n\nUI component layer.\n\n包含：\n- UsagePanel (268 行)\n- normalizePeriods (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":100,
+			"y":3152,
+			"width":280,
+			"height":232,
+			"color":"6",
+			"meta":{"relPath":"dashboard/src/ui/matrix-a/components/UsagePanel.jsx","category":"frontend","group":"frontend","side":"left","layerIndex":1}
+		},
+		{
+			"id":"frontend_AnnualPosterPage_70cafd26",
+			"type":"text",
+			"text":"**AnnualPosterPage**\n`dashboard/src/pages/AnnualPosterPage.jsx`\n\nUI component layer.\n\n包含：\n- AnnualPosterPage (333 行)\n- parseIsoDate (1 个参数)\n\n依赖：5 个模块\n被依赖：0 次",
+			"x":1540,
+			"y":1712,
+			"width":280,
+			"height":232,
+			"color":"6",
+			"meta":{"relPath":"dashboard/src/pages/AnnualPosterPage.jsx","category":"frontend","group":"frontend","side":"left","layerIndex":1}
+		},
+		{
+			"id":"frontend_DashboardPage_9ebda834",
+			"type":"text",
+			"text":"**DashboardPage**\n`dashboard/src/pages/DashboardPage.jsx`\n\nUI component layer.\n\n包含：\n- DashboardPage (1358 行)\n- hasUsageValue (2 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":1900,
+			"y":1712,
+			"width":280,
+			"height":232,
+			"color":"6",
+			"meta":{"relPath":"dashboard/src/pages/DashboardPage.jsx","category":"frontend","group":"frontend","side":"left","layerIndex":1}
+		},
+		{
+			"id":"frontend_LandingExtras_d794f96d",
+			"type":"text",
+			"text":"**LandingExtras**\n`dashboard/src/pages/LandingExtras.jsx`\n\nUI component layer.\n\n包含：\n- LandingExtras (49 行)\n- LandingExtras (6 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":2260,
+			"y":1712,
+			"width":280,
+			"height":232,
+			"color":"6",
+			"meta":{"relPath":"dashboard/src/pages/LandingExtras.jsx","category":"frontend","group":"frontend","side":"left","layerIndex":1}
+		},
+		{
+			"id":"frontend_LandingPage_8367c397",
+			"type":"text",
+			"text":"**LandingPage**\n`dashboard/src/pages/LandingPage.jsx`\n\nUI component layer.\n\n包含：\n- LandingPage (224 行)\n- useDeferredMount (1 个参数)\n\n依赖：0 个模块\n被依赖：1 次",
+			"x":2620,
+			"y":1712,
+			"width":280,
+			"height":232,
+			"color":"6",
+			"meta":{"relPath":"dashboard/src/pages/LandingPage.jsx","category":"frontend","group":"frontend","side":"left","layerIndex":1}
+		},
+		{
+			"id":"utils_activity-heatmap_9ca62158",
+			"type":"text",
+			"text":"**activity-heatmap**\n`dashboard/src/lib/activity-heatmap.js`\n\nShared utilities.\n\n包含：\n- activity-heatmap (193 行)\n- parseDateString (1 个参数)\n\n依赖：1 个模块\n被依赖：1 次",
+			"x":460,
+			"y":992,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"dashboard/src/lib/activity-heatmap.js","category":"utils","group":"utils","side":"left","layerIndex":5}
+		},
+		{
+			"id":"utils_auth-storage_f3bd6b20",
+			"type":"text",
+			"text":"**auth-storage**\n`dashboard/src/lib/auth-storage.js`\n\nShared utilities.\n\n包含：\n- auth-storage (110 行)\n- emitAuthStorageChange (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":820,
+			"y":992,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"dashboard/src/lib/auth-storage.js","category":"utils","group":"utils","side":"left","layerIndex":5}
+		},
+		{
+			"id":"utils_auth-url_f938f352",
+			"type":"text",
+			"text":"**auth-url**\n`dashboard/src/lib/auth-url.js`\n\nShared utilities.\n\n包含：\n- auth-url (7 行)\n- buildAuthUrl (3 个参数)\n\n依赖：0 个模块\n被依赖：1 次",
+			"x":1180,
+			"y":992,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"dashboard/src/lib/auth-url.js","category":"utils","group":"utils","side":"left","layerIndex":5}
+		},
+		{
+			"id":"utils_backend-probe-scheduler_50231065",
+			"type":"text",
+			"text":"**backend-probe-scheduler**\n`dashboard/src/lib/backend-probe-scheduler.js`\n\nShared utilities.\n\n包含：\n- backend-probe-scheduler (105 行)\n- resolveProbeCadenceConfig (5 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":1540,
+			"y":992,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"dashboard/src/lib/backend-probe-scheduler.js","category":"utils","group":"utils","side":"left","layerIndex":5}
+		},
+		{
+			"id":"utils_config_2e57e3d6",
+			"type":"text",
+			"text":"**config**\n`dashboard/src/lib/config.js`\n\nShared utilities.\n\n包含：\n- config (17 行)\n- getInsforgeBaseUrl (0 个参数)\n\n依赖：0 个模块\n被依赖：1 次",
+			"x":1900,
+			"y":992,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"dashboard/src/lib/config.js","category":"utils","group":"utils","side":"left","layerIndex":5}
+		},
+		{
+			"id":"utils_copy_ca6c3319",
+			"type":"text",
+			"text":"**copy**\n`dashboard/src/lib/copy.js`\n\nShared utilities.\n\n包含：\n- copy (145 行)\n- parseCsv (1 个参数)\n\n依赖：0 个模块\n被依赖：3 次",
+			"x":2260,
+			"y":992,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"dashboard/src/lib/copy.js","category":"utils","group":"utils","side":"left","layerIndex":5}
+		},
+		{
+			"id":"utils_daily_97e4fb45",
+			"type":"text",
+			"text":"**daily**\n`dashboard/src/lib/daily.js`\n\nShared utilities.\n\n包含：\n- daily (47 行)\n- getDetailsSortColumns (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":2620,
+			"y":992,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"dashboard/src/lib/daily.js","category":"utils","group":"utils","side":"left","layerIndex":5}
+		},
+		{
+			"id":"utils_date-range_f68d83fa",
+			"type":"text",
+			"text":"**date-range**\n`dashboard/src/lib/date-range.js`\n\nShared utilities.\n\n包含：\n- date-range (100 行)\n- formatDateUTC (1 个参数)\n\n依赖：0 个模块\n被依赖：1 次",
+			"x":2980,
+			"y":992,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"dashboard/src/lib/date-range.js","category":"utils","group":"utils","side":"left","layerIndex":5}
+		},
+		{
+			"id":"utils_detail-sort_7adc0c3a",
+			"type":"text",
+			"text":"**detail-sort**\n`dashboard/src/lib/detail-sort.js`\n\nShared utilities.\n\n包含：\n- detail-sort (148 行)\n- isDetailDateKey (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":100,
+			"y":1352,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"dashboard/src/lib/detail-sort.js","category":"utils","group":"utils","side":"left","layerIndex":5}
+		},
+		{
+			"id":"utils_details_e38a191e",
+			"type":"text",
+			"text":"**details**\n`dashboard/src/lib/details.js`\n\nShared utilities.\n\n包含：\n- details (46 行)\n- isNonZeroToken (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":460,
+			"y":1352,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"dashboard/src/lib/details.js","category":"utils","group":"utils","side":"left","layerIndex":5}
+		},
+		{
+			"id":"utils_format_bfd0859f",
+			"type":"text",
+			"text":"**format**\n`dashboard/src/lib/format.js`\n\nShared utilities.\n\n包含：\n- format (91 行)\n- toDisplayNumber (1 个参数)\n\n依赖：0 个模块\n被依赖：1 次",
+			"x":820,
+			"y":1352,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"dashboard/src/lib/format.js","category":"utils","group":"utils","side":"left","layerIndex":5}
+		},
+		{
+			"id":"utils_http-timeout_7c54b212",
+			"type":"text",
+			"text":"**http-timeout**\n`dashboard/src/lib/http-timeout.js`\n\nShared utilities.\n\n包含：\n- http-timeout (62 行)\n- getHttpTimeoutMs (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":1180,
+			"y":1352,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"dashboard/src/lib/http-timeout.js","category":"utils","group":"utils","side":"left","layerIndex":5}
+		},
+		{
+			"id":"utils_insforge-client_8b2467c5",
+			"type":"text",
+			"text":"**insforge-client**\n`dashboard/src/lib/insforge-client.js`\n\nShared utilities.\n\n包含：\n- insforge-client (32 行)\n- createMemoryStorage (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":1540,
+			"y":1352,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"dashboard/src/lib/insforge-client.js","category":"utils","group":"utils","side":"left","layerIndex":5}
+		},
+		{
+			"id":"utils_mock-data_85162fab",
+			"type":"text",
+			"text":"**mock-data**\n`dashboard/src/lib/mock-data.js`\n\nShared utilities.\n\n包含：\n- mock-data (419 行)\n- isMockEnabled (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":1900,
+			"y":1352,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"dashboard/src/lib/mock-data.js","category":"utils","group":"utils","side":"left","layerIndex":5}
+		},
+		{
+			"id":"utils_model-breakdown_f4d56253",
+			"type":"text",
+			"text":"**model-breakdown**\n`dashboard/src/lib/model-breakdown.js`\n\nShared utilities.\n\n包含：\n- model-breakdown (67 行)\n- buildFleetData (2 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":2260,
+			"y":1352,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"dashboard/src/lib/model-breakdown.js","category":"utils","group":"utils","side":"left","layerIndex":5}
+		},
+		{
+			"id":"utils_npm-version_8f5fd258",
+			"type":"text",
+			"text":"**npm-version**\n`dashboard/src/lib/npm-version.js`\n\nShared utilities.\n\n包含：\n- npm-version (73 行)\n- isValidVersion (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":2620,
+			"y":1352,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"dashboard/src/lib/npm-version.js","category":"utils","group":"utils","side":"left","layerIndex":5}
+		},
+		{
+			"id":"utils_safe-browser_c0afd4cc",
+			"type":"text",
+			"text":"**safe-browser**\n`dashboard/src/lib/safe-browser.js`\n\nShared utilities.\n\n包含：\n- safe-browser (87 行)\n- getLocalStorage (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":2980,
+			"y":1352,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"dashboard/src/lib/safe-browser.js","category":"utils","group":"utils","side":"left","layerIndex":5}
+		},
+		{
+			"id":"utils_timezone_f8b38e57",
+			"type":"text",
+			"text":"**timezone**\n`dashboard/src/lib/timezone.js`\n\nShared utilities.\n\n包含：\n- timezone (133 行)\n- getBrowserTimeZone (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":100,
+			"y":1712,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"dashboard/src/lib/timezone.js","category":"utils","group":"utils","side":"left","layerIndex":5}
+		},
+		{
+			"id":"utils_usage-aggregate_ae7360d5",
+			"type":"text",
+			"text":"**usage-aggregate**\n`dashboard/src/lib/usage-aggregate.js`\n\nShared utilities.\n\n包含：\n- usage-aggregate (42 行)\n- toBigIntValue (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":460,
+			"y":1712,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"dashboard/src/lib/usage-aggregate.js","category":"utils","group":"utils","side":"left","layerIndex":5}
+		},
+		{
+			"id":"utils_vibescore-api_4e9bf839",
+			"type":"text",
+			"text":"**vibescore-api**\n`dashboard/src/lib/vibescore-api.js`\n\nShared utilities.\n\n包含：\n- vibescore-api (481 行)\n- probeBackend (3 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":820,
+			"y":1712,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"dashboard/src/lib/vibescore-api.js","category":"utils","group":"utils","side":"left","layerIndex":5}
+		},
+		{
+			"id":"undefined_use-activity-heatmap_22649861",
+			"type":"text",
+			"text":"**use-activity-heatmap**\n`dashboard/src/hooks/use-activity-heatmap.js`\n\nGeneral module.\n\n包含：\n- use-activity-heatmap (239 行)\n- useActivityHeatmap (9 个参数)\n\n依赖：0 个模块\n被依赖：1 次",
+			"x":1540,
+			"y":632,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"dashboard/src/hooks/use-activity-heatmap.js","group":"misc","side":"left","layerIndex":7}
+		},
+		{
+			"id":"undefined_use-auth_94cf338d",
+			"type":"text",
+			"text":"**use-auth**\n`dashboard/src/hooks/use-auth.js`\n\nGeneral module.\n\n包含：\n- use-auth (68 行)\n- useAuth (0 个参数)\n\n依赖：0 个模块\n被依赖：1 次",
+			"x":1900,
+			"y":632,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"dashboard/src/hooks/use-auth.js","group":"misc","side":"left","layerIndex":7}
+		},
+		{
+			"id":"undefined_use-backend-status_f6637b78",
+			"type":"text",
+			"text":"**use-backend-status**\n`dashboard/src/hooks/use-backend-status.js`\n\nGeneral module.\n\n包含：\n- use-backend-status (242 行)\n- useBackendStatus (7 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":2260,
+			"y":632,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"dashboard/src/hooks/use-backend-status.js","group":"misc","side":"left","layerIndex":7}
+		},
+		{
+			"id":"undefined_use-trend-data_96a42251",
+			"type":"text",
+			"text":"**use-trend-data**\n`dashboard/src/hooks/use-trend-data.js`\n\nGeneral module.\n\n包含：\n- use-trend-data (518 行)\n- useTrendData (13 个参数)\n\n依赖：0 个模块\n被依赖：1 次",
+			"x":2620,
+			"y":632,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"dashboard/src/hooks/use-trend-data.js","group":"misc","side":"left","layerIndex":7}
+		},
+		{
+			"id":"undefined_use-usage-data_a20b1f9d",
+			"type":"text",
+			"text":"**use-usage-data**\n`dashboard/src/hooks/use-usage-data.js`\n\nGeneral module.\n\n包含：\n- use-usage-data (262 行)\n- useUsageData (10 个参数)\n\n依赖：0 个模块\n被依赖：1 次",
+			"x":2980,
+			"y":632,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"dashboard/src/hooks/use-usage-data.js","group":"misc","side":"left","layerIndex":7}
+		},
+		{
+			"id":"undefined_use-usage-model-breakdown_f5d46222",
+			"type":"text",
+			"text":"**use-usage-model-breakdown**\n`dashboard/src/hooks/use-usage-model-breakdown.js`\n\nGeneral module.\n\n包含：\n- use-usage-model-breakdown (123 行)\n- useUsageModelBreakdown (8 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":100,
+			"y":992,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"dashboard/src/hooks/use-usage-model-breakdown.js","group":"misc","side":"left","layerIndex":7}
+		},
+		{
+			"id":"frontend_BackendStatus_aa3fa02f",
+			"type":"text",
+			"text":"**BackendStatus**\n`dashboard/src/components/BackendStatus.jsx`\n\nUI component layer.\n\n包含：\n- BackendStatus (59 行)\n- BackendStatus (6 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":460,
+			"y":632,
+			"width":280,
+			"height":232,
+			"color":"6",
+			"meta":{"relPath":"dashboard/src/components/BackendStatus.jsx","category":"frontend","group":"frontend","side":"left","layerIndex":1}
+		},
+		{
+			"id":"frontend_ErrorBoundary_a5ae61df",
+			"type":"text",
+			"text":"**ErrorBoundary**\n`dashboard/src/components/ErrorBoundary.jsx`\n\nUI component layer.\n\n包含：\n- ErrorBoundary (65 行)\n- exports (0 个参数)\n\n依赖：0 个模块\n被依赖：1 次",
+			"x":820,
+			"y":632,
+			"width":280,
+			"height":232,
+			"color":"6",
+			"meta":{"relPath":"dashboard/src/components/ErrorBoundary.jsx","category":"frontend","group":"frontend","side":"left","layerIndex":1}
+		},
+		{
+			"id":"frontend_Sparkline_f06d4f6a",
+			"type":"text",
+			"text":"**Sparkline**\n`dashboard/src/components/Sparkline.jsx`\n\nUI component layer.\n\n包含：\n- Sparkline (51 行)\n- Sparkline (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":1180,
+			"y":632,
+			"width":280,
+			"height":232,
+			"color":"6",
+			"meta":{"relPath":"dashboard/src/components/Sparkline.jsx","category":"frontend","group":"frontend","side":"left","layerIndex":1}
+		},
+		{
+			"id":"undefined_tracker_c3cb4d80",
+			"type":"text",
+			"text":"**tracker**\n`bin/tracker.js`\n\nGeneral module.\n\n包含：\n- tracker (33 行)\n- stripDebugFlag (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+			"x":100,
+			"y":100,
+			"width":280,
+			"height":232,
+			"color":"2",
+			"meta":{"relPath":"bin/tracker.js","group":"misc","side":"right","layerIndex":7}
+		},
+		{
+			"id":"external_InsForge_f6643588",
+			"type":"text",
+			"text":"**InsForge**\n`external`\n\nThird-party service.\n\n包含：\n- InsForge (integration)\n- api (0 个参数)\n\n依赖：0 个模块\n被依赖：8 次",
+			"x":100,
+			"y":3684,
+			"width":280,
+			"height":232,
+			"color":"4",
+			"meta":{"relPath":"external","category":"external","group":"external","side":"right","layerIndex":4},
+			"externalService":"InsForge"
+		},
+		{
+			"id":"external_Anthropic_fbd19171",
+			"type":"text",
+			"text":"**Anthropic**\n`external`\n\nThird-party service.\n\n包含：\n- Anthropic (integration)\n- api (0 个参数)\n\n依赖：0 个模块\n被依赖：3 次",
+			"x":460,
+			"y":3684,
+			"width":280,
+			"height":232,
+			"color":"4",
+			"meta":{"relPath":"external","category":"external","group":"external","side":"right","layerIndex":4},
+			"externalService":"Anthropic"
+		},
+		{
+			"id":"external_OpenAI_ac6e26d9",
+			"type":"text",
+			"text":"**OpenAI**\n`external`\n\nThird-party service.\n\n包含：\n- OpenAI (integration)\n- api (0 个参数)\n\n依赖：0 个模块\n被依赖：1 次",
+			"x":100,
+			"y":4044,
+			"width":280,
+			"height":232,
+			"color":"4",
+			"meta":{"relPath":"external","category":"external","group":"external","side":"right","layerIndex":4},
+			"externalService":"OpenAI"
+		}
+	],
+	"edges":[
+		{"id":"edge_edge-function_vibescore-pricing-sync_76d1c55e_external_OpenAI_ac6e26d9","fromNode":"edge-function_vibescore-pricing-sync_76d1c55e","fromSide":"bottom","toNode":"external_OpenAI_ac6e26d9","toSide":"top"},
+		{"id":"edge_edge-function_vibescore-pricing-sync_76d1c55e_external_Anthropic_fbd19171","fromNode":"edge-function_vibescore-pricing-sync_76d1c55e","fromSide":"bottom","toNode":"external_Anthropic_fbd19171","toSide":"top"},
+		{"id":"edge_test_architecture-guardrails_test_b833cfeb_external_InsForge_f6643588","fromNode":"test_architecture-guardrails_test_b833cfeb","fromSide":"top","toNode":"external_InsForge_f6643588","toSide":"bottom"},
+		{"id":"edge_test_edge-functions_test_deffefcc_external_Anthropic_fbd19171","fromNode":"test_edge-functions_test_deffefcc","fromSide":"top","toNode":"external_Anthropic_fbd19171","toSide":"bottom"},
+		{"id":"edge_test_edge-functions_test_deffefcc_external_InsForge_f6643588","fromNode":"test_edge-functions_test_deffefcc","fromSide":"top","toNode":"external_InsForge_f6643588","toSide":"bottom"},
+		{"id":"edge_test_init-flow-copy_test_c9fa97e_external_InsForge_f6643588","fromNode":"test_init-flow-copy_test_c9fa97e","fromSide":"top","toNode":"external_InsForge_f6643588","toSide":"bottom"},
+		{"id":"edge_test_init-uninstall_test_de3698fe_external_Anthropic_fbd19171","fromNode":"test_init-uninstall_test_de3698fe","fromSide":"top","toNode":"external_Anthropic_fbd19171","toSide":"bottom"},
+		{"id":"edge_test_insforge-src-shared_test_110fa035_external_InsForge_f6643588","fromNode":"test_insforge-src-shared_test_110fa035","fromSide":"top","toNode":"external_InsForge_f6643588","toSide":"bottom"},
+		{"id":"edge_test_interaction-sequence-canvas_test_33aed5de_external_InsForge_f6643588","fromNode":"test_interaction-sequence-canvas_test_33aed5de","fromSide":"top","toNode":"external_InsForge_f6643588","toSide":"bottom"},
+		{"id":"edge_test_link-code-exchange-payload_test_900230c6_external_InsForge_f6643588","fromNode":"test_link-code-exchange-payload_test_900230c6","fromSide":"top","toNode":"external_InsForge_f6643588","toSide":"bottom"},
+		{"id":"edge_test_link-code-request-id_test_ec56824f_external_InsForge_f6643588","fromNode":"test_link-code-request-id_test_ec56824f","fromSide":"top","toNode":"external_InsForge_f6643588","toSide":"bottom"},
+		{"id":"edge_test_pro-status_test_b63d1907_external_InsForge_f6643588","fromNode":"test_pro-status_test_b63d1907","fromSide":"top","toNode":"external_InsForge_f6643588","toSide":"bottom"},
+		{"id":"edge_config_vibescore-leaderboard-settings_365d3875_utils_http_6ac7f961","fromNode":"config_vibescore-leaderboard-settings_365d3875","fromSide":"bottom","toNode":"utils_http_6ac7f961","toSide":"top"},
+		{"id":"edge_edge-function_vibescore-debug-auth_e899af08_utils_http_6ac7f961","fromNode":"edge-function_vibescore-debug-auth_e899af08","fromSide":"bottom","toNode":"utils_http_6ac7f961","toSide":"top"},
+		{"id":"edge_entry_App_50b6270d_utils_config_2e57e3d6","fromNode":"entry_App_50b6270d","fromSide":"bottom","toNode":"utils_config_2e57e3d6","toSide":"top"},
+		{"id":"edge_frontend_ActivityHeatmap_753263dd_utils_activity-heatmap_9ca62158","fromNode":"frontend_ActivityHeatmap_753263dd","fromSide":"bottom","toNode":"utils_activity-heatmap_9ca62158","toSide":"top"},
+		{"id":"edge_test_auto-retry_test_c3ddea79_undefined_sync_324be1c3","fromNode":"test_auto-retry_test_c3ddea79","fromSide":"bottom","toNode":"undefined_sync_324be1c3","toSide":"top"},
+		{"id":"edge_undefined_cli_16331b99_undefined_init_8ce62bde","fromNode":"undefined_cli_16331b99","fromSide":"right","toNode":"undefined_init_8ce62bde","toSide":"left"},
+		{"id":"edge_utils_activity-heatmap_9ca62158_utils_date-range_f68d83fa","fromNode":"utils_activity-heatmap_9ca62158","fromSide":"right","toNode":"utils_date-range_f68d83fa","toSide":"left"},
+		{"id":"edge_config_vibescore-leaderboard-settings_365d3875_utils_auth_7a311011","fromNode":"config_vibescore-leaderboard-settings_365d3875","fromSide":"bottom","toNode":"utils_auth_7a311011","toSide":"top"},
+		{"id":"edge_config_vibescore-leaderboard-settings_365d3875_utils_env_27e9ff64","fromNode":"config_vibescore-leaderboard-settings_365d3875","fromSide":"bottom","toNode":"utils_env_27e9ff64","toSide":"top"},
+		{"id":"edge_edge-function_vibescore-debug-auth_e899af08_utils_auth_7a311011","fromNode":"edge-function_vibescore-debug-auth_e899af08","fromSide":"bottom","toNode":"utils_auth_7a311011","toSide":"top"},
+		{"id":"edge_edge-function_vibescore-debug-auth_e899af08_utils_env_27e9ff64","fromNode":"edge-function_vibescore-debug-auth_e899af08","fromSide":"bottom","toNode":"utils_env_27e9ff64","toSide":"top"},
+		{"id":"edge_edge-function_vibescore-device-token-issue_6ec30e66_utils_http_6ac7f961","fromNode":"edge-function_vibescore-device-token-issue_6ec30e66","fromSide":"bottom","toNode":"utils_http_6ac7f961","toSide":"top"},
+		{"id":"edge_edge-function_vibescore-device-token-issue_6ec30e66_utils_logging_951e02fa","fromNode":"edge-function_vibescore-device-token-issue_6ec30e66","fromSide":"bottom","toNode":"utils_logging_951e02fa","toSide":"top"},
+		{"id":"edge_edge-function_vibescore-device-token-issue_6ec30e66_utils_auth_7a311011","fromNode":"edge-function_vibescore-device-token-issue_6ec30e66","fromSide":"bottom","toNode":"utils_auth_7a311011","toSide":"top"},
+		{"id":"edge_edge-function_vibescore-device-token-issue_6ec30e66_utils_env_27e9ff64","fromNode":"edge-function_vibescore-device-token-issue_6ec30e66","fromSide":"bottom","toNode":"utils_env_27e9ff64","toSide":"top"},
+		{"id":"edge_edge-function_vibescore-device-token-issue_6ec30e66_utils_crypto_6f5833da","fromNode":"edge-function_vibescore-device-token-issue_6ec30e66","fromSide":"bottom","toNode":"utils_crypto_6f5833da","toSide":"top"},
+		{"id":"edge_edge-function_vibescore-entitlements_26527776_utils_http_6ac7f961","fromNode":"edge-function_vibescore-entitlements_26527776","fromSide":"bottom","toNode":"utils_http_6ac7f961","toSide":"top"},
+		{"id":"edge_edge-function_vibescore-entitlements_26527776_utils_auth_7a311011","fromNode":"edge-function_vibescore-entitlements_26527776","fromSide":"bottom","toNode":"utils_auth_7a311011","toSide":"top"},
+		{"id":"edge_edge-function_vibescore-entitlements_26527776_utils_env_27e9ff64","fromNode":"edge-function_vibescore-entitlements_26527776","fromSide":"bottom","toNode":"utils_env_27e9ff64","toSide":"top"},
+		{"id":"edge_edge-function_vibescore-entitlements_26527776_utils_logging_951e02fa","fromNode":"edge-function_vibescore-entitlements_26527776","fromSide":"bottom","toNode":"utils_logging_951e02fa","toSide":"top"},
+		{"id":"edge_edge-function_vibescore-entitlements_26527776_utils_crypto_6f5833da","fromNode":"edge-function_vibescore-entitlements_26527776","fromSide":"bottom","toNode":"utils_crypto_6f5833da","toSide":"top"},
+		{"id":"edge_edge-function_vibescore-entitlements-revoke_f41ecebb_utils_http_6ac7f961","fromNode":"edge-function_vibescore-entitlements-revoke_f41ecebb","fromSide":"bottom","toNode":"utils_http_6ac7f961","toSide":"top"},
+		{"id":"edge_edge-function_vibescore-entitlements-revoke_f41ecebb_utils_auth_7a311011","fromNode":"edge-function_vibescore-entitlements-revoke_f41ecebb","fromSide":"bottom","toNode":"utils_auth_7a311011","toSide":"top"},
+		{"id":"edge_edge-function_vibescore-entitlements-revoke_f41ecebb_utils_env_27e9ff64","fromNode":"edge-function_vibescore-entitlements-revoke_f41ecebb","fromSide":"bottom","toNode":"utils_env_27e9ff64","toSide":"top"},
+		{"id":"edge_edge-function_vibescore-entitlements-revoke_f41ecebb_utils_logging_951e02fa","fromNode":"edge-function_vibescore-entitlements-revoke_f41ecebb","fromSide":"bottom","toNode":"utils_logging_951e02fa","toSide":"top"},
+		{"id":"edge_edge-function_vibescore-events-retention_66e231a_utils_http_6ac7f961","fromNode":"edge-function_vibescore-events-retention_66e231a","fromSide":"bottom","toNode":"utils_http_6ac7f961","toSide":"top"},
+		{"id":"edge_entry_App_50b6270d_undefined_use-auth_94cf338d","fromNode":"entry_App_50b6270d","fromSide":"bottom","toNode":"undefined_use-auth_94cf338d","toSide":"top"},
+		{"id":"edge_entry_App_50b6270d_utils_auth-url_f938f352","fromNode":"entry_App_50b6270d","fromSide":"bottom","toNode":"utils_auth-url_f938f352","toSide":"top"},
+		{"id":"edge_entry_App_50b6270d_frontend_ErrorBoundary_a5ae61df","fromNode":"entry_App_50b6270d","fromSide":"bottom","toNode":"frontend_ErrorBoundary_a5ae61df","toSide":"top"},
+		{"id":"edge_entry_App_50b6270d_frontend_LandingPage_8367c397","fromNode":"entry_App_50b6270d","fromSide":"bottom","toNode":"frontend_LandingPage_8367c397","toSide":"top"},
+		{"id":"edge_entry_main_8ec1de27_entry_App_50b6270d","fromNode":"entry_main_8ec1de27","fromSide":"right","toNode":"entry_App_50b6270d","toSide":"left"},
+		{"id":"edge_frontend_ActivityHeatmap_753263dd_utils_copy_ca6c3319","fromNode":"frontend_ActivityHeatmap_753263dd","fromSide":"bottom","toNode":"utils_copy_ca6c3319","toSide":"top"},
+		{"id":"edge_frontend_AnnualPosterPage_70cafd26_utils_copy_ca6c3319","fromNode":"frontend_AnnualPosterPage_70cafd26","fromSide":"bottom","toNode":"utils_copy_ca6c3319","toSide":"top"},
+		{"id":"edge_frontend_AnnualPosterPage_70cafd26_utils_format_bfd0859f","fromNode":"frontend_AnnualPosterPage_70cafd26","fromSide":"bottom","toNode":"utils_format_bfd0859f","toSide":"top"},
+		{"id":"edge_frontend_AnnualPosterPage_70cafd26_undefined_use-activity-heatmap_22649861","fromNode":"frontend_AnnualPosterPage_70cafd26","fromSide":"bottom","toNode":"undefined_use-activity-heatmap_22649861","toSide":"top"},
+		{"id":"edge_frontend_AnnualPosterPage_70cafd26_undefined_use-trend-data_96a42251","fromNode":"frontend_AnnualPosterPage_70cafd26","fromSide":"bottom","toNode":"undefined_use-trend-data_96a42251","toSide":"top"},
+		{"id":"edge_frontend_AnnualPosterPage_70cafd26_undefined_use-usage-data_a20b1f9d","fromNode":"frontend_AnnualPosterPage_70cafd26","fromSide":"bottom","toNode":"undefined_use-usage-data_a20b1f9d","toSide":"top"},
+		{"id":"edge_frontend_ArchiveHeatmap_933d5992_utils_copy_ca6c3319","fromNode":"frontend_ArchiveHeatmap_933d5992","fromSide":"bottom","toNode":"utils_copy_ca6c3319","toSide":"top"}
+	]
 }
