@@ -1,5 +1,12 @@
 # Deployment Freeze Records
 
+## 2026-01-02-optimize-usage-summary-db-aggregation
+- Scope: usage summary RPC aggregation + RPC execute grants
+- Change ID: `2026-01-02-optimize-usage-summary-db-aggregation`
+- Freeze artifact: `insforge-functions/vibescore-usage-summary.js` (built via `npm run build:insforge`) + apply `openspec/changes/2026-01-02-optimize-usage-summary-db-aggregation/sql/001_usage_summary_agg.sql`
+- Cold regression step: `node --test test/edge-functions.test.js`
+- Synthetic acceptance: `node scripts/acceptance/usage-summary-agg.cjs`, `node scripts/acceptance/usage-summary-agg-grant.cjs`
+
 ## 2025-12-31-add-ingest-guardrails
 - Scope: M1 logs for ingest/token/sync, ingest concurrency guard, canary probe, usage canary exclusion
 - Change ID: `2025-12-31-add-ingest-guardrails`
