@@ -85,6 +85,7 @@ module.exports = withRequestLogging('vibescore-usage-summary', async function(re
   let distinctModels = new Set();
 
   const queryStartMs = Date.now();
+  // NOTE: Insforge edge runtime does not support database.rpc yet; keep this path gated for future enablement.
   const rpcResult = await auth.edgeClient.database.rpc('vibescore_usage_summary_agg', {
     p_from: startIso,
     p_to: endIso,
@@ -94,7 +95,34 @@ module.exports = withRequestLogging('vibescore-usage-summary', async function(re
   const queryDurationMs = Date.now() - queryStartMs;
 
   if (rpcResult.error) {
-    return respond({ error: rpcResult.error.message }, 500, queryDurationMs);
+    const rpcError = {
+      message: rpcResult.error.message || 'RPC failed',
+      code: rpcResult.error.code ?? null,
+      details: rpcResult.error.details ?? null,
+      hint: rpcResult.error.hint ?? null
+    };
+    if (logger && typeof logger.log === 'function') {
+      logger.log({
+        stage: 'rpc_error',
+        status: 500,
+        rpc: 'vibescore_usage_summary_agg',
+        error_message: rpcError.message,
+        error_code: rpcError.code,
+        error_details: rpcError.details,
+        error_hint: rpcError.hint,
+        from,
+        to,
+        source: source || null,
+        model: model || null,
+        tz: tzContext?.timeZone || null,
+        tz_offset_minutes: Number.isFinite(tzContext?.offsetMinutes) ? tzContext.offsetMinutes : null
+      });
+    }
+    const responseBody = { error: rpcError.message };
+    if (debugEnabled) {
+      responseBody.rpc_error = rpcError;
+    }
+    return respond(responseBody, 500, queryDurationMs);
   }
 
   const rows = Array.isArray(rpcResult.data) ? rpcResult.data : [];

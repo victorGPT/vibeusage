@@ -602,7 +602,7 @@
     {
       "id": "test_pro-status_test_b63d1907",
       "type": "text",
-      "text": "**pro-status.test**\n`test/pro-status.test.js`\n\nTest module.\n\n包含：\n- pro-status.test (32 行)\n- exports (0 个参数)\n\n依赖：1 个模块\n被依赖：0 次",
+      "text": "**pro-status.test**\n`test/pro-status.test.js`\n\nTest module.\n\n包含：\n- pro-status.test (32 行)\n- exports (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
       "x": 820,
       "y": 11384,
       "width": 280,
@@ -1259,7 +1259,7 @@
     {
       "id": "utils_http_6ac7f961",
       "type": "text",
-      "text": "**http**\n`insforge-src/shared/http.js`\n\nShared utilities.\n\n包含：\n- http (52 行)\n- handleOptions (1 个参数)\n\n依赖：0 个模块\n被依赖：6 次",
+      "text": "**http**\n`insforge-src/shared/http.js`\n\nShared utilities.\n\n包含：\n- http (52 行)\n- handleOptions (1 个参数)\n\n依赖：0 个模块\n被依赖：5 次",
       "x": 1180,
       "y": 6548,
       "width": 280,
@@ -1480,7 +1480,7 @@
     {
       "id": "edge-function_vibescore-events-retention_66e231a",
       "type": "text",
-      "text": "**vibescore-events-retention**\n`insforge-src/functions/vibescore-events-retention.js`\n\nEdge function handler.\n\n包含：\n- vibescore-events-retention (138 行)\n- purgeTable (6 个参数)\n\n依赖：1 个模块\n被依赖：0 次",
+      "text": "**vibescore-events-retention**\n`insforge-src/functions/vibescore-events-retention.js`\n\nEdge function handler.\n\n包含：\n- vibescore-events-retention (138 行)\n- purgeTable (6 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
       "x": 1540,
       "y": 5108,
       "width": 280,
@@ -1718,7 +1718,7 @@
     {
       "id": "edge-function_vibescore-usage-summary_57a00ab8",
       "type": "text",
-      "text": "**vibescore-usage-summary**\n`insforge-src/functions/vibescore-usage-summary.js`\n\nEdge function handler.\n\n包含：\n- vibescore-usage-summary (201 行)\n- getRowsScannedTotal (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+      "text": "**vibescore-usage-summary**\n`insforge-src/functions/vibescore-usage-summary.js`\n\nEdge function handler.\n\n包含：\n- vibescore-usage-summary (229 行)\n- getRowsScannedTotal (1 个参数)\n\n依赖：1 个模块\n被依赖：0 次",
       "x": 100,
       "y": 6188,
       "width": 280,
@@ -1836,7 +1836,7 @@
     {
       "id": "frontend_ActivityHeatmap_753263dd",
       "type": "text",
-      "text": "**ActivityHeatmap**\n`dashboard/src/ui/matrix-a/components/ActivityHeatmap.jsx`\n\nUI component layer.\n\n包含：\n- ActivityHeatmap (599 行)\n- formatTokenValue (1 个参数)\n\n依赖：2 个模块\n被依赖：0 次",
+      "text": "**ActivityHeatmap**\n`dashboard/src/ui/matrix-a/components/ActivityHeatmap.jsx`\n\nUI component layer.\n\n包含：\n- ActivityHeatmap (599 行)\n- formatTokenValue (1 个参数)\n\n依赖：2 个模块\n被依赖：1 次",
       "x": 2980,
       "y": 1712,
       "width": 280,
@@ -1853,7 +1853,7 @@
     {
       "id": "frontend_ArchiveHeatmap_933d5992",
       "type": "text",
-      "text": "**ArchiveHeatmap**\n`dashboard/src/ui/matrix-a/components/ArchiveHeatmap.jsx`\n\nUI component layer.\n\n包含：\n- ArchiveHeatmap (36 行)\n- ArchiveHeatmap (2 个参数)\n\n依赖：1 个模块\n被依赖：0 次",
+      "text": "**ArchiveHeatmap**\n`dashboard/src/ui/matrix-a/components/ArchiveHeatmap.jsx`\n\nUI component layer.\n\n包含：\n- ArchiveHeatmap (36 行)\n- ArchiveHeatmap (2 个参数)\n\n依赖：2 个模块\n被依赖：0 次",
       "x": 100,
       "y": 2072,
       "width": 280,
@@ -2968,6 +2968,13 @@
       "toSide": "top"
     },
     {
+      "id": "edge_edge-function_vibescore-usage-summary_57a00ab8_external_InsForge_f6643588",
+      "fromNode": "edge-function_vibescore-usage-summary_57a00ab8",
+      "fromSide": "bottom",
+      "toNode": "external_InsForge_f6643588",
+      "toSide": "top"
+    },
+    {
       "id": "edge_test_architecture-guardrails_test_b833cfeb_external_InsForge_f6643588",
       "fromNode": "test_architecture-guardrails_test_b833cfeb",
       "fromSide": "top",
@@ -3026,13 +3033,6 @@
     {
       "id": "edge_test_link-code-request-id_test_ec56824f_external_InsForge_f6643588",
       "fromNode": "test_link-code-request-id_test_ec56824f",
-      "fromSide": "top",
-      "toNode": "external_InsForge_f6643588",
-      "toSide": "bottom"
-    },
-    {
-      "id": "edge_test_pro-status_test_b63d1907_external_InsForge_f6643588",
-      "fromNode": "test_pro-status_test_b63d1907",
       "fromSide": "top",
       "toNode": "external_InsForge_f6643588",
       "toSide": "bottom"
@@ -3213,13 +3213,6 @@
       "toSide": "top"
     },
     {
-      "id": "edge_edge-function_vibescore-events-retention_66e231a_utils_http_6ac7f961",
-      "fromNode": "edge-function_vibescore-events-retention_66e231a",
-      "fromSide": "bottom",
-      "toNode": "utils_http_6ac7f961",
-      "toSide": "top"
-    },
-    {
       "id": "edge_entry_App_50b6270d_undefined_use-auth_94cf338d",
       "fromNode": "entry_App_50b6270d",
       "fromSide": "bottom",
@@ -3302,6 +3295,13 @@
       "fromSide": "bottom",
       "toNode": "utils_copy_ca6c3319",
       "toSide": "top"
+    },
+    {
+      "id": "edge_frontend_ArchiveHeatmap_933d5992_frontend_ActivityHeatmap_753263dd",
+      "fromNode": "frontend_ArchiveHeatmap_933d5992",
+      "fromSide": "right",
+      "toNode": "frontend_ActivityHeatmap_753263dd",
+      "toSide": "left"
     }
   ]
 }
