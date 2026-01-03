@@ -11,6 +11,14 @@ const pagePath = path.join(
   "pages",
   "DashboardPage.jsx"
 );
+const copyPath = path.join(
+  __dirname,
+  "..",
+  "dashboard",
+  "src",
+  "content",
+  "copy.csv"
+);
 
 function readFile(filePath) {
   return fs.readFileSync(filePath, "utf8");
@@ -64,6 +72,21 @@ test("DashboardPage removes heatmap range label", () => {
     !src.includes("dashboard.activity.range"),
     "expected heatmap range label removed"
   );
+});
+
+test("copy registry removes unused install steps and range label", () => {
+  const csv = readFile(copyPath);
+  const removed = [
+    "landing.screenshot.alt",
+    "dashboard.install.headline",
+    "dashboard.install.step1",
+    "dashboard.install.step2",
+    "dashboard.install.step3",
+    "dashboard.activity.range",
+  ];
+  for (const key of removed) {
+    assert.ok(!csv.includes(key), `expected copy key removed: ${key}`);
+  }
 });
 
 test("DashboardPage lets TrendMonitor auto-size", () => {
