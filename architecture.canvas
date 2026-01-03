@@ -236,7 +236,7 @@
     {
       "id": "test_dashboard-layout-adjustments_test_90329a31",
       "type": "text",
-      "text": "**dashboard-layout-adjustments.test**\n`test/dashboard-layout-adjustments.test.js`\n\nTest module.\n\n包含：\n- dashboard-layout-adjustments.test (68 行)\n- readFile (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+      "text": "**dashboard-layout-adjustments.test**\n`test/dashboard-layout-adjustments.test.js`\n\nTest module.\n\n包含：\n- dashboard-layout-adjustments.test (76 行)\n- readFile (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
       "x": 820,
       "y": 9772,
       "width": 280,
@@ -2338,7 +2338,7 @@
     {
       "id": "frontend_DashboardPage_9ebda834",
       "type": "text",
-      "text": "**DashboardPage**\n`dashboard/src/pages/DashboardPage.jsx`\n\nUI component layer.\n\n包含：\n- DashboardPage (1336 行)\n- hasUsageValue (2 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+      "text": "**DashboardPage**\n`dashboard/src/pages/DashboardPage.jsx`\n\nUI component layer.\n\n包含：\n- DashboardPage (1335 行)\n- hasUsageValue (2 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
       "x": 1900,
       "y": 1712,
       "width": 280,

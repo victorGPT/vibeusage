@@ -1123,7 +1123,6 @@ export function DashboardPage({
                   period={period}
                   timeZoneLabel={trendTimeZoneLabel}
                   showTimeZoneLabel={false}
-                  className="min-h-[240px]"
                 />
               ) : null}
 

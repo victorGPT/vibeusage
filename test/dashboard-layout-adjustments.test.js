@@ -65,3 +65,11 @@ test("DashboardPage removes heatmap range label", () => {
     "expected heatmap range label removed"
   );
 });
+
+test("DashboardPage lets TrendMonitor auto-size", () => {
+  const src = readFile(pagePath);
+  assert.ok(
+    !src.includes('className="min-h-[240px]"'),
+    "expected TrendMonitor min height removed"
+  );
+});
