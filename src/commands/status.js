@@ -4,7 +4,12 @@ const fs = require('node:fs/promises');
 
 const { readJson } = require('../lib/fs');
 const { readCodexNotify, readEveryCodeNotify } = require('../lib/codex-config');
-const { isClaudeHookConfigured, buildClaudeHookCommand } = require('../lib/claude-config');
+const {
+  isClaudeHookConfigured,
+  buildClaudeHookCommand,
+  resolveClaudeHome,
+  resolveClaudeSettingsPath
+} = require('../lib/claude-config');
 const {
   resolveGeminiConfigDir,
   resolveGeminiSettingsPath,
@@ -37,7 +42,8 @@ async function cmdStatus(argv = []) {
   const codexConfigPath = path.join(codexHome, 'config.toml');
   const codeHome = process.env.CODE_HOME || path.join(home, '.code');
   const codeConfigPath = path.join(codeHome, 'config.toml');
-  const claudeSettingsPath = path.join(home, '.claude', 'settings.json');
+  const claudeHome = resolveClaudeHome({ home, env: process.env });
+  const claudeSettingsPath = resolveClaudeSettingsPath({ claudeHome });
   const geminiConfigDir = resolveGeminiConfigDir({ home, env: process.env });
   const geminiSettingsPath = resolveGeminiSettingsPath({ configDir: geminiConfigDir });
   const opencodeConfigDir = resolveOpencodeConfigDir({ home, env: process.env });

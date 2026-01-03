@@ -89,3 +89,34 @@ test('diagnostics redacts device token and home paths', async () => {
     await fs.rm(tmp, { recursive: true, force: true });
   }
 });
+
+test('diagnostics uses CLAUDE_HOME for claude_config path', async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'vibescore-diagnostics-'));
+  const prevHome = process.env.HOME;
+  const prevClaudeHome = process.env.CLAUDE_HOME;
+  const prevWrite = process.stdout.write;
+
+  try {
+    process.env.HOME = tmp;
+    process.env.CLAUDE_HOME = path.join(tmp, '.claude-alt');
+
+    let out = '';
+    process.stdout.write = (chunk, enc, cb) => {
+      out += typeof chunk === 'string' ? chunk : chunk.toString(enc || 'utf8');
+      if (typeof cb === 'function') cb();
+      return true;
+    };
+
+    await cmdDiagnostics([]);
+
+    const data = JSON.parse(out);
+    assert.ok(String(data?.paths?.claude_config || '').includes('.claude-alt'));
+  } finally {
+    process.stdout.write = prevWrite;
+    if (prevHome === undefined) delete process.env.HOME;
+    else process.env.HOME = prevHome;
+    if (prevClaudeHome === undefined) delete process.env.CLAUDE_HOME;
+    else process.env.CLAUDE_HOME = prevClaudeHome;
+    await fs.rm(tmp, { recursive: true, force: true });
+  }
+});

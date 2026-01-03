@@ -1,5 +1,11 @@
 # Deployment Freeze Records
 
+## 2026-01-03-add-linux-cli-support
+- Scope: Linux CLI support (Codex + Claude) + `CLAUDE_HOME` override
+- Change ID: `2026-01-03-add-linux-cli-support`
+- Freeze artifact: CLI package `@vibescore/tracker@0.2.7` (publish from this commit)
+- Cold regression step: `node --test test/init-uninstall.test.js test/status.test.js test/diagnostics.test.js test/claude-home-sync.test.js`
+
 ## 2026-01-02-optimize-usage-summary-db-aggregation
 - Scope: usage summary RPC aggregation + RPC execute grants
 - Change ID: `2026-01-02-optimize-usage-summary-db-aggregation`

@@ -10,7 +10,7 @@
 
 本仓库的 MVP 聚焦：
 
-- **平台**：macOS 优先
+- **平台**：macOS 优先，CLI 支持 Linux（Ubuntu/Fedora/Arch），采集来源限 Codex CLI + Claude Code
 - **统计维度**：全局（不按项目/cwd 拆分）
 - **触发机制**：优先使用 Codex CLI 的 `notify`（`agent-turn-complete`）事件驱动采集；离线/失败通过 `sync` 补账
 

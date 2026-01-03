@@ -9,7 +9,7 @@ _Real-time AI Analytics for Codex CLI_
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![Node.js Support](https://img.shields.io/badge/Node.js-%3E%3D18-brightgreen.svg)](https://nodejs.org/)
-[![Platform](https://img.shields.io/badge/Platform-macOS-lightgrey.svg)](https://www.apple.com/macos/)
+[![Platform](https://img.shields.io/badge/Platform-macOS%20%7C%20Linux-lightgrey.svg)](https://www.kernel.org/)
 
 [**English**](README.md) • [**中文说明**](README.zh-CN.md)
 
@@ -25,7 +25,7 @@ _Real-time AI Analytics for Codex CLI_
 
 ## 🌌 Overview
 
-**VibeScore** is an intelligent token usage tracking system designed specifically for macOS developers. Through the all-new **Matrix-A Design System**, it provides a high-fidelity cyberpunk-style dashboard that transforms your **AI Output** into quantifiable metrics, supported by the **Neural Divergence Map** for real-time monitoring of multi-model compute distribution.
+**VibeScore** is an intelligent token usage tracking system designed for macOS-first workflows, with CLI support on mainstream Linux (Ubuntu/Fedora/Arch). Through the all-new **Matrix-A Design System**, it provides a high-fidelity cyberpunk-style dashboard that transforms your **AI Output** into quantifiable metrics, supported by the **Neural Divergence Map** for real-time monitoring of multi-model compute distribution.
 
 > [!TIP] > **Core Index**: Our signature metric that reflects your flow state by analyzing token consumption rates and patterns.
 
@@ -67,6 +67,7 @@ Note: `init` shows a consent prompt in interactive shells. Use `--yes` to skip p
 Optional: `--dry-run` previews planned changes without writing files.
 Note: If `~/.code/config.toml` exists (or `CODE_HOME`), `init` also configures Every Code `notify` automatically. No further user intervention is required for data sync.
 Note: If Gemini CLI home exists, `init` installs a `SessionEnd` hook in `~/.gemini/settings.json` and sets `tools.enableHooks = true` so hooks execute. This enables all Gemini hooks; disable by setting `tools.enableHooks = false` (or disabling the `vibescore-tracker` hook).
+Note: Linux support is CLI-only and officially covers Codex CLI + Claude Code sources.
 
 ### Sync & Status
 
@@ -84,6 +85,7 @@ npx --yes @vibescore/tracker status
 ### Sources
 
 - Codex CLI logs: `~/.codex/sessions/**/rollout-*.jsonl` (override with `CODEX_HOME`)
+- Claude Code logs: `~/.claude/projects/**/*.jsonl` (override with `CLAUDE_HOME`)
 - Every Code logs: `~/.code/sessions/**/rollout-*.jsonl` (override with `CODE_HOME`)
 - Gemini CLI logs: `~/.gemini/tmp/**/chats/session-*.json` (override with `GEMINI_HOME`)
 
@@ -91,6 +93,7 @@ npx --yes @vibescore/tracker status
 
 - `VIBESCORE_HTTP_TIMEOUT_MS`: CLI HTTP timeout in ms (default `20000`, `0` disables, clamped to `1000..120000`).
 - `VITE_VIBESCORE_HTTP_TIMEOUT_MS`: Dashboard request timeout in ms (default `15000`, `0` disables, clamped to `1000..30000`).
+- `CLAUDE_HOME`: Override Claude Code home (defaults to `~/.claude`).
 - `GEMINI_HOME`: Override Gemini CLI home (defaults to `~/.gemini`).
 
 ## 🧰 Troubleshooting

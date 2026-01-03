@@ -54,7 +54,8 @@ function printHelp() {
       '  - Every Code notify installs when ~/.code/config.toml exists.',
       '  - auto sync waits for a device token.',
       '  - optional: VIBESCORE_DASHBOARD_URL or --dashboard-url for hosted landing.',
-      '  - sync parses ~/.codex/sessions/**/rollout-*.jsonl and ~/.code/sessions/**/rollout-*.jsonl, then uploads token deltas.',
+      '  - sync parses Codex (~/.codex/sessions/**/rollout-*.jsonl), Claude (~/.claude/projects/**/*.jsonl), and other supported sources.',
+      '  - Linux support: Codex + Claude only (set CLAUDE_HOME to override Claude paths).',
       '  - --debug shows original backend errors.',
       ''
     ].join('\n')

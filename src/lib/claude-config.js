@@ -1,9 +1,24 @@
 const fs = require('node:fs/promises');
+const os = require('node:os');
 const path = require('node:path');
 
 const { ensureDir, readJson, writeJson } = require('./fs');
 
 const DEFAULT_EVENT = 'SessionEnd';
+
+function resolveClaudeHome({ home = os.homedir(), env = process.env } = {}) {
+  const explicit = typeof env.CLAUDE_HOME === 'string' ? env.CLAUDE_HOME.trim() : '';
+  if (explicit) return path.resolve(explicit);
+  return path.join(home, '.claude');
+}
+
+function resolveClaudeSettingsPath({ claudeHome }) {
+  return path.join(claudeHome, 'settings.json');
+}
+
+function resolveClaudeProjectsDir({ claudeHome }) {
+  return path.join(claudeHome, 'projects');
+}
 
 async function upsertClaudeHook({ settingsPath, hookCommand, event = DEFAULT_EVENT }) {
   const existing = await readJson(settingsPath);
@@ -183,6 +198,9 @@ async function writeClaudeSettings({ settingsPath, settings }) {
 }
 
 module.exports = {
+  resolveClaudeHome,
+  resolveClaudeSettingsPath,
+  resolveClaudeProjectsDir,
   upsertClaudeHook,
   removeClaudeHook,
   isClaudeHookConfigured,

@@ -5,6 +5,7 @@ const fs = require('node:fs/promises');
 const { test } = require('node:test');
 
 const { cmdStatus } = require('../src/commands/status');
+const { buildClaudeHookCommand } = require('../src/lib/claude-config');
 
 test('status prints last upload timestamps from upload.throttle.json', async () => {
   const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'vibescore-status-'));
@@ -60,6 +61,50 @@ test('status prints last upload timestamps from upload.throttle.json', async () 
     else process.env.HOME = prevHome;
     if (prevCodexHome === undefined) delete process.env.CODEX_HOME;
     else process.env.CODEX_HOME = prevCodexHome;
+    await fs.rm(tmp, { recursive: true, force: true });
+  }
+});
+
+test('status reads Claude hooks from CLAUDE_HOME', async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'vibescore-status-'));
+  const prevHome = process.env.HOME;
+  const prevClaudeHome = process.env.CLAUDE_HOME;
+  const prevWrite = process.stdout.write;
+
+  try {
+    process.env.HOME = tmp;
+    process.env.CLAUDE_HOME = path.join(tmp, '.claude-alt');
+
+    await fs.mkdir(process.env.CLAUDE_HOME, { recursive: true });
+    const notifyPath = path.join(tmp, '.vibescore', 'bin', 'notify.cjs');
+    const hookCommand = buildClaudeHookCommand(notifyPath);
+    const settings = {
+      hooks: {
+        SessionEnd: [{ command: hookCommand, type: 'command' }]
+      }
+    };
+    await fs.writeFile(
+      path.join(process.env.CLAUDE_HOME, 'settings.json'),
+      JSON.stringify(settings, null, 2) + '\n',
+      'utf8'
+    );
+
+    let out = '';
+    process.stdout.write = (chunk, enc, cb) => {
+      out += typeof chunk === 'string' ? chunk : chunk.toString(enc || 'utf8');
+      if (typeof cb === 'function') cb();
+      return true;
+    };
+
+    await cmdStatus();
+
+    assert.match(out, /- Claude hooks: set/);
+  } finally {
+    process.stdout.write = prevWrite;
+    if (prevHome === undefined) delete process.env.HOME;
+    else process.env.HOME = prevHome;
+    if (prevClaudeHome === undefined) delete process.env.CLAUDE_HOME;
+    else process.env.CLAUDE_HOME = prevClaudeHome;
     await fs.rm(tmp, { recursive: true, force: true });
   }
 });

@@ -4,7 +4,12 @@ const fs = require('node:fs/promises');
 
 const { readJson } = require('./fs');
 const { readCodexNotify, readEveryCodeNotify } = require('./codex-config');
-const { isClaudeHookConfigured, buildClaudeHookCommand } = require('./claude-config');
+const {
+  isClaudeHookConfigured,
+  buildClaudeHookCommand,
+  resolveClaudeHome,
+  resolveClaudeSettingsPath
+} = require('./claude-config');
 const {
   resolveGeminiConfigDir,
   resolveGeminiSettingsPath,
@@ -30,7 +35,8 @@ async function collectTrackerDiagnostics({
   const autoRetryPath = path.join(trackerDir, 'auto.retry.json');
   const codexConfigPath = path.join(codexHome, 'config.toml');
   const codeConfigPath = path.join(codeHome, 'config.toml');
-  const claudeConfigPath = path.join(home, '.claude', 'settings.json');
+  const claudeHome = resolveClaudeHome({ home, env: process.env });
+  const claudeConfigPath = resolveClaudeSettingsPath({ claudeHome });
   const geminiConfigDir = resolveGeminiConfigDir({ home, env: process.env });
   const geminiSettingsPath = resolveGeminiSettingsPath({ configDir: geminiConfigDir });
   const opencodeConfigDir = resolveOpencodeConfigDir({ home, env: process.env });

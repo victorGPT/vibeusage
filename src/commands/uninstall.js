@@ -3,7 +3,12 @@ const path = require('node:path');
 const fs = require('node:fs/promises');
 
 const { restoreCodexNotify, restoreEveryCodeNotify } = require('../lib/codex-config');
-const { removeClaudeHook, buildClaudeHookCommand } = require('../lib/claude-config');
+const {
+  removeClaudeHook,
+  buildClaudeHookCommand,
+  resolveClaudeHome,
+  resolveClaudeSettingsPath
+} = require('../lib/claude-config');
 const {
   resolveGeminiConfigDir,
   resolveGeminiSettingsPath,
@@ -21,7 +26,8 @@ async function cmdUninstall(argv) {
   const codexConfigPath = path.join(codexHome, 'config.toml');
   const codeHome = process.env.CODE_HOME || path.join(home, '.code');
   const codeConfigPath = path.join(codeHome, 'config.toml');
-  const claudeSettingsPath = path.join(home, '.claude', 'settings.json');
+  const claudeHome = resolveClaudeHome({ home, env: process.env });
+  const claudeSettingsPath = resolveClaudeSettingsPath({ claudeHome });
   const geminiConfigDir = resolveGeminiConfigDir({ home, env: process.env });
   const geminiSettingsPath = resolveGeminiSettingsPath({ configDir: geminiConfigDir });
   const opencodeConfigDir = resolveOpencodeConfigDir({ home, env: process.env });

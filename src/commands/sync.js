@@ -14,6 +14,7 @@ const {
   parseGeminiIncremental,
   parseOpencodeIncremental
 } = require('../lib/rollout');
+const { resolveClaudeHome, resolveClaudeProjectsDir } = require('../lib/claude-config');
 const { drainQueueToCloud } = require('../lib/uploader');
 const { createProgress, renderBar, formatNumber, formatBytes } = require('../lib/progress');
 const { syncHeartbeat } = require('../lib/vibescore-api');
@@ -53,7 +54,8 @@ async function cmdSync(argv) {
 
     const codexHome = process.env.CODEX_HOME || path.join(home, '.codex');
     const codeHome = process.env.CODE_HOME || path.join(home, '.code');
-    const claudeProjectsDir = path.join(home, '.claude', 'projects');
+    const claudeHome = resolveClaudeHome({ home, env: process.env });
+    const claudeProjectsDir = resolveClaudeProjectsDir({ claudeHome });
     const geminiHome = process.env.GEMINI_HOME || path.join(home, '.gemini');
     const geminiTmpDir = path.join(geminiHome, 'tmp');
     const xdgDataHome = process.env.XDG_DATA_HOME || path.join(home, '.local', 'share');

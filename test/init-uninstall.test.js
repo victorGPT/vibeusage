@@ -6,7 +6,7 @@ const { test } = require('node:test');
 
 const { cmdInit } = require('../src/commands/init');
 const { cmdUninstall } = require('../src/commands/uninstall');
-const { buildClaudeHookCommand } = require('../src/lib/claude-config');
+const { buildClaudeHookCommand, isClaudeHookConfigured } = require('../src/lib/claude-config');
 const { buildGeminiHookCommand } = require('../src/lib/gemini-config');
 
 async function waitForFile(filePath, { timeoutMs = 1500, intervalMs = 50 } = {}) {
@@ -244,6 +244,61 @@ test('init skips Every Code notify when config is missing', async () => {
     else process.env.CODEX_HOME = prevCodexHome;
     if (prevCodeHome === undefined) delete process.env.CODE_HOME;
     else process.env.CODE_HOME = prevCodeHome;
+    if (prevToken === undefined) delete process.env.VIBESCORE_DEVICE_TOKEN;
+    else process.env.VIBESCORE_DEVICE_TOKEN = prevToken;
+    if (prevOpencodeConfigDir === undefined) delete process.env.OPENCODE_CONFIG_DIR;
+    else process.env.OPENCODE_CONFIG_DIR = prevOpencodeConfigDir;
+    await fs.rm(tmp, { recursive: true, force: true });
+  }
+});
+
+test('init/uninstall uses CLAUDE_HOME for Claude hooks', async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'vibescore-init-uninstall-'));
+  const prevHome = process.env.HOME;
+  const prevCodexHome = process.env.CODEX_HOME;
+  const prevClaudeHome = process.env.CLAUDE_HOME;
+  const prevToken = process.env.VIBESCORE_DEVICE_TOKEN;
+  const prevOpencodeConfigDir = process.env.OPENCODE_CONFIG_DIR;
+  const prevWrite = process.stdout.write;
+
+  try {
+    process.env.HOME = tmp;
+    process.env.CODEX_HOME = path.join(tmp, '.codex');
+    process.env.CLAUDE_HOME = path.join(tmp, '.claude-alt');
+    delete process.env.VIBESCORE_DEVICE_TOKEN;
+    process.env.OPENCODE_CONFIG_DIR = path.join(tmp, '.config', 'opencode');
+
+    await fs.mkdir(process.env.CLAUDE_HOME, { recursive: true });
+
+    process.stdout.write = () => true;
+    await cmdInit(['--yes', '--no-auth', '--no-open', '--base-url', 'https://example.invalid']);
+
+    const notifyPath = path.join(tmp, '.vibescore', 'bin', 'notify.cjs');
+    const hookCommand = buildClaudeHookCommand(notifyPath);
+    const claudeSettingsPath = path.join(process.env.CLAUDE_HOME, 'settings.json');
+
+    const hookConfigured = await isClaudeHookConfigured({
+      settingsPath: claudeSettingsPath,
+      hookCommand
+    });
+    assert.equal(hookConfigured, true, 'expected CLAUDE_HOME settings.json to include tracker hook');
+
+    await assert.rejects(fs.stat(path.join(tmp, '.claude', 'settings.json')), /ENOENT/);
+
+    await cmdUninstall([]);
+    const removed = await isClaudeHookConfigured({
+      settingsPath: claudeSettingsPath,
+      hookCommand
+    });
+    assert.equal(removed, false, 'expected uninstall to remove CLAUDE_HOME hook');
+  } finally {
+    process.stdout.write = prevWrite;
+    if (prevHome === undefined) delete process.env.HOME;
+    else process.env.HOME = prevHome;
+    if (prevCodexHome === undefined) delete process.env.CODEX_HOME;
+    else process.env.CODEX_HOME = prevCodexHome;
+    if (prevClaudeHome === undefined) delete process.env.CLAUDE_HOME;
+    else process.env.CLAUDE_HOME = prevClaudeHome;
     if (prevToken === undefined) delete process.env.VIBESCORE_DEVICE_TOKEN;
     else process.env.VIBESCORE_DEVICE_TOKEN = prevToken;
     if (prevOpencodeConfigDir === undefined) delete process.env.OPENCODE_CONFIG_DIR;

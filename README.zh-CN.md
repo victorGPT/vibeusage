@@ -9,7 +9,7 @@ _Codex CLI 实时 AI 分析工具_
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![Node.js Support](https://img.shields.io/badge/Node.js-%3E%3D18-brightgreen.svg)](https://nodejs.org/)
-[![Platform](https://img.shields.io/badge/Platform-macOS-lightgrey.svg)](https://www.apple.com/macos/)
+[![Platform](https://img.shields.io/badge/Platform-macOS%20%7C%20Linux-lightgrey.svg)](https://www.kernel.org/)
 
 [**English**](README.md) • [**中文说明**](README.zh-CN.md)
 
@@ -25,7 +25,7 @@ _Codex CLI 实时 AI 分析工具_
 
 ## 🌌 项目概述
 
-**VibeScore** 是一个专为 macOS 开发者设计的智能令牌（Token）使用追踪系统。它通过全新的 **Matrix-A Design System**，提供高度可视化的赛博朋克风格仪表盘，将你的 **AI 产出 (AI Output)** 转化为可量化的指标，并支持通过 **Neural Divergence Map** 实时监控多模型的算力分布。
+**VibeScore** 是一个 macOS 优先的智能令牌（Token）使用追踪系统，CLI 支持主流 Linux 发行版（Ubuntu/Fedora/Arch）。它通过全新的 **Matrix-A Design System**，提供高度可视化的赛博朋克风格仪表盘，将你的 **AI 产出 (AI Output)** 转化为可量化的指标，并支持通过 **Neural Divergence Map** 实时监控多模型的算力分布。
 
 > [!TIP] > **Core Index (核心指数)**: 我们的标志性指标，通过分析 Token 消耗速率与模式，反映你的开发心流状态。
 
@@ -67,6 +67,7 @@ npx --yes @vibescore/tracker init
 可选：`--dry-run` 仅预览将发生的变更，不写入任何文件。
 说明：若存在 `~/.code/config.toml`（或 `CODE_HOME`），`init` 会自动配置 Every Code 的 `notify`。配置完成后，数据同步完全自动化，无需后续人工干预。
 说明：若检测到 Gemini CLI home，`init` 会在 `~/.gemini/settings.json` 安装 `SessionEnd` hook，并将 `tools.enableHooks = true` 以确保 hook 生效。这会启用所有 Gemini hooks；如需关闭，可将 `tools.enableHooks = false`（或禁用 `vibescore-tracker` hook）。
+说明：Linux 仅支持 CLI，官方支持的数据源范围为 Codex CLI + Claude Code。
 
 ### 同步与状态查看
 
@@ -84,6 +85,7 @@ npx --yes @vibescore/tracker status
 ### 日志来源
 
 - Codex CLI 日志：`~/.codex/sessions/**/rollout-*.jsonl`（可用 `CODEX_HOME` 覆盖）
+- Claude Code 日志：`~/.claude/projects/**/*.jsonl`（可用 `CLAUDE_HOME` 覆盖）
 - Every Code 日志：`~/.code/sessions/**/rollout-*.jsonl`（可用 `CODE_HOME` 覆盖）
 - Gemini CLI 日志：`~/.gemini/tmp/**/chats/session-*.json`（可用 `GEMINI_HOME` 覆盖）
 
@@ -91,6 +93,7 @@ npx --yes @vibescore/tracker status
 
 - `VIBESCORE_HTTP_TIMEOUT_MS`：CLI 请求超时（毫秒，默认 `20000`，`0` 表示关闭，范围 `1000..120000`）。
 - `VITE_VIBESCORE_HTTP_TIMEOUT_MS`：Dashboard 请求超时（毫秒，默认 `15000`，`0` 表示关闭，范围 `1000..30000`）。
+- `CLAUDE_HOME`：覆盖 Claude Code 的 home（默认 `~/.claude`）。
 - `GEMINI_HOME`：覆盖 Gemini CLI 的 home（默认 `~/.gemini`）。
 
 ## 🧰 常见问题

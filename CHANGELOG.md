@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.2.7] - 2026-01-04
+### Added
+- Linux CLI support for Codex CLI + Claude Code via npx.
+- `CLAUDE_HOME` override for Claude Code config/log paths.
+
+### Changed
+- CLI help copy to clarify Linux source coverage.
+- Docs: platform badge, Linux support note, and Claude log/env details.
+
 ## [0.2.6] - 2026-01-01
 ### Changed
 - Refresh CLI init install flow copy (local report → auth transition → success).

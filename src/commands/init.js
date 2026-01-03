@@ -13,7 +13,13 @@ const {
   readCodexNotify,
   readEveryCodeNotify
 } = require('../lib/codex-config');
-const { upsertClaudeHook, buildClaudeHookCommand, isClaudeHookConfigured } = require('../lib/claude-config');
+const {
+  upsertClaudeHook,
+  buildClaudeHookCommand,
+  isClaudeHookConfigured,
+  resolveClaudeHome,
+  resolveClaudeSettingsPath
+} = require('../lib/claude-config');
 const {
   resolveGeminiConfigDir,
   resolveGeminiSettingsPath,
@@ -324,8 +330,8 @@ function buildIntegrationTargets({ home, trackerDir, notifyPath }) {
   const codeNotifyOriginalPath = path.join(trackerDir, 'code_notify_original.json');
   const notifyCmd = ['/usr/bin/env', 'node', notifyPath];
   const codeNotifyCmd = ['/usr/bin/env', 'node', notifyPath, '--source=every-code'];
-  const claudeDir = path.join(home, '.claude');
-  const claudeSettingsPath = path.join(claudeDir, 'settings.json');
+  const claudeDir = resolveClaudeHome({ home, env: process.env });
+  const claudeSettingsPath = resolveClaudeSettingsPath({ claudeHome: claudeDir });
   const claudeHookCommand = buildClaudeHookCommand(notifyPath);
   const geminiConfigDir = resolveGeminiConfigDir({ home, env: process.env });
   const geminiSettingsPath = resolveGeminiSettingsPath({ configDir: geminiConfigDir });
