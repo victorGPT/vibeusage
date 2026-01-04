@@ -5,7 +5,7 @@ const path = require("node:path");
 const os = require("node:os");
 const cp = require("node:child_process");
 
-const DEFAULT_TRACKER_DIR = path.join(os.homedir(), ".vibescore", "tracker");
+const DEFAULT_TRACKER_DIR = path.join(os.homedir(), ".vibeusage", "tracker");
 const TOKEN_FIELDS = [
   "input_tokens",
   "cached_input_tokens",
@@ -26,10 +26,10 @@ function printHelp() {
       "Options:",
       "  --dry-run        Default. Print planned corrections only.",
       "  --apply          Append corrections to queue.jsonl and update cursors.json.",
-      "  --sync           After --apply, run: npx @vibescore/tracker sync --drain.",
+      "  --sync           After --apply, run: npx vibeusage sync --drain.",
       "  --summary        Print counts only (no per-hour details).",
       "  --limit N        Limit detailed output rows (default: 20).",
-      "  --tracker-dir    Override tracker dir (default: ~/.vibescore/tracker).",
+      "  --tracker-dir    Override tracker dir (default: ~/.vibeusage/tracker).",
       "  --queue-path     Override queue.jsonl path.",
       "  --cursors-path   Override cursors.json path.",
       "  --help           Show this help.",
@@ -275,7 +275,7 @@ async function main() {
   process.stdout.write(`Appended records: ${records.length}\n`);
 
   if (opts.sync) {
-    const res = cp.spawnSync("npx", ["@vibescore/tracker", "sync", "--drain"], {
+    const res = cp.spawnSync("npx", ["vibeusage", "sync", "--drain"], {
       stdio: "inherit",
     });
     if (res.status !== 0) {

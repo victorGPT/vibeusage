@@ -65,7 +65,7 @@ const payload = {
   ]
 };
 
-const url = new URL('/functions/vibescore-ingest', baseUrl).toString();
+const url = new URL('/functions/vibeusage-ingest', baseUrl).toString();
 
 run().catch((err) => {
   console.error(err?.message || err);
