@@ -228,9 +228,21 @@ var require_logging = __commonJS({
       if (response && typeof response.status === "number") return response.status;
       return null;
     }
+    function resolveFunctionName(functionName, request) {
+      if (request && typeof request.url === "string") {
+        try {
+          const url = new URL(request.url);
+          const match = url.pathname.match(/\/functions\/([^/?#]+)/);
+          if (match && match[1]) return match[1];
+        } catch (_e) {
+        }
+      }
+      return functionName;
+    }
     function withRequestLogging2(functionName, handler) {
       return async function(request) {
-        const logger = createLogger({ functionName });
+        const resolvedName = resolveFunctionName(functionName, request);
+        const logger = createLogger({ functionName: resolvedName });
         try {
           const response = await handler(request, logger);
           const status = getResponseStatus(response);

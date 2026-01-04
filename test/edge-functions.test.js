@@ -1495,6 +1495,73 @@ test('vibeusage-usage-summary emits debug payload when requested', async () => {
   }
 });
 
+test('vibeusage-usage-summary logs vibeusage function name', async () => {
+  const fn = require('../insforge-functions/vibeusage-usage-summary');
+
+  const userId = '99999999-9999-9999-9999-999999999999';
+  const userJwt = 'user_jwt_test';
+  const rows = [
+    {
+      day: '2025-12-21',
+      total_tokens: '10',
+      input_tokens: '6',
+      cached_input_tokens: '2',
+      output_tokens: '4',
+      reasoning_output_tokens: '1'
+    }
+  ];
+  const logs = [];
+  const prevLog = console.log;
+
+  console.log = (message) => logs.push(message);
+
+  try {
+    globalThis.createClient = (args) => {
+      if (args && args.edgeFunctionToken === userJwt) {
+        return {
+          auth: {
+            getCurrentUser: async () => ({ data: { user: { id: userId } }, error: null })
+          },
+          database: {
+            from: (table) => {
+              assert.equal(table, 'vibescore_tracker_daily_rollup');
+              const query = createQueryMock({ rows });
+              return { select: () => query };
+            }
+          }
+        };
+      }
+      throw new Error(`Unexpected createClient args: ${JSON.stringify(args)}`);
+    };
+
+    const req = new Request(
+      'http://localhost/functions/vibeusage-usage-summary?from=2025-12-21&to=2025-12-21',
+      {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${userJwt}` }
+      }
+    );
+
+    const res = await fn(req);
+    assert.equal(res.status, 200);
+
+    const parsed = logs
+      .map((entry) => {
+        try {
+          return JSON.parse(entry);
+        } catch (_e) {
+          return null;
+        }
+      })
+      .filter(Boolean);
+    const responseLog = parsed.find((payload) => payload?.stage === 'response');
+    assert.ok(responseLog, 'expected response log payload');
+    assert.equal(responseLog.function, 'vibeusage-usage-summary');
+  } finally {
+    console.log = prevLog;
+  }
+});
+
 test('vibeusage-usage-summary uses auth lookup even with jwt payload', async () => {
   const fn = require('../insforge-functions/vibeusage-usage-summary');
 

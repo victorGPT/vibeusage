@@ -36,7 +36,7 @@
       "y": 64,
       "width": 180,
       "height": 90,
-      "text": "**Local Storage**\n`~/.vibeusage + logs (legacy ~/.vibescore)`\n\nQueue, cursors, session files.\nStatus: Implemented",
+      "text": "**Local Storage**\n`~/.vibescore + logs`\n\nQueue, cursors, session files.",
       "color": "5"
     },
     {
@@ -56,7 +56,7 @@
       "y": 64,
       "width": 180,
       "height": 90,
-      "text": "**InsForge Edge**\n`vibeusage-ingest`\n\nValidates token and writes usage.\nStatus: Implemented",
+      "text": "**InsForge Edge**\n`vibescore-ingest`\n\nValidates token and writes usage.",
       "color": "4"
     },
     {
@@ -121,7 +121,7 @@
       "y": 550,
       "width": 340,
       "height": 50,
-      "text": "6. POST /functions/vibeusage-ingest\nAI: Send hourly aggregates (idempotent)."
+      "text": "6. POST /functions/vibescore-ingest\nAI: Send hourly aggregates (idempotent)."
     },
     {
       "id": "message_tracker-sync-ingest_7",
@@ -166,7 +166,7 @@
       "y": 900,
       "width": 340,
       "height": 50,
-      "text": "11. POST /functions/vibeusage-sync-ping\nAI: Best-effort heartbeat."
+      "text": "11. POST /functions/vibescore-sync-ping\nAI: Best-effort heartbeat."
     },
     {
       "id": "message_tracker-sync-ingest_12",
@@ -213,7 +213,7 @@
       "y": 1168,
       "width": 180,
       "height": 90,
-      "text": "**InsForge Edge**\n`vibeusage-link-code-*`\n\nIssues and exchanges codes.\nStatus: Implemented",
+      "text": "**InsForge Edge**\n`link-code-*`\n\nIssues and exchanges codes.",
       "color": "4"
     },
     {
@@ -242,7 +242,7 @@
       "y": 1374,
       "width": 340,
       "height": 50,
-      "text": "2. POST /functions/vibeusage-link-code-init\nAI: Request a short-lived link code."
+      "text": "2. POST /functions/vibescore-link-code-init\nAI: Request a short-lived link code."
     },
     {
       "id": "message_link-code-exchange_3",
@@ -278,7 +278,7 @@
       "y": 1654,
       "width": 340,
       "height": 50,
-      "text": "6. POST /functions/vibeusage-link-code-exchange\nAI: Exchange code for device token."
+      "text": "6. POST /functions/vibescore-link-code-exchange\nAI: Exchange code for device token."
     },
     {
       "id": "message_link-code-exchange_7",
@@ -352,7 +352,7 @@
       "y": 2132,
       "width": 180,
       "height": 90,
-      "text": "**InsForge Edge**\n`vibeusage-usage-summary`\n\nAggregates usage totals.\nStatus: Implemented",
+      "text": "**InsForge Edge**\n`vibescore-usage-summary`\n\nAggregates usage totals.",
       "color": "4"
     },
     {
@@ -381,7 +381,7 @@
       "y": 2338,
       "width": 340,
       "height": 50,
-      "text": "2. GET /functions/vibeusage-usage-summary\nAI: Fetch aggregated usage totals."
+      "text": "2. GET /functions/vibescore-usage-summary\nAI: Fetch aggregated usage totals."
     },
     {
       "id": "message_usage-summary-query_3",
