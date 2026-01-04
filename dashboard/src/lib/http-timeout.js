@@ -4,7 +4,10 @@ const MAX_TIMEOUT_MS = 30_000;
 
 export function getHttpTimeoutMs({ env } = {}) {
   const resolvedEnv = env ?? (typeof import.meta !== "undefined" ? import.meta.env : undefined);
-  const raw = resolvedEnv?.VITE_VIBESCORE_HTTP_TIMEOUT_MS;
+  const raw = readEnvValue(resolvedEnv, [
+    "VITE_VIBEUSAGE_HTTP_TIMEOUT_MS",
+    "VITE_VIBESCORE_HTTP_TIMEOUT_MS",
+  ]);
   if (raw == null || raw === "") return DEFAULT_TIMEOUT_MS;
   const n = Number(raw);
   if (!Number.isFinite(n)) return DEFAULT_TIMEOUT_MS;
@@ -58,4 +61,13 @@ function clampInt(value, min, max) {
   const n = Number(value);
   if (!Number.isFinite(n)) return min;
   return Math.min(max, Math.max(min, Math.floor(n)));
+}
+
+function readEnvValue(env, keys) {
+  if (!env || !keys?.length) return undefined;
+  for (const key of keys) {
+    const value = env?.[key];
+    if (value != null && value !== "") return value;
+  }
+  return undefined;
 }

@@ -37,7 +37,7 @@ test('usage summary prefers /functions and falls back on 404', async () => {
     const target = String(url);
     calls.push(target);
 
-    if (target.includes('/api/functions/vibescore-usage-summary')) {
+    if (target.includes('/api/functions/vibeusage-usage-summary')) {
       return jsonResponse(
         {
           from: '2025-01-01',
@@ -48,7 +48,7 @@ test('usage summary prefers /functions and falls back on 404', async () => {
         200
       );
     }
-    if (target.includes('/functions/vibescore-usage-summary')) {
+    if (target.includes('/functions/vibeusage-usage-summary')) {
       return jsonResponse({ error: 'Not Found', message: 'Not Found' }, 404);
     }
 
@@ -75,10 +75,10 @@ test('usage summary does not fall back on 401', async () => {
     const target = String(url);
     calls.push(target);
 
-    if (target.includes('/api/functions/vibescore-usage-summary')) {
+    if (target.includes('/api/functions/vibeusage-usage-summary')) {
       return jsonResponse({ totals: { total_tokens: '0' } }, 200);
     }
-    if (target.includes('/functions/vibescore-usage-summary')) {
+    if (target.includes('/functions/vibeusage-usage-summary')) {
       return jsonResponse({ error: 'Unauthorized', message: 'Unauthorized' }, 401);
     }
 
@@ -110,7 +110,7 @@ test('link code init posts to /functions', async () => {
     const method = init?.method || input?.method;
     calls.push({ target, method });
 
-    if (target.includes('/functions/vibescore-link-code-init')) {
+    if (target.includes('/functions/vibeusage-link-code-init')) {
       return jsonResponse(
         {
           link_code: 'link_code_example',
@@ -130,6 +130,6 @@ test('link code init posts to /functions', async () => {
 
   assert.equal(res?.link_code, 'link_code_example');
   assert.equal(calls.length, 1);
-  assert.ok(calls[0]?.target?.includes('/functions/vibescore-link-code-init'));
+  assert.ok(calls[0]?.target?.includes('/functions/vibeusage-link-code-init'));
   assert.equal(calls[0]?.method, 'POST');
 });

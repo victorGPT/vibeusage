@@ -15,13 +15,13 @@ const BACKEND_RUNTIME_UNAVAILABLE =
   "Backend runtime unavailable (InsForge). Please retry later.";
 
 const PATHS = {
-  usageSummary: "vibescore-usage-summary",
-  usageDaily: "vibescore-usage-daily",
-  usageHourly: "vibescore-usage-hourly",
-  usageMonthly: "vibescore-usage-monthly",
-  usageHeatmap: "vibescore-usage-heatmap",
-  usageModelBreakdown: "vibescore-usage-model-breakdown",
-  linkCodeInit: "vibescore-link-code-init",
+  usageSummary: "vibeusage-usage-summary",
+  usageDaily: "vibeusage-usage-daily",
+  usageHourly: "vibeusage-usage-hourly",
+  usageMonthly: "vibeusage-usage-monthly",
+  usageHeatmap: "vibeusage-usage-heatmap",
+  usageModelBreakdown: "vibeusage-usage-model-breakdown",
+  linkCodeInit: "vibeusage-link-code-init",
 };
 
 const FUNCTION_PREFIX = "/functions";
