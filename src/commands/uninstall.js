@@ -11,12 +11,15 @@ const {
   removeGeminiHook
 } = require('../lib/gemini-config');
 const { resolveOpencodeConfigDir, removeOpencodePlugin } = require('../lib/opencode-config');
+const { resolveTrackerPaths } = require('../lib/tracker-paths');
 
 async function cmdUninstall(argv) {
   const opts = parseArgs(argv);
   const home = os.homedir();
-  const trackerDir = path.join(home, '.vibescore', 'tracker');
-  const binDir = path.join(home, '.vibescore', 'bin');
+  const { trackerDir, binDir, legacyRootDir } = await resolveTrackerPaths({
+    home,
+    migrate: false
+  });
   const codexHome = process.env.CODEX_HOME || path.join(home, '.codex');
   const codexConfigPath = path.join(codexHome, 'config.toml');
   const codeHome = process.env.CODE_HOME || path.join(home, '.code');
@@ -69,7 +72,8 @@ async function cmdUninstall(argv) {
   await fs.rm(path.join(trackerDir, 'app'), { recursive: true, force: true }).catch(() => {});
 
   if (opts.purge) {
-    await fs.rm(path.join(home, '.vibescore'), { recursive: true, force: true }).catch(() => {});
+    await fs.rm(path.join(home, '.vibeusage'), { recursive: true, force: true }).catch(() => {});
+    await fs.rm(legacyRootDir, { recursive: true, force: true }).catch(() => {});
   }
 
   process.stdout.write(
@@ -112,7 +116,7 @@ async function cmdUninstall(argv) {
               ? '- Opencode plugin: skipped (unexpected content)'
               : '- Opencode plugin: skipped'
         : `- Opencode plugin: skipped (${opencodeConfigDir} not found)`,
-      opts.purge ? `- Purged: ${path.join(home, '.vibescore')}` : '- Purge: skipped (use --purge)',
+      opts.purge ? `- Purged: ${path.join(home, '.vibeusage')}` : '- Purge: skipped (use --purge)',
       ''
     ].join('\n')
   );

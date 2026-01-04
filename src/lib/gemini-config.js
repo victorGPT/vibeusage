@@ -5,7 +5,7 @@ const fs = require('node:fs/promises');
 const { ensureDir, readJson, writeJson } = require('./fs');
 
 const DEFAULT_EVENT = 'SessionEnd';
-const DEFAULT_HOOK_NAME = 'vibescore-tracker';
+const DEFAULT_HOOK_NAME = 'vibeusage-tracker';
 const DEFAULT_MATCHER = 'exit|clear|logout|prompt_input_exit|other';
 
 function resolveGeminiConfigDir({ home = os.homedir(), env = process.env } = {}) {

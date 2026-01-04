@@ -37,14 +37,14 @@ function printHelp() {
   // Keep this short; npx users want quick guidance.
   process.stdout.write(
     [
-      '@vibescore/tracker',
+      'vibeusage',
       '',
       'Usage:',
-      '  npx @vibescore/tracker [--debug] init [--yes] [--dry-run] [--no-open] [--link-code <code>]',
-      '  npx @vibescore/tracker [--debug] sync [--auto] [--drain]',
-      '  npx @vibescore/tracker [--debug] status',
-      '  npx @vibescore/tracker [--debug] diagnostics [--out diagnostics.json]',
-      '  npx @vibescore/tracker [--debug] uninstall [--purge]',
+      '  npx vibeusage [--debug] init [--yes] [--dry-run] [--no-open] [--link-code <code>]',
+      '  npx vibeusage [--debug] sync [--auto] [--drain]',
+      '  npx vibeusage [--debug] status',
+      '  npx vibeusage [--debug] diagnostics [--out diagnostics.json]',
+      '  npx vibeusage [--debug] uninstall [--purge]',
       '',
       'Notes:',
       '  - init: consent first, local setup next, browser sign-in last.',
@@ -53,7 +53,7 @@ function printHelp() {
       '  - optional: --link-code <code> skips browser login when provided by Dashboard.',
       '  - Every Code notify installs when ~/.code/config.toml exists.',
       '  - auto sync waits for a device token.',
-      '  - optional: VIBESCORE_DASHBOARD_URL or --dashboard-url for hosted landing.',
+      '  - optional: VIBEUSAGE_DASHBOARD_URL or --dashboard-url for hosted landing.',
       '  - sync parses ~/.codex/sessions/**/rollout-*.jsonl and ~/.code/sessions/**/rollout-*.jsonl, then uploads token deltas.',
       '  - --debug shows original backend errors.',
       ''

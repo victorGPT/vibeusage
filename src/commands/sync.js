@@ -24,12 +24,12 @@ const {
   recordUploadSuccess,
   recordUploadFailure
 } = require('../lib/upload-throttle');
+const { resolveTrackerPaths } = require('../lib/tracker-paths');
 
 async function cmdSync(argv) {
   const opts = parseArgs(argv);
   const home = os.homedir();
-  const rootDir = path.join(home, '.vibescore');
-  const trackerDir = path.join(rootDir, 'tracker');
+  const { trackerDir } = await resolveTrackerPaths({ home, migrate: true });
 
   await ensureDir(trackerDir);
 
@@ -169,8 +169,11 @@ async function cmdSync(argv) {
 
     progress?.stop();
 
-    const deviceToken = config?.deviceToken || process.env.VIBESCORE_DEVICE_TOKEN || null;
-    const baseUrl = config?.baseUrl || process.env.VIBESCORE_INSFORGE_BASE_URL || 'https://5tmappuk.us-east.insforge.app';
+    const deviceToken = config?.deviceToken || process.env.VIBEUSAGE_DEVICE_TOKEN || process.env.VIBESCORE_DEVICE_TOKEN || null;
+    const baseUrl = config?.baseUrl ||
+      process.env.VIBEUSAGE_INSFORGE_BASE_URL ||
+      process.env.VIBESCORE_INSFORGE_BASE_URL ||
+      'https://5tmappuk.us-east.insforge.app';
 
     let uploadResult = null;
     let uploadAttempted = false;
@@ -408,14 +411,14 @@ async function scheduleAutoRetry({ trackerDir, retryAtMs, reason, pendingBytes, 
 
   const delayMs = Math.min(AUTO_RETRY_MAX_DELAY_MS, Math.max(0, retryMs - nowMs));
   if (delayMs <= 0) return { scheduled: false, retryAtMs: retryMs };
-  if (process.env.VIBESCORE_AUTO_RETRY_NO_SPAWN === '1') {
+  if (process.env.VIBEUSAGE_AUTO_RETRY_NO_SPAWN === '1' || process.env.VIBESCORE_AUTO_RETRY_NO_SPAWN === '1') {
     return { scheduled: false, retryAtMs: retryMs };
   }
 
   spawnAutoRetryProcess({
     retryPath,
     trackerBinPath: path.join(trackerDir, 'app', 'bin', 'tracker.js'),
-    fallbackPkg: '@vibescore/tracker',
+    fallbackPkg: 'vibeusage',
     delayMs
   });
   return { scheduled: true, retryAtMs: retryMs };

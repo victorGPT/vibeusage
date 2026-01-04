@@ -28,6 +28,7 @@ const {
   issueDeviceTokenWithAccessToken,
   issueDeviceTokenWithLinkCode
 } = require('../lib/insforge');
+const { resolveTrackerPaths } = require('../lib/tracker-paths');
 const {
   BOLD,
   DIM,
@@ -55,16 +56,20 @@ async function cmdInit(argv) {
   const opts = parseArgs(argv);
   const home = os.homedir();
 
-  const rootDir = path.join(home, '.vibescore');
-  const trackerDir = path.join(rootDir, 'tracker');
-  const binDir = path.join(rootDir, 'bin');
+  const { rootDir, trackerDir, binDir } = await resolveTrackerPaths({ home, migrate: true });
 
   const configPath = path.join(trackerDir, 'config.json');
   const notifyOriginalPath = path.join(trackerDir, 'codex_notify_original.json');
   const linkCodeStatePath = path.join(trackerDir, 'link_code_state.json');
 
-  const baseUrl = opts.baseUrl || process.env.VIBESCORE_INSFORGE_BASE_URL || 'https://5tmappuk.us-east.insforge.app';
-  let dashboardUrl = opts.dashboardUrl || process.env.VIBESCORE_DASHBOARD_URL || null;
+  const baseUrl = opts.baseUrl ||
+    process.env.VIBEUSAGE_INSFORGE_BASE_URL ||
+    process.env.VIBESCORE_INSFORGE_BASE_URL ||
+    'https://5tmappuk.us-east.insforge.app';
+  let dashboardUrl = opts.dashboardUrl ||
+    process.env.VIBEUSAGE_DASHBOARD_URL ||
+    process.env.VIBESCORE_DASHBOARD_URL ||
+    null;
   const notifyPath = path.join(binDir, 'notify.cjs');
   const appDir = path.join(trackerDir, 'app');
   const trackerBinPath = path.join(appDir, 'bin', 'tracker.js');
@@ -160,7 +165,7 @@ async function cmdInit(argv) {
   }
 
   try {
-    spawnInitSync({ trackerBinPath, packageName: '@vibescore/tracker' });
+    spawnInitSync({ trackerBinPath, packageName: 'vibeusage' });
   } catch (err) {
     const msg = err && err.message ? err.message : 'unknown error';
     process.stderr.write(`Initial sync spawn failed: ${msg}\n`);
@@ -193,7 +198,7 @@ function renderAccountNotLinked({ context } = {}) {
     process.stdout.write(['', 'Account not linked (dry run).', 'Run init without --dry-run to link your account.', ''].join('\n'));
     return;
   }
-  process.stdout.write(['', 'Account not linked.', 'Set VIBESCORE_DEVICE_TOKEN then re-run init.', ''].join('\n'));
+  process.stdout.write(['', 'Account not linked.', 'Set VIBEUSAGE_DEVICE_TOKEN then re-run init.', ''].join('\n'));
 }
 
 function shouldUseBrowserAuth({ deviceToken, opts }) {
@@ -206,7 +211,7 @@ function shouldUseBrowserAuth({ deviceToken, opts }) {
 
 async function buildDryRunSummary({ opts, home, trackerDir, configPath, notifyPath }) {
   const existingConfig = await readJson(configPath);
-  const deviceTokenFromEnv = process.env.VIBESCORE_DEVICE_TOKEN || null;
+  const deviceTokenFromEnv = process.env.VIBEUSAGE_DEVICE_TOKEN || process.env.VIBESCORE_DEVICE_TOKEN || null;
   const deviceToken = deviceTokenFromEnv || existingConfig?.deviceToken || null;
   const pendingBrowserAuth = shouldUseBrowserAuth({ deviceToken, opts });
   const context = buildIntegrationTargets({ home, trackerDir, notifyPath });
@@ -231,7 +236,7 @@ async function runSetup({
   await ensureDir(binDir);
 
   const existingConfig = await readJson(configPath);
-  const deviceTokenFromEnv = process.env.VIBESCORE_DEVICE_TOKEN || null;
+  const deviceTokenFromEnv = process.env.VIBEUSAGE_DEVICE_TOKEN || process.env.VIBESCORE_DEVICE_TOKEN || null;
 
   let deviceToken = deviceTokenFromEnv || existingConfig?.deviceToken || null;
   let deviceId = existingConfig?.deviceId || null;
@@ -295,7 +300,7 @@ async function runSetup({
 
   await writeFileAtomic(
     notifyPath,
-    buildNotifyHandler({ trackerDir, trackerBinPath, packageName: '@vibescore/tracker' })
+    buildNotifyHandler({ trackerDir, trackerBinPath, packageName: 'vibeusage' })
   );
   await fs.chmod(notifyPath, 0o755).catch(() => {});
 
@@ -559,7 +564,7 @@ function buildNotifyHandler({ trackerDir, packageName }) {
   // It must never block Codex; it spawns sync in the background and exits 0.
   const queueSignalPath = path.join(trackerDir, 'notify.signal');
   const originalPath = path.join(trackerDir, 'codex_notify_original.json');
-  const fallbackPkg = packageName || '@vibescore/tracker';
+  const fallbackPkg = packageName || 'vibeusage';
   const trackerBinPath = path.join(trackerDir, 'app', 'bin', 'tracker.js');
 
   return `#!/usr/bin/env node
@@ -606,7 +611,7 @@ try {
 // Throttle spawn: at most once per 20 seconds.
 try {
     const throttlePath = path.join(trackerDir, 'sync.throttle');
-    let deviceToken = process.env.VIBESCORE_DEVICE_TOKEN || null;
+    let deviceToken = process.env.VIBEUSAGE_DEVICE_TOKEN || process.env.VIBESCORE_DEVICE_TOKEN || null;
     if (!deviceToken) {
       try {
         const cfg = JSON.parse(fs.readFileSync(configPath, 'utf8'));
@@ -732,7 +737,7 @@ async function isDir(p) {
 }
 
 async function installLocalTrackerApp({ appDir }) {
-  // Copy the current package's runtime (bin + src) into ~/.vibescore so notify can run sync without npx.
+  // Copy the current package's runtime (bin + src) into ~/.vibeusage so notify can run sync without npx.
   const packageRoot = path.resolve(__dirname, '../..');
   const srcFrom = path.join(packageRoot, 'src');
   const binFrom = path.join(packageRoot, 'bin', 'tracker.js');
@@ -753,7 +758,7 @@ async function installLocalTrackerApp({ appDir }) {
 }
 
 function spawnInitSync({ trackerBinPath, packageName }) {
-  const fallbackPkg = packageName || '@vibescore/tracker';
+  const fallbackPkg = packageName || 'vibeusage';
   const argv = ['sync', '--drain'];
   const hasLocalRuntime = typeof trackerBinPath === 'string' && fssync.existsSync(trackerBinPath);
   const cmd = hasLocalRuntime
@@ -766,9 +771,9 @@ function spawnInitSync({ trackerBinPath, packageName }) {
   });
   child.on('error', (err) => {
     const msg = err && err.message ? err.message : 'unknown error';
-    const detail = process.env.VIBESCORE_DEBUG === '1' ? ` (${msg})` : '';
+    const detail = isDebugEnabled() ? ` (${msg})` : '';
     process.stderr.write(`Minor issue: Background sync could not start${detail}.\n`);
-    process.stderr.write('Run: npx --yes @vibescore/tracker sync\n');
+    process.stderr.write('Run: npx --yes vibeusage sync\n');
   });
   child.unref();
 }
@@ -786,4 +791,8 @@ async function copyRuntimeDependencies({ from, to }) {
   } catch (_e) {
     // Best-effort: missing dependencies will fall back to npx at notify time.
   }
+}
+
+function isDebugEnabled() {
+  return process.env.VIBEUSAGE_DEBUG === '1' || process.env.VIBESCORE_DEBUG === '1';
 }

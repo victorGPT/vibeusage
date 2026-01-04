@@ -2,12 +2,17 @@
 
 const { createClient } = require('@insforge/sdk');
 
-function getAnonKey() {
-  return process.env.VIBESCORE_INSFORGE_ANON_KEY || process.env.INSFORGE_ANON_KEY || '';
+function getAnonKey({ env = process.env } = {}) {
+  return (
+    env.VIBEUSAGE_INSFORGE_ANON_KEY ||
+    env.VIBESCORE_INSFORGE_ANON_KEY ||
+    env.INSFORGE_ANON_KEY ||
+    ''
+  );
 }
 
-function getHttpTimeoutMs() {
-  const raw = process.env.VIBESCORE_HTTP_TIMEOUT_MS;
+function getHttpTimeoutMs({ env = process.env } = {}) {
+  const raw = readEnvValue(env, ['VIBEUSAGE_HTTP_TIMEOUT_MS', 'VIBESCORE_HTTP_TIMEOUT_MS']);
   if (raw == null || raw === '') return 20_000;
   const n = Number(raw);
   if (!Number.isFinite(n)) return 20_000;
@@ -54,6 +59,17 @@ function clampInt(value, min, max) {
   return Math.min(max, Math.max(min, Math.floor(n)));
 }
 
+function readEnvValue(env, keys) {
+  if (!env || !Array.isArray(keys)) return undefined;
+  for (const key of keys) {
+    const value = env?.[key];
+    if (value != null && value !== '') return value;
+  }
+  return undefined;
+}
+
 module.exports = {
-  createInsforgeClient
+  createInsforgeClient,
+  getAnonKey,
+  getHttpTimeoutMs
 };

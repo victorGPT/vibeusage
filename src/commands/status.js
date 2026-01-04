@@ -14,6 +14,7 @@ const {
 const { resolveOpencodeConfigDir, isOpencodePluginInstalled } = require('../lib/opencode-config');
 const { normalizeState: normalizeUploadState } = require('../lib/upload-throttle');
 const { collectTrackerDiagnostics } = require('../lib/diagnostics');
+const { resolveTrackerPaths } = require('../lib/tracker-paths');
 
 async function cmdStatus(argv = []) {
   const opts = parseArgs(argv);
@@ -24,7 +25,7 @@ async function cmdStatus(argv = []) {
   }
 
   const home = os.homedir();
-  const trackerDir = path.join(home, '.vibescore', 'tracker');
+  const { trackerDir, binDir } = await resolveTrackerPaths({ home, migrate: true });
   const configPath = path.join(trackerDir, 'config.json');
   const queuePath = path.join(trackerDir, 'queue.jsonl');
   const queueStatePath = path.join(trackerDir, 'queue.state.json');
@@ -41,8 +42,9 @@ async function cmdStatus(argv = []) {
   const geminiConfigDir = resolveGeminiConfigDir({ home, env: process.env });
   const geminiSettingsPath = resolveGeminiSettingsPath({ configDir: geminiConfigDir });
   const opencodeConfigDir = resolveOpencodeConfigDir({ home, env: process.env });
-  const claudeHookCommand = buildClaudeHookCommand(path.join(home, '.vibescore', 'bin', 'notify.cjs'));
-  const geminiHookCommand = buildGeminiHookCommand(path.join(home, '.vibescore', 'bin', 'notify.cjs'));
+  const notifyPath = path.join(binDir, 'notify.cjs');
+  const claudeHookCommand = buildClaudeHookCommand(notifyPath);
+  const geminiHookCommand = buildGeminiHookCommand(notifyPath);
 
   const config = await readJson(configPath);
   const cursors = await readJson(cursorsPath);

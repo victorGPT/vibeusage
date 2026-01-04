@@ -49,10 +49,10 @@ function loadInitWithStubs() {
 }
 
 test('init emits local report then auth transition and success url', async () => {
-  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'vibescore-init-flow-'));
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'vibeusage-init-flow-'));
   const prevHome = process.env.HOME;
   const prevCodexHome = process.env.CODEX_HOME;
-  const prevDashboard = process.env.VIBESCORE_DASHBOARD_URL;
+  const prevDashboard = process.env.VIBEUSAGE_DASHBOARD_URL;
   const prevWrite = process.stdout.write;
 
   let output = '';
@@ -60,7 +60,7 @@ test('init emits local report then auth transition and success url', async () =>
   try {
     process.env.HOME = tmp;
     process.env.CODEX_HOME = path.join(tmp, '.codex');
-    process.env.VIBESCORE_DASHBOARD_URL = 'https://dashboard.example';
+    process.env.VIBEUSAGE_DASHBOARD_URL = 'https://dashboard.example';
 
     await fs.mkdir(process.env.CODEX_HOME, { recursive: true });
     await fs.writeFile(path.join(process.env.CODEX_HOME, 'config.toml'), '# empty\n', 'utf8');
@@ -97,8 +97,8 @@ test('init emits local report then auth transition and success url', async () =>
     else process.env.HOME = prevHome;
     if (prevCodexHome === undefined) delete process.env.CODEX_HOME;
     else process.env.CODEX_HOME = prevCodexHome;
-    if (prevDashboard === undefined) delete process.env.VIBESCORE_DASHBOARD_URL;
-    else process.env.VIBESCORE_DASHBOARD_URL = prevDashboard;
+    if (prevDashboard === undefined) delete process.env.VIBEUSAGE_DASHBOARD_URL;
+    else process.env.VIBEUSAGE_DASHBOARD_URL = prevDashboard;
     await fs.rm(tmp, { recursive: true, force: true });
 
     const browserAuthPath = path.join(__dirname, '..', 'src', 'lib', 'browser-auth.js');

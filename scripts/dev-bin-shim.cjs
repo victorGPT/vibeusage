@@ -11,6 +11,8 @@ fs.mkdirSync(binDir, { recursive: true });
 
 const targets = [
   { name: 'tracker', rel: '../../bin/tracker.js' },
+  { name: 'vibeusage', rel: '../../bin/tracker.js' },
+  { name: 'vibeusage-tracker', rel: '../../bin/tracker.js' },
   { name: 'vibescore-tracker', rel: '../../bin/tracker.js' }
 ];
 
@@ -24,4 +26,3 @@ for (const t of targets) {
 }
 
 process.stdout.write(`Created shims in ${binDir}\n`);
-

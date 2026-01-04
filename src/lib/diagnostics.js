@@ -13,13 +13,14 @@ const {
 } = require('./gemini-config');
 const { resolveOpencodeConfigDir, isOpencodePluginInstalled } = require('./opencode-config');
 const { normalizeState: normalizeUploadState } = require('./upload-throttle');
+const { resolveTrackerPaths } = require('./tracker-paths');
 
 async function collectTrackerDiagnostics({
   home = os.homedir(),
   codexHome = process.env.CODEX_HOME || path.join(home, '.codex'),
   codeHome = process.env.CODE_HOME || path.join(home, '.code')
 } = {}) {
-  const trackerDir = path.join(home, '.vibescore', 'tracker');
+  const { trackerDir, binDir } = await resolveTrackerPaths({ home, migrate: true });
   const configPath = path.join(trackerDir, 'config.json');
   const queuePath = path.join(trackerDir, 'queue.jsonl');
   const queueStatePath = path.join(trackerDir, 'queue.state.json');
@@ -54,12 +55,12 @@ async function collectTrackerDiagnostics({
   const everyCodeNotifyRaw = await readEveryCodeNotify(codeConfigPath);
   const everyCodeConfigured = Array.isArray(everyCodeNotifyRaw) && everyCodeNotifyRaw.length > 0;
   const everyCodeNotify = everyCodeConfigured ? everyCodeNotifyRaw.map((v) => redactValue(v, home)) : null;
-  const claudeHookCommand = buildClaudeHookCommand(path.join(home, '.vibescore', 'bin', 'notify.cjs'));
+  const claudeHookCommand = buildClaudeHookCommand(path.join(binDir, 'notify.cjs'));
   const claudeHookConfigured = await isClaudeHookConfigured({
     settingsPath: claudeConfigPath,
     hookCommand: claudeHookCommand
   });
-  const geminiHookCommand = buildGeminiHookCommand(path.join(home, '.vibescore', 'bin', 'notify.cjs'));
+  const geminiHookCommand = buildGeminiHookCommand(path.join(binDir, 'notify.cjs'));
   const geminiHookConfigured = await isGeminiHookConfigured({
     settingsPath: geminiSettingsPath,
     hookCommand: geminiHookCommand

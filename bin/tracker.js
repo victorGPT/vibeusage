@@ -2,9 +2,10 @@
 /* eslint-disable no-console */
 
 const { run } = require('../src/cli');
+const { stripDebugFlag } = require('../src/lib/debug-flags');
 
 const { argv, debug } = stripDebugFlag(process.argv.slice(2));
-if (debug) process.env.VIBESCORE_DEBUG = '1';
+if (debug) process.env.VIBEUSAGE_DEBUG = '1';
 
 run(argv).catch((err) => {
   console.error(err?.stack || String(err));
@@ -25,8 +26,3 @@ run(argv).catch((err) => {
   }
   process.exitCode = 1;
 });
-
-function stripDebugFlag(argv) {
-  const filtered = argv.filter((arg) => arg !== '--debug');
-  return { argv: filtered, debug: filtered.length !== argv.length || process.env.VIBESCORE_DEBUG === '1' };
-}

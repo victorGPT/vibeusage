@@ -7,7 +7,7 @@ const { test } = require('node:test');
 const { cmdDiagnostics } = require('../src/commands/diagnostics');
 
 test('diagnostics redacts device token and home paths', async () => {
-  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'vibescore-diagnostics-'));
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'vibeusage-diagnostics-'));
   const prevHome = process.env.HOME;
   const prevCodexHome = process.env.CODEX_HOME;
   const prevWrite = process.stdout.write;
@@ -16,7 +16,7 @@ test('diagnostics redacts device token and home paths', async () => {
     process.env.HOME = tmp;
     process.env.CODEX_HOME = path.join(tmp, '.codex');
 
-    const trackerDir = path.join(tmp, '.vibescore', 'tracker');
+    const trackerDir = path.join(tmp, '.vibeusage', 'tracker');
     await fs.mkdir(trackerDir, { recursive: true });
     await fs.mkdir(process.env.CODEX_HOME, { recursive: true });
 
@@ -38,7 +38,7 @@ test('diagnostics redacts device token and home paths', async () => {
 
     await fs.writeFile(
       path.join(process.env.CODEX_HOME, 'config.toml'),
-      `notify = ["/usr/bin/env", "node", "${path.join(tmp, '.vibescore', 'bin', 'notify.cjs')}"]\n`,
+      `notify = ["/usr/bin/env", "node", "${path.join(tmp, '.vibeusage', 'bin', 'notify.cjs')}"]\n`,
       'utf8'
     );
 

@@ -4,8 +4,8 @@ const fs = require('node:fs/promises');
 
 const { ensureDir } = require('./fs');
 
-const DEFAULT_PLUGIN_NAME = 'vibescore-tracker.js';
-const PLUGIN_MARKER = 'VIBESCORE_TRACKER_PLUGIN';
+const DEFAULT_PLUGIN_NAME = 'vibeusage-tracker.js';
+const PLUGIN_MARKER = 'VIBEUSAGE_TRACKER_PLUGIN';
 const DEFAULT_EVENT = 'session.idle';
 
 function resolveOpencodeConfigDir({ home = os.homedir(), env = process.env } = {}) {
@@ -24,7 +24,7 @@ function buildOpencodePlugin({ notifyPath }) {
   const safeNotifyPath = typeof notifyPath === 'string' ? notifyPath : '';
   return `// ${PLUGIN_MARKER}\n` +
     `const notifyPath = ${JSON.stringify(safeNotifyPath)};\n` +
-    `export const VibeScorePlugin = async ({ $ }) => {\n` +
+    `export const VibeUsagePlugin = async ({ $ }) => {\n` +
     `  return {\n` +
     `    event: async ({ event }) => {\n` +
     `      if (!event || event.type !== ${JSON.stringify(DEFAULT_EVENT)}) return;\n` +
