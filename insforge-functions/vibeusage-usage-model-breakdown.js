@@ -228,6 +228,119 @@ var require_model = __commonJS({
   }
 });
 
+// insforge-src/shared/model-identity.js
+var require_model_identity = __commonJS({
+  "insforge-src/shared/model-identity.js"(exports2, module2) {
+    "use strict";
+    var DEFAULT_MODEL = "unknown";
+    function normalizeUsageModelKey(value) {
+      if (typeof value !== "string") return null;
+      const trimmed = value.trim();
+      if (!trimmed) return null;
+      return trimmed.toLowerCase();
+    }
+    function normalizeDisplayName(value) {
+      if (typeof value !== "string") return null;
+      const trimmed = value.trim();
+      return trimmed ? trimmed : null;
+    }
+    function buildIdentityMap({ usageModels, aliasRows } = {}) {
+      const normalized = /* @__PURE__ */ new Set();
+      for (const model of Array.isArray(usageModels) ? usageModels : []) {
+        const key = normalizeUsageModelKey(model);
+        if (key) normalized.add(key);
+      }
+      const map = /* @__PURE__ */ new Map();
+      const rows = Array.isArray(aliasRows) ? aliasRows : [];
+      const limitToSet = normalized.size > 0;
+      for (const row of rows) {
+        const usageKey = normalizeUsageModelKey(row?.usage_model);
+        const canonical = normalizeUsageModelKey(row?.canonical_model);
+        if (!usageKey || !canonical) continue;
+        if (limitToSet && !normalized.has(usageKey)) continue;
+        const display = normalizeDisplayName(row?.display_name) || canonical;
+        const effective = String(row?.effective_from || "");
+        const existing = map.get(usageKey);
+        if (!existing || effective > existing.effective_from) {
+          map.set(usageKey, {
+            model_id: canonical,
+            model: display,
+            effective_from: effective
+          });
+        }
+      }
+      for (const key of normalized) {
+        if (!map.has(key)) {
+          map.set(key, { model_id: key, model: key, effective_from: "" });
+        }
+      }
+      const result = /* @__PURE__ */ new Map();
+      for (const [key, value] of map.entries()) {
+        result.set(key, { model_id: value.model_id, model: value.model });
+      }
+      return result;
+    }
+    function applyModelIdentity({ rawModel, identityMap } = {}) {
+      const normalized = normalizeUsageModelKey(rawModel) || DEFAULT_MODEL;
+      const entry = identityMap && typeof identityMap.get === "function" ? identityMap.get(normalized) : null;
+      if (entry) return { model_id: entry.model_id, model: entry.model };
+      const display = normalizeDisplayName(rawModel) || DEFAULT_MODEL;
+      return { model_id: normalized, model: display };
+    }
+    async function resolveModelIdentity({ edgeClient, usageModels, effectiveDate } = {}) {
+      const models = Array.isArray(usageModels) ? usageModels.map(normalizeUsageModelKey).filter(Boolean) : [];
+      if (!models.length) return /* @__PURE__ */ new Map();
+      if (!edgeClient || !edgeClient.database) {
+        return buildIdentityMap({ usageModels: models, aliasRows: [] });
+      }
+      const dateKey = typeof effectiveDate === "string" && effectiveDate.trim() ? effectiveDate.trim() : (/* @__PURE__ */ new Date()).toISOString().slice(0, 10);
+      const query = edgeClient.database.from("vibescore_model_aliases").select("usage_model,canonical_model,display_name,effective_from").eq("active", true).in("usage_model", models).lte("effective_from", dateKey).order("effective_from", { ascending: false });
+      const result = await query;
+      const data = Array.isArray(result?.data) ? result.data : Array.isArray(query?.data) ? query.data : null;
+      const error = result?.error || query?.error || null;
+      if (error || !Array.isArray(data)) {
+        return buildIdentityMap({ usageModels: models, aliasRows: [] });
+      }
+      return buildIdentityMap({ usageModels: models, aliasRows: data });
+    }
+    async function resolveUsageModelsForCanonical({ edgeClient, canonicalModel, effectiveDate } = {}) {
+      const canonical = normalizeUsageModelKey(canonicalModel);
+      if (!canonical) return { canonical: null, usageModels: [] };
+      if (!edgeClient || !edgeClient.database) {
+        return { canonical, usageModels: [canonical] };
+      }
+      const dateKey = typeof effectiveDate === "string" && effectiveDate.trim() ? effectiveDate.trim() : (/* @__PURE__ */ new Date()).toISOString().slice(0, 10);
+      const query = edgeClient.database.from("vibescore_model_aliases").select("usage_model,canonical_model,effective_from").eq("active", true).eq("canonical_model", canonical).lte("effective_from", dateKey).order("effective_from", { ascending: false });
+      const result = await query;
+      const data = Array.isArray(result?.data) ? result.data : Array.isArray(query?.data) ? query.data : null;
+      const error = result?.error || query?.error || null;
+      if (error || !Array.isArray(data)) {
+        return { canonical, usageModels: [canonical] };
+      }
+      const usageMap = /* @__PURE__ */ new Map();
+      for (const row of data) {
+        const usageKey = normalizeUsageModelKey(row?.usage_model);
+        if (!usageKey) continue;
+        const effective = String(row?.effective_from || "");
+        const existing = usageMap.get(usageKey);
+        if (!existing || effective > existing) usageMap.set(usageKey, effective);
+      }
+      const usageModels = /* @__PURE__ */ new Set([canonical]);
+      for (const usageKey of usageMap.keys()) {
+        usageModels.add(usageKey);
+      }
+      return { canonical, usageModels: Array.from(usageModels.values()) };
+    }
+    module2.exports = {
+      normalizeUsageModelKey,
+      buildIdentityMap,
+      applyModelIdentity,
+      resolveModelIdentity,
+      resolveUsageModelsForCanonical
+    };
+  }
+});
+
 // insforge-src/shared/canary.js
 var require_canary = __commonJS({
   "insforge-src/shared/canary.js"(exports2, module2) {
@@ -1035,6 +1148,7 @@ var require_vibescore_usage_model_breakdown = __commonJS({
     var { getBaseUrl } = require_env();
     var { getSourceParam, normalizeSource } = require_source();
     var { normalizeModel } = require_model();
+    var { applyModelIdentity, resolveModelIdentity } = require_model_identity();
     var { applyCanaryFilter } = require_canary();
     var {
       addDatePartsDays,
@@ -1133,7 +1247,19 @@ var require_vibescore_usage_model_breakdown = __commonJS({
         tz_offset_minutes: Number.isFinite(tzContext?.offsetMinutes) ? tzContext.offsetMinutes : null
       });
       if (error) return respond({ error: error.message }, 500, queryDurationMs);
-      const pricingModel = distinctModels.size === 1 ? Array.from(distinctModels)[0] : null;
+      const identityMap = await resolveModelIdentity({
+        edgeClient: auth.edgeClient,
+        usageModels: Array.from(distinctModels.values()),
+        effectiveDate: to
+      });
+      const canonicalModels = /* @__PURE__ */ new Set();
+      for (const model of distinctModels.values()) {
+        const identity = applyModelIdentity({ rawModel: model, identityMap });
+        if (identity.model_id && identity.model_id !== DEFAULT_MODEL) {
+          canonicalModels.add(identity.model_id);
+        }
+      }
+      const pricingModel = canonicalModels.size === 1 ? Array.from(canonicalModels)[0] : null;
       const pricingProfile = await resolvePricingProfile({
         edgeClient: auth.edgeClient,
         model: pricingModel,
@@ -1142,7 +1268,13 @@ var require_vibescore_usage_model_breakdown = __commonJS({
       const grandTotals = createTotals();
       const sources = Array.from(sourcesMap.values()).map((entry) => {
         addTotals(grandTotals, entry.totals);
-        const models = Array.from(entry.models.values()).map((modelEntry) => formatTotals(modelEntry, pricingProfile)).sort(compareTotals);
+        const canonicalMap = /* @__PURE__ */ new Map();
+        for (const modelEntry of entry.models.values()) {
+          const identity = applyModelIdentity({ rawModel: modelEntry.model, identityMap });
+          const canonicalEntry = getCanonicalEntry(canonicalMap, identity);
+          addTotals(canonicalEntry.totals, modelEntry.totals);
+        }
+        const models = Array.from(canonicalMap.values()).map((modelEntry) => formatTotals(modelEntry, pricingProfile)).sort(compareTotals);
         const totals = formatTotals(entry, pricingProfile).totals;
         return {
           source: entry.source,
@@ -1200,6 +1332,17 @@ var require_vibescore_usage_model_breakdown = __commonJS({
         totals: createTotals()
       };
       map.set(model, entry);
+      return entry;
+    }
+    function getCanonicalEntry(map, identity) {
+      const key = identity?.model_id || DEFAULT_MODEL;
+      if (map.has(key)) return map.get(key);
+      const entry = {
+        model_id: key,
+        model: identity?.model || key,
+        totals: createTotals()
+      };
+      map.set(key, entry);
       return entry;
     }
     function formatTotals(entry, pricingProfile) {

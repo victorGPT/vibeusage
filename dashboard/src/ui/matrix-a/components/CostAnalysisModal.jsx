@@ -48,6 +48,7 @@ export const CostAnalysisModal = React.memo(function CostAnalysisModal({
             typeof model?.calc === "string" ? model.calc.trim() : "";
           const calcValue = calcRaw ? calcRaw.toUpperCase() : calcFallback;
           return {
+            id: model?.id ? String(model.id) : "",
             name: model?.name ? String(model.name) : "",
             shareLabel,
             calcValue,
@@ -93,9 +94,11 @@ export const CostAnalysisModal = React.memo(function CostAnalysisModal({
                     </span>
                   </div>
                   <div className="grid grid-cols-1 gap-1.5">
-                    {fleet.models.map((model, modelIndex) => (
+                    {fleet.models.map((model, modelIndex) => {
+                      const modelKey = model?.id || `${model.name}-${modelIndex}`;
+                      return (
                       <div
-                        key={`${model.name}-${modelIndex}`}
+                        key={modelKey}
                         className="flex justify-between text-caption text-matrix-muted"
                       >
                         <span>
@@ -105,7 +108,8 @@ export const CostAnalysisModal = React.memo(function CostAnalysisModal({
                           {calcPrefix} {model.calcValue}
                         </span>
                       </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               ))}

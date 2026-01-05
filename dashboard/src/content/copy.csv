@@ -129,6 +129,8 @@ usage.range_label,ui,UsagePanel,UsagePanel,range_label,"Range: {{range}}",,activ
 dashboard.model_breakdown.title,ui,NeuralDivergenceMap,NeuralDivergenceMap,title,"Model Breakdown",,active
 dashboard.model_breakdown.footer,ui,NeuralDivergenceMap,NeuralDivergenceMap,footer,"Multi-Engine Load Balancing // Active Session",,active
 dashboard.model_breakdown.usage_label,ui,NeuralAdaptiveFleet,NeuralAdaptiveFleet,usage_label,"USAGE: {{value}}",,active
+dashboard.top_models.title,ui,TopModelsPanel,TopModelsPanel,title,"Top_Models",,active
+dashboard.top_models.subtitle,ui,TopModelsPanel,TopModelsPanel,subtitle,"All_Scores",,active
 dashboard.upgrade_alert.title,ui,UpgradeAlertModal,UpgradeAlertModal,title,"Update available",,active
 dashboard.upgrade_alert.subtitle,ui,UpgradeAlertModal,UpgradeAlertModal,subtitle,"VibeUsage Tracker v{{required}} is now available.",,active
 dashboard.upgrade_alert.subtitle_generic,ui,UpgradeAlertModal,UpgradeAlertModal,subtitle_generic,"A new version of VibeUsage Tracker is available.",,active

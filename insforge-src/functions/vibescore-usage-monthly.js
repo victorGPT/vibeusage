@@ -8,6 +8,7 @@ const { getBearerToken, getEdgeClientAndUserIdFast } = require('../shared/auth')
 const { getBaseUrl } = require('../shared/env');
 const { getSourceParam } = require('../shared/source');
 const { getModelParam } = require('../shared/model');
+const { resolveUsageModelsForCanonical } = require('../shared/model-identity');
 const { applyCanaryFilter } = require('../shared/canary');
 const {
   addDatePartsDays,
@@ -79,6 +80,14 @@ module.exports = withRequestLogging('vibescore-usage-monthly', async function(re
   const endUtc = localDatePartsToUtc(addDatePartsDays(toParts, 1), tzContext);
   const startIso = startUtc.toISOString();
   const endIso = endUtc.toISOString();
+  const modelFilter = await resolveUsageModelsForCanonical({
+    edgeClient: auth.edgeClient,
+    canonicalModel: model,
+    effectiveDate: to
+  });
+  const canonicalModel = modelFilter.canonical;
+  const usageModels = modelFilter.usageModels;
+  const hasModelFilter = Array.isArray(usageModels) && usageModels.length > 0;
 
   const monthKeys = [];
   const buckets = new Map();
@@ -105,8 +114,8 @@ module.exports = withRequestLogging('vibescore-usage-monthly', async function(re
         .select('hour_start,total_tokens,input_tokens,cached_input_tokens,output_tokens,reasoning_output_tokens')
         .eq('user_id', auth.userId);
       if (source) query = query.eq('source', source);
-      if (model) query = query.eq('model', model);
-      query = applyCanaryFilter(query, { source, model });
+      if (hasModelFilter) query = query.in('model', usageModels);
+      query = applyCanaryFilter(query, { source, model: canonicalModel });
       return query
         .gte('hour_start', startIso)
         .lt('hour_start', endIso)
@@ -142,7 +151,7 @@ module.exports = withRequestLogging('vibescore-usage-monthly', async function(re
     row_count: rowCount,
     range_months: months,
     source: source || null,
-    model: model || null,
+    model: canonicalModel || null,
     tz: tzContext?.timeZone || null,
     tz_offset_minutes: Number.isFinite(tzContext?.offsetMinutes) ? tzContext.offsetMinutes : null
   });

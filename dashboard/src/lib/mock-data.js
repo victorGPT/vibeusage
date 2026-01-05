@@ -365,22 +365,22 @@ export function getMockUsageModelBreakdown({ from, to, seed } = {}) {
       source: "codex",
       weight: 0.7,
       models: [
-        { model: "gpt-5.2-codex", weight: 0.2 },
-        { model: "unknown", weight: 0.8 },
+        { model: "gpt-5.2-codex", model_id: "gpt-5.2-codex", weight: 0.2 },
+        { model: "unknown", model_id: "unknown", weight: 0.8 },
       ],
     },
     {
       source: "claude",
       weight: 0.2,
       models: [
-        { model: "claude-3.5", weight: 0.3 },
-        { model: "unknown", weight: 0.7 },
+        { model: "claude-3.5", model_id: "claude-3.5", weight: 0.3 },
+        { model: "unknown", model_id: "unknown", weight: 0.7 },
       ],
     },
     {
       source: "every-code",
       weight: 0.1,
-      models: [{ model: "unknown", weight: 1 }],
+      models: [{ model: "unknown", model_id: "unknown", weight: 1 }],
     },
   ];
 

@@ -8,6 +8,7 @@ const { getBearerToken, getEdgeClientAndUserIdFast } = require('../shared/auth')
 const { getBaseUrl } = require('../shared/env');
 const { getSourceParam } = require('../shared/source');
 const { getModelParam } = require('../shared/model');
+const { resolveUsageModelsForCanonical } = require('../shared/model-identity');
 const { applyCanaryFilter } = require('../shared/canary');
 const {
   addDatePartsDays,
@@ -81,6 +82,15 @@ module.exports = withRequestLogging('vibescore-usage-heatmap', async function(re
     const endUtc = addUtcDays(end, 1);
     const endIso = endUtc.toISOString();
 
+    const modelFilter = await resolveUsageModelsForCanonical({
+      edgeClient: auth.edgeClient,
+      canonicalModel: model,
+      effectiveDate: to
+    });
+    const canonicalModel = modelFilter.canonical;
+    const usageModels = modelFilter.usageModels;
+    const hasModelFilter = Array.isArray(usageModels) && usageModels.length > 0;
+
     const valuesByDay = new Map();
     const queryStartMs = Date.now();
     let rowCount = 0;
@@ -91,8 +101,8 @@ module.exports = withRequestLogging('vibescore-usage-heatmap', async function(re
           .select('hour_start,total_tokens')
           .eq('user_id', auth.userId);
         if (source) query = query.eq('source', source);
-        if (model) query = query.eq('model', model);
-        query = applyCanaryFilter(query, { source, model });
+        if (hasModelFilter) query = query.in('model', usageModels);
+        query = applyCanaryFilter(query, { source, model: canonicalModel });
         return query
           .gte('hour_start', startIso)
           .lt('hour_start', endIso)
@@ -123,7 +133,7 @@ module.exports = withRequestLogging('vibescore-usage-heatmap', async function(re
       range_weeks: weeks,
       range_days: weeks * 7,
       source: source || null,
-      model: model || null,
+      model: canonicalModel || null,
       tz: tzContext?.timeZone || null,
       tz_offset_minutes: Number.isFinite(tzContext?.offsetMinutes) ? tzContext.offsetMinutes : null
     });
@@ -221,6 +231,15 @@ module.exports = withRequestLogging('vibescore-usage-heatmap', async function(re
   const auth = await getEdgeClientAndUserIdFast({ baseUrl, bearer });
   if (!auth.ok) return respond({ error: 'Unauthorized' }, 401, 0);
 
+  const modelFilter = await resolveUsageModelsForCanonical({
+    edgeClient: auth.edgeClient,
+    canonicalModel: model,
+    effectiveDate: to
+  });
+  const canonicalModel = modelFilter.canonical;
+  const usageModels = modelFilter.usageModels;
+  const hasModelFilter = Array.isArray(usageModels) && usageModels.length > 0;
+
   const valuesByDay = new Map();
   const queryStartMs = Date.now();
   let rowCount = 0;
@@ -231,8 +250,8 @@ module.exports = withRequestLogging('vibescore-usage-heatmap', async function(re
         .select('hour_start,total_tokens')
         .eq('user_id', auth.userId);
       if (source) query = query.eq('source', source);
-      if (model) query = query.eq('model', model);
-      query = applyCanaryFilter(query, { source, model });
+      if (hasModelFilter) query = query.in('model', usageModels);
+      query = applyCanaryFilter(query, { source, model: canonicalModel });
       return query
         .gte('hour_start', startIso)
         .lt('hour_start', endIso)
@@ -263,7 +282,7 @@ module.exports = withRequestLogging('vibescore-usage-heatmap', async function(re
     range_weeks: weeks,
     range_days: weeks * 7,
     source: source || null,
-    model: model || null,
+    model: canonicalModel || null,
     tz: tzContext?.timeZone || null,
     tz_offset_minutes: Number.isFinite(tzContext?.offsetMinutes) ? tzContext.offsetMinutes : null
   });

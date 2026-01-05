@@ -8,6 +8,7 @@ const { getBearerToken, getEdgeClientAndUserIdFast } = require('../shared/auth')
 const { getBaseUrl } = require('../shared/env');
 const { getSourceParam, normalizeSource } = require('../shared/source');
 const { normalizeModel } = require('../shared/model');
+const { applyModelIdentity, resolveModelIdentity } = require('../shared/model-identity');
 const { applyCanaryFilter } = require('../shared/canary');
 const {
   addDatePartsDays,
@@ -129,7 +130,19 @@ module.exports = withRequestLogging('vibescore-usage-model-breakdown', async fun
 
   if (error) return respond({ error: error.message }, 500, queryDurationMs);
 
-  const pricingModel = distinctModels.size === 1 ? Array.from(distinctModels)[0] : null;
+  const identityMap = await resolveModelIdentity({
+    edgeClient: auth.edgeClient,
+    usageModels: Array.from(distinctModels.values()),
+    effectiveDate: to
+  });
+  const canonicalModels = new Set();
+  for (const model of distinctModels.values()) {
+    const identity = applyModelIdentity({ rawModel: model, identityMap });
+    if (identity.model_id && identity.model_id !== DEFAULT_MODEL) {
+      canonicalModels.add(identity.model_id);
+    }
+  }
+  const pricingModel = canonicalModels.size === 1 ? Array.from(canonicalModels)[0] : null;
   const pricingProfile = await resolvePricingProfile({
     edgeClient: auth.edgeClient,
     model: pricingModel,
@@ -140,7 +153,13 @@ module.exports = withRequestLogging('vibescore-usage-model-breakdown', async fun
   const sources = Array.from(sourcesMap.values())
     .map((entry) => {
       addTotals(grandTotals, entry.totals);
-      const models = Array.from(entry.models.values())
+      const canonicalMap = new Map();
+      for (const modelEntry of entry.models.values()) {
+        const identity = applyModelIdentity({ rawModel: modelEntry.model, identityMap });
+        const canonicalEntry = getCanonicalEntry(canonicalMap, identity);
+        addTotals(canonicalEntry.totals, modelEntry.totals);
+      }
+      const models = Array.from(canonicalMap.values())
         .map((modelEntry) => formatTotals(modelEntry, pricingProfile))
         .sort(compareTotals);
       const totals = formatTotals(entry, pricingProfile).totals;
@@ -209,6 +228,18 @@ function getModelEntry(map, model) {
     totals: createTotals()
   };
   map.set(model, entry);
+  return entry;
+}
+
+function getCanonicalEntry(map, identity) {
+  const key = identity?.model_id || DEFAULT_MODEL;
+  if (map.has(key)) return map.get(key);
+  const entry = {
+    model_id: key,
+    model: identity?.model || key,
+    totals: createTotals()
+  };
+  map.set(key, entry);
   return entry;
 }
 

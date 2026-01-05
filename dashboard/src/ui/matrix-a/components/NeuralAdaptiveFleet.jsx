@@ -48,9 +48,10 @@ export const NeuralAdaptiveFleet = React.memo(function NeuralAdaptiveFleet({
       <div className="h-1 w-full bg-matrix-panel flex overflow-hidden relative">
         {models.map((model, index) => {
           const styleConfig = TEXTURES[index % TEXTURES.length];
+          const modelKey = model?.id ? String(model.id) : `${model.name}-${index}`;
           return (
             <div
-              key={`${model.name}-${index}`}
+              key={modelKey}
               className="h-full relative transition-all duration-1000 ease-out border-r border-black last:border-none"
               style={{
                 width: `${model.share}%`,
@@ -67,9 +68,10 @@ export const NeuralAdaptiveFleet = React.memo(function NeuralAdaptiveFleet({
       <div className="grid grid-cols-2 gap-y-2 gap-x-6 pl-1">
         {models.map((model, index) => {
           const styleConfig = TEXTURES[index % TEXTURES.length];
+          const modelKey = model?.id ? String(model.id) : `${model.name}-${index}`;
           return (
             <div
-              key={`${model.name}-${index}`}
+              key={modelKey}
               className="flex items-center space-x-2"
             >
               <div

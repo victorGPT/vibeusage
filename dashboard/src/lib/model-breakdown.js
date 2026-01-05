@@ -1,5 +1,23 @@
 import { toFiniteNumber } from "./format.js";
 
+function normalizeModelId(value) {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  return trimmed.toLowerCase();
+}
+
+function resolveModelId(model) {
+  const id = normalizeModelId(model?.model_id);
+  if (id) return id;
+  return normalizeModelId(model?.model);
+}
+
+function resolveModelName(model, fallback) {
+  if (model?.model) return String(model.model);
+  return fallback;
+}
+
 export function buildFleetData(modelBreakdown, { copyFn } = {}) {
   const safeCopy = typeof copyFn === "function" ? copyFn : (key) => key;
   const sources = Array.isArray(modelBreakdown?.sources)
@@ -49,10 +67,9 @@ export function buildFleetData(modelBreakdown, { copyFn } = {}) {
             entry.totalTokens > 0
               ? Math.round((modelTokens / entry.totalTokens) * 1000) / 10
               : 0;
-          const name = model?.model
-            ? String(model.model)
-            : safeCopy("shared.placeholder.short");
-          return { name, share, usage: modelTokens, calc: pricingMode };
+          const name = resolveModelName(model, safeCopy("shared.placeholder.short"));
+          const id = resolveModelId(model);
+          return { id, name, share, usage: modelTokens, calc: pricingMode };
         })
         .filter(Boolean);
       return {
@@ -63,4 +80,58 @@ export function buildFleetData(modelBreakdown, { copyFn } = {}) {
         models,
       };
     });
+}
+
+export function buildTopModels(modelBreakdown, { limit = 3, copyFn } = {}) {
+  const safeCopy = typeof copyFn === "function" ? copyFn : (key) => key;
+  const sources = Array.isArray(modelBreakdown?.sources)
+    ? modelBreakdown.sources
+    : [];
+  if (!sources.length) return [];
+
+  const totalsById = new Map();
+  const nameById = new Map();
+  const nameWeight = new Map();
+
+  for (const source of sources) {
+    const models = Array.isArray(source?.models) ? source.models : [];
+    for (const model of models) {
+      const tokens = toFiniteNumber(model?.totals?.total_tokens);
+      if (!Number.isFinite(tokens) || tokens <= 0) continue;
+      const id = resolveModelId(model);
+      if (!id) continue;
+      const name = resolveModelName(model, safeCopy("shared.placeholder.short"));
+      totalsById.set(id, (totalsById.get(id) || 0) + tokens);
+      const currentWeight = nameWeight.get(id) || 0;
+      if (tokens >= currentWeight) {
+        nameWeight.set(id, tokens);
+        nameById.set(id, name);
+      }
+    }
+  }
+
+  if (!totalsById.size) return [];
+
+  const totalTokens = Array.from(totalsById.values()).reduce(
+    (acc, value) => acc + value,
+    0
+  );
+
+  const normalizedLimit = Number.isFinite(limit) ? Math.max(0, Math.floor(limit)) : 3;
+  return Array.from(totalsById.entries())
+    .map(([id, tokens]) => {
+      const percent =
+        totalTokens > 0 ? ((tokens / totalTokens) * 100).toFixed(1) : "0.0";
+      return {
+        id,
+        name: nameById.get(id) || safeCopy("shared.placeholder.short"),
+        tokens,
+        percent: String(percent),
+      };
+    })
+    .sort((a, b) => {
+      if (b.tokens !== a.tokens) return b.tokens - a.tokens;
+      return String(a.name).localeCompare(String(b.name));
+    })
+    .slice(0, normalizedLimit);
 }

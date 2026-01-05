@@ -358,6 +358,8 @@ Response (bigints as strings):
   "from": "YYYY-MM-DD",
   "to": "YYYY-MM-DD",
   "days": 30,
+  "model_id": "gpt-5.2-codex",
+  "model": "gpt-5.2-codex",
   "totals": {
     "total_tokens": "0",
     "input_tokens": "0",
@@ -385,6 +387,8 @@ Notes:
 - Pricing metadata is resolved from `vibescore_pricing_profiles` using the configured default model/source and the latest `effective_from` not in the future (`active=true`).
 - If no pricing rows exist, the endpoint falls back to the built-in default profile.
 - `pricing_mode` is `add`, `overlap`, or `mixed` (multiple pricing modes across sources).
+- `model` query uses canonical model id; the backend expands it to include all active aliases for the date range.
+- `model_id`/`model` are `null` when no model filter is supplied.
 - When `debug=1` is set, the response includes a `debug` object with `request_id`, `status`, `query_ms`, `slow_threshold_ms`, `slow_query`.
 
 ---
@@ -406,6 +410,7 @@ Query:
 
 Notes:
 - `model` is not accepted because this endpoint already returns per-model groups.
+- Model groups are aggregated by canonical `model_id` across sources; `model` is the display name.
 - Pricing metadata is resolved from `vibescore_pricing_profiles`. If the range contains exactly one non-`unknown` model, pricing is resolved for that model; otherwise it falls back to the configured default profile.
 - `pricing_mode` is `add`, `overlap`, or `mixed` (multiple pricing modes across sources).
 - When `debug=1` is set, the response includes a `debug` object with `request_id`, `status`, `query_ms`, `slow_threshold_ms`, `slow_query`.
@@ -430,6 +435,7 @@ Response (bigints as strings):
       },
       "models": [
         {
+          "model_id": "gpt-5.2-codex",
           "model": "gpt-5.2-codex",
           "totals": {
             "total_tokens": "0",
@@ -481,6 +487,8 @@ Response:
 {
   "from": "YYYY-MM-DD",
   "to": "YYYY-MM-DD",
+  "model_id": "gpt-5.2-codex",
+  "model": "gpt-5.2-codex",
   "data": [
     {
       "day": "YYYY-MM-DD",
@@ -517,6 +525,8 @@ Response:
 ```
 
 Notes:
+- `model` query uses canonical model id; the backend expands it to include all active aliases for the date range.
+- `model_id`/`model` are `null` when no model filter is supplied.
 - The response includes backend-computed `summary` totals; the dashboard MUST NOT compute totals locally.
 - When `debug=1` is set, the response includes a `debug` object with `request_id`, `status`, `query_ms`, `slow_threshold_ms`, `slow_query`.
 
@@ -561,6 +571,7 @@ Response:
 ```
 
 Notes:
+- `model` query uses canonical model id; the backend expands it to include all active aliases for the date range.
 - When `debug=1` is set, the response includes a `debug` object with `request_id`, `status`, `query_ms`, `slow_threshold_ms`, `slow_query`.
 
 ---
@@ -602,6 +613,7 @@ Response:
 ```
 
 Notes:
+- `model` query uses canonical model id; the backend expands it to include all active aliases for the date range.
 - When `debug=1` is set, the response includes a `debug` object with `request_id`, `status`, `query_ms`, `slow_threshold_ms`, `slow_query`.
 
 ---
@@ -645,6 +657,7 @@ Response:
 Notes:
 - `weeks` is a list of week columns; each day cell is `{ day, value, level }` or `null` past the end date.
 - `value` is a bigint-as-string.
+- `model` query uses canonical model id; the backend expands it to include all active aliases for the date range.
 - When `debug=1` is set, the response includes a `debug` object with `request_id`, `status`, `query_ms`, `slow_threshold_ms`, `slow_query`.
 
 ---
