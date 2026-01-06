@@ -24,3 +24,6 @@ codex-pr-review-loop.skill
 # Local-only docs
 .vercel
 .env*.local
+
+# Local-only canvas focus output
+architecture.focus.canvas
