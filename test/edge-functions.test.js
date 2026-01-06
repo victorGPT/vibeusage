@@ -484,10 +484,10 @@ test('vibeusage-ingest uses serviceRoleKey as edgeFunctionToken and ingests hour
   const bucket = {
     hour_start: new Date('2025-12-17T00:00:00.000Z').toISOString(),
     input_tokens: 1,
-    cached_input_tokens: 0,
+    cached_input_tokens: 1,
     output_tokens: 2,
     reasoning_output_tokens: 0,
-    total_tokens: 3
+    total_tokens: 4
   };
 
   const req = new Request('http://localhost/functions/vibeusage-ingest', {
@@ -517,7 +517,8 @@ test('vibeusage-ingest uses serviceRoleKey as edgeFunctionToken and ingests hour
   assert.equal(postBody[0]?.hour_start, bucket.hour_start);
   assert.equal(postBody[0]?.source, 'codex');
   assert.equal(postBody[0]?.model, 'unknown');
-  assert.equal(postBody[0]?.model, 'unknown');
+  assert.equal(postBody[0]?.billable_total_tokens, '3');
+  assert.equal(postBody[0]?.billable_rule_version, 1);
 
   const serviceClientCall = calls.find((c) => c && c.edgeFunctionToken === SERVICE_ROLE_KEY);
   assert.ok(serviceClientCall, 'service client not created');
