@@ -107,19 +107,24 @@ function findLastCursorRow(rows) {
 function buildCursorFilter(cursor) {
   if (!cursor) return null;
   const clauses = [];
+  const encoded = {};
+  for (const field of CURSOR_FIELDS) {
+    const rawValue = cursor[field];
+    if (rawValue == null) return null;
+    encoded[field] = encodeURIComponent(String(rawValue)).replace(/\)/g, '%29');
+  }
   for (let i = 0; i < CURSOR_FIELDS.length; i++) {
     const field = CURSOR_FIELDS[i];
-    if (cursor[field] == null) return null;
     if (i === 0) {
-      clauses.push(`${field}.gt.${cursor[field]}`);
+      clauses.push(`${field}.gt.${encoded[field]}`);
       continue;
     }
     const parts = [];
     for (let j = 0; j < i; j++) {
       const prevField = CURSOR_FIELDS[j];
-      parts.push(`${prevField}.eq.${cursor[prevField]}`);
+      parts.push(`${prevField}.eq.${encoded[prevField]}`);
     }
-    parts.push(`${field}.gt.${cursor[field]}`);
+    parts.push(`${field}.gt.${encoded[field]}`);
     clauses.push(`and(${parts.join(',')})`);
   }
   return `(${clauses.join(',')})`;
