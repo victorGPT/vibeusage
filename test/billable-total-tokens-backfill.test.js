@@ -41,14 +41,14 @@ test('buildCursorFilter builds composite keyset cursor', () => {
     model: 'm1'
   };
   const filter = buildCursorFilter(cursor);
-  assert.ok(filter.includes('hour_start.gt.2025-12-17T00%3A00%3A00.000Z'));
-  assert.ok(filter.includes('and(hour_start.eq.2025-12-17T00%3A00%3A00.000Z,user_id.gt.u1)'));
-  assert.ok(filter.includes('and(hour_start.eq.2025-12-17T00%3A00%3A00.000Z,user_id.eq.u1,device_id.gt.d1)'));
-  assert.ok(filter.includes('and(hour_start.eq.2025-12-17T00%3A00%3A00.000Z,user_id.eq.u1,device_id.eq.d1,source.gt.codex)'));
-  assert.ok(filter.includes('and(hour_start.eq.2025-12-17T00%3A00%3A00.000Z,user_id.eq.u1,device_id.eq.d1,source.eq.codex,model.gt.m1)'));
+  assert.ok(filter.includes('hour_start.gt.2025-12-17T00:00:00.000Z'));
+  assert.ok(filter.includes('and(hour_start.eq.2025-12-17T00:00:00.000Z,user_id.gt.u1)'));
+  assert.ok(filter.includes('and(hour_start.eq.2025-12-17T00:00:00.000Z,user_id.eq.u1,device_id.gt.d1)'));
+  assert.ok(filter.includes('and(hour_start.eq.2025-12-17T00:00:00.000Z,user_id.eq.u1,device_id.eq.d1,source.gt.codex)'));
+  assert.ok(filter.includes('and(hour_start.eq.2025-12-17T00:00:00.000Z,user_id.eq.u1,device_id.eq.d1,source.eq.codex,model.gt.m1)'));
 });
 
-test('buildCursorFilter encodes special characters', () => {
+test('buildCursorFilter keeps raw values for URL encoding', () => {
   const cursor = {
     hour_start: '2025-12-17T00:00:00.000Z',
     user_id: 'user,1',
@@ -57,9 +57,26 @@ test('buildCursorFilter encodes special characters', () => {
     model: 'm1'
   };
   const filter = buildCursorFilter(cursor);
-  assert.ok(filter.includes('user_id.eq.user%2C1'));
-  assert.ok(filter.includes('source.eq.co%29dex'));
-  assert.ok(filter.includes('source.gt.co%29dex'));
+  assert.ok(filter.includes('user_id.eq.user,1'));
+  assert.ok(filter.includes('source.eq.co)dex'));
+  assert.ok(filter.includes('source.gt.co)dex'));
+});
+
+test('URLSearchParams encodes cursor filter safely', () => {
+  const cursor = {
+    hour_start: '2025-12-17T00:00:00.000Z',
+    user_id: 'user,1',
+    device_id: 'd1',
+    source: 'co)dex',
+    model: 'm1'
+  };
+  const filter = buildCursorFilter(cursor);
+  const url = new URL('http://localhost');
+  url.searchParams.set('or', filter);
+  const query = url.toString();
+  assert.ok(query.includes('user_id.eq.user%2C1'));
+  assert.ok(query.includes('source.eq.co%29dex'));
+  assert.ok(query.includes('source.gt.co%29dex'));
 });
 
 test('runBackfill paginates with cursor without skipping rows', async () => {
