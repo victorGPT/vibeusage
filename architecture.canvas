@@ -64,6 +64,16 @@
       "label": "test"
     },
     {
+      "id": "ops_billable_backfill_proposed_20260106",
+      "type": "text",
+      "text": "**billable-total-tokens backfill**\n`scripts/ops/billable-total-tokens-backfill.cjs`\n\nRole: Offline backfill job for hourly billable totals.\nStatus: Proposed\nNotes: Fill billable_total_tokens for vibescore_tracker_hourly with throttling + resume.",
+      "x": 100,
+      "y": 7580,
+      "width": 320,
+      "height": 240,
+      "color": "2"
+    },
+    {
       "id": "frontend_copy_bf33508f",
       "type": "text",
       "text": "**copy**\n`copy.jsx`\n\nUI component layer.\n\n包含：\n- copy (526 行)\n- App (0 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
@@ -440,7 +450,7 @@
     {
       "id": "test_edge-functions_test_deffefcc",
       "type": "text",
-      "text": "**edge-functions.test**\n`test/edge-functions.test.js`\n\nTest module.\n\n包含：\n- edge-functions.test (3158 行)\n- toBase64Url (1 个参数)\n\n依赖：2 个模块\n被依赖：0 次",
+      "text": "**edge-functions.test**\n`test/edge-functions.test.js`\n\nTest module.\n\n包含：\n- edge-functions.test (3220 行)\n- toBase64Url (1 个参数)\n\n依赖：2 个模块\n被依赖：0 次",
       "x": 100,
       "y": 11212,
       "width": 280,
