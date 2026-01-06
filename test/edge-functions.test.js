@@ -1435,6 +1435,7 @@ test('vibeusage-usage-hourly canonical model filter includes alias rows', async 
   const rows = [
     {
       hour_start: '2025-01-01T00:00:00.000Z',
+      model: 'gpt-4o-mini',
       total_tokens: '10',
       input_tokens: '4',
       cached_input_tokens: '0',
@@ -1511,6 +1512,85 @@ test('vibeusage-usage-hourly canonical model filter includes alias rows', async 
   assert.equal(res.status, 200);
   const filterCalls = filters.filter((entry) => entry.op === 'in' && entry.col === 'model');
   assert.ok(filterCalls.some((entry) => entry.values?.includes?.('gpt-4o-mini')));
+});
+
+test('vibeusage-usage-hourly honors alias effective_from across day', async () => {
+  const fn = require('../insforge-functions/vibeusage-usage-hourly');
+
+  const userId = '11111111-1111-1111-1111-111111111111';
+  const userJwt = 'user_jwt_test';
+  const filters = [];
+
+  const rows = [
+    {
+      hour_start: '2025-02-15T00:00:00.000Z',
+      model: 'gpt-foo',
+      total_tokens: '10',
+      input_tokens: '4',
+      cached_input_tokens: '0',
+      output_tokens: '6',
+      reasoning_output_tokens: '0'
+    }
+  ];
+
+  const aliasRows = [
+    {
+      usage_model: 'gpt-foo',
+      canonical_model: 'alpha',
+      display_name: 'Alpha',
+      effective_from: '2025-01-01',
+      active: true
+    },
+    {
+      usage_model: 'gpt-foo',
+      canonical_model: 'beta',
+      display_name: 'Beta',
+      effective_from: '2025-02-01',
+      active: true
+    }
+  ];
+
+  globalThis.createClient = (args) => {
+    if (args && args.edgeFunctionToken === userJwt) {
+      assert.equal(args.anonKey, ANON_KEY);
+      return {
+        auth: {
+          getCurrentUser: async () => ({ data: { user: { id: userId } }, error: null })
+        },
+        database: {
+          from: (table) => {
+            if (table === 'vibescore_tracker_hourly') {
+              return createQueryMock({
+                rows,
+                onFilter: (entry) => filters.push(entry)
+              });
+            }
+            if (table === 'vibescore_model_aliases') {
+              return createQueryMock({ rows: aliasRows });
+            }
+            throw new Error(`Unexpected table ${table}`);
+          }
+        }
+      };
+    }
+    throw new Error(`Unexpected createClient args: ${JSON.stringify(args)}`);
+  };
+
+  const req = new Request(
+    'http://localhost/functions/vibeusage-usage-hourly?day=2025-02-15&model=alpha',
+    {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${userJwt}` }
+    }
+  );
+
+  const res = await fn(req);
+  assert.equal(res.status, 200);
+  const body = await res.json();
+  assert.equal(body.day, '2025-02-15');
+  assert.equal(body.data[0].total_tokens, '0');
+  const filterCalls = filters.filter((entry) => entry.op === 'in' && entry.col === 'model');
+  assert.ok(filterCalls.some((entry) => entry.values?.includes?.('gpt-foo')));
 });
 
 test('vibeusage-usage-monthly aggregates hourly rows into months', async () => {
