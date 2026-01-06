@@ -326,9 +326,11 @@ async function parseOpencodeIncremental({ messageFiles, cursors, queuePath, onPr
       continue;
     }
 
+    const fallbackTotals = prev && typeof prev.lastTotals === 'object' ? prev.lastTotals : null;
     const result = await parseOpencodeMessageFile({
       filePath,
       messageIndex,
+      fallbackTotals,
       hourlyState,
       touchedBuckets,
       source: fileSource
@@ -561,7 +563,14 @@ async function parseGeminiFile({
   };
 }
 
-async function parseOpencodeMessageFile({ filePath, messageIndex, hourlyState, touchedBuckets, source }) {
+async function parseOpencodeMessageFile({
+  filePath,
+  messageIndex,
+  fallbackTotals,
+  hourlyState,
+  touchedBuckets,
+  source
+}) {
   const raw = await fs.readFile(filePath, 'utf8').catch(() => '');
   if (!raw.trim()) return { messageKey: null, lastTotals: null, eventsAggregated: 0, shouldUpdate: false };
 
@@ -574,7 +583,8 @@ async function parseOpencodeMessageFile({ filePath, messageIndex, hourlyState, t
 
   const messageKey = deriveOpencodeMessageKey(msg, filePath);
   const prev = messageIndex && messageKey ? messageIndex[messageKey] : null;
-  const lastTotals = prev && typeof prev.lastTotals === 'object' ? prev.lastTotals : null;
+  const legacyTotals = fallbackTotals && typeof fallbackTotals === 'object' ? fallbackTotals : null;
+  const lastTotals = prev && typeof prev.lastTotals === 'object' ? prev.lastTotals : legacyTotals;
 
   const currentTotals = normalizeOpencodeTokens(msg?.tokens);
   if (!currentTotals) {

@@ -763,7 +763,7 @@
     {
       "id": "test_rollout-parser_test_e96ece4a",
       "type": "text",
-      "text": "**rollout-parser.test**\n`test/rollout-parser.test.js`\n\nTest module.\n\n包含：\n- rollout-parser.test (1194 行)\n- buildTurnContextLine (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+      "text": "**rollout-parser.test**\n`test/rollout-parser.test.js`\n\nTest module.\n\n包含：\n- rollout-parser.test (1307 行)\n- buildTurnContextLine (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
       "x": 1900,
       "y": 11572,
       "width": 280,
@@ -1187,7 +1187,7 @@
     {
       "id": "utils_rollout_ea37f1e4",
       "type": "text",
-      "text": "**rollout**\n`src/lib/rollout.js`\n\nShared utilities.\n\n包含：\n- rollout (1318 行)\n- listRolloutFiles (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+      "text": "**rollout**\n`src/lib/rollout.js`\n\nShared utilities.\n\n包含：\n- rollout (1372 行)\n- listRolloutFiles (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
       "x": 1180,
       "y": 8880,
       "width": 280,
