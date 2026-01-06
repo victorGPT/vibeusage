@@ -1402,6 +1402,66 @@ test('vibeusage-usage-hourly aggregates half-hour buckets into half-hour totals'
   assert.equal(body.data[26].billable_total_tokens, '4');
 });
 
+test('vibeusage-usage-hourly computes billable totals from aggregated rows', async () => {
+  const fn = require('../insforge-functions/vibeusage-usage-hourly');
+
+  const userId = '77777777-7777-7777-7777-777777777777';
+  const userJwt = 'user_jwt_test';
+
+  const aggregateRows = [
+    {
+      hour: '2025-12-21T01:00:00.000Z',
+      source: 'codex',
+      sum_total_tokens: '10',
+      sum_input_tokens: '4',
+      sum_cached_input_tokens: '1',
+      sum_output_tokens: '3',
+      sum_reasoning_output_tokens: '2'
+    }
+  ];
+
+  globalThis.createClient = (args) => {
+    if (args && args.edgeFunctionToken === userJwt) {
+      assert.equal(args.anonKey, ANON_KEY);
+      return {
+        auth: {
+          getCurrentUser: async () => ({ data: { user: { id: userId } }, error: null })
+        },
+        database: {
+          from: (table) => {
+            assert.equal(table, 'vibescore_tracker_hourly');
+            return {
+              select: (columns) => {
+                const isAggregate =
+                  typeof columns === 'string' && columns.includes('sum(');
+                if (isAggregate) {
+                  assert.ok(columns.includes('source'));
+                  const query = createQueryMock({ rows: aggregateRows });
+                  query.range = async () => ({ data: aggregateRows, error: null });
+                  return query;
+                }
+                throw new Error('raw hourly query should not be called in aggregate path');
+              }
+            };
+          }
+        }
+      };
+    }
+    throw new Error(`Unexpected createClient args: ${JSON.stringify(args)}`);
+  };
+
+  const req = new Request('http://localhost/functions/vibeusage-usage-hourly?day=2025-12-21', {
+    method: 'GET',
+    headers: { Authorization: `Bearer ${userJwt}` }
+  });
+
+  const res = await fn(req);
+  assert.equal(res.status, 200);
+  const body = await res.json();
+  assert.equal(body.data[2].total_tokens, '10');
+  assert.equal(body.data[2].billable_total_tokens, '9');
+});
+
 test('vibeusage-usage-monthly aggregates hourly rows into months', async () => {
   const fn = require('../insforge-functions/vibeusage-usage-monthly');
 
@@ -1486,8 +1546,10 @@ test('vibeusage-usage-monthly aggregates hourly rows into months', async () => {
   assert.equal(body.data.length, 2);
   assert.equal(body.data[0].month, '2025-11');
   assert.equal(body.data[0].total_tokens, '15');
+  assert.equal(body.data[0].billable_total_tokens, '13');
   assert.equal(body.data[1].month, '2025-12');
   assert.equal(body.data[1].total_tokens, '7');
+  assert.equal(body.data[1].billable_total_tokens, '6');
 });
 
 test('vibeusage-usage-summary uses hourly when rollup disabled', () =>
