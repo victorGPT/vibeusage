@@ -166,40 +166,6 @@
       }
     },
     {
-      "id": "manual_billable-total-tokens-backfill_cjs",
-      "type": "text",
-      "text": "**billable-total-tokens-backfill**\n`scripts/ops/billable-total-tokens-backfill.cjs`\n\nRole: Backfill hourly billable_total_tokens.\nStatus: Implemented\nNotes: Offline backfill script for historical rows.",
-      "x": 1900,
-      "y": 10132,
-      "width": 320,
-      "height": 180,
-      "color": "4",
-      "meta": {
-        "relPath": "scripts/ops/billable-total-tokens-backfill.cjs",
-        "category": "utils",
-        "group": "utils",
-        "side": "right",
-        "layerIndex": 6
-      }
-    },
-    {
-      "id": "manual_billable-total-tokens-migration_sql",
-      "type": "text",
-      "text": "**billable-total-tokens-migration**\n`scripts/ops/billable-total-tokens-migration.sql`\n\nRole: Add billable_total_tokens columns.\nStatus: Implemented\nNotes: One-time migration for hourly table.",
-      "x": 2240,
-      "y": 10132,
-      "width": 320,
-      "height": 180,
-      "color": "4",
-      "meta": {
-        "relPath": "scripts/ops/billable-total-tokens-migration.sql",
-        "category": "utils",
-        "group": "utils",
-        "side": "right",
-        "layerIndex": 6
-      }
-    },
-    {
       "id": "test_boot-screen_test_21fc4cc4",
       "type": "text",
       "text": "**boot-screen.test**\n`test/boot-screen.test.js`\n\nTest module.\n\n包含：\n- boot-screen.test (86 行)\n- read (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
@@ -508,7 +474,7 @@
     {
       "id": "test_edge-functions_test_deffefcc",
       "type": "text",
-      "text": "**edge-functions.test**\n`test/edge-functions.test.js`\n\nTest module.\n\n包含：\n- edge-functions.test (3533 行)\n- toBase64Url (1 个参数)\n\n依赖：2 个模块\n被依赖：0 次",
+      "text": "**edge-functions.test**\n`test/edge-functions.test.js`\n\nTest module.\n\n包含：\n- edge-functions.test (3664 行)\n- toBase64Url (1 个参数)\n\n依赖：2 个模块\n被依赖：0 次",
       "x": 2620,
       "y": 10852,
       "width": 280,
@@ -1981,7 +1947,7 @@
     {
       "id": "edge-function_vibescore-usage-hourly_7f0e1821",
       "type": "text",
-      "text": "**vibescore-usage-hourly**\n`insforge-src/functions/vibescore-usage-hourly.js`\n\nEdge function handler.\n\n包含：\n- vibescore-usage-hourly (494 行)\n- initHourlyBuckets (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+      "text": "**vibescore-usage-hourly**\n`insforge-src/functions/vibescore-usage-hourly.js`\n\nEdge function handler.\n\n包含：\n- vibescore-usage-hourly (508 行)\n- initHourlyBuckets (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
       "x": 2620,
       "y": 4936,
       "width": 280,
@@ -3588,6 +3554,40 @@
         "layerIndex": 4
       },
       "externalService": "Anthropic"
+    },
+    {
+      "id": "manual_billable-total-tokens-backfill_cjs",
+      "type": "text",
+      "text": "**billable-total-tokens-backfill (manual)**\n`scripts/ops/billable-total-tokens-backfill.cjs`\n\nManual ops script.\n\n包含：\n- billable-total-tokens-backfill (296 行)\n- parseArgs (1 个参数)\n- printHelp (0 个参数)\n- buildUpdates (1 个参数)\n- findLastCursorRow (1 个参数)\n- buildCursorFilter (1 个参数)\n- buildCursorFromRow (1 个参数)\n- sleep (1 个参数)",
+      "x": 100,
+      "y": 10480,
+      "width": 280,
+      "height": 232,
+      "color": "2",
+      "meta": {
+        "relPath": "scripts/ops/billable-total-tokens-backfill.cjs",
+        "category": "ops",
+        "group": "ops",
+        "side": "right",
+        "layerIndex": 6
+      }
+    },
+    {
+      "id": "manual_billable-total-tokens-migration_sql",
+      "type": "text",
+      "text": "**billable-total-tokens-migration (manual)**\n`scripts/ops/billable-total-tokens-migration.sql`\n\nManual ops SQL.\n\n包含：\n- billable-total-tokens-migration (7 行)",
+      "x": 460,
+      "y": 10480,
+      "width": 280,
+      "height": 232,
+      "color": "2",
+      "meta": {
+        "relPath": "scripts/ops/billable-total-tokens-migration.sql",
+        "category": "ops",
+        "group": "ops",
+        "side": "right",
+        "layerIndex": 6
+      }
     }
   ],
   "edges": [

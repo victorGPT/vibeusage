@@ -112,16 +112,30 @@ module.exports = withRequestLogging('vibescore-usage-hourly', async function(req
         if (!bucket) continue;
 
         bucket.total += toBigInt(row?.sum_total_tokens);
-        const billable = computeBillableTotalTokens({
-          source: row?.source || source,
-          totals: {
-            total_tokens: row?.sum_total_tokens,
-            input_tokens: row?.sum_input_tokens,
-            cached_input_tokens: row?.sum_cached_input_tokens,
-            output_tokens: row?.sum_output_tokens,
-            reasoning_output_tokens: row?.sum_reasoning_output_tokens
-          }
-        });
+        const rowCount = Number(row?.count_rows);
+        const billableCount = Number(row?.count_billable_total_tokens);
+        const hasCompleteBillable =
+          Number.isFinite(rowCount) &&
+          Number.isFinite(billableCount) &&
+          rowCount > 0 &&
+          billableCount === rowCount;
+        const hasStoredBillable =
+          row &&
+          Object.prototype.hasOwnProperty.call(row, 'sum_billable_total_tokens') &&
+          row.sum_billable_total_tokens != null &&
+          hasCompleteBillable;
+        const billable = hasStoredBillable
+          ? toBigInt(row.sum_billable_total_tokens)
+          : computeBillableTotalTokens({
+              source: row?.source || source,
+              totals: {
+                total_tokens: row?.sum_total_tokens,
+                input_tokens: row?.sum_input_tokens,
+                cached_input_tokens: row?.sum_cached_input_tokens,
+                output_tokens: row?.sum_output_tokens,
+                reasoning_output_tokens: row?.sum_reasoning_output_tokens
+              }
+            });
         bucket.billable += billable;
         bucket.input += toBigInt(row?.sum_input_tokens);
         bucket.cached += toBigInt(row?.sum_cached_input_tokens);
@@ -405,7 +419,7 @@ async function tryAggregateHourlyTotals({ edgeClient, userId, startIso, endIso, 
     let query = edgeClient.database
       .from('vibescore_tracker_hourly')
       .select(
-        'source,hour:hour_start,sum_total_tokens:sum(total_tokens),sum_input_tokens:sum(input_tokens),sum_cached_input_tokens:sum(cached_input_tokens),sum_output_tokens:sum(output_tokens),sum_reasoning_output_tokens:sum(reasoning_output_tokens)'
+        'source,hour:hour_start,sum_total_tokens:sum(total_tokens),sum_input_tokens:sum(input_tokens),sum_cached_input_tokens:sum(cached_input_tokens),sum_output_tokens:sum(output_tokens),sum_reasoning_output_tokens:sum(reasoning_output_tokens),sum_billable_total_tokens:sum(billable_total_tokens),count_rows:count(),count_billable_total_tokens:count(billable_total_tokens)'
       )
       .eq('user_id', userId);
     if (source) query = query.eq('source', source);

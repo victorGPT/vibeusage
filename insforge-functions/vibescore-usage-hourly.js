@@ -947,7 +947,11 @@ module.exports = withRequestLogging("vibescore-usage-hourly", async function(req
         const bucket = key ? bucketMap2.get(key) : null;
         if (!bucket) continue;
         bucket.total += toBigInt(row?.sum_total_tokens);
-        const billable = computeBillableTotalTokens({
+        const rowCount3 = Number(row?.count_rows);
+        const billableCount = Number(row?.count_billable_total_tokens);
+        const hasCompleteBillable = Number.isFinite(rowCount3) && Number.isFinite(billableCount) && rowCount3 > 0 && billableCount === rowCount3;
+        const hasStoredBillable = row && Object.prototype.hasOwnProperty.call(row, "sum_billable_total_tokens") && row.sum_billable_total_tokens != null && hasCompleteBillable;
+        const billable = hasStoredBillable ? toBigInt(row.sum_billable_total_tokens) : computeBillableTotalTokens({
           source: row?.source || source,
           totals: {
             total_tokens: row?.sum_total_tokens,
@@ -1191,7 +1195,7 @@ function parseHalfHourSlotFromKey(key) {
 async function tryAggregateHourlyTotals({ edgeClient, userId, startIso, endIso, source, model }) {
   try {
     let query = edgeClient.database.from("vibescore_tracker_hourly").select(
-      "source,hour:hour_start,sum_total_tokens:sum(total_tokens),sum_input_tokens:sum(input_tokens),sum_cached_input_tokens:sum(cached_input_tokens),sum_output_tokens:sum(output_tokens),sum_reasoning_output_tokens:sum(reasoning_output_tokens)"
+      "source,hour:hour_start,sum_total_tokens:sum(total_tokens),sum_input_tokens:sum(input_tokens),sum_cached_input_tokens:sum(cached_input_tokens),sum_output_tokens:sum(output_tokens),sum_reasoning_output_tokens:sum(reasoning_output_tokens),sum_billable_total_tokens:sum(billable_total_tokens),count_rows:count(),count_billable_total_tokens:count(billable_total_tokens)"
     ).eq("user_id", userId);
     if (source) query = query.eq("source", source);
     if (model) query = query.eq("model", model);
