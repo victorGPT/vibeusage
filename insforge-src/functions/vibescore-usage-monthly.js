@@ -22,6 +22,7 @@ const { toBigInt, toPositiveIntOrNull } = require('../shared/numbers');
 const { forEachPage } = require('../shared/pagination');
 const { logSlowQuery, withRequestLogging } = require('../shared/logging');
 const { isDebugEnabled, withSlowQueryDebugPayload } = require('../shared/debug');
+const { computeBillableTotalTokens } = require('../shared/usage-billable');
 
 const MAX_MONTHS = 24;
 
@@ -89,6 +90,7 @@ module.exports = withRequestLogging('vibescore-usage-monthly', async function(re
     monthKeys.push(key);
     buckets.set(key, {
       total: 0n,
+      billable: 0n,
       input: 0n,
       cached: 0n,
       output: 0n,
@@ -102,7 +104,7 @@ module.exports = withRequestLogging('vibescore-usage-monthly', async function(re
     createQuery: () => {
       let query = auth.edgeClient.database
         .from('vibescore_tracker_hourly')
-        .select('hour_start,total_tokens,input_tokens,cached_input_tokens,output_tokens,reasoning_output_tokens')
+        .select('hour_start,source,billable_total_tokens,total_tokens,input_tokens,cached_input_tokens,output_tokens,reasoning_output_tokens')
         .eq('user_id', auth.userId);
       if (source) query = query.eq('source', source);
       if (model) query = query.eq('model', model);
@@ -128,6 +130,17 @@ module.exports = withRequestLogging('vibescore-usage-monthly', async function(re
         const bucket = buckets.get(key);
         if (!bucket) continue;
         bucket.total += toBigInt(row?.total_tokens);
+        const hasStoredBillable =
+          row &&
+          Object.prototype.hasOwnProperty.call(row, 'billable_total_tokens') &&
+          row.billable_total_tokens != null;
+        const billable = hasStoredBillable
+          ? toBigInt(row.billable_total_tokens)
+          : computeBillableTotalTokens({
+              source: row?.source || source,
+              totals: row
+            });
+        bucket.billable += billable;
         bucket.input += toBigInt(row?.input_tokens);
         bucket.cached += toBigInt(row?.cached_input_tokens);
         bucket.output += toBigInt(row?.output_tokens);
@@ -154,6 +167,7 @@ module.exports = withRequestLogging('vibescore-usage-monthly', async function(re
     return {
       month: key,
       total_tokens: bucket.total.toString(),
+      billable_total_tokens: bucket.billable.toString(),
       input_tokens: bucket.input.toString(),
       cached_input_tokens: bucket.cached.toString(),
       output_tokens: bucket.output.toString(),

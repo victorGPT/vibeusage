@@ -27,6 +27,8 @@ const {
   fetchRollupRows,
   isRollupEnabled
 } = require('../shared/usage-rollup');
+const { toBigInt } = require('../shared/numbers');
+const { computeBillableTotalTokens } = require('../shared/usage-billable');
 const {
   buildPricingMetadata,
   computeUsageCost,
@@ -104,10 +106,19 @@ module.exports = withRequestLogging('vibescore-usage-summary', async function(re
   };
 
   const ingestRow = (row) => {
-    addRowTotals(totals, row);
     const sourceKey = normalizeSource(row?.source) || DEFAULT_SOURCE;
+    const hasStoredBillable =
+      row &&
+      Object.prototype.hasOwnProperty.call(row, 'billable_total_tokens') &&
+      row.billable_total_tokens != null;
+    const billable = hasStoredBillable
+      ? toBigInt(row.billable_total_tokens)
+      : computeBillableTotalTokens({ source: sourceKey, totals: row });
+    addRowTotals(totals, row);
+    if (!hasStoredBillable) totals.billable_total_tokens += billable;
     const sourceEntry = getSourceEntry(sourcesMap, sourceKey);
     addRowTotals(sourceEntry.totals, row);
+    if (!hasStoredBillable) sourceEntry.totals.billable_total_tokens += billable;
     const normalizedModel = normalizeModel(row?.model);
     if (normalizedModel && normalizedModel.toLowerCase() !== 'unknown') {
       distinctModels.add(normalizedModel);
@@ -120,7 +131,7 @@ module.exports = withRequestLogging('vibescore-usage-summary', async function(re
         let query = auth.edgeClient.database
           .from('vibescore_tracker_hourly')
           .select(
-            'hour_start,source,model,total_tokens,input_tokens,cached_input_tokens,output_tokens,reasoning_output_tokens'
+            'hour_start,source,model,billable_total_tokens,total_tokens,input_tokens,cached_input_tokens,output_tokens,reasoning_output_tokens'
           )
           .eq('user_id', auth.userId);
         if (source) query = query.eq('source', source);
@@ -299,6 +310,7 @@ module.exports = withRequestLogging('vibescore-usage-summary', async function(re
 
   const totalsPayload = {
     total_tokens: totals.total_tokens.toString(),
+    billable_total_tokens: totals.billable_total_tokens.toString(),
     input_tokens: totals.input_tokens.toString(),
     cached_input_tokens: totals.cached_input_tokens.toString(),
     output_tokens: totals.output_tokens.toString(),

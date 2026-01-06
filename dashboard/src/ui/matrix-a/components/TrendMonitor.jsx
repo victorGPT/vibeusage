@@ -22,7 +22,7 @@ export function TrendMonitor({
   const seriesValues = series
     ? series.map((row) => {
         if (row?.missing || row?.future) return null;
-        const raw = row?.total_tokens ?? row?.value;
+        const raw = row?.billable_total_tokens ?? row?.total_tokens ?? row?.value;
         if (raw == null) return null;
         const n = Number(raw);
         return Number.isFinite(n) ? n : 0;

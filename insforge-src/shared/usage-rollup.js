@@ -7,6 +7,7 @@ const { forEachPage } = require('./pagination');
 function createTotals() {
   return {
     total_tokens: 0n,
+    billable_total_tokens: 0n,
     input_tokens: 0n,
     cached_input_tokens: 0n,
     output_tokens: 0n,
@@ -17,6 +18,7 @@ function createTotals() {
 function addRowTotals(target, row) {
   if (!target || !row) return;
   target.total_tokens += toBigInt(row?.total_tokens);
+  target.billable_total_tokens += toBigInt(row?.billable_total_tokens);
   target.input_tokens += toBigInt(row?.input_tokens);
   target.cached_input_tokens += toBigInt(row?.cached_input_tokens);
   target.output_tokens += toBigInt(row?.output_tokens);

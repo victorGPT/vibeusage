@@ -100,7 +100,9 @@ export function buildActivityHeatmap({
   for (const row of Array.isArray(dailyRows) ? dailyRows : []) {
     const day = typeof row?.day === "string" ? row.day : null;
     if (!day) continue;
-    const value = toFiniteNumber(row?.total_tokens) ?? 0;
+    const value = toFiniteNumber(
+      row?.billable_total_tokens ?? row?.total_tokens
+    ) ?? 0;
     valuesByDay.set(day, Math.max(0, value));
   }
 
@@ -174,7 +176,9 @@ export function computeActiveStreakDays({ dailyRows, to } = {}) {
   for (const row of Array.isArray(dailyRows) ? dailyRows : []) {
     const day = typeof row?.day === "string" ? row.day : null;
     if (!day) continue;
-    const value = toFiniteNumber(row?.total_tokens) ?? 0;
+    const value = toFiniteNumber(
+      row?.billable_total_tokens ?? row?.total_tokens
+    ) ?? 0;
     valuesByDay.set(day, Math.max(0, value));
   }
 

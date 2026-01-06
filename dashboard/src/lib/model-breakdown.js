@@ -7,7 +7,9 @@ export function buildFleetData(modelBreakdown, { copyFn } = {}) {
     : [];
   const normalizedSources = sources
     .map((entry) => {
-      const totalTokens = toFiniteNumber(entry?.totals?.total_tokens);
+      const totalTokens = toFiniteNumber(
+        entry?.totals?.billable_total_tokens ?? entry?.totals?.total_tokens
+      );
       const totalCost = toFiniteNumber(entry?.totals?.total_cost_usd);
       return {
         source: entry?.source,
@@ -43,7 +45,9 @@ export function buildFleetData(modelBreakdown, { copyFn } = {}) {
         : "0.0";
       const models = entry.models
         .map((model) => {
-          const modelTokens = toFiniteNumber(model?.totals?.total_tokens);
+          const modelTokens = toFiniteNumber(
+            model?.totals?.billable_total_tokens ?? model?.totals?.total_tokens
+          );
           if (!Number.isFinite(modelTokens) || modelTokens <= 0) return null;
           const share =
             entry.totalTokens > 0

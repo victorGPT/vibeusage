@@ -95,7 +95,12 @@ export function useActivityHeatmap({
           for (const week of weeksData) {
             for (const cell of Array.isArray(week) ? week : []) {
               if (!cell?.day) continue;
-              rows.push({ day: cell.day, total_tokens: cell.value ?? 0 });
+              rows.push({
+                day: cell.day,
+                total_tokens: cell.total_tokens ?? cell.value ?? 0,
+                billable_total_tokens:
+                  cell.billable_total_tokens ?? cell.value ?? cell.total_tokens ?? 0,
+              });
             }
           }
           const localHeatmap = buildActivityHeatmap({
@@ -108,7 +113,9 @@ export function useActivityHeatmap({
           setHeatmap({
             ...localHeatmap,
             week_starts_on: weekStartsOn,
-            active_days: rows.filter((r) => Number(r?.total_tokens) > 0).length,
+            active_days: rows.filter(
+              (r) => Number(r?.billable_total_tokens ?? r?.total_tokens) > 0
+            ).length,
             streak_days: computeActiveStreakDays({
               dailyRows: rows,
               to: res?.to || range.to,
@@ -119,7 +126,9 @@ export function useActivityHeatmap({
             heatmap: {
               ...localHeatmap,
               week_starts_on: weekStartsOn,
-              active_days: rows.filter((r) => Number(r?.total_tokens) > 0).length,
+              active_days: rows.filter(
+                (r) => Number(r?.billable_total_tokens ?? r?.total_tokens) > 0
+              ).length,
               streak_days: computeActiveStreakDays({
                 dailyRows: rows,
                 to: res?.to || range.to,
@@ -166,7 +175,9 @@ export function useActivityHeatmap({
       setHeatmap({
         ...localHeatmap,
         week_starts_on: weekStartsOn,
-        active_days: rows.filter((r) => Number(r?.total_tokens) > 0).length,
+        active_days: rows.filter(
+          (r) => Number(r?.billable_total_tokens ?? r?.total_tokens) > 0
+        ).length,
         streak_days: computeActiveStreakDays({ dailyRows: rows, to: range.to }),
       });
       setSource("client");
@@ -174,7 +185,9 @@ export function useActivityHeatmap({
         heatmap: {
           ...localHeatmap,
           week_starts_on: weekStartsOn,
-          active_days: rows.filter((r) => Number(r?.total_tokens) > 0).length,
+          active_days: rows.filter(
+            (r) => Number(r?.billable_total_tokens ?? r?.total_tokens) > 0
+          ).length,
           streak_days: computeActiveStreakDays({ dailyRows: rows, to: range.to }),
         },
         daily: rows,

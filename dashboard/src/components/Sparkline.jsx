@@ -5,7 +5,7 @@ import { toFiniteNumber } from "../lib/format.js";
 
 export function Sparkline({ rows }) {
   const values = (rows || [])
-    .map((r) => toFiniteNumber(r?.total_tokens))
+    .map((r) => toFiniteNumber(r?.billable_total_tokens ?? r?.total_tokens))
     .filter((n) => typeof n === "number");
   if (values.length < 2) return null;
 

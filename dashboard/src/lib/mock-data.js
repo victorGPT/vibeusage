@@ -157,6 +157,7 @@ function buildDailyRows({ from, to, seed }) {
     rows.push({
       day,
       total_tokens: total,
+      billable_total_tokens: total,
       input_tokens: input,
       output_tokens: output,
       cached_input_tokens: cached,
@@ -189,6 +190,7 @@ function buildHourlyRows({ day, seed }) {
     return {
       hour: `${dayKey}T${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}:00`,
       total_tokens: total,
+      billable_total_tokens: total,
       input_tokens: input,
       output_tokens: output,
       cached_input_tokens: cached,
@@ -238,6 +240,7 @@ function buildMonthlyRows({ months = 24, to, seed }) {
     rows.push({
       month: monthKey,
       total_tokens: total,
+      billable_total_tokens: total,
       input_tokens: input,
       output_tokens: output,
       cached_input_tokens: cached,
@@ -252,6 +255,7 @@ function sumDailyRows(rows) {
   return rows.reduce(
     (acc, row) => {
       acc.total_tokens += Number(row.total_tokens || 0);
+      acc.billable_total_tokens += Number(row.billable_total_tokens || row.total_tokens || 0);
       acc.input_tokens += Number(row.input_tokens || 0);
       acc.output_tokens += Number(row.output_tokens || 0);
       acc.cached_input_tokens += Number(row.cached_input_tokens || 0);
@@ -260,6 +264,7 @@ function sumDailyRows(rows) {
     },
     {
       total_tokens: 0,
+      billable_total_tokens: 0,
       input_tokens: 0,
       output_tokens: 0,
       cached_input_tokens: 0,
@@ -279,6 +284,10 @@ function scaleTotals(totals, weight) {
   const safeWeight = Number.isFinite(weight) ? weight : 0;
   return {
     total_tokens: Math.max(0, Math.round(totals.total_tokens * safeWeight)),
+    billable_total_tokens: Math.max(
+      0,
+      Math.round((totals.billable_total_tokens ?? totals.total_tokens) * safeWeight)
+    ),
     input_tokens: Math.max(0, Math.round(totals.input_tokens * safeWeight)),
     output_tokens: Math.max(0, Math.round(totals.output_tokens * safeWeight)),
     cached_input_tokens: Math.max(
@@ -351,7 +360,7 @@ export function getMockUsageHeatmap({ weeks = 52, to, weekStartsOn = "sun", seed
   return {
     ...heatmap,
     week_starts_on: weekStartsOn,
-    active_days: rows.filter((r) => Number(r.total_tokens) > 0).length,
+    active_days: rows.filter((r) => Number(r.billable_total_tokens ?? r.total_tokens) > 0).length,
     streak_days: computeActiveStreakDays({ dailyRows: rows, to: range.to }),
   };
 }

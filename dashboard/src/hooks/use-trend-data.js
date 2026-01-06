@@ -348,6 +348,7 @@ function fillDailyGaps(rows, from, to, { timeZone, offsetMinutes, now } = {}) {
     filled.push({
       day,
       total_tokens: null,
+      billable_total_tokens: null,
       input_tokens: null,
       cached_input_tokens: null,
       output_tokens: null,

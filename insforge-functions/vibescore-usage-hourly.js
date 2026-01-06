@@ -821,6 +821,35 @@ var require_debug = __commonJS({
   }
 });
 
+// insforge-src/shared/usage-billable.js
+var require_usage_billable = __commonJS({
+  "insforge-src/shared/usage-billable.js"(exports2, module2) {
+    "use strict";
+    var { toBigInt: toBigInt2 } = require_numbers();
+    var { normalizeSource } = require_source();
+    var BILLABLE_INPUT_OUTPUT_REASONING = /* @__PURE__ */ new Set(["codex", "every-code"]);
+    var BILLABLE_ADD_ALL = /* @__PURE__ */ new Set(["claude", "opencode"]);
+    var BILLABLE_TOTAL = /* @__PURE__ */ new Set(["gemini"]);
+    function computeBillableTotalTokens2({ source, totals } = {}) {
+      const normalizedSource = normalizeSource(source) || "unknown";
+      const input = toBigInt2(totals?.input_tokens);
+      const cached = toBigInt2(totals?.cached_input_tokens);
+      const output = toBigInt2(totals?.output_tokens);
+      const reasoning = toBigInt2(totals?.reasoning_output_tokens);
+      const total = toBigInt2(totals?.total_tokens);
+      const hasTotal = Boolean(totals && Object.prototype.hasOwnProperty.call(totals, "total_tokens"));
+      if (BILLABLE_TOTAL.has(normalizedSource)) return total;
+      if (BILLABLE_ADD_ALL.has(normalizedSource)) return input + cached + output + reasoning;
+      if (BILLABLE_INPUT_OUTPUT_REASONING.has(normalizedSource)) return input + output + reasoning;
+      if (hasTotal) return total;
+      return input + output + reasoning;
+    }
+    module2.exports = {
+      computeBillableTotalTokens: computeBillableTotalTokens2
+    };
+  }
+});
+
 // insforge-src/functions/vibescore-usage-hourly.js
 var { handleOptions, json } = require_http();
 var { getBearerToken, getEdgeClientAndUserIdFast } = require_auth();
@@ -844,6 +873,7 @@ var { toBigInt } = require_numbers();
 var { forEachPage } = require_pagination();
 var { logSlowQuery, withRequestLogging } = require_logging();
 var { isDebugEnabled, withSlowQueryDebugPayload } = require_debug();
+var { computeBillableTotalTokens } = require_usage_billable();
 var MIN_INTERVAL_MINUTES = 30;
 module.exports = withRequestLogging("vibescore-usage-hourly", async function(request, logger) {
   const opt = handleOptions(request);
@@ -917,6 +947,17 @@ module.exports = withRequestLogging("vibescore-usage-hourly", async function(req
         const bucket = key ? bucketMap2.get(key) : null;
         if (!bucket) continue;
         bucket.total += toBigInt(row?.sum_total_tokens);
+        const billable = computeBillableTotalTokens({
+          source: row?.source || source,
+          totals: {
+            total_tokens: row?.sum_total_tokens,
+            input_tokens: row?.sum_input_tokens,
+            cached_input_tokens: row?.sum_cached_input_tokens,
+            output_tokens: row?.sum_output_tokens,
+            reasoning_output_tokens: row?.sum_reasoning_output_tokens
+          }
+        });
+        bucket.billable += billable;
         bucket.input += toBigInt(row?.sum_input_tokens);
         bucket.cached += toBigInt(row?.sum_cached_input_tokens);
         bucket.output += toBigInt(row?.sum_output_tokens);
@@ -936,7 +977,7 @@ module.exports = withRequestLogging("vibescore-usage-hourly", async function(req
     let rowCount2 = 0;
     const { error: error2 } = await forEachPage({
       createQuery: () => {
-        let query = auth.edgeClient.database.from("vibescore_tracker_hourly").select("hour_start,total_tokens,input_tokens,cached_input_tokens,output_tokens,reasoning_output_tokens").eq("user_id", auth.userId);
+        let query = auth.edgeClient.database.from("vibescore_tracker_hourly").select("hour_start,source,billable_total_tokens,total_tokens,input_tokens,cached_input_tokens,output_tokens,reasoning_output_tokens").eq("user_id", auth.userId);
         if (source) query = query.eq("source", source);
         if (model) query = query.eq("model", model);
         query = applyCanaryFilter(query, { source, model });
@@ -956,6 +997,12 @@ module.exports = withRequestLogging("vibescore-usage-hourly", async function(req
           if (slot < 0 || slot > 47) continue;
           const bucket = buckets2[slot];
           bucket.total += toBigInt(row?.total_tokens);
+          const hasStoredBillable = row && Object.prototype.hasOwnProperty.call(row, "billable_total_tokens") && row.billable_total_tokens != null;
+          const billable = hasStoredBillable ? toBigInt(row.billable_total_tokens) : computeBillableTotalTokens({
+            source: row?.source || source,
+            totals: row
+          });
+          bucket.billable += billable;
           bucket.input += toBigInt(row?.input_tokens);
           bucket.cached += toBigInt(row?.cached_input_tokens);
           bucket.output += toBigInt(row?.output_tokens);
@@ -1007,7 +1054,9 @@ module.exports = withRequestLogging("vibescore-usage-hourly", async function(req
   let rowCount = 0;
   const { error } = await forEachPage({
     createQuery: () => {
-      let query = auth.edgeClient.database.from("vibescore_tracker_hourly").select("hour_start,total_tokens,input_tokens,cached_input_tokens,output_tokens,reasoning_output_tokens").eq("user_id", auth.userId);
+      let query = auth.edgeClient.database.from("vibescore_tracker_hourly").select(
+        "hour_start,source,billable_total_tokens,total_tokens,input_tokens,cached_input_tokens,output_tokens,reasoning_output_tokens"
+      ).eq("user_id", auth.userId);
       if (source) query = query.eq("source", source);
       if (model) query = query.eq("model", model);
       query = applyCanaryFilter(query, { source, model });
@@ -1031,6 +1080,12 @@ module.exports = withRequestLogging("vibescore-usage-hourly", async function(req
         if (slot < 0 || slot > 47) continue;
         const bucket = buckets[slot];
         bucket.total += toBigInt(row?.total_tokens);
+        const hasStoredBillable = row && Object.prototype.hasOwnProperty.call(row, "billable_total_tokens") && row.billable_total_tokens != null;
+        const billable = hasStoredBillable ? toBigInt(row.billable_total_tokens) : computeBillableTotalTokens({
+          source: row?.source || source,
+          totals: row
+        });
+        bucket.billable += billable;
         bucket.input += toBigInt(row?.input_tokens);
         bucket.cached += toBigInt(row?.cached_input_tokens);
         bucket.output += toBigInt(row?.output_tokens);
@@ -1064,6 +1119,7 @@ function initHourlyBuckets(dayLabel) {
   const hourKeys = [];
   const buckets = Array.from({ length: 48 }, () => ({
     total: 0n,
+    billable: 0n,
     input: 0n,
     cached: 0n,
     output: 0n,
@@ -1089,6 +1145,7 @@ function buildHourlyResponse(hourKeys, bucketMap, missingAfterSlot) {
     const row = {
       hour: key,
       total_tokens: bucket.total.toString(),
+      billable_total_tokens: bucket.billable.toString(),
       input_tokens: bucket.input.toString(),
       cached_input_tokens: bucket.cached.toString(),
       output_tokens: bucket.output.toString(),
@@ -1134,12 +1191,12 @@ function parseHalfHourSlotFromKey(key) {
 async function tryAggregateHourlyTotals({ edgeClient, userId, startIso, endIso, source, model }) {
   try {
     let query = edgeClient.database.from("vibescore_tracker_hourly").select(
-      "hour:hour_start,sum_total_tokens:sum(total_tokens),sum_input_tokens:sum(input_tokens),sum_cached_input_tokens:sum(cached_input_tokens),sum_output_tokens:sum(output_tokens),sum_reasoning_output_tokens:sum(reasoning_output_tokens)"
+      "source,hour:hour_start,sum_total_tokens:sum(total_tokens),sum_input_tokens:sum(input_tokens),sum_cached_input_tokens:sum(cached_input_tokens),sum_output_tokens:sum(output_tokens),sum_reasoning_output_tokens:sum(reasoning_output_tokens)"
     ).eq("user_id", userId);
     if (source) query = query.eq("source", source);
     if (model) query = query.eq("model", model);
     query = applyCanaryFilter(query, { source, model });
-    const { data, error } = await query.gte("hour_start", startIso).lt("hour_start", endIso).order("hour", { ascending: true });
+    const { data, error } = await query.gte("hour_start", startIso).lt("hour_start", endIso).order("hour", { ascending: true }).order("source", { ascending: true });
     if (error) return null;
     return data || [];
   } catch (_e) {

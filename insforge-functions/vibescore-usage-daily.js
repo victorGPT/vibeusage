@@ -849,6 +849,7 @@ var require_usage_rollup = __commonJS({
     function createTotals2() {
       return {
         total_tokens: 0n,
+        billable_total_tokens: 0n,
         input_tokens: 0n,
         cached_input_tokens: 0n,
         output_tokens: 0n,
@@ -858,6 +859,7 @@ var require_usage_rollup = __commonJS({
     function addRowTotals2(target, row) {
       if (!target || !row) return;
       target.total_tokens += toBigInt2(row?.total_tokens);
+      target.billable_total_tokens += toBigInt2(row?.billable_total_tokens);
       target.input_tokens += toBigInt2(row?.input_tokens);
       target.cached_input_tokens += toBigInt2(row?.cached_input_tokens);
       target.output_tokens += toBigInt2(row?.output_tokens);
@@ -897,6 +899,35 @@ var require_usage_rollup = __commonJS({
       fetchRollupRows: fetchRollupRows2,
       sumRollupRows,
       isRollupEnabled: isRollupEnabled2
+    };
+  }
+});
+
+// insforge-src/shared/usage-billable.js
+var require_usage_billable = __commonJS({
+  "insforge-src/shared/usage-billable.js"(exports2, module2) {
+    "use strict";
+    var { toBigInt: toBigInt2 } = require_numbers();
+    var { normalizeSource: normalizeSource2 } = require_source();
+    var BILLABLE_INPUT_OUTPUT_REASONING = /* @__PURE__ */ new Set(["codex", "every-code"]);
+    var BILLABLE_ADD_ALL = /* @__PURE__ */ new Set(["claude", "opencode"]);
+    var BILLABLE_TOTAL = /* @__PURE__ */ new Set(["gemini"]);
+    function computeBillableTotalTokens2({ source, totals } = {}) {
+      const normalizedSource = normalizeSource2(source) || "unknown";
+      const input = toBigInt2(totals?.input_tokens);
+      const cached = toBigInt2(totals?.cached_input_tokens);
+      const output = toBigInt2(totals?.output_tokens);
+      const reasoning = toBigInt2(totals?.reasoning_output_tokens);
+      const total = toBigInt2(totals?.total_tokens);
+      const hasTotal = Boolean(totals && Object.prototype.hasOwnProperty.call(totals, "total_tokens"));
+      if (BILLABLE_TOTAL.has(normalizedSource)) return total;
+      if (BILLABLE_ADD_ALL.has(normalizedSource)) return input + cached + output + reasoning;
+      if (BILLABLE_INPUT_OUTPUT_REASONING.has(normalizedSource)) return input + output + reasoning;
+      if (hasTotal) return total;
+      return input + output + reasoning;
+    }
+    module2.exports = {
+      computeBillableTotalTokens: computeBillableTotalTokens2
     };
   }
 });
@@ -1120,6 +1151,7 @@ var {
   fetchRollupRows,
   isRollupEnabled
 } = require_usage_rollup();
+var { computeBillableTotalTokens } = require_usage_billable();
 var { logSlowQuery, withRequestLogging } = require_logging();
 var { isDebugEnabled, withSlowQueryDebugPayload } = require_debug();
 module.exports = withRequestLogging("vibescore-usage-daily", async function(request, logger) {
@@ -1166,6 +1198,7 @@ module.exports = withRequestLogging("vibescore-usage-daily", async function(requ
       day,
       {
         total: 0n,
+        billable: 0n,
         input: 0n,
         cached: 0n,
         output: 0n,
@@ -1184,14 +1217,19 @@ module.exports = withRequestLogging("vibescore-usage-daily", async function(requ
     rollupHit = false;
   };
   const ingestRow = (row) => {
-    addRowTotals(totals, row);
     const sourceKey = normalizeSource(row?.source) || "codex";
+    const hasStoredBillable = row && Object.prototype.hasOwnProperty.call(row, "billable_total_tokens") && row.billable_total_tokens != null;
+    const billable = hasStoredBillable ? toBigInt(row.billable_total_tokens) : computeBillableTotalTokens({ source: sourceKey, totals: row });
+    addRowTotals(totals, row);
+    if (!hasStoredBillable) totals.billable_total_tokens += billable;
     const sourceEntry = getSourceEntry(sourcesMap, sourceKey);
     addRowTotals(sourceEntry.totals, row);
+    if (!hasStoredBillable) sourceEntry.totals.billable_total_tokens += billable;
     const normalizedModel = normalizeModel(row?.model);
     if (normalizedModel && normalizedModel.toLowerCase() !== "unknown") {
       distinctModels.add(normalizedModel);
     }
+    return billable;
   };
   const queryStartMs = Date.now();
   let rowCount = 0;
@@ -1201,7 +1239,7 @@ module.exports = withRequestLogging("vibescore-usage-daily", async function(requ
   const sumHourlyRange = async () => {
     const { error } = await forEachPage({
       createQuery: () => {
-        let query = auth.edgeClient.database.from("vibescore_tracker_hourly").select("hour_start,source,model,total_tokens,input_tokens,cached_input_tokens,output_tokens,reasoning_output_tokens").eq("user_id", auth.userId);
+        let query = auth.edgeClient.database.from("vibescore_tracker_hourly").select("hour_start,source,model,billable_total_tokens,total_tokens,input_tokens,cached_input_tokens,output_tokens,reasoning_output_tokens").eq("user_id", auth.userId);
         if (source) query = query.eq("source", source);
         if (model) query = query.eq("model", model);
         query = applyCanaryFilter(query, { source, model });
@@ -1219,11 +1257,12 @@ module.exports = withRequestLogging("vibescore-usage-daily", async function(requ
           const bucket = buckets.get(day);
           if (!bucket) continue;
           bucket.total += toBigInt(row?.total_tokens);
+          const billable = ingestRow(row);
+          bucket.billable += billable;
           bucket.input += toBigInt(row?.input_tokens);
           bucket.cached += toBigInt(row?.cached_input_tokens);
           bucket.output += toBigInt(row?.output_tokens);
           bucket.reasoning += toBigInt(row?.reasoning_output_tokens);
-          ingestRow(row);
         }
       }
     });
@@ -1257,11 +1296,12 @@ module.exports = withRequestLogging("vibescore-usage-daily", async function(requ
         const bucket = buckets.get(day);
         if (!bucket) continue;
         bucket.total += toBigInt(row?.total_tokens);
+        const billable = ingestRow(row);
+        bucket.billable += billable;
         bucket.input += toBigInt(row?.input_tokens);
         bucket.cached += toBigInt(row?.cached_input_tokens);
         bucket.output += toBigInt(row?.output_tokens);
         bucket.reasoning += toBigInt(row?.reasoning_output_tokens);
-        ingestRow(row);
       }
       if (rows2.length === 0) {
         const hourlyCheck = await hasHourlyData(startIso, endIso);
@@ -1300,6 +1340,7 @@ module.exports = withRequestLogging("vibescore-usage-daily", async function(requ
     return {
       day,
       total_tokens: bucket.total.toString(),
+      billable_total_tokens: bucket.billable.toString(),
       input_tokens: bucket.input.toString(),
       cached_input_tokens: bucket.cached.toString(),
       output_tokens: bucket.output.toString(),
@@ -1329,6 +1370,7 @@ module.exports = withRequestLogging("vibescore-usage-daily", async function(requ
   const summary = {
     totals: {
       total_tokens: totals.total_tokens.toString(),
+      billable_total_tokens: totals.billable_total_tokens.toString(),
       input_tokens: totals.input_tokens.toString(),
       cached_input_tokens: totals.cached_input_tokens.toString(),
       output_tokens: totals.output_tokens.toString(),

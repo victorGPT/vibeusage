@@ -67,6 +67,16 @@ function hasUsageValue(value, level) {
   return false;
 }
 
+function getBillableTotal(row) {
+  if (!row) return null;
+  return row?.billable_total_tokens ?? row?.total_tokens;
+}
+
+function getHeatmapValue(cell) {
+  if (!cell) return null;
+  return cell?.billable_total_tokens ?? cell?.value ?? cell?.total_tokens;
+}
+
 function isProductionHost(hostname) {
   if (!hostname) return false;
   return hostname === "www.vibeusage.cc";
@@ -434,6 +444,9 @@ export function DashboardPage({
   function renderDetailCell(row, key) {
     if (row?.future) return "—";
     if (row?.missing) return copy("shared.status.unsynced");
+    if (key === "total_tokens") {
+      return toDisplayNumber(getBillableTotal(row));
+    }
     return toDisplayNumber(row?.[key]);
   }
 
@@ -485,14 +498,14 @@ export function DashboardPage({
 
     if (Array.isArray(heatmapDaily)) {
       for (const row of heatmapDaily) {
-        considerDay(row?.day, row?.total_tokens);
+        considerDay(row?.day, getBillableTotal(row));
       }
     }
 
     const weeks = Array.isArray(heatmap?.weeks) ? heatmap.weeks : [];
     for (const week of weeks) {
       for (const cell of Array.isArray(week) ? week : []) {
-        const value = cell?.value ?? cell?.total_tokens;
+        const value = getHeatmapValue(cell);
         considerDay(cell?.day, value, cell?.level);
       }
     }
@@ -536,7 +549,7 @@ export function DashboardPage({
     if (Array.isArray(heatmapDaily)) {
       for (const row of heatmapDaily) {
         if (!row?.day) continue;
-        if (!hasUsageValue(row?.total_tokens)) continue;
+        if (!hasUsageValue(getBillableTotal(row))) continue;
         considerDay(row.day);
       }
     }
@@ -545,7 +558,7 @@ export function DashboardPage({
     for (const week of weeks) {
       for (const cell of Array.isArray(week) ? week : []) {
         if (!cell?.day) continue;
-        const value = cell?.value ?? cell?.total_tokens;
+        const value = getHeatmapValue(cell);
         const level = cell?.level;
         if (!hasUsageValue(value, level)) continue;
         considerDay(cell.day);
@@ -576,14 +589,15 @@ export function DashboardPage({
   }, [from, period, to]);
 
   const summaryLabel = copy("usage.summary.total");
+  const summaryTotalTokens = getBillableTotal(summary);
   const thousandSuffix = copy("shared.unit.thousand_abbrev");
   const millionSuffix = copy("shared.unit.million_abbrev");
   const billionSuffix = copy("shared.unit.billion_abbrev");
-  const summaryNumber = toFiniteNumber(summary?.total_tokens);
+  const summaryNumber = toFiniteNumber(summaryTotalTokens);
   const useCompactSummary =
     compactSummary && summaryNumber != null && Math.abs(summaryNumber) >= 1000000000;
   const summaryValue = useMemo(() => {
-    if (!useCompactSummary) return toDisplayNumber(summary?.total_tokens);
+    if (!useCompactSummary) return toDisplayNumber(summaryTotalTokens);
     return formatCompactNumber(summaryNumber, {
       thousandSuffix,
       millionSuffix,
@@ -593,7 +607,7 @@ export function DashboardPage({
   }, [
     billionSuffix,
     millionSuffix,
-    summary?.total_tokens,
+    summaryTotalTokens,
     summaryNumber,
     thousandSuffix,
     useCompactSummary,
@@ -618,7 +632,9 @@ export function DashboardPage({
     let topSourceTokens = 0;
 
     for (const source of sources) {
-      const tokens = toFiniteNumber(source?.totals?.total_tokens);
+      const tokens = toFiniteNumber(
+        source?.totals?.billable_total_tokens ?? source?.totals?.total_tokens
+      );
       if (!Number.isFinite(tokens) || tokens <= 0) continue;
       if (tokens > topSourceTokens) {
         topSourceTokens = tokens;
@@ -637,7 +653,9 @@ export function DashboardPage({
       const models = Array.isArray(topSource?.models) ? topSource.models : [];
       let topModelTokens = 0;
       for (const model of models) {
-        const tokens = toFiniteNumber(model?.totals?.total_tokens);
+        const tokens = toFiniteNumber(
+          model?.totals?.billable_total_tokens ?? model?.totals?.total_tokens
+        );
         if (!Number.isFinite(tokens) || tokens <= 0) continue;
         if (tokens > topModelTokens) {
           topModelTokens = tokens;
@@ -651,7 +669,7 @@ export function DashboardPage({
 
     return { agentName, modelName, modelPercent };
   }, [modelBreakdown, placeholderShort]);
-  const displayTotalTokens = toDisplayNumber(summary?.total_tokens);
+  const displayTotalTokens = toDisplayNumber(summaryTotalTokens);
   const twitterTotalTokens =
     displayTotalTokens === "-" ? placeholderShort : displayTotalTokens;
   const screenshotTwitterText = copy("dashboard.screenshot.twitter_text", {
@@ -773,7 +791,7 @@ export function DashboardPage({
     () => [
       {
         label: copy("usage.metric.total"),
-        value: toDisplayNumber(summary?.total_tokens),
+        value: toDisplayNumber(summaryTotalTokens),
         valueClassName: "text-white",
       },
       {
@@ -798,7 +816,7 @@ export function DashboardPage({
       summary?.input_tokens,
       summary?.output_tokens,
       summary?.reasoning_output_tokens,
-      summary?.total_tokens,
+      summaryTotalTokens,
     ]
   );
 

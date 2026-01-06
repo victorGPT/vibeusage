@@ -17,6 +17,7 @@ function toBigIntValue(value) {
 export function sumDailyRowsToTotals(rows) {
   const totals = {
     total_tokens: 0n,
+    billable_total_tokens: 0n,
     input_tokens: 0n,
     cached_input_tokens: 0n,
     output_tokens: 0n,
@@ -25,6 +26,9 @@ export function sumDailyRowsToTotals(rows) {
 
   for (const row of Array.isArray(rows) ? rows : []) {
     totals.total_tokens += toBigIntValue(row?.total_tokens);
+    totals.billable_total_tokens += toBigIntValue(
+      row?.billable_total_tokens ?? row?.total_tokens
+    );
     totals.input_tokens += toBigIntValue(row?.input_tokens);
     totals.cached_input_tokens += toBigIntValue(row?.cached_input_tokens);
     totals.output_tokens += toBigIntValue(row?.output_tokens);
@@ -33,6 +37,7 @@ export function sumDailyRowsToTotals(rows) {
 
   return {
     total_tokens: totals.total_tokens.toString(),
+    billable_total_tokens: totals.billable_total_tokens.toString(),
     input_tokens: totals.input_tokens.toString(),
     cached_input_tokens: totals.cached_input_tokens.toString(),
     output_tokens: totals.output_tokens.toString(),

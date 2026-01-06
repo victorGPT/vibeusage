@@ -126,12 +126,18 @@ export function sortDetailRows(rows, { key, dir }) {
   const items = Array.isArray(rows) ? rows : [];
 
   const cmp = DATE_KEYS.has(key) ? (a, b) => compareDateLike(a, b, key) : compareIntLike;
+  const pickValue = (row) => {
+    if (key === "total_tokens" && row?.billable_total_tokens != null) {
+      return row.billable_total_tokens;
+    }
+    return row?.[key];
+  };
 
   return items
     .map((row, index) => ({ row, index }))
     .sort((a, b) => {
-      const av = a.row?.[key];
-      const bv = b.row?.[key];
+      const av = pickValue(a.row);
+      const bv = pickValue(b.row);
 
       const aMissing = av == null;
       const bMissing = bv == null;

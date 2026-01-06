@@ -4,6 +4,7 @@ export const DETAILS_PAGE_SIZE = 12;
 
 const TOKEN_KEYS = [
   "total_tokens",
+  "billable_total_tokens",
   "input_tokens",
   "cached_input_tokens",
   "output_tokens",

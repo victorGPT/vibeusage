@@ -130,7 +130,12 @@ export function ActivityHeatmap({
     for (const week of sourceWeeks) {
       for (const cell of Array.isArray(week) ? week : []) {
         if (!cell?.day) continue;
-        rows.push({ day: cell.day, total_tokens: cell.value ?? 0 });
+        rows.push({
+          day: cell.day,
+          total_tokens: cell.total_tokens ?? cell.value ?? 0,
+          billable_total_tokens:
+            cell.billable_total_tokens ?? cell.value ?? cell.total_tokens ?? 0,
+        });
       }
     }
     const desiredWeeks = Math.max(52, sourceWeeks.length);

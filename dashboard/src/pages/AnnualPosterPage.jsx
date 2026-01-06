@@ -88,6 +88,16 @@ function hasUsageValue(value, level) {
   return false;
 }
 
+function getBillableTotal(row) {
+  if (!row) return null;
+  return row?.billable_total_tokens ?? row?.total_tokens;
+}
+
+function getHeatmapValue(cell) {
+  if (!cell) return null;
+  return cell?.billable_total_tokens ?? cell?.value ?? cell?.total_tokens;
+}
+
 export function AnnualPosterPage({ baseUrl, auth, signedIn }) {
   const mockEnabled = isMockEnabled();
   const accessEnabled = signedIn || mockEnabled;
@@ -152,20 +162,21 @@ export function AnnualPosterPage({ baseUrl, auth, signedIn }) {
   );
 
   const summaryLabel = copy("usage.summary.total");
+  const summaryTotalTokens = getBillableTotal(summary);
   const summaryValue = useMemo(
-    () => toDisplayNumber(summary?.total_tokens),
-    [summary?.total_tokens]
+    () => toDisplayNumber(summaryTotalTokens),
+    [summaryTotalTokens]
   );
 
   const metricsRows = useMemo(
     () => [
       {
         label: copy("usage.metric.total"),
-        value: toDisplayNumber(summary?.total_tokens),
+        value: toDisplayNumber(summaryTotalTokens),
         valueClassName: "text-white",
       },
     ],
-    [summary?.total_tokens]
+    [summaryTotalTokens]
   );
 
   const summaryCostValue = useMemo(() => {
@@ -193,14 +204,14 @@ export function AnnualPosterPage({ baseUrl, auth, signedIn }) {
 
     if (Array.isArray(heatmapDaily)) {
       for (const row of heatmapDaily) {
-        considerDay(row?.day, row?.total_tokens);
+        considerDay(row?.day, getBillableTotal(row));
       }
     }
 
     const weeks = Array.isArray(heatmap?.weeks) ? heatmap.weeks : [];
     for (const week of weeks) {
       for (const cell of Array.isArray(week) ? week : []) {
-        const value = cell?.value ?? cell?.total_tokens;
+        const value = getHeatmapValue(cell);
         considerDay(cell?.day, value, cell?.level);
       }
     }
@@ -229,7 +240,7 @@ export function AnnualPosterPage({ baseUrl, auth, signedIn }) {
     if (Array.isArray(heatmapDaily)) {
       for (const row of heatmapDaily) {
         if (!row?.day) continue;
-        if (!hasUsageValue(row?.total_tokens)) continue;
+        if (!hasUsageValue(getBillableTotal(row))) continue;
         considerDay(row.day);
       }
     }
@@ -238,7 +249,7 @@ export function AnnualPosterPage({ baseUrl, auth, signedIn }) {
     for (const week of weeks) {
       for (const cell of Array.isArray(week) ? week : []) {
         if (!cell?.day) continue;
-        const value = cell?.value ?? cell?.total_tokens;
+        const value = getHeatmapValue(cell);
         const level = cell?.level;
         if (!hasUsageValue(value, level)) continue;
         considerDay(cell.day);

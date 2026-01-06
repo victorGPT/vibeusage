@@ -15,6 +15,7 @@ test('sumDailyRowsToTotals aggregates with BigInt', async () => {
     },
     {
       total_tokens: 7,
+      billable_total_tokens: '9',
       input_tokens: '3',
       cached_input_tokens: '1',
       output_tokens: '4',
@@ -33,6 +34,7 @@ test('sumDailyRowsToTotals aggregates with BigInt', async () => {
   const totals = sumDailyRowsToTotals(rows);
 
   assert.equal(totals.total_tokens, '9007199254741000');
+  assert.equal(totals.billable_total_tokens, '9007199254741002');
   assert.equal(totals.input_tokens, '4');
   assert.equal(totals.cached_input_tokens, '1');
   assert.equal(totals.output_tokens, '6');
