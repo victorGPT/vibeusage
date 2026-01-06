@@ -5,6 +5,7 @@
 const { computeBillableTotalTokens } = require('../../insforge-src/shared/usage-billable');
 
 const BILLABLE_RULE_VERSION = 1;
+const CURSOR_FIELDS = ['hour_start', 'user_id', 'device_id', 'source', 'model'];
 
 function parseArgs(argv) {
   const out = {
@@ -93,7 +94,37 @@ function buildUpdates(rows) {
   return updates;
 }
 
-async function fetchBatch({ baseUrl, serviceRoleKey, from, to, limit, offset }) {
+function buildCursorFilter(cursor) {
+  if (!cursor) return null;
+  const clauses = [];
+  for (let i = 0; i < CURSOR_FIELDS.length; i++) {
+    const field = CURSOR_FIELDS[i];
+    if (cursor[field] == null) return null;
+    if (i === 0) {
+      clauses.push(`${field}.gt.${cursor[field]}`);
+      continue;
+    }
+    const parts = [];
+    for (let j = 0; j < i; j++) {
+      const prevField = CURSOR_FIELDS[j];
+      parts.push(`${prevField}.eq.${cursor[prevField]}`);
+    }
+    parts.push(`${field}.gt.${cursor[field]}`);
+    clauses.push(`and(${parts.join(',')})`);
+  }
+  return `(${clauses.join(',')})`;
+}
+
+function buildCursorFromRow(row) {
+  if (!row) return null;
+  const cursor = {};
+  for (const field of CURSOR_FIELDS) {
+    cursor[field] = row[field];
+  }
+  return cursor;
+}
+
+async function fetchBatch({ baseUrl, serviceRoleKey, from, to, limit, cursor }) {
   const url = new URL('/api/database/records/vibescore_tracker_hourly', baseUrl);
   url.searchParams.set(
     'select',
@@ -102,9 +133,10 @@ async function fetchBatch({ baseUrl, serviceRoleKey, from, to, limit, offset }) 
   url.searchParams.set('billable_total_tokens', 'is.null');
   url.searchParams.set('order', 'hour_start.asc,user_id.asc,device_id.asc,source.asc,model.asc');
   url.searchParams.set('limit', String(limit));
-  url.searchParams.set('offset', String(offset));
   if (from) url.searchParams.set('hour_start', `gte.${from}`);
   if (to) url.searchParams.set('hour_start', `lt.${to}`);
+  const cursorFilter = buildCursorFilter(cursor);
+  if (cursorFilter) url.searchParams.set('or', cursorFilter);
 
   const res = await fetch(url.toString(), {
     headers: {
@@ -144,6 +176,58 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+async function runBackfill({
+  from,
+  to,
+  batchSize,
+  sleepMs,
+  dryRun,
+  fetchBatch: fetchBatchImpl,
+  upsertBatch: upsertBatchImpl,
+  logger
+}) {
+  const logLine = typeof logger === 'function'
+    ? logger
+    : (line) => process.stdout.write(`${line}\n`);
+
+  let cursor = null;
+  let totalSeen = 0;
+  let totalUpdated = 0;
+
+  while (true) {
+    const rows = await fetchBatchImpl({
+      from,
+      to,
+      limit: batchSize,
+      cursor
+    });
+
+    if (!Array.isArray(rows) || rows.length === 0) break;
+
+    totalSeen += rows.length;
+    const updates = buildUpdates(rows);
+    totalUpdated += updates.length;
+
+    if (!dryRun) {
+      await upsertBatchImpl({ updates });
+    }
+
+    logLine(
+      `batch cursor=${cursor ? 'set' : 'start'} rows=${rows.length} updates=${updates.length} total_updated=${totalUpdated}`
+    );
+
+    cursor = buildCursorFromRow(rows[rows.length - 1]);
+    if (!cursor || CURSOR_FIELDS.some((field) => cursor[field] == null)) {
+      throw new Error('Invalid cursor from batch rows');
+    }
+
+    if (sleepMs) await sleep(sleepMs);
+  }
+
+  logLine(`${dryRun ? 'dry-run' : 'apply'} complete: rows=${totalSeen} updates=${totalUpdated}`);
+  return { totalSeen, totalUpdated };
+}
+
 async function main() {
   const opts = parseArgs(process.argv.slice(2));
   if (opts.help) {
@@ -165,41 +249,15 @@ async function main() {
   if (!baseUrl) throw new Error('Missing base URL: set INSFORGE_BASE_URL');
   if (!serviceRoleKey) throw new Error('Missing service role key: set INSFORGE_SERVICE_ROLE_KEY');
 
-  let offset = 0;
-  let totalSeen = 0;
-  let totalUpdated = 0;
-
-  while (true) {
-    const rows = await fetchBatch({
-      baseUrl,
-      serviceRoleKey,
-      from: opts.from,
-      to: opts.to,
-      limit: opts.batchSize,
-      offset
-    });
-
-    if (!Array.isArray(rows) || rows.length === 0) break;
-
-    totalSeen += rows.length;
-    const updates = buildUpdates(rows);
-    totalUpdated += updates.length;
-
-    if (!opts.dryRun) {
-      await upsertBatch({ baseUrl, serviceRoleKey, updates });
-    }
-
-    process.stdout.write(
-      `batch offset=${offset} rows=${rows.length} updates=${updates.length} total_updated=${totalUpdated}\n`
-    );
-
-    offset += rows.length;
-    if (opts.sleepMs) await sleep(opts.sleepMs);
-  }
-
-  process.stdout.write(
-    `${opts.dryRun ? 'dry-run' : 'apply'} complete: rows=${totalSeen} updates=${totalUpdated}\n`
-  );
+  await runBackfill({
+    from: opts.from,
+    to: opts.to,
+    batchSize: opts.batchSize,
+    sleepMs: opts.sleepMs,
+    dryRun: opts.dryRun,
+    fetchBatch: (args) => fetchBatch({ baseUrl, serviceRoleKey, ...args }),
+    upsertBatch: (args) => upsertBatch({ baseUrl, serviceRoleKey, ...args })
+  });
 }
 
 if (require.main === module) {
@@ -211,5 +269,7 @@ if (require.main === module) {
 
 module.exports = {
   BILLABLE_RULE_VERSION,
-  buildUpdates
+  buildUpdates,
+  buildCursorFilter,
+  runBackfill
 };
