@@ -92,12 +92,14 @@ export function buildTopModels(modelBreakdown, { limit = 3, copyFn } = {}) {
   const totalsById = new Map();
   const nameById = new Map();
   const nameWeight = new Map();
+  let totalTokensAll = 0;
 
   for (const source of sources) {
     const models = Array.isArray(source?.models) ? source.models : [];
     for (const model of models) {
       const tokens = toFiniteNumber(model?.totals?.total_tokens);
       if (!Number.isFinite(tokens) || tokens <= 0) continue;
+      totalTokensAll += tokens;
       const id = resolveModelId(model);
       if (!id) continue;
       const name = resolveModelName(model, safeCopy("shared.placeholder.short"));
@@ -112,10 +114,11 @@ export function buildTopModels(modelBreakdown, { limit = 3, copyFn } = {}) {
 
   if (!totalsById.size) return [];
 
-  const totalTokens = Array.from(totalsById.values()).reduce(
+  const knownTotal = Array.from(totalsById.values()).reduce(
     (acc, value) => acc + value,
     0
   );
+  const totalTokens = totalTokensAll > 0 ? totalTokensAll : knownTotal;
 
   const normalizedLimit = Number.isFinite(limit) ? Math.max(0, Math.floor(limit)) : 3;
   return Array.from(totalsById.entries())

@@ -9,7 +9,13 @@ export const ASCII_CHARS = {
   VERTICAL: "│",
 };
 
-export function AsciiBox({ title, subtitle, children, className = "" }) {
+export function AsciiBox({
+  title,
+  subtitle,
+  children,
+  className = "",
+  bodyClassName = "",
+}) {
   return (
     <div
       className={`relative flex flex-col matrix-panel ${className}`}
@@ -34,7 +40,9 @@ export function AsciiBox({ title, subtitle, children, className = "" }) {
         <div className="shrink-0 w-3 flex justify-center text-matrix-ghost">
           {ASCII_CHARS.VERTICAL}
         </div>
-        <div className="flex-1 min-w-0 py-5 px-4 relative z-10">{children}</div>
+        <div className={`flex-1 min-w-0 py-5 px-4 relative z-10 ${bodyClassName}`}>
+          {children}
+        </div>
         <div className="shrink-0 w-3 flex justify-center text-matrix-ghost">
           {ASCII_CHARS.VERTICAL}
         </div>

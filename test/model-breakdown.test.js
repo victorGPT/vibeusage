@@ -97,7 +97,7 @@ test("buildTopModels aggregates by model_id across sources", async () => {
   assert.equal(topModels[1].percent, "20.0");
 });
 
-test("buildTopModels ignores entries without model_id", async () => {
+test("buildTopModels computes percent using total tokens across all models", async () => {
   const mod = await import("../dashboard/src/lib/model-breakdown.js");
   const buildTopModels = mod.buildTopModels;
 
@@ -122,5 +122,5 @@ test("buildTopModels ignores entries without model_id", async () => {
 
   assert.equal(topModels.length, 1);
   assert.equal(topModels[0].id, "gpt-4o");
-  assert.equal(topModels[0].percent, "100.0");
+  assert.equal(topModels[0].percent, "50.0");
 });

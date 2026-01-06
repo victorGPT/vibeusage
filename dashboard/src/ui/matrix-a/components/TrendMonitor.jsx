@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
 import { copy } from "../../../lib/copy.js";
-import { ASCII_CHARS } from "./AsciiBox.jsx";
+import { AsciiBox } from "./AsciiBox.jsx";
 
 // --- Trend Monitor (NeuralFluxMonitor v2.0) ---
 // Industrial TUI style: independent axes, precise grid, physical partitions.
@@ -367,22 +367,16 @@ export function TrendMonitor({
   }
 
   return (
-    <div
-      className={`w-full min-h-[160px] flex flex-col relative group select-none matrix-panel p-2 ${className}`}
+    <AsciiBox
+      title={label}
+      className={`w-full ${className}`}
+      bodyClassName="flex flex-col gap-3"
     >
-      <div className="flex items-center leading-none px-1 mb-2">
-        <span className="shrink-0 text-matrix-dim">{ASCII_CHARS.TOP_LEFT}</span>
-        <span className="mx-3 shrink-0 text-heading uppercase text-matrix-primary px-2 py-1 bg-matrix-panelStrong border border-matrix-ghost">
-          {label}
-        </span>
-        <div className="flex gap-3 text-caption text-matrix-muted">
+      <div className="flex items-center justify-between text-caption text-matrix-muted px-1">
+        <div className="flex gap-3">
           <span>{copy("trend.monitor.max_label", { value: Math.round(max) })}</span>
           <span>{copy("trend.monitor.avg_label", { value: Math.round(avg) })}</span>
         </div>
-        <span className="flex-1 overflow-hidden whitespace-nowrap text-matrix-ghost">
-          {ASCII_CHARS.HORIZONTAL.repeat(100)}
-        </span>
-        <span className="shrink-0 text-matrix-dim">{ASCII_CHARS.TOP_RIGHT}</span>
       </div>
 
       <div className="flex-1 relative overflow-hidden border border-matrix-ghost bg-matrix-panel">
@@ -508,7 +502,7 @@ export function TrendMonitor({
         ) : null}
       </div>
 
-      <div className="h-5 flex justify-between items-center px-1 mt-2 text-caption text-matrix-muted border-t border-matrix-ghost pt-2">
+      <div className="h-5 flex justify-between items-center px-1 text-caption text-matrix-muted border-t border-matrix-ghost pt-2">
         {xLabels.map((labelText, idx) => (
           <span
             key={`${labelText}-${idx}`}
@@ -533,6 +527,6 @@ export function TrendMonitor({
       `,
         }}
       />
-    </div>
+    </AsciiBox>
   );
 }

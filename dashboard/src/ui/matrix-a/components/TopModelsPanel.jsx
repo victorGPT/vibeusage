@@ -9,26 +9,39 @@ export const TopModelsPanel = React.memo(function TopModelsPanel({
 }) {
   const placeholder = copy("shared.placeholder.short");
   const percentSymbol = copy("shared.unit.percent");
-  const displayRows = rows.length
-    ? rows
-    : Array.from({ length: 3 }, () => ({
-        id: "",
-        name: placeholder,
-        percent: placeholder,
-      }));
+  const displayRows = Array.from({ length: 3 }, (_, index) => {
+    const row = rows[index];
+    if (row) return row;
+    return {
+      id: "",
+      name: "",
+      percent: "",
+      empty: true,
+    };
+  });
 
   return (
     <AsciiBox
       title={copy("dashboard.top_models.title")}
       subtitle={copy("dashboard.top_models.subtitle")}
       className={className}
+      bodyClassName="py-3"
     >
       <div className="flex flex-col gap-2">
         {displayRows.map((row, index) => {
           const rankLabel = String(index + 1).padStart(2, "0");
-          const name = row?.name ? String(row.name) : placeholder;
-          const percent = row?.percent ? String(row.percent) : placeholder;
-          const showPercentSymbol = percent !== placeholder;
+          const isEmpty = Boolean(row?.empty);
+          const name = isEmpty
+            ? ""
+            : row?.name
+              ? String(row.name)
+              : placeholder;
+          const percent = isEmpty
+            ? ""
+            : row?.percent
+              ? String(row.percent)
+              : placeholder;
+          const showPercentSymbol = !isEmpty && percent !== placeholder;
           const rowKey = row?.id ? String(row.id) : `${name}-${index}`;
 
           return (

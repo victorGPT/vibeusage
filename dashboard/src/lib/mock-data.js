@@ -388,7 +388,11 @@ export function getMockUsageModelBreakdown({ from, to, seed } = {}) {
     const sourceTotals = scaleTotals(totals, source.weight);
     const models = source.models.map((model) => {
       const modelTotals = scaleTotals(sourceTotals, model.weight);
-      return { model: model.model, totals: withCost(modelTotals) };
+      return {
+        model: model.model,
+        model_id: model.model_id || model.model,
+        totals: withCost(modelTotals),
+      };
     });
     return {
       source: source.source,

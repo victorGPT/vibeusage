@@ -285,17 +285,15 @@ export function AnnualPosterPage({ baseUrl, auth, signedIn }) {
                 className="min-h-[360px]"
               />
 
-                <div className="matrix-panel border border-matrix-ghost p-3 h-full min-h-[360px]">
-                  <TrendMonitor
-                    rows={trendRows}
-                    from={trendFrom}
-                    to={trendTo}
-                    period="total"
-                    timeZoneLabel={timeZoneLabel}
-                    showTimeZoneLabel={false}
-                    className="h-full"
-                  />
-                </div>
+                <TrendMonitor
+                  rows={trendRows}
+                  from={trendFrom}
+                  to={trendTo}
+                  period="total"
+                  timeZoneLabel={timeZoneLabel}
+                  showTimeZoneLabel={false}
+                  className="min-h-[360px]"
+                />
               </div>
 
               <div className="flex flex-col gap-8">
