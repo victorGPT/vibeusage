@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { logSlowQuery } = require('../insforge-src/shared/logging');
 const { getUsageMaxDays } = require('../insforge-src/shared/date');
-const { normalizeUsageModel } = require('../insforge-src/shared/model');
+const { normalizeUsageModel, applyUsageModelFilter } = require('../insforge-src/shared/model');
 const pricing = require('../insforge-src/shared/pricing');
 
 test('insforge shared logging module exists', () => {
@@ -127,4 +127,20 @@ test('normalizeUsageModel canonicalizes usage model ids', () => {
   assert.equal(normalizeUsageModel('Anthropic/Claude-3.5'), 'claude-3.5');
   assert.equal(normalizeUsageModel('unknown'), 'unknown');
   assert.equal(normalizeUsageModel(''), null);
+});
+
+test('applyUsageModelFilter builds prefix-aware filters', () => {
+  const filters = [];
+  const query = {
+    or: (value) => {
+      filters.push(value);
+      return query;
+    }
+  };
+
+  applyUsageModelFilter(query, ['gpt-4o']);
+
+  assert.equal(filters.length, 1);
+  assert.ok(filters[0].includes('model.ilike.gpt-4o'));
+  assert.ok(filters[0].includes('model.ilike.%/gpt-4o'));
 });

@@ -16,6 +16,38 @@ function normalizeUsageModel(value) {
   return candidate ? candidate : null;
 }
 
+function escapeLike(value) {
+  return String(value).replace(/[\\%_]/g, '\\$&');
+}
+
+function applyUsageModelFilter(query, usageModels) {
+  if (!query || typeof query.or !== 'function') return query;
+  const models = Array.isArray(usageModels) ? usageModels : [];
+  const terms = [];
+  const seen = new Set();
+
+  for (const model of models) {
+    const normalized = normalizeUsageModel(model);
+    if (!normalized) continue;
+    const safe = escapeLike(normalized);
+    const exact = `model.ilike.${safe}`;
+    if (!seen.has(exact)) {
+      seen.add(exact);
+      terms.push(exact);
+    }
+    if (!normalized.includes('/')) {
+      const suffixed = `model.ilike.%/${safe}`;
+      if (!seen.has(suffixed)) {
+        seen.add(suffixed);
+        terms.push(suffixed);
+      }
+    }
+  }
+
+  if (terms.length === 0) return query;
+  return query.or(terms.join(','));
+}
+
 function getModelParam(url) {
   if (!url || typeof url.searchParams?.get !== 'function') {
     return { ok: false, error: 'Invalid request URL' };
@@ -31,5 +63,6 @@ function getModelParam(url) {
 module.exports = {
   normalizeModel,
   normalizeUsageModel,
+  applyUsageModelFilter,
   getModelParam
 };

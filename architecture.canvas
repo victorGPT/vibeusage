@@ -644,7 +644,7 @@
     {
       "id": "test_insforge-src-shared_test_110fa035",
       "type": "text",
-      "text": "**insforge-src-shared.test**\n`test/insforge-src-shared.test.js`\n\nTest module.\n\n包含：\n- insforge-src-shared.test (131 行)\n- exports (0 个参数)\n\n依赖：2 个模块\n被依赖：0 次",
+      "text": "**insforge-src-shared.test**\n`test/insforge-src-shared.test.js`\n\nTest module.\n\n包含：\n- insforge-src-shared.test (147 行)\n- exports (0 个参数)\n\n依赖：2 个模块\n被依赖：0 次",
       "x": 460,
       "y": 11572,
       "width": 280,
@@ -1675,7 +1675,7 @@
     {
       "id": "utils_model_516b2f36",
       "type": "text",
-      "text": "**model**\n`insforge-src/shared/model.js`\n\nShared utilities.\n\n包含：\n- model (36 行)\n- normalizeModel (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
+      "text": "**model**\n`insforge-src/shared/model.js`\n\nShared utilities.\n\n包含：\n- model (69 行)\n- normalizeModel (1 个参数)\n\n依赖：0 个模块\n被依赖：0 次",
       "x": 1180,
       "y": 6736,
       "width": 280,
