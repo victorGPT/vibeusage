@@ -29,7 +29,7 @@ const {
   fetchAliasRows,
   resolveIdentityAtDate
 } = require('../shared/model-alias-timeline');
-const { computeBillableTotalTokens } = require('../shared/usage-billable');
+const { resolveBillableTotals } = require('../shared/usage-aggregate');
 
 const MAX_MONTHS = 24;
 
@@ -166,16 +166,10 @@ module.exports = withRequestLogging('vibescore-usage-monthly', async function(re
         const bucket = buckets.get(key);
         if (!bucket) continue;
         bucket.total += toBigInt(row?.total_tokens);
-        const hasStoredBillable =
-          row &&
-          Object.prototype.hasOwnProperty.call(row, 'billable_total_tokens') &&
-          row.billable_total_tokens != null;
-        const billable = hasStoredBillable
-          ? toBigInt(row.billable_total_tokens)
-          : computeBillableTotalTokens({
-              source: row?.source || source,
-              totals: row
-            });
+        const { billable } = resolveBillableTotals({
+          row,
+          source: row?.source || source
+        });
         bucket.billable += billable;
         bucket.input += toBigInt(row?.input_tokens);
         bucket.cached += toBigInt(row?.cached_input_tokens);

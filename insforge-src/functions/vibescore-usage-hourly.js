@@ -32,7 +32,7 @@ const {
   fetchAliasRows,
   resolveIdentityAtDate
 } = require('../shared/model-alias-timeline');
-const { computeBillableTotalTokens } = require('../shared/usage-billable');
+const { resolveBillableTotals } = require('../shared/usage-aggregate');
 
 const MIN_INTERVAL_MINUTES = 30;
 
@@ -152,18 +152,19 @@ module.exports = withRequestLogging('vibescore-usage-hourly', async function(req
           Object.prototype.hasOwnProperty.call(row, 'sum_billable_total_tokens') &&
           row.sum_billable_total_tokens != null &&
           hasCompleteBillable;
-        const billable = hasStoredBillable
-          ? toBigInt(row.sum_billable_total_tokens)
-          : computeBillableTotalTokens({
-              source: row?.source || source,
-              totals: {
-                total_tokens: row?.sum_total_tokens,
-                input_tokens: row?.sum_input_tokens,
-                cached_input_tokens: row?.sum_cached_input_tokens,
-                output_tokens: row?.sum_output_tokens,
-                reasoning_output_tokens: row?.sum_reasoning_output_tokens
-              }
-            });
+        const { billable } = resolveBillableTotals({
+          row,
+          source: row?.source || source,
+          billableField: 'sum_billable_total_tokens',
+          totals: {
+            total_tokens: row?.sum_total_tokens,
+            input_tokens: row?.sum_input_tokens,
+            cached_input_tokens: row?.sum_cached_input_tokens,
+            output_tokens: row?.sum_output_tokens,
+            reasoning_output_tokens: row?.sum_reasoning_output_tokens
+          },
+          hasStoredBillable
+        });
         bucket.billable += billable;
         bucket.input += toBigInt(row?.sum_input_tokens);
         bucket.cached += toBigInt(row?.sum_cached_input_tokens);
@@ -228,16 +229,10 @@ module.exports = withRequestLogging('vibescore-usage-hourly', async function(req
 
           const bucket = buckets[slot];
           bucket.total += toBigInt(row?.total_tokens);
-          const hasStoredBillable =
-            row &&
-            Object.prototype.hasOwnProperty.call(row, 'billable_total_tokens') &&
-            row.billable_total_tokens != null;
-          const billable = hasStoredBillable
-            ? toBigInt(row.billable_total_tokens)
-            : computeBillableTotalTokens({
-                source: row?.source || source,
-                totals: row
-              });
+          const { billable } = resolveBillableTotals({
+            row,
+            source: row?.source || source
+          });
           bucket.billable += billable;
           bucket.input += toBigInt(row?.input_tokens);
           bucket.cached += toBigInt(row?.cached_input_tokens);
@@ -362,16 +357,10 @@ module.exports = withRequestLogging('vibescore-usage-hourly', async function(req
 
         const bucket = buckets[slot];
         bucket.total += toBigInt(row?.total_tokens);
-        const hasStoredBillable =
-          row &&
-          Object.prototype.hasOwnProperty.call(row, 'billable_total_tokens') &&
-          row.billable_total_tokens != null;
-        const billable = hasStoredBillable
-          ? toBigInt(row.billable_total_tokens)
-          : computeBillableTotalTokens({
-              source: row?.source || source,
-              totals: row
-            });
+        const { billable } = resolveBillableTotals({
+          row,
+          source: row?.source || source
+        });
         bucket.billable += billable;
         bucket.input += toBigInt(row?.input_tokens);
         bucket.cached += toBigInt(row?.cached_input_tokens);

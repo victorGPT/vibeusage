@@ -1089,6 +1089,33 @@ var require_usage_billable = __commonJS({
   }
 });
 
+// insforge-src/shared/usage-aggregate.js
+var require_usage_aggregate = __commonJS({
+  "insforge-src/shared/usage-aggregate.js"(exports2, module2) {
+    "use strict";
+    var { toBigInt } = require_numbers();
+    var { computeBillableTotalTokens } = require_usage_billable();
+    var { addRowTotals } = require_usage_rollup();
+    function resolveBillableTotals({ row, source, totals, billableField = "billable_total_tokens", hasStoredBillable } = {}) {
+      const stored = typeof hasStoredBillable === "boolean" ? hasStoredBillable : Boolean(row && Object.prototype.hasOwnProperty.call(row, billableField) && row[billableField] != null);
+      const resolvedTotals = totals || row;
+      const billable = stored ? toBigInt(row?.[billableField]) : computeBillableTotalTokens({ source, totals: resolvedTotals });
+      return { billable, hasStoredBillable: stored };
+    }
+    function applyTotalsAndBillable({ totals, row, billable, hasStoredBillable } = {}) {
+      if (!totals || !row) return;
+      addRowTotals(totals, row);
+      if (!hasStoredBillable) {
+        totals.billable_total_tokens += toBigInt(billable);
+      }
+    }
+    module2.exports = {
+      resolveBillableTotals,
+      applyTotalsAndBillable
+    };
+  }
+});
+
 // insforge-src/shared/logging.js
 var require_logging = __commonJS({
   "insforge-src/shared/logging.js"(exports2, module2) {
@@ -1410,7 +1437,7 @@ var require_vibescore_usage_daily = __commonJS({
       fetchRollupRows,
       isRollupEnabled
     } = require_usage_rollup();
-    var { computeBillableTotalTokens } = require_usage_billable();
+    var { applyTotalsAndBillable, resolveBillableTotals } = require_usage_aggregate();
     var { logSlowQuery, withRequestLogging } = require_logging();
     var { isDebugEnabled, withSlowQueryDebugPayload } = require_debug();
     var {
@@ -1505,13 +1532,10 @@ var require_vibescore_usage_daily = __commonJS({
       };
       const ingestRow = (row) => {
         const sourceKey = normalizeSource(row?.source) || "codex";
-        const hasStoredBillable = row && Object.prototype.hasOwnProperty.call(row, "billable_total_tokens") && row.billable_total_tokens != null;
-        const billable = hasStoredBillable ? toBigInt(row.billable_total_tokens) : computeBillableTotalTokens({ source: sourceKey, totals: row });
-        addRowTotals(totals, row);
-        if (!hasStoredBillable) totals.billable_total_tokens += billable;
+        const { billable, hasStoredBillable } = resolveBillableTotals({ row, source: sourceKey });
+        applyTotalsAndBillable({ totals, row, billable, hasStoredBillable });
         const sourceEntry = getSourceEntry(sourcesMap, sourceKey);
-        addRowTotals(sourceEntry.totals, row);
-        if (!hasStoredBillable) sourceEntry.totals.billable_total_tokens += billable;
+        applyTotalsAndBillable({ totals: sourceEntry.totals, row, billable, hasStoredBillable });
         const normalizedModel = normalizeUsageModel(row?.model);
         if (normalizedModel && normalizedModel !== "unknown") {
           distinctModels.add(normalizedModel);

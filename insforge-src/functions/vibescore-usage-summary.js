@@ -33,8 +33,7 @@ const {
   fetchRollupRows,
   isRollupEnabled
 } = require('../shared/usage-rollup');
-const { toBigInt } = require('../shared/numbers');
-const { computeBillableTotalTokens } = require('../shared/usage-billable');
+const { applyTotalsAndBillable, resolveBillableTotals } = require('../shared/usage-aggregate');
 const {
   buildPricingMetadata,
   computeUsageCost,
@@ -162,18 +161,10 @@ module.exports = withRequestLogging('vibescore-usage-summary', async function(re
   const ingestRow = (row) => {
     if (!shouldIncludeRow(row)) return;
     const sourceKey = normalizeSource(row?.source) || DEFAULT_SOURCE;
-    const hasStoredBillable =
-      row &&
-      Object.prototype.hasOwnProperty.call(row, 'billable_total_tokens') &&
-      row.billable_total_tokens != null;
-    const billable = hasStoredBillable
-      ? toBigInt(row.billable_total_tokens)
-      : computeBillableTotalTokens({ source: sourceKey, totals: row });
-    addRowTotals(totals, row);
-    if (!hasStoredBillable) totals.billable_total_tokens += billable;
+    const { billable, hasStoredBillable } = resolveBillableTotals({ row, source: sourceKey });
+    applyTotalsAndBillable({ totals, row, billable, hasStoredBillable });
     const sourceEntry = getSourceEntry(sourcesMap, sourceKey);
-    addRowTotals(sourceEntry.totals, row);
-    if (!hasStoredBillable) sourceEntry.totals.billable_total_tokens += billable;
+    applyTotalsAndBillable({ totals: sourceEntry.totals, row, billable, hasStoredBillable });
     const normalizedModel = normalizeUsageModel(row?.model);
     if (normalizedModel && normalizedModel !== 'unknown') {
       distinctModels.add(normalizedModel);

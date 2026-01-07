@@ -35,7 +35,7 @@ const {
   fetchAliasRows,
   resolveIdentityAtDate
 } = require('../shared/model-alias-timeline');
-const { computeBillableTotalTokens } = require('../shared/usage-billable');
+const { resolveBillableTotals } = require('../shared/usage-aggregate');
 
 module.exports = withRequestLogging('vibescore-usage-heatmap', async function(request, logger) {
   const opt = handleOptions(request);
@@ -149,16 +149,10 @@ module.exports = withRequestLogging('vibescore-usage-heatmap', async function(re
           }
           const day = formatDateUTC(dt);
           const prev = valuesByDay.get(day) || 0n;
-          const hasStoredBillable =
-            row &&
-            Object.prototype.hasOwnProperty.call(row, 'billable_total_tokens') &&
-            row.billable_total_tokens != null;
-          const billable = hasStoredBillable
-            ? toBigInt(row.billable_total_tokens)
-            : computeBillableTotalTokens({
-                source: row?.source || source,
-                totals: row
-              });
+          const { billable } = resolveBillableTotals({
+            row,
+            source: row?.source || source
+          });
           valuesByDay.set(day, prev + billable);
         }
       }
@@ -329,16 +323,10 @@ module.exports = withRequestLogging('vibescore-usage-heatmap', async function(re
         }
         const key = formatLocalDateKey(dt, tzContext);
         const prev = valuesByDay.get(key) || 0n;
-        const hasStoredBillable =
-          row &&
-          Object.prototype.hasOwnProperty.call(row, 'billable_total_tokens') &&
-          row.billable_total_tokens != null;
-        const billable = hasStoredBillable
-          ? toBigInt(row.billable_total_tokens)
-          : computeBillableTotalTokens({
-              source: row?.source || source,
-              totals: row
-            });
+        const { billable } = resolveBillableTotals({
+          row,
+          source: row?.source || source
+        });
         valuesByDay.set(key, prev + billable);
       }
     }

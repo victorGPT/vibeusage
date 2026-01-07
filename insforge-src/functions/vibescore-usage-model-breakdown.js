@@ -33,7 +33,7 @@ const {
   formatUsdFromMicros,
   resolvePricingProfile
 } = require('../shared/pricing');
-const { computeBillableTotalTokens } = require('../shared/usage-billable');
+const { resolveBillableTotals } = require('../shared/usage-aggregate');
 const { logSlowQuery, withRequestLogging } = require('../shared/logging');
 const { isDebugEnabled, withSlowQueryDebugPayload } = require('../shared/debug');
 
@@ -115,13 +115,7 @@ module.exports = withRequestLogging('vibescore-usage-model-breakdown', async fun
         const source = normalizeSource(row?.source) || DEFAULT_SOURCE;
         const model = normalizeUsageModel(row?.model) || DEFAULT_MODEL;
         const usageKey = normalizeUsageModelKey(model);
-        const hasStoredBillable =
-          row &&
-          Object.prototype.hasOwnProperty.call(row, 'billable_total_tokens') &&
-          row.billable_total_tokens != null;
-        const billable = hasStoredBillable
-          ? toBigInt(row.billable_total_tokens)
-          : computeBillableTotalTokens({ source, totals: row });
+        const { billable, hasStoredBillable } = resolveBillableTotals({ row, source });
         rowsBuffer.push({
           source,
           model,

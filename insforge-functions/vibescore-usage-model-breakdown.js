@@ -1098,7 +1098,7 @@ var require_usage_billable = __commonJS({
     var BILLABLE_INPUT_OUTPUT_REASONING = /* @__PURE__ */ new Set(["codex", "every-code"]);
     var BILLABLE_ADD_ALL = /* @__PURE__ */ new Set(["claude", "opencode"]);
     var BILLABLE_TOTAL = /* @__PURE__ */ new Set(["gemini"]);
-    function computeBillableTotalTokens2({ source, totals } = {}) {
+    function computeBillableTotalTokens({ source, totals } = {}) {
       const normalizedSource = normalizeSource2(source) || "unknown";
       const input = toBigInt2(totals?.input_tokens);
       const cached = toBigInt2(totals?.cached_input_tokens);
@@ -1113,7 +1113,98 @@ var require_usage_billable = __commonJS({
       return input + output + reasoning;
     }
     module2.exports = {
-      computeBillableTotalTokens: computeBillableTotalTokens2
+      computeBillableTotalTokens
+    };
+  }
+});
+
+// insforge-src/shared/usage-rollup.js
+var require_usage_rollup = __commonJS({
+  "insforge-src/shared/usage-rollup.js"(exports2, module2) {
+    "use strict";
+    var { applyCanaryFilter: applyCanaryFilter2 } = require_canary();
+    var { toBigInt: toBigInt2 } = require_numbers();
+    var { forEachPage: forEachPage2 } = require_pagination();
+    function createTotals2() {
+      return {
+        total_tokens: 0n,
+        billable_total_tokens: 0n,
+        input_tokens: 0n,
+        cached_input_tokens: 0n,
+        output_tokens: 0n,
+        reasoning_output_tokens: 0n
+      };
+    }
+    function addRowTotals(target, row) {
+      if (!target || !row) return;
+      target.total_tokens += toBigInt2(row?.total_tokens);
+      target.billable_total_tokens += toBigInt2(row?.billable_total_tokens);
+      target.input_tokens += toBigInt2(row?.input_tokens);
+      target.cached_input_tokens += toBigInt2(row?.cached_input_tokens);
+      target.output_tokens += toBigInt2(row?.output_tokens);
+      target.reasoning_output_tokens += toBigInt2(row?.reasoning_output_tokens);
+    }
+    async function fetchRollupRows({ edgeClient, userId, fromDay, toDay, source, model }) {
+      const rows = [];
+      const { error } = await forEachPage2({
+        createQuery: () => {
+          let query = edgeClient.database.from("vibescore_tracker_daily_rollup").select("day,source,model,total_tokens,billable_total_tokens,input_tokens,cached_input_tokens,output_tokens,reasoning_output_tokens").eq("user_id", userId).gte("day", fromDay).lte("day", toDay);
+          if (source) query = query.eq("source", source);
+          if (model) query = query.eq("model", model);
+          query = applyCanaryFilter2(query, { source, model });
+          return query.order("day", { ascending: true }).order("source", { ascending: true }).order("model", { ascending: true });
+        },
+        onPage: (pageRows) => {
+          if (!Array.isArray(pageRows) || pageRows.length === 0) return;
+          rows.push(...pageRows);
+        }
+      });
+      if (error) return { ok: false, error };
+      return { ok: true, rows };
+    }
+    function sumRollupRows(rows) {
+      const totals = createTotals2();
+      for (const row of Array.isArray(rows) ? rows : []) {
+        addRowTotals(totals, row);
+      }
+      return totals;
+    }
+    function isRollupEnabled() {
+      return false;
+    }
+    module2.exports = {
+      createTotals: createTotals2,
+      addRowTotals,
+      fetchRollupRows,
+      sumRollupRows,
+      isRollupEnabled
+    };
+  }
+});
+
+// insforge-src/shared/usage-aggregate.js
+var require_usage_aggregate = __commonJS({
+  "insforge-src/shared/usage-aggregate.js"(exports2, module2) {
+    "use strict";
+    var { toBigInt: toBigInt2 } = require_numbers();
+    var { computeBillableTotalTokens } = require_usage_billable();
+    var { addRowTotals } = require_usage_rollup();
+    function resolveBillableTotals2({ row, source, totals, billableField = "billable_total_tokens", hasStoredBillable } = {}) {
+      const stored = typeof hasStoredBillable === "boolean" ? hasStoredBillable : Boolean(row && Object.prototype.hasOwnProperty.call(row, billableField) && row[billableField] != null);
+      const resolvedTotals = totals || row;
+      const billable = stored ? toBigInt2(row?.[billableField]) : computeBillableTotalTokens({ source, totals: resolvedTotals });
+      return { billable, hasStoredBillable: stored };
+    }
+    function applyTotalsAndBillable({ totals, row, billable, hasStoredBillable } = {}) {
+      if (!totals || !row) return;
+      addRowTotals(totals, row);
+      if (!hasStoredBillable) {
+        totals.billable_total_tokens += toBigInt2(billable);
+      }
+    }
+    module2.exports = {
+      resolveBillableTotals: resolveBillableTotals2,
+      applyTotalsAndBillable
     };
   }
 });
@@ -1336,7 +1427,7 @@ var {
   formatUsdFromMicros,
   resolvePricingProfile
 } = require_pricing();
-var { computeBillableTotalTokens } = require_usage_billable();
+var { resolveBillableTotals } = require_usage_aggregate();
 var { logSlowQuery, withRequestLogging } = require_logging();
 var { isDebugEnabled, withSlowQueryDebugPayload } = require_debug();
 var DEFAULT_SOURCE = "codex";
@@ -1397,8 +1488,7 @@ module.exports = withRequestLogging("vibescore-usage-model-breakdown", async fun
         const source = normalizeSource(row?.source) || DEFAULT_SOURCE;
         const model = normalizeUsageModel(row?.model) || DEFAULT_MODEL;
         const usageKey = normalizeUsageModelKey(model);
-        const hasStoredBillable = row && Object.prototype.hasOwnProperty.call(row, "billable_total_tokens") && row.billable_total_tokens != null;
-        const billable = hasStoredBillable ? toBigInt(row.billable_total_tokens) : computeBillableTotalTokens({ source, totals: row });
+        const { billable, hasStoredBillable } = resolveBillableTotals({ row, source });
         rowsBuffer.push({
           source,
           model,
