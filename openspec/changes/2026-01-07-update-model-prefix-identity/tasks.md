@@ -15,4 +15,5 @@
 
 ## Verification
 - `node --test test/insforge-src-shared.test.js test/edge-functions.test.js` (PASS)
+- `npm test` (PASS)
 
