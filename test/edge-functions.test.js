@@ -3727,6 +3727,179 @@ test('vibeusage-usage-model-breakdown sorts models by billable_total_tokens', as
   assert.equal(sourceEntry.models[0]?.model, 'gpt-4.1');
 });
 
+test('vibeusage usage aggregates stay consistent across summary daily breakdown', { concurrency: 1 }, async () => {
+  const summaryFn = require('../insforge-functions/vibeusage-usage-summary');
+  const dailyFn = require('../insforge-functions/vibeusage-usage-daily');
+  const breakdownFn = require('../insforge-functions/vibeusage-usage-model-breakdown');
+
+  const userId = '88888888-8888-8888-8888-888888888888';
+  const userJwt = 'user_jwt_test';
+
+  const rows = [
+    {
+      hour_start: '2025-12-20T01:00:00.000Z',
+      source: 'codex',
+      model: 'gpt-4o',
+      total_tokens: '10',
+      input_tokens: '4',
+      cached_input_tokens: '1',
+      output_tokens: '3',
+      reasoning_output_tokens: '2'
+    },
+    {
+      hour_start: '2025-12-20T12:00:00.000Z',
+      source: 'claude',
+      model: 'claude-3-5-sonnet',
+      total_tokens: '5',
+      input_tokens: '2',
+      cached_input_tokens: '1',
+      output_tokens: '1',
+      reasoning_output_tokens: '1'
+    },
+    {
+      hour_start: '2025-12-21T03:00:00.000Z',
+      source: 'codex',
+      model: 'gpt-4o',
+      total_tokens: '7',
+      input_tokens: '3',
+      cached_input_tokens: '0',
+      output_tokens: '3',
+      reasoning_output_tokens: '1',
+      billable_total_tokens: '6'
+    },
+    {
+      hour_start: '2025-12-21T18:00:00.000Z',
+      source: 'every-code',
+      model: 'gpt-4o',
+      total_tokens: '9',
+      input_tokens: '4',
+      cached_input_tokens: '1',
+      output_tokens: '3',
+      reasoning_output_tokens: '1'
+    }
+  ];
+
+  globalThis.createClient = (args) => {
+    if (args && args.edgeFunctionToken === userJwt) {
+      return {
+        auth: {
+          getCurrentUser: async () => ({ data: { user: { id: userId } }, error: null })
+        },
+        database: {
+          from: (table) => {
+            if (table === 'vibescore_tracker_hourly') {
+              const query = createQueryMock({ rows });
+              return { select: () => query };
+            }
+            if (table === 'vibescore_model_aliases') {
+              return createQueryMock({ rows: [] });
+            }
+            if (table === 'vibescore_pricing_profiles') {
+              return createQueryMock({ rows: [] });
+            }
+            if (table === 'vibescore_pricing_model_aliases') {
+              return createQueryMock({ rows: [] });
+            }
+            throw new Error(`Unexpected table ${table}`);
+          }
+        }
+      };
+    }
+    throw new Error(`Unexpected createClient args: ${JSON.stringify(args)}`);
+  };
+
+  const headers = { Authorization: `Bearer ${userJwt}` };
+  const summaryReq = new Request(
+    'http://localhost/functions/vibeusage-usage-summary?from=2025-12-20&to=2025-12-21',
+    { method: 'GET', headers }
+  );
+  const dailyReq = new Request(
+    'http://localhost/functions/vibeusage-usage-daily?from=2025-12-20&to=2025-12-21',
+    { method: 'GET', headers }
+  );
+  const breakdownReq = new Request(
+    'http://localhost/functions/vibeusage-usage-model-breakdown?from=2025-12-20&to=2025-12-21',
+    { method: 'GET', headers }
+  );
+
+  const summaryRes = await summaryFn(summaryReq);
+  const dailyRes = await dailyFn(dailyReq);
+  const breakdownRes = await breakdownFn(breakdownReq);
+
+  assert.equal(summaryRes.status, 200);
+  assert.equal(dailyRes.status, 200);
+  assert.equal(breakdownRes.status, 200);
+
+  const summaryBody = await summaryRes.json();
+  const dailyBody = await dailyRes.json();
+  const breakdownBody = await breakdownRes.json();
+
+  const summaryTotals = normalizeTokenTotals(summaryBody.totals);
+  const dailyTotals = sumTokenTotals(dailyBody.data);
+  const breakdownTotals = sumTokenTotals(breakdownBody.sources.map((entry) => entry.totals));
+
+  assertTokenTotalsEqual(summaryTotals, dailyTotals, 'daily');
+  assertTokenTotalsEqual(summaryTotals, breakdownTotals, 'model breakdown');
+});
+
+const TOKEN_TOTAL_FIELDS = [
+  'total_tokens',
+  'billable_total_tokens',
+  'input_tokens',
+  'cached_input_tokens',
+  'output_tokens',
+  'reasoning_output_tokens'
+];
+
+function toBigIntValue(value) {
+  if (typeof value === 'bigint') return value;
+  if (typeof value === 'number') {
+    if (!Number.isFinite(value) || value <= 0) return 0n;
+    return BigInt(Math.floor(value));
+  }
+  if (typeof value === 'string') {
+    const s = value.trim();
+    if (!/^[0-9]+$/.test(s)) return 0n;
+    try {
+      return BigInt(s);
+    } catch (_e) {
+      return 0n;
+    }
+  }
+  return 0n;
+}
+
+function initTokenTotals() {
+  return TOKEN_TOTAL_FIELDS.reduce((acc, field) => {
+    acc[field] = 0n;
+    return acc;
+  }, {});
+}
+
+function normalizeTokenTotals(totals) {
+  const normalized = initTokenTotals();
+  for (const field of TOKEN_TOTAL_FIELDS) {
+    normalized[field] = toBigIntValue(totals?.[field]);
+  }
+  return normalized;
+}
+
+function sumTokenTotals(rows) {
+  const totals = initTokenTotals();
+  for (const row of Array.isArray(rows) ? rows : []) {
+    for (const field of TOKEN_TOTAL_FIELDS) {
+      totals[field] += toBigIntValue(row?.[field]);
+    }
+  }
+  return totals;
+}
+
+function assertTokenTotalsEqual(expected, actual, label) {
+  for (const field of TOKEN_TOTAL_FIELDS) {
+    assert.equal(actual[field], expected[field], `${label} ${field} mismatch`);
+  }
+}
+
 test('vibeusage-usage-model-breakdown rejects oversized ranges', { concurrency: 1 }, async () => {
   const fn = require('../insforge-functions/vibeusage-usage-model-breakdown');
   const prevMaxDays = process.env.VIBEUSAGE_USAGE_MAX_DAYS;

@@ -40,6 +40,7 @@ Introduce a shared aggregation helper module in `insforge-src/shared/usage-aggre
 ## Testing Strategy
 - Unit tests for the aggregator cover billable rules per source and mixed row inputs.
 - Integration tests assert that totals match existing behavior for each endpoint.
+- Add a cross-endpoint consistency test (summary vs daily vs model breakdown) in edge-functions tests.
 - Regression test runs `node --test test/*.test.js`.
 
 ## Rollout

@@ -16,3 +16,4 @@
 ## Verification
 - [x] `npm run build:insforge` (PASS)
 - [x] `node --test test/*.test.js` (PASS)
+- [x] `node --test test/edge-functions.test.js` (PASS)
