@@ -25,7 +25,7 @@ export const GithubStar = ({
 
   const baseClasses =
     size === "header"
-      ? "matrix-header-chip matrix-header-action group gap-3 no-underline overflow-hidden"
+      ? "matrix-header-chip matrix-header-action text-caption uppercase font-bold tracking-[0.2em] select-none group gap-3 no-underline overflow-hidden"
       : "group flex items-center gap-3 px-4 py-2 bg-matrix-panel border border-matrix-ghost backdrop-blur-md transition-all duration-300 hover:border-matrix-primary hover:bg-matrix-panelStrong no-underline overflow-hidden";
   const positionClasses = isFixed ? "fixed top-6 right-6 z-[100]" : "relative";
 
@@ -54,10 +54,10 @@ export const GithubStar = ({
 
       {/* Label & Counter */}
       <div className="flex items-center gap-2 leading-none">
-        <span className="text-matrix-primary font-matrix font-black text-caption">
+        <span className="text-matrix-primary">
           STAR
         </span>
-        <span className="text-matrix-bright font-matrix font-black text-body tabular-nums">
+        <span className="text-matrix-bright tabular-nums tracking-normal">
           {stars !== null ? stars : "---"}
         </span>
       </div>

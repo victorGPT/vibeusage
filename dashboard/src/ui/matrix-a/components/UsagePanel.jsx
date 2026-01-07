@@ -108,7 +108,7 @@ export const UsagePanel = React.memo(function UsagePanel({
           {onRefresh || statusLabel ? (
             <div className="flex items-center gap-3">
               {statusLabel ? (
-                <span className="text-caption uppercase font-bold text-matrix-muted">
+                <span className="text-caption uppercase font-bold text-matrix-primary">
                   {statusLabel}
                 </span>
               ) : null}

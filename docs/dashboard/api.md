@@ -33,7 +33,7 @@ or:
 ## Common Query Parameters
 
 - `source` (optional): `codex|every-code|claude|...` (case-insensitive on input; stored lowercase)
-- `model` (optional): model identifier string. Trimmed only; case is preserved. Omit to aggregate across models.
+- `model` (optional): usage model identifier string. Input is trimmed and lowercased; vendor prefixes are preserved (for example `aws/gpt-4o`). Omit to aggregate across models.
 - `tz` (optional): IANA timezone, e.g. `America/Los_Angeles`
 - `tz_offset_minutes` (optional): fixed offset in minutes from UTC, e.g. `-480`
 
@@ -41,6 +41,7 @@ Notes:
 - If both `tz` and `tz_offset_minutes` are provided, `tz` wins.
 - Date params are `YYYY-MM-DD`.
 - Token totals are returned as **strings** (bigint-safe).
+- `model` filters are strict; only explicit alias mappings can expand the match scope.
 
 ## Endpoints
 

@@ -24,10 +24,6 @@ function resolveIdentityAtDate({ rawModel, usageKey, dateKey, timeline } = {}) {
   const normalizedDateKey = extractDateKey(dateKey) || dateKey || null;
   const candidates = [];
   if (normalizedKey) candidates.push(normalizedKey);
-  if (!usageKey && normalizedKey && normalizedKey.includes('/')) {
-    const suffix = normalizedKey.split('/').pop();
-    if (suffix && suffix !== normalizedKey) candidates.push(suffix);
-  }
 
   for (const key of candidates) {
     const entries = timeline && typeof timeline.get === 'function' ? timeline.get(key) : null;

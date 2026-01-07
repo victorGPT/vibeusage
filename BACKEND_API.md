@@ -76,6 +76,7 @@ Health check:
 Alias mapping:
 - `vibescore_pricing_model_aliases` maps `usage_model` -> `pricing_model` with `effective_from`.
 - Resolver checks alias mapping before suffix matching.
+- Prefixed usage models require explicit aliases; without one, pricing falls back to the default profile (no suffix inference).
 
 ## Usage guardrails & observability
 
@@ -387,7 +388,7 @@ Notes:
 - Pricing metadata is resolved from `vibescore_pricing_profiles` using the configured default model/source and the latest `effective_from` not in the future (`active=true`).
 - If no pricing rows exist, the endpoint falls back to the built-in default profile.
 - `pricing_mode` is `add`, `overlap`, or `mixed` (multiple pricing modes across sources).
-- `model` query uses canonical model id; the backend expands it to include all active aliases for the date range.
+- `model` query uses canonical model id; the backend expands it only to explicit active aliases for the date range (no implicit suffix matching).
 - `model_id`/`model` are `null` when no model filter is supplied.
 - When `debug=1` is set, the response includes a `debug` object with `request_id`, `status`, `query_ms`, `slow_threshold_ms`, `slow_query`.
 
@@ -525,7 +526,7 @@ Response:
 ```
 
 Notes:
-- `model` query uses canonical model id; the backend expands it to include all active aliases for the date range.
+- `model` query uses canonical model id; the backend expands it only to explicit active aliases for the date range (no implicit suffix matching).
 - `model_id`/`model` are `null` when no model filter is supplied.
 - The response includes backend-computed `summary` totals; the dashboard MUST NOT compute totals locally.
 - When `debug=1` is set, the response includes a `debug` object with `request_id`, `status`, `query_ms`, `slow_threshold_ms`, `slow_query`.
@@ -571,7 +572,7 @@ Response:
 ```
 
 Notes:
-- `model` query uses canonical model id; the backend expands it to include all active aliases for the date range.
+- `model` query uses canonical model id; the backend expands it only to explicit active aliases for the date range (no implicit suffix matching).
 - When `debug=1` is set, the response includes a `debug` object with `request_id`, `status`, `query_ms`, `slow_threshold_ms`, `slow_query`.
 
 ---
@@ -613,7 +614,7 @@ Response:
 ```
 
 Notes:
-- `model` query uses canonical model id; the backend expands it to include all active aliases for the date range.
+- `model` query uses canonical model id; the backend expands it only to explicit active aliases for the date range (no implicit suffix matching).
 - When `debug=1` is set, the response includes a `debug` object with `request_id`, `status`, `query_ms`, `slow_threshold_ms`, `slow_query`.
 
 ---
@@ -657,7 +658,7 @@ Response:
 Notes:
 - `weeks` is a list of week columns; each day cell is `{ day, value, level }` or `null` past the end date.
 - `value` is a bigint-as-string.
-- `model` query uses canonical model id; the backend expands it to include all active aliases for the date range.
+- `model` query uses canonical model id; the backend expands it only to explicit active aliases for the date range (no implicit suffix matching).
 - When `debug=1` is set, the response includes a `debug` object with `request_id`, `status`, `query_ms`, `slow_threshold_ms`, `slow_query`.
 
 ---

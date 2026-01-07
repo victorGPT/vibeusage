@@ -61,11 +61,11 @@ export const TopModelsPanel = React.memo(function TopModelsPanel({
                 </span>
               </div>
               <div className="flex items-baseline gap-1">
-                <span className="text-body font-black text-matrix-bright">
+                <span className="text-body font-black text-matrix-primary">
                   {percent}
                 </span>
                 {showPercentSymbol ? (
-                  <span className="text-caption text-matrix-dim font-bold">
+                  <span className="text-caption text-matrix-primary font-bold">
                     {percentSymbol}
                   </span>
                 ) : null}

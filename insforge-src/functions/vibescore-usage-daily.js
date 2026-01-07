@@ -201,12 +201,18 @@ module.exports = withRequestLogging('vibescore-usage-daily', async function(requ
           if (!ts) continue;
           const dt = new Date(ts);
           if (!Number.isFinite(dt.getTime())) continue;
-          if (hasModelFilter) {
-            const rawModel = normalizeUsageModel(row?.model);
-            const dateKey = extractDateKey(ts) || to;
-            const identity = resolveIdentityAtDate({ rawModel, dateKey, timeline: aliasTimeline });
-            if (identity.model_id !== canonicalModel) continue;
-          }
+        if (hasModelFilter) {
+          const rawModel = normalizeUsageModel(row?.model);
+          const dateKey = extractDateKey(ts) || to;
+          const identity = resolveIdentityAtDate({ rawModel, dateKey, timeline: aliasTimeline });
+          const filterIdentity = resolveIdentityAtDate({
+            rawModel: canonicalModel,
+            usageKey: canonicalModel,
+            dateKey,
+            timeline: aliasTimeline
+          });
+          if (identity.model_id !== filterIdentity.model_id) continue;
+        }
           const day = formatLocalDateKey(dt, tzContext);
           const bucket = buckets.get(day);
           if (!bucket) continue;
@@ -262,7 +268,13 @@ module.exports = withRequestLogging('vibescore-usage-daily', async function(requ
           const rawModel = normalizeUsageModel(row?.model);
           const dateKey = extractDateKey(day) || to;
           const identity = resolveIdentityAtDate({ rawModel, dateKey, timeline: aliasTimeline });
-          if (identity.model_id !== canonicalModel) continue;
+          const filterIdentity = resolveIdentityAtDate({
+            rawModel: canonicalModel,
+            usageKey: canonicalModel,
+            dateKey,
+            timeline: aliasTimeline
+          });
+          if (identity.model_id !== filterIdentity.model_id) continue;
         }
         bucket.total += toBigInt(row?.total_tokens);
         const billable = ingestRow(row);

@@ -28,7 +28,7 @@ export const NeuralAdaptiveFleet = React.memo(function NeuralAdaptiveFleet({
     <div className="w-full space-y-4">
       <div className="flex justify-between items-baseline border-b border-matrix-ghost pb-2">
         <div className="flex items-baseline gap-2">
-          <span className="text-heading font-black text-matrix-bright uppercase">
+          <span className="text-heading font-black text-matrix-primary uppercase">
             {label}
           </span>
           <span className="text-caption text-matrix-muted">

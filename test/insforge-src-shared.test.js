@@ -5,7 +5,67 @@ const path = require('node:path');
 const { logSlowQuery } = require('../insforge-src/shared/logging');
 const { getUsageMaxDays } = require('../insforge-src/shared/date');
 const { normalizeUsageModel, applyUsageModelFilter } = require('../insforge-src/shared/model');
+const { resolveIdentityAtDate } = require('../insforge-src/shared/model-alias-timeline');
 const pricing = require('../insforge-src/shared/pricing');
+
+function createPricingEdgeClient({ aliasRows = [], profileRows = [] } = {}) {
+  return {
+    database: {
+      from: (table) => {
+        const rows = table === 'vibescore_pricing_model_aliases'
+          ? aliasRows
+          : table === 'vibescore_pricing_profiles'
+            ? profileRows
+            : [];
+        const state = {
+          filters: {},
+          select() {
+            return this;
+          },
+          eq(field, value) {
+            this.filters[field] = value;
+            return this;
+          },
+          lte(field, value) {
+            this.filters.lte = { field, value };
+            return this;
+          },
+          or(value) {
+            this.filters.or = value;
+            return this;
+          },
+          order() {
+            return this;
+          },
+          limit() {
+            let data = rows;
+            if (this.filters.active !== undefined) {
+              data = data.filter((row) => row.active === this.filters.active);
+            }
+            if (this.filters.source) {
+              data = data.filter((row) => row.source === this.filters.source);
+            }
+            if (this.filters.pricing_source) {
+              data = data.filter((row) => row.pricing_source === this.filters.pricing_source);
+            }
+            if (this.filters.usage_model) {
+              data = data.filter((row) => row.usage_model === this.filters.usage_model);
+            }
+            if (this.filters.model) {
+              data = data.filter((row) => row.model === this.filters.model);
+            }
+            if (this.filters.lte) {
+              const { field, value } = this.filters.lte;
+              data = data.filter((row) => String(row[field] || '') <= String(value));
+            }
+            return { data, error: null };
+          }
+        };
+        return state;
+      }
+    }
+  };
+}
 
 test('insforge shared logging module exists', () => {
   const loggingPath = path.join(
@@ -121,15 +181,42 @@ test('pricing defaults read VIBEUSAGE env with VIBESCORE fallback', () => {
   }
 });
 
-test('normalizeUsageModel canonicalizes usage model ids', () => {
+test('resolvePricingProfile falls back for prefixed models without aliases', async () => {
+  const edgeClient = createPricingEdgeClient({
+    aliasRows: [],
+    profileRows: [
+      {
+        model: 'openai/gpt-4o',
+        source: 'openai',
+        effective_from: '2025-01-01',
+        active: true,
+        input_rate_micro_per_million: 100,
+        cached_input_rate_micro_per_million: 10,
+        output_rate_micro_per_million: 200,
+        reasoning_output_rate_micro_per_million: 200
+      }
+    ]
+  });
+
+  const profile = await pricing.resolvePricingProfile({
+    edgeClient,
+    effectiveDate: '2025-01-02',
+    model: 'aws/gpt-4o',
+    source: 'openai'
+  });
+
+  assert.deepEqual(profile, pricing.getDefaultPricingProfile());
+});
+
+test('normalizeUsageModel preserves vendor prefixes', () => {
   assert.equal(normalizeUsageModel(' GPT-4o '), 'gpt-4o');
-  assert.equal(normalizeUsageModel('openai/GPT-4o'), 'gpt-4o');
-  assert.equal(normalizeUsageModel('Anthropic/Claude-3.5'), 'claude-3.5');
+  assert.equal(normalizeUsageModel('openai/GPT-4o'), 'openai/gpt-4o');
+  assert.equal(normalizeUsageModel('Anthropic/Claude-3.5'), 'anthropic/claude-3.5');
   assert.equal(normalizeUsageModel('unknown'), 'unknown');
   assert.equal(normalizeUsageModel(''), null);
 });
 
-test('applyUsageModelFilter builds prefix-aware filters', () => {
+test('applyUsageModelFilter builds strict filters', () => {
   const filters = [];
   const query = {
     or: (value) => {
@@ -142,5 +229,22 @@ test('applyUsageModelFilter builds prefix-aware filters', () => {
 
   assert.equal(filters.length, 1);
   assert.ok(filters[0].includes('model.ilike.gpt-4o'));
-  assert.ok(filters[0].includes('model.ilike.%/gpt-4o'));
+  assert.ok(!filters[0].includes('model.ilike.%/gpt-4o'));
+});
+
+
+test('resolveIdentityAtDate does not infer suffix aliases for prefixed models', () => {
+  const timeline = new Map();
+  timeline.set('gpt-4o', [
+    { model_id: 'gpt-4o', model: 'GPT-4o', effective_from: '2026-01-01' }
+  ]);
+
+  const identity = resolveIdentityAtDate({
+    rawModel: 'aws/gpt-4o',
+    dateKey: '2026-01-02',
+    timeline
+  });
+
+  assert.equal(identity.model_id, 'aws/gpt-4o');
+  assert.equal(identity.model, 'aws/gpt-4o');
 });

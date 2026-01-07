@@ -214,10 +214,7 @@ var require_model = __commonJS({
       const normalized = normalizeModel(value);
       if (!normalized) return null;
       const lowered = normalized.toLowerCase();
-      if (!lowered) return null;
-      const slashIndex = lowered.lastIndexOf("/");
-      const candidate = slashIndex >= 0 ? lowered.slice(slashIndex + 1) : lowered;
-      return candidate ? candidate : null;
+      return lowered ? lowered : null;
     }
     function escapeLike(value) {
       return String(value).replace(/[\\%_]/g, "\\$&");
@@ -235,13 +232,6 @@ var require_model = __commonJS({
         if (!seen.has(exact)) {
           seen.add(exact);
           terms.push(exact);
-        }
-        if (!normalized.includes("/")) {
-          const suffixed = `model.ilike.%/${safe}`;
-          if (!seen.has(suffixed)) {
-            seen.add(suffixed);
-            terms.push(suffixed);
-          }
         }
       }
       if (terms.length === 0) return query;
@@ -1012,10 +1002,6 @@ var require_model_alias_timeline = __commonJS({
       const normalizedDateKey = extractDateKey2(dateKey) || dateKey || null;
       const candidates = [];
       if (normalizedKey) candidates.push(normalizedKey);
-      if (!usageKey && normalizedKey && normalizedKey.includes("/")) {
-        const suffix = normalizedKey.split("/").pop();
-        if (suffix && suffix !== normalizedKey) candidates.push(suffix);
-      }
       for (const key of candidates) {
         const entries = timeline && typeof timeline.get === "function" ? timeline.get(key) : null;
         if (!Array.isArray(entries)) continue;
@@ -1319,7 +1305,13 @@ module.exports = withRequestLogging("vibescore-usage-heatmap", async function(re
             const rawModel = normalizeUsageModel(row?.model);
             const dateKey = extractDateKey(ts) || to2;
             const identity = resolveIdentityAtDate({ rawModel, dateKey, timeline: aliasTimeline2 });
-            if (identity.model_id !== canonicalModel2) continue;
+            const filterIdentity = resolveIdentityAtDate({
+              rawModel: canonicalModel2,
+              usageKey: canonicalModel2,
+              dateKey,
+              timeline: aliasTimeline2
+            });
+            if (identity.model_id !== filterIdentity.model_id) continue;
           }
           const day = formatDateUTC(dt);
           const prev = valuesByDay2.get(day) || 0n;
@@ -1463,7 +1455,13 @@ module.exports = withRequestLogging("vibescore-usage-heatmap", async function(re
           const rawModel = normalizeUsageModel(row?.model);
           const dateKey = extractDateKey(ts) || to;
           const identity = resolveIdentityAtDate({ rawModel, dateKey, timeline: aliasTimeline });
-          if (identity.model_id !== canonicalModel) continue;
+          const filterIdentity = resolveIdentityAtDate({
+            rawModel: canonicalModel,
+            usageKey: canonicalModel,
+            dateKey,
+            timeline: aliasTimeline
+          });
+          if (identity.model_id !== filterIdentity.model_id) continue;
         }
         const key = formatLocalDateKey(dt, tzContext);
         const prev = valuesByDay.get(key) || 0n;

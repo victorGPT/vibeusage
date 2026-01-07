@@ -10,10 +10,7 @@ function normalizeUsageModel(value) {
   const normalized = normalizeModel(value);
   if (!normalized) return null;
   const lowered = normalized.toLowerCase();
-  if (!lowered) return null;
-  const slashIndex = lowered.lastIndexOf('/');
-  const candidate = slashIndex >= 0 ? lowered.slice(slashIndex + 1) : lowered;
-  return candidate ? candidate : null;
+  return lowered ? lowered : null;
 }
 
 function escapeLike(value) {
@@ -34,13 +31,6 @@ function applyUsageModelFilter(query, usageModels) {
     if (!seen.has(exact)) {
       seen.add(exact);
       terms.push(exact);
-    }
-    if (!normalized.includes('/')) {
-      const suffixed = `model.ilike.%/${safe}`;
-      if (!seen.has(suffixed)) {
-        seen.add(suffixed);
-        terms.push(suffixed);
-      }
     }
   }
 

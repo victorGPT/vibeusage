@@ -153,7 +153,13 @@ module.exports = withRequestLogging('vibescore-usage-monthly', async function(re
           const rawModel = normalizeUsageModel(row?.model);
           const dateKey = extractDateKey(ts) || to;
           const identity = resolveIdentityAtDate({ rawModel, dateKey, timeline: aliasTimeline });
-          if (identity.model_id !== canonicalModel) continue;
+          const filterIdentity = resolveIdentityAtDate({
+            rawModel: canonicalModel,
+            usageKey: canonicalModel,
+            dateKey,
+            timeline: aliasTimeline
+          });
+          if (identity.model_id !== filterIdentity.model_id) continue;
         }
         const localParts = getLocalParts(dt, tzContext);
         const key = `${localParts.year}-${String(localParts.month).padStart(2, '0')}`;
