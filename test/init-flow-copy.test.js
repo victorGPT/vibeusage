@@ -109,3 +109,53 @@ test('init emits local report then auth transition and success url', async () =>
     delete require.cache[initPath];
   }
 });
+
+test('init defaults dashboard url when not configured', async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'vibeusage-init-flow-'));
+  const prevHome = process.env.HOME;
+  const prevCodexHome = process.env.CODEX_HOME;
+  const prevDashboard = process.env.VIBEUSAGE_DASHBOARD_URL;
+  const prevLegacyDashboard = process.env.VIBESCORE_DASHBOARD_URL;
+  const prevWrite = process.stdout.write;
+
+  let output = '';
+
+  try {
+    process.env.HOME = tmp;
+    process.env.CODEX_HOME = path.join(tmp, '.codex');
+    delete process.env.VIBEUSAGE_DASHBOARD_URL;
+    delete process.env.VIBESCORE_DASHBOARD_URL;
+
+    await fs.mkdir(process.env.CODEX_HOME, { recursive: true });
+    await fs.writeFile(path.join(process.env.CODEX_HOME, 'config.toml'), '# empty\n', 'utf8');
+
+    process.stdout.write = (chunk) => {
+      output += String(chunk || '');
+      return true;
+    };
+
+    const { cmdInit } = loadInitWithStubs();
+    await cmdInit(['--yes', '--no-open', '--base-url', 'https://example.invalid']);
+
+    const clean = stripAnsi(output);
+    assert.ok(clean.includes('View your stats at: https://www.vibeusage.cc'));
+  } finally {
+    process.stdout.write = prevWrite;
+    if (prevHome === undefined) delete process.env.HOME;
+    else process.env.HOME = prevHome;
+    if (prevCodexHome === undefined) delete process.env.CODEX_HOME;
+    else process.env.CODEX_HOME = prevCodexHome;
+    if (prevDashboard === undefined) delete process.env.VIBEUSAGE_DASHBOARD_URL;
+    else process.env.VIBEUSAGE_DASHBOARD_URL = prevDashboard;
+    if (prevLegacyDashboard === undefined) delete process.env.VIBESCORE_DASHBOARD_URL;
+    else process.env.VIBESCORE_DASHBOARD_URL = prevLegacyDashboard;
+    await fs.rm(tmp, { recursive: true, force: true });
+
+    const browserAuthPath = path.join(__dirname, '..', 'src', 'lib', 'browser-auth.js');
+    const insforgePath = path.join(__dirname, '..', 'src', 'lib', 'insforge.js');
+    const initPath = path.join(__dirname, '..', 'src', 'commands', 'init.js');
+    delete require.cache[browserAuthPath];
+    delete require.cache[insforgePath];
+    delete require.cache[initPath];
+  }
+});

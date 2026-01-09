@@ -610,7 +610,7 @@
     {
       "id": "test_init-flow-copy_test_c9fa97e",
       "type": "text",
-      "text": "**init-flow-copy.test**\n`test/init-flow-copy.test.js`\n\nTest module.\n\n包含：\n- init-flow-copy.test (112 行)\n- stripAnsi (1 个参数)\n\n依赖：1 个模块\n被依赖：0 次",
+      "text": "**init-flow-copy.test**\n`test/init-flow-copy.test.js`\n\nTest module.\n\n包含：\n- init-flow-copy.test (162 行)\n- stripAnsi (1 个参数)\n\n依赖：1 个模块\n被依赖：0 次",
       "x": 2620,
       "y": 11212,
       "width": 280,
@@ -1509,7 +1509,7 @@
     {
       "id": "undefined_init_8ce62bde",
       "type": "text",
-      "text": "**init**\n`src/commands/init.js`\n\nGeneral module.\n\n包含：\n- init (799 行)\n- cmdInit (1 个参数)\n\n依赖：0 个模块\n被依赖：1 次",
+      "text": "**init**\n`src/commands/init.js`\n\nGeneral module.\n\n包含：\n- init (769 行)\n- cmdInit (1 个参数)\n\n依赖：0 个模块\n被依赖：1 次",
       "x": 820,
       "y": 8160,
       "width": 280,

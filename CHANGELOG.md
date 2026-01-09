@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.2.12] - 2026-01-09
+### Changed
+- Default CLI dashboard URL now points to https://www.vibeusage.cc.
+
 ## [0.2.11] - 2026-01-07
 ### Fixed
 - Count Opencode cache write tokens in input totals.

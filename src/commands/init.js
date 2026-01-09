@@ -51,6 +51,7 @@ const ASCII_LOGO = [
 ].join('\n');
 
 const DIVIDER = '----------------------------------------------';
+const DEFAULT_DASHBOARD_URL = 'https://www.vibeusage.cc';
 
 async function cmdInit(argv) {
   const opts = parseArgs(argv);
@@ -69,7 +70,7 @@ async function cmdInit(argv) {
   let dashboardUrl = opts.dashboardUrl ||
     process.env.VIBEUSAGE_DASHBOARD_URL ||
     process.env.VIBESCORE_DASHBOARD_URL ||
-    null;
+    DEFAULT_DASHBOARD_URL;
   const notifyPath = path.join(binDir, 'notify.cjs');
   const appDir = path.join(trackerDir, 'app');
   const trackerBinPath = path.join(appDir, 'bin', 'tracker.js');
@@ -140,7 +141,6 @@ async function cmdInit(argv) {
 
   if (setup.pendingBrowserAuth) {
     const deviceName = opts.deviceName || os.hostname();
-    if (!dashboardUrl) dashboardUrl = await detectLocalDashboardUrl();
     const flow = await beginBrowserAuth({ baseUrl, dashboardUrl, timeoutMs: 10 * 60_000, open: false });
     const canAutoOpen = !opts.noOpen;
     renderAuthTransition({ authUrl: flow.authUrl, canAutoOpen });
@@ -157,7 +157,6 @@ async function cmdInit(argv) {
     const resolvedDashboardUrl = dashboardUrl || null;
     renderSuccessBox({ configPath, dashboardUrl: resolvedDashboardUrl });
   } else if (deviceToken) {
-    if (!dashboardUrl) dashboardUrl = await detectLocalDashboardUrl();
     const resolvedDashboardUrl = dashboardUrl || null;
     renderSuccessBox({ configPath, dashboardUrl: resolvedDashboardUrl });
   } else {
@@ -685,35 +684,6 @@ function isSelfNotify(cmd) {
 }
 
 module.exports = { cmdInit };
-
-async function detectLocalDashboardUrl() {
-  // Dev-only convenience: prefer a local dashboard (if running) so the user sees our own UI first.
-  // Vite defaults to 5173, but may auto-increment if the port is taken.
-  const hosts = ['127.0.0.1', 'localhost'];
-  const ports = [5173, 5174, 5175, 5176, 5177];
-
-  for (const port of ports) {
-    for (const host of hosts) {
-      const base = `http://${host}:${port}`;
-      const ok = await checkUrlReachable(base);
-      if (ok) return base;
-    }
-  }
-  return null;
-}
-
-async function checkUrlReachable(url) {
-  const timeoutMs = 250;
-  try {
-    const controller = new AbortController();
-    const t = setTimeout(() => controller.abort(), timeoutMs);
-    const res = await fetch(url, { method: 'GET', signal: controller.signal });
-    clearTimeout(t);
-    return Boolean(res && res.ok);
-  } catch (_e) {
-    return false;
-  }
-}
 
 async function probeFile(p) {
   try {
