@@ -25,6 +25,18 @@ export function SignInRedirect() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (typeof document === "undefined") return;
+    try {
+      const stored = window.localStorage?.getItem("vibeusage:dashboard-theme");
+      if (stored === "day" || stored === "night") {
+        document.documentElement.setAttribute("data-dashboard-theme", stored);
+      }
+    } catch (_err) {
+      // ignore
+    }
+  }, []);
+
+  useEffect(() => {
     if (typeof window === "undefined") return;
     const { saved } = storeRedirectFromSearch(window.location.search);
     const { saved: nextSaved } = storePostAuthPathFromSearch(

@@ -55,6 +55,9 @@ import {
 const PERIODS = ["day", "week", "month", "total"];
 const DETAILS_DATE_KEYS = new Set(["day", "hour", "month"]);
 const DETAILS_PAGED_PERIODS = new Set(["day", "total"]);
+const DASHBOARD_THEME_STORAGE_KEY = "vibeusage:dashboard-theme";
+const DASHBOARD_THEME_DAY = "day";
+const DASHBOARD_THEME_NIGHT = "night";
 
 function hasUsageValue(value, level) {
   if (typeof level === "number" && level > 0) return true;
@@ -100,6 +103,23 @@ function isForceInstallEnabled() {
   return !isProductionHost(window.location.hostname);
 }
 
+function normalizeDashboardTheme(raw) {
+  return raw === DASHBOARD_THEME_DAY ? DASHBOARD_THEME_DAY : DASHBOARD_THEME_NIGHT;
+}
+
+function loadDashboardTheme() {
+  if (typeof window === "undefined") return DASHBOARD_THEME_NIGHT;
+  try {
+    const stored = window.localStorage?.getItem(DASHBOARD_THEME_STORAGE_KEY);
+    if (typeof stored === "string" && stored.length > 0) {
+      return normalizeDashboardTheme(stored);
+    }
+  } catch (_err) {
+    // ignore storage read failures
+  }
+  return DASHBOARD_THEME_NIGHT;
+}
+
 export function DashboardPage({
   baseUrl,
   auth,
@@ -135,6 +155,12 @@ export function DashboardPage({
     if (typeof window === "undefined") return false;
     return isScreenshotModeEnabled(window.location.search);
   }, []);
+  const [dashboardTheme, setDashboardTheme] = useState(() =>
+    loadDashboardTheme()
+  );
+  const effectiveDashboardTheme = screenshotMode
+    ? DASHBOARD_THEME_NIGHT
+    : dashboardTheme;
   const forceInstall = useMemo(() => isForceInstallEnabled(), []);
   const [isCapturing, setIsCapturing] = useState(false);
   const identityScrambleDurationMs = 2200;
@@ -155,6 +181,20 @@ export function DashboardPage({
   const accessEnabled = signedIn || mockEnabled || publicMode;
   const authTokenReady = authTokenAllowed && isAccessTokenReady(effectiveAuthToken);
   const guestAllowed = signedIn && sessionSoftExpired && !publicMode;
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    document.documentElement.setAttribute(
+      "data-dashboard-theme",
+      effectiveDashboardTheme
+    );
+    if (screenshotMode) return;
+    try {
+      window.localStorage?.setItem(DASHBOARD_THEME_STORAGE_KEY, dashboardTheme);
+    } catch (_err) {
+      // ignore storage write failures
+    }
+  }, [dashboardTheme, effectiveDashboardTheme, screenshotMode]);
 
   useEffect(() => {
     const t = window.setTimeout(() => setBooted(true), 900);
@@ -855,6 +895,7 @@ export function DashboardPage({
         timeZoneShortLabel={timeZoneShortLabel}
         hideLegend={screenshotMode}
         defaultToLatestMonth={screenshotMode}
+        theme={effectiveDashboardTheme}
       />
     </AsciiBox>
   );
@@ -1256,6 +1297,12 @@ export function DashboardPage({
     }
   }, [effectiveAuthToken, baseUrl, publicViewActionLoading, publicViewEnabled]);
 
+  const handleToggleDashboardTheme = useCallback(() => {
+    setDashboardTheme((current) =>
+      current === DASHBOARD_THEME_DAY ? DASHBOARD_THEME_NIGHT : DASHBOARD_THEME_DAY
+    );
+  }, []);
+
   const dailyEmptyTemplate = useMemo(
     () => copy("dashboard.daily.empty", { cmd: "{{cmd}}" }),
     []
@@ -1270,6 +1317,10 @@ export function DashboardPage({
     authTokenAllowed && authTokenReady ? (
       <BackendStatus baseUrl={baseUrl} accessToken={effectiveAuthToken} />
     ) : null;
+  const dashboardThemeToggleLabel =
+    effectiveDashboardTheme === DASHBOARD_THEME_DAY
+      ? copy("dashboard.theme.toggle.night")
+      : copy("dashboard.theme.toggle.day");
 
   const headerRight = (
     <div className="ml-auto flex w-max min-w-max items-center gap-2 sm:gap-3 md:gap-4">
@@ -1299,6 +1350,15 @@ export function DashboardPage({
           {copy("dashboard.not_signed_in")}
         </span>
       )}
+      <MatrixButton
+        onClick={handleToggleDashboardTheme}
+        size="header"
+        aria-label={dashboardThemeToggleLabel}
+        title={dashboardThemeToggleLabel}
+        className="dashboard-theme-toggle"
+      >
+        {dashboardThemeToggleLabel}
+      </MatrixButton>
     </div>
   );
 

@@ -64,15 +64,25 @@ export const MatrixRain = () => {
     };
 
     const drawFrame = () => {
-      ctx.fillStyle = `rgba(5, 5, 5, ${settings.trailAlpha})`;
+      const isDayTheme =
+        document.documentElement.getAttribute("data-dashboard-theme") === "day";
+      const trailColor = isDayTheme
+        ? `rgba(255, 255, 255, ${settings.trailAlpha})`
+        : `rgba(5, 5, 5, ${settings.trailAlpha})`;
+      ctx.fillStyle = trailColor;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       for (let i = 0; i < drops.length; i++) {
         const char = characters.charAt(
           Math.floor(random() * characters.length)
         );
-        ctx.fillStyle =
-          random() < settings.highlightChance ? "#E8FFE9" : "#00FF41";
+        ctx.fillStyle = isDayTheme
+          ? random() < settings.highlightChance
+            ? "#555555"
+            : "#aaaaaa"
+          : random() < settings.highlightChance
+            ? "#E8FFE9"
+            : "#00FF41";
         ctx.fillText(char, i * columnPitch, drops[i] * fontSize);
         if (
           drops[i] * fontSize > canvas.height &&

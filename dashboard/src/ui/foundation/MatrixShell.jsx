@@ -1,7 +1,16 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 import { MatrixRain } from "../matrix-a/components/MatrixRain.jsx";
 import { copy } from "../../lib/copy";
+
+function readStoredDayTheme() {
+  if (typeof window === "undefined") return false;
+  try {
+    return window.localStorage?.getItem("vibeusage:dashboard-theme") === "day";
+  } catch {
+    return false;
+  }
+}
 
 export function MatrixShell({
   headerRight,
@@ -13,10 +22,35 @@ export function MatrixShell({
   rootClassName = "",
   hideHeader = false,
 }) {
+  const [isDayTheme, setIsDayTheme] = useState(readStoredDayTheme);
+  const [headerIconSrc, setHeaderIconSrc] = useState(() =>
+    readStoredDayTheme() ? "/icon-day.svg" : "/icon.svg"
+  );
   const headerTitle = copy("shell.header.title");
   const titleParts = String(headerTitle || "").trim().split(/\s+/);
   const titlePrimary = titleParts[0] || headerTitle;
   const titleSecondary = titleParts.slice(1).join(" ");
+
+  useEffect(() => {
+    if (typeof document === "undefined") return () => {};
+    const root = document.documentElement;
+    const syncIconSrc = () => {
+      const theme = root.getAttribute("data-dashboard-theme");
+      const dayTheme = theme === "day";
+      setIsDayTheme(dayTheme);
+      setHeaderIconSrc(dayTheme ? "/icon-day.svg" : "/icon.svg");
+    };
+    syncIconSrc();
+    if (typeof MutationObserver !== "function") return () => {};
+    const observer = new MutationObserver(syncIconSrc);
+    observer.observe(root, {
+      attributes: true,
+      attributeFilter: ["data-dashboard-theme"],
+    });
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
 
   return (
     <div
@@ -33,10 +67,14 @@ export function MatrixShell({
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div className="flex min-w-0 items-center gap-3 md:gap-6">
                 <img
-                  src="/icon.svg"
+                  src={headerIconSrc}
                   alt=""
                   aria-hidden="true"
-                  className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-sm bg-black border border-matrix-primary/30 shadow-[0_0_12px_rgba(0,255,65,0.35)] shrink-0"
+                  className={`w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-sm shrink-0 ${
+                    isDayTheme
+                      ? "bg-white border border-black/20 shadow-[0_2px_8px_rgba(0,0,0,0.14)]"
+                      : "bg-black border border-matrix-primary/30 shadow-[0_0_12px_rgba(0,255,65,0.35)]"
+                  }`}
                 />
                 <div className="flex min-w-0 items-baseline gap-2 md:gap-3 uppercase select-none">
                   <span

@@ -209,6 +209,17 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react(), richLinkMetaPlugin()],
     ...(Object.keys(define).length ? { define } : {}),
+    server: {
+      host: true,
+      port: 5173,
+      strictPort: true,
+      allowedHosts: [
+        'localhost',
+        '127.0.0.1',
+        'vibeusage.cc',
+        'www.vibeusage.cc'
+      ]
+    },
     build: {
       rollupOptions: {
         input: {
@@ -217,11 +228,6 @@ export default defineConfig(({ mode }) => {
           wrapped: path.resolve(ROOT_DIR, 'wrapped-2025.html')
         }
       }
-    },
-    server: {
-      port: 5173,
-      // Prefer 5173 for local CLI integration, but don't fail if already in use.
-      strictPort: false
     }
   };
 });
