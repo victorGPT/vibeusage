@@ -52,12 +52,23 @@ module.exports = async function (request) {
 
     if (settingsErr) return json({ error: "Failed to resolve leaderboard settings" }, 500);
     if (!settings?.leaderboard_public) return json({ error: "Not found" }, 404);
+
+    const { data: activeLink, error: activeLinkErr } = await serviceClient.database
+      .from("vibeusage_public_views")
+      .select("user_id")
+      .eq("user_id", requestedUserId)
+      .is("revoked_at", null)
+      .limit(1)
+      .maybeSingle();
+
+    if (activeLinkErr) return json({ error: "Failed to resolve public share state" }, 500);
+    if (!activeLink?.user_id) return json({ error: "Not found" }, 404);
   }
 
   const { data: snapshot, error: snapshotErr } = await serviceClient.database
     .from("vibeusage_leaderboard_snapshots")
     .select(
-      "user_id,display_name,avatar_url,rank,gpt_tokens,claude_tokens,other_tokens,total_tokens,generated_at",
+      "user_id,display_name,avatar_url,rank,gpt_tokens,claude_tokens,other_tokens,total_tokens,is_public,generated_at",
     )
     .eq("period", period)
     .eq("from_day", from)
@@ -68,6 +79,7 @@ module.exports = async function (request) {
   if (snapshotErr)
     return json({ error: snapshotErr.message || "Failed to fetch leaderboard snapshot" }, 500);
   if (!snapshot) return json({ error: "Not found" }, 404);
+  if (!isSelf && snapshot.is_public !== true) return json({ error: "Not found" }, 404);
 
   return json(
     {

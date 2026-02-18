@@ -8108,7 +8108,7 @@ test("vibeusage-leaderboard-profile hides non-public users", async () => {
   assert.equal(res.status, 404);
 });
 
-test("vibeusage-leaderboard-profile returns weekly snapshot entry for public user", async () => {
+test("vibeusage-leaderboard-profile requires active public link for non-self user", async () => {
   setDenoEnv({
     INSFORGE_INTERNAL_URL: BASE_URL,
     ANON_KEY,
@@ -8117,9 +8117,97 @@ test("vibeusage-leaderboard-profile returns weekly snapshot entry for public use
 
   const fn = require("../insforge-functions/vibeusage-leaderboard-profile");
 
-  const userId = "99990000-0000-0000-0000-000000000000";
+  const userId = "ffff0000-0000-0000-0000-000000000000";
   const userJwt = createUserJwt(userId);
-  const targetUserId = "99990000-0000-0000-0000-000000000001";
+  const targetUserId = "ffff0000-0000-0000-0000-000000000001";
+  let snapshotRead = false;
+
+  globalThis.createClient = (args) => {
+    if (args && args.edgeFunctionToken === userJwt) {
+      return {
+        auth: {
+          getCurrentUser: async () => ({ data: { user: { id: userId } }, error: null }),
+        },
+      };
+    }
+
+    if (args && args.edgeFunctionToken === SERVICE_ROLE_KEY) {
+      return {
+        database: {
+          from: (table) => {
+            if (table === "vibeusage_user_settings") {
+              return {
+                select: () => {
+                  const q = {
+                    eq: () => q,
+                    maybeSingle: async () => ({ data: { leaderboard_public: true }, error: null }),
+                  };
+                  return q;
+                },
+              };
+            }
+
+            if (table === "vibeusage_public_views") {
+              return {
+                select: () => {
+                  const q = {
+                    eq: () => q,
+                    is: () => q,
+                    limit: () => q,
+                    maybeSingle: async () => ({ data: null, error: null }),
+                  };
+                  return q;
+                },
+              };
+            }
+
+            if (table === "vibeusage_leaderboard_snapshots") {
+              snapshotRead = true;
+              return {
+                select: () => {
+                  const q = {
+                    eq: () => q,
+                    maybeSingle: async () => ({ data: null, error: null }),
+                  };
+                  return q;
+                },
+              };
+            }
+
+            throw new Error(`Unexpected service table: ${String(table)}`);
+          },
+        },
+      };
+    }
+
+    throw new Error(`Unexpected createClient args: ${JSON.stringify(args)}`);
+  };
+
+  const req = new Request(
+    `http://localhost/functions/vibeusage-leaderboard-profile?user_id=${encodeURIComponent(targetUserId)}`,
+    {
+      method: "GET",
+      headers: { Authorization: `Bearer ${userJwt}` },
+    },
+  );
+
+  const res = await fn(req);
+  assert.equal(res.status, 404);
+  assert.equal(snapshotRead, false);
+});
+
+test("vibeusage-leaderboard-profile hides snapshot rows marked private", async () => {
+  setDenoEnv({
+    INSFORGE_INTERNAL_URL: BASE_URL,
+    ANON_KEY,
+    INSFORGE_SERVICE_ROLE_KEY: SERVICE_ROLE_KEY,
+  });
+
+  const fn = require("../insforge-functions/vibeusage-leaderboard-profile");
+
+  const userId = "999a0000-0000-0000-0000-000000000000";
+  const userJwt = createUserJwt(userId);
+  const targetUserId = "999a0000-0000-0000-0000-000000000001";
 
   const snapshotRow = {
     user_id: targetUserId,
@@ -8128,7 +8216,9 @@ test("vibeusage-leaderboard-profile returns weekly snapshot entry for public use
     rank: 12,
     gpt_tokens: "10",
     claude_tokens: "5",
-    total_tokens: "15",
+    other_tokens: "2",
+    total_tokens: "17",
+    is_public: false,
     generated_at: "2026-02-09T00:00:00.000Z",
   };
 
@@ -8151,6 +8241,118 @@ test("vibeusage-leaderboard-profile returns weekly snapshot entry for public use
                   const q = {
                     eq: () => q,
                     maybeSingle: async () => ({ data: { leaderboard_public: true }, error: null }),
+                  };
+                  return q;
+                },
+              };
+            }
+
+            if (table === "vibeusage_public_views") {
+              return {
+                select: () => {
+                  const q = {
+                    eq: () => q,
+                    is: () => q,
+                    limit: () => q,
+                    maybeSingle: async () => ({ data: { user_id: targetUserId }, error: null }),
+                  };
+                  return q;
+                },
+              };
+            }
+
+            if (table === "vibeusage_leaderboard_snapshots") {
+              return {
+                select: () => {
+                  const q = {
+                    eq: () => q,
+                    maybeSingle: async () => ({ data: snapshotRow, error: null }),
+                  };
+                  return q;
+                },
+              };
+            }
+
+            throw new Error(`Unexpected service table: ${String(table)}`);
+          },
+        },
+      };
+    }
+
+    throw new Error(`Unexpected createClient args: ${JSON.stringify(args)}`);
+  };
+
+  const req = new Request(
+    `http://localhost/functions/vibeusage-leaderboard-profile?user_id=${encodeURIComponent(targetUserId)}`,
+    {
+      method: "GET",
+      headers: { Authorization: `Bearer ${userJwt}` },
+    },
+  );
+
+  const res = await fn(req);
+  assert.equal(res.status, 404);
+});
+
+test("vibeusage-leaderboard-profile returns weekly snapshot entry for public user", async () => {
+  setDenoEnv({
+    INSFORGE_INTERNAL_URL: BASE_URL,
+    ANON_KEY,
+    INSFORGE_SERVICE_ROLE_KEY: SERVICE_ROLE_KEY,
+  });
+
+  const fn = require("../insforge-functions/vibeusage-leaderboard-profile");
+
+  const userId = "99990000-0000-0000-0000-000000000000";
+  const userJwt = createUserJwt(userId);
+  const targetUserId = "99990000-0000-0000-0000-000000000001";
+
+  const snapshotRow = {
+    user_id: targetUserId,
+    display_name: "Nick",
+    avatar_url: "https://example.com/avatar.png",
+    rank: 12,
+    gpt_tokens: "10",
+    claude_tokens: "5",
+    other_tokens: "2",
+    total_tokens: "17",
+    is_public: true,
+    generated_at: "2026-02-09T00:00:00.000Z",
+  };
+
+  globalThis.createClient = (args) => {
+    if (args && args.edgeFunctionToken === userJwt) {
+      return {
+        auth: {
+          getCurrentUser: async () => ({ data: { user: { id: userId } }, error: null }),
+        },
+      };
+    }
+
+    if (args && args.edgeFunctionToken === SERVICE_ROLE_KEY) {
+      return {
+        database: {
+          from: (table) => {
+            if (table === "vibeusage_user_settings") {
+              return {
+                select: () => {
+                  const q = {
+                    eq: () => q,
+                    maybeSingle: async () => ({ data: { leaderboard_public: true }, error: null }),
+                  };
+                  return q;
+                },
+              };
+            }
+
+            if (table === "vibeusage_public_views") {
+              return {
+                select: () => {
+                  const q = {
+                    eq: () => q,
+                    is: () => q,
+                    limit: () => q,
+                    maybeSingle: async () => ({ data: { user_id: targetUserId }, error: null }),
                   };
                   return q;
                 },
@@ -8194,7 +8396,8 @@ test("vibeusage-leaderboard-profile returns weekly snapshot entry for public use
   assert.equal(body.entry?.user_id, targetUserId);
   assert.equal(body.entry?.display_name, "Nick");
   assert.equal(body.entry?.rank, 12);
-  assert.equal(body.entry?.total_tokens, "15");
+  assert.equal(body.entry?.other_tokens, "2");
+  assert.equal(body.entry?.total_tokens, "17");
 });
 
 test("vibeusage-user-status returns pro.active for cutoff user", async () => {
