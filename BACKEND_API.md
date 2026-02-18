@@ -73,9 +73,11 @@ OpenRouter sync requires these environment variables in InsForge:
 - `OPENROUTER_APP_TITLE` (optional, for attribution)
 
 Health check:
+
 - See `docs/ops/pricing-sync-health.md` and `scripts/ops/pricing-sync-health.sql`.
 
 Alias mapping:
+
 - `vibeusage_pricing_model_aliases` maps `usage_model` -> `pricing_model` with `effective_from`.
 - Resolver checks alias mapping before suffix matching.
 - Prefixed usage models require explicit aliases; without one, pricing falls back to the default profile (no suffix inference).
@@ -106,6 +108,7 @@ To keep low-tier backends stable, the CLI and dashboard apply conservative defau
 Issue a long-lived device token for the current user.
 
 Auth:
+
 - User mode: `Authorization: Bearer <user_jwt>`
 - Admin bootstrap (optional): `Authorization: Bearer <service_role_key>` with `user_id` in body
 
@@ -128,6 +131,7 @@ Response:
 Issue a short-lived, single-use link code bound to the current user session.
 
 Auth:
+
 - `Authorization: Bearer <user_jwt>`
 
 Request body:
@@ -143,6 +147,7 @@ Response:
 ```
 
 Notes:
+
 - Link codes expire after ~10 minutes.
 - Each link code can be used once.
 
@@ -153,6 +158,7 @@ Notes:
 Exchange a link code for a device token (CLI init flow).
 
 Auth:
+
 - None (public function; server uses service role internally)
 
 Request body:
@@ -173,6 +179,7 @@ Response:
 ```
 
 Notes:
+
 - `request_id` is required for replay safety; retries with the same `request_id` return the same token.
 - Expired link codes return `400` and used codes return `409`.
 
@@ -183,6 +190,7 @@ Notes:
 Return privacy-safe profile fields for a public share token.
 
 Auth:
+
 - `Authorization: Bearer <share_token>`
 
 Response:
@@ -192,6 +200,7 @@ Response:
 ```
 
 Notes:
+
 - `display_name` is derived from user metadata and sanitized; email-like values are removed.
 - `avatar_url` is returned only for `http/https` URLs with length ≤ 1024; otherwise `null`.
 
@@ -202,6 +211,7 @@ Notes:
 Ingest half-hour token usage aggregates from a device token idempotently.
 
 Auth:
+
 - `Authorization: Bearer <device_token>`
 
 Request body:
@@ -251,6 +261,7 @@ Response:
 ```
 
 Notes:
+
 - `hour_start` must be a UTC half-hour boundary ISO timestamp (`:00` or `:30`).
 - `source` is optional; when missing or empty, it defaults to `codex`.
 - `model` is optional; when missing or empty, it defaults to `unknown`.
@@ -269,6 +280,7 @@ Notes:
 Record a throttled sync heartbeat for a device token. Used to distinguish “unsynced” from “no usage”.
 
 Auth:
+
 - `Authorization: Bearer <device_token>`
 
 Response:
@@ -289,6 +301,7 @@ Response:
 Return Pro status for the authenticated user.
 
 Auth:
+
 - `Authorization: Bearer <user_jwt>`
 
 Response:
@@ -326,6 +339,7 @@ Response:
 ```
 
 Notes:
+
 - Registration cutoff is fixed at `2025-12-31T23:59:59` Asia/Shanghai (`2025-12-31T15:59:59Z`).
 - Registration-based Pro expires at `created_at + 99 years`.
 - Entitlements are active when `now_utc` is in `[effective_from, effective_to)` and `revoked_at IS NULL`.
@@ -339,6 +353,7 @@ Notes:
 Grant an entitlement for a user (admin only).
 
 Auth:
+
 - `Authorization: Bearer <service_role_key>` or a `project_admin` JWT
 
 Request body:
@@ -372,6 +387,7 @@ Response:
 ```
 
 Notes:
+
 - For idempotent retries, send a stable `id` or `idempotency_key` (the backend derives a deterministic id).
 - If the `id` or `idempotency_key` already exists with a different payload, the endpoint returns `409`.
 
@@ -382,6 +398,7 @@ Notes:
 Revoke an entitlement by id (admin only).
 
 Auth:
+
 - `Authorization: Bearer <service_role_key>` or a `project_admin` JWT
 
 Request body:
@@ -403,9 +420,11 @@ Response:
 Return token usage totals for the authenticated user over a date range in the requested timezone (default UTC).
 
 Auth:
+
 - `Authorization: Bearer <user_jwt>`
 
 Query:
+
 - `from=YYYY-MM-DD` (optional; default last 30 days)
 - `to=YYYY-MM-DD` (optional; default today in requested timezone)
 - `source=codex|every-code|...` (optional; filter by source; omit to aggregate all sources)
@@ -447,6 +466,7 @@ Response (bigints as strings):
 ```
 
 Notes:
+
 - Pricing metadata is resolved from `vibeusage_pricing_profiles` using the configured default model/source and the latest `effective_from` not in the future (`active=true`).
 - If no pricing rows exist, the endpoint falls back to the built-in default profile.
 - `pricing_mode` is `add`, `overlap`, or `mixed` (multiple pricing modes across sources).
@@ -461,9 +481,11 @@ Notes:
 Return top project usage totals for the authenticated user across all recorded history.
 
 Auth:
+
 - `Authorization: Bearer <user_jwt>`
 
 Query:
+
 - `source=codex|every-code|...` (optional; filter by source; omit to aggregate all sources)
 - `limit=1..10` (optional; default 3)
 - `debug=1` (optional; include debug payload for query timing)
@@ -489,6 +511,7 @@ Response (bigints as strings):
 ```
 
 Notes:
+
 - Results are sorted by `billable_total_tokens` descending.
 - When `debug=1` is set, the response includes a `debug` object with `request_id`, `status`, `query_ms`, `slow_threshold_ms`, `slow_query`.
 
@@ -499,9 +522,11 @@ Notes:
 Return per-source and per-model aggregates for a date range. This endpoint is intended for model mix and cost breakdown UI.
 
 Auth:
+
 - `Authorization: Bearer <user_jwt>`
 
 Query:
+
 - `from=YYYY-MM-DD` (optional; default last 30 days)
 - `to=YYYY-MM-DD` (optional; default today in requested timezone)
 - `source=codex|every-code|...` (optional; filter by source; omit to aggregate all sources)
@@ -510,6 +535,7 @@ Query:
 - `debug=1` (optional; include debug payload for query timing)
 
 Notes:
+
 - `model` is not accepted because this endpoint already returns per-model groups.
 - Model groups are aggregated by canonical `model_id` across sources; `model` is the display name.
 - Pricing metadata is resolved from `vibeusage_pricing_profiles`. If the range contains exactly one non-`unknown` model, pricing is resolved for that model; otherwise it falls back to the configured default profile.
@@ -572,9 +598,11 @@ Response (bigints as strings):
 Return daily aggregates for the authenticated user in the requested timezone (default UTC).
 
 Auth:
+
 - `Authorization: Bearer <user_jwt>`
 
 Query:
+
 - `from=YYYY-MM-DD` (optional; default last 30 days)
 - `to=YYYY-MM-DD` (optional; default today in requested timezone)
 - `source=codex|every-code|...` (optional; filter by source; omit to aggregate all sources)
@@ -626,6 +654,7 @@ Response:
 ```
 
 Notes:
+
 - `model` query uses canonical model id; the backend expands it only to explicit active aliases for the date range (no implicit suffix matching).
 - `model_id`/`model` are `null` when no model filter is supplied.
 - The response includes backend-computed `summary` totals; the dashboard MUST NOT compute totals locally.
@@ -638,9 +667,11 @@ Notes:
 Return half-hour aggregates (48 buckets) for the authenticated user on a given local day (timezone-aware; default UTC).
 
 Auth:
+
 - `Authorization: Bearer <user_jwt>`
 
 Query:
+
 - `day=YYYY-MM-DD` (optional; default today in requested timezone)
 - `source=codex|every-code|...` (optional; filter by source; omit to aggregate all sources)
 - `model=<model-id>` (optional; filter by model; omit to aggregate all models)
@@ -672,6 +703,7 @@ Response:
 ```
 
 Notes:
+
 - `model` query uses canonical model id; the backend expands it only to explicit active aliases for the date range (no implicit suffix matching).
 - When `debug=1` is set, the response includes a `debug` object with `request_id`, `status`, `query_ms`, `slow_threshold_ms`, `slow_query`.
 
@@ -682,9 +714,11 @@ Notes:
 Return monthly aggregates for the authenticated user aligned to local months (timezone-aware; default UTC).
 
 Auth:
+
 - `Authorization: Bearer <user_jwt>`
 
 Query:
+
 - `months=1..24` (optional; default `24`)
 - `to=YYYY-MM-DD` (optional; default today in requested timezone)
 - `source=codex|every-code|...` (optional; filter by source; omit to aggregate all sources)
@@ -714,6 +748,7 @@ Response:
 ```
 
 Notes:
+
 - `model` query uses canonical model id; the backend expands it only to explicit active aliases for the date range (no implicit suffix matching).
 - When `debug=1` is set, the response includes a `debug` object with `request_id`, `status`, `query_ms`, `slow_threshold_ms`, `slow_query`.
 
@@ -724,9 +759,11 @@ Notes:
 Return a GitHub-inspired activity heatmap derived from local daily totals (timezone-aware; default UTC).
 
 Auth:
+
 - `Authorization: Bearer <user_jwt>`
 
 Query:
+
 - `weeks=1..104` (optional; default `52`)
 - `to=YYYY-MM-DD` (optional; default today in requested timezone)
 - `week_starts_on=sun|mon` (optional; default `sun`)
@@ -746,16 +783,12 @@ Response:
   "thresholds": { "t1": "0", "t2": "0", "t3": "0" },
   "active_days": 0,
   "streak_days": 0,
-  "weeks": [
-    [
-      { "day": "YYYY-MM-DD", "value": "0", "level": 0 },
-      null
-    ]
-  ]
+  "weeks": [[{ "day": "YYYY-MM-DD", "value": "0", "level": 0 }, null]]
 }
 ```
 
 Notes:
+
 - `weeks` is a list of week columns; each day cell is `{ day, value, level }` or `null` past the end date.
 - `value` is a bigint-as-string.
 - `model` query uses canonical model id; the backend expands it only to explicit active aliases for the date range (no implicit suffix matching).
@@ -768,23 +801,30 @@ Notes:
 Return token usage leaderboard for the current UTC period window.
 
 Auth:
+
 - `Authorization: Bearer <user_jwt>`
 
 Query:
+
 - `period=week|month|total` (required)
-- `metric=all|gpt|claude` (optional; default `all`)
+- `metric=all|gpt|claude|other` (optional; default `all`)
 - `limit=1..100` (optional; default `20`)
 - `offset=0..10000` (optional; default `0`)
 
 Rules:
+
 - `period=week`: UTC calendar week; week starts Sunday (UTC).
 - `period=month`: UTC calendar month (1st..last day).
 - `period=total`: all-time (represented as `from=1970-01-01` and `to=9999-12-31`).
-- `metric=all` ranks by `total_tokens` where `total_tokens = gpt_tokens + claude_tokens`.
+- `metric=all` ranks by `total_tokens` where `total_tokens = gpt_tokens + claude_tokens + other_tokens`.
 - `metric=gpt` ranks by `gpt_tokens` (users with `gpt_tokens=0` are excluded from `entries`; `me.rank` is `null` when `gpt_tokens=0`).
 - `metric=claude` ranks by `claude_tokens` (users with `claude_tokens=0` are excluded from `entries`; `me.rank` is `null` when `claude_tokens=0`).
-- Code sources only: buckets with `source` not in `codex|every-code|claude|opencode` are excluded.
-- Privacy-safe: no email, no user_id, no raw logs.
+- `metric=other` ranks by `other_tokens` (users with `other_tokens=0` are excluded from `entries`; `me.rank` is `null` when `other_tokens=0`).
+- Leaderboard source scope includes all sources except `source=canary` (no source whitelist).
+- Unknown/unclassified models are included in the `other_tokens` bucket.
+- Privacy-safe: no email and no raw logs.
+- `entries[].is_public` is always a boolean.
+- `entries[].user_id` is exposed only when `is_public=true`; otherwise it is `null`.
 - Response includes `me` even when not in Top N.
 
 Response:
@@ -802,9 +842,26 @@ Response:
   "total_entries": 0,
   "total_pages": 0,
   "entries": [
-    { "rank": 1, "is_me": false, "display_name": "Anonymous", "avatar_url": null, "gpt_tokens": "0", "claude_tokens": "0", "total_tokens": "0" }
+    {
+      "user_id": null,
+      "rank": 1,
+      "is_me": false,
+      "is_public": false,
+      "display_name": "Anonymous",
+      "avatar_url": null,
+      "gpt_tokens": "0",
+      "claude_tokens": "0",
+      "other_tokens": "0",
+      "total_tokens": "0"
+    }
   ],
-  "me": { "rank": null, "gpt_tokens": "0", "claude_tokens": "0", "total_tokens": "0" }
+  "me": {
+    "rank": null,
+    "gpt_tokens": "0",
+    "claude_tokens": "0",
+    "other_tokens": "0",
+    "total_tokens": "0"
+  }
 }
 ```
 
@@ -815,9 +872,11 @@ Response:
 Rebuild leaderboard snapshots for the current UTC period window. Intended for automation (service role only).
 
 Auth:
-- `Authorization: Bearer <service_role_key|api_key>`
+
+- `Authorization: Bearer <service_role_key>`
 
 Query (optional):
+
 - `period=week|month|total` (when omitted, refreshes `week` + `month`)
 
 Response:
@@ -826,9 +885,7 @@ Response:
 {
   "success": true,
   "generated_at": "iso",
-  "results": [
-    { "period": "week", "from": "YYYY-MM-DD", "to": "YYYY-MM-DD", "inserted": 42 }
-  ]
+  "results": [{ "period": "week", "from": "YYYY-MM-DD", "to": "YYYY-MM-DD", "inserted": 42 }]
 }
 ```
 
@@ -836,7 +893,7 @@ Manual refresh runbook:
 
 ```bash
 BASE_URL="https://5tmappuk.us-east.insforge.app"
-ADMIN_TOKEN="<service_role_key or api_key>"
+ADMIN_TOKEN="<service_role_key>"
 
 curl -s -X POST "$BASE_URL/functions/vibeusage-leaderboard-refresh?period=week" \
   -H "Authorization: Bearer $ADMIN_TOKEN" \
@@ -868,6 +925,7 @@ curl -s "$BASE_URL/functions/vibeusage-leaderboard?period=week" \
 Update the current user's leaderboard privacy setting.
 
 Auth:
+
 - `Authorization: Bearer <user_jwt>`
 
 Request body:
@@ -889,6 +947,7 @@ Response:
 Sync OpenRouter Models API pricing into `vibeusage_pricing_profiles` (admin only).
 
 Auth:
+
 - `Authorization: Bearer <service_role_key>`
 
 Request body:
@@ -898,6 +957,7 @@ Request body:
 ```
 
 Notes:
+
 - `retention_days` is optional; when provided, rows older than the cutoff are soft-deactivated (`active=false`).
 - `effective_from` defaults to today (UTC).
 - `allow_models` is optional; when omitted, all models from OpenRouter are processed.
@@ -928,6 +988,7 @@ Response:
 Purge legacy tracker events older than a cutoff (admin only).
 
 Auth:
+
 - `Authorization: Bearer <service_role_key>`
 
 Request body:
@@ -951,6 +1012,7 @@ configured and whether the supplied bearer token validates. This does **not**
 expose any secrets.
 
 Auth:
+
 - Optional `Authorization: Bearer <user_jwt>` to validate the token.
 
 Response:

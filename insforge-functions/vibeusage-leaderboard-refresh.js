@@ -305,7 +305,11 @@ var require_auth = __commonJS({
     }
     async function getEdgeClientAndUserIdFast({ baseUrl, bearer }) {
       const anonKey = getAnonKey2();
-      const edgeClient = createClient({ baseUrl, anonKey: anonKey || void 0, edgeFunctionToken: bearer });
+      const edgeClient = createClient({
+        baseUrl,
+        anonKey: anonKey || void 0,
+        edgeFunctionToken: bearer
+      });
       const local = await verifyUserJwtHs256({ token: bearer });
       const allowRemoteOnly = !local.ok && local?.code === "missing_jwt_secret";
       if (!local.ok && !allowRemoteOnly) {
@@ -414,7 +418,14 @@ var require_auth = __commonJS({
       }
       const publicView = await resolvePublicView({ baseUrl, shareToken: bearer });
       if (!publicView.ok) {
-        return { ok: false, edgeClient: null, userId: null, accessType: null, status: 401, error: "Unauthorized" };
+        return {
+          ok: false,
+          edgeClient: null,
+          userId: null,
+          accessType: null,
+          status: 401,
+          error: "Unauthorized"
+        };
       }
       return {
         ok: true,
@@ -639,7 +650,14 @@ var require_date = __commonJS({
     }
     function getTimeZoneOffsetMinutes(date, timeZone) {
       const parts = getTimeZoneParts(date, timeZone);
-      const asUtc = Date.UTC(parts.year, parts.month - 1, parts.day, parts.hour, parts.minute, parts.second);
+      const asUtc = Date.UTC(
+        parts.year,
+        parts.month - 1,
+        parts.day,
+        parts.hour,
+        parts.minute,
+        parts.second
+      );
       return Math.round((asUtc - date.getTime()) / 6e4);
     }
     function getLocalParts(date, tzContext) {
@@ -939,7 +957,9 @@ async function refreshPeriod({ serviceClient, period, from, to, generatedAt }) {
   let inserted = 0;
   const { error } = await forEachPage({
     pageSize: SOURCE_PAGE_SIZE,
-    createQuery: () => serviceClient.database.from(sourceView).select("user_id,rank,rank_gpt,rank_claude,gpt_tokens,claude_tokens,total_tokens,display_name,avatar_url").order("rank", { ascending: true }),
+    createQuery: () => serviceClient.database.from(sourceView).select(
+      "user_id,rank,rank_gpt,rank_claude,rank_other,gpt_tokens,claude_tokens,other_tokens,total_tokens,display_name,avatar_url"
+    ).order("rank", { ascending: true }),
     onPage: async (rows) => {
       const profileByUserId = await loadPublicProfileLookup({
         serviceClient,
@@ -967,7 +987,9 @@ async function refreshPeriod({ serviceClient, period, from, to, generatedAt }) {
 }
 async function loadPublicProfileLookup({ serviceClient, userIds }) {
   const uniqueUserIds = Array.from(
-    new Set((userIds || []).filter((value) => typeof value === "string" && value.trim().length > 0))
+    new Set(
+      (userIds || []).filter((value) => typeof value === "string" && value.trim().length > 0)
+    )
   );
   const lookup = /* @__PURE__ */ new Map();
   if (uniqueUserIds.length === 0) return lookup;
@@ -1020,11 +1042,23 @@ function normalizeSnapshotRow({ row, period, from, to, generatedAt, publicProfil
   if (rank <= 0) return null;
   const rankGpt = toPositiveInt(row.rank_gpt);
   const rankClaude = toPositiveInt(row.rank_claude);
+  const rankOtherRaw = toPositiveInt(row.rank_other);
+  const rankOther = rankOtherRaw > 0 ? rankOtherRaw : rank;
   if (rankGpt <= 0) return null;
   if (rankClaude <= 0) return null;
-  const gptTokens = toBigInt(row.gpt_tokens).toString();
-  const claudeTokens = toBigInt(row.claude_tokens).toString();
-  const totalTokens = toBigInt(row.total_tokens).toString();
+  const gptTokensBigInt = toBigInt(row.gpt_tokens);
+  const claudeTokensBigInt = toBigInt(row.claude_tokens);
+  const totalTokensBigInt = toBigInt(row.total_tokens);
+  const otherTokensBigInt = resolveOtherTokens({
+    row,
+    totalTokens: totalTokensBigInt,
+    gptTokens: gptTokensBigInt,
+    claudeTokens: claudeTokensBigInt
+  });
+  const gptTokens = gptTokensBigInt.toString();
+  const claudeTokens = claudeTokensBigInt.toString();
+  const otherTokens = otherTokensBigInt.toString();
+  const totalTokens = totalTokensBigInt.toString();
   const fallbackDisplayName = normalizeDisplayName(row.display_name);
   const fallbackAvatarUrl = normalizeAvatarUrl(row.avatar_url);
   const displayName = publicProfile ? publicProfile.isPublic ? publicProfile.displayName || "Anonymous" : "Anonymous" : fallbackDisplayName;
@@ -1038,14 +1072,22 @@ function normalizeSnapshotRow({ row, period, from, to, generatedAt, publicProfil
     rank,
     rank_gpt: rankGpt,
     rank_claude: rankClaude,
+    rank_other: rankOther,
     gpt_tokens: gptTokens,
     claude_tokens: claudeTokens,
+    other_tokens: otherTokens,
     total_tokens: totalTokens,
     display_name: displayName,
     avatar_url: avatarUrl,
     is_public: isPublic,
     generated_at: generatedAt
   };
+}
+function resolveOtherTokens({ row, totalTokens, gptTokens, claudeTokens }) {
+  const explicit = row?.other_tokens;
+  if (explicit != null) return toBigInt(explicit);
+  const derived = totalTokens - gptTokens - claudeTokens;
+  return derived > 0n ? derived : 0n;
 }
 function resolveDisplayName(row) {
   const profile = isObject(row?.profile) ? row.profile : null;

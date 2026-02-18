@@ -1,12 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
-
-import { copy } from "../lib/copy";
-import { getLeaderboardProfile } from "../lib/vibeusage-api";
-import { isMockEnabled } from "../lib/mock-data";
-import { isAccessTokenReady, resolveAuthAccessToken } from "../lib/auth-token";
-import { toDisplayNumber } from "../lib/format";
 import { BackendStatus } from "../components/BackendStatus.jsx";
+import { isAccessTokenReady, resolveAuthAccessToken } from "../lib/auth-token";
+import { copy } from "../lib/copy";
+import { toDisplayNumber } from "../lib/format";
+import { isMockEnabled } from "../lib/mock-data";
+import { getLeaderboardProfile } from "../lib/vibeusage-api";
 import { AsciiBox } from "../ui/foundation/AsciiBox.jsx";
 import { MatrixButton } from "../ui/foundation/MatrixButton.jsx";
 import { MatrixShell } from "../ui/foundation/MatrixShell.jsx";
@@ -155,14 +154,18 @@ export function LeaderboardProfilePage({
               <th className="px-4 py-3">{copy("leaderboard.column.total")}</th>
               <th className="px-4 py-3">{copy("leaderboard.column.gpt")}</th>
               <th className="px-4 py-3">{copy("leaderboard.column.claude")}</th>
+              <th className="px-4 py-3">{copy("leaderboard.column.other")}</th>
             </tr>
           </thead>
           <tbody>
             <tr className="border-b border-matrix-ghost/40 bg-transparent">
-              <td className="px-4 py-3 font-bold">{entry?.rank ?? copy("shared.placeholder.short")}</td>
+              <td className="px-4 py-3 font-bold">
+                {entry?.rank ?? copy("shared.placeholder.short")}
+              </td>
               <td className="px-4 py-3">{toDisplayNumber(entry?.total_tokens)}</td>
               <td className="px-4 py-3">{toDisplayNumber(entry?.gpt_tokens)}</td>
               <td className="px-4 py-3">{toDisplayNumber(entry?.claude_tokens)}</td>
+              <td className="px-4 py-3">{toDisplayNumber(entry?.other_tokens)}</td>
             </tr>
           </tbody>
         </table>
@@ -181,7 +184,9 @@ export function LeaderboardProfilePage({
       <div className="max-w-4xl mx-auto flex flex-col gap-6">
         <div className="flex flex-col gap-2">
           <div className="flex flex-wrap items-baseline justify-between gap-3">
-            <h1 className="text-xl md:text-2xl font-black tracking-tight glow-text">{displayName}</h1>
+            <h1 className="text-xl md:text-2xl font-black tracking-tight glow-text">
+              {displayName}
+            </h1>
             <div className="text-[10px] uppercase tracking-[0.25em] text-matrix-muted">
               {period === "total"
                 ? copy("leaderboard.range.total")

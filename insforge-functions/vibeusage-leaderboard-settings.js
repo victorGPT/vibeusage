@@ -305,7 +305,11 @@ var require_auth = __commonJS({
     }
     async function getEdgeClientAndUserIdFast({ baseUrl, bearer }) {
       const anonKey = getAnonKey2();
-      const edgeClient = createClient({ baseUrl, anonKey: anonKey || void 0, edgeFunctionToken: bearer });
+      const edgeClient = createClient({
+        baseUrl,
+        anonKey: anonKey || void 0,
+        edgeFunctionToken: bearer
+      });
       const local = await verifyUserJwtHs256({ token: bearer });
       const allowRemoteOnly = !local.ok && local?.code === "missing_jwt_secret";
       if (!local.ok && !allowRemoteOnly) {
@@ -414,7 +418,14 @@ var require_auth = __commonJS({
       }
       const publicView = await resolvePublicView({ baseUrl, shareToken: bearer });
       if (!publicView.ok) {
-        return { ok: false, edgeClient: null, userId: null, accessType: null, status: 401, error: "Unauthorized" };
+        return {
+          ok: false,
+          edgeClient: null,
+          userId: null,
+          accessType: null,
+          status: 401,
+          error: "Unauthorized"
+        };
       }
       return {
         ok: true,
@@ -639,7 +650,14 @@ var require_date = __commonJS({
     }
     function getTimeZoneOffsetMinutes(date, timeZone) {
       const parts = getTimeZoneParts(date, timeZone);
-      const asUtc = Date.UTC(parts.year, parts.month - 1, parts.day, parts.hour, parts.minute, parts.second);
+      const asUtc = Date.UTC(
+        parts.year,
+        parts.month - 1,
+        parts.day,
+        parts.hour,
+        parts.minute,
+        parts.second
+      );
       return Math.round((asUtc - date.getTime()) / 6e4);
     }
     function getLocalParts(date, tzContext) {
@@ -805,9 +823,16 @@ module.exports = async function(request) {
   const settingsTable = auth.edgeClient.database.from("vibeusage_user_settings");
   if (typeof settingsTable.upsert === "function") {
     try {
-      const { error: upsertErr } = await settingsTable.upsert([upsertRow], { onConflict: "user_id" });
+      const { error: upsertErr } = await settingsTable.upsert([upsertRow], {
+        onConflict: "user_id"
+      });
       if (!upsertErr) {
-        await trySyncPublicView({ edgeClient: auth.edgeClient, userId: auth.userId, leaderboardPublic, updatedAt });
+        await trySyncPublicView({
+          edgeClient: auth.edgeClient,
+          userId: auth.userId,
+          leaderboardPublic,
+          updatedAt
+        });
         await trySyncSnapshot({ baseUrl, userId: auth.userId, leaderboardPublic });
         return json({ leaderboard_public: leaderboardPublic, updated_at: updatedAt }, 200);
       }
@@ -823,7 +848,12 @@ module.exports = async function(request) {
     const { error: insErr } = await auth.edgeClient.database.from("vibeusage_user_settings").insert([upsertRow]);
     if (insErr) return json({ error: insErr.message }, 500);
   }
-  await trySyncPublicView({ edgeClient: auth.edgeClient, userId: auth.userId, leaderboardPublic, updatedAt });
+  await trySyncPublicView({
+    edgeClient: auth.edgeClient,
+    userId: auth.userId,
+    leaderboardPublic,
+    updatedAt
+  });
   await trySyncSnapshot({ baseUrl, userId: auth.userId, leaderboardPublic });
   return json({ leaderboard_public: leaderboardPublic, updated_at: updatedAt }, 200);
 };
@@ -851,15 +881,26 @@ async function trySyncSnapshot({ baseUrl, userId, leaderboardPublic }) {
   } catch (_err) {
     profileRow = null;
   }
+  const hasActivePublicLink = leaderboardPublic ? await loadHasActivePublicLink({ serviceClient, userId }) : false;
+  const isPublic = leaderboardPublic && hasActivePublicLink;
   const resolvedDisplayName = resolveDisplayName(profileRow);
   const resolvedAvatarUrl = resolveAvatarUrl(profileRow);
-  const displayName = leaderboardPublic ? resolvedDisplayName || "Anonymous" : "Anonymous";
-  const nextAvatarUrl = leaderboardPublic ? resolvedAvatarUrl : null;
+  const displayName = isPublic ? resolvedDisplayName || "Anonymous" : "Anonymous";
+  const nextAvatarUrl = isPublic ? resolvedAvatarUrl : null;
   for (const w of windows) {
     try {
-      await serviceClient.database.from("vibeusage_leaderboard_snapshots").update({ display_name: displayName, avatar_url: nextAvatarUrl }).eq("period", w.period).eq("from_day", w.from).eq("to_day", w.to).eq("user_id", userId);
+      await serviceClient.database.from("vibeusage_leaderboard_snapshots").update({ display_name: displayName, avatar_url: nextAvatarUrl, is_public: isPublic }).eq("period", w.period).eq("from_day", w.from).eq("to_day", w.to).eq("user_id", userId);
     } catch (_err) {
     }
+  }
+}
+async function loadHasActivePublicLink({ serviceClient, userId }) {
+  try {
+    const { data, error } = await serviceClient.database.from("vibeusage_public_views").select("user_id").eq("user_id", userId).is("revoked_at", null).maybeSingle();
+    if (error) return false;
+    return typeof data?.user_id === "string";
+  } catch (_err) {
+    return false;
   }
 }
 function computeWindows() {

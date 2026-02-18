@@ -1,8 +1,8 @@
-import { createInsforgeClient } from "./insforge-client";
 import { clearSessionSoftExpired, markSessionSoftExpired } from "./auth-storage";
 import { normalizeAccessToken, resolveAuthAccessToken } from "./auth-token";
 import { formatDateLocal } from "./date-range";
 import { insforgeAuthClient } from "./insforge-auth-client";
+import { createInsforgeClient } from "./insforge-client";
 import {
   getMockUsageDaily,
   getMockUsageHourly,
@@ -15,8 +15,7 @@ import {
   isMockEnabled,
 } from "./mock-data";
 
-const BACKEND_RUNTIME_UNAVAILABLE =
-  "Backend runtime unavailable (InsForge). Please retry later.";
+const BACKEND_RUNTIME_UNAVAILABLE = "Backend runtime unavailable (InsForge). Please retry later.";
 
 const PATHS = {
   usageSummary: "vibeusage-usage-summary",
@@ -207,6 +206,7 @@ export async function getLeaderboardProfile({
             rank: match.rank ?? null,
             gpt_tokens: match.gpt_tokens ?? "0",
             claude_tokens: match.claude_tokens ?? "0",
+            other_tokens: match.other_tokens ?? "0",
             total_tokens: match.total_tokens ?? "0",
           }
         : null,
@@ -787,12 +787,7 @@ async function requestWithFallbackPost({
   }
 }
 
-async function requestWithAuthRetryPost({
-  http,
-  path,
-  body,
-  fetchOptions,
-}: AnyRecord = {}) {
+async function requestWithAuthRetryPost({ http, path, body, fetchOptions }: AnyRecord = {}) {
   return await http.post(path, body, { ...(fetchOptions || {}) });
 }
 
@@ -806,11 +801,10 @@ function shouldFallbackToLegacy(error: any, primaryPath: any) {
 
 function normalizeSdkError(
   error: any,
-  { errorPrefix, hadAccessToken, accessToken, skipSessionExpiry }: AnyRecord = {}
+  { errorPrefix, hadAccessToken, accessToken, skipSessionExpiry }: AnyRecord = {},
 ) {
   // InsForgeError may have an empty `message` but a meaningful `error` field.
-  const rawMessage =
-    typeof error?.message === "string" ? error.message.trim() : "";
+  const rawMessage = typeof error?.message === "string" ? error.message.trim() : "";
   const rawError = typeof error?.error === "string" ? error.error.trim() : "";
   const raw = rawMessage || rawError || String(error || "Unknown error");
   const msg = normalizeBackendErrorMessage(raw);
@@ -859,17 +853,11 @@ function shouldMarkSessionSoftExpired({
   return canSetSessionSoftExpired({ hadAccessToken, accessToken, skipSessionExpiry });
 }
 
-function shouldClearSessionSoftExpired({
-  hadAccessToken,
-  accessToken,
-}: AnyRecord = {}) {
+function shouldClearSessionSoftExpired({ hadAccessToken, accessToken }: AnyRecord = {}) {
   return canSetSessionSoftExpired({ hadAccessToken, accessToken });
 }
 
-function clearSessionSoftExpiredIfNeeded({
-  hadAccessToken,
-  accessToken,
-}: AnyRecord = {}) {
+function clearSessionSoftExpiredIfNeeded({ hadAccessToken, accessToken }: AnyRecord = {}) {
   if (!shouldClearSessionSoftExpired({ hadAccessToken, accessToken })) return;
   clearSessionSoftExpired();
 }
@@ -886,8 +874,7 @@ function isBackendRuntimeDownMessage(message: any) {
   if (s.includes("econnreset") || s.includes("econnrefused")) return true;
   if (s.includes("etimedout")) return true;
   if (s.includes("timeout") && s.includes("request")) return true;
-  if (s.includes("upstream") && (s.includes("deno") || s.includes("connect")))
-    return true;
+  if (s.includes("upstream") && (s.includes("deno") || s.includes("connect"))) return true;
   return false;
 }
 
@@ -941,11 +928,7 @@ function normalizeRetryOptions(retry: any, method: any) {
 
   const maxRetries = clampInt(retry.maxRetries ?? defaultRetry.maxRetries, 0, 10);
   const baseDelayMs = clampInt(retry.baseDelayMs ?? defaultRetry.baseDelayMs, 50, 60_000);
-  const maxDelayMs = clampInt(
-    retry.maxDelayMs ?? defaultRetry.maxDelayMs,
-    baseDelayMs,
-    120_000
-  );
+  const maxDelayMs = clampInt(retry.maxDelayMs ?? defaultRetry.maxDelayMs, baseDelayMs, 120_000);
   const jitterRatio =
     typeof retry.jitterRatio === "number"
       ? Math.max(0, Math.min(0.5, retry.jitterRatio))

@@ -1,9 +1,9 @@
-import { formatDateLocal, formatDateUTC } from "./date-range";
 import {
   buildActivityHeatmap,
   computeActiveStreakDays,
   getHeatmapRangeLocal,
 } from "./activity-heatmap";
+import { formatDateLocal, formatDateUTC } from "./date-range";
 
 type AnyRecord = Record<string, any>;
 type HourRow = {
@@ -154,9 +154,7 @@ function parseUtcDate(yyyyMmDd: any) {
 }
 
 function addUtcDays(date: Date, days: number) {
-  return new Date(
-    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate() + days)
-  );
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate() + days));
 }
 
 function addUtcMonths(date: Date, months: number) {
@@ -177,7 +175,7 @@ function buildDailyRows({ from, to, seed }: AnyRecord) {
     Math.floor(
       (Date.UTC(end.getUTCFullYear(), end.getUTCMonth(), end.getUTCDate()) -
         Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), start.getUTCDate())) /
-        86400000
+        86400000,
     ) + 1;
 
   for (let i = 0; i < totalDays; i += 1) {
@@ -311,7 +309,7 @@ function sumDailyRows(rows: AnyRecord[]) {
       output_tokens: 0,
       cached_input_tokens: 0,
       reasoning_output_tokens: 0,
-    } as AnyRecord
+    } as AnyRecord,
   );
 }
 
@@ -328,18 +326,12 @@ function scaleTotals(totals: any, weight: number) {
     total_tokens: Math.max(0, Math.round(totals.total_tokens * safeWeight)),
     billable_total_tokens: Math.max(
       0,
-      Math.round((totals.billable_total_tokens ?? totals.total_tokens) * safeWeight)
+      Math.round((totals.billable_total_tokens ?? totals.total_tokens) * safeWeight),
     ),
     input_tokens: Math.max(0, Math.round(totals.input_tokens * safeWeight)),
     output_tokens: Math.max(0, Math.round(totals.output_tokens * safeWeight)),
-    cached_input_tokens: Math.max(
-      0,
-      Math.round(totals.cached_input_tokens * safeWeight)
-    ),
-    reasoning_output_tokens: Math.max(
-      0,
-      Math.round(totals.reasoning_output_tokens * safeWeight)
-    ),
+    cached_input_tokens: Math.max(0, Math.round(totals.cached_input_tokens * safeWeight)),
+    reasoning_output_tokens: Math.max(0, Math.round(totals.reasoning_output_tokens * safeWeight)),
   };
 }
 
@@ -368,23 +360,16 @@ export function getMockUsageMonthly({ months = 24, to, seed }: AnyRecord = {}) {
   const rows = buildMonthlyRows({ months, to: endDay, seed });
   const startMonth = addUtcMonths(
     new Date(Date.UTC(end.getUTCFullYear(), end.getUTCMonth(), 1)),
-    -(months - 1)
+    -(months - 1),
   );
   return { from: formatDateUTC(startMonth), to: endDay, months, data: rows };
 }
 
-export function getMockUsageSummary({
-  from,
-  to,
-  seed,
-  rolling = true,
-}: AnyRecord = {}) {
+export function getMockUsageSummary({ from, to, seed, rolling = true }: AnyRecord = {}) {
   const rows = buildDailyRows({ from, to, seed });
   const totals = sumDailyRows(rows);
   const totalsWithCost = withCost(totals);
-  const rollingPayload = rolling
-    ? buildMockRollingSummary({ to, seed })
-    : null;
+  const rollingPayload = rolling ? buildMockRollingSummary({ to, seed }) : null;
   return {
     from,
     to,
@@ -411,10 +396,9 @@ function buildMockRollingSummary({ to, seed }: AnyRecord = {}) {
 function buildMockRollingWindow({ rows, from, to }: AnyRecord = {}) {
   const totals = sumDailyRows(rows || []);
   const activeDays = (rows || []).filter(
-    (row: AnyRecord) => Number(row.billable_total_tokens ?? row.total_tokens) > 0
+    (row: AnyRecord) => Number(row.billable_total_tokens ?? row.total_tokens) > 0,
   ).length;
-  const avg =
-    activeDays > 0 ? Math.floor(totals.billable_total_tokens / activeDays) : 0;
+  const avg = activeDays > 0 ? Math.floor(totals.billable_total_tokens / activeDays) : 0;
 
   return {
     from,
@@ -425,10 +409,7 @@ function buildMockRollingWindow({ rows, from, to }: AnyRecord = {}) {
   };
 }
 
-export function getMockProjectUsageSummary({
-  seed,
-  limit = 3,
-}: AnyRecord = {}) {
+export function getMockProjectUsageSummary({ seed, limit = 3 }: AnyRecord = {}) {
   const seedValue = toSeed(seed);
   const entries = MOCK_PROJECT_REPOS.map((repo, index) => {
     const hash = hashString(`${seedValue}:${repo}`);
@@ -443,10 +424,7 @@ export function getMockProjectUsageSummary({
       billable_total_tokens: String(billable),
     };
   })
-    .sort(
-      (a, b) =>
-        Number(b.billable_total_tokens) - Number(a.billable_total_tokens)
-    )
+    .sort((a, b) => Number(b.billable_total_tokens) - Number(a.billable_total_tokens))
     .slice(0, Math.max(1, Math.min(10, Math.floor(Number(limit) || 3))));
 
   return {
@@ -457,7 +435,10 @@ export function getMockProjectUsageSummary({
 
 function computeLeaderboardWindow(period: string) {
   const today = parseUtcDate(formatDateLocal(new Date())) || new Date();
-  const safe = String(period || "week").trim().toLowerCase() || "week";
+  const safe =
+    String(period || "week")
+      .trim()
+      .toLowerCase() || "week";
 
   if (safe === "total") {
     return { from: "1970-01-01", to: "9999-12-31" };
@@ -485,9 +466,16 @@ export function getMockLeaderboard({
   const seedValue = toSeed(seed);
   const safeLimit = Math.max(1, Math.min(100, Math.floor(Number(limit) || 20)));
   const safeOffset = Math.max(0, Math.min(10_000, Math.floor(Number(offset) || 0)));
-  const safeMetric = String(metric || "all").trim().toLowerCase() || "all";
-  const safePeriod = String(rawPeriod || "week").trim().toLowerCase() || "week";
-  const period = safePeriod === "month" || safePeriod === "total" || safePeriod === "week" ? safePeriod : "week";
+  const safeMetric =
+    String(metric || "all")
+      .trim()
+      .toLowerCase() || "all";
+  const safePeriod =
+    String(rawPeriod || "week")
+      .trim()
+      .toLowerCase() || "week";
+  const period =
+    safePeriod === "month" || safePeriod === "total" || safePeriod === "week" ? safePeriod : "week";
   const { from, to } = computeLeaderboardWindow(period);
   const totalEntries = 250;
   const totalPages = totalEntries > 0 ? Math.ceil(totalEntries / safeLimit) : 0;
@@ -495,22 +483,25 @@ export function getMockLeaderboard({
 
   const raw = Array.from({ length: totalEntries }, (_, index) => {
     const id = index + 1;
-    const userId = `00000000-0000-0000-0000-${String(id).padStart(12, '0')}`;
+    const userId = `00000000-0000-0000-0000-${String(id).padStart(12, "0")}`;
     const name = MOCK_LEADERBOARD_NAMES[id % MOCK_LEADERBOARD_NAMES.length];
     const hash = hashString(`${seedValue}:${name}:${id}`);
     const base = 180000 + (hash % 900000);
     const total = Math.max(0, base + id * 1200);
-    const gpt = Math.floor(total * 0.62);
-    const claude = Math.max(0, total - gpt);
-    const isAnon = id % 7 === 0;
+    const gpt = Math.floor(total * 0.55);
+    const claude = Math.floor(total * 0.25);
+    const other = Math.max(0, total - gpt - claude);
+    const isPublic = id % 7 !== 0;
     return {
       id,
       user_id: userId,
+      is_public: isPublic,
       is_me: false,
-      display_name: isAnon ? "Anonymous" : name,
+      display_name: isPublic ? name : "Anonymous",
       avatar_url: null,
       gpt_tokens: gpt,
       claude_tokens: claude,
+      other_tokens: other,
       total_tokens: total,
     };
   });
@@ -519,20 +510,28 @@ export function getMockLeaderboard({
   if (raw[meIndex]) raw[meIndex].is_me = true;
 
   const metricKey =
-    safeMetric === "gpt" ? "gpt_tokens" : safeMetric === "claude" ? "claude_tokens" : "total_tokens";
+    safeMetric === "gpt"
+      ? "gpt_tokens"
+      : safeMetric === "claude"
+        ? "claude_tokens"
+        : safeMetric === "other"
+          ? "other_tokens"
+          : "total_tokens";
 
   const sorted = raw
     .slice()
     .sort((a: any, b: any) => Number(b[metricKey]) - Number(a[metricKey]) || a.id - b.id)
     .map((entry: any, index: number) => ({
-      user_id: entry.display_name === "Anonymous" ? null : entry.user_id,
+      user_id: entry.is_public ? entry.user_id : null,
       rank: index + 1,
       is_me: Boolean(entry.is_me),
       display_name: entry.display_name,
       avatar_url: entry.avatar_url,
       gpt_tokens: String(entry.gpt_tokens),
       claude_tokens: String(entry.claude_tokens),
+      other_tokens: String(entry.other_tokens),
       total_tokens: String(entry.total_tokens),
+      is_public: Boolean(entry.is_public),
     }));
 
   const meRow = sorted.find((entry: any) => entry?.is_me) || null;
@@ -541,9 +540,10 @@ export function getMockLeaderboard({
         rank: meRow.rank,
         gpt_tokens: meRow.gpt_tokens,
         claude_tokens: meRow.claude_tokens,
+        other_tokens: meRow.other_tokens,
         total_tokens: meRow.total_tokens,
       }
-    : { rank: null, gpt_tokens: "0", claude_tokens: "0", total_tokens: "0" };
+    : { rank: null, gpt_tokens: "0", claude_tokens: "0", other_tokens: "0", total_tokens: "0" };
 
   const entries = sorted.slice(safeOffset, safeOffset + safeLimit);
 
@@ -585,9 +585,8 @@ export function getMockUsageHeatmap({
   return {
     ...heatmap,
     week_starts_on: weekStartsOn,
-    active_days: rows.filter(
-      (r: any) => Number(r.billable_total_tokens ?? r.total_tokens) > 0
-    ).length,
+    active_days: rows.filter((r: any) => Number(r.billable_total_tokens ?? r.total_tokens) > 0)
+      .length,
     streak_days: computeActiveStreakDays({ dailyRows: rows, to: range.to }),
   };
 }

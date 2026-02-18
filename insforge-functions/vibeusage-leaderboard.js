@@ -305,7 +305,11 @@ var require_auth = __commonJS({
     }
     async function getEdgeClientAndUserIdFast({ baseUrl, bearer }) {
       const anonKey = getAnonKey2();
-      const edgeClient = createClient({ baseUrl, anonKey: anonKey || void 0, edgeFunctionToken: bearer });
+      const edgeClient = createClient({
+        baseUrl,
+        anonKey: anonKey || void 0,
+        edgeFunctionToken: bearer
+      });
       const local = await verifyUserJwtHs256({ token: bearer });
       const allowRemoteOnly = !local.ok && local?.code === "missing_jwt_secret";
       if (!local.ok && !allowRemoteOnly) {
@@ -414,7 +418,14 @@ var require_auth = __commonJS({
       }
       const publicView = await resolvePublicView({ baseUrl, shareToken: bearer });
       if (!publicView.ok) {
-        return { ok: false, edgeClient: null, userId: null, accessType: null, status: 401, error: "Unauthorized" };
+        return {
+          ok: false,
+          edgeClient: null,
+          userId: null,
+          accessType: null,
+          status: 401,
+          error: "Unauthorized"
+        };
       }
       return {
         ok: true,
@@ -639,7 +650,14 @@ var require_date = __commonJS({
     }
     function getTimeZoneOffsetMinutes(date, timeZone) {
       const parts = getTimeZoneParts(date, timeZone);
-      const asUtc = Date.UTC(parts.year, parts.month - 1, parts.day, parts.hour, parts.minute, parts.second);
+      const asUtc = Date.UTC(
+        parts.year,
+        parts.month - 1,
+        parts.day,
+        parts.hour,
+        parts.minute,
+        parts.second
+      );
       return Math.round((asUtc - date.getTime()) / 6e4);
     }
     function getLocalParts(date, tzContext) {
@@ -911,9 +929,9 @@ module.exports = async function(request) {
       200
     );
   }
-  const { data: rawEntries, error: entriesErr } = await auth.edgeClient.database.from(entriesView).select("rank,is_me,display_name,avatar_url,gpt_tokens,claude_tokens,total_tokens").order("rank", { ascending: true }).range(offset, offset + limit - 1);
+  const { data: rawEntries, error: entriesErr } = await auth.edgeClient.database.from(entriesView).select("rank,is_me,display_name,avatar_url,gpt_tokens,claude_tokens,other_tokens,total_tokens").order("rank", { ascending: true }).range(offset, offset + limit - 1);
   if (entriesErr) return json({ error: entriesErr.message }, 500);
-  const { data: rawMe, error: meErr } = await auth.edgeClient.database.from(meView).select("rank,gpt_tokens,claude_tokens,total_tokens").maybeSingle();
+  const { data: rawMe, error: meErr } = await auth.edgeClient.database.from(meView).select("rank,gpt_tokens,claude_tokens,other_tokens,total_tokens").maybeSingle();
   if (meErr) return json({ error: meErr.message }, 500);
   const entries = (rawEntries || []).slice(0, limit).map(normalizeEntry);
   const me = normalizeMe(rawMe);
@@ -944,7 +962,9 @@ async function tryLoadSingleQuery({ edgeClient, entriesView, limit, offset }) {
   try {
     const startRank = offset + 1;
     const endRank = offset + limit;
-    const { data, error } = await edgeClient.database.from(entriesView).select("rank,is_me,display_name,avatar_url,gpt_tokens,claude_tokens,total_tokens,is_public").or(`and(rank.gte.${startRank},rank.lte.${endRank}),is_me.eq.true`).order("rank", { ascending: true });
+    const { data, error } = await edgeClient.database.from(entriesView).select(
+      "rank,is_me,display_name,avatar_url,gpt_tokens,claude_tokens,other_tokens,total_tokens,is_public"
+    ).or(`and(rank.gte.${startRank},rank.lte.${endRank}),is_me.eq.true`).order("rank", { ascending: true });
     if (error) return null;
     const rows = Array.isArray(data) ? data : [];
     const entries = [];
@@ -975,6 +995,7 @@ function normalizeMetric(raw) {
   if (v === "all") return v;
   if (v === "gpt") return v;
   if (v === "claude") return v;
+  if (v === "other") return v;
   return null;
 }
 function normalizeLimit(raw) {
@@ -999,11 +1020,13 @@ function applyMetricFilter(query, metric) {
   if (!query) return query;
   if (metric === "gpt") return query.gt("gpt_tokens", 0);
   if (metric === "claude") return query.gt("claude_tokens", 0);
+  if (metric === "other") return query.gt("other_tokens", 0);
   return query;
 }
 function resolveRankColumn(metric) {
   if (metric === "gpt") return "rank_gpt";
   if (metric === "claude") return "rank_claude";
+  if (metric === "other") return "rank_other";
   return "rank";
 }
 async function loadSnapshot({ serviceClient, period, metric, from, to, userId, limit, offset }) {
@@ -1021,7 +1044,7 @@ async function loadSnapshot({ serviceClient, period, metric, from, to, userId, l
   const totalPages = totalEntries > 0 ? Math.ceil(totalEntries / Math.max(1, limit)) : 0;
   const entriesQuery = applyMetricFilter(
     serviceClient.database.from("vibeusage_leaderboard_snapshots").select(
-      "user_id,rank,rank_gpt,rank_claude,gpt_tokens,claude_tokens,total_tokens,display_name,avatar_url,is_public,generated_at"
+      "user_id,rank,rank_gpt,rank_claude,rank_other,gpt_tokens,claude_tokens,other_tokens,total_tokens,display_name,avatar_url,is_public,generated_at"
     ).eq("period", period).eq("from_day", from).eq("to_day", to),
     metric
   );
@@ -1030,7 +1053,9 @@ async function loadSnapshot({ serviceClient, period, metric, from, to, userId, l
     console.error("snapshot entries error", entriesErr);
     return { ok: false };
   }
-  const { data: meRow, error: meErr } = await serviceClient.database.from("vibeusage_leaderboard_snapshots").select("rank,rank_gpt,rank_claude,gpt_tokens,claude_tokens,total_tokens,generated_at").eq("period", period).eq("from_day", from).eq("to_day", to).eq("user_id", userId).maybeSingle();
+  const { data: meRow, error: meErr } = await serviceClient.database.from("vibeusage_leaderboard_snapshots").select(
+    "rank,rank_gpt,rank_claude,rank_other,gpt_tokens,claude_tokens,other_tokens,total_tokens,generated_at"
+  ).eq("period", period).eq("from_day", from).eq("to_day", to).eq("user_id", userId).maybeSingle();
   if (meErr) {
     console.error("snapshot me error", meErr);
     return { ok: false };
@@ -1039,16 +1064,30 @@ async function loadSnapshot({ serviceClient, period, metric, from, to, userId, l
     const displayName = normalizeDisplayName(row?.display_name);
     const avatarUrl = normalizeAvatarUrl(row?.avatar_url);
     const rawUserId = typeof row?.user_id === "string" ? row.user_id : null;
-    const exposedUserId = displayName === "Anonymous" ? null : rawUserId;
+    const isPublic = Boolean(row?.is_public);
+    const exposedUserId = isPublic ? rawUserId : null;
+    const gptTokens = toBigInt(row?.gpt_tokens);
+    const claudeTokens = toBigInt(row?.claude_tokens);
+    const totalTokens = toBigInt(row?.total_tokens);
+    const otherTokens = resolveOtherTokens({
+      row,
+      totalTokens,
+      gptTokens,
+      claudeTokens
+    });
+    const metricRank = toPositiveInt(row?.[rankColumn]);
+    const resolvedRank = metricRank > 0 ? metricRank : toPositiveInt(row?.rank);
     return {
       user_id: exposedUserId,
-      rank: toPositiveInt(row?.[rankColumn]),
+      rank: resolvedRank,
       is_me: rawUserId === userId,
       display_name: displayName,
       avatar_url: avatarUrl,
-      gpt_tokens: toBigInt(row?.gpt_tokens).toString(),
-      claude_tokens: toBigInt(row?.claude_tokens).toString(),
-      total_tokens: toBigInt(row?.total_tokens).toString()
+      gpt_tokens: gptTokens.toString(),
+      claude_tokens: claudeTokens.toString(),
+      other_tokens: otherTokens.toString(),
+      total_tokens: totalTokens.toString(),
+      is_public: isPublic
     };
   });
   const me = normalizeMetricMe(meRow, metric);
@@ -1067,16 +1106,26 @@ function normalizeMetricMe(row, metric) {
   const gptTokens = toBigInt(row?.gpt_tokens);
   const claudeTokens = toBigInt(row?.claude_tokens);
   const totalTokens = toBigInt(row?.total_tokens);
+  const otherTokens = resolveOtherTokens({
+    row,
+    totalTokens,
+    gptTokens,
+    claudeTokens
+  });
   let rank = toPositiveIntOrNull(row?.rank);
   if (metric === "gpt") {
     rank = gptTokens > 0n ? toPositiveIntOrNull(row?.rank_gpt) : null;
   } else if (metric === "claude") {
     rank = claudeTokens > 0n ? toPositiveIntOrNull(row?.rank_claude) : null;
+  } else if (metric === "other") {
+    const rankOther = toPositiveIntOrNull(row?.rank_other);
+    rank = otherTokens > 0n ? rankOther ?? toPositiveIntOrNull(row?.rank) : null;
   }
   return {
     rank,
     gpt_tokens: gptTokens.toString(),
     claude_tokens: claudeTokens.toString(),
+    other_tokens: otherTokens.toString(),
     total_tokens: totalTokens.toString()
   };
 }
@@ -1100,14 +1149,25 @@ async function computeWindow({ period }) {
   throw new Error(`Unsupported period: ${String(period)}`);
 }
 function normalizeEntry(row) {
+  const gptTokens = toBigInt(row?.gpt_tokens);
+  const claudeTokens = toBigInt(row?.claude_tokens);
+  const totalTokens = toBigInt(row?.total_tokens);
+  const otherTokens = resolveOtherTokens({
+    row,
+    totalTokens,
+    gptTokens,
+    claudeTokens
+  });
   return {
+    user_id: null,
     rank: toPositiveInt(row?.rank),
     is_me: Boolean(row?.is_me),
     display_name: normalizeDisplayName(row?.display_name),
     avatar_url: normalizeAvatarUrl(row?.avatar_url),
-    gpt_tokens: toBigInt(row?.gpt_tokens).toString(),
-    claude_tokens: toBigInt(row?.claude_tokens).toString(),
-    total_tokens: toBigInt(row?.total_tokens).toString(),
+    gpt_tokens: gptTokens.toString(),
+    claude_tokens: claudeTokens.toString(),
+    other_tokens: otherTokens.toString(),
+    total_tokens: totalTokens.toString(),
     is_public: Boolean(row?.is_public)
   };
 }
@@ -1116,12 +1176,25 @@ function normalizeMe(row) {
   const gptTokens = toBigInt(row?.gpt_tokens);
   const claudeTokens = toBigInt(row?.claude_tokens);
   const totalTokens = toBigInt(row?.total_tokens);
+  const otherTokens = resolveOtherTokens({
+    row,
+    totalTokens,
+    gptTokens,
+    claudeTokens
+  });
   return {
     rank,
     gpt_tokens: gptTokens.toString(),
     claude_tokens: claudeTokens.toString(),
+    other_tokens: otherTokens.toString(),
     total_tokens: totalTokens.toString()
   };
+}
+function resolveOtherTokens({ row, totalTokens, gptTokens, claudeTokens }) {
+  const explicit = row?.other_tokens;
+  if (explicit != null) return toBigInt(explicit);
+  const derived = totalTokens - gptTokens - claudeTokens;
+  return derived > 0n ? derived : 0n;
 }
 function normalizeGeneratedAt(entryRows, meRow) {
   const candidate = entryRows?.[0]?.generated_at || meRow?.generated_at;

@@ -298,6 +298,7 @@ leaderboard.column.user,dashboard,LeaderboardPage,LeaderboardPage,column_user,"U
 leaderboard.column.total,dashboard,LeaderboardPage,LeaderboardPage,column_total,"TOTAL",,active
 leaderboard.column.gpt,dashboard,LeaderboardPage,LeaderboardPage,column_gpt,"GPT_MODEL",,active
 leaderboard.column.claude,dashboard,LeaderboardPage,LeaderboardPage,column_claude,"CLAUDE_MODEL",,active
+leaderboard.column.other,dashboard,LeaderboardPage,LeaderboardPage,column_other,"OTHER_MODELS",,active
 
 leaderboard.pagination.prev,dashboard,LeaderboardPage,LeaderboardPage,pagination_prev,"PREV",,active
 leaderboard.pagination.next,dashboard,LeaderboardPage,LeaderboardPage,pagination_next,"NEXT",,active

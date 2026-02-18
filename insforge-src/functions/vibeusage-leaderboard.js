@@ -5,42 +5,42 @@
 // - month: current UTC calendar month
 // - total: all-time
 
-'use strict';
+"use strict";
 
-const { handleOptions, json, requireMethod } = require('../shared/http');
-const { getBearerToken, getEdgeClientAndUserId } = require('../shared/auth');
-const { getAnonKey, getBaseUrl, getServiceRoleKey } = require('../shared/env');
-const { toUtcDay, addUtcDays, formatDateUTC } = require('../shared/date');
-const { toBigInt, toPositiveInt, toPositiveIntOrNull } = require('../shared/numbers');
+const { handleOptions, json, requireMethod } = require("../shared/http");
+const { getBearerToken, getEdgeClientAndUserId } = require("../shared/auth");
+const { getAnonKey, getBaseUrl, getServiceRoleKey } = require("../shared/env");
+const { toUtcDay, addUtcDays, formatDateUTC } = require("../shared/date");
+const { toBigInt, toPositiveInt, toPositiveIntOrNull } = require("../shared/numbers");
 
 const DEFAULT_LIMIT = 20;
 const MAX_LIMIT = 100;
 const DEFAULT_OFFSET = 0;
 const MAX_OFFSET = 10_000;
 
-module.exports = async function(request) {
+module.exports = async function (request) {
   const opt = handleOptions(request);
   if (opt) return opt;
 
-  const methodErr = requireMethod(request, 'GET');
+  const methodErr = requireMethod(request, "GET");
   if (methodErr) return methodErr;
 
-  const bearer = getBearerToken(request.headers.get('Authorization'));
-  if (!bearer) return json({ error: 'Missing bearer token' }, 401);
+  const bearer = getBearerToken(request.headers.get("Authorization"));
+  if (!bearer) return json({ error: "Missing bearer token" }, 401);
 
   const baseUrl = getBaseUrl();
   const auth = await getEdgeClientAndUserId({ baseUrl, bearer });
-  if (!auth.ok) return json({ error: auth.error || 'Unauthorized' }, auth.status || 401);
+  if (!auth.ok) return json({ error: auth.error || "Unauthorized" }, auth.status || 401);
 
   const url = new URL(request.url);
-  const period = normalizePeriod(url.searchParams.get('period'));
-  if (!period) return json({ error: 'Invalid period' }, 400);
+  const period = normalizePeriod(url.searchParams.get("period"));
+  if (!period) return json({ error: "Invalid period" }, 400);
 
-  const metric = normalizeMetric(url.searchParams.get('metric'));
-  if (url.searchParams.has('metric') && !metric) return json({ error: 'Invalid metric' }, 400);
+  const metric = normalizeMetric(url.searchParams.get("metric"));
+  if (url.searchParams.has("metric") && !metric) return json({ error: "Invalid metric" }, 400);
 
-  const limit = normalizeLimit(url.searchParams.get('limit'));
-  const offset = normalizeOffset(url.searchParams.get('offset'));
+  const limit = normalizeLimit(url.searchParams.get("limit"));
+  const offset = normalizeOffset(url.searchParams.get("offset"));
   const page = Math.floor(offset / Math.max(1, limit)) + 1;
 
   let from;
@@ -57,7 +57,7 @@ module.exports = async function(request) {
     ? createClient({
         baseUrl,
         anonKey: anonKey || serviceRoleKey,
-        edgeFunctionToken: serviceRoleKey
+        edgeFunctionToken: serviceRoleKey,
       })
     : null;
 
@@ -70,7 +70,7 @@ module.exports = async function(request) {
       to,
       userId: auth.userId,
       limit,
-      offset
+      offset,
     });
 
     if (snapshot.ok) {
@@ -87,29 +87,29 @@ module.exports = async function(request) {
           total_entries: snapshot.total_entries,
           total_pages: snapshot.total_pages,
           entries: snapshot.entries,
-          me: snapshot.me
+          me: snapshot.me,
         },
-        200
+        200,
       );
     }
   }
 
   const entriesView =
-    metric === 'all'
+    metric === "all"
       ? `vibeusage_leaderboard_${period}_current`
       : `vibeusage_leaderboard_${metric}_${period}_current`;
   const meView =
-    metric === 'all'
+    metric === "all"
       ? `vibeusage_leaderboard_me_${period}_current`
       : `vibeusage_leaderboard_me_${metric}_${period}_current`;
 
   const singleQuery =
-    metric === 'all'
+    metric === "all"
       ? await tryLoadSingleQuery({
           edgeClient: auth.edgeClient,
           entriesView,
           limit,
-          offset
+          offset,
         })
       : null;
 
@@ -127,23 +127,23 @@ module.exports = async function(request) {
         total_entries: null,
         total_pages: null,
         entries: singleQuery.entries,
-        me: singleQuery.me
+        me: singleQuery.me,
       },
-      200
+      200,
     );
   }
 
   const { data: rawEntries, error: entriesErr } = await auth.edgeClient.database
     .from(entriesView)
-    .select('rank,is_me,display_name,avatar_url,gpt_tokens,claude_tokens,total_tokens')
-    .order('rank', { ascending: true })
+    .select("rank,is_me,display_name,avatar_url,gpt_tokens,claude_tokens,other_tokens,total_tokens")
+    .order("rank", { ascending: true })
     .range(offset, offset + limit - 1);
 
   if (entriesErr) return json({ error: entriesErr.message }, 500);
 
   const { data: rawMe, error: meErr } = await auth.edgeClient.database
     .from(meView)
-    .select('rank,gpt_tokens,claude_tokens,total_tokens')
+    .select("rank,gpt_tokens,claude_tokens,other_tokens,total_tokens")
     .maybeSingle();
 
   if (meErr) return json({ error: meErr.message }, 500);
@@ -164,9 +164,9 @@ module.exports = async function(request) {
       total_entries: null,
       total_pages: null,
       entries,
-      me
+      me,
     },
-    200
+    200,
   );
 };
 
@@ -182,9 +182,11 @@ async function tryLoadSingleQuery({ edgeClient, entriesView, limit, offset }) {
     const endRank = offset + limit;
     const { data, error } = await edgeClient.database
       .from(entriesView)
-      .select('rank,is_me,display_name,avatar_url,gpt_tokens,claude_tokens,total_tokens,is_public')
+      .select(
+        "rank,is_me,display_name,avatar_url,gpt_tokens,claude_tokens,other_tokens,total_tokens,is_public",
+      )
       .or(`and(rank.gte.${startRank},rank.lte.${endRank}),is_me.eq.true`)
-      .order('rank', { ascending: true });
+      .order("rank", { ascending: true });
 
     if (error) return null;
 
@@ -207,26 +209,27 @@ async function tryLoadSingleQuery({ edgeClient, entriesView, limit, offset }) {
 }
 
 function normalizePeriod(raw) {
-  if (typeof raw !== 'string') return null;
+  if (typeof raw !== "string") return null;
   const v = raw.trim().toLowerCase();
-  if (v === 'week') return v;
-  if (v === 'month') return v;
-  if (v === 'total') return v;
+  if (v === "week") return v;
+  if (v === "month") return v;
+  if (v === "total") return v;
   return null;
 }
 
 function normalizeMetric(raw) {
-  if (typeof raw !== 'string') return 'all';
+  if (typeof raw !== "string") return "all";
   const v = raw.trim().toLowerCase();
-  if (!v) return 'all';
-  if (v === 'all') return v;
-  if (v === 'gpt') return v;
-  if (v === 'claude') return v;
+  if (!v) return "all";
+  if (v === "all") return v;
+  if (v === "gpt") return v;
+  if (v === "claude") return v;
+  if (v === "other") return v;
   return null;
 }
 
 function normalizeLimit(raw) {
-  if (typeof raw !== 'string' || raw.trim().length === 0) return DEFAULT_LIMIT;
+  if (typeof raw !== "string" || raw.trim().length === 0) return DEFAULT_LIMIT;
   const n = Number(raw);
   if (!Number.isFinite(n)) return DEFAULT_LIMIT;
   const i = Math.floor(n);
@@ -236,7 +239,7 @@ function normalizeLimit(raw) {
 }
 
 function normalizeOffset(raw) {
-  if (typeof raw !== 'string' || raw.trim().length === 0) return DEFAULT_OFFSET;
+  if (typeof raw !== "string" || raw.trim().length === 0) return DEFAULT_OFFSET;
   const n = Number(raw);
   if (!Number.isFinite(n)) return DEFAULT_OFFSET;
   const i = Math.floor(n);
@@ -247,15 +250,17 @@ function normalizeOffset(raw) {
 
 function applyMetricFilter(query, metric) {
   if (!query) return query;
-  if (metric === 'gpt') return query.gt('gpt_tokens', 0);
-  if (metric === 'claude') return query.gt('claude_tokens', 0);
+  if (metric === "gpt") return query.gt("gpt_tokens", 0);
+  if (metric === "claude") return query.gt("claude_tokens", 0);
+  if (metric === "other") return query.gt("other_tokens", 0);
   return query;
 }
 
 function resolveRankColumn(metric) {
-  if (metric === 'gpt') return 'rank_gpt';
-  if (metric === 'claude') return 'rank_claude';
-  return 'rank';
+  if (metric === "gpt") return "rank_gpt";
+  if (metric === "claude") return "rank_claude";
+  if (metric === "other") return "rank_other";
+  return "rank";
 }
 
 async function loadSnapshot({ serviceClient, period, metric, from, to, userId, limit, offset }) {
@@ -263,18 +268,18 @@ async function loadSnapshot({ serviceClient, period, metric, from, to, userId, l
 
   const countQuery = applyMetricFilter(
     serviceClient.database
-      .from('vibeusage_leaderboard_snapshots')
-      .select('user_id', { count: 'exact' })
-      .eq('period', period)
-      .eq('from_day', from)
-      .eq('to_day', to),
-    metric
+      .from("vibeusage_leaderboard_snapshots")
+      .select("user_id", { count: "exact" })
+      .eq("period", period)
+      .eq("from_day", from)
+      .eq("to_day", to),
+    metric,
   );
 
   const countRes = await countQuery.limit(1);
 
   if (countRes.error) {
-    console.error('snapshot count error', countRes.error);
+    console.error("snapshot count error", countRes.error);
     return { ok: false };
   }
 
@@ -283,58 +288,76 @@ async function loadSnapshot({ serviceClient, period, metric, from, to, userId, l
 
   const entriesQuery = applyMetricFilter(
     serviceClient.database
-      .from('vibeusage_leaderboard_snapshots')
+      .from("vibeusage_leaderboard_snapshots")
       .select(
-        'user_id,rank,rank_gpt,rank_claude,gpt_tokens,claude_tokens,total_tokens,display_name,avatar_url,is_public,generated_at'
+        "user_id,rank,rank_gpt,rank_claude,rank_other,gpt_tokens,claude_tokens,other_tokens,total_tokens,display_name,avatar_url,is_public,generated_at",
       )
-      .eq('period', period)
-      .eq('from_day', from)
-      .eq('to_day', to),
-    metric
+      .eq("period", period)
+      .eq("from_day", from)
+      .eq("to_day", to),
+    metric,
   );
 
   const { data: entryRows, error: entriesErr } = await entriesQuery
     .order(rankColumn, { ascending: true })
-    .order('user_id', { ascending: true })
+    .order("user_id", { ascending: true })
     .range(offset, offset + limit - 1);
 
   if (entriesErr) {
-    console.error('snapshot entries error', entriesErr);
+    console.error("snapshot entries error", entriesErr);
     return { ok: false };
   }
 
   const { data: meRow, error: meErr } = await serviceClient.database
-    .from('vibeusage_leaderboard_snapshots')
-    .select('rank,rank_gpt,rank_claude,gpt_tokens,claude_tokens,total_tokens,generated_at')
-    .eq('period', period)
-    .eq('from_day', from)
-    .eq('to_day', to)
-    .eq('user_id', userId)
+    .from("vibeusage_leaderboard_snapshots")
+    .select(
+      "rank,rank_gpt,rank_claude,rank_other,gpt_tokens,claude_tokens,other_tokens,total_tokens,generated_at",
+    )
+    .eq("period", period)
+    .eq("from_day", from)
+    .eq("to_day", to)
+    .eq("user_id", userId)
     .maybeSingle();
 
   if (meErr) {
-    console.error('snapshot me error', meErr);
+    console.error("snapshot me error", meErr);
     return { ok: false };
   }
 
   const entries = (entryRows || []).map((row) => {
     const displayName = normalizeDisplayName(row?.display_name);
     const avatarUrl = normalizeAvatarUrl(row?.avatar_url);
-    const rawUserId = typeof row?.user_id === 'string' ? row.user_id : null;
+    const rawUserId = typeof row?.user_id === "string" ? row.user_id : null;
+    const isPublic = Boolean(row?.is_public);
 
-    // Only expose user_id when the user is showing a public profile.
-    // Anonymous rows should not be linkable or leak stable identifiers.
-    const exposedUserId = displayName === 'Anonymous' ? null : rawUserId;
+    // Only expose user_id when is_public=true.
+    // Public name/avatar and stable id exposure are controlled independently.
+    const exposedUserId = isPublic ? rawUserId : null;
+
+    const gptTokens = toBigInt(row?.gpt_tokens);
+    const claudeTokens = toBigInt(row?.claude_tokens);
+    const totalTokens = toBigInt(row?.total_tokens);
+    const otherTokens = resolveOtherTokens({
+      row,
+      totalTokens,
+      gptTokens,
+      claudeTokens,
+    });
+
+    const metricRank = toPositiveInt(row?.[rankColumn]);
+    const resolvedRank = metricRank > 0 ? metricRank : toPositiveInt(row?.rank);
 
     return {
       user_id: exposedUserId,
-      rank: toPositiveInt(row?.[rankColumn]),
+      rank: resolvedRank,
       is_me: rawUserId === userId,
       display_name: displayName,
       avatar_url: avatarUrl,
-      gpt_tokens: toBigInt(row?.gpt_tokens).toString(),
-      claude_tokens: toBigInt(row?.claude_tokens).toString(),
-      total_tokens: toBigInt(row?.total_tokens).toString()
+      gpt_tokens: gptTokens.toString(),
+      claude_tokens: claudeTokens.toString(),
+      other_tokens: otherTokens.toString(),
+      total_tokens: totalTokens.toString(),
+      is_public: isPublic,
     };
   });
 
@@ -349,7 +372,7 @@ async function loadSnapshot({ serviceClient, period, metric, from, to, userId, l
     total_pages: totalPages,
     entries,
     me,
-    generated_at: generatedAt
+    generated_at: generatedAt,
   };
 }
 
@@ -357,19 +380,29 @@ function normalizeMetricMe(row, metric) {
   const gptTokens = toBigInt(row?.gpt_tokens);
   const claudeTokens = toBigInt(row?.claude_tokens);
   const totalTokens = toBigInt(row?.total_tokens);
+  const otherTokens = resolveOtherTokens({
+    row,
+    totalTokens,
+    gptTokens,
+    claudeTokens,
+  });
 
   let rank = toPositiveIntOrNull(row?.rank);
-  if (metric === 'gpt') {
+  if (metric === "gpt") {
     rank = gptTokens > 0n ? toPositiveIntOrNull(row?.rank_gpt) : null;
-  } else if (metric === 'claude') {
+  } else if (metric === "claude") {
     rank = claudeTokens > 0n ? toPositiveIntOrNull(row?.rank_claude) : null;
+  } else if (metric === "other") {
+    const rankOther = toPositiveIntOrNull(row?.rank_other);
+    rank = otherTokens > 0n ? (rankOther ?? toPositiveIntOrNull(row?.rank)) : null;
   }
 
   return {
     rank,
     gpt_tokens: gptTokens.toString(),
     claude_tokens: claudeTokens.toString(),
-    total_tokens: totalTokens.toString()
+    other_tokens: otherTokens.toString(),
+    total_tokens: totalTokens.toString(),
   };
 }
 
@@ -377,37 +410,49 @@ async function computeWindow({ period }) {
   const now = new Date();
   const today = toUtcDay(now);
 
-  if (period === 'week') {
+  if (period === "week") {
     const dow = today.getUTCDay(); // 0=Sunday
     const from = addUtcDays(today, -dow);
     const to = addUtcDays(from, 6);
     return { from: formatDateUTC(from), to: formatDateUTC(to) };
   }
 
-  if (period === 'month') {
+  if (period === "month") {
     const from = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), 1));
     const to = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth() + 1, 0));
     return { from: formatDateUTC(from), to: formatDateUTC(to) };
   }
 
-  if (period === 'total') {
+  if (period === "total") {
     // Represent all-time as an open-ended UTC date range.
-    return { from: '1970-01-01', to: '9999-12-31' };
+    return { from: "1970-01-01", to: "9999-12-31" };
   }
 
   throw new Error(`Unsupported period: ${String(period)}`);
 }
 
 function normalizeEntry(row) {
+  const gptTokens = toBigInt(row?.gpt_tokens);
+  const claudeTokens = toBigInt(row?.claude_tokens);
+  const totalTokens = toBigInt(row?.total_tokens);
+  const otherTokens = resolveOtherTokens({
+    row,
+    totalTokens,
+    gptTokens,
+    claudeTokens,
+  });
+
   return {
+    user_id: null,
     rank: toPositiveInt(row?.rank),
     is_me: Boolean(row?.is_me),
     display_name: normalizeDisplayName(row?.display_name),
     avatar_url: normalizeAvatarUrl(row?.avatar_url),
-    gpt_tokens: toBigInt(row?.gpt_tokens).toString(),
-    claude_tokens: toBigInt(row?.claude_tokens).toString(),
-    total_tokens: toBigInt(row?.total_tokens).toString(),
-    is_public: Boolean(row?.is_public)
+    gpt_tokens: gptTokens.toString(),
+    claude_tokens: claudeTokens.toString(),
+    other_tokens: otherTokens.toString(),
+    total_tokens: totalTokens.toString(),
+    is_public: Boolean(row?.is_public),
   };
 }
 
@@ -416,17 +461,32 @@ function normalizeMe(row) {
   const gptTokens = toBigInt(row?.gpt_tokens);
   const claudeTokens = toBigInt(row?.claude_tokens);
   const totalTokens = toBigInt(row?.total_tokens);
+  const otherTokens = resolveOtherTokens({
+    row,
+    totalTokens,
+    gptTokens,
+    claudeTokens,
+  });
   return {
     rank,
     gpt_tokens: gptTokens.toString(),
     claude_tokens: claudeTokens.toString(),
-    total_tokens: totalTokens.toString()
+    other_tokens: otherTokens.toString(),
+    total_tokens: totalTokens.toString(),
   };
+}
+
+function resolveOtherTokens({ row, totalTokens, gptTokens, claudeTokens }) {
+  const explicit = row?.other_tokens;
+  if (explicit != null) return toBigInt(explicit);
+
+  const derived = totalTokens - gptTokens - claudeTokens;
+  return derived > 0n ? derived : 0n;
 }
 
 function normalizeGeneratedAt(entryRows, meRow) {
   const candidate = entryRows?.[0]?.generated_at || meRow?.generated_at;
-  if (candidate && typeof candidate === 'string') {
+  if (candidate && typeof candidate === "string") {
     const dt = new Date(candidate);
     if (!Number.isNaN(dt.getTime())) return dt.toISOString();
   }
@@ -434,13 +494,13 @@ function normalizeGeneratedAt(entryRows, meRow) {
 }
 
 function normalizeDisplayName(value) {
-  if (typeof value !== 'string') return 'Anonymous';
+  if (typeof value !== "string") return "Anonymous";
   const trimmed = value.trim();
-  return trimmed.length > 0 ? trimmed : 'Anonymous';
+  return trimmed.length > 0 ? trimmed : "Anonymous";
 }
 
 function normalizeAvatarUrl(value) {
-  if (typeof value !== 'string') return null;
+  if (typeof value !== "string") return null;
   const trimmed = value.trim();
   return trimmed.length > 0 ? trimmed : null;
 }

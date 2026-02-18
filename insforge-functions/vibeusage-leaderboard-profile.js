@@ -305,7 +305,11 @@ var require_auth = __commonJS({
     }
     async function getEdgeClientAndUserIdFast({ baseUrl, bearer }) {
       const anonKey = getAnonKey2();
-      const edgeClient = createClient({ baseUrl, anonKey: anonKey || void 0, edgeFunctionToken: bearer });
+      const edgeClient = createClient({
+        baseUrl,
+        anonKey: anonKey || void 0,
+        edgeFunctionToken: bearer
+      });
       const local = await verifyUserJwtHs256({ token: bearer });
       const allowRemoteOnly = !local.ok && local?.code === "missing_jwt_secret";
       if (!local.ok && !allowRemoteOnly) {
@@ -414,7 +418,14 @@ var require_auth = __commonJS({
       }
       const publicView = await resolvePublicView({ baseUrl, shareToken: bearer });
       if (!publicView.ok) {
-        return { ok: false, edgeClient: null, userId: null, accessType: null, status: 401, error: "Unauthorized" };
+        return {
+          ok: false,
+          edgeClient: null,
+          userId: null,
+          accessType: null,
+          status: 401,
+          error: "Unauthorized"
+        };
       }
       return {
         ok: true,
@@ -639,7 +650,14 @@ var require_date = __commonJS({
     }
     function getTimeZoneOffsetMinutes(date, timeZone) {
       const parts = getTimeZoneParts(date, timeZone);
-      const asUtc = Date.UTC(parts.year, parts.month - 1, parts.day, parts.hour, parts.minute, parts.second);
+      const asUtc = Date.UTC(
+        parts.year,
+        parts.month - 1,
+        parts.day,
+        parts.hour,
+        parts.minute,
+        parts.second
+      );
       return Math.round((asUtc - date.getTime()) / 6e4);
     }
     function getLocalParts(date, tzContext) {
@@ -847,8 +865,11 @@ module.exports = async function(request) {
     if (settingsErr) return json({ error: "Failed to resolve leaderboard settings" }, 500);
     if (!settings?.leaderboard_public) return json({ error: "Not found" }, 404);
   }
-  const { data: snapshot, error: snapshotErr } = await serviceClient.database.from("vibeusage_leaderboard_snapshots").select("user_id,display_name,avatar_url,rank,gpt_tokens,claude_tokens,total_tokens,generated_at").eq("period", period).eq("from_day", from).eq("to_day", to).eq("user_id", requestedUserId).maybeSingle();
-  if (snapshotErr) return json({ error: snapshotErr.message || "Failed to fetch leaderboard snapshot" }, 500);
+  const { data: snapshot, error: snapshotErr } = await serviceClient.database.from("vibeusage_leaderboard_snapshots").select(
+    "user_id,display_name,avatar_url,rank,gpt_tokens,claude_tokens,other_tokens,total_tokens,generated_at"
+  ).eq("period", period).eq("from_day", from).eq("to_day", to).eq("user_id", requestedUserId).maybeSingle();
+  if (snapshotErr)
+    return json({ error: snapshotErr.message || "Failed to fetch leaderboard snapshot" }, 500);
   if (!snapshot) return json({ error: "Not found" }, 404);
   return json(
     {
@@ -905,15 +926,31 @@ function normalizeGeneratedAt(value) {
 function normalizeSnapshotEntry(row) {
   const displayName = normalizeDisplayName(row?.display_name);
   const avatarUrl = normalizeAvatarUrl(row?.avatar_url);
+  const gptTokens = toBigInt(row?.gpt_tokens);
+  const claudeTokens = toBigInt(row?.claude_tokens);
+  const totalTokens = toBigInt(row?.total_tokens);
+  const otherTokens = resolveOtherTokens({
+    row,
+    totalTokens,
+    gptTokens,
+    claudeTokens
+  });
   return {
     user_id: typeof row?.user_id === "string" ? row.user_id : null,
     display_name: displayName,
     avatar_url: avatarUrl,
     rank: toPositiveIntOrNull(row?.rank),
-    gpt_tokens: toBigInt(row?.gpt_tokens).toString(),
-    claude_tokens: toBigInt(row?.claude_tokens).toString(),
-    total_tokens: toBigInt(row?.total_tokens).toString()
+    gpt_tokens: gptTokens.toString(),
+    claude_tokens: claudeTokens.toString(),
+    other_tokens: otherTokens.toString(),
+    total_tokens: totalTokens.toString()
   };
+}
+function resolveOtherTokens({ row, totalTokens, gptTokens, claudeTokens }) {
+  const explicit = row?.other_tokens;
+  if (explicit != null) return toBigInt(explicit);
+  const derived = totalTokens - gptTokens - claudeTokens;
+  return derived > 0n ? derived : 0n;
 }
 function normalizeDisplayName(value) {
   if (typeof value !== "string") return "Anonymous";

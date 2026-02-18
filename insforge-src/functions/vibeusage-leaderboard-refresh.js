@@ -2,42 +2,42 @@
 // Rebuilds leaderboard snapshots for current UTC period window.
 // Auth: Authorization: Bearer <service_role_key>
 
-'use strict';
+"use strict";
 
-const { handleOptions, json, requireMethod } = require('../shared/http');
-const { getBearerToken } = require('../shared/auth');
-const { getAnonKey, getBaseUrl, getServiceRoleKey } = require('../shared/env');
-const { toUtcDay, addUtcDays, formatDateUTC } = require('../shared/date');
-const { forEachPage } = require('../shared/pagination');
-const { toBigInt, toPositiveInt } = require('../shared/numbers');
+const { handleOptions, json, requireMethod } = require("../shared/http");
+const { getBearerToken } = require("../shared/auth");
+const { getAnonKey, getBaseUrl, getServiceRoleKey } = require("../shared/env");
+const { toUtcDay, addUtcDays, formatDateUTC } = require("../shared/date");
+const { forEachPage } = require("../shared/pagination");
+const { toBigInt, toPositiveInt } = require("../shared/numbers");
 
-const PERIODS = ['week', 'month'];
+const PERIODS = ["week", "month"];
 const SOURCE_PAGE_SIZE = 1000;
 const INSERT_BATCH_SIZE = 500;
 
-module.exports = async function(request) {
+module.exports = async function (request) {
   const opt = handleOptions(request);
   if (opt) return opt;
 
-  const methodErr = requireMethod(request, 'POST');
+  const methodErr = requireMethod(request, "POST");
   if (methodErr) return methodErr;
 
   const serviceRoleKey = getServiceRoleKey();
-  if (!serviceRoleKey) return json({ error: 'Admin key missing' }, 500);
+  if (!serviceRoleKey) return json({ error: "Admin key missing" }, 500);
 
-  const bearer = getBearerToken(request.headers.get('Authorization'));
-  if (!bearer || bearer !== serviceRoleKey) return json({ error: 'Unauthorized' }, 401);
+  const bearer = getBearerToken(request.headers.get("Authorization"));
+  if (!bearer || bearer !== serviceRoleKey) return json({ error: "Unauthorized" }, 401);
 
   const url = new URL(request.url);
-  const requested = normalizePeriod(url.searchParams.get('period'));
-  if (url.searchParams.has('period') && !requested) return json({ error: 'Invalid period' }, 400);
+  const requested = normalizePeriod(url.searchParams.get("period"));
+  if (url.searchParams.has("period") && !requested) return json({ error: "Invalid period" }, 400);
 
   const baseUrl = getBaseUrl();
   const anonKey = getAnonKey();
   const serviceClient = createClient({
     baseUrl,
     anonKey: anonKey || serviceRoleKey,
-    edgeFunctionToken: serviceRoleKey
+    edgeFunctionToken: serviceRoleKey,
   });
 
   const targetPeriods = requested ? [requested] : PERIODS;
@@ -55,7 +55,7 @@ module.exports = async function(request) {
         period,
         from,
         to,
-        generatedAt
+        generatedAt,
       });
 
       results.push({ period, from, to, inserted });
@@ -68,11 +68,11 @@ module.exports = async function(request) {
 };
 
 function normalizePeriod(raw) {
-  if (typeof raw !== 'string') return null;
+  if (typeof raw !== "string") return null;
   const v = raw.trim().toLowerCase();
-  if (v === 'week') return v;
-  if (v === 'month') return v;
-  if (v === 'total') return v;
+  if (v === "week") return v;
+  if (v === "month") return v;
+  if (v === "total") return v;
   return null;
 }
 
@@ -80,21 +80,21 @@ async function computeWindow({ period }) {
   const now = new Date();
   const today = toUtcDay(now);
 
-  if (period === 'week') {
+  if (period === "week") {
     const dow = today.getUTCDay();
     const from = addUtcDays(today, -dow);
     const to = addUtcDays(from, 6);
     return { ok: true, from: formatDateUTC(from), to: formatDateUTC(to) };
   }
 
-  if (period === 'month') {
+  if (period === "month") {
     const from = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), 1));
     const to = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth() + 1, 0));
     return { ok: true, from: formatDateUTC(from), to: formatDateUTC(to) };
   }
 
-  if (period === 'total') {
-    return { ok: true, from: '1970-01-01', to: '9999-12-31' };
+  if (period === "total") {
+    return { ok: true, from: "1970-01-01", to: "9999-12-31" };
   }
 
   return { ok: false, error: `Invalid period: ${String(period)}` };
@@ -102,11 +102,11 @@ async function computeWindow({ period }) {
 
 async function refreshPeriod({ serviceClient, period, from, to, generatedAt }) {
   const deleteRes = await serviceClient.database
-    .from('vibeusage_leaderboard_snapshots')
+    .from("vibeusage_leaderboard_snapshots")
     .delete()
-    .eq('period', period)
-    .eq('from_day', from)
-    .eq('to_day', to);
+    .eq("period", period)
+    .eq("from_day", from)
+    .eq("to_day", to);
 
   if (deleteRes.error) {
     throw new Error(deleteRes.error.message);
@@ -120,12 +120,14 @@ async function refreshPeriod({ serviceClient, period, from, to, generatedAt }) {
     createQuery: () =>
       serviceClient.database
         .from(sourceView)
-        .select('user_id,rank,rank_gpt,rank_claude,gpt_tokens,claude_tokens,total_tokens,display_name,avatar_url')
-        .order('rank', { ascending: true }),
+        .select(
+          "user_id,rank,rank_gpt,rank_claude,rank_other,gpt_tokens,claude_tokens,other_tokens,total_tokens,display_name,avatar_url",
+        )
+        .order("rank", { ascending: true }),
     onPage: async (rows) => {
       const profileByUserId = await loadPublicProfileLookup({
         serviceClient,
-        userIds: (rows || []).map((row) => row?.user_id)
+        userIds: (rows || []).map((row) => row?.user_id),
       });
 
       const normalized = (rows || [])
@@ -136,18 +138,20 @@ async function refreshPeriod({ serviceClient, period, from, to, generatedAt }) {
             from,
             to,
             generatedAt,
-            publicProfile: profileByUserId.get(row?.user_id)
-          })
+            publicProfile: profileByUserId.get(row?.user_id),
+          }),
         )
         .filter(Boolean);
 
       for (const batch of chunkRows(normalized, INSERT_BATCH_SIZE)) {
-        const { error: insertErr } = await serviceClient.database.from('vibeusage_leaderboard_snapshots').insert(batch);
+        const { error: insertErr } = await serviceClient.database
+          .from("vibeusage_leaderboard_snapshots")
+          .insert(batch);
         if (insertErr) throw new Error(insertErr.message);
       }
 
       inserted += normalized.length;
-    }
+    },
   });
 
   if (error) throw new Error(error.message);
@@ -156,7 +160,9 @@ async function refreshPeriod({ serviceClient, period, from, to, generatedAt }) {
 
 async function loadPublicProfileLookup({ serviceClient, userIds }) {
   const uniqueUserIds = Array.from(
-    new Set((userIds || []).filter((value) => typeof value === 'string' && value.trim().length > 0))
+    new Set(
+      (userIds || []).filter((value) => typeof value === "string" && value.trim().length > 0),
+    ),
   );
 
   const lookup = new Map();
@@ -165,18 +171,18 @@ async function loadPublicProfileLookup({ serviceClient, userIds }) {
   try {
     const [settingsRes, usersRes, publicViewsRes] = await Promise.all([
       serviceClient.database
-        .from('vibeusage_user_settings')
-        .select('user_id,leaderboard_public')
-        .in('user_id', uniqueUserIds),
+        .from("vibeusage_user_settings")
+        .select("user_id,leaderboard_public")
+        .in("user_id", uniqueUserIds),
       serviceClient.database
-        .from('users')
-        .select('id,nickname,avatar_url,profile,metadata')
-        .in('id', uniqueUserIds),
+        .from("users")
+        .select("id,nickname,avatar_url,profile,metadata")
+        .in("id", uniqueUserIds),
       serviceClient.database
-        .from('vibeusage_public_views')
-        .select('user_id')
-        .in('user_id', uniqueUserIds)
-        .is('revoked_at', null)
+        .from("vibeusage_public_views")
+        .select("user_id")
+        .in("user_id", uniqueUserIds)
+        .is("revoked_at", null),
     ]);
 
     if (settingsRes?.error || usersRes?.error || publicViewsRes?.error) {
@@ -185,19 +191,19 @@ async function loadPublicProfileLookup({ serviceClient, userIds }) {
 
     const settingsMap = new Map();
     for (const row of settingsRes.data || []) {
-      if (typeof row?.user_id !== 'string') continue;
+      if (typeof row?.user_id !== "string") continue;
       settingsMap.set(row.user_id, Boolean(row?.leaderboard_public));
     }
 
     const usersMap = new Map();
     for (const row of usersRes.data || []) {
-      if (typeof row?.id !== 'string') continue;
+      if (typeof row?.id !== "string") continue;
       usersMap.set(row.id, row);
     }
 
     const hasActiveLink = new Set();
     for (const row of publicViewsRes.data || []) {
-      if (typeof row?.user_id === 'string') {
+      if (typeof row?.user_id === "string") {
         hasActiveLink.add(row.user_id);
       }
     }
@@ -214,7 +220,7 @@ async function loadPublicProfileLookup({ serviceClient, userIds }) {
       lookup.set(userId, {
         isPublic,
         displayName: displayName || null,
-        avatarUrl: avatarUrl || null
+        avatarUrl: avatarUrl || null,
       });
     }
   } catch (_err) {
@@ -230,19 +236,32 @@ function normalizeSnapshotRow({ row, period, from, to, generatedAt, publicProfil
   if (rank <= 0) return null;
   const rankGpt = toPositiveInt(row.rank_gpt);
   const rankClaude = toPositiveInt(row.rank_claude);
+  const rankOtherRaw = toPositiveInt(row.rank_other);
+  const rankOther = rankOtherRaw > 0 ? rankOtherRaw : rank;
   if (rankGpt <= 0) return null;
   if (rankClaude <= 0) return null;
 
-  const gptTokens = toBigInt(row.gpt_tokens).toString();
-  const claudeTokens = toBigInt(row.claude_tokens).toString();
-  const totalTokens = toBigInt(row.total_tokens).toString();
+  const gptTokensBigInt = toBigInt(row.gpt_tokens);
+  const claudeTokensBigInt = toBigInt(row.claude_tokens);
+  const totalTokensBigInt = toBigInt(row.total_tokens);
+  const otherTokensBigInt = resolveOtherTokens({
+    row,
+    totalTokens: totalTokensBigInt,
+    gptTokens: gptTokensBigInt,
+    claudeTokens: claudeTokensBigInt,
+  });
+
+  const gptTokens = gptTokensBigInt.toString();
+  const claudeTokens = claudeTokensBigInt.toString();
+  const otherTokens = otherTokensBigInt.toString();
+  const totalTokens = totalTokensBigInt.toString();
 
   const fallbackDisplayName = normalizeDisplayName(row.display_name);
   const fallbackAvatarUrl = normalizeAvatarUrl(row.avatar_url);
   const displayName = publicProfile
     ? publicProfile.isPublic
-      ? publicProfile.displayName || 'Anonymous'
-      : 'Anonymous'
+      ? publicProfile.displayName || "Anonymous"
+      : "Anonymous"
     : fallbackDisplayName;
   const avatarUrl = publicProfile
     ? publicProfile.isPublic
@@ -259,14 +278,24 @@ function normalizeSnapshotRow({ row, period, from, to, generatedAt, publicProfil
     rank,
     rank_gpt: rankGpt,
     rank_claude: rankClaude,
+    rank_other: rankOther,
     gpt_tokens: gptTokens,
     claude_tokens: claudeTokens,
+    other_tokens: otherTokens,
     total_tokens: totalTokens,
     display_name: displayName,
     avatar_url: avatarUrl,
     is_public: isPublic,
-    generated_at: generatedAt
+    generated_at: generatedAt,
   };
+}
+
+function resolveOtherTokens({ row, totalTokens, gptTokens, claudeTokens }) {
+  const explicit = row?.other_tokens;
+  if (explicit != null) return toBigInt(explicit);
+
+  const derived = totalTokens - gptTokens - claudeTokens;
+  return derived > 0n ? derived : 0n;
 }
 
 function resolveDisplayName(row) {
@@ -297,22 +326,22 @@ function resolveAvatarUrl(row) {
 }
 
 function sanitizeName(value) {
-  if (typeof value !== 'string') return null;
+  if (typeof value !== "string") return null;
   const trimmed = value.trim();
   if (!trimmed) return null;
-  if (trimmed.includes('@')) return null;
+  if (trimmed.includes("@")) return null;
   if (trimmed.length > 128) return trimmed.slice(0, 128);
   return trimmed;
 }
 
 function sanitizeAvatarUrl(value) {
-  if (typeof value !== 'string') return null;
+  if (typeof value !== "string") return null;
   const trimmed = value.trim();
   if (!trimmed) return null;
   if (trimmed.length > 1024) return null;
   try {
     const url = new URL(trimmed);
-    if (url.protocol !== 'http:' && url.protocol !== 'https:') return null;
+    if (url.protocol !== "http:" && url.protocol !== "https:") return null;
     return url.toString();
   } catch (_e) {
     return null;
@@ -320,19 +349,19 @@ function sanitizeAvatarUrl(value) {
 }
 
 function normalizeDisplayName(value) {
-  if (typeof value !== 'string') return 'Anonymous';
+  if (typeof value !== "string") return "Anonymous";
   const trimmed = value.trim();
-  return trimmed.length > 0 ? trimmed : 'Anonymous';
+  return trimmed.length > 0 ? trimmed : "Anonymous";
 }
 
 function normalizeAvatarUrl(value) {
-  if (typeof value !== 'string') return null;
+  if (typeof value !== "string") return null;
   const trimmed = value.trim();
   return trimmed.length > 0 ? trimmed : null;
 }
 
 function isObject(value) {
-  return Boolean(value && typeof value === 'object');
+  return Boolean(value && typeof value === "object");
 }
 
 function chunkRows(rows, size) {

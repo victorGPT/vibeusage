@@ -25,7 +25,9 @@ If the token is missing or invalid, responses return 401 with:
 ```json
 { "error": "Missing bearer token" }
 ```
+
 or:
+
 ```json
 { "error": "Unauthorized" }
 ```
@@ -38,6 +40,7 @@ or:
 - `tz_offset_minutes` (optional): fixed offset in minutes from UTC, e.g. `-480`
 
 Notes:
+
 - If both `tz` and `tz_offset_minutes` are provided, `tz` wins.
 - Date params are `YYYY-MM-DD`.
 - Token totals are returned as **strings** (bigint-safe).
@@ -50,6 +53,7 @@ Notes:
 Totals for a date range.
 
 Query:
+
 - `from=YYYY-MM-DD` (optional; default last 30 days)
 - `to=YYYY-MM-DD` (optional; default today)
 - `source` (optional)
@@ -87,6 +91,7 @@ Response:
 ```
 
 Notes:
+
 - Pricing metadata is resolved from `vibeusage_pricing_profiles` (latest effective row, `active=true`) using the configured default model/source.
 - If the pricing table is empty, the backend falls back to the default profile.
 
@@ -95,12 +100,14 @@ Notes:
 Per-source and per-model aggregates for a date range (used by model mix + cost breakdown UI).
 
 Query:
+
 - `from=YYYY-MM-DD` (optional; default last 30 days)
 - `to=YYYY-MM-DD` (optional; default today)
 - `source` (optional; omit to aggregate all sources)
 - `tz`, `tz_offset_minutes` (optional)
 
 Notes:
+
 - `model` is not accepted because this endpoint already returns per-model groups.
 - Pricing metadata is resolved from `vibeusage_pricing_profiles` with fallback to default profile when no match exists.
 
@@ -157,6 +164,7 @@ Response:
 Daily aggregates for a date range.
 
 Query:
+
 - `from=YYYY-MM-DD` (optional; default last 30 days)
 - `to=YYYY-MM-DD` (optional; default today)
 - `source` (optional)
@@ -205,6 +213,7 @@ Response:
 ```
 
 Notes:
+
 - The dashboard should use `summary.totals` directly and MUST NOT compute totals locally.
 
 ### GET /functions/vibeusage-usage-hourly
@@ -212,6 +221,7 @@ Notes:
 Half-hour buckets for a local day (48 buckets).
 
 Query:
+
 - `day=YYYY-MM-DD` (optional; default today)
 - `source` (optional)
 - `model` (optional)
@@ -245,6 +255,7 @@ Response:
 Monthly aggregates aligned to local months.
 
 Query:
+
 - `months=1..24` (optional; default 24)
 - `to=YYYY-MM-DD` (optional; default today)
 - `source` (optional)
@@ -276,6 +287,7 @@ Response:
 GitHub-style activity heatmap.
 
 Query:
+
 - `weeks=1..104` (optional; default 52)
 - `to=YYYY-MM-DD` (optional; default today)
 - `week_starts_on=sun|mon` (optional; default sun)
@@ -293,24 +305,25 @@ Response:
   "thresholds": { "t1": "0", "t2": "0", "t3": "0" },
   "active_days": 0,
   "streak_days": 0,
-  "weeks": [
-    [
-      { "day": "YYYY-MM-DD", "value": "0", "level": 0 },
-      null
-    ]
-  ]
+  "weeks": [[{ "day": "YYYY-MM-DD", "value": "0", "level": 0 }, null]]
 }
 ```
 
 ### GET /functions/vibeusage-leaderboard
 
-Leaderboard entries for the current UTC week (Sunday start).
+Leaderboard entries for the current UTC period window (week/month/total).
 
 Query:
-- `period=week` (required)
-- `metric=all|gpt|claude` (optional; default `all`)
+
+- `period=week|month|total` (required)
+- `metric=all|gpt|claude|other` (optional; default `all`)
 - `limit=1..100` (optional; default 20)
 - `offset=0..10000` (optional; default 0)
+
+Privacy contract:
+
+- `entries[].is_public`: boolean
+- `entries[].user_id`: `string | null` (exposed only when `is_public=true`)
 
 Response:
 
@@ -327,9 +340,26 @@ Response:
   "total_entries": 0,
   "total_pages": 0,
   "entries": [
-    { "rank": 1, "is_me": false, "display_name": "Anonymous", "avatar_url": null, "gpt_tokens": "0", "claude_tokens": "0", "total_tokens": "0" }
+    {
+      "user_id": null,
+      "rank": 1,
+      "is_me": false,
+      "is_public": false,
+      "display_name": "Anonymous",
+      "avatar_url": null,
+      "gpt_tokens": "0",
+      "claude_tokens": "0",
+      "other_tokens": "0",
+      "total_tokens": "0"
+    }
   ],
-  "me": { "rank": null, "gpt_tokens": "0", "claude_tokens": "0", "total_tokens": "0" }
+  "me": {
+    "rank": null,
+    "gpt_tokens": "0",
+    "claude_tokens": "0",
+    "other_tokens": "0",
+    "total_tokens": "0"
+  }
 }
 ```
 
@@ -352,7 +382,7 @@ Response:
 ## TypeScript Types
 
 ```ts
-export type Source = 'codex' | 'every-code' | 'claude' | string;
+export type Source = "codex" | "every-code" | "claude" | string;
 export type ModelId = string;
 
 export interface UsageTotals {
@@ -370,7 +400,7 @@ export interface UsageSummaryResponse {
   totals: UsageTotals & { total_cost_usd: string };
   pricing: {
     model: string;
-    pricing_mode: 'add' | 'overlap' | 'mixed';
+    pricing_mode: "add" | "overlap" | "mixed";
     source: string;
     effective_from: string;
     rates_per_million_usd: {
@@ -398,7 +428,7 @@ export interface UsageModelBreakdownResponse {
   to: string;
   days: number;
   sources: UsageModelBreakdownSource[];
-  pricing: UsageSummaryResponse['pricing'];
+  pricing: UsageSummaryResponse["pricing"];
 }
 
 export interface DailyUsageRow extends UsageTotals {
@@ -445,7 +475,7 @@ export interface HeatmapCell {
 export interface UsageHeatmapResponse {
   from: string;
   to: string;
-  week_starts_on: 'sun' | 'mon';
+  week_starts_on: "sun" | "mon";
   thresholds: {
     t1: string;
     t2: string;
@@ -457,20 +487,37 @@ export interface UsageHeatmapResponse {
 }
 
 export interface LeaderboardEntry {
+  user_id: string | null;
   rank: number | null;
   is_me: boolean;
+  is_public: boolean;
   display_name: string;
   avatar_url: string | null;
+  gpt_tokens: string;
+  claude_tokens: string;
+  other_tokens: string;
   total_tokens: string;
 }
 
 export interface LeaderboardResponse {
-  period: 'day' | 'week' | 'month' | 'total';
+  period: "week" | "month" | "total";
+  metric: "all" | "gpt" | "claude" | "other";
   from: string;
   to: string;
   generated_at: string;
+  page: number;
+  limit: number;
+  offset: number;
+  total_entries: number | null;
+  total_pages: number | null;
   entries: LeaderboardEntry[];
-  me: { rank: number | null; total_tokens: string };
+  me: {
+    rank: number | null;
+    gpt_tokens: string;
+    claude_tokens: string;
+    other_tokens: string;
+    total_tokens: string;
+  };
 }
 
 export interface LeaderboardSettingsRequest {
@@ -492,24 +539,24 @@ const authHeader = { Authorization: `Bearer ${userJwt}` };
 // Model breakdown for a date range
 const breakdown = await fetch(
   `${baseUrl}/functions/vibeusage-usage-model-breakdown?from=2025-12-01&to=2025-12-31`,
-  { headers: authHeader }
+  { headers: authHeader },
 ).then((r) => r.json());
 
 // Daily usage filtered by model
 const daily = await fetch(
   `${baseUrl}/functions/vibeusage-usage-daily?from=2025-12-01&to=2025-12-31&model=gpt-5.2-codex`,
-  { headers: authHeader }
+  { headers: authHeader },
 ).then((r) => r.json());
 
 // Hourly usage for a local day
 const hourly = await fetch(
   `${baseUrl}/functions/vibeusage-usage-hourly?day=2025-12-25&tz=America/Los_Angeles`,
-  { headers: authHeader }
+  { headers: authHeader },
 ).then((r) => r.json());
 
 // Summary usage for a model
 const summary = await fetch(
   `${baseUrl}/functions/vibeusage-usage-summary?from=2025-12-25&to=2025-12-25&model=moonshotai%2FKimi-K2-Thinking`,
-  { headers: authHeader }
+  { headers: authHeader },
 ).then((r) => r.json());
 ```

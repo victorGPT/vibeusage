@@ -1,22 +1,21 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-
-import { copy } from "../lib/copy";
-import {
-  getLeaderboard,
-  getLeaderboardSettings,
-  setLeaderboardSettings,
-} from "../lib/vibeusage-api";
-import { isMockEnabled } from "../lib/mock-data";
+import { BackendStatus } from "../components/BackendStatus.jsx";
 import { isAccessTokenReady, resolveAuthAccessToken } from "../lib/auth-token";
+import { copy } from "../lib/copy";
+import { toDisplayNumber } from "../lib/format";
 import {
   buildPageItems,
   clampInt,
   getPaginationFlags,
   injectMeIntoFirstPage,
 } from "../lib/leaderboard-ui";
-import { toDisplayNumber } from "../lib/format";
-import { BackendStatus } from "../components/BackendStatus.jsx";
+import { isMockEnabled } from "../lib/mock-data";
+import {
+  getLeaderboard,
+  getLeaderboardSettings,
+  setLeaderboardSettings,
+} from "../lib/vibeusage-api";
 import { AsciiBox } from "../ui/foundation/AsciiBox.jsx";
 import { MatrixButton } from "../ui/foundation/MatrixButton.jsx";
 import { MatrixShell } from "../ui/foundation/MatrixShell.jsx";
@@ -216,7 +215,16 @@ export function LeaderboardPage({
     return () => {
       active = false;
     };
-  }, [baseUrl, effectiveAuthToken, authTokenAllowed, authTokenReady, listOffset, listReloadToken, mockEnabled, period]);
+  }, [
+    baseUrl,
+    effectiveAuthToken,
+    authTokenAllowed,
+    authTokenReady,
+    listOffset,
+    listReloadToken,
+    mockEnabled,
+    period,
+  ]);
 
   const listData = listState.data;
 
@@ -313,6 +321,7 @@ export function LeaderboardPage({
             <col className="w-[112px]" />
             <col className="w-[112px]" />
             <col className="w-[112px]" />
+            <col className="w-[112px]" />
           </colgroup>
           <thead className="uppercase text-matrix-dim tracking-[0.25em] text-[10px]">
             <tr className="border-b border-matrix-ghost">
@@ -321,6 +330,7 @@ export function LeaderboardPage({
               <th className="px-4 py-3">{copy("leaderboard.column.total")}</th>
               <th className="px-4 py-3">{copy("leaderboard.column.gpt")}</th>
               <th className="px-4 py-3">{copy("leaderboard.column.claude")}</th>
+              <th className="px-4 py-3">{copy("leaderboard.column.other")}</th>
             </tr>
           </thead>
           <tbody>
@@ -338,19 +348,31 @@ export function LeaderboardPage({
               const rowClickable = Boolean(publicViewPath);
               if (isMe) {
                 return (
-                  <tr key={`row-${entry?.rank}-${name}`} className="border-b border-matrix-ghost/40">
-                    <td colSpan={5} className="px-0 py-2">
+                  <tr
+                    key={`row-${entry?.rank}-${name}`}
+                    className="border-b border-matrix-ghost/40"
+                  >
+                    <td colSpan={6} className="px-0 py-2">
                       <div className="rounded-none ring-1 ring-inset ring-matrix-primary/40 bg-matrix-panelStrong/70 backdrop-blur-panel shadow-matrix-glow">
-                        <div className="grid grid-cols-[72px_minmax(0,1fr)_112px_112px_112px] items-center text-[12px]">
+                        <div className="grid grid-cols-[72px_minmax(0,1fr)_112px_112px_112px_112px] items-center text-[12px]">
                           <div className="px-4 py-3 font-black text-matrix-ink-bright glow-text">
                             {entry?.rank ?? placeholder}
                           </div>
                           <div className="px-4 py-3 font-black truncate text-matrix-ink-bright glow-text">
                             {name}
                           </div>
-                          <div className="px-4 py-3 font-bold">{toDisplayNumber(entry?.total_tokens)}</div>
-                          <div className="px-4 py-3 font-bold">{toDisplayNumber(entry?.gpt_tokens)}</div>
-                          <div className="px-4 py-3 font-bold">{toDisplayNumber(entry?.claude_tokens)}</div>
+                          <div className="px-4 py-3 font-bold">
+                            {toDisplayNumber(entry?.total_tokens)}
+                          </div>
+                          <div className="px-4 py-3 font-bold">
+                            {toDisplayNumber(entry?.gpt_tokens)}
+                          </div>
+                          <div className="px-4 py-3 font-bold">
+                            {toDisplayNumber(entry?.claude_tokens)}
+                          </div>
+                          <div className="px-4 py-3 font-bold">
+                            {toDisplayNumber(entry?.other_tokens)}
+                          </div>
                         </div>
                       </div>
                     </td>
@@ -397,6 +419,7 @@ export function LeaderboardPage({
                   <td className="px-4 py-3">{toDisplayNumber(entry?.total_tokens)}</td>
                   <td className="px-4 py-3">{toDisplayNumber(entry?.gpt_tokens)}</td>
                   <td className="px-4 py-3">{toDisplayNumber(entry?.claude_tokens)}</td>
+                  <td className="px-4 py-3">{toDisplayNumber(entry?.other_tokens)}</td>
                 </tr>
               );
             })}
@@ -569,9 +592,7 @@ export function LeaderboardPage({
                 {copy("leaderboard.pagination.next")}
               </MatrixButton>
             </div>
-            <div className="flex flex-wrap items-center gap-2">
-              {pageButtons}
-            </div>
+            <div className="flex flex-wrap items-center gap-2">{pageButtons}</div>
           </div>
         </AsciiBox>
       </div>

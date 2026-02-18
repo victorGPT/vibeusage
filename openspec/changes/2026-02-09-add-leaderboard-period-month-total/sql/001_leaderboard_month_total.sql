@@ -8,6 +8,8 @@
 -- Notes:
 -- - `from_day/to_day` are inclusive dates; hourly scan uses [from_day, to_day+1) in UTC.
 -- - Keep view column order stable when using CREATE OR REPLACE VIEW; add new columns at the end.
+-- - Historical caveat: grants in this migration were later tightened by
+--   `002_leaderboard_scope_other.sql` (SELECT-only). Treat 002 grants as authoritative.
 
 -- 1) Source views for service-role refresh (month + total).
 
