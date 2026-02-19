@@ -5,6 +5,11 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      apply_leaderboard_scope_other:
+        description: "Apply 002_leaderboard_scope_other.sql via Insforge DB API"
+        required: false
+        default: "false"
 
 jobs:
   model-alias-table:
@@ -27,3 +32,77 @@ jobs:
           INSFORGE_SERVICE_ROLE_KEY: ${{ secrets.INSFORGE_SERVICE_ROLE_KEY }}
           INSFORGE_API_KEY: ${{ secrets.INSFORGE_API_KEY }}
         run: node scripts/acceptance/model-identity-alias-table.cjs
+
+      - name: Apply leaderboard scope/other migration (manual)
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.apply_leaderboard_scope_other == 'true'
+        env:
+          INSFORGE_BASE_URL: ${{ secrets.INSFORGE_BASE_URL }}
+          INSFORGE_SERVICE_ROLE_KEY: ${{ secrets.INSFORGE_SERVICE_ROLE_KEY }}
+          INSFORGE_API_KEY: ${{ secrets.INSFORGE_API_KEY }}
+        run: |
+          node - <<'NODE'
+          const fs = require('fs');
+
+          const migrationPath = 'openspec/changes/2026-02-09-add-leaderboard-period-month-total/sql/002_leaderboard_scope_other.sql';
+          const sql = fs.readFileSync(migrationPath, 'utf8');
+
+          const baseUrlRaw = process.env.INSFORGE_BASE_URL || '';
+          const baseUrl = baseUrlRaw.replace(/\/$/, '');
+          const apiKey = process.env.INSFORGE_SERVICE_ROLE_KEY || process.env.INSFORGE_API_KEY || '';
+
+          if (!baseUrl || !apiKey) {
+            throw new Error('Missing INSFORGE_BASE_URL or INSFORGE_SERVICE_ROLE_KEY/INSFORGE_API_KEY');
+          }
+
+          async function query(queryText) {
+            const resp = await fetch(`${baseUrl}/api/database/query`, {
+              method: 'POST',
+              headers: {
+                'x-api-key': apiKey,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ query: queryText }),
+            });
+            const text = await resp.text();
+            let payload;
+            try {
+              payload = JSON.parse(text);
+            } catch {
+              payload = { raw: text };
+            }
+            if (!resp.ok || payload?.error) {
+              throw new Error(`DB query failed (${resp.status}): ${JSON.stringify(payload)}`);
+            }
+            return payload;
+          }
+
+          (async () => {
+            console.log('[migrate] applying', migrationPath);
+            await query(sql);
+
+            const cols = await query(`
+              select table_name, column_name
+              from information_schema.columns
+              where table_schema='public'
+                and table_name='vibeusage_leaderboard_snapshots'
+                and column_name in ('other_tokens','rank_other')
+              order by column_name;
+            `);
+            console.log('[verify] snapshots columns:', JSON.stringify(cols.data || cols.rows || []));
+
+            const viewDefRes = await query(`
+              select pg_get_viewdef('public.vibeusage_leaderboard_source_week'::regclass, true) as def;
+            `);
+            const row = (viewDefRes.data || viewDefRes.rows || [])[0] || {};
+            const def = String(row.def || '');
+            console.log('[verify] source_week definition snippet:', def.slice(0, 500));
+            if (!def.includes("h.source <> 'canary'")) {
+              throw new Error("Expected source scope filter h.source <> 'canary' not found in source_week view definition");
+            }
+
+            console.log('[ok] leaderboard scope/other migration applied and verified');
+          })().catch((err) => {
+            console.error(err);
+            process.exit(1);
+          });
+          NODE
