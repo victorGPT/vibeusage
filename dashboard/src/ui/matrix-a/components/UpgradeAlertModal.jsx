@@ -83,7 +83,7 @@ export function UpgradeAlertModal({ requiredVersion, installCommand, onClose }) 
   return (
     <div
       ref={bannerRef}
-      className="fixed top-0 left-0 right-0 z-[200] border-b border-gold/30 bg-matrix-dark/95 backdrop-blur-md shadow-[0_0_20px_rgba(255,215,0,0.1)] overflow-hidden"
+      className="upgrade-alert-modal fixed top-0 left-0 right-0 z-[200] border-b border-gold/30 bg-matrix-dark/95 backdrop-blur-md shadow-[0_0_20px_rgba(255,215,0,0.1)] overflow-hidden"
     >
       {/* Scanline effect */}
       <div className="absolute inset-0 pointer-events-none opacity-10">

@@ -121,7 +121,18 @@ export function ActivityHeatmap({
   timeZoneShortLabel,
   hideLegend = false,
   defaultToLatestMonth = false,
+  theme = "night",
 }) {
+  const isDayTheme = theme === "day";
+  const heatmapPalette = isDayTheme
+    ? ["#ebedf0", "#9be9a8", "#40c463", "#30a14e", "#216e39"]
+    : [
+        "rgba(0,255,65,0.08)",
+        `rgba(0,255,65,${OPACITY_BY_LEVEL[1]})`,
+        `rgba(0,255,65,${OPACITY_BY_LEVEL[2]})`,
+        `rgba(0,255,65,${OPACITY_BY_LEVEL[3]})`,
+        `rgba(0,255,65,${OPACITY_BY_LEVEL[4]})`,
+      ];
   const weekStartsOn = heatmap?.week_starts_on === "mon" ? "mon" : "sun";
   const normalizedHeatmap = useMemo(() => {
     const sourceWeeks = Array.isArray(heatmap?.weeks) ? heatmap.weeks : [];
@@ -514,11 +525,7 @@ export function ActivityHeatmap({
                     }
 
                     const level = Number(cell.level) || 0;
-                    const opacity = OPACITY_BY_LEVEL[level] ?? 0.3;
-                    const color =
-                      level === 0
-                        ? "rgba(0,255,65,0.08)"
-                        : `rgba(0,255,65,${opacity})`;
+                    const color = heatmapPalette[level] || heatmapPalette[0];
 
                     const tzDetail =
                       timeZoneLabel || timeZoneShortLabel || copy("heatmap.legend.utc");
@@ -559,9 +566,11 @@ export function ActivityHeatmap({
         {/* Scrollbar Thumb */}
         <div
           ref={thumbRef}
-          className={`absolute top-0 bottom-0 rounded-full bg-[#00FF41]/50 hover:bg-[#00FF41]/70 shadow-[0_0_10px_rgba(0,255,65,0.4)] ${
-            isDraggingScrollbar ? "cursor-grabbing" : "cursor-grab"
-          }`}
+          className={`absolute top-0 bottom-0 rounded-full ${
+            isDayTheme
+              ? "bg-[#40c463]/55 hover:bg-[#30a14e]/70 shadow-[0_0_8px_rgba(48,161,78,0.25)]"
+              : "bg-[#00FF41]/50 hover:bg-[#00FF41]/70 shadow-[0_0_10px_rgba(0,255,65,0.4)]"
+          } ${isDraggingScrollbar ? "cursor-grabbing" : "cursor-grab"}`}
           style={{
             left: `${scrollState.left * 100 * (1 - scrollState.width)}%`,
             width: `${scrollState.width * 100}%`,
@@ -585,10 +594,7 @@ export function ActivityHeatmap({
                   style={{
                     width: 10,
                     height: 10,
-                    background:
-                      level === 0
-                        ? "rgba(0,255,65,0.08)"
-                        : `rgba(0,255,65,${OPACITY_BY_LEVEL[level]})`,
+                    background: heatmapPalette[level] || heatmapPalette[0],
                   }}
                 ></span>
               ))}

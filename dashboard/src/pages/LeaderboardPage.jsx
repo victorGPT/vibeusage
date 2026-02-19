@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { BackendStatus } from "../components/BackendStatus.jsx";
 import { isAccessTokenReady, resolveAuthAccessToken } from "../lib/auth-token";
@@ -22,6 +22,26 @@ import { MatrixShell } from "../ui/foundation/MatrixShell.jsx";
 import { GithubStar } from "../ui/matrix-a/components/GithubStar.jsx";
 
 const PAGE_LIMIT = 20;
+const DASHBOARD_THEME_STORAGE_KEY = "vibeusage:dashboard-theme";
+const DASHBOARD_THEME_DAY = "day";
+const DASHBOARD_THEME_NIGHT = "night";
+
+function normalizeDashboardTheme(raw) {
+  return raw === DASHBOARD_THEME_DAY ? DASHBOARD_THEME_DAY : DASHBOARD_THEME_NIGHT;
+}
+
+function loadDashboardTheme() {
+  if (typeof window === "undefined") return DASHBOARD_THEME_NIGHT;
+  try {
+    const stored = window.localStorage?.getItem(DASHBOARD_THEME_STORAGE_KEY);
+    if (typeof stored === "string" && stored.length > 0) {
+      return normalizeDashboardTheme(stored);
+    }
+  } catch (_err) {
+    // ignore storage read failures
+  }
+  return DASHBOARD_THEME_NIGHT;
+}
 
 function normalizePeriod(value) {
   if (typeof value !== "string") return null;
@@ -72,6 +92,9 @@ export function LeaderboardPage({
 }) {
   const location = useLocation();
   const navigate = useNavigate();
+  const [dashboardTheme, setDashboardTheme] = useState(() =>
+    loadDashboardTheme()
+  );
   const mockEnabled = isMockEnabled();
   const authTokenAllowed = signedIn && !sessionSoftExpired;
   const authAccessToken = useMemo(() => {
@@ -83,6 +106,27 @@ export function LeaderboardPage({
   }, [auth, authTokenAllowed]);
   const effectiveAuthToken = authTokenAllowed ? authAccessToken : null;
   const authTokenReady = authTokenAllowed && isAccessTokenReady(effectiveAuthToken);
+
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      document.documentElement.setAttribute("data-dashboard-theme", dashboardTheme);
+    }
+    try {
+      window.localStorage?.setItem(DASHBOARD_THEME_STORAGE_KEY, dashboardTheme);
+    } catch (_err) {
+      // ignore storage write failures
+    }
+  }, [dashboardTheme]);
+
+  const handleToggleDashboardTheme = useCallback(() => {
+    setDashboardTheme((current) =>
+      current === DASHBOARD_THEME_DAY ? DASHBOARD_THEME_NIGHT : DASHBOARD_THEME_DAY
+    );
+  }, []);
+  const dashboardThemeToggleLabel =
+    dashboardTheme === DASHBOARD_THEME_DAY
+      ? copy("dashboard.theme.toggle.night")
+      : copy("dashboard.theme.toggle.day");
 
   let headerStatus = null;
   if (authTokenAllowed && authTokenReady) {
@@ -104,6 +148,15 @@ export function LeaderboardPage({
           {copy("shared.button.sign_in")}
         </MatrixButton>
       )}
+      <MatrixButton
+        onClick={handleToggleDashboardTheme}
+        size="header"
+        aria-label={dashboardThemeToggleLabel}
+        title={dashboardThemeToggleLabel}
+        className="dashboard-theme-toggle"
+      >
+        {dashboardThemeToggleLabel}
+      </MatrixButton>
     </div>
   );
 

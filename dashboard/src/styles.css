@@ -20,6 +20,20 @@
   --matrix-caption-size: 12px;
 }
 
+:root[data-dashboard-theme="day"] {
+  color-scheme: light;
+  --matrix-bg: #ffffff;
+  --matrix-panel-bg: rgba(246, 246, 246, 0.94);
+  --matrix-panel-border: rgba(0, 0, 0, 0.14);
+  --matrix-panel-border-strong: rgba(0, 0, 0, 0.22);
+  --matrix-ink: #1b1b1b;
+  --matrix-ink-bright: #101010;
+  --matrix-ink-muted: rgba(0, 0, 0, 0.62);
+  --matrix-ink-dim: rgba(0, 0, 0, 0.45);
+  --matrix-ink-ghost: rgba(0, 0, 0, 0.2);
+  --matrix-glow: rgba(0, 0, 0, 0.16);
+}
+
 html,
 body {
   height: 100%;
@@ -33,6 +47,98 @@ body {
     Consolas, "Liberation Mono", "Courier New", monospace;
   font-size: var(--matrix-body-size);
   line-height: 1.5;
+  transition: background-color 180ms ease, color 180ms ease;
+}
+
+:root[data-dashboard-theme="day"] body {
+  background: linear-gradient(180deg, #ffffff 0%, #f2f2f2 100%);
+}
+
+:root[data-dashboard-theme="day"] .matrix-scanline-overlay,
+:root[data-dashboard-theme="day"] .matrix-scanlines,
+:root[data-dashboard-theme="day"] .matrix-scan-sweep {
+  display: none !important;
+  opacity: 0 !important;
+  animation: none !important;
+}
+
+:root[data-dashboard-theme="day"] .bg-matrix-dark {
+  background-color: #fff;
+}
+
+:root[data-dashboard-theme="day"] .upgrade-alert-modal {
+  background-color: rgba(246, 246, 246, 0.98) !important;
+  border-bottom-color: rgba(0, 0, 0, 0.15) !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08) !important;
+}
+
+:root[data-dashboard-theme="day"] .bg-matrix-panel {
+  background-color: rgba(246, 246, 246, 0.94);
+}
+
+:root[data-dashboard-theme="day"] .bg-matrix-panelStrong {
+  background-color: rgba(238, 238, 238, 0.95);
+}
+
+:root[data-dashboard-theme="day"] .text-matrix-primary {
+  color: #1b1b1b;
+}
+
+:root[data-dashboard-theme="day"] .text-matrix-bright {
+  color: #101010;
+}
+
+:root[data-dashboard-theme="day"] .text-matrix-muted {
+  color: rgba(0, 0, 0, 0.62);
+}
+
+:root[data-dashboard-theme="day"] .text-matrix-dim {
+  color: rgba(0, 0, 0, 0.45);
+}
+
+:root[data-dashboard-theme="day"] .text-matrix-ghost {
+  color: rgba(0, 0, 0, 0.2);
+}
+
+:root[data-dashboard-theme="day"] .border-matrix-primary {
+  border-color: rgba(0, 0, 0, 0.32);
+}
+
+:root[data-dashboard-theme="day"] .border-matrix-ghost {
+  border-color: rgba(0, 0, 0, 0.2);
+}
+
+:root[data-dashboard-theme="day"] .border-matrix-dim {
+  border-color: rgba(0, 0, 0, 0.28);
+}
+
+:root[data-dashboard-theme="day"] .fill-matrix-primary {
+  fill: #1b1b1b;
+}
+
+:root[data-dashboard-theme="day"] .text-white {
+  color: var(--matrix-ink-bright) !important;
+}
+
+:root[data-dashboard-theme="day"] .bg-black {
+  background-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+:root[data-dashboard-theme="day"] .bg-black\/30 {
+  background-color: rgba(0, 0, 0, 0.12) !important;
+}
+
+:root[data-dashboard-theme="day"] .bg-black\/40 {
+  background-color: rgba(0, 0, 0, 0.16) !important;
+}
+
+:root[data-dashboard-theme="day"] .bg-black\/60 {
+  background-color: rgba(0, 0, 0, 0.24) !important;
+}
+
+:root[data-dashboard-theme="day"] .bg-black\/90,
+:root[data-dashboard-theme="day"] .bg-black\/95 {
+  background-color: rgba(236, 236, 236, 0.94) !important;
 }
 
 @layer components {
@@ -101,6 +207,25 @@ body {
     border-color: var(--matrix-ink);
   }
 
+  :root[data-dashboard-theme="day"] .matrix-header-action:hover {
+    background: rgba(232, 232, 232, 0.9);
+  }
+
+  :root[data-dashboard-theme="day"] .matrix-header-action::after {
+    background: linear-gradient(
+      120deg,
+      transparent 0%,
+      rgba(0, 0, 0, 0.08) 45%,
+      rgba(255, 255, 255, 0.28) 50%,
+      rgba(0, 0, 0, 0.08) 55%,
+      transparent 100%
+    );
+  }
+
+  .dashboard-theme-toggle {
+    min-width: 120px;
+  }
+
   .matrix-header-action::after {
     content: "";
     position: absolute;
@@ -122,6 +247,28 @@ body {
   .matrix-header-action:hover::after {
     transform: translateX(120%);
     opacity: 1;
+  }
+
+  .matrix-header-chip--solid.matrix-header-action:hover {
+    background: #39ff6a;
+    border-color: #39ff6a;
+  }
+
+  :root[data-dashboard-theme="day"] .matrix-header-chip--solid {
+    background: #1b1b1b;
+    border-color: #1b1b1b;
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    --matrix-header-corner: #fff;
+  }
+
+  :root[data-dashboard-theme="day"] .matrix-header-chip--solid span {
+    color: #ffffff;
+  }
+
+  :root[data-dashboard-theme="day"] .matrix-header-chip--solid.matrix-header-action:hover {
+    background: #333333;
+    border-color: #333333;
   }
 
   .matrix-header-action--ghost:hover {

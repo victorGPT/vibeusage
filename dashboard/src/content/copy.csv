@@ -307,6 +307,8 @@ leaderboard.pagination.page_unknown,dashboard,LeaderboardPage,LeaderboardPage,pa
 
 dashboard.sign_out,dashboard,DashboardPage,Header,sign_out,"Sign out",,active
 dashboard.not_signed_in,dashboard,DashboardPage,Header,not_signed_in,"Not signed in",,active
+dashboard.theme.toggle.day,dashboard,DashboardPage,Header,theme_toggle,"DAY MODE",,active
+dashboard.theme.toggle.night,dashboard,DashboardPage,Header,theme_toggle,"NIGHT MODE",,active
 
 dashboard.footer.active,dashboard,DashboardPage,Footer,footer_active,"{{range}} • click Refresh to reload",,active
 dashboard.footer.auth,dashboard,DashboardPage,Footer,footer_auth,"Sign in to view usage",,active
