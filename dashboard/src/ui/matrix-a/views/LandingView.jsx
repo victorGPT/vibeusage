@@ -114,11 +114,17 @@ export function LandingView({
         </section>
 
         <section className="w-full max-w-3xl border border-matrix-ghost bg-matrix-panel px-6 py-6 space-y-4">
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <h2 className="text-2xl md:text-3xl font-bold text-matrix-bright tracking-tight">
-              {copy("landing.install.title")}
-            </h2>
-            <MatrixButton
+          <h2 className="text-2xl md:text-3xl font-bold text-matrix-bright tracking-tight">
+            {copy("landing.install.title")}
+          </h2>
+          <p className="text-caption text-matrix-muted uppercase">{copy("landing.install.prompt")}</p>
+          <div className="border border-matrix-dim bg-black/70 px-4 py-3 flex items-center gap-3">
+            <div className="min-w-0 flex-1 overflow-x-auto">
+              <code className="font-matrix text-body text-matrix-primary whitespace-nowrap">
+                {installCommand}
+              </code>
+            </div>
+            <button
               type="button"
               aria-label={
                 installCopied
@@ -131,16 +137,19 @@ export function LandingView({
                   : copy("landing.install.action.copy")
               }
               onClick={onCopyInstallCommand}
-              className="w-full md:w-auto"
+              className="shrink-0 inline-flex h-8 w-8 items-center justify-center border border-matrix-ghost text-matrix-primary hover:text-matrix-bright hover:border-matrix-dim transition-colors"
             >
-              {installCopied ? copy("landing.install.action.copied") : copy("landing.install.action.copy")}
-            </MatrixButton>
-          </div>
-          <p className="text-caption text-matrix-muted uppercase">{copy("landing.install.prompt")}</p>
-          <div className="border border-matrix-dim bg-black/70 px-4 py-3 overflow-x-auto">
-            <code className="font-matrix text-body text-matrix-primary whitespace-nowrap">
-              {installCommand}
-            </code>
+              {installCopied ? (
+                <svg viewBox="0 0 20 20" aria-hidden="true" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8">
+                  <path d="M4 10.5 8 14.5 16 6.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              ) : (
+                <svg viewBox="0 0 20 20" aria-hidden="true" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8">
+                  <rect x="7" y="7" width="9" height="9" rx="1.5" />
+                  <path d="M4 13V4h9" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              )}
+            </button>
           </div>
           <p className="text-caption text-matrix-dim uppercase">{copy("landing.install.helper")}</p>
         </section>
