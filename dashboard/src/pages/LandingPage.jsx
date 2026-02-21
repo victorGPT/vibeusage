@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { copy } from "../lib/copy";
+import { safeWriteClipboard } from "../lib/safe-browser";
 import { isScreenshotModeEnabled } from "../lib/screenshot-mode";
 import { LandingView } from "../ui/matrix-a/views/LandingView.jsx";
 import { shouldDeferMount } from "./should-defer-mount.js";
@@ -70,19 +71,27 @@ export function LandingPage({ signInUrl, signUpUrl }) {
 
   const handlePlaceholder = useMemo(
     () => copy("landing.handle.placeholder", { handle: specialHandle }),
-    [specialHandle]
+    [specialHandle],
   );
 
   const rankLabel = useMemo(() => {
     const rank =
-      handle === specialHandle
-        ? copy("landing.rank.singularity")
-        : copy("landing.rank.unranked");
+      handle === specialHandle ? copy("landing.rank.singularity") : copy("landing.rank.unranked");
     return copy("landing.rank.expectation", { rank });
   }, [handle, specialHandle]);
 
+  const installCommand = copy("landing.install.command");
+  const [installCopied, setInstallCopied] = useState(false);
+
   const handleChange = (event) => {
     setHandle(event.target.value.toUpperCase());
+  };
+
+  const handleCopyInstall = async () => {
+    const didCopy = await safeWriteClipboard(installCommand);
+    if (!didCopy) return;
+    setInstallCopied(true);
+    window.setTimeout(() => setInstallCopied(false), 2000);
   };
 
   return (
@@ -98,6 +107,9 @@ export function LandingPage({ signInUrl, signUpUrl }) {
       specialHandle={specialHandle}
       handlePlaceholder={handlePlaceholder}
       rankLabel={rankLabel}
+      installCommand={installCommand}
+      installCopied={installCopied}
+      onCopyInstallCommand={handleCopyInstall}
     />
   );
 }

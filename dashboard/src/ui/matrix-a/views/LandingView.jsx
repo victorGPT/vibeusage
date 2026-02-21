@@ -1,5 +1,4 @@
 import React, { Suspense } from "react";
-
 import { DecodingText } from "../../foundation/DecodingText.jsx";
 import { MatrixButton } from "../../foundation/MatrixButton.jsx";
 import { GithubStar } from "../components/GithubStar.jsx";
@@ -7,12 +6,12 @@ import { GithubStar } from "../components/GithubStar.jsx";
 const MatrixRain = React.lazy(() =>
   import("../components/MatrixRain.jsx").then((mod) => ({
     default: mod.MatrixRain,
-  }))
+  })),
 );
 const LandingExtras = React.lazy(() =>
   import("../components/LandingExtras.jsx").then((mod) => ({
     default: mod.LandingExtras,
-  }))
+  })),
 );
 
 export function LandingView({
@@ -27,6 +26,9 @@ export function LandingView({
   specialHandle,
   handlePlaceholder,
   rankLabel,
+  installCommand,
+  installCopied,
+  onCopyInstallCommand,
 }) {
   const extrasSkeleton = (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-3xl">
@@ -44,22 +46,12 @@ export function LandingView({
       ) : null}
       <div className="fixed top-6 right-6 z-[70] flex flex-col items-end space-y-3 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-3">
         <GithubStar isFixed={false} size="header" />
-        <MatrixButton
-          as="a"
-          href={signInUrl}
-          size="header"
-          className="matrix-header-action--ghost"
-        >
+        <MatrixButton as="a" href={signInUrl} size="header" className="matrix-header-action--ghost">
           <span className="font-matrix font-black text-caption tracking-[0.12em] text-matrix-primary">
             {loginLabel}
           </span>
         </MatrixButton>
-        <MatrixButton
-          as="a"
-          href={signUpUrl}
-          size="header"
-          className="matrix-header-chip--solid"
-        >
+        <MatrixButton as="a" href={signUpUrl} size="header" className="matrix-header-chip--solid">
           <span className="font-matrix font-black text-caption tracking-[0.12em] text-black">
             {signupLabel}
           </span>
@@ -122,12 +114,42 @@ export function LandingView({
         </section>
 
         <section className="w-full max-w-3xl border border-matrix-ghost bg-matrix-panel px-6 py-6 space-y-4">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <h2 className="text-2xl md:text-3xl font-bold text-matrix-bright tracking-tight">
+              {copy("landing.install.title")}
+            </h2>
+            <MatrixButton
+              type="button"
+              aria-label={
+                installCopied
+                  ? copy("landing.install.action.copied")
+                  : copy("landing.install.action.copy")
+              }
+              title={
+                installCopied
+                  ? copy("landing.install.action.copied")
+                  : copy("landing.install.action.copy")
+              }
+              onClick={onCopyInstallCommand}
+              className="w-full md:w-auto"
+            >
+              {installCopied ? copy("landing.install.action.copied") : copy("landing.install.action.copy")}
+            </MatrixButton>
+          </div>
+          <p className="text-caption text-matrix-muted uppercase">{copy("landing.install.prompt")}</p>
+          <div className="border border-matrix-dim bg-black/70 px-4 py-3 overflow-x-auto">
+            <code className="font-matrix text-body text-matrix-primary whitespace-nowrap">
+              {installCommand}
+            </code>
+          </div>
+          <p className="text-caption text-matrix-dim uppercase">{copy("landing.install.helper")}</p>
+        </section>
+
+        <section className="w-full max-w-3xl border border-matrix-ghost bg-matrix-panel px-6 py-6 space-y-4">
           <h2 className="text-2xl md:text-3xl font-bold text-matrix-bright tracking-tight">
             {copy("landing.seo.title")}
           </h2>
-          <p className="text-body text-matrix-muted">
-            {copy("landing.seo.summary")}
-          </p>
+          <p className="text-body text-matrix-muted">{copy("landing.seo.summary")}</p>
           <ul className="space-y-2 text-body text-matrix-muted">
             <li className="flex gap-2">
               <span className="text-matrix-primary">-</span>
@@ -142,9 +164,7 @@ export function LandingView({
               <span>{copy("landing.seo.point3")}</span>
             </li>
           </ul>
-          <p className="text-caption text-matrix-dim uppercase">
-            {copy("landing.seo.roadmap")}
-          </p>
+          <p className="text-caption text-matrix-dim uppercase">{copy("landing.seo.roadmap")}</p>
         </section>
 
         {/* 核心操作区域 */}

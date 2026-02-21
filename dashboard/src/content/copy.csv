@@ -28,6 +28,12 @@ landing.nav.login,landing,LandingPage,LandingPage,nav_login,"LOGIN",,active
 landing.nav.signup,landing,LandingPage,LandingPage,nav_signup,"SIGN UP",,active
 landing.seo.title,landing,LandingPage,LandingPage,seo_title,"Quantify Codex, Claude Code & Gemini CLI Usage",,active
 landing.seo.summary,landing,LandingPage,LandingPage,seo_summary,"VibeUsage is a token usage tracker built for AI CLI users (Codex, Claude, Gemini) who want a fast, reliable view of token spend.",,active
+landing.install.title,landing,LandingPage,LandingPage,install_title,"INSTALL IN ONE COMMAND",,active
+landing.install.prompt,landing,LandingPage,LandingPage,install_prompt,"Run this in your terminal:",,active
+landing.install.command,landing,LandingPage,LandingPage,install_command,"npx --yes vibeusage init",,active
+landing.install.helper,landing,LandingPage,LandingPage,install_helper,"Then connect your account and start syncing usage.",,active
+landing.install.action.copy,landing,LandingPage,LandingPage,install_copy,"COPY COMMAND",,active
+landing.install.action.copied,landing,LandingPage,LandingPage,install_copied,"COPIED",,active
 landing.meta.title,landing,LandingPage,Meta,title,"VibeUsage",,active
 landing.meta.description,landing,LandingPage,Meta,description,"Track Codex, Claude Code & Gemini CLI usage in real time.",,active
 landing.meta.og_site_name,landing,LandingPage,Meta,og_site_name,"VibeUsage",,active
