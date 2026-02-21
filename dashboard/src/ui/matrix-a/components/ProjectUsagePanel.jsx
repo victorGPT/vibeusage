@@ -145,7 +145,6 @@ export function ProjectUsagePanel({
         <div className="relative">
           <Select.Root
             value={resolvedLimit}
-            modal={false}
             items={LIMIT_OPTIONS.map((value) => ({
               value,
               label: optionLabels[value],
@@ -164,9 +163,9 @@ export function ProjectUsagePanel({
               <span className="text-matrix-bright">▾</span>
             </Select.Trigger>
             <Select.Portal>
-              <Select.Positioner align="end" side="bottom" sideOffset={8}>
-                <Select.Popup className="w-40 border border-matrix-ghost bg-matrix-panelStrong backdrop-blur-md z-20">
-                  <Select.List aria-label={limitAria}>
+              <Select.Positioner align="end" side="bottom" sideOffset={8} className="z-50">
+                <Select.Popup className="w-40 border border-matrix-ghost bg-matrix-panelStrong backdrop-blur-md pointer-events-auto">
+                  <Select.List aria-label={limitAria} role="listbox">
                     {LIMIT_OPTIONS.map((value) => (
                       <Select.Item
                         key={value}
