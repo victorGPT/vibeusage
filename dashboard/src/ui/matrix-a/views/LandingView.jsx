@@ -100,23 +100,7 @@ export function LandingView({
           extrasSkeleton
         )}
 
-        <section className="w-full max-w-4xl border border-matrix-ghost bg-matrix-panel p-4">
-          <div className="relative overflow-hidden border border-matrix-dim bg-black/60 shadow-[0_0_30px_rgba(0,255,65,0.15)]">
-            <img
-              src="/landing-dashboard.jpg"
-              alt={copy("landing.screenshot.alt")}
-              className="block w-full h-auto"
-              loading="lazy"
-              decoding="async"
-            />
-            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(120deg,rgba(0,255,65,0.08),rgba(0,0,0,0)_40%)]"></div>
-          </div>
-        </section>
-
         <section className="w-full max-w-3xl border border-matrix-ghost bg-matrix-panel px-6 py-6 space-y-4">
-          <h2 className="text-2xl md:text-3xl font-bold text-matrix-bright tracking-tight">
-            {copy("landing.install.title")}
-          </h2>
           <p className="text-caption text-matrix-muted uppercase">{copy("landing.install.prompt")}</p>
           <div className="border border-matrix-dim bg-black/70 px-4 py-3 flex items-center gap-3">
             <div className="min-w-0 flex-1 overflow-x-auto">
@@ -152,6 +136,19 @@ export function LandingView({
             </button>
           </div>
           <p className="text-caption text-matrix-dim uppercase">{copy("landing.install.helper")}</p>
+        </section>
+
+        <section className="w-full max-w-4xl border border-matrix-ghost bg-matrix-panel p-4">
+          <div className="relative overflow-hidden border border-matrix-dim bg-black/60 shadow-[0_0_30px_rgba(0,255,65,0.15)]">
+            <img
+              src="/landing-dashboard.jpg"
+              alt={copy("landing.screenshot.alt")}
+              className="block w-full h-auto"
+              loading="lazy"
+              decoding="async"
+            />
+            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(120deg,rgba(0,255,65,0.08),rgba(0,0,0,0)_40%)]"></div>
+          </div>
         </section>
 
         <section className="w-full max-w-3xl border border-matrix-ghost bg-matrix-panel px-6 py-6 space-y-4">
