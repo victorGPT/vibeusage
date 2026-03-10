@@ -1152,6 +1152,100 @@ test("parseOpencodeIncremental preserves legacy file totals when opencode index 
   }
 });
 
+test("parseOpencodeIncremental ingests sqlite rows when message files are absent", async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "vibescore-opencode-"));
+  try {
+    const queuePath = path.join(tmp, "queue.jsonl");
+    const cursors = { version: 1, files: {}, updatedAt: null };
+
+    const res = await parseOpencodeIncremental({
+      messageFiles: [],
+      opencodeDbPath: path.join(tmp, "opencode.db"),
+      cursors,
+      queuePath,
+      readSqliteRows: async () => ({
+        status: "ok",
+        inode: 42,
+        rows: [
+          {
+            id: "msg_sqlite",
+            session_id: "ses_sqlite",
+            role: "assistant",
+            time_created: Date.parse("2025-12-29T10:15:00.000Z"),
+            data: JSON.stringify(
+              buildOpencodeMessage({
+                modelID: "gpt-5",
+                created: "2025-12-29T10:14:00.000Z",
+                completed: "2025-12-29T10:15:00.000Z",
+                tokens: { input: 10, output: 2, reasoning: 1, cached: 3, cacheWrite: 5 },
+              }),
+            ),
+          },
+        ],
+      }),
+    });
+
+    assert.equal(res.filesProcessed, 0);
+    assert.equal(res.eventsAggregated, 1);
+    assert.equal(res.bucketsQueued, 1);
+    assert.equal(cursors.opencodeSqlite.inode, 42);
+    assert.equal(cursors.opencodeSqlite.lastProcessedIds[0], "msg_sqlite");
+
+    const queued = await readJsonLines(queuePath);
+    assert.equal(queued.length, 1);
+    assert.equal(queued[0].source, "opencode");
+    assert.equal(queued[0].model, "gpt-5");
+    assert.equal(queued[0].total_tokens, 18);
+  } finally {
+    await fs.rm(tmp, { recursive: true, force: true });
+  }
+});
+
+test("parseOpencodeIncremental dedupes sqlite rows against json message keys", async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "vibescore-opencode-"));
+  try {
+    const messageDir = path.join(tmp, "message", "ses_test");
+    await fs.mkdir(messageDir, { recursive: true });
+    const messagePath = path.join(messageDir, "msg_test.json");
+    const queuePath = path.join(tmp, "queue.jsonl");
+    const cursors = { version: 1, files: {}, updatedAt: null };
+
+    const message = buildOpencodeMessage({
+      modelID: "gpt-4o",
+      created: "2025-12-29T10:14:00.000Z",
+      completed: "2025-12-29T10:15:00.000Z",
+      tokens: { input: 4, output: 1, reasoning: 0, cached: 0 },
+    });
+
+    const sqliteRow = {
+      id: "msg_test",
+      session_id: "ses_test",
+      role: "assistant",
+      time_created: Date.parse("2025-12-29T10:15:00.000Z"),
+      data: JSON.stringify(message),
+    };
+
+    await fs.writeFile(messagePath, JSON.stringify(message), "utf8");
+
+    const res = await parseOpencodeIncremental({
+      messageFiles: [messagePath],
+      opencodeDbPath: path.join(tmp, "opencode.db"),
+      cursors,
+      queuePath,
+      readSqliteRows: async () => ({ status: "ok", inode: 5, rows: [sqliteRow] }),
+    });
+
+    assert.equal(res.eventsAggregated, 1);
+    assert.equal(res.bucketsQueued, 1);
+
+    const queued = await readJsonLines(queuePath);
+    assert.equal(queued.length, 1);
+    assert.equal(queued[0].total_tokens, 5);
+  } finally {
+    await fs.rm(tmp, { recursive: true, force: true });
+  }
+});
+
 test("parseRolloutIncremental handles Every Code token_count envelope", async () => {
   const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "vibescore-rollout-"));
   try {

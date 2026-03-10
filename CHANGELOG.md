@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed
+
+- Sync now reads OpenCode token usage from `opencode.db` when available, while deduping overlap with legacy message-file parsing.
+
 ## [0.2.21] - 2026-02-18
 
 ### Changed

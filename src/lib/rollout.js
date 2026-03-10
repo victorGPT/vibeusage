@@ -4,6 +4,7 @@ const path = require("node:path");
 const readline = require("node:readline");
 
 const { ensureDir } = require("./fs");
+const { readOpencodeSqliteRows } = require("./opencode-sqlite");
 const { hashRepoRoot, resolveGitHubPublicStatus } = require("./vibeusage-public-repo");
 
 const DEFAULT_SOURCE = "codex";
@@ -398,12 +399,14 @@ async function parseGeminiIncremental({
 
 async function parseOpencodeIncremental({
   messageFiles,
+  opencodeDbPath,
   cursors,
   queuePath,
   projectQueuePath,
   onProgress,
   source,
   publicRepoResolver,
+  readSqliteRows,
 }) {
   await ensureDir(path.dirname(queuePath));
   let filesProcessed = 0;
@@ -419,6 +422,7 @@ async function parseOpencodeIncremental({
   const projectMetaCache = projectEnabled ? new Map() : null;
   const publicRepoCache = projectEnabled ? new Map() : null;
   const opencodeState = normalizeOpencodeState(cursors?.opencode);
+  const opencodeSqliteState = normalizeOpencodeSqliteState(cursors?.opencodeSqlite);
   const messageIndex = opencodeState.messages;
   const touchedBuckets = new Set();
   const defaultSource = normalizeSourceInput(source) || "opencode";
@@ -519,6 +523,70 @@ async function parseOpencodeIncremental({
         eventsAggregated,
         bucketsQueued: touchedBuckets.size,
       });
+    }
+  }
+
+  if (typeof opencodeDbPath === "string" && opencodeDbPath.length > 0) {
+    const readRows = typeof readSqliteRows === "function" ? readSqliteRows : readOpencodeSqliteRows;
+    const sqliteResult = await readRows({
+      dbPath: opencodeDbPath,
+      lastTimeCreated: opencodeSqliteState.lastTimeCreated,
+      expectedInode: opencodeSqliteState.inode,
+    });
+
+    if (sqliteResult && sqliteResult.status === "ok") {
+      const sameDb =
+        !sqliteResult.cursorReset &&
+        opencodeSqliteState.inode &&
+        sqliteResult.inode &&
+        opencodeSqliteState.inode === sqliteResult.inode;
+      const prevProcessedIds = new Set(
+        sameDb ? opencodeSqliteState.lastProcessedIds : [],
+      );
+      const rawRows = Array.isArray(sqliteResult.rows) ? sqliteResult.rows : [];
+      const rows = prevProcessedIds.size
+        ? rawRows.filter((row) => !prevProcessedIds.has(row?.id))
+        : rawRows;
+      const knownMessageKeys = new Set([
+        ...Object.keys(messageIndex || {}),
+        ...Object.values(cursors.files || {})
+          .map((entry) => entry?.messageKey)
+          .filter((entry) => typeof entry === "string" && entry.trim()),
+      ]);
+
+      for (const row of rows) {
+        const result = await parseOpencodeSqliteRow({
+          row,
+          messageIndex,
+          knownMessageKeys,
+          hourlyState,
+          touchedBuckets,
+          source: defaultSource,
+          projectState,
+          projectTouchedBuckets,
+          projectMetaCache,
+          publicRepoCache,
+          publicRepoResolver,
+        });
+        eventsAggregated += result.eventsAggregated;
+      }
+
+      const lastTimeCreated = sameDb ? opencodeSqliteState.lastTimeCreated : 0;
+      const maxTime = rawRows.length > 0
+        ? Math.max(
+            lastTimeCreated,
+            ...rawRows.map((row) =>
+              Number.isFinite(Number(row?.time_created)) ? Number(row.time_created) : 0),
+          )
+        : lastTimeCreated;
+      opencodeSqliteState.lastTimeCreated = maxTime;
+      opencodeSqliteState.lastProcessedIds = rawRows
+        .filter((row) => Number(row?.time_created) === maxTime)
+        .map((row) => row?.id)
+        .filter((value) => typeof value === "string" && value.trim());
+      opencodeSqliteState.inode = sqliteResult.inode || opencodeSqliteState.inode || 0;
+      opencodeSqliteState.updatedAt = new Date().toISOString();
+      cursors.opencodeSqlite = opencodeSqliteState;
     }
   }
 
@@ -1062,6 +1130,98 @@ async function parseOpencodeMessageFile({
   return { messageKey, lastTotals: currentTotals, eventsAggregated: 1, shouldUpdate: true };
 }
 
+async function parseOpencodeSqliteRow({
+  row,
+  messageIndex,
+  knownMessageKeys,
+  hourlyState,
+  touchedBuckets,
+  source,
+  projectState,
+  projectTouchedBuckets,
+  projectMetaCache,
+  publicRepoCache,
+  publicRepoResolver,
+}) {
+  if (!row || typeof row !== "object") {
+    return { eventsAggregated: 0 };
+  }
+  if (normalizeMessageKeyPart(row.role) !== "assistant") {
+    return { eventsAggregated: 0 };
+  }
+
+  let msg;
+  try {
+    msg = JSON.parse(String(row.data || ""));
+  } catch (_e) {
+    return { eventsAggregated: 0 };
+  }
+
+  const messageKey = deriveOpencodeMessageKey(msg, null);
+  if (!messageKey || knownMessageKeys.has(messageKey)) {
+    return { eventsAggregated: 0 };
+  }
+
+  const currentTotals = normalizeOpencodeTokens(msg?.tokens);
+  if (!currentTotals || isAllZeroUsage(currentTotals)) {
+    return { eventsAggregated: 0 };
+  }
+
+  const timestampMs = coerceEpochMs(msg?.time?.completed) || coerceEpochMs(msg?.time?.created);
+  if (!timestampMs) {
+    return { eventsAggregated: 0 };
+  }
+
+  const bucketStart = toUtcHalfHourStart(new Date(timestampMs).toISOString());
+  if (!bucketStart) {
+    return { eventsAggregated: 0 };
+  }
+
+  const model = normalizeModelInput(msg?.modelID || msg?.model || msg?.modelId) || DEFAULT_MODEL;
+  const bucket = getHourlyBucket(hourlyState, source, model, bucketStart);
+  addTotals(bucket.totals, currentTotals);
+  touchedBuckets.add(bucketKey(source, model, bucketStart));
+
+  if (
+    row.project_id &&
+    projectState &&
+    projectTouchedBuckets &&
+    projectMetaCache &&
+    publicRepoCache
+  ) {
+    const projectContext = await resolveProjectContextForPath({
+      startDir: String(row.project_id),
+      projectMetaCache,
+      publicRepoCache,
+      publicRepoResolver,
+      projectState,
+    });
+    const projectRef = projectContext?.projectRef || null;
+    const projectKey = projectContext?.projectKey || null;
+    if (projectKey) {
+      const projectBucket = getProjectBucket(
+        projectState,
+        projectKey,
+        source,
+        bucketStart,
+        projectRef,
+      );
+      addTotals(projectBucket.totals, currentTotals);
+      projectTouchedBuckets.add(projectBucketKey(projectKey, source, bucketStart));
+    }
+  }
+
+  if (messageIndex && typeof messageIndex === "object") {
+    messageIndex[messageKey] = {
+      lastTotals: currentTotals,
+      updatedAt: new Date().toISOString(),
+    };
+  }
+  knownMessageKeys.add(messageKey);
+
+  return { eventsAggregated: 1 };
+}
+
 async function enqueueTouchedBuckets({ queuePath, hourlyState, touchedBuckets }) {
   if (!touchedBuckets || touchedBuckets.size === 0) return 0;
 
@@ -1555,6 +1715,22 @@ function normalizeOpencodeState(raw) {
   const messages = state.messages && typeof state.messages === "object" ? state.messages : {};
   return {
     messages,
+    updatedAt: typeof state.updatedAt === "string" ? state.updatedAt : null,
+  };
+}
+
+function normalizeOpencodeSqliteState(raw) {
+  const state = raw && typeof raw === "object" ? raw : {};
+  return {
+    lastTimeCreated: Number.isFinite(Number(state.lastTimeCreated))
+      ? Number(state.lastTimeCreated)
+      : 0,
+    lastProcessedIds: Array.isArray(state.lastProcessedIds)
+      ? state.lastProcessedIds
+          .filter((value) => typeof value === "string" && value.trim())
+          .map((value) => value.trim())
+      : [],
+    inode: Number.isFinite(Number(state.inode)) ? Number(state.inode) : 0,
     updatedAt: typeof state.updatedAt === "string" ? state.updatedAt : null,
   };
 }

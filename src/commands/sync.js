@@ -68,6 +68,7 @@ async function cmdSync(argv) {
     const xdgDataHome = process.env.XDG_DATA_HOME || path.join(home, ".local", "share");
     const opencodeHome = process.env.OPENCODE_HOME || path.join(xdgDataHome, "opencode");
     const opencodeStorageDir = path.join(opencodeHome, "storage");
+    const opencodeDbPath = path.join(opencodeHome, "opencode.db");
 
     // OpenClaw hook integration: allow a hook to request incremental parsing for a single session jsonl.
     // We still parse all regular sources so model/source attribution stays complete (e.g. Kimi sessions).
@@ -202,6 +203,7 @@ async function cmdSync(argv) {
       }
       opencodeResult = await parseOpencodeIncremental({
         messageFiles: opencodeFiles,
+        opencodeDbPath,
         cursors,
         queuePath,
         projectQueuePath,
