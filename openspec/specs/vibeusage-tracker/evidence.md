@@ -1,250 +1,123 @@
-# Evidence Map: vibescore-tracker
-
-Source: `openspec/specs/vibescore-tracker/spec.md`
-
-## Legend
-
-- Status: Implemented | Partial | Gap
-- Verification: script/test or manual steps (environment-dependent).
-
-## Requirements
-
-### Requirement: CLI installation and commands
-
-- Implementation: `bin/tracker.js`, `src/cli.js`, `src/commands/init.js`, `src/commands/sync.js`, `src/commands/status.js`, `src/commands/uninstall.js`, `package.json#bin`
-- Verification: manual `npx --yes /tracker --help`; `node --test test/*.test.js` (init/uninstall/status)
-- Status: Implemented
-
-### Requirement: Public npm distribution for CLI
-
-- Implementation: `package.json` (`name=@vibescore/tracker`, `publishConfig.access=public`)
-- Verification: manual `npx --yes @vibescore/tracker --help` (requires published package)
-- Status: Partial (release-dependent)
-
-### Requirement: Notify hook install is safe and reversible
-
-- Implementation: `src/commands/init.js`, `src/lib/codex-config.js`, `src/commands/uninstall.js`
-- Verification: `node --test test/init-uninstall.test.js` (includes Every Code config paths)
-- Status: Implemented
-
-### Requirement: Notify handler is non-blocking and safe
-
-- Implementation: `src/commands/init.js` (`buildNotifyHandler` writes `notify.cjs`, spawns detached, exits 0, chains by source)
-- Verification: manual run `~/.vibescore/bin/notify.cjs` after `init`, confirm exit 0
-- Status: Implemented (manual)
-
-### Requirement: Incremental parsing with a strict data allowlist
-
-- Implementation: `src/lib/rollout.js` (`payload.type === "token_count"` + explicit field allowlist)
-- Verification: `node --test test/rollout-parser.test.js`
-- Status: Implemented
-
-### Requirement: Client-side idempotency
-
-- Implementation: `src/lib/rollout.js` (half-hour bucket aggregation + queuedKey + cursors), `src/commands/sync.js` (cursor persistence)
-- Verification: `node --test test/rollout-parser.test.js`; manual run `tracker sync` twice with no new events
-- Status: Implemented (manual)
-
-### Requirement: Every Code rollout ingestion
-
-- Implementation: `src/lib/rollout.js`, `src/commands/sync.js`
-- Verification: `node --test test/rollout-parser.test.js` (Every Code payload.msg token_count test)
-- Status: Implemented
-
-### Requirement: Multi-source client deduplication
-
-- Implementation: `src/lib/rollout.js` (source-aware bucket keys), `src/lib/uploader.js` (source-aware queue dedupe)
-- Verification: `node --test test/rollout-parser.test.js` (multi-source bucket separation)
-- Status: Implemented
-
-### Requirement: Legacy queues remain compatible
-
-- Implementation: `src/lib/uploader.js` (default `source=codex` when missing)
-- Verification: `node --test test/uploader.test.js`
-- Status: Implemented
-
-### Requirement: Multi-source usage ingestion
-
-- Implementation: `insforge-src/functions/vibescore-ingest.js`, `insforge-src/shared/source.js`, `openspec/changes/2025-12-24-add-usage-source-dimension/sql/001_add_source.sql`
-- Verification: `node --test test/edge-functions.test.js` (ingest default `source=codex`)
-- Status: Implemented
-
-### Requirement: Multi-source deduplication
-
-- Implementation: `insforge-src/functions/vibescore-ingest.js` (`on_conflict` includes `source`), `openspec/changes/2025-12-24-add-usage-source-dimension/sql/001_add_source.sql`
-- Verification: `node scripts/acceptance/ingest-duplicate-replay.cjs`
-- Status: Implemented
-
-### Requirement: Usage queries support source filtering
-
-- Implementation: `insforge-src/functions/vibescore-usage-daily.js`, `insforge-src/functions/vibescore-usage-summary.js`, `insforge-src/functions/vibescore-usage-hourly.js`, `insforge-src/functions/vibescore-usage-monthly.js`, `insforge-src/functions/vibescore-usage-heatmap.js`
-- Verification: `node --test test/edge-functions.test.js` (usage daily source filter)
-- Status: Implemented
-
-### Requirement: Auto sync uploads are throttled to half-hour cadence
-
-- Implementation: `src/lib/upload-throttle.js` (30 min interval), `src/commands/sync.js` (auto-only throttle), `src/commands/init.js` (init triggers sync)
-- Verification: `node --test test/upload-throttle.test.js`; `node --test test/init-uninstall.test.js`
-- Status: Implemented
-
-### Requirement: Raw event retention is capped
-
-- Implementation: `insforge-src/functions/vibescore-events-retention.js`, `openspec/changes/2025-12-23-add-hourly-client-aggregation/sql/003_purge_events_older_than_30d.sql`, `openspec/changes/2025-12-23-add-hourly-client-aggregation/runbook.md`, `.github/workflows/vibescore-events-retention.yml`
-- Verification: manual SQL purge or run the GitHub Actions workflow with service role token
-- Status: Implemented (manual + scheduled if secrets configured)
-
-### Requirement: Device token authentication boundary
-
-- Implementation: `src/commands/init.js` (stores device token), `src/lib/insforge.js`, `src/lib/insforge-client.js`
-- Verification: manual inspect `~/.vibescore/tracker/config.json` (no user JWT stored)
-- Status: Implemented (manual)
-
-### Requirement: Sync heartbeat records freshness
-
-- Implementation: `src/commands/sync.js` (`maybeSendHeartbeat`), `src/lib/insforge.js` (`syncHeartbeat`), `insforge-src/functions/vibescore-sync-ping.js`
-- Verification: `scripts/acceptance/sync-heartbeat.cjs`
-- Status: Implemented
-
-### Requirement: Hourly usage marks unsynced buckets
-
-- Implementation: `insforge-src/functions/vibescore-usage-hourly.js`, `dashboard/src/hooks/use-trend-data.js`
-- Verification: `scripts/acceptance/usage-hourly-missing.cjs`
-- Status: Implemented
-
-### Requirement: Dashboard resolves edge function path compatibility
-
-- Implementation: `dashboard/src/lib/vibescore-api.js`
-- Verification: `node --test test/dashboard-function-path.test.js`
-- Status: Implemented
-
-### Requirement: Dashboard UI is retro-TUI themed (visual only)
-
-- Implementation: `dashboard/src/ui/matrix-a/**`, `dashboard/src/pages/DashboardPage.jsx`
-- Verification: manual visual check of dashboard
-- Status: Implemented (manual)
-
-### Requirement: UI and data logic are decoupled
-
-- Implementation: data hooks under `dashboard/src/hooks/**`, UI components under `dashboard/src/ui/**`
-- Verification: manual code review
-- Status: Implemented (manual)
-
-### Requirement: Dashboard shows a boot screen (visual only)
-
-- Implementation: `dashboard/src/ui/matrix-a/components/BootScreen.jsx`, `dashboard/src/pages/DashboardPage.jsx`
-- Verification: manual page load; observe boot screen delay
-- Status: Implemented (manual)
-
-### Requirement: Dashboard provides a GitHub-inspired activity heatmap
-
-- Implementation: `dashboard/src/hooks/use-activity-heatmap.js`, `dashboard/src/ui/matrix-a/components/ActivityHeatmap.jsx`, `insforge-src/functions/vibescore-usage-heatmap.js`
-- Verification: `test/edge-functions.test.js` (heatmap contract); manual UI
-- Status: Implemented
-
-### Requirement: Dashboard surfaces timezone basis for usage data
-
-- Implementation: `dashboard/src/pages/DashboardPage.jsx`, `dashboard/src/ui/matrix-a/components/ActivityHeatmap.jsx`, `dashboard/src/ui/matrix-a/components/UsagePanel.jsx`, `dashboard/src/lib/timezone.js`, `dashboard/src/content/copy.csv`
-- Verification: manual UI check of time zone label consistency
-- Status: Implemented (manual)
-
-### Requirement: Dashboard does not support custom date filters
-
-- Implementation: `dashboard/src/pages/DashboardPage.jsx` (`PERIODS` only)
-- Verification: manual UI inspection (no date picker)
-- Status: Implemented (manual)
-
-### Requirement: Dashboard TREND truncates future buckets
-
-- Implementation: `dashboard/src/hooks/use-trend-data.js` (future flags), `dashboard/src/ui/matrix-a/components/TrendMonitor.jsx`
-- Verification: manual check during mid-period (line stops before future buckets)
-- Status: Implemented (manual)
-
-### Requirement: Dashboard DETAILS table matches selected period granularity
-
-- Implementation: `dashboard/src/pages/DashboardPage.jsx` (DETAILS table + period mapping), `dashboard/src/lib/daily.js`
-- Verification: manual UI check (period switch)
-- Status: Implemented (manual)
-
-### Requirement: Dashboard DETAILS trims months before first non-zero usage for total
-
-- Implementation: `dashboard/src/pages/DashboardPage.jsx` (DETAILS pagination + trimming), `dashboard/src/lib/details.js`
-- Verification: `node --test test/details-pagination.test.js`, `node --test test/details-trim.test.js`
-- Status: Implemented
-
-### Requirement: Leaderboard endpoint is available (calendar day/week/month/total)
-
-- Implementation: `insforge-src/functions/vibescore-leaderboard.js`
-- Verification: `test/edge-functions.test.js` (leaderboard tests), `scripts/acceptance/leaderboard-limit.cjs`, `scripts/acceptance/leaderboard-single-query.cjs`
-- Status: Implemented
-
-### Requirement: Leaderboard response includes generation timestamp
-
-- Implementation: `insforge-src/functions/vibescore-leaderboard.js`
-- Verification: `test/edge-functions.test.js` (asserts `generated_at`)
-- Status: Implemented
-
-### Requirement: Leaderboard response includes `me`
-
-- Implementation: `insforge-src/functions/vibescore-leaderboard.js`
-- Verification: `test/edge-functions.test.js` (leaderboard tests), `scripts/smoke/insforge-smoke.cjs`
-- Status: Implemented
-
-### Requirement: Leaderboard output is privacy-safe
-
-- Implementation: `insforge-src/functions/vibescore-leaderboard.js` (selects `display_name`, `avatar_url` only)
-- Verification: manual code review; optional API response inspection
-- Status: Implemented (manual)
-
-### Requirement: Leaderboard is anonymous by default
-
-- Implementation: `insforge-src/functions/vibescore-leaderboard-refresh.js` (snapshot fields), `insforge-src/functions/vibescore-leaderboard.js`
-- Verification: manual API inspection (unauthorized profile should be anonymized)
-- Status: Partial (needs explicit verification)
-
-### Requirement: Leaderboard enforces safe limits
-
-- Implementation: `insforge-src/functions/vibescore-leaderboard.js` (period/limit validation)
-- Verification: `test/edge-functions.test.js` (invalid period), `scripts/acceptance/leaderboard-limit.cjs`
-- Status: Implemented
-
-### Requirement: Leaderboard snapshots can be refreshed by automation
-
-- Implementation: `insforge-src/functions/vibescore-leaderboard-refresh.js`, `.github/workflows/vibescore-leaderboard-refresh.yml`
-- Verification: manual workflow run or curl with service role
-- Status: Implemented (manual)
-
-### Requirement: Leaderboard privacy setting can be updated
-
-- Implementation: `insforge-src/functions/vibescore-leaderboard-settings.js`
-- Verification: `test/edge-functions.test.js` (settings tests), `scripts/acceptance/leaderboard-settings-replay.cjs`
-- Status: Implemented
-
-### Requirement: Dashboard shows identity information from login state
-
-- Implementation: `dashboard/src/pages/DashboardPage.jsx`, `dashboard/src/ui/matrix-a/components/IdentityCard.jsx`
-- Verification: manual sign-in UI check
-- Status: Implemented (manual)
-
-### Requirement: Debug output includes backend status and code
-
-- Implementation: `dashboard/src/components/BackendStatus.jsx`, `dashboard/src/hooks/use-backend-status.js`
-- Verification: manual hover/inspect status tooltip
-- Status: Implemented (manual)
-
-### Requirement: Dashboard compositing effects are GPU-budgeted
-
-- Implementation: pending optimization work (`openspec/changes/2025-12-22-investigate-dashboard-gpu-spikes`, `openspec/changes/2025-12-22-optimize-matrix-rain-gpu`)
-- Verification: requires performance trace with defined GPU metrics
-- Status: Gap
-
-### Requirement: Matrix rain cost is further reduced
-
-- Implementation: `dashboard/src/ui/matrix-a/components/MatrixRain.jsx` (reduced motion scaling, fps cap)
-- Verification: performance trace comparing baseline vs reduced settings
-- Status: Partial (optimization change in progress)
-
-### Requirement: Landing page serves static social metadata
-
-- Implementation: `dashboard/vite.config.js`, `dashboard/index.html`, `dashboard/src/content/copy.csv`
-- Verification: `npm --prefix dashboard run build`; inspect `dashboard/dist/index.html` for OG/Twitter meta tags and `og:url`
-- Status: Implemented
+# Evidence Map: vibeusage-tracker
+
+Source: `openspec/specs/vibeusage-tracker/spec.md`
+
+This evidence map is intentionally focused on the live contracts that currently govern collection, backend ingestion, deployment, and dashboard presentation. Archived paths and retired CommonJS Edge Function entries are excluded on purpose.
+
+## CLI collection, idempotency, and auth boundary
+
+- Install / notify / uninstall flow:
+  - `bin/tracker.js`
+  - `src/cli.js`
+  - `src/commands/init.js`
+  - `src/commands/uninstall.js`
+  - `src/lib/codex-config.js`
+  - Verification path: `node --test test/init-uninstall.test.js test/init-dry-run.test.js test/init-spawn-error.test.js`
+- Incremental parsing, allowlist extraction, and queue/idempotency:
+  - `src/lib/rollout.js`
+  - `src/lib/uploader.js`
+  - `src/commands/sync.js`
+  - Verification path: `node --test test/rollout-parser.test.js test/uploader.test.js`
+- Device-token boundary and runtime config:
+  - `src/lib/insforge.js`
+  - `src/lib/insforge-client.js`
+  - `src/lib/runtime-config.js`
+  - Verification path: `node --test test/insforge-client.test.js test/runtime-config.test.js`
+- Sync heartbeat:
+  - `src/commands/sync.js`
+  - `src/lib/insforge.js`
+  - `insforge-src/functions-esm/vibeusage-sync-ping.js`
+  - Verification path: `node scripts/acceptance/sync-heartbeat.cjs`
+
+## Edge Function authoring and deployment contract
+
+- Author source of truth:
+  - `insforge-src/functions-esm/`
+- Shared ESM helpers:
+  - `insforge-src/functions-esm/shared/`
+  - `insforge-src/shared/*.mjs`
+- Generated deploy artifacts:
+  - `insforge-functions/*.js`
+- Build and local loader contract:
+  - `scripts/build-insforge-functions.cjs`
+  - `scripts/lib/load-edge-function.cjs`
+  - Verification path: `node --test test/edge-functions.test.js test/insforge-esm-artifacts.test.js test/interaction-sequence-canvas.test.js`
+  - Verification path: `npm run build:insforge`
+  - Verification path: `npm run build:insforge:check`
+
+## Ingest, token issuance, and replay safety
+
+- Device token issuance:
+  - `insforge-src/functions-esm/vibeusage-device-token-issue.js`
+  - Verification path: `node scripts/acceptance/device-token-issue-compensation.cjs`
+- Link-code init and exchange:
+  - `insforge-src/functions-esm/vibeusage-link-code-init.js`
+  - `insforge-src/functions-esm/vibeusage-link-code-exchange.js`
+  - Verification path: `node scripts/acceptance/link-code-exchange.cjs`
+- Ingest contract, concurrency guard, and DB write path:
+  - `insforge-src/functions-esm/vibeusage-ingest.js`
+  - `insforge-src/shared/concurrency.mjs`
+  - `insforge-src/shared/core/ingest.mjs`
+  - `insforge-src/shared/db/ingest.mjs`
+  - Verification path: `node scripts/acceptance/ingest-duplicate-replay.cjs`
+  - Verification path: `node scripts/acceptance/ingest-service-role-upsert.cjs`
+  - Verification path: `node scripts/acceptance/ingest-batch-metrics.cjs`
+  - Verification path: `node scripts/acceptance/ingest-concurrency-guard.cjs`
+- Retention and ingest-batch cleanup:
+  - `insforge-src/functions-esm/vibeusage-events-retention.js`
+  - Verification path: `node --test test/edge-functions.test.js`
+
+## Usage, leaderboard, visibility, and entitlement APIs
+
+- Usage read endpoints:
+  - `insforge-src/functions-esm/vibeusage-usage-summary.js`
+  - `insforge-src/functions-esm/vibeusage-usage-daily.js`
+  - `insforge-src/functions-esm/vibeusage-usage-hourly.js`
+  - `insforge-src/functions-esm/vibeusage-usage-monthly.js`
+  - `insforge-src/functions-esm/vibeusage-usage-heatmap.js`
+  - `insforge-src/functions-esm/vibeusage-usage-model-breakdown.js`
+  - `insforge-src/functions-esm/vibeusage-project-usage-summary.js`
+  - Supporting shared modules:
+    - `insforge-src/shared/env-core.mjs`
+    - `insforge-src/shared/usage-hourly-query-core.mjs`
+    - `insforge-src/shared/usage-rollup-core.mjs`
+  - Verification path: `node --test test/edge-functions.test.js test/insforge-src-shared.test.js`
+- Leaderboard, public-view, and visibility:
+  - `insforge-src/functions-esm/vibeusage-leaderboard.js`
+  - `insforge-src/functions-esm/vibeusage-leaderboard-refresh.js`
+  - `insforge-src/functions-esm/vibeusage-leaderboard-profile.js`
+  - `insforge-src/functions-esm/vibeusage-leaderboard-settings.js`
+  - `insforge-src/functions-esm/vibeusage-public-view-issue.js`
+  - `insforge-src/functions-esm/vibeusage-public-view-profile.js`
+  - `insforge-src/functions-esm/vibeusage-public-view-revoke.js`
+  - `insforge-src/functions-esm/vibeusage-public-view-status.js`
+  - `insforge-src/functions-esm/vibeusage-public-visibility.js`
+  - Verification path: `node --test test/public-view.test.js test/public-view-resolve.test.js test/edge-functions.test.js`
+- Entitlements and user status:
+  - `insforge-src/functions-esm/vibeusage-entitlements.js`
+  - `insforge-src/functions-esm/vibeusage-entitlements-revoke.js`
+  - `insforge-src/functions-esm/vibeusage-user-status.js`
+  - Verification path: `node --test test/edge-functions.test.js`
+
+## Dashboard presentation and copy contract
+
+- Dashboard fetch, cache, and rendering:
+  - `dashboard/src/hooks/`
+  - `dashboard/src/lib/`
+  - `dashboard/src/pages/DashboardPage.jsx`
+- Public view and identity presentation:
+  - `dashboard/src/ui/matrix-a/components/`
+- Copy registry source of truth:
+  - `dashboard/src/content/copy.csv`
+- Verification path:
+  - `node --test test/public-view.test.js`
+  - `node --test test/edge-functions.test.js`
+
+## Current hard-cut change record
+
+- Active change:
+  - `openspec/changes/2026-03-29-refactor-remaining-edge-functions-esm-hard-cut/`
+- Stable contract:
+  - `openspec/specs/vibeusage-tracker/spec.md`
+- Release evidence:
+  - `docs/deployment/freeze.md`

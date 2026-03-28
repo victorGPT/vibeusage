@@ -638,7 +638,7 @@ When debug mode is enabled, the CLI SHALL surface backend status and error code 
 
 #### Scenario: Debug output shows status and code
 
-- **GIVEN** `VIBESCORE_DEBUG=1`
+- **GIVEN** `VIBEUSAGE_DEBUG=1`
 - **WHEN** `npx --yes vibeusage sync` encounters a backend error
 - **THEN** stderr SHALL include `Status:` and `Code:` when available
 
@@ -688,14 +688,14 @@ The heatmap endpoint MUST validate inputs and enforce reasonable limits to avoid
 
 ### Requirement: Edge Functions are modular in-source but single-file in deployment
 
-The system SHALL keep Edge Function source code modular (multi-file) while still producing single-file deployable artifacts, to respect InsForge2's single-file Edge Function deployment constraint.
+The system SHALL keep Edge Function author sources under `insforge-src/functions-esm/` with modular ESM shared helpers, while still producing single-file deployable artifacts under `insforge-functions/`, to respect InsForge2's single-file Edge Function deployment constraint.
 
 #### Scenario: Build generates deployable single-file artifacts
 
-- **GIVEN** a developer modifies shared Edge Function logic (e.g., auth/CORS helpers)
+- **GIVEN** a developer modifies shared Edge Function logic under `insforge-src/functions-esm/shared/` or `insforge-src/shared/*.mjs`
 - **WHEN** the developer runs the Edge Function build script
 - **THEN** the repository SHALL generate updated deployable artifacts under `insforge-functions/`
-- **AND** each artifact SHALL remain a single file exporting `module.exports = async function(request) { ... }`
+- **AND** each artifact SHALL remain a single-file ESM module exporting a default async request handler compatible with the InsForge Deno runtime
 
 ### Requirement: Dashboard retains last-known data during backend failures
 
@@ -734,7 +734,7 @@ The dashboard SHALL display a data source label (`edge|cache|mock`) for usage an
 
 #### Scenario: Mock mode is explicit
 
-- **GIVEN** mock mode is enabled via `VITE_VIBESCORE_MOCK=1` or `?mock=1`
+- **GIVEN** mock mode is enabled via `VITE_VIBEUSAGE_MOCK=1` or `?mock=1`
 - **WHEN** the dashboard renders
 - **THEN** the UI SHALL show `DATA_SOURCE: MOCK`
 
@@ -1112,7 +1112,7 @@ The system SHALL attempt database-side monthly aggregation for `GET /functions/v
 
 ### Requirement: UTC daily rollup is maintained from hourly buckets when enabled
 
-When rollup aggregation is enabled and the rollup table is deployed, the system SHALL maintain a UTC daily rollup keyed by `user_id + day + source + model`, derived from `vibescore_tracker_hourly`. Rollup updates MUST be idempotent and replayable.
+When rollup aggregation is enabled and the rollup table is deployed, the system SHALL maintain a UTC daily rollup keyed by `user_id + day + source + model`, derived from `vibeusage_tracker_hourly`. Rollup updates MUST be idempotent and replayable.
 
 #### Scenario: Hourly upsert updates rollup totals
 
@@ -1139,7 +1139,7 @@ The system MUST prefer rollup aggregation for `usage-summary` when rollup aggreg
 
 ### Requirement: Usage day-range endpoints enforce maximum range
 
-The system SHALL reject usage requests that exceed a maximum day range for `GET /functions/vibeusage-usage-summary`, `GET /functions/vibeusage-usage-daily`, and `GET /functions/vibeusage-usage-model-breakdown`. The maximum day range SHALL default to 800 days and be configurable via `VIBESCORE_USAGE_MAX_DAYS`.
+The system SHALL reject usage requests that exceed a maximum day range for `GET /functions/vibeusage-usage-summary`, `GET /functions/vibeusage-usage-daily`, and `GET /functions/vibeusage-usage-model-breakdown`. The maximum day range SHALL default to 800 days and be configurable via `VIBEUSAGE_USAGE_MAX_DAYS`.
 
 #### Scenario: 24-month window succeeds by default
 
@@ -1155,7 +1155,7 @@ The system SHALL reject usage requests that exceed a maximum day range for `GET 
 
 #### Scenario: Env override enforces smaller cap
 
-- **GIVEN** `VIBESCORE_USAGE_MAX_DAYS=30`
+- **GIVEN** `VIBEUSAGE_USAGE_MAX_DAYS=30`
 - **WHEN** a client calls `GET /functions/vibeusage-usage-daily?from=2025-01-01&to=2025-02-15`
 - **THEN** the endpoint SHALL respond with `400`
 
@@ -1436,4 +1436,3 @@ Loopback auth redirect payloads used by the dashboard MUST NOT carry display ide
 - **WHEN** it builds a loopback redirect URL
 - **THEN** the redirect payload SHALL omit `name`
 - **AND** subsequent dashboard rendering SHALL resolve display identity from the authenticated user's profile
-

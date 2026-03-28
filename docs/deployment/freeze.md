@@ -15,6 +15,22 @@
 - Cold regression step:
 - Synthetic acceptance:
 
+## 2026-03-29-refactor-remaining-edge-functions-esm-hard-cut
+
+- Date: 2026-03-29
+- Scope: Remaining legacy Edge Functions hard-cut to the unified ESM-only author/build/load/deploy contract, plus local removal of SDK import injection from generated artifacts
+- Change ID: `2026-03-29-refactor-remaining-edge-functions-esm-hard-cut`
+- CI workflow run: N/A (local branch only; not pushed)
+- Release workflow run: N/A (local branch only; not pushed)
+- Preflight: `openspec validate 2026-03-29-refactor-remaining-edge-functions-esm-hard-cut --strict` (pass); `npm run ci:local` (pass)
+- npm publish: skipped
+- Vercel check: covered by `npm --prefix dashboard run build` inside `npm run ci:local` (pass)
+- MCP deploy: refreshed stored code for all 28 live `vibeusage-*` function slugs through Insforge MCP; representative remote verification confirmed `vibeusage-usage-summary` now stores the clean ESM artifact banner and no longer references `npm:@insforge/sdk`
+- MCP deploy blocker: provider/runtime boot failed after upload with `BOOT_FAILURE` and `[ERR_MODULE_NOT_FOUND] Cannot find module 'file:///node_modules/.deno/@insforge+shared-schemas@1.1.46/node_modules/@insforge/shared-schemas/dist/database.schema'`, so live remote smoke could not complete in this change window
+- Freeze artifact: rebuilt `insforge-functions/*.js` from `insforge-src/functions-esm/` under the hard-cut ESM contract; hard-cut base commit `59b2eaf8`
+- Cold regression step: `npm run ci:local`
+- Synthetic acceptance: `node scripts/acceptance/device-token-issue-compensation.cjs`; `node scripts/acceptance/link-code-exchange.cjs`; `node scripts/acceptance/sync-heartbeat.cjs`; `node scripts/acceptance/ingest-duplicate-replay.cjs`; `node scripts/acceptance/ingest-service-role-upsert.cjs`; `node scripts/acceptance/ingest-batch-metrics.cjs`; `node scripts/acceptance/ingest-concurrency-guard.cjs` (all pass locally)
+
 ## 2026-02-09-add-leaderboard-period-month-total
 
 - Date: 2026-02-09
@@ -62,7 +78,7 @@
 
 ## Runbook: Insforge MCP Deploy (Functions)
 
-1. Ensure `insforge-functions/` matches `insforge-src/functions/` (CI `build:insforge:check` or `npm run build:insforge`).
+1. Ensure `insforge-functions/` matches `insforge-src/functions-esm/` (CI `build:insforge:check` or `npm run build:insforge`).
 2. Use Insforge MCP deployment flow to deploy updated functions.
 3. Record MCP output + confirmation in the release record above.
 

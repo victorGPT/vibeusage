@@ -348,14 +348,14 @@ test("backend date and logging helpers flow through shared cores", () => {
     /resolveUsageDateRangeLocal/,
   );
   assert.match(read("insforge-src/functions-esm\/vibeusage-sync-ping.js"), /from "\.\/shared\/date\.js"/);
-  assert.match(read("insforge-src/shared\/db\/ingest.js"), /require\(\"..\/date\"\)/);
+  assert.match(read("insforge-src/shared/db/ingest.mjs"), /import "..\/date-core\.mjs"/);
   assert.match(read("insforge-src/functions-esm\/vibeusage-user-status.js"), /from "\.\/shared\/date\.js"/);
   assert.doesNotMatch(read("insforge-src/functions-esm/vibeusage-usage-hourly.js"), /function normalizeIso/);
   assert.doesNotMatch(read("insforge-src/functions-esm/vibeusage-user-status.js"), /function normalizeIso/);
   assert.doesNotMatch(read("insforge-src/functions-esm/vibeusage-sync-ping.js"), /function normalizeIso/);
   assert.doesNotMatch(read("insforge-src/functions-esm/vibeusage-sync-ping.js"), /function isWithinInterval/);
-  assert.doesNotMatch(read("insforge-src/shared\/db\/ingest.js"), /function normalizeIso/);
-  assert.doesNotMatch(read("insforge-src/shared\/db\/ingest.js"), /function isWithinInterval/);
+  assert.doesNotMatch(read("insforge-src/shared/db/ingest.mjs"), /function normalizeIso/);
+  assert.doesNotMatch(read("insforge-src/shared/db/ingest.mjs"), /function isWithinInterval/);
   assert.doesNotMatch(read("insforge-src/functions-esm/vibeusage-usage-summary.js"), /normalizeDateRangeLocal/);
   assert.doesNotMatch(read("insforge-src/functions-esm/vibeusage-usage-summary.js"), /listDateStrings/);
   assert.doesNotMatch(read("insforge-src/functions-esm/vibeusage-usage-summary.js"), /getUsageMaxDays/);

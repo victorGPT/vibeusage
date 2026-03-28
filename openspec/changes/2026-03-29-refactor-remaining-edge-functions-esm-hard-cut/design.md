@@ -1,8 +1,8 @@
 ## Context
 
-The repository already proved the ESM deploy path with the usage, identity, public-view, and pricing-sync batches. The remaining legacy functions still keep the build graph in a dual state because `scripts/build-insforge-functions.cjs` scans both `insforge-src/functions/` and `insforge-src/functions-esm/`, and `scripts/lib/load-edge-function.cjs` preserves a migrated whitelist plus generated-artifact fallback.
+Before this change, the repository had already proved the ESM deploy path with the usage, identity, public-view, and pricing-sync batches. The remaining legacy functions still kept the build graph in a dual state because `scripts/build-insforge-functions.cjs` scanned both `insforge-src/functions/` and `insforge-src/functions-esm/`, and `scripts/lib/load-edge-function.cjs` preserved a migrated whitelist plus generated-artifact fallback.
 
-The requested change is a hard cut. That means no compatibility wrappers, no fallback branch for unmigrated functions, and no long-lived CJS-only shared dependency path.
+The requested change is a hard cut. That means no compatibility wrappers, no fallback branch for unmigrated functions, and no long-lived CJS-only shared dependency path. The deployed artifact contract also moves to ESM-only without local SDK import injection.
 
 ## Goals / Non-Goals
 
@@ -15,7 +15,7 @@ The requested change is a hard cut. That means no compatibility wrappers, no fal
 - Non-Goals:
   - Redesigning endpoint schemas or auth semantics
   - Rewriting archived plans or archived change history
-  - Replacing the current ESM banner-based `createClient` injection unless it blocks deployment
+  - Reintroducing local SDK import fallbacks, CommonJS entrypoints, or generated-artifact fallback loading
 
 ## Decisions
 
@@ -25,6 +25,9 @@ The requested change is a hard cut. That means no compatibility wrappers, no fal
 - Decision: hard-cut build and local loader after the final legacy entrypoint is migrated
   - Why: the repository must not keep a compatibility branch after the migration lands
 
+- Decision: generated artifacts no longer inject `npm:@insforge/sdk`; the runtime must provide `globalThis.createClient`
+  - Why: the local deploy contract is now a single ESM path, and the later remote deployment failure is a provider/runtime module-resolution problem rather than a reason to restore local SDK import fallback
+
 - Decision: treat doc/spec reconciliation as a blocking post-commit gate
   - Why: the user explicitly requires code and active docs to be unified immediately after each task commit window
 
@@ -33,6 +36,7 @@ The requested change is a hard cut. That means no compatibility wrappers, no fal
 - `vibeusage-ingest` currently depends on CJS-oriented helper modules that must gain ESM-consumable equivalents without changing ingest behavior
 - Acceptance scripts currently load some legacy sources directly; the test harness must be unified or it will reintroduce a second source-of-truth
 - The build and loader cutover will affect broad regression coverage, so the contract tests must be strengthened before production code changes
+- Remote deployment is still blocked by provider-side `BOOT_FAILURE` module resolution in `@insforge/shared-schemas`; that blocker must be recorded as deployment evidence, not papered over with local compatibility code
 
 ## Verification
 

@@ -72,10 +72,12 @@
 提示（开发者必读）：
 
 - 更详细的接口契约、示例、以及 build/deploy 说明：见仓库根目录 `BACKEND_API.md`
-- Edge Functions 源码在 `insforge-src/`
-  - 旧 CommonJS 函数：源码在 `insforge-src/functions/`，部署产物在 `insforge-functions/`（单文件、生成物）
-  - 新 Deno/ESM 函数：源码在 `insforge-src/functions-esm/`，部署前同样先生成 `insforge-functions/` 单文件产物
-  - `vibeusage-leaderboard` / `vibeusage-usage-summary` / `vibeusage-project-usage-summary` 已切到 `insforge-src/functions-esm/`
+- Edge Functions 的活跃作者路径与部署契约如下：
+  - 唯一作者路径：`insforge-src/functions-esm/`
+  - 共享 ESM helper：`insforge-src/functions-esm/shared/` 与 `insforge-src/shared/*.mjs`
+  - 已退役路径：`insforge-src/functions/`（不得再用于作者源码、测试入口或部署判断）
+  - 部署产物：`insforge-functions/`（单文件 ESM 生成物）
+  - 运行时契约：生成物不再注入 `npm:@insforge/sdk`；InsForge 运行时必须提供 `globalThis.createClient`
 
 - `POST /functions/vibeusage-device-token-issue`
   - Auth：`Authorization: Bearer <user_jwt>`（或 admin bootstrap：Bearer `<service_role_key>` + body `user_id`）
@@ -106,11 +108,11 @@
 
 以云端代码为准（当前函数使用的表名）：
 
-- `vibescore_tracker_devices`：设备元信息（含 `last_seen_at`）
-- `vibescore_tracker_device_tokens`：设备 token hash（含 `revoked_at`、`last_used_at`）
-- `vibescore_tracker_hourly`：按 UTC 半小时聚合（幂等键：`user_id + device_id + hour_start`）
-- `vibescore_tracker_events`：明细事件（legacy；新路径不再写入）
-- `vibescore_tracker_daily`：按 UTC 日聚合（legacy 视图/表；使用时从 half-hour 汇总）
+- `vibeusage_tracker_devices`：设备元信息（含 `last_seen_at`）
+- `vibeusage_tracker_device_tokens`：设备 token hash（含 `revoked_at`、`last_used_at`）
+- `vibeusage_tracker_hourly`：按 UTC 半小时聚合（幂等键：`user_id + device_id + hour_start`）
+- `vibeusage_tracker_events`：明细事件（legacy；新路径不再写入）
+- `vibeusage_tracker_daily`：按 UTC 日聚合（legacy 视图/表；使用时从 half-hour 汇总）
 
 ## 6. 配置与环境变量
 
@@ -127,11 +129,11 @@
 
 ### 6.2 Dashboard（Vite）
 
-- `VITE_VIBESCORE_INSFORGE_BASE_URL`
-- `VITE_VIBESCORE_INSFORGE_ANON_KEY`：可选；Dashboard SDK 用的 anon key（回退 `VITE_INSFORGE_ANON_KEY`）
+- `VITE_VIBEUSAGE_INSFORGE_BASE_URL`
+- `VITE_VIBEUSAGE_INSFORGE_ANON_KEY`：可选；Dashboard SDK 用的 anon key（回退 `VITE_INSFORGE_ANON_KEY`）
 - UI 组件库统一使用：`dashboard/src/ui/matrix-a/components`
-- `VITE_VIBESCORE_MOCK`：可选；`1|true` 时使用本地 mock 数据（可用 `?mock=1`）
-- `VITE_VIBESCORE_MOCK_SEED`：可选；mock 数据种子（可用 `?mock_seed=xxx`）
+- `VITE_VIBEUSAGE_MOCK`：可选；`1|true` 时使用本地 mock 数据（可用 `?mock=1`）
+- `VITE_VIBEUSAGE_MOCK_SEED`：可选；mock 数据种子（可用 `?mock_seed=xxx`）
 
 ### 6.3 InsForge Edge Functions（Deno）
 
@@ -139,10 +141,10 @@
 - `INSFORGE_INTERNAL_URL`：内部 base URL（默认 `http://insforge:7130`）
 - `INSFORGE_ANON_KEY`（或 `ANON_KEY`）：用于无 service role key 场景下的 records API 写入（ingest）
 - `INSFORGE_JWT_SECRET`：用于本地验证用户 JWT（HS256）；必须与签发密钥一致
-- `VIBESCORE_USAGE_MAX_DAYS`：usage summary/daily/model-breakdown 最大天数（默认 `800`）
-- `VIBESCORE_SLOW_QUERY_MS`：usage 查询慢日志阈值（毫秒；默认 `2000`）
-- `VIBESCORE_INGEST_MAX_INFLIGHT`：ingest 并发上限（每实例；默认 `0` 表示不限制）
-- `VIBESCORE_INGEST_RETRY_AFTER_MS`：ingest 触发并发限流时的 Retry-After（毫秒）
+- `VIBEUSAGE_USAGE_MAX_DAYS`：usage summary/daily/model-breakdown 最大天数（默认 `800`）
+- `VIBEUSAGE_SLOW_QUERY_MS`：usage 查询慢日志阈值（毫秒；默认 `2000`）
+- `VIBEUSAGE_INGEST_MAX_INFLIGHT`：ingest 并发上限（每实例；默认 `0` 表示不限制）
+- `VIBEUSAGE_INGEST_RETRY_AFTER_MS`：ingest 触发并发限流时的 Retry-After（毫秒）
 
 ## 7. OpenSpec 组织方式与写作约定
 

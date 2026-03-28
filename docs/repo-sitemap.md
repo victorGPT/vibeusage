@@ -20,11 +20,13 @@ This document is the single source of truth for repository navigation. Use it to
 - `dashboard/`
   - React/Vite web app and public web assets.
 - `insforge-src/functions-esm/`
-  - Authoritative source for migrated InsForge edge functions.
+  - Authoritative source for all live `vibeusage-*` InsForge edge functions.
+- `insforge-src/shared/`
+  - Shared backend helpers; ESM authoring helpers live in `*.mjs`.
 - `insforge-src/functions/`
-  - Remaining legacy CommonJS edge function sources that have not been migrated yet.
+  - Retired legacy CommonJS path. Do not use for authoring, tests, or deploy decisions.
 - `insforge-functions/`
-  - Generated deploy artifacts. Do not edit by hand.
+  - Generated single-file ESM deploy artifacts. Do not edit by hand.
 - `scripts/`
   - Operational scripts, validation scripts, build helpers, smoke checks, and acceptance tooling.
 - `test/`
@@ -70,10 +72,13 @@ This document is the single source of truth for repository navigation. Use it to
 
 ### Edge Functions
 
-- Preferred author path:
+- Author source path:
   - `insforge-src/functions-esm/`
-- Shared helpers for ESM functions:
+- Shared helpers consumed by ESM functions:
   - `insforge-src/functions-esm/shared/`
+  - `insforge-src/shared/*.mjs`
+- Retired path:
+  - `insforge-src/functions/`
 - Usage response contract hotspots:
   - `insforge-src/shared/usage-pricing-core.js`
   - `insforge-src/shared/usage-pricing-core.mjs`
@@ -87,7 +92,12 @@ This document is the single source of truth for repository navigation. Use it to
   - pricing alias generation still consumes canonical models only; the backfill only affects `raw -> canonical`
 - Generated deploy output:
   - `insforge-functions/`
-- Use generated artifacts only for deployment validation, not as authoring sources.
+- Build/load contract is ESM-only:
+  - `scripts/build-insforge-functions.cjs`
+  - `scripts/lib/load-edge-function.cjs`
+- Runtime contract:
+  - Generated artifacts expect the InsForge runtime to provide `globalThis.createClient`.
+- Use generated artifacts only for deployment validation and deployment, not as authoring sources.
 
 ### Scripts And Validation
 
