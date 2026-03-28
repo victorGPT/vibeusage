@@ -1,35 +1,28 @@
-// Edge function: vibeusage-ingest
-// Accepts half-hour token usage aggregates from a device token and stores them idempotently.
-//
-// Auth:
-// - Authorization: Bearer <device_token> (opaque, stored as sha256 hash server-side)
-
-"use strict";
-
-const { handleOptions, json, requireMethod, readJson } = require("../shared/http");
-const { withRequestLogging } = require("../shared/logging");
-const { createConcurrencyGuard } = require("../shared/concurrency");
-const { getBearerToken } = require("../shared/auth");
-const { getAnonKey, getBaseUrl, getServiceRoleKey } = require("../shared/env");
-const { sha256Hex } = require("../shared/crypto");
-const {
+import { getBearerToken } from "./shared/auth.js";
+import { createConcurrencyGuard } from "../shared/concurrency.mjs";
+import { sha256Hex } from "./shared/crypto.js";
+import { getAnonKey, getBaseUrl, getServiceRoleKey } from "./shared/env.js";
+import { handleOptions, json, readJson, requireMethod } from "./shared/http.js";
+import { createEdgeClient } from "./shared/insforge-client.js";
+import { withRequestLogging } from "./shared/logging.js";
+import {
   BILLABLE_RULE_VERSION,
+  buildProjectRows,
   buildRows,
+  buildSubscriptionRows,
   deriveMetricsSource,
+  normalizeDeviceSubscriptionsPayload,
   normalizeHourlyPayload,
   normalizeProjectHourlyPayload,
-  normalizeDeviceSubscriptionsPayload,
-  buildSubscriptionRows,
-  buildProjectRows,
-} = require("../shared/core/ingest");
-const {
+} from "../shared/core/ingest.mjs";
+import {
   fetchDeviceTokenRow,
   recordIngestBatchMetrics,
-  upsertHourlyUsage,
-  upsertProjectUsage,
-  upsertProjectRegistry,
   upsertDeviceSubscriptions,
-} = require("../shared/db/ingest");
+  upsertHourlyUsage,
+  upsertProjectRegistry,
+  upsertProjectUsage,
+} from "../shared/db/ingest.mjs";
 
 const MAX_BUCKETS = 500;
 const MAX_DEVICE_SUBSCRIPTIONS = 16;
@@ -42,7 +35,7 @@ const ingestGuard = createConcurrencyGuard({
   defaultRetryAfterMs: 1000,
 });
 
-module.exports = withRequestLogging("vibeusage-ingest", async function (request, logger) {
+export default withRequestLogging("vibeusage-ingest", async function (request, logger) {
   const opt = handleOptions(request);
   if (opt) return opt;
 
@@ -62,7 +55,7 @@ module.exports = withRequestLogging("vibeusage-ingest", async function (request,
   const serviceRoleKey = getServiceRoleKey();
   const anonKey = getAnonKey();
   const serviceClient = serviceRoleKey
-    ? createClient({
+    ? await createEdgeClient({
         baseUrl,
         anonKey: anonKey || serviceRoleKey,
         edgeFunctionToken: serviceRoleKey,
@@ -74,8 +67,8 @@ module.exports = withRequestLogging("vibeusage-ingest", async function (request,
     let tokenRow = null;
     try {
       tokenRow = await fetchDeviceTokenRow({ serviceClient, baseUrl, anonKey, tokenHash, fetcher });
-    } catch (e) {
-      return json({ error: e?.message || "Internal error" }, 500);
+    } catch (error) {
+      return json({ error: error?.message || "Internal error" }, 500);
     }
     if (!tokenRow) return json({ error: "Unauthorized" }, 401);
 
@@ -114,6 +107,7 @@ module.exports = withRequestLogging("vibeusage-ingest", async function (request,
       ? buildProjectRows({ hourly: projectHourly, tokenRow, nowIso })
       : { error: null, data: [] };
     if (projectRows.error) return json({ error: projectRows.error }, 400);
+
     const subscriptionRows = Array.isArray(deviceSubscriptions)
       ? buildSubscriptionRows({ subscriptions: deviceSubscriptions, tokenRow, nowIso })
       : { error: null, data: [] };
@@ -221,7 +215,6 @@ module.exports = withRequestLogging("vibeusage-ingest", async function (request,
       nowIso,
       fetcher,
     });
-
     if (!upsert.ok) return json({ error: upsert.error }, 500);
 
     await recordIngestBatchMetrics({

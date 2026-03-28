@@ -1,15 +1,10 @@
-// Edge function: vibeusage-leaderboard-profile
-// Returns the requested user's leaderboard snapshot row for the requested period when it is public (or self).
-
-"use strict";
-
-const { handleOptions, json, requireMethod } = require("../shared/http");
-const { getBearerToken, getEdgeClientAndUserId } = require("../shared/auth");
-const { getAnonKey, getBaseUrl, getServiceRoleKey } = require("../shared/env");
-require("../shared/date");
-require("../shared/user-identity-core");
-require("../shared/leaderboard-core");
-const { toBigInt, toPositiveIntOrNull } = require("../shared/numbers");
+import { getBearerToken, getEdgeClientAndUserId } from "./shared/auth.js";
+import { createEdgeClient } from "./shared/insforge-client.js";
+import { getAnonKey, getBaseUrl, getServiceRoleKey } from "./shared/env.js";
+import { handleOptions, json, requireMethod } from "./shared/http.js";
+import { toBigInt, toPositiveIntOrNull } from "./shared/numbers.js";
+import "../shared/user-identity-core.mjs";
+import "../shared/leaderboard-core.mjs";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 const leaderboardCore = globalThis.__vibeusageLeaderboardCore;
@@ -23,7 +18,7 @@ const {
   normalizeLeaderboardGeneratedAt,
 } = leaderboardCore;
 
-module.exports = async function (request) {
+export default async function (request) {
   const opt = handleOptions(request);
   if (opt) return opt;
 
@@ -52,7 +47,7 @@ module.exports = async function (request) {
   if (!serviceRoleKey) return json({ error: "Service unavailable" }, 503);
 
   const anonKey = getAnonKey();
-  const serviceClient = createClient({
+  const serviceClient = await createEdgeClient({
     baseUrl,
     anonKey: anonKey || serviceRoleKey,
     edgeFunctionToken: serviceRoleKey,

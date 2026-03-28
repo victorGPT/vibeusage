@@ -1,5 +1,6 @@
 "use strict";
 
+const CORE_KEY = "__vibeusageConcurrencyCore";
 const LIMITERS = new Map();
 
 function createConcurrencyGuard({
@@ -18,8 +19,9 @@ function createConcurrencyGuard({
 function getLimiter({ name, maxInflight, retryAfterMs }) {
   const key = name || "default";
   const existing = LIMITERS.get(key);
-  if (existing && existing.maxInflight === maxInflight && existing.retryAfterMs === retryAfterMs)
+  if (existing && existing.maxInflight === maxInflight && existing.retryAfterMs === retryAfterMs) {
     return existing;
+  }
   const limiter = createLimiter({ maxInflight, retryAfterMs });
   LIMITERS.set(key, limiter);
   return limiter;
@@ -75,15 +77,24 @@ function readEnvValue(key) {
       const value = Deno.env.get(key);
       if (value !== undefined) return value;
     }
-  } catch (_e) {}
+  } catch (_error) {}
   try {
     if (typeof process !== "undefined" && process?.env) {
       return process.env[key];
     }
-  } catch (_e) {}
+  } catch (_error) {}
   return null;
 }
 
-module.exports = {
-  createConcurrencyGuard,
-};
+if (!globalThis[CORE_KEY]) {
+  Object.defineProperty(globalThis, CORE_KEY, {
+    value: {
+      createConcurrencyGuard,
+    },
+    configurable: true,
+    enumerable: false,
+    writable: false,
+  });
+}
+
+export { createConcurrencyGuard };

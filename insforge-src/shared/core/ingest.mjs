@@ -1,12 +1,27 @@
 "use strict";
 
-const { normalizeIso } = require("../date");
-const { normalizeSource } = require("../source");
-const { normalizeUsageModel } = require("../model");
-const { computeBillableTotalTokens } = require("../usage-billable");
+import "../date-core.mjs";
+import "../runtime-primitives-core.mjs";
+import "../usage-model-core.mjs";
+import "../usage-metrics-core.mjs";
 
+const CORE_KEY = "__vibeusageIngestCore";
 const DEFAULT_MODEL = "unknown";
 const BILLABLE_RULE_VERSION = 1;
+
+const dateCore = globalThis.__vibeusageDateCore;
+if (!dateCore) throw new Error("date core not initialized");
+const runtimePrimitivesCore = globalThis.__vibeusageRuntimePrimitivesCore;
+if (!runtimePrimitivesCore) throw new Error("runtime primitives core not initialized");
+const usageModelCore = globalThis.__vibeusageUsageModelCore;
+if (!usageModelCore) throw new Error("usage-model core not initialized");
+const usageMetricsCore = globalThis.__vibeusageUsageMetricsCore;
+if (!usageMetricsCore) throw new Error("usage metrics core not initialized");
+
+const { normalizeIso } = dateCore;
+const { normalizeSource } = runtimePrimitivesCore;
+const { normalizeUsageModel } = usageModelCore;
+const { computeBillableTotalTokens } = usageMetricsCore;
 
 function normalizeHourlyPayload(data) {
   if (Array.isArray(data)) return data;
@@ -120,8 +135,9 @@ function parseHourlyBucket(raw) {
 }
 
 function parseProjectHourlyBucket(raw) {
-  if (!raw || typeof raw !== "object")
+  if (!raw || typeof raw !== "object") {
     return { ok: false, error: "Invalid project half-hour bucket" };
+  }
 
   const hourStart = parseUtcHalfHourStart(raw.hour_start);
   if (!hourStart) {
@@ -137,12 +153,8 @@ function parseProjectHourlyBucket(raw) {
   const reasoning = toNonNegativeInt(raw.reasoning_output_tokens);
   const total = toNonNegativeInt(raw.total_tokens);
 
-  if (!projectKey) {
-    return { ok: false, error: "project_key is required" };
-  }
-  if (!projectRef) {
-    return { ok: false, error: "project_ref is required" };
-  }
+  if (!projectKey) return { ok: false, error: "project_key is required" };
+  if (!projectRef) return { ok: false, error: "project_ref is required" };
   if ([input, cached, output, reasoning, total].some((n) => n == null)) {
     return { ok: false, error: "Token fields must be non-negative integers" };
   }
@@ -306,19 +318,43 @@ function deriveMetricsSource(rows) {
   return null;
 }
 
-module.exports = {
-  DEFAULT_MODEL,
+if (!globalThis[CORE_KEY]) {
+  Object.defineProperty(globalThis, CORE_KEY, {
+    value: {
+      BILLABLE_RULE_VERSION,
+      DEFAULT_MODEL,
+      buildProjectRows,
+      buildRows,
+      buildSubscriptionRows,
+      deriveMetricsSource,
+      normalizeDeviceSubscriptionsPayload,
+      normalizeHourlyPayload,
+      normalizeProjectHourlyPayload,
+      parseDeviceSubscription,
+      parseHourlyBucket,
+      parseProjectHourlyBucket,
+      parseUtcHalfHourStart,
+      toNonNegativeInt,
+    },
+    configurable: true,
+    enumerable: false,
+    writable: false,
+  });
+}
+
+export {
   BILLABLE_RULE_VERSION,
-  normalizeHourlyPayload,
-  normalizeProjectHourlyPayload,
-  normalizeDeviceSubscriptionsPayload,
-  parseUtcHalfHourStart,
-  toNonNegativeInt,
-  parseHourlyBucket,
-  parseProjectHourlyBucket,
-  parseDeviceSubscription,
-  buildRows,
+  DEFAULT_MODEL,
   buildProjectRows,
+  buildRows,
   buildSubscriptionRows,
   deriveMetricsSource,
+  normalizeDeviceSubscriptionsPayload,
+  normalizeHourlyPayload,
+  normalizeProjectHourlyPayload,
+  parseDeviceSubscription,
+  parseHourlyBucket,
+  parseProjectHourlyBucket,
+  parseUtcHalfHourStart,
+  toNonNegativeInt,
 };

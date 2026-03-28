@@ -4,6 +4,7 @@
 const assert = require("node:assert/strict");
 const { createHash } = require("node:crypto");
 const path = require("node:path");
+const { pathToFileURL } = require("node:url");
 
 const SERVICE_ROLE_KEY = "srk_test_123";
 const BASE_URL = "http://insforge:7130";
@@ -24,7 +25,9 @@ async function main() {
   setDenoEnv();
 
   const repoRoot = path.resolve(__dirname, "..", "..");
-  const fn = require(path.join(repoRoot, "insforge-functions", "vibeusage-link-code-exchange.js"));
+  const fn = await loadEdgeModule(
+    path.join(repoRoot, "insforge-src/functions-esm/vibeusage-link-code-exchange.js"),
+  );
 
   const linkCode = "link_code_test";
   const requestId = "req_123";
@@ -83,6 +86,15 @@ main().catch((err) => {
   process.stderr.write(`${err && err.stack ? err.stack : String(err)}\n`);
   process.exitCode = 1;
 });
+
+async function loadEdgeModule(resolvedPath) {
+  const href = `${pathToFileURL(resolvedPath).href}?t=${Date.now()}`;
+  const mod = await import(href);
+  if (typeof mod?.default !== "function") {
+    throw new Error(`Missing default export for ${resolvedPath}`);
+  }
+  return mod.default;
+}
 
 function createLinkCodeExchangeDbMock(linkCodeRow) {
   const inserts = [];

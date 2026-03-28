@@ -1,18 +1,12 @@
-// Edge function: vibeusage-events-retention
-// Purges legacy events older than a cutoff (default 30 days).
-// Optionally purges ingest batch metrics when requested.
-// Requires service role token in Authorization header.
-
-"use strict";
-
-const { handleOptions, json, requireMethod, readJson } = require("../shared/http");
-const { getBearerToken } = require("../shared/auth");
-const { getAnonKey, getBaseUrl, getServiceRoleKey } = require("../shared/env");
+import { getBearerToken } from "./shared/auth.js";
+import { createEdgeClient } from "./shared/insforge-client.js";
+import { getAnonKey, getBaseUrl, getServiceRoleKey } from "./shared/env.js";
+import { handleOptions, json, readJson, requireMethod } from "./shared/http.js";
 
 const DEFAULT_DAYS = 30;
 const MAX_DAYS = 365;
 
-module.exports = async function (request) {
+export default async function (request) {
   const opt = handleOptions(request);
   if (opt) return opt;
 
@@ -36,7 +30,7 @@ module.exports = async function (request) {
 
   const baseUrl = getBaseUrl();
   const anonKey = getAnonKey();
-  const serviceClient = createClient({
+  const serviceClient = await createEdgeClient({
     baseUrl,
     anonKey: anonKey || serviceRoleKey,
     edgeFunctionToken: serviceRoleKey,

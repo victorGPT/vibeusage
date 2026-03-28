@@ -1,15 +1,21 @@
 "use strict";
 
-const { isWithinInterval, normalizeIso } = require("../date");
-const {
+import "../date-core.mjs";
+import {
   buildAuthHeaders,
   isUpsertUnsupported,
   normalizeRows,
   readApiJson,
   recordsUpsert,
-} = require("./records");
+} from "./records.mjs";
 
+const CORE_KEY = "__vibeusageIngestDbCore";
 const DEVICE_TOKEN_SELECT = "id,user_id,device_id,revoked_at,last_sync_at";
+
+const dateCore = globalThis.__vibeusageDateCore;
+if (!dateCore) throw new Error("date core not initialized");
+
+const { isWithinInterval, normalizeIso } = dateCore;
 
 function toNonNegativeInt(value) {
   if (typeof value !== "number") return 0;
@@ -102,7 +108,7 @@ async function touchDeviceTokenAndDevice({
         fetcher,
       });
     }
-  } catch (_e) {}
+  } catch (_error) {}
 
   try {
     if (serviceClient?.database?.from) {
@@ -121,7 +127,7 @@ async function touchDeviceTokenAndDevice({
         fetcher,
       });
     }
-  } catch (_e) {}
+  } catch (_error) {}
 }
 
 async function upsertHourlyUsage({
@@ -486,17 +492,34 @@ async function recordIngestBatchMetrics({
       const { error } = await readApiJson(res);
       throw new Error(error || `HTTP ${res.status}`);
     }
-  } catch (_e) {
+  } catch (_error) {
     // best-effort metrics; ignore failures
   }
 }
 
-module.exports = {
+if (!globalThis[CORE_KEY]) {
+  Object.defineProperty(globalThis, CORE_KEY, {
+    value: {
+      fetchDeviceTokenRow,
+      recordIngestBatchMetrics,
+      touchDeviceTokenAndDevice,
+      upsertDeviceSubscriptions,
+      upsertHourlyUsage,
+      upsertProjectRegistry,
+      upsertProjectUsage,
+    },
+    configurable: true,
+    enumerable: false,
+    writable: false,
+  });
+}
+
+export {
   fetchDeviceTokenRow,
-  touchDeviceTokenAndDevice,
-  upsertHourlyUsage,
-  upsertProjectUsage,
-  upsertProjectRegistry,
-  upsertDeviceSubscriptions,
   recordIngestBatchMetrics,
+  touchDeviceTokenAndDevice,
+  upsertDeviceSubscriptions,
+  upsertHourlyUsage,
+  upsertProjectRegistry,
+  upsertProjectUsage,
 };

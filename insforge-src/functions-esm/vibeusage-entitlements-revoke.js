@@ -1,14 +1,10 @@
-// Edge function: vibeusage-entitlements-revoke
-// Admin-only endpoint to revoke an entitlement.
+import { getBearerToken, isProjectAdminBearer } from "./shared/auth.js";
+import { createEdgeClient } from "./shared/insforge-client.js";
+import { getAnonKey, getBaseUrl, getServiceRoleKey } from "./shared/env.js";
+import { handleOptions, json, readJson, requireMethod } from "./shared/http.js";
+import { withRequestLogging } from "./shared/logging.js";
 
-"use strict";
-
-const { handleOptions, json, requireMethod, readJson } = require("../shared/http");
-const { getBearerToken, isProjectAdminBearer } = require("../shared/auth");
-const { getBaseUrl, getAnonKey, getServiceRoleKey } = require("../shared/env");
-const { withRequestLogging } = require("../shared/logging");
-
-module.exports = withRequestLogging("vibeusage-entitlements-revoke", async function (request) {
+export default withRequestLogging("vibeusage-entitlements-revoke", async function (request) {
   const opt = handleOptions(request);
   if (opt) return opt;
 
@@ -39,7 +35,7 @@ module.exports = withRequestLogging("vibeusage-entitlements-revoke", async funct
   if (!anonKey && !serviceRoleKey) return json({ error: "Admin key missing" }, 500);
 
   const baseUrl = getBaseUrl();
-  const dbClient = createClient({
+  const dbClient = await createEdgeClient({
     baseUrl,
     anonKey: anonKey || serviceRoleKey,
     edgeFunctionToken: isServiceRole ? serviceRoleKey : bearer,

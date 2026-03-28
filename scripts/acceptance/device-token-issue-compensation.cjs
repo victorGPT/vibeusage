@@ -3,6 +3,7 @@
 
 const assert = require("node:assert/strict");
 const nodeCrypto = require("node:crypto");
+const { pathToFileURL } = require("node:url");
 
 class QueryStub {
   constructor(table, state) {
@@ -57,7 +58,7 @@ function createClientStub(state) {
 async function main() {
   process.env.INSFORGE_INTERNAL_URL = "http://insforge:7130";
   process.env.INSFORGE_ANON_KEY = "anon";
-  process.env.INSFORGE_SERVICE_ROLE_KEY = "";
+  process.env.INSFORGE_SERVICE_ROLE_KEY = "service-role-key";
 
   global.Deno = {
     env: {
@@ -78,15 +79,19 @@ async function main() {
   const state = { inserts: [], deletes: [] };
   global.createClient = () => createClientStub(state);
 
-  const issueToken = require("../../insforge-src/functions/vibeusage-device-token-issue.js");
+  const issueToken = await loadEdgeModule("../../insforge-src/functions-esm/vibeusage-device-token-issue.js");
 
   const req = new Request("http://local/functions/vibeusage-device-token-issue", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: "Bearer user-jwt",
+      Authorization: "Bearer service-role-key",
     },
-    body: JSON.stringify({ device_name: "test-mac", platform: "macos" }),
+    body: JSON.stringify({
+      user_id: "11111111-1111-1111-1111-111111111111",
+      device_name: "test-mac",
+      platform: "macos",
+    }),
   });
 
   const res = await issueToken(req);
@@ -121,6 +126,15 @@ async function main() {
       2,
     ) + "\n",
   );
+}
+
+async function loadEdgeModule(relativePath) {
+  const href = `${pathToFileURL(require.resolve(relativePath)).href}?t=${Date.now()}`;
+  const mod = await import(href);
+  if (typeof mod?.default !== "function") {
+    throw new Error(`Missing default export for ${relativePath}`);
+  }
+  return mod.default;
 }
 
 main().catch((err) => {

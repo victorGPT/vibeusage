@@ -1,18 +1,14 @@
-// Edge function: vibeusage-link-code-exchange
-// Exchanges a link code for a device token.
-
-"use strict";
-
-const { handleOptions, json, requireMethod, readJson } = require("../shared/http");
-const { getAnonKey, getBaseUrl, getServiceRoleKey } = require("../shared/env");
-const { sha256Hex } = require("../shared/crypto");
-const { withRequestLogging } = require("../shared/logging");
+import { createEdgeClient } from "./shared/insforge-client.js";
+import { getAnonKey, getBaseUrl, getServiceRoleKey } from "./shared/env.js";
+import { handleOptions, json, readJson, requireMethod } from "./shared/http.js";
+import { sha256Hex } from "./shared/crypto.js";
+import { withRequestLogging } from "./shared/logging.js";
 
 const ISSUE_ERROR_MESSAGE = "Link code exchange failed";
 const DEVICE_NAME_FALLBACK = "VibeScore CLI";
 const PLATFORM_FALLBACK = "macos";
 
-module.exports = withRequestLogging("vibeusage-link-code-exchange", async function (request) {
+export default withRequestLogging("vibeusage-link-code-exchange", async function (request) {
   const opt = handleOptions(request);
   if (opt) return opt;
 
@@ -35,7 +31,7 @@ module.exports = withRequestLogging("vibeusage-link-code-exchange", async functi
   if (!serviceRoleKey) return json({ error: "Missing service role key" }, 500);
 
   const anonKey = getAnonKey();
-  const dbClient = createClient({
+  const dbClient = await createEdgeClient({
     baseUrl,
     anonKey: anonKey || serviceRoleKey,
     edgeFunctionToken: serviceRoleKey,

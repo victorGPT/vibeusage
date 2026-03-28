@@ -62,10 +62,7 @@ function setDenoEnv(env) {
 }
 
 test("vibeusage function sources are not wrapper shims", () => {
-  const functionsDirs = [
-    path.join(__dirname, "..", "insforge-src", "functions"),
-    path.join(__dirname, "..", "insforge-src", "functions-esm"),
-  ];
+  const functionsDirs = [path.join(__dirname, "..", "insforge-src", "functions-esm")];
   const entries = functionsDirs.flatMap((functionsDir) =>
     fs.existsSync(functionsDir)
       ? fs
@@ -80,6 +77,14 @@ test("vibeusage function sources are not wrapper shims", () => {
     const content = fs.readFileSync(path.join(entry.functionsDir, entry.name), "utf8");
     assert.equal(wrapperPattern.test(content), false, `${entry.name} still wraps vibescore`);
   }
+});
+
+test("legacy edge-function author directory no longer contains live vibeusage sources", () => {
+  const legacyDir = path.join(__dirname, "..", "insforge-src", "functions");
+  const entries = fs.existsSync(legacyDir)
+    ? fs.readdirSync(legacyDir).filter((name) => name.startsWith("vibeusage-") && name.endsWith(".js"))
+    : [];
+  assert.deepEqual(entries, []);
 });
 
 test("identity deploy artifacts are built from the ESM pipeline", () => {
@@ -925,7 +930,7 @@ test("vibeusage-device-token-issue works without serviceRoleKey (user mode)", as
     API_KEY: "",
   });
 
-  const fn = require("../insforge-functions/vibeusage-device-token-issue");
+  const fn = await loadEdgeFunction("vibeusage-device-token-issue");
 
   const calls = [];
   const db = createServiceDbMock();
@@ -971,7 +976,7 @@ test("vibeusage-device-token-issue works without serviceRoleKey (user mode)", as
 });
 
 test("vibeusage-device-token-issue admin mode skips user lookup", async () => {
-  const fn = require("../insforge-functions/vibeusage-device-token-issue");
+  const fn = await loadEdgeFunction("vibeusage-device-token-issue");
 
   const calls = [];
   const service = createServiceDbMock();
@@ -1002,7 +1007,7 @@ test("vibeusage-device-token-issue admin mode skips user lookup", async () => {
 });
 
 test("vibeusage-ingest uses serviceRoleKey as edgeFunctionToken and ingests hourly aggregates", async () => {
-  const fn = require("../insforge-functions/vibeusage-ingest");
+  const fn = await loadEdgeFunction("vibeusage-ingest");
 
   const calls = [];
   const fetchCalls = [];
@@ -1113,7 +1118,7 @@ test("vibeusage-ingest uses serviceRoleKey as edgeFunctionToken and ingests hour
 });
 
 test("vibeusage-ingest ingests project_hourly buckets and upserts project registry", async () => {
-  const fn = require("../insforge-functions/vibeusage-ingest");
+  const fn = await loadEdgeFunction("vibeusage-ingest");
 
   const calls = [];
   const fetchCalls = [];
@@ -1241,7 +1246,7 @@ test("vibeusage-ingest ingests project_hourly buckets and upserts project regist
 });
 
 test("vibeusage-ingest accepts wrapped payload with data.hourly", async () => {
-  const fn = require("../insforge-functions/vibeusage-ingest");
+  const fn = await loadEdgeFunction("vibeusage-ingest");
 
   const calls = [];
   const fetchCalls = [];
@@ -1335,7 +1340,7 @@ test("vibeusage-ingest accepts wrapped payload with data.hourly", async () => {
 });
 
 test("vibeusage-ingest accepts project_hourly alongside hourly payloads", async () => {
-  const fn = require("../insforge-functions/vibeusage-ingest");
+  const fn = await loadEdgeFunction("vibeusage-ingest");
 
   const calls = [];
   const fetchCalls = [];
@@ -1457,7 +1462,7 @@ test("vibeusage-ingest accepts project_hourly alongside hourly payloads", async 
 });
 
 test("vibeusage-ingest upserts device subscriptions when provided", async () => {
-  const fn = require("../insforge-functions/vibeusage-ingest");
+  const fn = await loadEdgeFunction("vibeusage-ingest");
 
   const fetchCalls = [];
   const tokenRow = {
@@ -1569,7 +1574,7 @@ test("vibeusage-ingest works without serviceRoleKey via anonKey records API", as
     ANON_KEY,
   });
 
-  const fn = require("../insforge-functions/vibeusage-ingest");
+  const fn = await loadEdgeFunction("vibeusage-ingest");
 
   const tokenRow = {
     id: "token-id",
@@ -1720,8 +1725,7 @@ test("vibeusage-ingest returns 429 when concurrency limit exceeded", async () =>
     VIBEUSAGE_INGEST_RETRY_AFTER_MS: "1000",
   });
 
-  delete require.cache[require.resolve("../insforge-functions/vibeusage-ingest")];
-  const fn = require("../insforge-functions/vibeusage-ingest");
+  const fn = await loadEdgeFunction("vibeusage-ingest", { reload: true });
 
   const tokenRow = {
     id: "token-id",
@@ -1804,7 +1808,7 @@ test("vibeusage-ingest anonKey path errors when hourly upsert unsupported", asyn
     ANON_KEY,
   });
 
-  const fn = require("../insforge-functions/vibeusage-ingest");
+  const fn = await loadEdgeFunction("vibeusage-ingest");
 
   const tokenRow = {
     id: "token-id",
@@ -8648,7 +8652,7 @@ test("vibeusage-leaderboard-profile rejects missing user_id", async () => {
     INSFORGE_SERVICE_ROLE_KEY: SERVICE_ROLE_KEY,
   });
 
-  const fn = require("../insforge-functions/vibeusage-leaderboard-profile");
+  const fn = await loadEdgeFunction("vibeusage-leaderboard-profile");
 
   const userId = "eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee";
   const userJwt = createUserJwt(userId);
@@ -8680,7 +8684,7 @@ test("vibeusage-leaderboard-profile hides non-public users", async () => {
     INSFORGE_SERVICE_ROLE_KEY: SERVICE_ROLE_KEY,
   });
 
-  const fn = require("../insforge-functions/vibeusage-leaderboard-profile");
+  const fn = await loadEdgeFunction("vibeusage-leaderboard-profile");
 
   const userId = "ffffffff-ffff-ffff-ffff-ffffffffffff";
   const userJwt = createUserJwt(userId);
@@ -8752,7 +8756,7 @@ test("vibeusage-leaderboard-profile requires active public link for non-self use
     INSFORGE_SERVICE_ROLE_KEY: SERVICE_ROLE_KEY,
   });
 
-  const fn = require("../insforge-functions/vibeusage-leaderboard-profile");
+  const fn = await loadEdgeFunction("vibeusage-leaderboard-profile");
 
   const userId = "ffff0000-0000-0000-0000-000000000000";
   const userJwt = createUserJwt(userId);
@@ -8840,7 +8844,7 @@ test("vibeusage-leaderboard-profile hides snapshot rows marked private", async (
     INSFORGE_SERVICE_ROLE_KEY: SERVICE_ROLE_KEY,
   });
 
-  const fn = require("../insforge-functions/vibeusage-leaderboard-profile");
+  const fn = await loadEdgeFunction("vibeusage-leaderboard-profile");
 
   const userId = "999a0000-0000-0000-0000-000000000000";
   const userJwt = createUserJwt(userId);
@@ -8938,7 +8942,7 @@ test("vibeusage-leaderboard-profile returns weekly snapshot entry for public use
     INSFORGE_SERVICE_ROLE_KEY: SERVICE_ROLE_KEY,
   });
 
-  const fn = require("../insforge-functions/vibeusage-leaderboard-profile");
+  const fn = await loadEdgeFunction("vibeusage-leaderboard-profile");
 
   const userId = "99990000-0000-0000-0000-000000000000";
   const userJwt = createUserJwt(userId);
@@ -9330,7 +9334,7 @@ test("vibeusage-user-status returns 500 for unrelated missing relation errors", 
 });
 
 test("vibeusage-entitlements rejects non-admin caller", async () => {
-  const fn = require("../insforge-functions/vibeusage-entitlements");
+  const fn = await loadEdgeFunction("vibeusage-entitlements");
 
   const userId = "cccccccc-cccc-cccc-cccc-cccccccccccc";
   const userJwt = createUserJwt(userId);
@@ -9350,7 +9354,7 @@ test("vibeusage-entitlements rejects non-admin caller", async () => {
 });
 
 test("vibeusage-entitlements inserts entitlement (admin)", async () => {
-  const fn = require("../insforge-functions/vibeusage-entitlements");
+  const fn = await loadEdgeFunction("vibeusage-entitlements");
 
   const db = createServiceDbMock();
   const userId = "22222222-2222-2222-2222-222222222222";
@@ -9387,7 +9391,7 @@ test("vibeusage-entitlements inserts entitlement (admin)", async () => {
 });
 
 test("vibeusage-entitlements replays idempotency_key without duplicate insert", async () => {
-  const fn = require("../insforge-functions/vibeusage-entitlements");
+  const fn = await loadEdgeFunction("vibeusage-entitlements");
 
   const db = createEntitlementsDbMock();
   const userId = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
@@ -9431,7 +9435,7 @@ test("vibeusage-entitlements replays idempotency_key without duplicate insert", 
 });
 
 test("vibeusage-entitlements accepts long idempotency_key without collisions", async () => {
-  const fn = require("../insforge-functions/vibeusage-entitlements");
+  const fn = await loadEdgeFunction("vibeusage-entitlements");
 
   const db = createEntitlementsDbMock();
   const userId = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb";
@@ -9483,7 +9487,7 @@ test("vibeusage-entitlements accepts long idempotency_key without collisions", a
 });
 
 test("vibeusage-entitlements normalizes user_id for idempotency replays", async () => {
-  const fn = require("../insforge-functions/vibeusage-entitlements");
+  const fn = await loadEdgeFunction("vibeusage-entitlements");
 
   const db = createEntitlementsDbMock({ normalizeUserId: true });
   const userId = "AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA";
@@ -9529,7 +9533,7 @@ test("vibeusage-entitlements normalizes user_id for idempotency replays", async 
 });
 
 test("vibeusage-entitlements rejects idempotency_key payload mismatch", async () => {
-  const fn = require("../insforge-functions/vibeusage-entitlements");
+  const fn = await loadEdgeFunction("vibeusage-entitlements");
 
   const db = createEntitlementsDbMock();
   const userId = "eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee";
@@ -9574,7 +9578,7 @@ test("vibeusage-entitlements rejects idempotency_key payload mismatch", async ()
 });
 
 test("vibeusage-entitlements returns existing row after insert conflict", async () => {
-  const fn = require("../insforge-functions/vibeusage-entitlements");
+  const fn = await loadEdgeFunction("vibeusage-entitlements");
 
   const userId = "ffffffff-ffff-ffff-ffff-ffffffffffff";
   const conflictRow = {
@@ -9618,7 +9622,7 @@ test("vibeusage-entitlements returns existing row after insert conflict", async 
 });
 
 test("vibeusage-entitlements rejects id reuse across users", async () => {
-  const fn = require("../insforge-functions/vibeusage-entitlements");
+  const fn = await loadEdgeFunction("vibeusage-entitlements");
 
   const existingId = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb";
   const existingRow = {
@@ -9662,7 +9666,7 @@ test("vibeusage-entitlements rejects id reuse across users", async () => {
 });
 
 test("vibeusage-entitlements accepts project_admin token", async () => {
-  const fn = require("../insforge-functions/vibeusage-entitlements");
+  const fn = await loadEdgeFunction("vibeusage-entitlements");
 
   const db = createServiceDbMock();
   const userId = "44444444-4444-4444-4444-444444444444";
@@ -9691,7 +9695,7 @@ test("vibeusage-entitlements accepts project_admin token", async () => {
 });
 
 test("vibeusage-entitlements accepts project_admin token from roles array", async () => {
-  const fn = require("../insforge-functions/vibeusage-entitlements");
+  const fn = await loadEdgeFunction("vibeusage-entitlements");
 
   const db = createServiceDbMock();
   const userId = "55555555-5555-5555-5555-555555555555";
@@ -9720,7 +9724,7 @@ test("vibeusage-entitlements accepts project_admin token from roles array", asyn
 });
 
 test("vibeusage-entitlements-revoke updates revoked_at (admin)", async () => {
-  const fn = require("../insforge-functions/vibeusage-entitlements-revoke");
+  const fn = await loadEdgeFunction("vibeusage-entitlements-revoke");
 
   const db = createServiceDbMock();
   const entitlementId = "33333333-3333-3333-3333-333333333333";
@@ -9751,7 +9755,7 @@ test("vibeusage-entitlements-revoke updates revoked_at (admin)", async () => {
 });
 
 test("vibeusage-entitlements-revoke accepts project_admin token", async () => {
-  const fn = require("../insforge-functions/vibeusage-entitlements-revoke");
+  const fn = await loadEdgeFunction("vibeusage-entitlements-revoke");
 
   const db = createServiceDbMock();
   const entitlementId = "55555555-5555-5555-5555-555555555555";
@@ -9815,7 +9819,7 @@ test("vibeusage-link-code-init issues a short-lived link code", async () => {
 });
 
 test("vibeusage-link-code-exchange creates device token and marks link code used", async () => {
-  const fn = require("../insforge-functions/vibeusage-link-code-exchange");
+  const fn = await loadEdgeFunction("vibeusage-link-code-exchange");
 
   const linkCode = "link_code_test";
   const requestId = "req_123";
@@ -9880,7 +9884,7 @@ test("vibeusage-link-code-exchange creates device token and marks link code used
 });
 
 test("vibeusage-link-code-exchange returns existing device for repeated request", async () => {
-  const fn = require("../insforge-functions/vibeusage-link-code-exchange");
+  const fn = await loadEdgeFunction("vibeusage-link-code-exchange");
 
   const linkCode = "link_code_used";
   const requestId = "req_repeat";

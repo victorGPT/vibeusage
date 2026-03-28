@@ -32,9 +32,9 @@ const SCENARIO_CATALOG = [
       "src/lib/rollout.js",
       "src/lib/uploader.js",
       "src/lib/vibeusage-api.js",
-      "insforge-src/functions/vibeusage-ingest.js",
+      "insforge-src/functions-esm/vibeusage-ingest.js",
     ],
-    optionalPaths: ["insforge-src/functions/vibeusage-sync-ping.js"],
+    optionalPaths: ["insforge-src/functions-esm/vibeusage-sync-ping.js"],
     lifelines: [
       {
         id: "cli-user",
@@ -164,7 +164,7 @@ const SCENARIO_CATALOG = [
     requiredPaths: [
       "src/commands/init.js",
       "insforge-src/functions-esm/vibeusage-link-code-init.js",
-      "insforge-src/functions/vibeusage-link-code-exchange.js",
+      "insforge-src/functions-esm/vibeusage-link-code-exchange.js",
       "src/lib/vibeusage-api.js",
     ],
     optionalPaths: [],

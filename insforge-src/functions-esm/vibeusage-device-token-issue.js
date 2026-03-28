@@ -1,21 +1,13 @@
-// Edge function: vibeusage-device-token-issue
-// Issues a long-lived device token for the authenticated user.
-//
-// Auth modes:
-// - User mode (default): Authorization: Bearer <user_jwt>
-// - Admin mode (bootstrap): Authorization: Bearer <service_role_key> with JSON body { user_id: "<uuid>" }
-
-"use strict";
-
-const { handleOptions, json, requireMethod, readJson } = require("../shared/http");
-const { withRequestLogging } = require("../shared/logging");
-const { getBearerToken, getEdgeClientAndUserId } = require("../shared/auth");
-const { getBaseUrl, getAnonKey, getServiceRoleKey } = require("../shared/env");
-const { sha256Hex } = require("../shared/crypto");
+import { getBearerToken, getEdgeClientAndUserId } from "./shared/auth.js";
+import { createEdgeClient } from "./shared/insforge-client.js";
+import { getAnonKey, getBaseUrl, getServiceRoleKey } from "./shared/env.js";
+import { handleOptions, json, readJson, requireMethod } from "./shared/http.js";
+import { withRequestLogging } from "./shared/logging.js";
+import { sha256Hex } from "./shared/crypto.js";
 
 const ISSUE_ERROR_MESSAGE = "Failed to issue device token";
 
-module.exports = withRequestLogging("vibeusage-device-token-issue", async function (request) {
+export default withRequestLogging("vibeusage-device-token-issue", async function (request) {
   const opt = handleOptions(request);
   if (opt) return opt;
 
@@ -39,7 +31,7 @@ module.exports = withRequestLogging("vibeusage-device-token-issue", async functi
     userId = typeof body.data?.user_id === "string" ? body.data.user_id : null;
     if (!userId) return json({ error: "user_id is required (admin mode)" }, 400);
     const anonKey = getAnonKey();
-    dbClient = createClient({
+    dbClient = await createEdgeClient({
       baseUrl,
       anonKey: anonKey || serviceRoleKey,
       edgeFunctionToken: serviceRoleKey,

@@ -1,5 +1,7 @@
 "use strict";
 
+const CORE_KEY = "__vibeusageDbRecordsCore";
+
 function buildAuthHeaders({ anonKey, tokenHash }) {
   return {
     apikey: anonKey,
@@ -18,7 +20,7 @@ async function readApiJson(res) {
       error: parsed?.message || parsed?.error || null,
       code: parsed?.code || null,
     };
-  } catch (_e) {
+  } catch (_error) {
     return { data: null, error: text.slice(0, 300), code: null };
   }
 }
@@ -31,8 +33,9 @@ function normalizeRows(data) {
 
 function isUpsertUnsupported(result) {
   const status = Number(result?.status || 0);
-  if (status !== 400 && status !== 404 && status !== 405 && status !== 409 && status !== 422)
+  if (status !== 400 && status !== 404 && status !== 405 && status !== 409 && status !== 422) {
     return false;
+  }
   const msg = String(result?.error || "").toLowerCase();
   if (!msg) return false;
   return (
@@ -77,10 +80,19 @@ async function recordsUpsert({
   return { ok: res.ok, status: res.status, data, error, code };
 }
 
-module.exports = {
-  buildAuthHeaders,
-  readApiJson,
-  normalizeRows,
-  isUpsertUnsupported,
-  recordsUpsert,
-};
+if (!globalThis[CORE_KEY]) {
+  Object.defineProperty(globalThis, CORE_KEY, {
+    value: {
+      buildAuthHeaders,
+      isUpsertUnsupported,
+      normalizeRows,
+      readApiJson,
+      recordsUpsert,
+    },
+    configurable: true,
+    enumerable: false,
+    writable: false,
+  });
+}
+
+export { buildAuthHeaders, isUpsertUnsupported, normalizeRows, readApiJson, recordsUpsert };

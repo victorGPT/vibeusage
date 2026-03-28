@@ -1,21 +1,14 @@
-// Edge function: vibeusage-sync-ping
-// Records a throttled sync heartbeat for a device token.
-//
-// Auth:
-// - Authorization: Bearer <device_token>
-
-"use strict";
-
-const { handleOptions, json, requireMethod } = require("../shared/http");
-const { withRequestLogging } = require("../shared/logging");
-const { getBearerToken } = require("../shared/auth");
-const { isWithinInterval, normalizeIso } = require("../shared/date");
-const { getAnonKey, getBaseUrl, getServiceRoleKey } = require("../shared/env");
-const { sha256Hex } = require("../shared/crypto");
+import { getBearerToken } from "./shared/auth.js";
+import { isWithinInterval, normalizeIso } from "./shared/date.js";
+import { getAnonKey, getBaseUrl, getServiceRoleKey } from "./shared/env.js";
+import { handleOptions, json, requireMethod } from "./shared/http.js";
+import { createEdgeClient } from "./shared/insforge-client.js";
+import { withRequestLogging } from "./shared/logging.js";
+import { sha256Hex } from "./shared/crypto.js";
 
 const MIN_INTERVAL_MINUTES = 30;
 
-module.exports = withRequestLogging("vibeusage-sync-ping", async function (request, logger) {
+export default withRequestLogging("vibeusage-sync-ping", async function (request, logger) {
   const opt = handleOptions(request);
   if (opt) return opt;
 
@@ -38,7 +31,7 @@ module.exports = withRequestLogging("vibeusage-sync-ping", async function (reque
   const nowIso = new Date().toISOString();
 
   if (serviceRoleKey) {
-    const serviceClient = createClient({
+    const serviceClient = await createEdgeClient({
       baseUrl,
       anonKey: anonKey || serviceRoleKey,
       edgeFunctionToken: serviceRoleKey,
@@ -97,8 +90,8 @@ module.exports = withRequestLogging("vibeusage-sync-ping", async function (reque
       },
       200,
     );
-  } catch (e) {
-    return json({ error: e?.message || "Internal error" }, 500);
+  } catch (error) {
+    return json({ error: error?.message || "Internal error" }, 500);
   }
 });
 
@@ -129,7 +122,7 @@ async function readApiJson(res) {
   try {
     const parsed = JSON.parse(text);
     return { data: parsed, error: parsed?.message || parsed?.error || null };
-  } catch (_e) {
+  } catch (_error) {
     return { data: null, error: text.slice(0, 300) };
   }
 }

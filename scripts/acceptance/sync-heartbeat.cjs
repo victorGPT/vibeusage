@@ -2,6 +2,7 @@
 "use strict";
 
 const assert = require("node:assert/strict");
+const { pathToFileURL } = require("node:url");
 
 class DatabaseStub {
   constructor({ tokenRow }) {
@@ -47,8 +48,7 @@ async function runScenario({ name, lastSyncAt, expectUpdated }) {
 
   const db = new DatabaseStub({ tokenRow });
   global.createClient = () => createClientStub(db);
-  delete require.cache[require.resolve("../../insforge-src/functions/vibeusage-sync-ping.js")];
-  const syncPing = require("../../insforge-src/functions/vibeusage-sync-ping.js");
+  const syncPing = await loadEdgeModule("../../insforge-src/functions-esm/vibeusage-sync-ping.js");
 
   const res = await syncPing(
     new Request("http://local/functions/vibeusage-sync-ping", {
@@ -84,6 +84,15 @@ async function main() {
 
   await runScenario({ name: "old-sync", lastSyncAt: oldSync, expectUpdated: true });
   await runScenario({ name: "recent-sync", lastSyncAt: recentSync, expectUpdated: false });
+}
+
+async function loadEdgeModule(relativePath) {
+  const href = `${pathToFileURL(require.resolve(relativePath)).href}?t=${Date.now()}`;
+  const mod = await import(href);
+  if (typeof mod?.default !== "function") {
+    throw new Error(`Missing default export for ${relativePath}`);
+  }
+  return mod.default;
 }
 
 main().catch((err) => {

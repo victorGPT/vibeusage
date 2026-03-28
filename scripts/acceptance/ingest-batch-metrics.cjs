@@ -2,6 +2,7 @@
 "use strict";
 
 const assert = require("node:assert/strict");
+const { loadEdgeFunction } = require("../lib/load-edge-function.cjs");
 
 main().catch((err) => {
   console.error(err && err.stack ? err.stack : String(err));
@@ -45,7 +46,7 @@ async function runScenario({ name, state, failMetrics, expectMetrics }) {
   state.metricsInserts = 0;
   state.lastMetricsRow = null;
 
-  const ingest = require("../../insforge-src/functions/vibeusage-ingest.js");
+  const ingest = await loadEdgeFunction("vibeusage-ingest", { reload: true });
   const hourly = buildBuckets();
   const req = new Request("http://local/functions/vibeusage-ingest", {
     method: "POST",

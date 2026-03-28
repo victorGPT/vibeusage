@@ -3,6 +3,7 @@
 "use strict";
 
 const assert = require("node:assert/strict");
+const { loadEdgeFunction } = require("../lib/load-edge-function.cjs");
 
 const BASE_URL = "http://insforge:7130";
 const ANON_KEY = "anon_test_123";
@@ -13,8 +14,6 @@ setDenoEnv({
   VIBEUSAGE_INGEST_MAX_INFLIGHT: "1",
   VIBEUSAGE_INGEST_RETRY_AFTER_MS: "1000",
 });
-
-const fn = require("../../insforge-functions/vibeusage-ingest");
 
 const tokenRow = {
   id: "token-id",
@@ -69,6 +68,7 @@ run().catch((err) => {
 });
 
 async function run() {
+  const fn = await loadEdgeFunction("vibeusage-ingest", { reload: true });
   const req1 = buildRequest();
   const req2 = buildRequest();
 

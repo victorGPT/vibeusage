@@ -347,13 +347,13 @@ test("backend date and logging helpers flow through shared cores", () => {
     read("insforge-src/functions-esm/vibeusage-usage-model-breakdown.js"),
     /resolveUsageDateRangeLocal/,
   );
-  assert.match(read("insforge-src/functions\/vibeusage-sync-ping.js"), /require\(\"..\/shared\/date\"\)/);
+  assert.match(read("insforge-src/functions-esm\/vibeusage-sync-ping.js"), /from "\.\/shared\/date\.js"/);
   assert.match(read("insforge-src/shared\/db\/ingest.js"), /require\(\"..\/date\"\)/);
   assert.match(read("insforge-src/functions-esm\/vibeusage-user-status.js"), /from "\.\/shared\/date\.js"/);
   assert.doesNotMatch(read("insforge-src/functions-esm/vibeusage-usage-hourly.js"), /function normalizeIso/);
   assert.doesNotMatch(read("insforge-src/functions-esm/vibeusage-user-status.js"), /function normalizeIso/);
-  assert.doesNotMatch(read("insforge-src/functions\/vibeusage-sync-ping.js"), /function normalizeIso/);
-  assert.doesNotMatch(read("insforge-src/functions\/vibeusage-sync-ping.js"), /function isWithinInterval/);
+  assert.doesNotMatch(read("insforge-src/functions-esm/vibeusage-sync-ping.js"), /function normalizeIso/);
+  assert.doesNotMatch(read("insforge-src/functions-esm/vibeusage-sync-ping.js"), /function isWithinInterval/);
   assert.doesNotMatch(read("insforge-src/shared\/db\/ingest.js"), /function normalizeIso/);
   assert.doesNotMatch(read("insforge-src/shared\/db\/ingest.js"), /function isWithinInterval/);
   assert.doesNotMatch(read("insforge-src/functions-esm/vibeusage-usage-summary.js"), /normalizeDateRangeLocal/);
@@ -585,7 +585,7 @@ test("backend leaderboard and user identity semantics flow through shared cores"
     read("insforge-src/functions-esm/vibeusage-leaderboard-refresh.js"),
     /shared\/leaderboard-core\.mjs/,
   );
-  assert.match(read("insforge-src/functions/vibeusage-leaderboard-profile.js"), /leaderboard-core/);
+  assert.match(read("insforge-src/functions-esm/vibeusage-leaderboard-profile.js"), /leaderboard-core/);
   assert.match(
     read("insforge-src/functions-esm/vibeusage-leaderboard.js"),
     /shared\/leaderboard-core\.mjs/,

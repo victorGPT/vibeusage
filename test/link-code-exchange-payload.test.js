@@ -8,7 +8,7 @@ test("link code exchange uses records API (no rpc)", () => {
     __dirname,
     "..",
     "insforge-src",
-    "functions",
+    "functions-esm",
     "vibeusage-link-code-exchange.js",
   );
   const src = fs.readFileSync(filePath, "utf8");

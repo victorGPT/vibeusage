@@ -2,6 +2,7 @@
 "use strict";
 
 const assert = require("node:assert/strict");
+const { loadEdgeFunction } = require("../lib/load-edge-function.cjs");
 
 main().catch((err) => {
   console.error(err && err.stack ? err.stack : String(err));
@@ -9,7 +10,7 @@ main().catch((err) => {
 });
 
 async function main() {
-  const fn = require("../../insforge-functions/vibeusage-leaderboard-settings");
+  const fn = await loadEdgeFunction("vibeusage-leaderboard-settings");
 
   const userId = "11111111-2222-3333-4444-555555555555";
   const userJwt = "user_jwt_test";
