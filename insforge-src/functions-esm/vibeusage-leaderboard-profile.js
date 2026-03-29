@@ -1,4 +1,5 @@
 import { getBearerToken, getEdgeClientAndUserId } from "./shared/auth.js";
+import "./shared/date.js";
 import { createEdgeClient } from "./shared/insforge-client.js";
 import { getAnonKey, getBaseUrl, getServiceRoleKey } from "./shared/env.js";
 import { handleOptions, json, requireMethod } from "./shared/http.js";

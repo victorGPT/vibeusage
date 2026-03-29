@@ -600,6 +600,15 @@ test("backend leaderboard and user identity semantics flow through shared cores"
   );
 });
 
+test("leaderboard profile initializes date core before leaderboard core", () => {
+  const content = read("insforge-src/functions-esm/vibeusage-leaderboard-profile.js");
+  assert.match(content, /import "\.\/shared\/date\.js";/);
+  assert.ok(
+    content.indexOf('import "./shared/date.js";') < content.indexOf('import "../shared/leaderboard-core.mjs";'),
+    "expected date core import before leaderboard core import",
+  );
+});
+
 test("backend usage pricing semantics flow through shared cores", () => {
   const usagePricingCoreJs = read("insforge-src/shared/usage-pricing-core.js");
   const usagePricingCoreMjs = read("insforge-src/shared/usage-pricing-core.mjs");
