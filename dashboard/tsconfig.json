@@ -10,5 +10,10 @@
     "skipLibCheck": true
   },
   "include": ["src", "../src/shared/*.cjs.d.ts"],
-  "exclude": ["src/**/__tests__/**", "src/test/**"]
+  "exclude": [
+    "src/**/__tests__/**",
+    "src/test/**",
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx"
+  ]
 }
