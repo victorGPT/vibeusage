@@ -64,6 +64,8 @@ test("hard-cut repo removes legacy edge author sources", () => {
 test("hard-cut edge function artifacts do not include CommonJS wrappers", () => {
   for (const slug of FUNCTION_SLUGS) {
     const artifact = readFile(`insforge-functions/${slug}.js`);
+    assert.match(artifact, /import \{ createClient as __insforgeCreateClient \} from "npm:@insforge\/sdk";/);
+    assert.match(artifact, /globalThis\.createClient = __insforgeCreateClient/);
     assert.doesNotMatch(artifact, /__commonJS/);
     assert.doesNotMatch(artifact, /\bmodule\.exports\b/);
     assert.doesNotMatch(artifact, /\brequire\(/);

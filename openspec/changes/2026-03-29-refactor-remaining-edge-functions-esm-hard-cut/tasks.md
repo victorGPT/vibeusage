@@ -7,7 +7,8 @@
 - [x] 1.5 Update acceptance scripts, interaction-sequence tooling, OpenSpec, and active docs so they all describe the same ESM-only deploy contract.
 - [x] 1.6 Deploy the migrated functions through Insforge and capture live smoke evidence plus freeze-record updates.
   - Runtime root cause was not provider boot failure: Insforge ESM execution did not inject `globalThis.createClient`, so the shared client loader now prefers the injected global when present and otherwise loads `npm:@insforge/sdk` via dynamic import preserved as an external dependency.
-  - Live smoke evidence is recorded in `docs/deployment/freeze.md`: representative protected endpoints now return `401 Unauthorized`, confirming deploy-time boot and request handling succeeded.
+  - Live contract probes on 2026-03-29 proved the runtime does not inject `globalThis.createClient`; generated artifacts now inject the SDK banner, and the shared client loader also falls back to `await import("npm:@insforge/sdk")`.
+  - Live smoke evidence is recorded in `docs/deployment/freeze.md`: `vibeusage-usage-summary` now returns `401 Unauthorized`, `vibeusage-link-code-exchange` returns `400 {"error":"invalid link code"}`, `vibeusage-sync-ping` returns `401 {"error":"Missing bearer token"}`, and `vibeusage-leaderboard-profile` returns `404 {"error":"Not found"}` instead of bootstrap failures.
 
 ## 2. Verification
 

@@ -22,14 +22,23 @@
 - Change ID: `2026-03-29-refactor-remaining-edge-functions-esm-hard-cut`
 - CI workflow run: pending post-push
 - Release workflow run: N/A (manual function deploy only)
-- Preflight: `node --test test/insforge-esm-artifacts.test.js test/edge-functions.test.js` (pass); `npm run build:insforge` (pass); `npm run build:insforge:check` (pass)
+- Preflight: `openspec validate 2026-03-29-refactor-remaining-edge-functions-esm-hard-cut --strict` (pass); `node --test test/insforge-esm-artifacts.test.js test/edge-functions.test.js` (pass); `npm run build:insforge` (pass); `npm run build:insforge:check` (pass); `npm run ci:local` (pass)
 - npm publish: skipped
-- Vercel check: not required (no dashboard changes in this loop)
-- MCP deploy: refreshed the changed live `vibeusage-*` function slugs through Insforge MCP, including `vibeusage-usage-summary`, `vibeusage-project-usage-summary`, `vibeusage-public-visibility`, and the follow-up `vibeusage-leaderboard-profile` cold-start fix; deployment responses reported `deployment.status: success`
-- MCP deploy evidence: live remote smoke against `https://5tmappuk.us-east.insforge.app/functions/*` now returns `401 Unauthorized` for representative protected endpoints instead of `500 Missing createClient`, and `vibeusage-leaderboard-profile?user_id=11111111-1111-1111-1111-111111111111` returns `404 Not found` instead of `500 date core not initialized`
-- Freeze artifact: rebuilt `insforge-functions/*.js` from `insforge-src/functions-esm/` with a runtime-safe client loader that prefers injected `globalThis.createClient` and falls back to `await import("npm:@insforge/sdk")`; build preserves the npm import as an external dependency
-- Cold regression step: `node --test test/insforge-esm-artifacts.test.js test/edge-functions.test.js`
-- Synthetic acceptance: `/usr/bin/curl -i -H 'Authorization: Bearer foo.bar.baz' 'https://5tmappuk.us-east.insforge.app/functions/vibeusage-usage-summary'`; `/usr/bin/curl -i -H 'Authorization: Bearer foo.bar.baz' 'https://5tmappuk.us-east.insforge.app/functions/vibeusage-project-usage-summary'`; `/usr/bin/curl -i -H 'Authorization: Bearer foo.bar.baz' 'https://5tmappuk.us-east.insforge.app/functions/vibeusage-public-visibility'` (all return `401 Unauthorized`); `/usr/bin/curl -i 'https://5tmappuk.us-east.insforge.app/functions/vibeusage-leaderboard-profile?user_id=11111111-1111-1111-1111-111111111111'` (returns `404 {"error":"Not found"}`)
+- Vercel check: not required (no dashboard changes in this loop; `npm --prefix dashboard run build` passed inside `npm run ci:local`)
+- MCP deploy: refreshed all 28 live `vibeusage-*` function slugs through Insforge MCP using the rebuilt ESM artifacts from `insforge-functions/`; the follow-up `vibeusage-leaderboard-profile` cold-start hotfix also reported `deployment.status: success`
+- Runtime evidence:
+  - `vibeusage-probe-esm-noop-20260329` -> `200`, confirming ESM boot is valid on Insforge
+  - `vibeusage-probe-esm-global-read-20260329` -> `200` with `createClientType:"undefined"`, confirming the runtime does not auto-inject `globalThis.createClient`
+  - `vibeusage-probe-esm-sdk-import-20260329` -> `200` with `createClientType:"function"`, confirming the official `npm:@insforge/sdk` path works live
+  - `vibeusage-probe-esm-banner-injected-20260329` -> `200` with `createClientType:"function"`, confirming the generated artifact banner matches the live contract
+- MCP deploy evidence:
+  - `GET /functions/vibeusage-usage-summary` with `Authorization: Bearer foo.bar.baz` now returns `401 {"error":"Unauthorized"}` instead of bootstrap failure
+  - `POST /functions/vibeusage-link-code-exchange` with an invalid link code returns `400 {"error":"invalid link code"}` instead of `500 Missing createClient`
+  - `POST /functions/vibeusage-sync-ping` without a bearer token returns `401 {"error":"Missing bearer token"}`
+  - `GET /functions/vibeusage-leaderboard-profile?user_id=11111111-1111-1111-1111-111111111111` returns `404 {"error":"Not found"}` instead of `500 date core not initialized`
+- Freeze artifact: rebuilt `insforge-functions/*.js` from `insforge-src/functions-esm/` with top-level `npm:@insforge/sdk` banner injection, and a shared client loader that prefers injected `globalThis.createClient` and otherwise falls back to `await import("npm:@insforge/sdk")`
+- Cold regression step: `node --test test/insforge-esm-artifacts.test.js test/edge-functions.test.js`; `npm run ci:local`
+- Synthetic acceptance: `/usr/bin/curl -i -H 'Authorization: Bearer foo.bar.baz' 'https://5tmappuk.us-east.insforge.app/functions/vibeusage-usage-summary'`; `/usr/bin/curl -i -X POST 'https://5tmappuk.us-east.insforge.app/functions/vibeusage-link-code-exchange' -H 'Content-Type: application/json' --data '{"link_code":"test-code","request_id":"test-request"}'`; `/usr/bin/curl -i -X POST 'https://5tmappuk.us-east.insforge.app/functions/vibeusage-sync-ping' -H 'Content-Type: application/json' --data '{"request_id":"test-request"}'`; `/usr/bin/curl -i 'https://5tmappuk.us-east.insforge.app/functions/vibeusage-leaderboard-profile?user_id=11111111-1111-1111-1111-111111111111'`
 
 ## 2026-02-09-add-leaderboard-period-month-total
 

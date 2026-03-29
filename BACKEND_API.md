@@ -33,8 +33,8 @@ insforge2 update-function --slug vibeusage-device-token-issue --codeFile insforg
 
 Runtime note:
 
-- Generated artifacts no longer inject `npm:@insforge/sdk`.
-- The InsForge runtime is expected to provide `globalThis.createClient` for the deployed ESM handler.
+- Generated artifacts inject `npm:@insforge/sdk` at the top level and bind `globalThis.createClient` inside the artifact before the handler runs.
+- The deployed ESM handler must not assume the InsForge runtime injects `globalThis.createClient` for us.
 
 ## Auth models
 

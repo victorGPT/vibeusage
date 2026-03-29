@@ -96,7 +96,8 @@ This document is the single source of truth for repository navigation. Use it to
   - `scripts/build-insforge-functions.cjs`
   - `scripts/lib/load-edge-function.cjs`
 - Runtime contract:
-  - Generated artifacts expect the InsForge runtime to provide `globalThis.createClient`.
+  - Generated artifacts inject `npm:@insforge/sdk` and bind `globalThis.createClient` inside the artifact.
+  - The live runtime does not provide `globalThis.createClient` automatically.
 - Use generated artifacts only for deployment validation and deployment, not as authoring sources.
 
 ### Scripts And Validation

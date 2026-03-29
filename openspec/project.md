@@ -77,7 +77,8 @@
   - 共享 ESM helper：`insforge-src/functions-esm/shared/` 与 `insforge-src/shared/*.mjs`
   - 已退役路径：`insforge-src/functions/`（不得再用于作者源码、测试入口或部署判断）
   - 部署产物：`insforge-functions/`（单文件 ESM 生成物）
-  - 运行时契约：生成物不再注入 `npm:@insforge/sdk`；InsForge 运行时必须提供 `globalThis.createClient`
+  - 运行时契约：生成物显式注入 `npm:@insforge/sdk`，并在产物内绑定 `globalThis.createClient`
+  - 线上事实：InsForge 运行时不会自动提供 `globalThis.createClient`
 
 - `POST /functions/vibeusage-device-token-issue`
   - Auth：`Authorization: Bearer <user_jwt>`（或 admin bootstrap：Bearer `<service_role_key>` + body `user_id`）
