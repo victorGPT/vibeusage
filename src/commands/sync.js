@@ -195,30 +195,28 @@ async function cmdSync(argv) {
 
     const opencodeFiles = await listOpencodeMessageFiles(opencodeStorageDir);
     let opencodeResult = { filesProcessed: 0, eventsAggregated: 0, bucketsQueued: 0 };
-    if (opencodeFiles.length > 0) {
-      if (progress?.enabled) {
-        progress.start(
-          `Parsing Opencode ${renderBar(0)} 0/${formatNumber(opencodeFiles.length)} files | buckets 0`,
-        );
-      }
-      opencodeResult = await parseOpencodeIncremental({
-        messageFiles: opencodeFiles,
-        opencodeDbPath,
-        cursors,
-        queuePath,
-        projectQueuePath,
-        onProgress: (p) => {
-          if (!progress?.enabled) return;
-          const pct = p.total > 0 ? p.index / p.total : 1;
-          progress.update(
-            `Parsing Opencode ${renderBar(pct)} ${formatNumber(p.index)}/${formatNumber(
-              p.total,
-            )} files | buckets ${formatNumber(p.bucketsQueued)}`,
-          );
-        },
-        source: "opencode",
-      });
+    if (progress?.enabled && opencodeFiles.length > 0) {
+      progress.start(
+        `Parsing Opencode ${renderBar(0)} 0/${formatNumber(opencodeFiles.length)} files | buckets 0`,
+      );
     }
+    opencodeResult = await parseOpencodeIncremental({
+      messageFiles: opencodeFiles,
+      opencodeDbPath,
+      cursors,
+      queuePath,
+      projectQueuePath,
+      onProgress: (p) => {
+        if (!progress?.enabled) return;
+        const pct = p.total > 0 ? p.index / p.total : 1;
+        progress.update(
+          `Parsing Opencode ${renderBar(pct)} ${formatNumber(p.index)}/${formatNumber(
+            p.total,
+          )} files | buckets ${formatNumber(p.bucketsQueued)}`,
+        );
+      },
+      source: "opencode",
+    });
 
     if (cursors?.projectHourly?.projects && projectQueuePath && projectQueueStatePath) {
       for (const [projectKey, meta] of Object.entries(cursors.projectHourly.projects)) {
