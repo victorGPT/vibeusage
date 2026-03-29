@@ -25,8 +25,8 @@ The requested change is a hard cut. That means no compatibility wrappers, no fal
 - Decision: hard-cut build and local loader after the final legacy entrypoint is migrated
   - Why: the repository must not keep a compatibility branch after the migration lands
 
-- Decision: generated artifacts no longer inject `npm:@insforge/sdk`; the runtime must provide `globalThis.createClient`
-  - Why: the local deploy contract is now a single ESM path, and the later remote deployment failure is a provider/runtime module-resolution problem rather than a reason to restore local SDK import fallback
+- Decision: generated artifacts use a runtime-safe client loader that prefers injected `globalThis.createClient` and otherwise dynamically imports `npm:@insforge/sdk`
+  - Why: live Insforge ESM probes showed the runtime executes ESM correctly but does not always inject `globalThis.createClient`; preserving a dynamic npm import as an external dependency keeps one ESM-only contract without restoring legacy CommonJS or dual author paths
 
 - Decision: treat doc/spec reconciliation as a blocking post-commit gate
   - Why: the user explicitly requires code and active docs to be unified immediately after each task commit window
@@ -36,7 +36,8 @@ The requested change is a hard cut. That means no compatibility wrappers, no fal
 - `vibeusage-ingest` currently depends on CJS-oriented helper modules that must gain ESM-consumable equivalents without changing ingest behavior
 - Acceptance scripts currently load some legacy sources directly; the test harness must be unified or it will reintroduce a second source-of-truth
 - The build and loader cutover will affect broad regression coverage, so the contract tests must be strengthened before production code changes
-- Remote deployment is still blocked by provider-side `BOOT_FAILURE` module resolution in `@insforge/shared-schemas`; that blocker must be recorded as deployment evidence, not papered over with local compatibility code
+- The build must keep `npm:@insforge/sdk` external so Node-based local tests do not try to resolve a Deno npm specifier while live Insforge deployments can still load it at runtime
+- Remote verification depends on endpoint-level smoke after deploy because artifact upload success alone does not prove the client factory exists in the target runtime
 
 ## Verification
 

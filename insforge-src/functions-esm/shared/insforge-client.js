@@ -1,7 +1,8 @@
 export async function getCreateClient() {
   const injected = globalThis.createClient;
   if (typeof injected === "function") return injected;
-  throw new Error("Missing createClient");
+  const sdk = await import("npm:@insforge/sdk");
+  return sdk.createClient;
 }
 
 export async function createEdgeClient(options) {

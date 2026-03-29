@@ -44,6 +44,7 @@ async function main() {
     outdir: outDir,
     entryNames: "[name]",
     bundle: true,
+    external: ["npm:@insforge/sdk"],
     format: "esm",
     platform: "neutral",
     target: ["es2020"],

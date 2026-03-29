@@ -46,6 +46,13 @@ test("hard-cut build script is esm-only", () => {
   assert.doesNotMatch(buildSrc, /insforge-src\/functions\/\*\.js/);
 });
 
+test("esm helper resolves createClient from official sdk when runtime injection is absent", () => {
+  const helperSrc = readFile("insforge-src/functions-esm/shared/insforge-client.js");
+  assert.match(helperSrc, /import\("npm:@insforge\/sdk"\)/);
+  assert.match(helperSrc, /typeof injected === "function"/);
+  assert.doesNotMatch(helperSrc, /Missing createClient/);
+});
+
 test("hard-cut repo removes legacy edge author sources", () => {
   const legacyDir = path.join(ROOT, "insforge-src", "functions");
   const legacyFiles = fs.existsSync(legacyDir)

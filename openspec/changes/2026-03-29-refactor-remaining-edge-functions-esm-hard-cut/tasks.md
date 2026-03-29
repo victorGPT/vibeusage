@@ -5,8 +5,9 @@
 - [x] 1.3 Migrate `vibeusage-ingest` and its direct shared dependencies to an ESM-only executable path, then delete the CommonJS ingest entry source.
 - [x] 1.4 Hard cut the build and load graph to `insforge-src/functions-esm/` only, rebuild `insforge-functions/`, and remove legacy fallback behavior.
 - [x] 1.5 Update acceptance scripts, interaction-sequence tooling, OpenSpec, and active docs so they all describe the same ESM-only deploy contract.
-- [ ] 1.6 Deploy the migrated functions through Insforge and capture live smoke evidence plus freeze-record updates.
-  - Blocked by provider/runtime `BOOT_FAILURE`: Insforge accepted updated code uploads, but runtime boot failed with `[ERR_MODULE_NOT_FOUND]` for `@insforge/shared-schemas/dist/database.schema`, so live smoke could not complete in this window.
+- [x] 1.6 Deploy the migrated functions through Insforge and capture live smoke evidence plus freeze-record updates.
+  - Runtime root cause was not provider boot failure: Insforge ESM execution did not inject `globalThis.createClient`, so the shared client loader now prefers the injected global when present and otherwise loads `npm:@insforge/sdk` via dynamic import preserved as an external dependency.
+  - Live smoke evidence is recorded in `docs/deployment/freeze.md`: representative protected endpoints now return `401 Unauthorized`, confirming deploy-time boot and request handling succeeded.
 
 ## 2. Verification
 

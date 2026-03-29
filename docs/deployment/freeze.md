@@ -18,18 +18,18 @@
 ## 2026-03-29-refactor-remaining-edge-functions-esm-hard-cut
 
 - Date: 2026-03-29
-- Scope: Remaining legacy Edge Functions hard-cut to the unified ESM-only author/build/load/deploy contract, plus local removal of SDK import injection from generated artifacts
+- Scope: Remaining legacy Edge Functions hard-cut to the unified ESM-only author/build/load/deploy contract, plus runtime-safe ESM client loading for generated artifacts
 - Change ID: `2026-03-29-refactor-remaining-edge-functions-esm-hard-cut`
-- CI workflow run: N/A (local branch only; not pushed)
-- Release workflow run: N/A (local branch only; not pushed)
-- Preflight: `openspec validate 2026-03-29-refactor-remaining-edge-functions-esm-hard-cut --strict` (pass); `npm run ci:local` (pass)
+- CI workflow run: pending post-push
+- Release workflow run: N/A (manual function deploy only)
+- Preflight: `node --test test/insforge-esm-artifacts.test.js test/edge-functions.test.js` (pass); `npm run build:insforge` (pass); `npm run build:insforge:check` (pass)
 - npm publish: skipped
-- Vercel check: covered by `npm --prefix dashboard run build` inside `npm run ci:local` (pass)
-- MCP deploy: refreshed stored code for all 28 live `vibeusage-*` function slugs through Insforge MCP; representative remote verification confirmed `vibeusage-usage-summary` now stores the clean ESM artifact banner and no longer references `npm:@insforge/sdk`
-- MCP deploy blocker: provider/runtime boot failed after upload with `BOOT_FAILURE` and `[ERR_MODULE_NOT_FOUND] Cannot find module 'file:///node_modules/.deno/@insforge+shared-schemas@1.1.46/node_modules/@insforge/shared-schemas/dist/database.schema'`, so live remote smoke could not complete in this change window
-- Freeze artifact: rebuilt `insforge-functions/*.js` from `insforge-src/functions-esm/` under the hard-cut ESM contract; hard-cut base commit `59b2eaf8`
-- Cold regression step: `npm run ci:local`
-- Synthetic acceptance: `node scripts/acceptance/device-token-issue-compensation.cjs`; `node scripts/acceptance/link-code-exchange.cjs`; `node scripts/acceptance/sync-heartbeat.cjs`; `node scripts/acceptance/ingest-duplicate-replay.cjs`; `node scripts/acceptance/ingest-service-role-upsert.cjs`; `node scripts/acceptance/ingest-batch-metrics.cjs`; `node scripts/acceptance/ingest-concurrency-guard.cjs` (all pass locally)
+- Vercel check: not required (no dashboard changes in this loop)
+- MCP deploy: refreshed the changed live `vibeusage-*` function slugs through Insforge MCP, including `vibeusage-usage-summary`, `vibeusage-project-usage-summary`, and `vibeusage-public-visibility`; deployment responses reported `deployment.status: success`
+- MCP deploy evidence: live remote smoke against `https://5tmappuk.us-east.insforge.app/functions/*` now returns `401 Unauthorized` for representative protected endpoints instead of `500 Missing createClient`
+- Freeze artifact: rebuilt `insforge-functions/*.js` from `insforge-src/functions-esm/` with a runtime-safe client loader that prefers injected `globalThis.createClient` and falls back to `await import("npm:@insforge/sdk")`; build preserves the npm import as an external dependency
+- Cold regression step: `node --test test/insforge-esm-artifacts.test.js test/edge-functions.test.js`
+- Synthetic acceptance: `/usr/bin/curl -i -H 'Authorization: Bearer foo.bar.baz' 'https://5tmappuk.us-east.insforge.app/functions/vibeusage-usage-summary'`; `/usr/bin/curl -i -H 'Authorization: Bearer foo.bar.baz' 'https://5tmappuk.us-east.insforge.app/functions/vibeusage-project-usage-summary'`; `/usr/bin/curl -i -H 'Authorization: Bearer foo.bar.baz' 'https://5tmappuk.us-east.insforge.app/functions/vibeusage-public-visibility'` (all return `401 Unauthorized`)
 
 ## 2026-02-09-add-leaderboard-period-month-total
 

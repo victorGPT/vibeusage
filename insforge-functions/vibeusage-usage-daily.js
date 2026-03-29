@@ -3133,7 +3133,8 @@ if (!globalThis[CORE_KEY20]) {
 async function getCreateClient() {
   const injected = globalThis.createClient;
   if (typeof injected === "function") return injected;
-  throw new Error("Missing createClient");
+  const sdk = await import("npm:@insforge/sdk");
+  return sdk.createClient;
 }
 async function createEdgeClient(options) {
   const createClient = await getCreateClient();
