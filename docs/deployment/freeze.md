@@ -25,11 +25,11 @@
 - Preflight: `node --test test/insforge-esm-artifacts.test.js test/edge-functions.test.js` (pass); `npm run build:insforge` (pass); `npm run build:insforge:check` (pass)
 - npm publish: skipped
 - Vercel check: not required (no dashboard changes in this loop)
-- MCP deploy: refreshed the changed live `vibeusage-*` function slugs through Insforge MCP, including `vibeusage-usage-summary`, `vibeusage-project-usage-summary`, and `vibeusage-public-visibility`; deployment responses reported `deployment.status: success`
-- MCP deploy evidence: live remote smoke against `https://5tmappuk.us-east.insforge.app/functions/*` now returns `401 Unauthorized` for representative protected endpoints instead of `500 Missing createClient`
+- MCP deploy: refreshed the changed live `vibeusage-*` function slugs through Insforge MCP, including `vibeusage-usage-summary`, `vibeusage-project-usage-summary`, `vibeusage-public-visibility`, and the follow-up `vibeusage-leaderboard-profile` cold-start fix; deployment responses reported `deployment.status: success`
+- MCP deploy evidence: live remote smoke against `https://5tmappuk.us-east.insforge.app/functions/*` now returns `401 Unauthorized` for representative protected endpoints instead of `500 Missing createClient`, and `vibeusage-leaderboard-profile?user_id=11111111-1111-1111-1111-111111111111` returns `404 Not found` instead of `500 date core not initialized`
 - Freeze artifact: rebuilt `insforge-functions/*.js` from `insforge-src/functions-esm/` with a runtime-safe client loader that prefers injected `globalThis.createClient` and falls back to `await import("npm:@insforge/sdk")`; build preserves the npm import as an external dependency
 - Cold regression step: `node --test test/insforge-esm-artifacts.test.js test/edge-functions.test.js`
-- Synthetic acceptance: `/usr/bin/curl -i -H 'Authorization: Bearer foo.bar.baz' 'https://5tmappuk.us-east.insforge.app/functions/vibeusage-usage-summary'`; `/usr/bin/curl -i -H 'Authorization: Bearer foo.bar.baz' 'https://5tmappuk.us-east.insforge.app/functions/vibeusage-project-usage-summary'`; `/usr/bin/curl -i -H 'Authorization: Bearer foo.bar.baz' 'https://5tmappuk.us-east.insforge.app/functions/vibeusage-public-visibility'` (all return `401 Unauthorized`)
+- Synthetic acceptance: `/usr/bin/curl -i -H 'Authorization: Bearer foo.bar.baz' 'https://5tmappuk.us-east.insforge.app/functions/vibeusage-usage-summary'`; `/usr/bin/curl -i -H 'Authorization: Bearer foo.bar.baz' 'https://5tmappuk.us-east.insforge.app/functions/vibeusage-project-usage-summary'`; `/usr/bin/curl -i -H 'Authorization: Bearer foo.bar.baz' 'https://5tmappuk.us-east.insforge.app/functions/vibeusage-public-visibility'` (all return `401 Unauthorized`); `/usr/bin/curl -i 'https://5tmappuk.us-east.insforge.app/functions/vibeusage-leaderboard-profile?user_id=11111111-1111-1111-1111-111111111111'` (returns `404 {"error":"Not found"}`)
 
 ## 2026-02-09-add-leaderboard-period-month-total
 
