@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed
+
+- `sync` and OpenCode audit now read `opencode.db` when legacy message JSON files are absent, while using the SQLite `project.worktree` for correct project attribution.
+
 ## [0.3.0] - 2026-04-02
 
 ### Changed

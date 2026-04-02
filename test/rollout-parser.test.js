@@ -1152,6 +1152,118 @@ test("parseOpencodeIncremental preserves legacy file totals when opencode index 
   }
 });
 
+test("parseOpencodeIncremental ingests sqlite rows when message files are absent", async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "vibescore-opencode-sqlite-"));
+  try {
+    const queuePath = path.join(tmp, "queue.jsonl");
+    const cursors = { version: 1, files: {}, updatedAt: null };
+
+    const res = await parseOpencodeIncremental({
+      messageFiles: [],
+      opencodeDbPath: path.join(tmp, "opencode.db"),
+      cursors,
+      queuePath,
+      readSqliteRows: async () => ({
+        status: "ok",
+        inode: 42,
+        rows: [
+          {
+            id: "msg_sqlite",
+            session_id: "ses_sqlite",
+            role: "assistant",
+            time_created: Date.parse("2025-12-29T10:15:00.000Z"),
+            data: JSON.stringify(
+              buildOpencodeMessage({
+                modelID: "gpt-5",
+                created: "2025-12-29T10:14:00.000Z",
+                completed: "2025-12-29T10:15:00.000Z",
+                tokens: { input: 10, output: 2, reasoning: 1, cached: 3, cacheWrite: 5 },
+              }),
+            ),
+          },
+        ],
+      }),
+    });
+
+    assert.equal(res.filesProcessed, 0);
+    assert.equal(res.eventsAggregated, 1);
+    assert.equal(res.bucketsQueued, 1);
+    assert.equal(cursors.opencodeSqlite.inode, 42);
+    assert.equal(cursors.opencodeSqlite.lastProcessedIds[0], "msg_sqlite");
+
+    const queued = await readJsonLines(queuePath);
+    assert.equal(queued.length, 1);
+    assert.equal(queued[0].source, "opencode");
+    assert.equal(queued[0].model, "gpt-5");
+    assert.equal(queued[0].total_tokens, 18);
+  } finally {
+    await fs.rm(tmp, { recursive: true, force: true });
+  }
+});
+
+test("parseOpencodeIncremental resolves sqlite project usage from project worktree", async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "vibescore-opencode-sqlite-project-"));
+  try {
+    const repoRoot = path.join(tmp, "repo");
+    await fs.mkdir(path.join(repoRoot, ".git"), { recursive: true });
+    await fs.writeFile(
+      path.join(repoRoot, ".git", "config"),
+      `[remote "origin"]\n\turl = https://github.com/acme/alpha.git\n`,
+      "utf8",
+    );
+
+    const queuePath = path.join(tmp, "queue.jsonl");
+    const projectQueuePath = path.join(tmp, "project.queue.jsonl");
+    const cursors = { version: 1, files: {}, updatedAt: null };
+
+    const res = await parseOpencodeIncremental({
+      messageFiles: [],
+      opencodeDbPath: path.join(tmp, "opencode.db"),
+      cursors,
+      queuePath,
+      projectQueuePath,
+      publicRepoResolver: async ({ projectRef }) => ({
+        status: "public_verified",
+        projectKey: "acme/alpha",
+        projectRef,
+      }),
+      readSqliteRows: async () => ({
+        status: "ok",
+        inode: 7,
+        rows: [
+          {
+            id: "msg_sqlite_project",
+            session_id: "ses_sqlite_project",
+            role: "assistant",
+            time_created: Date.parse("2025-12-29T10:15:00.000Z"),
+            project_worktree: repoRoot,
+            data: JSON.stringify(
+              buildOpencodeMessage({
+                modelID: "gpt-5",
+                created: "2025-12-29T10:14:00.000Z",
+                completed: "2025-12-29T10:15:00.000Z",
+                tokens: { input: 4, output: 1, reasoning: 0, cached: 0 },
+              }),
+            ),
+          },
+        ],
+      }),
+    });
+
+    assert.equal(res.eventsAggregated, 1);
+    assert.equal(res.projectBucketsQueued, 1);
+
+    const projectQueued = await readJsonLines(projectQueuePath);
+    assert.equal(projectQueued.length, 1);
+    assert.equal(projectQueued[0].project_key, "acme/alpha");
+    assert.equal(projectQueued[0].project_ref, "https://github.com/acme/alpha");
+    assert.equal(projectQueued[0].source, "opencode");
+    assert.equal(projectQueued[0].total_tokens, 5);
+  } finally {
+    await fs.rm(tmp, { recursive: true, force: true });
+  }
+});
+
 test("parseRolloutIncremental handles Every Code token_count envelope", async () => {
   const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "vibescore-rollout-"));
   try {

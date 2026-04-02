@@ -1,4 +1,5 @@
 const assert = require("node:assert/strict");
+const cp = require("node:child_process");
 const fs = require("node:fs/promises");
 const os = require("node:os");
 const path = require("node:path");
@@ -187,6 +188,62 @@ test("auditOpencodeUsage ignores missing hourly slots by default", async () => {
 
     assert.equal(result.summary.mismatched, 0);
     assert.equal(result.summary.incomplete, 1);
+  } finally {
+    await fs.rm(tmp, { recursive: true, force: true });
+  }
+});
+
+test("auditOpencodeUsage reads sqlite-backed local totals when storage files are absent", async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "vibeusage-audit-sqlite-"));
+  try {
+    const storageDir = path.join(tmp, "storage");
+    await fs.mkdir(storageDir, { recursive: true });
+    const dbPath = path.join(tmp, "opencode.db");
+
+    const payload = JSON.stringify(
+      buildMessage({
+        createdMs: Date.parse("2025-12-29T10:14:00.000Z"),
+        completedMs: Date.parse("2025-12-29T10:15:00.000Z"),
+        tokens: { input: 4, output: 1, reasoning: 0, cached: 0 },
+      }),
+    ).replace(/'/g, "''");
+
+    cp.execFileSync("sqlite3", [
+      dbPath,
+      [
+        "create table project (id text primary key, worktree text not null);",
+        "create table session (id text primary key, project_id text not null, time_created integer, data text);",
+        "create table message (id text primary key, session_id text not null, time_created integer, data text not null);",
+        "insert into project (id, worktree) values ('proj_1', '/tmp/example-project');",
+        "insert into session (id, project_id, time_created, data) values ('ses_1', 'proj_1', 1767003240000, '{}');",
+        `insert into message (id, session_id, time_created, data) values ('msg_1', 'ses_1', 1767003300000, '${payload}');`,
+      ].join(" "),
+    ]);
+
+    const fetchHourly = async () => ({
+      day: "2025-12-29",
+      data: [
+        {
+          hour: "2025-12-29T10:00:00",
+          total_tokens: "999",
+          input_tokens: "999",
+          cached_input_tokens: "0",
+          output_tokens: "0",
+          reasoning_output_tokens: "0",
+        },
+      ],
+    });
+
+    const result = await auditOpencodeUsage({
+      storageDir,
+      from: "2025-12-29",
+      to: "2025-12-29",
+      fetchHourly,
+    });
+
+    assert.equal(result.summary.days, 1);
+    assert.equal(result.summary.mismatched, 1);
+    assert.equal(result.diffs[0].local.total_tokens, 5n);
   } finally {
     await fs.rm(tmp, { recursive: true, force: true });
   }

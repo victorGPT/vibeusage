@@ -32,13 +32,14 @@ function addTotals(target, delta) {
 
 async function buildLocalHourlyTotals({ storageDir, source = "opencode" }) {
   const messageFiles = await listOpencodeMessageFiles(storageDir);
+  const opencodeDbPath = path.resolve(storageDir, "..", "opencode.db");
   const queuePath = path.join(
     os.tmpdir(),
     `vibeusage-opencode-audit-${process.pid}-${Date.now()}.jsonl`,
   );
   const cursors = { version: 1, files: {}, hourly: null, opencode: null };
 
-  await parseOpencodeIncremental({ messageFiles, cursors, queuePath, source });
+  await parseOpencodeIncremental({ messageFiles, opencodeDbPath, cursors, queuePath, source });
   await fs.rm(queuePath, { force: true }).catch(() => {});
 
   const byHour = new Map();
