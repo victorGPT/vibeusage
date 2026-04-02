@@ -53,7 +53,8 @@ This document is the single source of truth for repository navigation. Use it to
 - Common hotspots:
   - init/install flow: `src/commands/init.js`, `src/lib/integrations/`
   - integration status/diagnostics: `src/commands/status.js`, `src/lib/diagnostics.js`
-  - sync pipeline: `src/commands/sync.js`, `src/lib/rollout.js`, `src/lib/upload.js`
+  - sync pipeline: `src/commands/sync.js`, `src/lib/rollout.js`, `src/lib/opencode-sqlite.js`, `src/lib/upload.js`
+  - OpenCode local verification and audit: `src/lib/opencode-usage-audit.js`, `src/lib/rollout.js`, `src/lib/opencode-sqlite.js`
   - local state/config: `src/lib/runtime-config.js`, `src/lib/tracker-paths.js`, `src/lib/fs.js`
 - Hard-cut CLI integration contract:
   - `init` is the only supported command that mutates local AI CLI integration config.
