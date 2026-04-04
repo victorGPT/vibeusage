@@ -385,7 +385,7 @@ function buildSessionPluginIndex({ trackerDir }) {
     `    cachedInputTokens: toNonNegativeInt(usage.cachedInputTokens ?? usage.cached_input_tokens ?? usage.cacheRead ?? 0) + toNonNegativeInt(usage.cacheWrite ?? 0),\n` +
     `    outputTokens: toNonNegativeInt(usage.outputTokens ?? usage.output_tokens ?? usage.output),\n` +
     `    reasoningOutputTokens: toNonNegativeInt(usage.reasoningOutputTokens ?? usage.reasoning_output_tokens),\n` +
-    `    totalTokens: toNonNegativeInt(usage.totalTokens ?? usage.total_tokens)\n` +
+    `    totalTokens: toNonNegativeInt(usage.totalTokens ?? usage.total_tokens ?? usage.total)\n` +
     `  };\n` +
     `  const sum = normalized.inputTokens + normalized.cachedInputTokens + normalized.outputTokens + normalized.reasoningOutputTokens + normalized.totalTokens;\n` +
     `  return sum > 0 ? normalized : null;\n` +

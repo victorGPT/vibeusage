@@ -248,6 +248,55 @@ test("ensureOpenclawSessionPluginFiles registers llm_output and writes sanitized
   }
 });
 
+test("ensureOpenclawSessionPluginFiles maps live usage.total into ledger totalTokens", async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "vibeusage-openclaw-plugin-"));
+  const home = path.join(tmp, "home");
+  const trackerDir = path.join(home, ".vibeusage", "tracker");
+  await fs.mkdir(trackerDir, { recursive: true });
+  await seedTrackerLedgerRuntime(trackerDir);
+
+  try {
+    const { pluginEntryDir } = resolveOpenclawSessionPluginPaths({ home, trackerDir, env: {} });
+    await ensureOpenclawSessionPluginFiles({
+      pluginDir: path.dirname(pluginEntryDir),
+      trackerDir,
+      packageName: "vibeusage",
+    });
+
+    const mod = await import(pathToFileURL(path.join(pluginEntryDir, "index.js")).href);
+    const handlers = new Map();
+    mod.default({
+      on(name, handler) {
+        handlers.set(name, handler);
+      },
+    });
+
+    await handlers.get("llm_output")(
+      {
+        emittedAt: "2026-04-05T05:25:00.000Z",
+        provider: "openai-codex",
+        model: "gpt-5.4",
+        input: 22009,
+        output: 120,
+        total: 22129,
+      },
+      {
+        agentId: "codex-dev",
+        sessionKey: "agent:codex-dev:discord:channel:1490019049302659232",
+        trigger: "user",
+      },
+    );
+
+    const { events } = await readOpenclawUsageLedger({ trackerDir, offset: 0 });
+    assert.equal(events.length, 1);
+    assert.equal(events[0].inputTokens, 22009);
+    assert.equal(events[0].outputTokens, 120);
+    assert.equal(events[0].totalTokens, 22129);
+  } finally {
+    await fs.rm(tmp, { recursive: true, force: true });
+  }
+});
+
 test("ensureOpenclawSessionPluginFiles no longer references transcript sync hints", async () => {
   const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "vibeusage-openclaw-plugin-"));
   const home = path.join(tmp, "home");
