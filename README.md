@@ -209,7 +209,7 @@ graph LR
     C[Gemini CLI] -->|Session Logs| G
     D[Opencode] -->|SQLite DB| G
     E[Claude Code] -->|Hook Output| G
-    F[OpenClaw] -->|Session Plugin| G
+    F[OpenClaw] -->|Session Plugin → Sanitized Ledger| G
     G -->|AI Tokens| H{Core Relay}
     H --> I[VibeUsage Dashboard]
     H --> J[AI Analytics Engine]
@@ -236,7 +236,7 @@ graph LR
 
 1. AI CLI tools generate logs during usage
 2. Local `notify-handler` detects changes and triggers sync
-3. CLI incrementally parses logs and SQLite state, extracting whitelist token counts only
+3. CLI incrementally parses logs, SQLite state, and the OpenClaw sanitized ledger, extracting whitelist token counts only
 4. Data aggregated into 30-minute UTC buckets locally
 5. Batch upload to InsForge with idempotent deduplication
 6. Dashboard queries aggregated results for visualization
@@ -250,7 +250,7 @@ graph LR
 | **Gemini CLI** | `~/.gemini/tmp/**/chats/session-*.json` | `GEMINI_HOME` |
 | **Opencode** | `~/.local/share/opencode/opencode.db` (legacy `storage/message/**/*.json` fallback) | `OPENCODE_HOME` |
 | **Claude Code** | Parsed from hook output | - |
-| **OpenClaw** | Session plugin integration | - |
+| **OpenClaw** | Session plugin → local sanitized usage ledger | - |
 
 ## ⚙️ Configuration
 
@@ -278,6 +278,8 @@ graph LR
 | `OPENCODE_HOME` | OpenCode data directory override | `~/.local/share/opencode` |
 
 </details>
+
+See also: [`docs/openclaw-integration.md`](docs/openclaw-integration.md) for the OpenClaw single-path accounting contract.
 
 ## 🔧 Troubleshooting
 
@@ -380,8 +382,8 @@ This project uses **OpenSpec** for spec-driven development. Before making signif
 
 1. Read [`openspec/project.md`](openspec/project.md) for project conventions
 2. Check [`openspec/AGENTS.md`](openspec/AGENTS.md) for the full OpenSpec workflow
-3. Run `openspec list` to see active changes
-4. Run `openspec list --specs` to see existing specifications
+3. Run `npx openspec list` to see active changes
+4. Run `npx openspec list --specs` to see existing specifications
 
 See [CLAUDE.md](CLAUDE.md) for detailed guidelines.
 

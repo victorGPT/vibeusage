@@ -143,7 +143,7 @@ npx vibeusage init [选项]
 | **Codex CLI** | `~/.codex/config.toml` | `notify` 钩子 |
 | **Every Code** | `~/.code/config.toml`（或 `CODE_HOME`） | `notify` 钩子 |
 | **Gemini CLI** | `~/.gemini/settings.json`（或 `GEMINI_HOME`） | `SessionEnd` 钩子 |
-| **Opencode** | 全局插件 | 消息解析器插件 |
+| **Opencode** | OpenCode 配置/插件 | SQLite-first 解析插件 |
 | **Claude Code** | `~/.claude/settings.json` | `Stop` + `SessionEnd` 钩子 |
 | **OpenClaw** | 安装时自动链接 | Session plugin（需要重启） |
 
@@ -207,9 +207,9 @@ graph LR
     A[Codex CLI] -->|Rollout 日志| G(Tracker CLI)
     B[Every Code] -->|Rollout 日志| G
     C[Gemini CLI] -->|会话日志| G
-    D[Opencode] -->|消息日志| G
+    D[Opencode] -->|SQLite DB| G
     E[Claude Code] -->|钩子输出| G
-    F[OpenClaw] -->|Gateway 钩子| G
+    F[OpenClaw] -->|Session Plugin → Sanitized Ledger| G
     G -->|AI Tokens| H{核心中继}
     H --> I[VibeUsage 控制台]
     H --> J[AI 分析引擎]
@@ -236,7 +236,7 @@ graph LR
 
 1. AI CLI 工具在使用过程中生成日志
 2. 本地 `notify-handler` 检测更改并触发同步
-3. CLI 增量解析日志，提取 token 计数（仅白名单字段）
+3. CLI 增量解析日志、SQLite 状态以及 OpenClaw 的本地脱敏 usage ledger，只提取白名单 token 计数
 4. 数据在本地聚合到 30 分钟 UTC 桶中
 5. 批量上传到 InsForge，带幂等去重
 6. 控制台查询聚合结果进行可视化
@@ -248,9 +248,9 @@ graph LR
 | **Codex CLI** | `~/.codex/sessions/**/rollout-*.jsonl` | `CODEX_HOME` |
 | **Every Code** | `~/.code/sessions/**/rollout-*.jsonl` | `CODE_HOME` |
 | **Gemini CLI** | `~/.gemini/tmp/**/chats/session-*.json` | `GEMINI_HOME` |
-| **Opencode** | `~/.opencode/messages/*.json` | - |
+| **Opencode** | `~/.local/share/opencode/opencode.db`（旧版 `storage/message/**/*.json` 仅作回退） | `OPENCODE_HOME` |
 | **Claude Code** | 从钩子输出解析 | - |
-| **OpenClaw** | Gateway 钩子集成 | - |
+| **OpenClaw** | Session plugin → 本地脱敏 usage ledger | - |
 
 ## ⚙️ 配置
 
@@ -277,6 +277,8 @@ graph LR
 | `GEMINI_HOME` | Gemini CLI 目录覆盖 | `~/.gemini` |
 
 </details>
+
+另见：[`docs/openclaw-integration.md`](docs/openclaw-integration.md)，其中说明了 OpenClaw 单一路径 accounting 合同。
 
 ## 🔧 故障排查
 
@@ -374,8 +376,8 @@ npm run smoke
 
 1. 阅读 [`openspec/project.md`](openspec/project.md) 了解项目约定
 2. 查看 [`openspec/AGENTS.md`](openspec/AGENTS.md) 了解完整的 OpenSpec 工作流
-3. 运行 `openspec list` 查看活跃的更改
-4. 运行 `openspec list --specs` 查看现有规格
+3. 运行 `npx openspec list` 查看活跃的更改
+4. 运行 `npx openspec list --specs` 查看现有规格
 
 详见 [CLAUDE.md](CLAUDE.md) 了解详细指南。
 
