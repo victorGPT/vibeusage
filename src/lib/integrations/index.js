@@ -5,7 +5,6 @@ const claude = require("./claude");
 const gemini = require("./gemini");
 const opencode = require("./opencode");
 const openclawSession = require("./openclaw-session");
-const openclawLegacy = require("./openclaw-legacy");
 
 const INTEGRATIONS = [
   codex,
@@ -14,7 +13,6 @@ const INTEGRATIONS = [
   gemini,
   opencode,
   openclawSession,
-  openclawLegacy,
 ];
 
 function listIntegrations() {

@@ -3,6 +3,7 @@ const os = require("node:os");
 const path = require("node:path");
 const fs = require("node:fs/promises");
 const { test } = require("node:test");
+const { pathToFileURL } = require("node:url");
 
 const {
   OPENCLAW_SESSION_PLUGIN_ID,
@@ -12,6 +13,20 @@ const {
   installOpenclawSessionPlugin,
   removeOpenclawSessionPluginConfig,
 } = require("../src/lib/openclaw-session-plugin");
+const { readOpenclawUsageLedger } = require("../src/lib/openclaw-usage-ledger");
+
+async function seedTrackerLedgerRuntime(trackerDir) {
+  const runtimeLibDir = path.join(trackerDir, "app", "src", "lib");
+  await fs.mkdir(runtimeLibDir, { recursive: true });
+  await fs.copyFile(
+    path.join(__dirname, "..", "src", "lib", "openclaw-usage-ledger.js"),
+    path.join(runtimeLibDir, "openclaw-usage-ledger.js"),
+  );
+  await fs.copyFile(
+    path.join(__dirname, "..", "src", "lib", "fs.js"),
+    path.join(runtimeLibDir, "fs.js"),
+  );
+}
 
 test("probeOpenclawSessionPluginState detects linked + enabled plugin", async () => {
   const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "vibeusage-openclaw-plugin-"));
@@ -156,27 +171,113 @@ test("removeOpenclawSessionPluginConfig removes linked config and plugin dir", a
   await fs.rm(tmp, { recursive: true, force: true });
 });
 
-test("ensureOpenclawSessionPluginFiles includes agent/session lifecycle hooks", async () => {
+test("ensureOpenclawSessionPluginFiles registers llm_output and writes sanitized ledger events", async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "vibeusage-openclaw-plugin-"));
+  const home = path.join(tmp, "home");
+  const trackerDir = path.join(home, ".vibeusage", "tracker");
+  await fs.mkdir(trackerDir, { recursive: true });
+  await seedTrackerLedgerRuntime(trackerDir);
+
+  try {
+    const { pluginEntryDir } = resolveOpenclawSessionPluginPaths({ home, trackerDir, env: {} });
+    await ensureOpenclawSessionPluginFiles({
+      pluginDir: path.dirname(pluginEntryDir),
+      trackerDir,
+      packageName: "vibeusage",
+    });
+
+    const pkg = JSON.parse(await fs.readFile(path.join(pluginEntryDir, "package.json"), "utf8"));
+    assert.deepEqual(pkg.openclaw?.extensions, ["./index.js"]);
+
+    const mod = await import(pathToFileURL(path.join(pluginEntryDir, "index.js")).href);
+    const handlers = new Map();
+    mod.default({
+      on(name, handler) {
+        handlers.set(name, handler);
+      },
+    });
+
+    assert.equal(typeof handlers.get("llm_output"), "function");
+    assert.equal(handlers.has("agent_end"), false);
+    assert.equal(handlers.has("gateway_start"), false);
+    assert.equal(handlers.has("gateway_stop"), false);
+
+    await handlers.get("llm_output")(
+      {
+        emittedAt: "2026-04-05T01:45:00.000Z",
+        provider: "openai",
+        model: "gpt-5.4",
+        inputTokens: 120,
+        cachedInputTokens: 15,
+        outputTokens: 33,
+        reasoningOutputTokens: 7,
+        totalTokens: 175,
+        assistantTexts: ["secret answer"],
+        lastAssistant: "secret answer",
+      },
+      {
+        agentId: "codex-dev",
+        sessionKey: "agent:codex-dev:discord:channel:1490019049302659232",
+        channel: "discord",
+        chatType: "channel",
+        trigger: "llm_output",
+        workspaceDir: "/Users/farmer/private/project",
+      },
+    );
+
+    const { events } = await readOpenclawUsageLedger({ trackerDir, offset: 0 });
+    assert.equal(events.length, 1);
+    assert.equal(events[0].source, "openclaw");
+    assert.equal(events[0].agentId, "codex-dev");
+    assert.equal(events[0].provider, "openai");
+    assert.equal(events[0].model, "gpt-5.4");
+    assert.equal(events[0].channel, "discord");
+    assert.equal(events[0].chatType, "channel");
+    assert.equal(events[0].trigger, "llm_output");
+    assert.equal(events[0].inputTokens, 120);
+    assert.equal(events[0].cachedInputTokens, 15);
+    assert.equal(events[0].outputTokens, 33);
+    assert.equal(events[0].reasoningOutputTokens, 7);
+    assert.equal(events[0].totalTokens, 175);
+    assert.ok(!Object.prototype.hasOwnProperty.call(events[0], "sessionKey"));
+    assert.ok(!Object.prototype.hasOwnProperty.call(events[0], "assistantTexts"));
+    assert.ok(!Object.prototype.hasOwnProperty.call(events[0], "lastAssistant"));
+    assert.ok(!Object.prototype.hasOwnProperty.call(events[0], "workspaceDir"));
+  } finally {
+    await fs.rm(tmp, { recursive: true, force: true });
+  }
+});
+
+test("ensureOpenclawSessionPluginFiles no longer references transcript sync hints", async () => {
   const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "vibeusage-openclaw-plugin-"));
   const home = path.join(tmp, "home");
   const trackerDir = path.join(home, ".vibeusage", "tracker");
   await fs.mkdir(trackerDir, { recursive: true });
 
-  const { pluginEntryDir } = resolveOpenclawSessionPluginPaths({ home, trackerDir, env: {} });
-  await ensureOpenclawSessionPluginFiles({
-    pluginDir: path.dirname(pluginEntryDir),
-    trackerDir,
-    packageName: "vibeusage",
-  });
+  try {
+    const { pluginEntryDir } = resolveOpenclawSessionPluginPaths({ home, trackerDir, env: {} });
+    await ensureOpenclawSessionPluginFiles({
+      pluginDir: path.dirname(pluginEntryDir),
+      trackerDir,
+      packageName: "vibeusage",
+    });
 
-  const pkg = JSON.parse(await fs.readFile(path.join(pluginEntryDir, "package.json"), "utf8"));
-  assert.deepEqual(pkg.openclaw?.extensions, ["./index.js"]);
-
-  const index = await fs.readFile(path.join(pluginEntryDir, "index.js"), "utf8");
-  assert.match(index, /api\.on\('agent_end'/);
-  assert.match(index, /api\.on\('gateway_start'/);
-  assert.match(index, /api\.on\('gateway_stop'/);
-  assert.match(index, /VIBEUSAGE_OPENCLAW_PREV_SESSION_ID/);
-
-  await fs.rm(tmp, { recursive: true, force: true });
+    const index = await fs.readFile(path.join(pluginEntryDir, "index.js"), "utf8");
+    assert.match(index, /api\.on\('llm_output'/);
+    assert.doesNotMatch(index, /api\.on\('agent_end'/);
+    assert.doesNotMatch(index, /api\.on\('gateway_start'/);
+    assert.doesNotMatch(index, /api\.on\('gateway_stop'/);
+    assert.doesNotMatch(index, /sync', '--auto', '--from-openclaw/);
+    assert.doesNotMatch(index, /VIBEUSAGE_OPENCLAW_AGENT_ID/);
+    assert.doesNotMatch(index, /VIBEUSAGE_OPENCLAW_SESSION_KEY/);
+    assert.doesNotMatch(index, /VIBEUSAGE_OPENCLAW_PREV_SESSION_ID/);
+    assert.doesNotMatch(index, /VIBEUSAGE_OPENCLAW_PREV_TOTAL_TOKENS/);
+    assert.doesNotMatch(index, /VIBEUSAGE_OPENCLAW_PREV_INPUT_TOKENS/);
+    assert.doesNotMatch(index, /VIBEUSAGE_OPENCLAW_PREV_OUTPUT_TOKENS/);
+    assert.doesNotMatch(index, /VIBEUSAGE_OPENCLAW_PREV_MODEL/);
+    assert.doesNotMatch(index, /VIBEUSAGE_OPENCLAW_PREV_UPDATED_AT/);
+    assert.doesNotMatch(index, /sessions\.json/);
+  } finally {
+    await fs.rm(tmp, { recursive: true, force: true });
+  }
 });

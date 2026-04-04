@@ -637,161 +637,6 @@ async function parseOpencodeIncremental({
   };
 }
 
-async function parseOpenclawIncremental({
-  sessionFiles,
-  cursors,
-  queuePath,
-  projectQueuePath,
-  onProgress,
-  source,
-}) {
-  await ensureDir(path.dirname(queuePath));
-  let filesProcessed = 0;
-  let eventsAggregated = 0;
-
-  const cb = typeof onProgress === "function" ? onProgress : null;
-  const files = Array.isArray(sessionFiles) ? sessionFiles : [];
-  const totalFiles = files.length;
-  const hourlyState = normalizeHourlyState(cursors?.hourly);
-  const projectEnabled = typeof projectQueuePath === "string" && projectQueuePath.length > 0;
-  const projectState = projectEnabled ? normalizeProjectState(cursors?.projectHourly) : null;
-  const projectTouchedBuckets = projectEnabled ? new Set() : null;
-  const touchedBuckets = new Set();
-  const defaultSource = normalizeSourceInput(source) || "openclaw";
-
-  if (!cursors.files || typeof cursors.files !== "object") {
-    cursors.files = {};
-  }
-
-  for (let idx = 0; idx < files.length; idx++) {
-    const entry = files[idx];
-    const filePath = typeof entry === "string" ? entry : entry?.path;
-    if (!filePath) continue;
-    const fileSource =
-      typeof entry === "string"
-        ? defaultSource
-        : normalizeSourceInput(entry?.source) || defaultSource;
-    const st = await fs.stat(filePath).catch(() => null);
-    if (!st || !st.isFile()) continue;
-
-    const key = filePath;
-    const prev = cursors.files[key] || null;
-    const inode = st.ino || 0;
-    const startOffset = prev && prev.inode === inode ? prev.offset || 0 : 0;
-
-    const result = await parseOpenclawSessionFile({
-      filePath,
-      startOffset,
-      hourlyState,
-      touchedBuckets,
-      source: fileSource,
-      projectState,
-      projectTouchedBuckets,
-    });
-
-    cursors.files[key] = {
-      inode,
-      offset: result.endOffset,
-      updatedAt: new Date().toISOString(),
-    };
-
-    filesProcessed += 1;
-    eventsAggregated += result.eventsAggregated;
-
-    if (cb) {
-      cb({
-        index: idx + 1,
-        total: totalFiles,
-        filePath,
-        filesProcessed,
-        eventsAggregated,
-        bucketsQueued: touchedBuckets.size,
-      });
-    }
-  }
-
-  const bucketsQueued = await enqueueTouchedBuckets({ queuePath, hourlyState, touchedBuckets });
-  const projectBucketsQueued = projectEnabled
-    ? await enqueueTouchedProjectBuckets({ projectQueuePath, projectState, projectTouchedBuckets })
-    : 0;
-  hourlyState.updatedAt = new Date().toISOString();
-  cursors.hourly = hourlyState;
-  if (projectState) {
-    projectState.updatedAt = new Date().toISOString();
-    cursors.projectHourly = projectState;
-  }
-
-  return { filesProcessed, eventsAggregated, bucketsQueued, projectBucketsQueued };
-}
-
-async function parseOpenclawSessionFile({
-  filePath,
-  startOffset,
-  hourlyState,
-  touchedBuckets,
-  source,
-  projectState,
-  projectTouchedBuckets,
-}) {
-  const st = await fs.stat(filePath);
-  const endOffset = st.size;
-  if (startOffset >= endOffset) return { endOffset, eventsAggregated: 0 };
-
-  const stream = fssync.createReadStream(filePath, { encoding: "utf8", start: startOffset });
-  const rl = readline.createInterface({ input: stream, crlfDelay: Infinity });
-
-  let eventsAggregated = 0;
-  for await (const line of rl) {
-    if (!line) continue;
-    // Fast-path filter: OpenClaw assistant messages include message.usage.totalTokens.
-    if (!line.includes('"usage"') || !line.includes("totalTokens")) continue;
-
-    let obj;
-    try {
-      obj = JSON.parse(line);
-    } catch (_e) {
-      continue;
-    }
-
-    if (obj?.type !== "message") continue;
-    const msg = obj?.message;
-    if (!msg || typeof msg !== "object") continue;
-
-    const usage = msg.usage;
-    if (!usage || typeof usage !== "object") continue;
-
-    const tokenTimestamp = typeof obj?.timestamp === "string" ? obj.timestamp : null;
-    if (!tokenTimestamp) continue;
-
-    const model = normalizeModelInput(msg.model) || DEFAULT_MODEL;
-
-    const delta = {
-      input_tokens: Number(usage.input || 0),
-      cached_input_tokens: Number((usage.cacheRead || 0) + (usage.cacheWrite || 0)),
-      output_tokens: Number(usage.output || 0),
-      reasoning_output_tokens: 0,
-      total_tokens: Number(usage.totalTokens || 0),
-    };
-
-    if (isAllZeroUsage(delta)) continue;
-
-    const bucketStart = toUtcHalfHourStart(tokenTimestamp);
-    if (!bucketStart) continue;
-
-    const bucket = getHourlyBucket(hourlyState, source, model, bucketStart);
-    addTotals(bucket.totals, delta);
-    touchedBuckets.add(bucketKey(source, model, bucketStart));
-
-    // Project-level OpenClaw attribution is not supported yet (no stable cwd info).
-    // If OpenClaw later records cwd per event, we can mirror rollout's project logic.
-    eventsAggregated += 1;
-  }
-
-  rl.close();
-  stream.close?.();
-  return { endOffset, eventsAggregated };
-}
-
 async function parseRolloutFile({
   filePath,
   startOffset,
@@ -2453,5 +2298,10 @@ module.exports = {
   parseClaudeIncremental,
   parseGeminiIncremental,
   parseOpencodeIncremental,
-  parseOpenclawIncremental,
+  normalizeHourlyState,
+  getHourlyBucket,
+  addTotals,
+  bucketKey,
+  enqueueTouchedBuckets,
+  toUtcHalfHourStart,
 };

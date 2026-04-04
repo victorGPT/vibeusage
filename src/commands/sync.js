@@ -13,9 +13,15 @@ const {
   parseClaudeIncremental,
   parseGeminiIncremental,
   parseOpencodeIncremental,
-  parseOpenclawIncremental,
+  normalizeHourlyState,
+  getHourlyBucket,
+  addTotals,
+  bucketKey,
+  enqueueTouchedBuckets,
+  toUtcHalfHourStart,
 } = require("../lib/rollout");
 const { drainQueueToCloud } = require("../lib/uploader");
+const { readOpenclawUsageLedger } = require("../lib/openclaw-usage-ledger");
 const { collectLocalSubscriptions } = require("../lib/subscriptions");
 const { createProgress, renderBar, formatNumber, formatBytes } = require("../lib/progress");
 const { syncHeartbeat } = require("../lib/vibeusage-api");
@@ -70,13 +76,6 @@ async function cmdSync(argv) {
     const opencodeStorageDir = path.join(opencodeHome, "storage");
     const opencodeDbPath = path.join(opencodeHome, "opencode.db");
 
-    // OpenClaw session-plugin integration: allow a plugin-triggered sync to request incremental parsing
-    // for a single session jsonl. We still parse all regular sources so model/source attribution stays
-    // complete (e.g. Kimi sessions).
-    const openclawSignal = opts.fromOpenclaw
-      ? resolveOpenclawSignal({ home, env: process.env })
-      : null;
-
     const sources = [
       { source: "codex", sessionsDir: path.join(codexHome, "sessions") },
       { source: "every-code", sessionsDir: path.join(codeHome, "sessions") },
@@ -92,10 +91,6 @@ async function cmdSync(argv) {
         rolloutFiles.push({ path: filePath, source: entry.source });
       }
     }
-
-    const openclawFiles = openclawSignal?.sessionFile
-      ? [{ path: openclawSignal.sessionFile, source: "openclaw" }]
-      : [];
 
     if (progress?.enabled) {
       progress.start(
@@ -119,28 +114,13 @@ async function cmdSync(argv) {
       },
     });
 
-    let openclawResult = { filesProcessed: 0, eventsAggregated: 0, bucketsQueued: 0 };
-    if (openclawFiles.length > 0) {
-      // Only runs when explicitly triggered by OpenClaw session-plugin events.
-      openclawResult = await parseOpenclawIncremental({
-        sessionFiles: openclawFiles,
-        cursors,
-        queuePath,
-        projectQueuePath,
-        source: "openclaw",
-      });
-    }
-
-    const openclawFallback = await applyOpenclawTotalsFallback({
-      trackerDir,
-      signal: openclawSignal,
-      cursors,
-      queuePath,
-      projectQueuePath,
-    });
-    openclawResult.filesProcessed += openclawFallback.filesProcessed;
-    openclawResult.eventsAggregated += openclawFallback.eventsAggregated;
-    openclawResult.bucketsQueued += openclawFallback.bucketsQueued;
+    const openclawResult = opts.fromOpenclaw
+      ? await parseOpenclawSanitizedLedger({
+          trackerDir,
+          cursors,
+          queuePath,
+        })
+      : { filesProcessed: 0, eventsAggregated: 0, bucketsQueued: 0 };
 
     const claudeFiles = await listClaudeProjectFiles(claudeProjectsDir);
     let claudeResult = { filesProcessed: 0, eventsAggregated: 0, bucketsQueued: 0 };
@@ -456,153 +436,65 @@ function parseArgs(argv) {
 
 module.exports = { cmdSync };
 
-function normalizeString(value) {
-  if (typeof value !== "string") return null;
-  const trimmed = value.trim();
-  return trimmed.length > 0 ? trimmed : null;
-}
+async function parseOpenclawSanitizedLedger({ trackerDir, cursors, queuePath }) {
+  const ledgerCursor =
+    cursors?.openclawLedger && typeof cursors.openclawLedger === "object"
+      ? cursors.openclawLedger
+      : {};
+  const offset = Math.max(0, Number(ledgerCursor.offset || 0));
+  const { events, endOffset } = await readOpenclawUsageLedger({ trackerDir, offset });
 
-function resolveOpenclawSignal({ home, env } = {}) {
-  if (!env) return null;
+  const hourlyState = normalizeHourlyState(cursors?.hourly);
+  const touchedBuckets = new Set();
+  let eventsAggregated = 0;
 
-  const agentId = normalizeString(env.VIBEUSAGE_OPENCLAW_AGENT_ID);
-  const sessionId = normalizeString(env.VIBEUSAGE_OPENCLAW_PREV_SESSION_ID);
-  if (!agentId || !sessionId) return null;
+  for (const event of events) {
+    if (!event || typeof event !== "object") continue;
+    const bucketStart = toUtcHalfHourStart(event.emittedAt);
+    if (!bucketStart) continue;
 
-  const openclawHome =
-    normalizeString(env.VIBEUSAGE_OPENCLAW_HOME) || path.join(home || os.homedir(), ".openclaw");
-  const sessionFile = path.join(openclawHome, "agents", agentId, "sessions", `${sessionId}.jsonl`);
+    const model =
+      typeof event.model === "string" && event.model.trim() ? event.model.trim() : "unknown";
+    const source =
+      typeof event.source === "string" && event.source.trim() ? event.source.trim() : "openclaw";
+    const delta = {
+      input_tokens: Math.max(0, Number(event.inputTokens || 0)),
+      cached_input_tokens: Math.max(0, Number(event.cachedInputTokens || 0)),
+      output_tokens: Math.max(0, Number(event.outputTokens || 0)),
+      reasoning_output_tokens: Math.max(0, Number(event.reasoningOutputTokens || 0)),
+      total_tokens: Math.max(0, Number(event.totalTokens || 0)),
+    };
 
-  const prevTotals = {
-    totalTokens: normalizeNonNegativeInt(env.VIBEUSAGE_OPENCLAW_PREV_TOTAL_TOKENS),
-    inputTokens: normalizeNonNegativeInt(env.VIBEUSAGE_OPENCLAW_PREV_INPUT_TOKENS),
-    outputTokens: normalizeNonNegativeInt(env.VIBEUSAGE_OPENCLAW_PREV_OUTPUT_TOKENS),
-    model: normalizeString(env.VIBEUSAGE_OPENCLAW_PREV_MODEL),
-    updatedAt: normalizeIsoOrEpoch(env.VIBEUSAGE_OPENCLAW_PREV_UPDATED_AT),
+    if (
+      delta.input_tokens === 0 &&
+      delta.cached_input_tokens === 0 &&
+      delta.output_tokens === 0 &&
+      delta.reasoning_output_tokens === 0 &&
+      delta.total_tokens === 0
+    ) {
+      continue;
+    }
+
+    const bucket = getHourlyBucket(hourlyState, source, model, bucketStart);
+    addTotals(bucket.totals, delta);
+    touchedBuckets.add(bucketKey(source, model, bucketStart));
+    eventsAggregated += 1;
+  }
+
+  const bucketsQueued = await enqueueTouchedBuckets({ queuePath, hourlyState, touchedBuckets });
+  hourlyState.updatedAt = new Date().toISOString();
+  cursors.hourly = hourlyState;
+  cursors.openclawLedger = {
+    version: 1,
+    offset: endOffset,
+    updatedAt: new Date().toISOString(),
   };
 
   return {
-    agentId,
-    sessionId,
-    sessionKey: normalizeString(env.VIBEUSAGE_OPENCLAW_SESSION_KEY),
-    openclawHome,
-    sessionFile,
-    prevTotals,
+    filesProcessed: endOffset > offset ? 1 : 0,
+    eventsAggregated,
+    bucketsQueued,
   };
-}
-
-async function applyOpenclawTotalsFallback({
-  trackerDir,
-  signal,
-  cursors,
-  queuePath,
-  projectQueuePath,
-}) {
-  const totalTokens = Number(signal?.prevTotals?.totalTokens || 0);
-  if (!trackerDir || !signal || totalTokens <= 0) {
-    return { filesProcessed: 0, eventsAggregated: 0, bucketsQueued: 0 };
-  }
-
-  const sessionKey = `${signal.agentId}:${signal.sessionId}`;
-  const statePath = path.join(trackerDir, "openclaw.fallback.state.json");
-  const fallbackFilePath = path.join(trackerDir, "openclaw.fallback.jsonl");
-  const state = (await readJson(statePath)) || { version: 1, sessions: {} };
-  const sessions = state.sessions && typeof state.sessions === "object" ? state.sessions : {};
-  const prev =
-    sessions[sessionKey] && typeof sessions[sessionKey] === "object" ? sessions[sessionKey] : null;
-
-  const current = {
-    totalTokens: normalizeNonNegativeInt(signal?.prevTotals?.totalTokens) || 0,
-    inputTokens: normalizeNonNegativeInt(signal?.prevTotals?.inputTokens) || 0,
-    outputTokens: normalizeNonNegativeInt(signal?.prevTotals?.outputTokens) || 0,
-    model: normalizeString(signal?.prevTotals?.model) || "unknown",
-    updatedAt: normalizeIsoOrEpoch(signal?.prevTotals?.updatedAt) || new Date().toISOString(),
-    seenAt: new Date().toISOString(),
-  };
-
-  let deltaTotal = current.totalTokens;
-  let deltaInput = current.inputTokens;
-  let deltaOutput = current.outputTokens;
-  if (prev) {
-    deltaTotal = Math.max(
-      0,
-      current.totalTokens - (normalizeNonNegativeInt(prev.totalTokens) || 0),
-    );
-    deltaInput = Math.max(
-      0,
-      current.inputTokens - (normalizeNonNegativeInt(prev.inputTokens) || 0),
-    );
-    deltaOutput = Math.max(
-      0,
-      current.outputTokens - (normalizeNonNegativeInt(prev.outputTokens) || 0),
-    );
-  }
-
-  if (deltaTotal > 0 && deltaInput + deltaOutput === 0) {
-    deltaInput = deltaTotal;
-  }
-
-  sessions[sessionKey] = current;
-  state.version = 1;
-  state.sessions = sessions;
-
-  if (deltaTotal <= 0) {
-    await writeJson(statePath, state);
-    return { filesProcessed: 0, eventsAggregated: 0, bucketsQueued: 0 };
-  }
-
-  await ensureDir(path.dirname(fallbackFilePath));
-  const syntheticMessage = {
-    type: "message",
-    timestamp: current.updatedAt,
-    message: {
-      role: "assistant",
-      model: current.model,
-      usage: {
-        input: deltaInput,
-        output: deltaOutput,
-        cacheRead: 0,
-        cacheWrite: 0,
-        totalTokens: deltaTotal,
-      },
-    },
-  };
-  await fs.appendFile(fallbackFilePath, `${JSON.stringify(syntheticMessage)}\n`, "utf8");
-  await writeJson(statePath, state);
-
-  return parseOpenclawIncremental({
-    sessionFiles: [{ path: fallbackFilePath, source: "openclaw" }],
-    cursors,
-    queuePath,
-    projectQueuePath,
-    source: "openclaw",
-  });
-}
-
-function normalizeNonNegativeInt(value) {
-  const n = Number(value);
-  if (!Number.isFinite(n) || n < 0) return null;
-  return Math.floor(n);
-}
-
-function normalizeIsoOrEpoch(value) {
-  if (typeof value === "string") {
-    const trimmed = value.trim();
-    if (trimmed.length > 0 && !Number.isNaN(Date.parse(trimmed))) return trimmed;
-    const numeric = Number(trimmed);
-    if (Number.isFinite(numeric) && numeric > 0) {
-      const ms = numeric < 1e12 ? Math.floor(numeric * 1000) : Math.floor(numeric);
-      const iso = new Date(ms).toISOString();
-      if (!Number.isNaN(Date.parse(iso))) return iso;
-    }
-  }
-
-  const n = Number(value);
-  if (!Number.isFinite(n) || n <= 0) return null;
-  const ms = n < 1e12 ? Math.floor(n * 1000) : Math.floor(n);
-  const dt = new Date(ms);
-  if (Number.isNaN(dt.getTime())) return null;
-  return dt.toISOString();
 }
 
 async function safeStatSize(p) {

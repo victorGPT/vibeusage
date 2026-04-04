@@ -182,6 +182,70 @@ test("init skips Codex notify when config is missing", async () => {
   }
 });
 
+test("init dry-run does not mention OpenClaw legacy integration", async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "vibeusage-init-openclaw-single-path-"));
+  const prevHome = process.env.HOME;
+  const prevCodexHome = process.env.CODEX_HOME;
+  const prevWrite = process.stdout.write;
+  let output = "";
+
+  try {
+    process.env.HOME = tmp;
+    process.env.CODEX_HOME = path.join(tmp, ".codex");
+    await fs.mkdir(process.env.CODEX_HOME, { recursive: true });
+
+    process.stdout.write = (chunk) => {
+      output += String(chunk);
+      return true;
+    };
+
+    await cmdInit([
+      "--dry-run",
+      "--yes",
+      "--no-auth",
+      "--no-open",
+      "--base-url",
+      "https://example.invalid",
+    ]);
+
+    assert.match(output, /OpenClaw Session Plugin/i);
+    assert.doesNotMatch(output, /OpenClaw Hook \(legacy\)/i);
+  } finally {
+    process.stdout.write = prevWrite;
+    if (prevHome === undefined) delete process.env.HOME;
+    else process.env.HOME = prevHome;
+    if (prevCodexHome === undefined) delete process.env.CODEX_HOME;
+    else process.env.CODEX_HOME = prevCodexHome;
+    await fs.rm(tmp, { recursive: true, force: true });
+  }
+});
+
+test("uninstall does not mention OpenClaw legacy integration", async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "vibeusage-uninstall-openclaw-single-path-"));
+  const prevHome = process.env.HOME;
+  const prevWrite = process.stdout.write;
+  let output = "";
+
+  try {
+    process.env.HOME = tmp;
+
+    process.stdout.write = (chunk) => {
+      output += String(chunk);
+      return true;
+    };
+
+    await cmdUninstall([]);
+
+    assert.match(output, /OpenClaw session plugin/i);
+    assert.doesNotMatch(output, /OpenClaw hook \(legacy\)/i);
+  } finally {
+    process.stdout.write = prevWrite;
+    if (prevHome === undefined) delete process.env.HOME;
+    else process.env.HOME = prevHome;
+    await fs.rm(tmp, { recursive: true, force: true });
+  }
+});
+
 test("init then uninstall restores original Every Code notify (when config exists)", async () => {
   const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "vibeusage-init-uninstall-"));
   const prevHome = process.env.HOME;

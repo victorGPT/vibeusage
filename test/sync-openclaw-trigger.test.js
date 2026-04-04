@@ -51,8 +51,8 @@ test("sync --from-openclaw records last OpenClaw trigger marker", async () => {
   }
 });
 
-test("sync --from-openclaw falls back to previous session totals when jsonl has zero usage", async () => {
-  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "vibeusage-sync-openclaw-fallback-"));
+test("sync --from-openclaw ignores transcript files and previous-total fallback env", async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "vibeusage-sync-openclaw-hard-cut-"));
   const prevHome = process.env.HOME;
   const prevCodexHome = process.env.CODEX_HOME;
   const prevCodeHome = process.env.CODE_HOME;
@@ -76,9 +76,10 @@ test("sync --from-openclaw falls back to previous session totals when jsonl has 
 
     const openclawHome = path.join(tmp, ".openclaw");
     const sessionDir = path.join(openclawHome, "agents", "coding", "sessions");
+    const sessionFile = path.join(sessionDir, "session-a.jsonl");
     await fs.mkdir(sessionDir, { recursive: true });
     await fs.writeFile(
-      path.join(sessionDir, "session-a.jsonl"),
+      sessionFile,
       [
         JSON.stringify({ type: "session", id: "session-a", timestamp: "2026-02-14T00:00:00.000Z" }),
         JSON.stringify({
@@ -87,7 +88,7 @@ test("sync --from-openclaw falls back to previous session totals when jsonl has 
           message: {
             role: "assistant",
             model: "delivery-mirror",
-            usage: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, totalTokens: 0 },
+            usage: { input: 70, output: 30, cacheRead: 0, cacheWrite: 0, totalTokens: 100 },
           },
         }),
       ].join("\n") + "\n",
@@ -106,39 +107,24 @@ test("sync --from-openclaw falls back to previous session totals when jsonl has 
     await cmdSync(["--from-openclaw"]);
 
     const queuePath = path.join(tmp, ".vibeusage", "tracker", "queue.jsonl");
-    const firstRunRows = await readJsonl(queuePath);
-    assert.ok(firstRunRows.length > 0, "expected at least one queued row");
-    const firstLast = firstRunRows[firstRunRows.length - 1];
-    assert.equal(firstLast.source, "openclaw");
-    assert.equal(firstLast.total_tokens, 100);
-    assert.equal(firstLast.input_tokens, 70);
-    assert.equal(firstLast.output_tokens, 30);
-
-    await cmdSync(["--from-openclaw"]);
-    const secondRunRows = await readJsonl(queuePath);
-    assert.equal(
-      secondRunRows.length,
-      firstRunRows.length,
-      "expected no duplicate queue rows when totals do not change",
+    const rows = await readJsonl(queuePath);
+    assert.deepEqual(
+      rows.filter((row) => row.source === "openclaw"),
+      [],
+      "expected sync to ignore transcript accounting and fallback totals before sanitized ledger lands",
     );
 
-    process.env.VIBEUSAGE_OPENCLAW_PREV_TOTAL_TOKENS = "140";
-    process.env.VIBEUSAGE_OPENCLAW_PREV_INPUT_TOKENS = "98";
-    process.env.VIBEUSAGE_OPENCLAW_PREV_OUTPUT_TOKENS = "42";
-    process.env.VIBEUSAGE_OPENCLAW_PREV_UPDATED_AT = "2026-02-14T00:35:00.000Z";
+    const fallbackStatePath = path.join(tmp, ".vibeusage", "tracker", "openclaw.fallback.state.json");
+    const fallbackJsonlPath = path.join(tmp, ".vibeusage", "tracker", "openclaw.fallback.jsonl");
+    await assert.rejects(fs.stat(fallbackStatePath), /ENOENT/);
+    await assert.rejects(fs.stat(fallbackJsonlPath), /ENOENT/);
 
-    await cmdSync(["--from-openclaw"]);
-    const thirdRunRows = await readJsonl(queuePath);
-    assert.equal(
-      thirdRunRows.length,
-      firstRunRows.length + 1,
-      "expected one new queued row when totals increase",
+    const cursorsPath = path.join(tmp, ".vibeusage", "tracker", "cursors.json");
+    const cursors = JSON.parse(await fs.readFile(cursorsPath, "utf8"));
+    assert.ok(
+      !Object.prototype.hasOwnProperty.call(cursors.files || {}, sessionFile),
+      "expected sync to stop tracking OpenClaw transcript files as accounting inputs",
     );
-    const thirdLast = thirdRunRows[thirdRunRows.length - 1];
-    assert.equal(thirdLast.source, "openclaw");
-    assert.equal(thirdLast.total_tokens, 140);
-    assert.equal(thirdLast.input_tokens, 98);
-    assert.equal(thirdLast.output_tokens, 42);
   } finally {
     if (prevHome === undefined) delete process.env.HOME;
     else process.env.HOME = prevHome;

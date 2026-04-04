@@ -11,11 +11,6 @@ const {
   resolveOpenclawSessionPluginPaths,
   ensureOpenclawSessionPluginFiles,
 } = require("../src/lib/openclaw-session-plugin");
-const {
-  OPENCLAW_HOOK_NAME,
-  resolveOpenclawHookPaths,
-  ensureOpenclawHookFiles,
-} = require("../src/lib/openclaw-hook");
 
 test("diagnostics redacts device token and home paths", async () => {
   const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "vibeusage-diagnostics-"));
@@ -120,7 +115,7 @@ test("diagnostics does not migrate legacy root", async () => {
   await assert.rejects(() => fs.stat(path.join(home, ".vibeusage")));
 });
 
-test("diagnostics preserves OpenClaw linked and enabled flags from integration probes", async () => {
+test("diagnostics exposes only the supported OpenClaw session plugin path", async () => {
   const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "vibeusage-diagnostics-openclaw-"));
   const home = path.join(tmp, "home");
   const trackerDir = path.join(home, ".vibeusage", "tracker");
@@ -131,14 +126,11 @@ test("diagnostics preserves OpenClaw linked and enabled flags from integration p
     trackerDir,
     env: {},
   });
-  const { hookDir } = resolveOpenclawHookPaths({ home, trackerDir, env: {} });
-
   await ensureOpenclawSessionPluginFiles({
     pluginDir: path.dirname(pluginEntryDir),
     trackerDir,
     packageName: "vibeusage",
   });
-  await ensureOpenclawHookFiles({ hookDir, trackerDir, packageName: "vibeusage" });
   await fs.mkdir(path.dirname(openclawConfigPath), { recursive: true });
   await fs.writeFile(
     openclawConfigPath,
@@ -160,24 +152,6 @@ test("diagnostics preserves OpenClaw linked and enabled flags from integration p
             },
           },
         },
-        hooks: {
-          internal: {
-            entries: {
-              [OPENCLAW_HOOK_NAME]: { enabled: true },
-            },
-            load: {
-              extraDirs: [hookDir],
-            },
-            installs: {
-              [OPENCLAW_HOOK_NAME]: {
-                source: "path",
-                sourcePath: hookDir,
-                installPath: hookDir,
-                hooks: [OPENCLAW_HOOK_NAME],
-              },
-            },
-          },
-        },
       },
       null,
       2,
@@ -189,9 +163,9 @@ test("diagnostics preserves OpenClaw linked and enabled flags from integration p
   assert.equal(diagnostics.notify.openclaw_session_plugin_status, "ready");
   assert.equal(diagnostics.notify.openclaw_session_plugin_linked, true);
   assert.equal(diagnostics.notify.openclaw_session_plugin_enabled, true);
-  assert.equal(diagnostics.notify.openclaw_hook_status, "unsupported_legacy");
-  assert.equal(diagnostics.notify.openclaw_hook_linked, true);
-  assert.equal(diagnostics.notify.openclaw_hook_enabled, true);
+  assert.ok(!Object.prototype.hasOwnProperty.call(diagnostics.notify, "openclaw_hook_status"));
+  assert.ok(!Object.prototype.hasOwnProperty.call(diagnostics.notify, "openclaw_hook_linked"));
+  assert.ok(!Object.prototype.hasOwnProperty.call(diagnostics.notify, "openclaw_hook_enabled"));
 
   await fs.rm(tmp, { recursive: true, force: true });
 });
@@ -207,8 +181,8 @@ test("diagnostics reports unreadable OpenClaw config explicitly", async () => {
   const diagnostics = await collectTrackerDiagnostics({ home });
   assert.equal(diagnostics.notify.openclaw_session_plugin_status, "unreadable");
   assert.match(diagnostics.notify.openclaw_session_plugin_detail, /OpenClaw config unreadable:/);
-  assert.equal(diagnostics.notify.openclaw_hook_status, "unreadable");
-  assert.match(diagnostics.notify.openclaw_hook_detail, /OpenClaw config unreadable:/);
+  assert.ok(!Object.prototype.hasOwnProperty.call(diagnostics.notify, "openclaw_hook_status"));
+  assert.ok(!Object.prototype.hasOwnProperty.call(diagnostics.notify, "openclaw_hook_detail"));
 
   await fs.rm(tmp, { recursive: true, force: true });
 });

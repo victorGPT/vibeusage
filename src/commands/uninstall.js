@@ -93,17 +93,6 @@ async function cmdUninstall(argv) {
         unreadableText: (result) =>
           `- OpenClaw session plugin: skipped (${result.detail || "openclaw config unreadable"})`,
       }),
-      renderHookLine({
-        exists: true,
-        result: resultByName.get("openclaw-legacy"),
-        missingText: "- OpenClaw hook (legacy): skipped (openclaw config not found)",
-        removedText: (result) =>
-          `- OpenClaw hook (legacy) removed: ${result.detail || result.openclawConfigPath || "unknown"}`,
-        noChangeText: "- OpenClaw hook (legacy): no change",
-        skippedText: "- OpenClaw hook (legacy): no change",
-        unreadableText: (result) =>
-          `- OpenClaw hook (legacy): skipped (${result.detail || "openclaw config unreadable"})`,
-      }),
       opts.purge ? `- Purged: ${path.join(home, ".vibeusage")}` : "- Purge: skipped (use --purge)",
       "",
     ].join("\n"),

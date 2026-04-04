@@ -8,7 +8,6 @@ const {
   buildGeminiHookCommand,
 } = require("../gemini-config");
 const { resolveOpencodeConfigDir } = require("../opencode-config");
-const { resolveOpenclawHookPaths } = require("../openclaw-hook");
 const { resolveOpenclawSessionPluginPaths } = require("../openclaw-session-plugin");
 const { resolveTrackerPaths } = require("../tracker-paths");
 
@@ -59,11 +58,6 @@ async function createIntegrationContext({
       configDir: opencodeConfigDir,
     },
     openclawSession: resolveOpenclawSessionPluginPaths({
-      home,
-      trackerDir: resolvedTrackerPaths.trackerDir,
-      env,
-    }),
-    openclawLegacy: resolveOpenclawHookPaths({
       home,
       trackerDir: resolvedTrackerPaths.trackerDir,
       env,

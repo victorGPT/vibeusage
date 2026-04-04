@@ -313,8 +313,7 @@ function buildDiagnosticsChecks(diagnostics) {
     notify.claude_hook_configured ||
     notify.gemini_hook_configured ||
     notify.opencode_plugin_configured ||
-    notify.openclaw_session_plugin_configured ||
-    notify.openclaw_hook_configured,
+    notify.openclaw_session_plugin_configured,
   );
 
   checks.push({
@@ -334,19 +333,6 @@ function buildDiagnosticsChecks(diagnostics) {
       meta: {
         status: notify.openclaw_session_plugin_status,
         detail: notify.openclaw_session_plugin_detail || null,
-      },
-    });
-  }
-
-  if (notify.openclaw_hook_status === "unreadable") {
-    checks.push({
-      id: "notify.openclaw_hook",
-      status: "warn",
-      detail: "OpenClaw hook config unreadable",
-      critical: false,
-      meta: {
-        status: notify.openclaw_hook_status,
-        detail: notify.openclaw_hook_detail || null,
       },
     });
   }

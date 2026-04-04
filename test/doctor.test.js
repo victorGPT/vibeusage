@@ -58,7 +58,7 @@ test("doctor reports runtime config status", async () => {
   assert.equal(tokenCheck.status, "ok");
 });
 
-test("doctor surfaces unreadable OpenClaw diagnostics as warnings", async () => {
+test("doctor surfaces unreadable supported OpenClaw diagnostics as warnings", async () => {
   const report = await buildDoctorReport({
     runtime: { baseUrl: "https://example" },
     fetch: async () => ({ status: 200 }),
@@ -67,9 +67,6 @@ test("doctor surfaces unreadable OpenClaw diagnostics as warnings", async () => 
         openclaw_session_plugin_status: "unreadable",
         openclaw_session_plugin_detail: "OpenClaw config unreadable: invalid json",
         openclaw_session_plugin_configured: false,
-        openclaw_hook_status: "unreadable",
-        openclaw_hook_detail: "OpenClaw config unreadable: invalid json",
-        openclaw_hook_configured: false,
       },
     },
   });
@@ -78,8 +75,27 @@ test("doctor surfaces unreadable OpenClaw diagnostics as warnings", async () => 
 
   assert.equal(sessionCheck.status, "warn");
   assert.equal(sessionCheck.meta.status, "unreadable");
-  assert.equal(hookCheck.status, "warn");
-  assert.equal(hookCheck.meta.status, "unreadable");
+  assert.equal(hookCheck, undefined);
+});
+
+test("doctor ignores legacy OpenClaw hook diagnostics when computing checks", async () => {
+  const report = await buildDoctorReport({
+    runtime: { baseUrl: "https://example" },
+    fetch: async () => ({ status: 200 }),
+    diagnostics: {
+      notify: {
+        openclaw_hook_status: "unreadable",
+        openclaw_hook_detail: "should be ignored",
+        openclaw_hook_configured: true,
+      },
+      upload: { last_error: null },
+      opencode: { sqlite_status: "ok", sqlite_db_present: true },
+    },
+  });
+
+  assert.equal(report.checks.find((c) => c.id === "notify.openclaw_hook"), undefined);
+  const notifyConfigured = report.checks.find((c) => c.id === "notify.configured");
+  assert.equal(notifyConfigured.meta.configured, false);
 });
 
 test("doctor marks invalid config.json as critical", async () => {

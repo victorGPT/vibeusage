@@ -61,7 +61,6 @@ async function collectTrackerDiagnostics({
   const geminiProbe = probeByName.get("gemini");
   const opencodeProbe = probeByName.get("opencode");
   const openclawSessionProbe = probeByName.get("openclaw-session");
-  const openclawLegacyProbe = probeByName.get("openclaw-legacy");
 
   const codexNotify = Array.isArray(codexProbe?.currentNotify)
     ? codexProbe.currentNotify.map((value) => redactValue(value, home))
@@ -155,14 +154,6 @@ async function collectTrackerDiagnostics({
       openclaw_session_plugin_detail:
         typeof openclawSessionProbe?.detail === "string"
           ? redactError(openclawSessionProbe.detail, home)
-          : null,
-      openclaw_hook_status: openclawLegacyProbe?.status || "unknown",
-      openclaw_hook_configured: Boolean(openclawLegacyProbe?.configured),
-      openclaw_hook_linked: Boolean(openclawLegacyProbe?.linked),
-      openclaw_hook_enabled: Boolean(openclawLegacyProbe?.enabled),
-      openclaw_hook_detail:
-        typeof openclawLegacyProbe?.detail === "string"
-          ? redactError(openclawLegacyProbe.detail, home)
           : null,
     },
     upload: {

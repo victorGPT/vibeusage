@@ -81,7 +81,6 @@ async function cmdStatus(argv = []) {
   const geminiProbe = probeByName.get("gemini");
   const opencodeProbe = probeByName.get("opencode");
   const openclawSessionProbe = probeByName.get("openclaw-session");
-  const openclawLegacyProbe = probeByName.get("openclaw-legacy");
   const opencodeDbPresent = Boolean((await safeStat(opencodeDbPath))?.isFile?.());
   const opencodeSqliteState =
     cursors?.opencodeSqlite && typeof cursors.opencodeSqlite === "object"
@@ -117,10 +116,6 @@ async function cmdStatus(argv = []) {
       `- OpenClaw session plugin: ${renderIntegrationStatus(
         descriptors.get("openclaw-session"),
         openclawSessionProbe,
-      )}`,
-      `- OpenClaw hook (legacy): ${renderIntegrationStatus(
-        descriptors.get("openclaw-legacy"),
-        openclawLegacyProbe,
       )}`,
       ...subscriptionLines,
       "",

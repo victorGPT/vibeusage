@@ -3,6 +3,7 @@ const path = require("node:path");
 const fs = require("node:fs/promises");
 const fssync = require("node:fs");
 const cp = require("node:child_process");
+const { pathToFileURL } = require("node:url");
 
 const OPENCLAW_SESSION_PLUGIN_ID = "openclaw-session-sync";
 const OPENCLAW_SESSION_PLUGIN_DIRNAME = "openclaw-plugin";
@@ -103,7 +104,6 @@ async function ensureOpenclawSessionPluginFiles({
     buildSessionPluginIndex({
       trackerDir,
       packageName,
-      openclawHome: openclawHome || path.join(os.homedir(), ".openclaw"),
     }),
     "utf8",
   );
@@ -337,144 +337,58 @@ function buildSessionPluginMeta() {
   )}\n`;
 }
 
-function buildSessionPluginIndex({ trackerDir, packageName = "vibeusage", openclawHome }) {
-  const trackerBinPath = path.join(trackerDir, "app", "bin", "tracker.js");
-  const fallbackPkg = packageName || "vibeusage";
-  const safeOpenclawHome = openclawHome || path.join(os.homedir(), ".openclaw");
+function buildSessionPluginIndex({ trackerDir }) {
+  const ledgerModuleUrl = pathToFileURL(
+    path.join(trackerDir, "app", "src", "lib", "openclaw-usage-ledger.js"),
+  ).href;
 
   return (
-    `import fs from 'node:fs';\n` +
-    `import path from 'node:path';\n` +
-    `import cp from 'node:child_process';\n` +
+    `import { appendOpenclawUsageEvent } from ${JSON.stringify(ledgerModuleUrl)};\n` +
     `\n` +
     `const trackerDir = ${JSON.stringify(trackerDir)};\n` +
-    `const trackerBinPath = ${JSON.stringify(trackerBinPath)};\n` +
-    `const fallbackPkg = ${JSON.stringify(fallbackPkg)};\n` +
-    `const openclawHome = ${JSON.stringify(safeOpenclawHome)};\n` +
-    `const depsMarkerPath = path.join(trackerDir, 'app', 'node_modules', '@insforge', 'sdk', 'package.json');\n` +
-    `const triggerStatePath = path.join(trackerDir, 'openclaw.session-sync.trigger-state.json');\n` +
-    `const SESSION_TRIGGER_THROTTLE_MS = 15_000;\n` +
     `\n` +
     `export default function register(api) {\n` +
-    `  api.on('agent_end', async (_event, ctx) => {\n` +
+    `  api.on('llm_output', async (event, ctx) => {\n` +
     `    try {\n` +
-    `      const sessionKey = normalize(ctx && ctx.sessionKey);\n` +
-    `      if (!sessionKey) return;\n` +
-    `\n` +
-    `      const agentId = normalize(ctx && ctx.agentId) || parseAgentId(sessionKey);\n` +
-    `      if (!agentId) return;\n` +
-    `\n` +
-    `      const sessionInfo = resolveSessionInfo(agentId, sessionKey);\n` +
-    `      const sessionId = normalize(sessionInfo && sessionInfo.sessionId);\n` +
-    `      if (!sessionId) return;\n` +
-    `\n` +
-    `      if (!allowTrigger('agent_end', agentId, sessionId)) return;\n` +
-    `\n` +
-    `      spawnSync({\n` +
-    `        args: ['sync', '--auto', '--from-openclaw'],\n` +
-    `        env: buildSessionEnv({\n` +
-    `          agentId,\n` +
-    `          sessionId,\n` +
-    `          sessionKey,\n` +
-    `          sessionEntry: sessionInfo && sessionInfo.entry\n` +
-    `        })\n` +
-    `      });\n` +
-    `    } catch (_) {}\n` +
-    `  });\n` +
-    `\n` +
-    `  api.on('gateway_start', async () => {\n` +
-    `    try {\n` +
-    `      if (!allowTrigger('gateway_start', 'gateway', 'startup')) return;\n` +
-    `      spawnSync({ args: ['sync', '--auto'] });\n` +
-    `    } catch (_) {}\n` +
-    `  });\n` +
-    `\n` +
-    `  api.on('gateway_stop', async () => {\n` +
-    `    try {\n` +
-    `      if (!allowTrigger('gateway_stop', 'gateway', 'stop')) return;\n` +
-    `      spawnSync({ args: ['sync', '--auto'] });\n` +
+    `      const payload = buildPayload(event, ctx);\n` +
+    `      if (!payload) return;\n` +
+    `      await appendOpenclawUsageEvent({ trackerDir, payload });\n` +
     `    } catch (_) {}\n` +
     `  });\n` +
     `}\n` +
     `\n` +
-    `function spawnSync({ args, env = {} }) {\n` +
-    `  const hasLocalRuntime = fs.existsSync(trackerBinPath);\n` +
-    `  const hasLocalDeps = fs.existsSync(depsMarkerPath);\n` +
-    `  const argv = Array.isArray(args) && args.length > 0 ? args : ['sync', '--auto'];\n` +
-    `  const cmd = hasLocalRuntime && hasLocalDeps\n` +
-    `    ? [process.execPath, trackerBinPath, ...argv]\n` +
-    `    : ['npx', '--yes', fallbackPkg, ...argv];\n` +
-    `  const child = cp.spawn(cmd[0], cmd.slice(1), {\n` +
-    `    detached: true,\n` +
-    `    stdio: 'ignore',\n` +
-    `    env: { ...process.env, ...env }\n` +
-    `  });\n` +
-    `  child.unref();\n` +
-    `}\n` +
+    `function buildPayload(event, ctx) {\n` +
+    `  const usage = normalizeUsage(event);\n` +
+    `  if (!usage) return null;\n` +
     `\n` +
-    `function buildSessionEnv({ agentId, sessionId, sessionKey, sessionEntry }) {\n` +
-    `  const out = {\n` +
-    `    VIBEUSAGE_OPENCLAW_AGENT_ID: agentId,\n` +
-    `    VIBEUSAGE_OPENCLAW_PREV_SESSION_ID: sessionId,\n` +
-    `    VIBEUSAGE_OPENCLAW_HOME: openclawHome\n` +
+    `  const sessionKey = normalize(ctx && ctx.sessionKey);\n` +
+    `  if (!sessionKey) return null;\n` +
+    `\n` +
+    `  return {\n` +
+    `    emittedAt: normalizeIso(event && (event.emittedAt || event.timestamp)) || new Date().toISOString(),\n` +
+    `    source: 'openclaw',\n` +
+    `    agentId: normalize(ctx && ctx.agentId),\n` +
+    `    sessionKey,\n` +
+    `    provider: normalize(event && event.provider) || normalize(ctx && ctx.provider),\n` +
+    `    model: normalize(event && event.model) || normalize(ctx && ctx.model),\n` +
+    `    channel: normalize(ctx && ctx.channel),\n` +
+    `    chatType: normalize(ctx && ctx.chatType),\n` +
+    `    trigger: normalize(ctx && ctx.trigger) || 'llm_output',\n` +
+    `    ...usage\n` +
     `  };\n` +
-    `  const key = normalize(sessionKey);\n` +
-    `  if (key) out.VIBEUSAGE_OPENCLAW_SESSION_KEY = key;\n` +
-    `  const prevTotalTokens = toNonNegativeInt(sessionEntry && sessionEntry.totalTokens);\n` +
-    `  const prevInputTokens = toNonNegativeInt(sessionEntry && sessionEntry.inputTokens);\n` +
-    `  const prevOutputTokens = toNonNegativeInt(sessionEntry && sessionEntry.outputTokens);\n` +
-    `  const prevModel = normalize(sessionEntry && sessionEntry.model);\n` +
-    `  const prevUpdatedAt = toIso(sessionEntry && sessionEntry.updatedAt);\n` +
-    `  if (prevTotalTokens != null) out.VIBEUSAGE_OPENCLAW_PREV_TOTAL_TOKENS = String(prevTotalTokens);\n` +
-    `  if (prevInputTokens != null) out.VIBEUSAGE_OPENCLAW_PREV_INPUT_TOKENS = String(prevInputTokens);\n` +
-    `  if (prevOutputTokens != null) out.VIBEUSAGE_OPENCLAW_PREV_OUTPUT_TOKENS = String(prevOutputTokens);\n` +
-    `  if (prevModel) out.VIBEUSAGE_OPENCLAW_PREV_MODEL = prevModel;\n` +
-    `  if (prevUpdatedAt) out.VIBEUSAGE_OPENCLAW_PREV_UPDATED_AT = prevUpdatedAt;\n` +
-    `  return out;\n` +
     `}\n` +
     `\n` +
-    `function resolveSessionInfo(agentId, sessionKey) {\n` +
-    `  const key = normalize(sessionKey);\n` +
-    `  if (!key) return null;\n` +
-    `  const sessionsPath = path.join(openclawHome, 'agents', agentId, 'sessions', 'sessions.json');\n` +
-    `  try {\n` +
-    `    const raw = fs.readFileSync(sessionsPath, 'utf8');\n` +
-    `    const parsed = JSON.parse(raw);\n` +
-    `    if (!parsed || typeof parsed !== 'object') return null;\n` +
-    `    const entry = parsed[key];\n` +
-    `    if (!entry || typeof entry !== 'object') return null;\n` +
-    `    return {\n` +
-    `      sessionKey: key,\n` +
-    `      sessionId: normalize(entry.sessionId),\n` +
-    `      entry\n` +
-    `    };\n` +
-    `  } catch (_) {}\n` +
-    `  return null;\n` +
-    `}\n` +
-    `\n` +
-    `function parseAgentId(sessionKey) {\n` +
-    `  const s = normalize(sessionKey);\n` +
-    `  if (!s || !s.startsWith('agent:')) return null;\n` +
-    `  const parts = s.split(':');\n` +
-    `  return parts.length >= 2 ? normalize(parts[1]) : null;\n` +
-    `}\n` +
-    `\n` +
-    `function allowTrigger(kind, scope, target) {\n` +
-    `  const key = [kind, scope || 'na', target || 'na'].join(':');\n` +
-    `  const now = Date.now();\n` +
-    `  let state = {};\n` +
-    `  try {\n` +
-    `    state = JSON.parse(fs.readFileSync(triggerStatePath, 'utf8'));\n` +
-    `    if (!state || typeof state !== 'object') state = {};\n` +
-    `  } catch (_) {}\n` +
-    `  const last = Number(state[key] || 0);\n` +
-    `  if (Number.isFinite(last) && now - last < SESSION_TRIGGER_THROTTLE_MS) return false;\n` +
-    `  state[key] = now;\n` +
-    `  try {\n` +
-    `    fs.mkdirSync(path.dirname(triggerStatePath), { recursive: true });\n` +
-    `    fs.writeFileSync(triggerStatePath, JSON.stringify(state), 'utf8');\n` +
-    `  } catch (_) {}\n` +
-    `  return true;\n` +
+    `function normalizeUsage(event) {\n` +
+    `  const usage = event && typeof event.usage === 'object' ? event.usage : event || {};\n` +
+    `  const normalized = {\n` +
+    `    inputTokens: toNonNegativeInt(usage.inputTokens ?? usage.input_tokens ?? usage.input),\n` +
+    `    cachedInputTokens: toNonNegativeInt(usage.cachedInputTokens ?? usage.cached_input_tokens ?? usage.cacheRead ?? 0) + toNonNegativeInt(usage.cacheWrite ?? 0),\n` +
+    `    outputTokens: toNonNegativeInt(usage.outputTokens ?? usage.output_tokens ?? usage.output),\n` +
+    `    reasoningOutputTokens: toNonNegativeInt(usage.reasoningOutputTokens ?? usage.reasoning_output_tokens),\n` +
+    `    totalTokens: toNonNegativeInt(usage.totalTokens ?? usage.total_tokens)\n` +
+    `  };\n` +
+    `  const sum = normalized.inputTokens + normalized.cachedInputTokens + normalized.outputTokens + normalized.reasoningOutputTokens + normalized.totalTokens;\n` +
+    `  return sum > 0 ? normalized : null;\n` +
     `}\n` +
     `\n` +
     `function normalize(v) {\n` +
@@ -483,22 +397,18 @@ function buildSessionPluginIndex({ trackerDir, packageName = "vibeusage", opencl
     `  return s.length > 0 ? s : null;\n` +
     `}\n` +
     `\n` +
-    `function toNonNegativeInt(v) {\n` +
-    `  const n = Number(v);\n` +
-    `  if (!Number.isFinite(n) || n < 0) return null;\n` +
-    `  return Math.floor(n);\n` +
+    `function normalizeIso(v) {\n` +
+    `  const s = normalize(v);\n` +
+    `  if (!s) return null;\n` +
+    `  const ms = Date.parse(s);\n` +
+    `  if (!Number.isFinite(ms)) return null;\n` +
+    `  return new Date(ms).toISOString();\n` +
     `}\n` +
     `\n` +
-    `function toIso(v) {\n` +
-    `  if (typeof v === 'string') {\n` +
-    `    const s = normalize(v);\n` +
-    `    if (s && !Number.isNaN(Date.parse(s))) return s;\n` +
-    `  }\n` +
-    `  const n = Number(v);\n` +
-    `  if (!Number.isFinite(n) || n <= 0) return null;\n` +
-    `  const ms = n < 1e12 ? Math.floor(n * 1000) : Math.floor(n);\n` +
-    `  const d = new Date(ms);\n` +
-    `  return Number.isNaN(d.getTime()) ? null : d.toISOString();\n` +
+    `function toNonNegativeInt(v) {\n` +
+    `  const n = Number(v || 0);\n` +
+    `  if (!Number.isFinite(n) || n < 0) return 0;\n` +
+    `  return Math.floor(n);\n` +
     `}\n`
   );
 }

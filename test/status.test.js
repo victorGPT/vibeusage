@@ -219,7 +219,7 @@ test("status reports Claude hooks unsupported_legacy when only SessionEnd is con
   }
 });
 
-test("status reports OpenClaw integrations as unreadable when config cannot be parsed", async () => {
+test("status shows only the supported OpenClaw integration when config cannot be parsed", async () => {
   const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "vibeusage-status-openclaw-"));
   const prevHome = process.env.HOME;
   const prevCodexHome = process.env.CODEX_HOME;
@@ -247,7 +247,7 @@ test("status reports OpenClaw integrations as unreadable when config cannot be p
     await cmdStatus();
 
     assert.match(out, /- OpenClaw session plugin: unreadable/);
-    assert.match(out, /- OpenClaw hook \(legacy\): unreadable/);
+    assert.doesNotMatch(out, /OpenClaw hook \(legacy\)/);
     assert.equal(await fs.readFile(openclawConfigPath, "utf8"), "{ bad json\n");
   } finally {
     process.stdout.write = prevWrite;
