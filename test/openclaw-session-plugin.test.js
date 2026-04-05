@@ -1,4 +1,5 @@
 const assert = require("node:assert/strict");
+const childProcess = require("node:child_process");
 const os = require("node:os");
 const path = require("node:path");
 const fs = require("node:fs/promises");
@@ -248,6 +249,155 @@ test("ensureOpenclawSessionPluginFiles registers llm_output and writes sanitized
   }
 });
 
+test("ensureOpenclawSessionPluginFiles triggers auto sync after appending a sanitized event", async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "vibeusage-openclaw-plugin-"));
+  const home = path.join(tmp, "home");
+  const trackerDir = path.join(home, ".vibeusage", "tracker");
+  await fs.mkdir(trackerDir, { recursive: true });
+  await seedTrackerLedgerRuntime(trackerDir);
+
+  const trackerBinPath = path.join(trackerDir, "app", "bin", "tracker.js");
+  const depsMarkerPath = path.join(
+    trackerDir,
+    "app",
+    "node_modules",
+    "@insforge",
+    "sdk",
+    "package.json",
+  );
+  await fs.mkdir(path.dirname(trackerBinPath), { recursive: true });
+  await fs.writeFile(trackerBinPath, "#!/usr/bin/env node\n", "utf8");
+  await fs.mkdir(path.dirname(depsMarkerPath), { recursive: true });
+  await fs.writeFile(depsMarkerPath, '{"name":"@insforge/sdk"}\n', "utf8");
+
+  const calls = [];
+  const originalSpawn = childProcess.spawn;
+  childProcess.spawn = (command, args, options) => {
+    calls.push({ command, args, options });
+    return { unref() {} };
+  };
+
+  try {
+    const { pluginEntryDir } = resolveOpenclawSessionPluginPaths({ home, trackerDir, env: {} });
+    await ensureOpenclawSessionPluginFiles({
+      pluginDir: path.dirname(pluginEntryDir),
+      trackerDir,
+      packageName: "vibeusage",
+    });
+
+    const mod = await import(pathToFileURL(path.join(pluginEntryDir, "index.js")).href);
+    const handlers = new Map();
+    mod.default({
+      on(name, handler) {
+        handlers.set(name, handler);
+      },
+    });
+
+    await handlers.get("llm_output")(
+      {
+        emittedAt: "2026-04-05T01:45:00.000Z",
+        provider: "openai",
+        model: "gpt-5.4",
+        inputTokens: 120,
+        cachedInputTokens: 15,
+        outputTokens: 33,
+        reasoningOutputTokens: 7,
+        totalTokens: 175,
+      },
+      {
+        agentId: "codex-dev",
+        sessionKey: "agent:codex-dev:discord:channel:1490019049302659232",
+        trigger: "llm_output",
+      },
+    );
+
+    assert.equal(calls.length, 1);
+    assert.equal(calls[0].command, process.execPath);
+    assert.deepEqual(calls[0].args.slice(-3), ["sync", "--auto", "--from-openclaw"]);
+    assert.equal(calls[0].options.detached, true);
+    assert.equal(calls[0].options.stdio, "ignore");
+  } finally {
+    childProcess.spawn = originalSpawn;
+    await fs.rm(tmp, { recursive: true, force: true });
+  }
+});
+
+test("ensureOpenclawSessionPluginFiles falls back to event.sessionId when ctx.sessionKey is missing", async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "vibeusage-openclaw-plugin-"));
+  const home = path.join(tmp, "home");
+  const trackerDir = path.join(home, ".vibeusage", "tracker");
+  await fs.mkdir(trackerDir, { recursive: true });
+  await seedTrackerLedgerRuntime(trackerDir);
+
+  const trackerBinPath = path.join(trackerDir, "app", "bin", "tracker.js");
+  const depsMarkerPath = path.join(
+    trackerDir,
+    "app",
+    "node_modules",
+    "@insforge",
+    "sdk",
+    "package.json",
+  );
+  await fs.mkdir(path.dirname(trackerBinPath), { recursive: true });
+  await fs.writeFile(trackerBinPath, "#!/usr/bin/env node\n", "utf8");
+  await fs.mkdir(path.dirname(depsMarkerPath), { recursive: true });
+  await fs.writeFile(depsMarkerPath, '{"name":"@insforge/sdk"}\n', "utf8");
+
+  const calls = [];
+  const originalSpawn = childProcess.spawn;
+  childProcess.spawn = (command, args, options) => {
+    calls.push({ command, args, options });
+    return { unref() {} };
+  };
+
+  try {
+    const { pluginEntryDir } = resolveOpenclawSessionPluginPaths({ home, trackerDir, env: {} });
+    await ensureOpenclawSessionPluginFiles({
+      pluginDir: path.dirname(pluginEntryDir),
+      trackerDir,
+      packageName: "vibeusage",
+    });
+
+    const mod = await import(pathToFileURL(path.join(pluginEntryDir, "index.js")).href);
+    const handlers = new Map();
+    mod.default({
+      on(name, handler) {
+        handlers.set(name, handler);
+      },
+    });
+
+    await handlers.get("llm_output")(
+      {
+        emittedAt: "2026-04-05T05:30:00.000Z",
+        sessionId: "vibeusage-debug-probe",
+        provider: "openai-codex",
+        model: "gpt-5.4",
+        usage: {
+          input: 22009,
+          output: 75,
+          total: 22084,
+        },
+      },
+      {
+        agentId: "main",
+        trigger: "user",
+      },
+    );
+
+    const { events } = await readOpenclawUsageLedger({ trackerDir, offset: 0 });
+    assert.equal(events.length, 1);
+    assert.equal(events[0].agentId, "main");
+    assert.equal(events[0].inputTokens, 22009);
+    assert.equal(events[0].outputTokens, 75);
+    assert.equal(events[0].totalTokens, 22084);
+    assert.equal(calls.length, 1);
+    assert.deepEqual(calls[0].args.slice(-3), ["sync", "--auto", "--from-openclaw"]);
+  } finally {
+    childProcess.spawn = originalSpawn;
+    await fs.rm(tmp, { recursive: true, force: true });
+  }
+});
+
 test("ensureOpenclawSessionPluginFiles maps live usage.total into ledger totalTokens", async () => {
   const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "vibeusage-openclaw-plugin-"));
   const home = path.join(tmp, "home");
@@ -297,7 +447,7 @@ test("ensureOpenclawSessionPluginFiles maps live usage.total into ledger totalTo
   }
 });
 
-test("ensureOpenclawSessionPluginFiles no longer references transcript sync hints", async () => {
+test("ensureOpenclawSessionPluginFiles triggers sync without transcript env hints", async () => {
   const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "vibeusage-openclaw-plugin-"));
   const home = path.join(tmp, "home");
   const trackerDir = path.join(home, ".vibeusage", "tracker");
@@ -313,10 +463,10 @@ test("ensureOpenclawSessionPluginFiles no longer references transcript sync hint
 
     const index = await fs.readFile(path.join(pluginEntryDir, "index.js"), "utf8");
     assert.match(index, /api\.on\('llm_output'/);
+    assert.match(index, /sync', '--auto', '--from-openclaw/);
     assert.doesNotMatch(index, /api\.on\('agent_end'/);
     assert.doesNotMatch(index, /api\.on\('gateway_start'/);
     assert.doesNotMatch(index, /api\.on\('gateway_stop'/);
-    assert.doesNotMatch(index, /sync', '--auto', '--from-openclaw/);
     assert.doesNotMatch(index, /VIBEUSAGE_OPENCLAW_AGENT_ID/);
     assert.doesNotMatch(index, /VIBEUSAGE_OPENCLAW_SESSION_KEY/);
     assert.doesNotMatch(index, /VIBEUSAGE_OPENCLAW_PREV_SESSION_ID/);

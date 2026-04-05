@@ -337,31 +337,79 @@ function buildSessionPluginMeta() {
   )}\n`;
 }
 
-function buildSessionPluginIndex({ trackerDir }) {
+function buildSessionPluginIndex({ trackerDir, packageName = "vibeusage" }) {
   const ledgerModuleUrl = pathToFileURL(
     path.join(trackerDir, "app", "src", "lib", "openclaw-usage-ledger.js"),
   ).href;
+  const trackerBinPath = path.join(trackerDir, "app", "bin", "tracker.js");
+  const fallbackPkg = packageName || "vibeusage";
 
   return (
+    `import fs from 'node:fs';\n` +
+    `import path from 'node:path';\n` +
+    `import cp from 'node:child_process';\n` +
     `import { appendOpenclawUsageEvent } from ${JSON.stringify(ledgerModuleUrl)};\n` +
     `\n` +
     `const trackerDir = ${JSON.stringify(trackerDir)};\n` +
+    `const trackerBinPath = ${JSON.stringify(trackerBinPath)};\n` +
+    `const fallbackPkg = ${JSON.stringify(fallbackPkg)};\n` +
+    `const depsMarkerPath = path.join(trackerDir, 'app', 'node_modules', '@insforge', 'sdk', 'package.json');\n` +
+    `const triggerStatePath = path.join(trackerDir, 'openclaw.session-sync.trigger-state.json');\n` +
+    `const SESSION_TRIGGER_THROTTLE_MS = 15_000;\n` +
     `\n` +
     `export default function register(api) {\n` +
     `  api.on('llm_output', async (event, ctx) => {\n` +
     `    try {\n` +
     `      const payload = buildPayload(event, ctx);\n` +
     `      if (!payload) return;\n` +
-    `      await appendOpenclawUsageEvent({ trackerDir, payload });\n` +
+    `      const result = await appendOpenclawUsageEvent({ trackerDir, payload });\n` +
+    `      if (!result || result.appended === false) return;\n` +
+    `      const scope = normalize(ctx && ctx.agentId) || 'openclaw';\n` +
+    `      const target = resolveSessionRef(event, ctx) || normalize(payload.eventId) || 'unknown';\n` +
+    `      if (!allowTrigger('llm_output', scope, target)) return;\n` +
+    `      spawnSync({ args: ['sync', '--auto', '--from-openclaw'] });\n` +
     `    } catch (_) {}\n` +
     `  });\n` +
+    `}\n` +
+    `\n` +
+    `function spawnSync({ args }) {\n` +
+    `  const hasLocalRuntime = fs.existsSync(trackerBinPath);\n` +
+    `  const hasLocalDeps = fs.existsSync(depsMarkerPath);\n` +
+    `  const argv = Array.isArray(args) && args.length > 0 ? args : ['sync', '--auto'];\n` +
+    `  const cmd = hasLocalRuntime && hasLocalDeps\n` +
+    `    ? [process.execPath, trackerBinPath, ...argv]\n` +
+    `    : ['npx', '--yes', fallbackPkg, ...argv];\n` +
+    `  const child = cp.spawn(cmd[0], cmd.slice(1), {\n` +
+    `    detached: true,\n` +
+    `    stdio: 'ignore',\n` +
+    `    env: { ...process.env }\n` +
+    `  });\n` +
+    `  child.unref();\n` +
+    `}\n` +
+    `\n` +
+    `function allowTrigger(kind, scope, target) {\n` +
+    `  const key = [kind, scope || 'na', target || 'na'].join(':');\n` +
+    `  const now = Date.now();\n` +
+    `  let state = {};\n` +
+    `  try {\n` +
+    `    state = JSON.parse(fs.readFileSync(triggerStatePath, 'utf8'));\n` +
+    `    if (!state || typeof state !== 'object') state = {};\n` +
+    `  } catch (_) {}\n` +
+    `  const last = Number(state[key] || 0);\n` +
+    `  if (Number.isFinite(last) && now - last < SESSION_TRIGGER_THROTTLE_MS) return false;\n` +
+    `  state[key] = now;\n` +
+    `  try {\n` +
+    `    fs.mkdirSync(path.dirname(triggerStatePath), { recursive: true });\n` +
+    `    fs.writeFileSync(triggerStatePath, JSON.stringify(state), 'utf8');\n` +
+    `  } catch (_) {}\n` +
+    `  return true;\n` +
     `}\n` +
     `\n` +
     `function buildPayload(event, ctx) {\n` +
     `  const usage = normalizeUsage(event);\n` +
     `  if (!usage) return null;\n` +
     `\n` +
-    `  const sessionKey = normalize(ctx && ctx.sessionKey);\n` +
+    `  const sessionKey = resolveSessionRef(event, ctx);\n` +
     `  if (!sessionKey) return null;\n` +
     `\n` +
     `  return {\n` +
@@ -376,6 +424,22 @@ function buildSessionPluginIndex({ trackerDir }) {
     `    trigger: normalize(ctx && ctx.trigger) || 'llm_output',\n` +
     `    ...usage\n` +
     `  };\n` +
+    `}\n` +
+    `\n` +
+    `function resolveSessionRef(event, ctx) {\n` +
+    `  const explicit = normalize(ctx && ctx.sessionKey);\n` +
+    `  if (explicit) return explicit;\n` +
+    `  const eventSessionId = normalize(event && event.sessionId);\n` +
+    `  if (eventSessionId) {\n` +
+    `    const agentId = normalize(ctx && ctx.agentId) || 'openclaw';\n` +
+    `    return 'agent:' + agentId + ':session:' + eventSessionId;\n` +
+    `  }\n` +
+    `  const ctxSessionId = normalize(ctx && ctx.sessionId);\n` +
+    `  if (ctxSessionId) {\n` +
+    `    const agentId = normalize(ctx && ctx.agentId) || 'openclaw';\n` +
+    `    return 'agent:' + agentId + ':session:' + ctxSessionId;\n` +
+    `  }\n` +
+    `  return null;\n` +
     `}\n` +
     `\n` +
     `function normalizeUsage(event) {\n` +
