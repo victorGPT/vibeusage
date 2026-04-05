@@ -1,113 +1,173 @@
-# VibeUsage AI Agent 安装指南
+# 让你的 AI Agent 安装 VibeUsage
 
-## 概述
-VibeUsage 是一个 AI Token 用量追踪工具，支持 Codex CLI、Claude Code、Gemini CLI、OpenCode 和 OpenClaw 等多种 AI 客户端。
+这份文档是给 **ChatGPT、Claude、Codex、OpenClaw 或其他 AI Agent** 用的安装说明。
 
-> 说明
-> 当前 OpenCode 版本的本地用量真源是 `~/.local/share/opencode/opencode.db`（可由 `OPENCODE_HOME` 覆盖），不是旧版 `storage/message/**/*.json`。要获得完整 OpenCode 支持，系统里需要可执行的 `sqlite3`。
+目标不是让用户自己手动折腾，而是：**把下面这段说明直接发给你的 Agent，它就可以帮你完成安装。**
 
-## 安装步骤（请按顺序执行）
+## 直接复制给 Agent
 
-### 步骤 1: 检查环境
-```bash
-# 检查 Node.js 版本（需要 18+）
-node --version
+把下面整段原样发给你的 AI 助手：
 
-# OpenCode 用户额外检查 sqlite3（完整支持需要）
-sqlite3 --version
+```text
+请帮我安装 VibeUsage，用来追踪 AI Coding CLI 的 Token 用量。
 
-# 如果 Node.js 版本低于 18，请先升级
-# macOS/Linux: nvm install 18 && nvm use 18
-# Windows: 下载安装 https://nodejs.org/
+要求：
+1. 先检查我的环境是否满足要求
+2. 如果缺依赖，告诉我缺什么
+3. 安装并初始化 VibeUsage
+4. 安装完成后帮我验证状态
+5. 如果是 OpenCode 用户，额外检查 sqlite3 是否可用
+6. 不要修改与 VibeUsage 无关的配置
+
+请按这个顺序执行：
+
+1) 检查 Node.js 版本（需要 Node.js 20.x）
+2) 如有需要，检查 sqlite3 是否可用
+3) 运行：
+   npx --yes vibeusage init
+4) 安装完成后运行：
+   vibeusage status
+5) 如需手动补同步，再运行：
+   vibeusage sync
+
+补充说明：
+- 从 vibeusage@0.3.0 开始，只有 init 会修改本地客户端配置
+- status、diagnostics、doctor、sync 都是只读命令，不会自动修复旧安装
+- OpenCode 当前以本地 SQLite 为主数据源：~/.local/share/opencode/opencode.db
+- OpenClaw 使用 session plugin + 本地 sanitized usage ledger；如果安装了 OpenClaw，可能需要提醒我重启 gateway
+- 不要上传我的代码、prompt 或 response 内容
 ```
 
-### 步骤 2: 安装 VibeUsage
-```bash
-# 使用 npx 安装（推荐，无需全局安装）
-npx --yes vibeusage init
+## Agent 在做什么
 
-# 或者全局安装
-npm install -g vibeusage
-vibeusage init
-```
+运行 `npx --yes vibeusage init` 时，VibeUsage 会：
 
-### 步骤 3: 完成初始化
-运行 `npx vibeusage init` 后会：
-1. 自动检测并配置支持的 AI 客户端
-2. 安装 notify hook 到 ~/.codex/config.toml、~/.code/config.toml 等
-3. 创建本地数据目录 ~/.vibeusage/
-4. 生成设备 token 用于身份识别
+1. 检测本地支持的 AI 客户端
+2. 安装轻量 hook / plugin
+3. 创建本地数据目录 `~/.vibeusage/`
+4. 引导浏览器认证，或接受 dashboard 的 link code
+5. 执行一次初始同步
 
 > 说明
 > 从 `vibeusage@0.3.0` 开始，只有 `init` 会修改本地客户端配置。`status`、`diagnostics`、`doctor`、`sync` 都是只读命令；如果是旧安装，请重新执行一次 `vibeusage init`。
 
-### 步骤 4: 验证安装
-```bash
-# 检查状态
-vibeusage status
+## 环境要求
 
-# 手动同步测试
-vibeusage sync
+- **Node.js 20.x**
+- 当前主要支持 **macOS**
+- 若使用 OpenCode，为了获得完整支持，系统需要可执行的 **`sqlite3`**
 
-# 查看帮助
-vibeusage --help
-```
+> 说明
+> 当前 OpenCode 版本的本地用量真源是 `~/.local/share/opencode/opencode.db`（可由 `OPENCODE_HOME` 覆盖），不是旧版 `storage/message/**/*.json`。
 
-## 支持的 AI 客户端自动配置
+## 支持自动配置的客户端
 
 VibeUsage 会自动检测并配置以下客户端：
 
-| 客户端 | 配置位置 |
-|--------|----------|
-| Codex CLI | ~/.codex/config.toml |
-| Every Code | ~/.code/config.toml |
-| Gemini CLI | ~/.gemini/settings.json |
+| 客户端 | 配置 / 数据来源 |
+|--------|----------------|
+| Codex CLI | `~/.codex/config.toml` + rollout logs |
+| Every Code | `~/.code/config.toml` + rollout logs |
+| Gemini CLI | `~/.gemini/settings.json` + session files |
 | OpenCode | 全局插件 + 本地 SQLite |
-| Claude Code | ~/.claude/settings.json |
-| OpenClaw | Session plugin |
+| Claude Code | `~/.claude/settings.json` |
+| OpenClaw | Session plugin + 本地 sanitized usage ledger |
+
+## 安装完成后怎么验证
+
+```bash
+# 查看当前状态
+vibeusage status
+
+# 如需手动同步
+vibeusage sync
+
+# 健康检查
+vibeusage doctor
+```
 
 ## 常用命令
 
 ```bash
+# 安装 / 修复本地接入
+npx --yes vibeusage init
+
 # 查看状态
 vibeusage status
 
 # 手动同步
 vibeusage sync
 
-# 调试模式同步
-vibeusage sync --debug
+# 输出诊断 JSON
+vibeusage diagnostics --out diagnostics.json
 
-# 查看版本
-vibeusage --version
+# 健康检查
+vibeusage doctor
 
 # 卸载
 vibeusage uninstall
 
-# 完全清除（包括数据）
+# 完全清除（包括本地数据）
 vibeusage uninstall --purge
 ```
 
 ## 故障排除
 
-### 问题: 命令找不到
-解决: 确保 Node.js 18+ 已安装，并尝试使用 `npx --yes vibeusage init`
+### 问题：命令找不到
+确保 Node.js 20.x 已安装，然后重新运行：
 
-### 问题: 同步失败
-解决: 检查网络连接，或运行 `vibeusage sync --debug` 查看详细日志
+```bash
+npx --yes vibeusage init
+```
 
-### 问题: OpenCode 用量不完整
-解决: 先运行 `vibeusage status --diagnostics` 或 `vibeusage doctor`，确认 `opencode.sqlite_status` / `OpenCode SQLite reader`。如果状态是 `missing-sqlite3`，请先安装 `sqlite3`；如果状态是 `query-failed`，请保留 `vibeusage sync --debug` 输出继续排查。
+### 问题：同步失败
+先检查网络连接，再运行：
 
-### 问题: 某些客户端未配置
-解决: 手动运行 `vibeusage init` 会重新检测并配置所有支持的客户端；只读命令不会自动修复旧 hook 布局
+```bash
+vibeusage sync --debug
+```
+
+### 问题：OpenCode 用量不完整
+先运行：
+
+```bash
+vibeusage status
+vibeusage doctor
+```
+
+重点确认 `OpenCode SQLite reader` / `opencode.sqlite_status`：
+
+- 如果是 `missing-sqlite3`：先安装 `sqlite3`
+- 如果是 `query-failed`：保留 `vibeusage sync --debug` 输出继续排查
+
+### 问题：OpenClaw 用量没进来
+按顺序检查：
+
+1. `npx --yes vibeusage init`
+2. 重启 OpenClaw gateway
+3. 先跑一个真实 OpenClaw turn
+4. 运行 `vibeusage sync --from-openclaw`
+5. 再看 `vibeusage status` / `vibeusage doctor`
+
+### 问题：某些客户端没有被配置
+重新运行：
+
+```bash
+npx --yes vibeusage init
+```
+
+只读命令不会自动修复旧 hook / plugin 布局。
 
 ## 隐私说明
-- 仅追踪 Token 用量数字，不上传代码或对话内容
-- 所有数据本地存储在 ~/.vibeusage/
-- 支持公开/私有模式切换
 
-## 链接
+- 只追踪 Token 用量和少量 usage 元数据
+- 不上传代码、prompt、response、transcript 内容
+- 数据首先在本地解析与聚合
+- OpenClaw 仅走 sanitized usage 路径
+
+## 相关链接
+
 - 官网: https://www.vibeusage.cc
-- 文档: https://docs.vibeusage.cc
 - GitHub: https://github.com/victorGPT/vibeusage
+- README: https://github.com/victorGPT/vibeusage/blob/main/README.md
+- 中文 README: https://github.com/victorGPT/vibeusage/blob/main/README.zh-CN.md

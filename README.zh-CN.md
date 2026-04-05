@@ -2,446 +2,359 @@
 
 <img src="dashboard/public/icon-192.png" width="96" alt="VibeUsage 图标" />
 
-# 🟢 VIBEUSAGE
+# VibeUsage
 
-**量化你的 AI 产出**
-_追踪所有 AI CLI 工具的 Token 使用量_
+**统一追踪 AI Coding CLI 的 Token 用量。**  
+本地解析、最小化数据上传，并提供可分享的 Dashboard，支持 Codex CLI、Claude Code、Gemini CLI、OpenCode、OpenClaw 等工具。
 
-[**www.vibeusage.cc**](https://www.vibeusage.cc)
-
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![npm version](https://img.shields.io/npm/v/vibeusage.svg)](https://www.npmjs.com/package/vibeusage)
-[![Node.js Support](https://img.shields.io/badge/Node.js-20.x-brightgreen.svg)](https://nodejs.org/)
-[![Platform](https://img.shields.io/badge/Platform-macOS-lightgrey.svg)](https://www.apple.com/macos/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Node.js](https://img.shields.io/badge/Node.js-20.x-brightgreen.svg)](https://nodejs.org/)
+[![Website](https://img.shields.io/badge/Website-vibeusage.cc-black)](https://www.vibeusage.cc)
 
-[**English**](README.md) • [**中文说明**](README.zh-CN.md)
+**[让你的 Agent 安装 VibeUsage](docs/AI_AGENT_INSTALL.md)** · [打开 Dashboard](https://www.vibeusage.cc) · [访问官网](https://www.vibeusage.cc)
 
-[**文档**](docs/) • [**控制台**](https://www.vibeusage.cc) • [**后端接口**](BACKEND_API.md)
+把安装指南直接交给 ChatGPT、Claude、Codex，或你常用的 Agent —— 它可以替你完成 VibeUsage 的安装与接入。
+
+<sub>隐私优先 · macOS-first · 支持 Codex CLI、Every Code、Claude Code、Gemini CLI、OpenCode、OpenClaw</sub>
 
 <br/>
 
-<img src="docs/screenshots/dashboard.png" width="900" alt="VibeUsage 控制台预览"/>
+[文档](docs/) · [后端 API](BACKEND_API.md) · [npm](https://www.npmjs.com/package/vibeusage) · [English](README.md) · [中文说明](README.zh-CN.md)
+
+<br/>
+
+<img src="docs/screenshots/dashboard.png" width="900" alt="VibeUsage Dashboard 截图" />
 
 </div>
 
 ---
 
-## 🚀 快速开始
+VibeUsage 是一个面向 **AI Agent / Coding CLI** 的 **Token 用量追踪器**。它会在本地安装轻量 hook / plugin，读取本地日志或本地数据库中的 usage 信息，在你的机器上聚合为时间桶，然后只同步 Dashboard、成本拆解、项目统计、公开主页和排行榜所需的最小数据。
 
-30 秒即可上手：
+当前它是 **macOS-first**，主要围绕真实开发者场景支持：**Codex CLI、Every Code、Claude Code、Gemini CLI、OpenCode、OpenClaw**。
 
-```bash
-npx vibeusage init
-```
+## 为什么用 VibeUsage
 
-就这样！你的 AI token 使用量将自动同步到[控制台](https://www.vibeusage.cc) 🎉
+- **Agent-first onboarding** —— 可以把安装指南直接交给 AI Agent，也可以在需要时自己运行 `npx --yes vibeusage init` 完成手动安装。
+- **多客户端统一统计** —— 把多个 AI Coding CLI 的用量收敛到一条时间线里。
+- **隐私优先** —— prompt、response、代码、transcript 默认不上传。
+- **项目维度分析** —— 在可识别仓库身份时，支持按公开 GitHub 仓库查看 usage。
+- **不只是原始数字** —— 提供总量、模型拆解、成本估算、热力图、趋势和项目使用情况。
+- **可分享身份页** —— 支持可选公开主页与排行榜参与。
+- **OpenClaw 专用安全路径** —— 通过本地 sanitized ledger 集成，而不是解析 transcript。
 
-## ✨ 为什么选择 VibeUsage？
+## 快速开始
 
-- 📡 **多来源统一追踪** - 支持 Codex CLI、Every Code、Gemini CLI、Claude Code、Opencode、OpenClaw 等多个 AI CLI 工具
-- 🤖 **多模型统计** - 统一追踪 GPT-4、Claude、Gemini、o1 等所有 AI 模型的 token 消耗
-- 📁 **项目 AI 足迹** - 按仓库追踪并公开展示 token 使用量，证明这是 AI 辅助开发的项目
-- 🏆 **全球排行榜** - 周榜/月榜/总榜实时更新，与全球开发者社区一起成长
-- 🌐 **公开档案** - 分享你的 AI 使用旅程，可选公开参与排行榜
-- 🔒 **隐私优先** - 只统计数字，永不上传你的代码和对话
-- ⚡ **零配置自动同步** - 设置一次，终身自动
-- 🎨 **Matrix-A 设计** - 赛博朋克风格的高颜值控制台
-- 📈 **深度分析** - 成本洞察、趋势预测、活动热图
+### 环境要求
 
-## 🧰 支持的 AI CLI
+- **Node.js 20.x**
+- 当前主要支持 **macOS**
+- 为了获得完整 OpenCode 支持，系统需要有 **`sqlite3`**
 
-| CLI 工具 | 自动检测 | 状态 |
-|----------|---------|------|
-| **Codex CLI** | ✅ | 完全支持 |
-| **Every Code** | ✅ | 完全支持 |
-| **Gemini CLI** | ✅ | 完全支持 |
-| **Claude Code** | ✅ | 完全支持 |
-| **Opencode** | ✅ | 完全支持 |
-| **OpenClaw** | ✅ | 完全支持 |
-
-无论你使用 GPT-4、Claude 3.5 Sonnet、o1 还是 Gemini，所有 token 消耗都会被统一追踪。
-
-## 🌌 项目概述
-
-**VibeUsage** 是一个专为 macOS 开发者设计的智能 token 使用追踪系统。通过全新的 **Matrix-A Design System**，它提供高度可视化的赛博朋克风格仪表盘，将你的 **AI 产出** 转化为可量化的指标，并支持通过 **Neural Divergence Map** 实时监控多模型的算力分布。
-
-> [!TIP]
-> **核心指数**：我们的标志性指标，通过分析 token 消耗速率与模式，反映你的开发心流状态。
-
-## 📊 控制台功能
-
-### 🎨 Matrix-A 设计系统
-使用 React + Vite 构建的高性能控制台，配备赛博朋克风格的设计语言：
-- **Neural Divergence Map**：可视化多引擎负载均衡和算力分布
-- **成本智能**：实时、多维度的成本分解和预测
-- **活动热图**：GitHub 风格的贡献图表，带连击追踪
-- **智能通知**：非侵入式的系统级提醒，采用 Golden 视觉风格
-
-### 📈 分析与洞察
-- **AI 分析**：深度分析输入/输出 token，专门追踪缓存和推理组件
-- **模型分解**：按模型统计使用量和成本分析
-- **项目统计**：按 GitHub 仓库追踪 token 使用量
-- **趋势预测**：预测未来使用模式
-
-### 🏆 社区功能
-- **全球排行榜**：日榜、周榜、月榜和总榜，隐私安全的显示名称
-- **公开档案**：使用隐私安全的公开档案分享你的 AI 使用旅程
-- **排行榜分类**：参与总体排名或按特定模型（GPT、Claude 等）竞争
-
-<img src="docs/screenshots/landing.png" width="900" alt="VibeUsage 落地页预览"/>
-
-## 🔒 隐私保证
-
-我们相信你的代码和想法属于你自己。VibeUsage 采用严格的隐私保护架构，确保你的数据始终受控。
-
-| 保护措施 | 说明 |
-|---------|------|
-| 🛡️ **不上传内容** | 永不上传 prompt 或响应 - 仅在本地计算 token 数量 |
-| 📡 **本地聚合** | 所有分析在本地完成 - 仅发送 30 分钟使用桶 |
-| 🔐 **哈希身份** | 设备 token 在服务端使用 SHA-256 哈希 - 原始凭据从不存储 |
-| 🔦 **完全透明** | 可以在 `src/lib/rollout.js` 中审计同步逻辑 - 真的只有数字和时间戳 |
-
-## 📦 安装
-
-### 标准设置
-
-一次初始化环境 - VibeUsage 会在后台自动处理所有同步：
+### 安装并绑定设备
 
 ```bash
-npx vibeusage init
+npx --yes vibeusage init
 ```
+
+执行后会发生这些事：
+
+1. VibeUsage 检测本地已安装的 AI CLI。
+2. 自动为支持的工具安装轻量 hook / plugin。
+3. 默认走浏览器认证，或者接受 Dashboard 下发的 link code。
+4. 执行一次初始同步。
+
+之后你只需要继续正常使用原本的 AI 工具，后台会自动同步。
 
 > [!IMPORTANT]
-> 从 `vibeusage@0.3.0` 开始，只有 `init` 会修改本地集成配置。如果你是从旧版本升级，请重新执行一次 `npx vibeusage init`；`status`、`diagnostics`、`doctor`、`sync` 都不会自动修复旧 hook 布局。
+> 从 `vibeusage@0.3.0` 开始，**只有 `init` 会修改本地集成配置**。如果你是从旧安装布局升级，请重新运行一次 `npx vibeusage init`。
 
-### 认证方式
-
-1. **浏览器认证**（默认）- 打开浏览器进行安全认证
-2. **链接码** - 使用 `--link-code` 通过控制台生成的代码进行认证
-3. **密码** - 直接密码登录（备选）
-4. **访问令牌** - 用于 CI/自动化环境
-
-### CLI 选项
+### 用 Dashboard link code 安装
 
 ```bash
-npx vibeusage init [选项]
-
-选项:
-  --yes              跳过确认提示（非交互环境）
-  --dry-run          预览更改但不实际写入文件
-  --link-code <code> 使用控制台的链接码进行认证
-  --base-url <url>   覆盖默认 API 端点
-  --debug            启用调试输出
+npx --yes vibeusage init --link-code <code>
 ```
 
-### 自动配置
+适用于你想从 Dashboard 复制安装命令，或者想让另一个 AI 助手代为安装的时候。
 
-`init` 完成后，所有支持的 CLI 工具都会自动配置数据同步：
+## 支持的客户端
 
-| 工具 | 配置位置 | 方法 |
-|-----|---------|-----|
-| **Codex CLI** | `~/.codex/config.toml` | `notify` 钩子 |
-| **Every Code** | `~/.code/config.toml`（或 `CODE_HOME`） | `notify` 钩子 |
-| **Gemini CLI** | `~/.gemini/settings.json`（或 `GEMINI_HOME`） | `SessionEnd` 钩子 |
-| **Opencode** | OpenCode 配置/插件 | SQLite-first 解析插件 |
-| **Claude Code** | `~/.claude/settings.json` | `Stop` + `SessionEnd` 钩子 |
-| **OpenClaw** | 安装时自动链接 | Session plugin（需要重启） |
+| 工具 | 检测方式 | 同步触发 / 安装方式 | 主要本地数据源 |
+| --- | --- | --- | --- |
+| **Codex CLI** | 自动检测 | `notify` hook | `~/.codex/sessions/**/rollout-*.jsonl` |
+| **Every Code** | 自动检测 | `notify` hook | `~/.code/sessions/**/rollout-*.jsonl` |
+| **Claude Code** | 自动检测 | `Stop` + `SessionEnd` hooks | 本地 hook 输出 |
+| **Gemini CLI** | 自动检测 | `SessionEnd` hook | `~/.gemini/tmp/**/chats/session-*.json` |
+| **OpenCode** | 自动检测 | plugin + 本地解析 | `~/.local/share/opencode/opencode.db`（旧 message 文件仅作 fallback） |
+| **OpenClaw** | 安装后自动检测 | session plugin | 本地 sanitized usage ledger |
 
-无需进一步操作！🎉
+### OpenClaw 说明
 
-如果后续某个集成出现漂移，请重新执行 `npx vibeusage init`。只读命令不会重写本地 hook/plugin 状态。
+OpenClaw 走的是专门的隐私保护路径：
 
-## 💡 使用方法
+**OpenClaw session plugin → 本地 sanitized usage ledger → `vibeusage sync --from-openclaw`**
 
-### 手动同步
+- 不解析 transcript
+- 不上传 prompt / response 内容
+- link 完 plugin 后需要重启 OpenClaw gateway
 
-虽然同步是自动进行的，但你可以随时手动触发同步：
+详见 [`docs/openclaw-integration.md`](docs/openclaw-integration.md)。
 
-```bash
-# 手动同步最新的本地会话数据
-npx vibeusage sync
+## VibeUsage 会追踪什么
 
-# 检查当前链接状态
-npx vibeusage status
-```
+VibeUsage聚焦的是 **usage accounting**，不是内容采集。
 
-### 健康检查
+会追踪的数据包括：
 
-运行综合诊断以识别问题：
+- source / 工具名
+- model identity
+- input tokens
+- cached input tokens
+- output tokens
+- reasoning output tokens
+- total tokens
+- 时间桶元数据
+- 在可识别时的 project / public repo 归属
 
-```bash
-# 基本健康检查
-npx vibeusage doctor
+## VibeUsage 不会上传什么
 
-# JSON 输出用于调试
-npx vibeusage doctor --json --out doctor.json
+VibeUsage **不会上传**：
 
-# 针对不同端点进行测试
-npx vibeusage doctor --base-url https://your-instance.insforge.app
-```
+- prompt
+- response
+- 源代码
+- 聊天 transcript
+- OpenClaw transcript 内容
+- 原始 workspace 内容
+- secret、token、credential 等敏感信息
 
-### 调试模式
+对于 OpenClaw，受支持路径只包含本地 sanitized usage metadata 与 token 计数。
 
-启用调试输出以查看详细的请求/响应信息：
-
-```bash
-VIBEUSAGE_DEBUG=1 npx vibeusage sync
-# 或
-npx vibeusage sync --debug
-```
-
-### 卸载
-
-```bash
-# 标准卸载（保留数据）
-npx vibeusage uninstall
-
-# 完全清除 - 删除所有数据，包括配置和缓存的会话
-npx vibeusage uninstall --purge
-```
-
-## 🏗️ 架构
+## 工作原理
 
 ```mermaid
 graph LR
-    A[Codex CLI] -->|Rollout 日志| G(Tracker CLI)
-    B[Every Code] -->|Rollout 日志| G
-    C[Gemini CLI] -->|会话日志| G
-    D[Opencode] -->|SQLite DB| G
-    E[Claude Code] -->|钩子输出| G
-    F[OpenClaw] -->|Session Plugin → Sanitized Ledger| G
-    G -->|AI Tokens| H{核心中继}
-    H --> I[VibeUsage 控制台]
-    H --> J[AI 分析引擎]
-    H --> K[排行榜服务]
-    H --> L[公开视图 API]
+    A[Codex CLI] --> G[VibeUsage CLI]
+    B[Every Code] --> G
+    C[Claude Code] --> G
+    D[Gemini CLI] --> G
+    E[OpenCode] --> G
+    F[OpenClaw] --> G
+    G --> H[本地聚合为 30 分钟 UTC buckets]
+    H --> I[VibeUsage 后端]
+    I --> J[Dashboard]
+    I --> K[Project Usage]
+    I --> L[公开主页 / 排行榜]
 ```
 
-### 技术栈
+整体流程如下：
 
-- **CLI**：Node.js 20.x、CommonJS
-- **控制台**：React 18 + Vite + TailwindCSS + TypeScript
-- **后端**：InsForge Edge Functions (Deno)
-- **数据库**：InsForge Database (PostgreSQL)
-- **设计**：Matrix-A Design System
+1. `init` 为支持的工具安装轻量 hook / plugin。
+2. 你的 AI 客户端继续按原来的方式工作。
+3. VibeUsage 增量读取本地 usage 工件。
+4. 在本地聚合为 **30 分钟 UTC buckets**。
+5. 批量上传，供 Dashboard 和 API 使用。
 
-### 组件
+## Dashboard 功能
 
-- **Tracker CLI**（`src/`）：Node.js CLI，解析多个 AI 工具的日志并同步 token 数据
-- **核心中继**（InsForge Edge Functions）：无服务器后端，处理摄入、聚合和 API
-- **控制台**（`dashboard/`）：React + Vite 前端用于可视化
-- **AI 分析引擎**：成本计算、模型分解和使用预测
+VibeUsage 提供托管 Dashboard： [www.vibeusage.cc](https://www.vibeusage.cc)
 
-### 数据流
+<img src="docs/screenshots/landing.png" width="900" alt="VibeUsage Landing 页面截图" />
 
-1. AI CLI 工具在使用过程中生成日志
-2. 本地 `notify-handler` 检测更改并触发同步
-3. CLI 增量解析日志、SQLite 状态以及 OpenClaw 的本地脱敏 usage ledger，只提取白名单 token 计数
-4. 数据在本地聚合到 30 分钟 UTC 桶中
-5. 批量上传到 InsForge，带幂等去重
-6. 控制台查询聚合结果进行可视化
+### 当前包含的视图
 
-### 日志源
+- **Usage summary** —— 总量、input、output、cached、reasoning tokens
+- **Model breakdown** —— 查看模型家族与单模型占比
+- **Cost breakdown** —— 基于价格数据估算成本
+- **Activity heatmap** —— 查看活跃天数与使用节奏
+- **Trend views** —— 支持 day / week / month / total 维度查看趋势
+- **Project usage panel** —— 查看哪些公开 GitHub 仓库消耗了最多 token
+- **Install panel** —— 可从 Dashboard 生成 install / link-code 流程
+- **可选公开主页** —— 分享你的 usage profile
+- **Leaderboard** —— 参与社区排行榜
 
-| 工具 | 日志位置 | 覆盖环境变量 |
-|-----|---------|------------|
-| **Codex CLI** | `~/.codex/sessions/**/rollout-*.jsonl` | `CODEX_HOME` |
-| **Every Code** | `~/.code/sessions/**/rollout-*.jsonl` | `CODE_HOME` |
-| **Gemini CLI** | `~/.gemini/tmp/**/chats/session-*.json` | `GEMINI_HOME` |
-| **Opencode** | `~/.local/share/opencode/opencode.db`（旧版 `storage/message/**/*.json` 仅作回退） | `OPENCODE_HOME` |
-| **Claude Code** | 从钩子输出解析 | - |
-| **OpenClaw** | Session plugin → 本地脱敏 usage ledger | - |
+## CLI 命令
 
-## ⚙️ 配置
+| 命令 | 用途 |
+| --- | --- |
+| `vibeusage init` | 安装本地集成、完成认证绑定、执行初始设置 |
+| `vibeusage sync` | 解析本地 usage 并上传待同步数据 |
+| `vibeusage status` | 查看当前配置、队列、上传状态和集成状态 |
+| `vibeusage diagnostics` | 输出机器可读的诊断 JSON |
+| `vibeusage doctor` | 运行健康检查并给出问题提示 |
+| `vibeusage uninstall` | 移除 VibeUsage 本地集成状态 |
 
-<details>
-<summary><b>环境变量</b></summary>
-
-### 核心设置
-
-| 变量 | 说明 | 默认值 |
-|-----|------|-------|
-| `VIBEUSAGE_HTTP_TIMEOUT_MS` | CLI HTTP 超时（毫秒）（`0` 禁用，限制 `1000..120000`） | `20000` |
-| `VITE_VIBEUSAGE_HTTP_TIMEOUT_MS` | 控制台请求超时（毫秒）（`0` 禁用，限制 `1000..30000`） | `15000` |
-| `VIBEUSAGE_DEBUG` | 启用调试输出（`1` 或 `true` 启用） | - |
-| `VIBEUSAGE_DASHBOARD_URL` | 自定义控制台 URL | `https://www.vibeusage.cc` |
-| `VIBEUSAGE_INSFORGE_BASE_URL` | 自定义 API 基础 URL | `https://5tmappuk.us-east.insforge.app` |
-| `VIBEUSAGE_DEVICE_TOKEN` | 预配置设备令牌（用于 CI） | - |
-
-### CLI 工具覆盖
-
-| 变量 | 说明 | 默认值 |
-|-----|------|-------|
-| `CODEX_HOME` | Codex CLI 目录覆盖 | `~/.codex` |
-| `CODE_HOME` | Every Code 目录覆盖 | `~/.code` |
-| `GEMINI_HOME` | Gemini CLI 目录覆盖 | `~/.gemini` |
-
-</details>
-
-另见：[`docs/openclaw-integration.md`](docs/openclaw-integration.md)，其中说明了 OpenClaw 单一路径 accounting 合同。
-
-## 🔧 故障排查
-
-<details>
-<summary><b>数据未出现在控制台中</b></summary>
-
-1. 检查状态：`npx vibeusage status`
-2. 强制手动同步：`npx vibeusage sync`
-3. 验证 CLI 工具钩子已配置（如需要，重新运行 `init`）
-4. 检查调试输出：`VIBEUSAGE_DEBUG=1 npx vibeusage sync`
-
-</details>
-
-<details>
-<summary><b>连击显示 0 天，但总数看起来正确</b></summary>
-
-连击定义为连续到今天的天数。如果今天的总数为 0，连击将为 0。
-
-如果你期望非零连击，清除缓存的认证/热图数据并重新登录：
-
-```javascript
-localStorage.removeItem("vibeusage.dashboard.auth.v1");
-Object.keys(localStorage)
-  .filter((k) => k.startsWith("vibeusage.heatmap."))
-  .forEach((k) => localStorage.removeItem(k));
-location.reload();
-```
-
-重新加载后完成落地页登录流程。
-
-注意：控制台不使用 `insforge-auth-token`；使用 `vibeusage.dashboard.auth.v1`。
-
-</details>
-
-<details>
-<summary><b>慢速连接上的超时错误</b></summary>
-
-为慢速连接增加 HTTP 超时：
+### 命令示例
 
 ```bash
-VIBEUSAGE_HTTP_TIMEOUT_MS=60000 npx vibeusage sync
+# 安装 / 修复本地集成
+npx --yes vibeusage init
+
+# 预览改动但不落盘
+npx vibeusage init --dry-run
+
+# 手动同步
+npx vibeusage sync
+
+# 一次性把队列尽量清空
+npx vibeusage sync --drain
+
+# 查看状态
+npx vibeusage status
+
+# 输出完整诊断 JSON
+npx vibeusage diagnostics --out diagnostics.json
+
+# 健康检查
+npx vibeusage doctor
+
+# 移除集成
+npx vibeusage uninstall
 ```
 
-</details>
+可运行 `node bin/tracker.js --help` 或 `npx vibeusage --help` 查看当前 CLI 面。
 
-## 💻 开发
+## 配置
 
-### 本地开发
+### 运行时配置
+
+| 变量 | 说明 | 默认值 |
+| --- | --- | --- |
+| `VIBEUSAGE_INSFORGE_BASE_URL` | API base URL 覆盖 | hosted default |
+| `VIBEUSAGE_DASHBOARD_URL` | Dashboard URL 覆盖 | `https://www.vibeusage.cc` |
+| `VIBEUSAGE_DEVICE_TOKEN` | 预配置的 device token | unset |
+| `VIBEUSAGE_HTTP_TIMEOUT_MS` | CLI HTTP 超时 | `20000` |
+| `VIBEUSAGE_DEBUG` | Debug 输出（`1` / `true`） | off |
+
+### 本地工具路径覆盖
+
+| 变量 | 说明 | 默认值 |
+| --- | --- | --- |
+| `CODEX_HOME` | Codex CLI home 覆盖 | `~/.codex` |
+| `CODE_HOME` | Every Code home 覆盖 | `~/.code` |
+| `GEMINI_HOME` | Gemini CLI home 覆盖 | `~/.gemini` |
+| `OPENCODE_HOME` | OpenCode 数据目录覆盖 | `~/.local/share/opencode` |
+
+## FAQ
+
+### VibeUsage 会上传我的代码或对话吗？
+
+不会。VibeUsage 采用本地解析 + 最小上传原则，关注的是 usage accounting 及其相关元数据。
+
+### 升级后我应该运行哪个命令？
+
+运行：
 
 ```bash
-# 克隆仓库
-git clone https://github.com/your-username/vibeusage.git
+npx --yes vibeusage init
+```
+
+`init` 是唯一会修复或更新本地集成配置的命令。
+
+### 我的 OpenCode 总量看起来不完整，先检查什么？
+
+运行：
+
+```bash
+npx vibeusage status
+npx vibeusage doctor
+```
+
+最常见原因是系统里缺少 `sqlite3`，或者本地 SQLite 查询失败。
+
+### 我的 OpenClaw usage 没显示，先检查什么？
+
+1. 运行 `npx vibeusage init`
+2. 重启 OpenClaw gateway
+3. 先跑一个真实的 OpenClaw turn
+4. 运行 `npx vibeusage sync --from-openclaw`
+5. 用 `npx vibeusage status` / `npx vibeusage doctor` 检查状态
+
+### 现在支持 Linux / Windows 吗？
+
+还没有完全支持。当前阶段仍然是 **macOS-first**，跨平台支持仍在 roadmap 中。
+
+## 给 AI 助手使用
+
+如果你想让 ChatGPT、Claude 或其他 AI 助手帮你安装 VibeUsage，可以直接用这个指南：
+
+- [`docs/AI_AGENT_INSTALL.md`](docs/AI_AGENT_INSTALL.md)
+
+## 文档
+
+- [OpenClaw 集成契约](docs/openclaw-integration.md)
+- [后端 API](BACKEND_API.md)
+- [Dashboard API 说明](docs/dashboard/api.md)
+- [仓库导航图](docs/repo-sitemap.md)
+- [AI Agent 安装指南](docs/AI_AGENT_INSTALL.md)
+
+## 开发
+
+```bash
+git clone https://github.com/victorGPT/vibeusage.git
 cd vibeusage
-
-# 安装依赖
 npm install
-
-# 启动控制台开发服务器
-cd dashboard
-npm install
-npm run dev
+npm --prefix dashboard install
+npm --prefix dashboard run dev
 ```
 
-### 开发命令
+### 常用命令
 
 ```bash
-# 运行测试
+# 测试
 npm test
 
-# 运行本地 CI 检查
+# 本地完整 CI 门禁
 npm run ci:local
 
-# 验证文案注册表
-npm run validate:copy
-
-# 验证 UI 硬编码文本
-npm run validate:ui-hardcode
-
-# 验证架构防护栏
-npm run validate:guardrails
-
-# 构建后端函数
+# 构建生成的 edge artifacts
 npm run build:insforge
 
-# 检查后端构建（不写入）
+# 校验生成的 edge artifacts 是否最新
 npm run build:insforge:check
 
-# 运行冒烟测试
+# 校验 UI copy registry
+npm run validate:copy
+
+# 校验 UI 中硬编码字符串
+npm run validate:ui-hardcode
+
+# 架构 guardrails
+npm run validate:guardrails
+
+# smoke checks
 npm run smoke
 ```
 
-### OpenSpec 工作流
+## 贡献
 
-本项目使用 **OpenSpec** 进行规格驱动开发。在进行重大更改之前：
+欢迎贡献。
 
-1. 阅读 [`openspec/project.md`](openspec/project.md) 了解项目约定
-2. 查看 [`openspec/AGENTS.md`](openspec/AGENTS.md) 了解完整的 OpenSpec 工作流
-3. 运行 `npx openspec list` 查看活跃的更改
-4. 运行 `npx openspec list --specs` 查看现有规格
+如果是较大的改动，建议先：
 
-详见 [CLAUDE.md](CLAUDE.md) 了解详细指南。
+- 阅读 [`AGENTS.md`](AGENTS.md)
+- 阅读 [`docs/repo-sitemap.md`](docs/repo-sitemap.md)
+- 对重要产品 / 架构变更走 OpenSpec 流程
+- 所有用户可见文案统一维护在 `dashboard/src/content/copy.csv`
 
-### 架构验证
+## Roadmap
 
-```bash
-# 验证文案注册表
-npm run validate:copy
+- 更完整的 Linux 支持
+- Windows 支持
+- 更丰富的项目级分析
+- 更好的团队 / 协作视图
+- 更多 AI Coding Client 支持
 
-# 生成架构画布
-npm run architecture:canvas
+## License
 
-# 为模块生成聚焦画布
-npm run architecture:canvas:focus -- src
-```
-
-## 🗺️ 路线图
-
-- [ ] Windows 支持
-- [ ] Linux 支持
-- [ ] 增强的项目级统计
-- [ ] 团队协作功能
-- [ ] 自定义报告导出
-- [ ] 更多 AI CLI 支持
-
-查看 [Issues](https://github.com/your-username/vibeusage/issues) 了解详细计划。
-
-## 🤝 贡献
-
-我们欢迎所有形式的贡献！
-
-1. Fork 仓库
-2. 创建功能分支（`git checkout -b feature/amazing-feature`）
-3. 提交你的更改（`git commit -m 'Add amazing feature'`）
-4. 推送到分支（`git push origin feature/amazing-feature`）
-5. 创建 Pull Request
-
-### 开发指南
-
-- 所有用户界面文本必须在 `dashboard/src/content/copy.csv` 中注册
-- 对于重大更改，遵循 OpenSpec 提案流程
-- 代码必须通过所有测试和验证
-- 详见 [CLAUDE.md](CLAUDE.md) 了解详细约定
-
-## 📜 许可证
-
-本项目采用 [MIT 许可证](LICENSE)。
-
-## 🙏 致谢
-
-- [InsForge](https://insforge.app) - 后端基础设施
-- [Matrix-A Design System](docs/dashboard/matrix-a.md) - UI 框架
-- 所有出色的贡献者
+[MIT](LICENSE)
 
 ---
 
 <div align="center">
-  <b>System_Ready // 2024-2026 VibeUsage</b><br/>
-  <i>"量化你的 AI 产出。拥有你的数据。"</i><br/><br/>
-
-  由开发者制作，为开发者服务 💚
-
-  [网站](https://www.vibeusage.cc) •
-  [控制台](https://www.vibeusage.cc) •
-  [文档](docs/) •
-  [API](BACKEND_API.md)
+  <b>More tokens. More vibe.</b><br/>
+  <a href="https://www.vibeusage.cc">官网</a> ·
+  <a href="https://github.com/victorGPT/vibeusage">GitHub</a> ·
+  <a href="https://www.npmjs.com/package/vibeusage">npm</a>
 </div>

@@ -1,464 +1,360 @@
 <div align="center">
 
-<img src="dashboard/public/icon-192.png" width="96" alt="VibeUsage Icon" />
+<img src="dashboard/public/icon-192.png" width="96" alt="VibeUsage icon" />
 
-# 🟢 VIBEUSAGE
+# VibeUsage
 
-**QUANTIFY YOUR AI OUTPUT**
-_Track AI Token Usage Across All Your CLI Tools_
+**Track token usage across AI coding CLIs.**  
+Local parsing, minimal data collection, and a shareable dashboard for Codex CLI, Claude Code, Gemini CLI, OpenCode, OpenClaw, and more.
 
-[**www.vibeusage.cc**](https://www.vibeusage.cc)
-
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![npm version](https://img.shields.io/npm/v/vibeusage.svg)](https://www.npmjs.com/package/vibeusage)
-[![Node.js Support](https://img.shields.io/badge/Node.js-20.x-brightgreen.svg)](https://nodejs.org/)
-[![Platform](https://img.shields.io/badge/Platform-macOS-lightgrey.svg)](https://www.apple.com/macos/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Node.js](https://img.shields.io/badge/Node.js-20.x-brightgreen.svg)](https://nodejs.org/)
+[![Website](https://img.shields.io/badge/Website-vibeusage.cc-black)](https://www.vibeusage.cc)
 
-[**English**](README.md) • [**中文说明**](README.zh-CN.md)
+**[Let your agent install VibeUsage](docs/AI_AGENT_INSTALL.md)** · [Open Dashboard](https://www.vibeusage.cc) · [Visit Website](https://www.vibeusage.cc)
 
-[**Documentation**](docs/) • [**Dashboard**](https://www.vibeusage.cc) • [**Backend API**](BACKEND_API.md)
+Give the install guide to ChatGPT, Claude, Codex, or your preferred agent — it can set up VibeUsage for you.
+
+<sub>Privacy-first · macOS-first · Supports Codex CLI, Every Code, Claude Code, Gemini CLI, OpenCode, and OpenClaw</sub>
 
 <br/>
 
-<img src="docs/screenshots/dashboard.png" width="900" alt="VibeUsage Dashboard Preview"/>
+[Docs](docs/) · [Backend API](BACKEND_API.md) · [npm](https://www.npmjs.com/package/vibeusage) · [English](README.md) · [中文说明](README.zh-CN.md)
+
+<br/>
+
+<img src="docs/screenshots/dashboard.png" width="900" alt="VibeUsage dashboard screenshot" />
 
 </div>
 
 ---
 
-## 🚀 Quick Start
+VibeUsage is a **token usage tracker for AI agent CLIs**. It installs lightweight local hooks/plugins, reads usage from local logs or local databases, aggregates usage into time buckets on your machine, and syncs only the data needed to power a dashboard, cost breakdowns, project usage views, public profiles, and leaderboards.
 
-Get started in 30 seconds:
+It is currently **macOS-first**, with support focused on real developer workflows around **Codex CLI, Every Code, Claude Code, Gemini CLI, OpenCode, and OpenClaw**.
 
-```bash
-npx vibeusage init
-```
+## Why VibeUsage
 
-That's it! Your AI token usage will now automatically sync to the [Dashboard](https://www.vibeusage.cc) 🎉
+- **Agent-first onboarding** — hand the install guide to your AI agent, or run `npx --yes vibeusage init` yourself when you want manual setup.
+- **Multi-client tracking** — unify usage across multiple AI coding CLIs in one timeline.
+- **Privacy-first by design** — prompts, responses, code, and transcripts stay local.
+- **Project-aware analytics** — view usage by public GitHub repository when repo identity can be resolved.
+- **Useful dashboard, not just raw numbers** — see totals, model breakdowns, cost estimates, heatmaps, trends, and project usage.
+- **Shareable presence** — optional public profile and leaderboard participation.
+- **OpenClaw support with a sanitized path** — integrates through a local usage ledger instead of transcript parsing.
 
-## ✨ Why VibeUsage?
+## Quickstart
 
-- 📡 **Multi-Source Unified Tracking** - Support for Codex CLI, Every Code, Gemini CLI, Claude Code, Opencode, OpenClaw, and more
-- 🤖 **Multi-Model Statistics** - Unified tracking for GPT-4, Claude, Gemini, o1, and all AI models
-- 📁 **Project AI Footprint** - Track and publicly display token usage per repository, proving AI-assisted development
-- 🏆 **Global Leaderboard** - Weekly/monthly/all-time rankings, grow with the global developer community
-- 🌐 **Public Profiles** - Share your AI usage journey, optionally participate in leaderboards
-- 🔒 **Privacy-First** - Only track numbers, never upload your code or conversations
-- ⚡ **Zero-Config Auto-Sync** - Set up once, sync forever
-- 🎨 **Matrix-A Design** - Cyberpunk-style high-fidelity dashboard
-- 📈 **Deep Analytics** - Cost insights, trend forecasting, activity heatmaps
+### Requirements
 
-## 🧰 Supported AI CLIs
+- **Node.js 20.x**
+- **macOS** is the primary supported environment today
+- **`sqlite3` on PATH** for full OpenCode support
 
-| CLI Tool | Auto-Detection | Status |
-|----------|----------------|--------|
-| **Codex CLI** | ✅ | Full Support |
-| **Every Code** | ✅ | Full Support |
-| **Gemini CLI** | ✅ | Full Support |
-| **Claude Code** | ✅ | Full Support |
-| **Opencode** | ✅ | SQLite-First Support |
-| **OpenClaw** | ✅ | Full Support |
-
-Whether you're using GPT-4, Claude 3.5 Sonnet, o1, or Gemini - all token consumption is unified and tracked.
-
-## 🌌 Overview
-
-**VibeUsage** is an intelligent token usage tracking system designed for macOS developers. Through the all-new **Matrix-A Design System**, it provides a high-fidelity cyberpunk-style dashboard that transforms your **AI Output** into quantifiable metrics, supported by the **Neural Divergence Map** for real-time monitoring of multi-model compute distribution.
-
-> [!TIP]
-> **Core Index**: Our signature metric that reflects your flow state by analyzing token consumption rates and patterns.
-
-## 📊 Dashboard Features
-
-### 🎨 Matrix-A Design System
-High-performance dashboard built with React + Vite, featuring our cyberpunk-inspired design language with:
-- **Neural Divergence Map**: Visualize multi-engine load balancing and compute distribution
-- **Cost Intelligence**: Real-time, multi-dimensional cost breakdown and forecasting
-- **Activity Heatmap**: GitHub-style contribution graph with streak tracking
-- **Smart Notifications**: Non-intrusive system-level alerts with Golden visual style
-
-### 📈 Analytics & Insights
-- **AI Analytics**: Deep analysis of Input/Output tokens with dedicated tracking for Cached and Reasoning components
-- **Model Breakdown**: Per-model usage statistics and cost analysis
-- **Project Stats**: Track token usage by GitHub repository
-- **Trend Forecasting**: Predict future usage patterns
-
-### 🏆 Community Features
-- **Global Leaderboard**: Daily, weekly, monthly, and all-time rankings with privacy-safe display names
-- **Public Profiles**: Share your AI usage journey with a privacy-safe public profile
-- **Leaderboard Categories**: Compete in overall rankings or by specific models (GPT, Claude, etc.)
-
-<img src="docs/screenshots/landing.png" width="900" alt="VibeUsage Landing Preview"/>
-
-## 🔒 Privacy Guarantee
-
-We believe your code and thoughts are your own. VibeUsage is built with strict privacy pillars to ensure your data never leaves your control.
-
-| Protection | Description |
-|------------|-------------|
-| 🛡️ **No Content Upload** | Never upload prompts or responses - only compute token counts locally |
-| 📡 **Local Aggregation** | All analysis happens on your machine - only send 30-minute usage buckets |
-| 🔐 **Hashed Identity** | Device tokens are SHA-256 hashed server-side - raw credentials never stored |
-| 🔦 **Full Transparency** | Audit the sync logic yourself in `src/lib/rollout.js` - literally only numbers and timestamps |
-
-## 📦 Installation
-
-### Standard Setup
-
-Initialize your environment once - VibeUsage handles all synchronization automatically in the background:
+### Install and link your device
 
 ```bash
-npx vibeusage init
+npx --yes vibeusage init
 ```
+
+What happens next:
+
+1. VibeUsage detects supported local AI CLIs.
+2. It installs lightweight hooks/plugins where needed.
+3. It opens browser auth by default, or accepts a dashboard-issued link code.
+4. It performs an initial sync.
+
+Then keep using your normal AI tools — sync runs automatically in the background.
 
 > [!IMPORTANT]
-> Starting with `vibeusage@0.3.0`, `init` is the only supported command that writes local integration config. If you upgrade from an older install layout, re-run `npx vibeusage init`; `status`, `diagnostics`, `doctor`, and `sync` will not auto-repair legacy hooks.
+> Since `vibeusage@0.3.0`, **`init` is the only command that mutates local integration config**. If you upgrade from an older install layout, re-run `npx vibeusage init`.
 
-### Authentication Methods
-
-1. **Browser Auth** (default) - Opens browser for secure authentication
-2. **Link Code** - Use `--link-code` to authenticate via dashboard-generated code
-3. **Password** - Direct password authentication (fallback)
-4. **Access Token** - For CI/automated environments
-
-### CLI Options
+### Install with a dashboard link code
 
 ```bash
-npx vibeusage init [options]
-
-Options:
-  --yes              Skip consent prompts (non-interactive environments)
-  --dry-run          Preview changes without writing files
-  --link-code <code> Authenticate using a link code from dashboard
-  --base-url <url>   Override the default API endpoint
-  --debug            Enable debug output
+npx --yes vibeusage init --link-code <code>
 ```
 
-### Auto-Configuration
+This is useful when you want to copy an install command from the dashboard or let another AI assistant perform the install for you.
 
-Once `init` completes, all supported CLI tools are automatically configured for data sync:
+## Supported clients
 
-| Tool | Config Location | Method |
-|------|----------------|--------|
-| **Codex CLI** | `~/.codex/config.toml` | `notify` hook |
-| **Every Code** | `~/.code/config.toml` (or `CODE_HOME`) | `notify` hook |
-| **Gemini CLI** | `~/.gemini/settings.json` (or `GEMINI_HOME`) | `SessionEnd` hook |
-| **Opencode** | OpenCode config/plugins | SQLite-first parser plugin |
-| **Claude Code** | `~/.claude/settings.json` | `Stop` + `SessionEnd` hooks |
-| **OpenClaw** | Auto-links when installed | Session plugin (requires restart) |
+| Tool | Detection | Sync trigger / install method | Primary local data source |
+| --- | --- | --- | --- |
+| **Codex CLI** | Auto-detected | `notify` hook | `~/.codex/sessions/**/rollout-*.jsonl` |
+| **Every Code** | Auto-detected | `notify` hook | `~/.code/sessions/**/rollout-*.jsonl` |
+| **Claude Code** | Auto-detected | `Stop` + `SessionEnd` hooks | local hook output |
+| **Gemini CLI** | Auto-detected | `SessionEnd` hook | `~/.gemini/tmp/**/chats/session-*.json` |
+| **OpenCode** | Auto-detected | plugin + local parsing | `~/.local/share/opencode/opencode.db` (legacy message files are fallback only) |
+| **OpenClaw** | Auto-detected when installed | session plugin | local sanitized usage ledger |
 
-No further intervention required! 🎉
+### OpenClaw note
 
-If any integration drifts later, re-run `npx vibeusage init`. The read-only commands intentionally do not rewrite local hook/plugin state.
+OpenClaw uses a dedicated privacy-preserving path:
 
-## 💡 Usage
+**OpenClaw session plugin → local sanitized usage ledger → `vibeusage sync --from-openclaw`**
 
-### Manual Sync
+- no transcript parsing
+- no prompt / response content upload
+- requires an OpenClaw gateway restart after plugin linking
 
-While sync happens automatically, you can manually trigger synchronization anytime:
+See [`docs/openclaw-integration.md`](docs/openclaw-integration.md) for the exact contract.
 
-```bash
-# Manually sync latest local session data
-npx vibeusage sync
+## What VibeUsage tracks
 
-# Check current link status
-npx vibeusage status
-```
+VibeUsage focuses on **usage accounting**, not content capture.
 
-### Health Check
+Tracked fields include:
 
-Run comprehensive diagnostics to identify issues:
+- source / tool name
+- model identity
+- input tokens
+- cached input tokens
+- output tokens
+- reasoning output tokens
+- total tokens
+- time bucket metadata
+- project / public repo attribution when resolvable
 
-```bash
-# Basic health check
-npx vibeusage doctor
+## What VibeUsage does not upload
 
-# JSON output for debugging
-npx vibeusage doctor --json --out doctor.json
+VibeUsage does **not** upload:
 
-# Test against a different endpoint
-npx vibeusage doctor --base-url https://your-instance.insforge.app
-```
+- prompts
+- responses
+- source code
+- chat transcripts
+- OpenClaw transcript content
+- raw workspace contents
+- secrets, tokens, or credentials
 
-### Debug Mode
+For OpenClaw specifically, the supported path is limited to sanitized local usage metadata plus token counts.
 
-Enable debug output to see detailed request/response information:
-
-```bash
-VIBEUSAGE_DEBUG=1 npx vibeusage sync
-# or
-npx vibeusage sync --debug
-```
-
-### Uninstall
-
-```bash
-# Standard uninstall (keeps data)
-npx vibeusage uninstall
-
-# Full purge - removes all data including config and cached sessions
-npx vibeusage uninstall --purge
-```
-
-## 🏗️ Architecture
+## How it works
 
 ```mermaid
 graph LR
-    A[Codex CLI] -->|Rollout Logs| G(Tracker CLI)
-    B[Every Code] -->|Rollout Logs| G
-    C[Gemini CLI] -->|Session Logs| G
-    D[Opencode] -->|SQLite DB| G
-    E[Claude Code] -->|Hook Output| G
-    F[OpenClaw] -->|Session Plugin → Sanitized Ledger| G
-    G -->|AI Tokens| H{Core Relay}
-    H --> I[VibeUsage Dashboard]
-    H --> J[AI Analytics Engine]
-    H --> K[Leaderboard Service]
-    H --> L[Public View API]
+    A[Codex CLI] --> G[VibeUsage CLI]
+    B[Every Code] --> G
+    C[Claude Code] --> G
+    D[Gemini CLI] --> G
+    E[OpenCode] --> G
+    F[OpenClaw] --> G
+    G --> H[Local aggregation into 30-min UTC buckets]
+    H --> I[VibeUsage backend]
+    I --> J[Dashboard]
+    I --> K[Project usage]
+    I --> L[Public profile / leaderboard]
 ```
 
-### Tech Stack
+At a high level:
 
-- **CLI**: Node.js 20.x, CommonJS
-- **Dashboard**: React 18 + Vite + TailwindCSS + TypeScript
-- **Backend**: InsForge Edge Functions (Deno)
-- **Database**: InsForge Database (PostgreSQL)
-- **Design**: Matrix-A Design System
+1. `init` installs lightweight hooks/plugins for supported tools.
+2. Your AI clients continue running normally.
+3. VibeUsage reads local usage artifacts incrementally.
+4. Usage is aggregated locally into **30-minute UTC buckets**.
+5. Batched uploads power the dashboard and API.
 
-### Components
+## Dashboard features
 
-- **Tracker CLI** (`src/`): Node.js CLI that parses logs from multiple AI tools and syncs token data
-- **Core Relay** (InsForge Edge Functions): Serverless backend handling ingestion, aggregation, and API
-- **Dashboard** (`dashboard/`): React + Vite frontend for visualization
-- **AI Analytics Engine**: Cost calculation, model breakdown, and usage forecasting
+VibeUsage ships with a hosted dashboard at [www.vibeusage.cc](https://www.vibeusage.cc).
 
-### Data Flow
+<img src="docs/screenshots/landing.png" width="900" alt="VibeUsage landing page screenshot" />
 
-1. AI CLI tools generate logs during usage
-2. Local `notify-handler` detects changes and triggers sync
-3. CLI incrementally parses logs, SQLite state, and the OpenClaw sanitized ledger, extracting whitelist token counts only
-4. Data aggregated into 30-minute UTC buckets locally
-5. Batch upload to InsForge with idempotent deduplication
-6. Dashboard queries aggregated results for visualization
+### Included views
 
-### Log Sources
+- **Usage summary** — total, input, output, cached, and reasoning token views
+- **Model breakdown** — compare model families and individual models
+- **Cost breakdown** — estimate usage cost from pricing data
+- **Activity heatmap** — view active days and streak-like usage patterns
+- **Trend views** — inspect usage over day / week / month / total windows
+- **Project usage panel** — see which public GitHub repositories consumed the most tokens
+- **Install panel** — generate install / link-code flows from the dashboard
+- **Optional public view** — share a public page for your usage profile
+- **Leaderboard** — participate in community rankings
 
-| Tool | Log Location | Override Env |
-|------|-------------|--------------|
-| **Codex CLI** | `~/.codex/sessions/**/rollout-*.jsonl` | `CODEX_HOME` |
-| **Every Code** | `~/.code/sessions/**/rollout-*.jsonl` | `CODE_HOME` |
-| **Gemini CLI** | `~/.gemini/tmp/**/chats/session-*.json` | `GEMINI_HOME` |
-| **Opencode** | `~/.local/share/opencode/opencode.db` (legacy `storage/message/**/*.json` fallback) | `OPENCODE_HOME` |
-| **Claude Code** | Parsed from hook output | - |
-| **OpenClaw** | Session plugin → local sanitized usage ledger | - |
+## CLI commands
 
-## ⚙️ Configuration
+| Command | Purpose |
+| --- | --- |
+| `vibeusage init` | Install local integrations, link auth, and perform initial setup |
+| `vibeusage sync` | Parse local usage and upload pending buckets |
+| `vibeusage status` | Show current config, queue, upload, and integration status |
+| `vibeusage diagnostics` | Emit machine-readable diagnostics JSON |
+| `vibeusage doctor` | Run a health report and surface likely problems |
+| `vibeusage uninstall` | Remove VibeUsage integration state |
 
-<details>
-<summary><b>Environment Variables</b></summary>
+### Command examples
 
-### Core Settings
+```bash
+# Install / repair local integration setup
+npx --yes vibeusage init
+
+# Preview setup changes without writing files
+npx vibeusage init --dry-run
+
+# Manual sync
+npx vibeusage sync
+
+# Drain the queue completely
+npx vibeusage sync --drain
+
+# Status overview
+npx vibeusage status
+
+# Full diagnostics JSON
+npx vibeusage diagnostics --out diagnostics.json
+
+# Health report
+npx vibeusage doctor
+
+# Remove integrations
+npx vibeusage uninstall
+```
+
+Run `node bin/tracker.js --help` or `npx vibeusage --help` for the current CLI surface.
+
+## Configuration
+
+### Runtime settings
 
 | Variable | Description | Default |
-|----------|-------------|---------|
-| `VIBEUSAGE_HTTP_TIMEOUT_MS` | CLI HTTP timeout in ms (`0` disables, clamped `1000..120000`) | `20000` |
-| `VITE_VIBEUSAGE_HTTP_TIMEOUT_MS` | Dashboard request timeout in ms (`0` disables, clamped `1000..30000`) | `15000` |
-| `VIBEUSAGE_DEBUG` | Enable debug output (`1` or `true` to enable) | - |
-| `VIBEUSAGE_DASHBOARD_URL` | Custom dashboard URL | `https://www.vibeusage.cc` |
-| `VIBEUSAGE_INSFORGE_BASE_URL` | Custom API base URL | `https://5tmappuk.us-east.insforge.app` |
-| `VIBEUSAGE_DEVICE_TOKEN` | Pre-configured device token (for CI) | - |
+| --- | --- | --- |
+| `VIBEUSAGE_INSFORGE_BASE_URL` | API base URL override | hosted default |
+| `VIBEUSAGE_DASHBOARD_URL` | Dashboard URL override | `https://www.vibeusage.cc` |
+| `VIBEUSAGE_DEVICE_TOKEN` | Preconfigured device token | unset |
+| `VIBEUSAGE_HTTP_TIMEOUT_MS` | CLI HTTP timeout | `20000` |
+| `VIBEUSAGE_DEBUG` | Debug output (`1` / `true`) | off |
 
-### CLI Tool Overrides
+### Local tool path overrides
 
 | Variable | Description | Default |
-|----------|-------------|---------|
-| `CODEX_HOME` | Codex CLI directory override | `~/.codex` |
-| `CODE_HOME` | Every Code directory override | `~/.code` |
-| `GEMINI_HOME` | Gemini CLI directory override | `~/.gemini` |
+| --- | --- | --- |
+| `CODEX_HOME` | Codex CLI home override | `~/.codex` |
+| `CODE_HOME` | Every Code home override | `~/.code` |
+| `GEMINI_HOME` | Gemini CLI home override | `~/.gemini` |
 | `OPENCODE_HOME` | OpenCode data directory override | `~/.local/share/opencode` |
 
-</details>
+## FAQ
 
-See also: [`docs/openclaw-integration.md`](docs/openclaw-integration.md) for the OpenClaw single-path accounting contract.
+### Does VibeUsage upload my code or conversations?
 
-## 🔧 Troubleshooting
+No. VibeUsage is designed around local parsing and minimal upload. It tracks token accounting and related metadata needed for usage reporting.
 
-<details>
-<summary><b>Data not appearing in Dashboard</b></summary>
+### Which command should I run after upgrading?
 
-1. Check status: `npx vibeusage status`
-2. Force manual sync: `npx vibeusage sync`
-3. Check OpenCode SQLite reader health: `npx vibeusage status --diagnostics`
-4. Run `npx vibeusage doctor` if OpenCode usage looks incomplete
-5. Verify CLI tool hooks are configured (re-run `init` if needed)
-6. Check debug output: `VIBEUSAGE_DEBUG=1 npx vibeusage sync`
-
-> [!NOTE]
-> Current OpenCode releases store usage in `~/.local/share/opencode/opencode.db`. Legacy message JSON files are treated as fallback only. Complete OpenCode support requires the `sqlite3` CLI to be available on `PATH`.
-
-</details>
-
-<details>
-<summary><b>Streak shows 0 days while totals look correct</b></summary>
-
-Streak is defined as consecutive days ending today. If today's total is 0, streak will be 0.
-
-If you expect a non-zero streak, clear cached auth/heatmap data and sign in again:
-
-```javascript
-localStorage.removeItem("vibeusage.dashboard.auth.v1");
-Object.keys(localStorage)
-  .filter((k) => k.startsWith("vibeusage.heatmap."))
-  .forEach((k) => localStorage.removeItem(k));
-location.reload();
-```
-
-Complete the landing page sign-in flow again after reload.
-
-Note: `insforge-auth-token` is not used by the dashboard; use `vibeusage.dashboard.auth.v1`.
-
-</details>
-
-<details>
-<summary><b>Timeout errors on slow connections</b></summary>
-
-Increase HTTP timeout for slow connections:
+Run:
 
 ```bash
-VIBEUSAGE_HTTP_TIMEOUT_MS=60000 npx vibeusage sync
+npx --yes vibeusage init
 ```
 
-</details>
+`init` is the only supported command that repairs or updates local integration config.
 
-## 💻 Development
+### My OpenCode totals look incomplete. What should I check?
 
-### Local Development
+Run:
 
 ```bash
-# Clone the repository
-git clone https://github.com/your-username/vibeusage.git
+npx vibeusage status
+npx vibeusage doctor
+```
+
+If OpenCode support is incomplete, the most common issue is missing `sqlite3` on `PATH`, or a local SQLite query failure.
+
+### My OpenClaw usage is not showing up. What should I check?
+
+1. Run `npx vibeusage init`
+2. Restart the OpenClaw gateway
+3. Generate a real OpenClaw turn
+4. Run `npx vibeusage sync --from-openclaw`
+5. Inspect `npx vibeusage status` / `npx vibeusage doctor`
+
+### Is this Linux / Windows ready?
+
+Not fully yet. VibeUsage is currently **macOS-first**. Cross-platform support is still on the roadmap.
+
+## For AI assistants
+
+If you want ChatGPT, Claude, or another assistant to install VibeUsage for you, use the guide here:
+
+- [`docs/AI_AGENT_INSTALL.md`](docs/AI_AGENT_INSTALL.md)
+
+## Documentation
+
+- [OpenClaw integration contract](docs/openclaw-integration.md)
+- [Backend API](BACKEND_API.md)
+- [Dashboard API notes](docs/dashboard/api.md)
+- [Repository sitemap](docs/repo-sitemap.md)
+- [AI agent install guide](docs/AI_AGENT_INSTALL.md)
+
+## Development
+
+```bash
+git clone https://github.com/victorGPT/vibeusage.git
 cd vibeusage
-
-# Install dependencies
 npm install
-
-# Start dashboard dev server
-cd dashboard
-npm install
-npm run dev
+npm --prefix dashboard install
+npm --prefix dashboard run dev
 ```
 
-### Development Commands
+### Useful commands
 
 ```bash
-# Run tests
+# test suite
 npm test
 
-# Run local CI checks
+# full local CI gate
 npm run ci:local
 
-# Validate copy registry
-npm run validate:copy
-
-# Validate UI hardcoded text
-npm run validate:ui-hardcode
-
-# Validate architecture guardrails
-npm run validate:guardrails
-
-# Build backend functions
+# build generated edge artifacts
 npm run build:insforge
 
-# Check backend build (no write)
+# verify generated edge artifacts are current
 npm run build:insforge:check
 
-# Run smoke tests
+# validate UI copy registry
+npm run validate:copy
+
+# validate UI hardcoded strings
+npm run validate:ui-hardcode
+
+# architecture guardrails
+npm run validate:guardrails
+
+# smoke checks
 npm run smoke
 ```
 
-### OpenSpec Workflow
+## Contributing
 
-This project uses **OpenSpec** for spec-driven development. Before making significant changes:
+Contributions are welcome.
 
-1. Read [`openspec/project.md`](openspec/project.md) for project conventions
-2. Check [`openspec/AGENTS.md`](openspec/AGENTS.md) for the full OpenSpec workflow
-3. Run `npx openspec list` to see active changes
-4. Run `npx openspec list --specs` to see existing specifications
+Before opening a larger change:
 
-See [CLAUDE.md](CLAUDE.md) for detailed guidelines.
+- read [`AGENTS.md`](AGENTS.md)
+- read [`docs/repo-sitemap.md`](docs/repo-sitemap.md)
+- use the OpenSpec workflow for significant product or architecture changes
+- keep user-facing copy in `dashboard/src/content/copy.csv`
 
-### Repository Navigation
+## Roadmap
 
-```bash
-# Read the repository sitemap first
-cat docs/repo-sitemap.md
-```
+- broader Linux support
+- Windows support
+- richer project-level analytics
+- better team / collaboration views
+- more supported AI coding clients
 
-## 🗺️ Roadmap
+## License
 
-- [ ] Windows support
-- [ ] Linux support
-- [ ] Enhanced project-level statistics
-- [ ] Team collaboration features
-- [ ] Custom report exports
-- [ ] Additional AI CLI support
-
-See [Issues](https://github.com/your-username/vibeusage/issues) for detailed plans.
-
-## 🤝 Contributing
-
-We welcome all forms of contributions!
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Create a Pull Request
-
-### Development Guidelines
-
-- All user-facing text must be registered in `dashboard/src/content/copy.csv`
-- Follow the OpenSpec proposal process for significant changes
-- Code must pass all tests and validations
-- See [CLAUDE.md](CLAUDE.md) for detailed conventions
-
-## 📜 License
-
-This project is licensed under the [MIT License](LICENSE).
-
-## 🙏 Acknowledgments
-
-- [InsForge](https://insforge.app) - Backend infrastructure
-- [Matrix-A Design System](docs/dashboard/matrix-a.md) - UI framework
-- All our amazing contributors
+[MIT](LICENSE)
 
 ---
 
 <div align="center">
-  <b>System_Ready // 2024-2026 VibeUsage</b><br/>
-  <i>"Quantify Your AI Output. Own Your Data."</i><br/><br/>
-
-  Made with 💚 by developers, for developers
-
-  [Website](https://www.vibeusage.cc) •
-  [Dashboard](https://www.vibeusage.cc) •
-  [Docs](docs/) •
-  [API](BACKEND_API.md)
+  <b>More tokens. More vibe.</b><br/>
+  <a href="https://www.vibeusage.cc">Website</a> ·
+  <a href="https://github.com/victorGPT/vibeusage">GitHub</a> ·
+  <a href="https://www.npmjs.com/package/vibeusage">npm</a>
 </div>
-
-
-## AI Agent 快速安装
-
-复制以下内容发送给你的 AI 助手：
-
-```
-请帮我安装 VibeUsage 来追踪 AI Token 用量。
-
-执行以下命令：
-npx --yes vibeusage init
-
-安装完成后验证：
-vibeusage status
-```
-
-或者查看完整指南: https://github.com/victorGPT/vibeusage/blob/main/docs/AI_AGENT_INSTALL.md
