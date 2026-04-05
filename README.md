@@ -16,7 +16,7 @@ Local parsing, minimal data collection, and a shareable dashboard for Codex CLI,
 
 Give the install guide to ChatGPT, Claude, Codex, or your preferred agent — it can set up VibeUsage for you.
 
-<sub>Privacy-first · macOS-first · Supports Codex CLI, Every Code, Claude Code, Gemini CLI, OpenCode, and OpenClaw</sub>
+<sub>Wherever you work, whichever agent you use, VibeUsage keeps your AI usage in one place.</sub>
 
 <br/>
 

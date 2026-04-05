@@ -16,7 +16,7 @@
 
 把安装指南直接交给 ChatGPT、Claude、Codex，或你常用的 Agent —— 它可以替你完成 VibeUsage 的安装与接入。
 
-<sub>隐私优先 · macOS-first · 支持 Codex CLI、Every Code、Claude Code、Gemini CLI、OpenCode、OpenClaw</sub>
+<sub>无论你在哪台设备上、用哪个 Agent 工作，VibeUsage 都能把所有 AI 用量汇总到一个地方。</sub>
 
 <br/>
 
