@@ -156,7 +156,16 @@ async function removeClaudePluginConfig({
     changed = true;
   }
 
-  if (initialState.marketplaceDeclared) {
+  const siblingRefs = await listMarketplaceSiblingPluginRefs({
+    installedPluginsPath: paths.installedPluginsPath,
+    marketplaceName: CLAUDE_PLUGIN_MARKETPLACE_NAME,
+    excludePluginRef: paths.pluginRef,
+  });
+
+  const shouldRemoveMarketplace =
+    initialState.marketplaceDeclared && siblingRefs.unreadable !== true && siblingRefs.refs.length === 0;
+
+  if (shouldRemoveMarketplace) {
     const removeMarketplaceResult = runClaudeCli(
       ["plugin", "marketplace", "remove", CLAUDE_PLUGIN_MARKETPLACE_NAME],
       env,
@@ -169,8 +178,15 @@ async function removeClaudePluginConfig({
     skippedReason = "plugin-missing";
   }
 
-  await fs.rm(paths.marketplaceDir, { recursive: true, force: true }).catch(() => {});
-  return { removed: changed || hadMarketplaceDir, skippedReason, ...paths };
+  if (shouldRemoveMarketplace) {
+    await fs.rm(paths.marketplaceDir, { recursive: true, force: true }).catch(() => {});
+  }
+  return {
+    removed: changed || (hadMarketplaceDir && shouldRemoveMarketplace),
+    skippedReason,
+    siblingPluginRefs: siblingRefs.refs,
+    ...paths,
+  };
 }
 
 function runClaudeCli(args, env = process.env) {
@@ -279,6 +295,31 @@ function unreadableState(paths, detail) {
     detail,
     ...paths,
   };
+}
+
+async function listMarketplaceSiblingPluginRefs({
+  installedPluginsPath,
+  marketplaceName,
+  excludePluginRef,
+} = {}) {
+  const installed = await readJsonStrict(installedPluginsPath);
+  if (installed.status === "invalid") {
+    return { unreadable: true, refs: [] };
+  }
+
+  const plugins =
+    installed.value?.plugins && typeof installed.value.plugins === "object"
+      ? installed.value.plugins
+      : {};
+  const refs = Object.entries(plugins)
+    .filter(([ref, entries]) => {
+      if (ref === excludePluginRef) return false;
+      if (!ref.endsWith(`@${marketplaceName}`)) return false;
+      return Array.isArray(entries) && entries.length > 0;
+    })
+    .map(([ref]) => ref);
+
+  return { unreadable: false, refs };
 }
 
 function isNonEmptyObject(value) {

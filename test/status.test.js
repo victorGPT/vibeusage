@@ -5,6 +5,7 @@ const fs = require("node:fs/promises");
 const { test } = require("node:test");
 
 const { cmdStatus } = require("../src/commands/status");
+const { ensureClaudePluginFiles } = require("../src/lib/claude-plugin");
 
 test("status prints last upload timestamps from upload.throttle.json", async () => {
   const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "vibeusage-status-"));
@@ -209,6 +210,50 @@ test("status reports Claude plugin unsupported_legacy when only SessionEnd is co
     await cmdStatus();
 
     assert.match(out, /- Claude plugin: unsupported_legacy/);
+  } finally {
+    process.stdout.write = prevWrite;
+    if (prevHome === undefined) delete process.env.HOME;
+    else process.env.HOME = prevHome;
+    if (prevCodexHome === undefined) delete process.env.CODEX_HOME;
+    else process.env.CODEX_HOME = prevCodexHome;
+    await fs.rm(tmp, { recursive: true, force: true });
+  }
+});
+
+test("status reports Claude plugin drifted when local plugin files exist without Claude registry state", async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "vibeusage-status-claude-drifted-"));
+  const prevHome = process.env.HOME;
+  const prevCodexHome = process.env.CODEX_HOME;
+  const prevWrite = process.stdout.write;
+
+  try {
+    process.env.HOME = tmp;
+    process.env.CODEX_HOME = path.join(tmp, ".codex");
+
+    const trackerDir = path.join(tmp, ".vibeusage", "tracker");
+    const notifyPath = path.join(tmp, ".vibeusage", "bin", "notify.cjs");
+    const claudeDir = path.join(tmp, ".claude");
+    await fs.mkdir(trackerDir, { recursive: true });
+    await fs.mkdir(path.dirname(notifyPath), { recursive: true });
+    await fs.mkdir(claudeDir, { recursive: true });
+    await fs.mkdir(process.env.CODEX_HOME, { recursive: true });
+    await fs.writeFile(notifyPath, "// noop\n", "utf8");
+
+    await ensureClaudePluginFiles({
+      trackerDir,
+      notifyPath,
+    });
+
+    let out = "";
+    process.stdout.write = (chunk, enc, cb) => {
+      out += typeof chunk === "string" ? chunk : chunk.toString(enc || "utf8");
+      if (typeof cb === "function") cb();
+      return true;
+    };
+
+    await cmdStatus();
+
+    assert.match(out, /- Claude plugin: drifted/);
   } finally {
     process.stdout.write = prevWrite;
     if (prevHome === undefined) delete process.env.HOME;

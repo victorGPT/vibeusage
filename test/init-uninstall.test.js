@@ -626,6 +626,79 @@ test("init migrates Claude legacy hooks to plugin and uninstall removes plugin w
   }
 });
 
+test("uninstall keeps Claude marketplace when another vibeusage-local plugin remains installed", async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "vibeusage-init-uninstall-"));
+  const prevHome = process.env.HOME;
+  const prevCodexHome = process.env.CODEX_HOME;
+  const prevToken = process.env.VIBEUSAGE_DEVICE_TOKEN;
+  const prevOpencodeConfigDir = process.env.OPENCODE_CONFIG_DIR;
+  const prevPath = process.env.PATH;
+  const prevWrite = process.stdout.write;
+
+  try {
+    process.env.HOME = tmp;
+    process.env.CODEX_HOME = path.join(tmp, ".codex");
+    delete process.env.VIBEUSAGE_DEVICE_TOKEN;
+    process.env.OPENCODE_CONFIG_DIR = path.join(tmp, ".config", "opencode");
+    await fs.mkdir(process.env.CODEX_HOME, { recursive: true });
+
+    const codexConfigPath = path.join(process.env.CODEX_HOME, "config.toml");
+    await fs.writeFile(codexConfigPath, "# empty\n", "utf8");
+
+    const claudeDir = path.join(tmp, ".claude");
+    const pluginsDir = path.join(claudeDir, "plugins");
+    const fakeBinDir = path.join(tmp, "bin");
+    await fs.mkdir(claudeDir, { recursive: true });
+    await writeFakeClaudeCli(fakeBinDir);
+    process.env.PATH = `${fakeBinDir}${path.delimiter}${prevPath || ""}`;
+
+    process.stdout.write = () => true;
+    await cmdInit(["--yes", "--no-auth", "--no-open", "--base-url", "https://example.invalid"]);
+
+    const installedPluginsPath = path.join(pluginsDir, "installed_plugins.json");
+    const knownMarketplacesPath = path.join(pluginsDir, "known_marketplaces.json");
+    const settingsPath = path.join(claudeDir, "settings.json");
+
+    const installed = JSON.parse(await fs.readFile(installedPluginsPath, "utf8"));
+    installed.plugins["other-plugin@vibeusage-local"] = [
+      {
+        scope: "user",
+        installPath: path.join(pluginsDir, "cache", "vibeusage-local", "other-plugin", "1.0.0"),
+        version: "1.0.0",
+        installedAt: "2026-04-06T00:00:00.000Z",
+        lastUpdated: "2026-04-06T00:00:00.000Z",
+      },
+    ];
+    await fs.writeFile(installedPluginsPath, JSON.stringify(installed, null, 2) + "\n", "utf8");
+
+    const settings = JSON.parse(await fs.readFile(settingsPath, "utf8"));
+    settings.enabledPlugins = settings.enabledPlugins || {};
+    settings.enabledPlugins["other-plugin@vibeusage-local"] = true;
+    await fs.writeFile(settingsPath, JSON.stringify(settings, null, 2) + "\n", "utf8");
+
+    await cmdUninstall([]);
+
+    const marketplaces = JSON.parse(await fs.readFile(knownMarketplacesPath, "utf8"));
+    assert.ok(
+      marketplaces["vibeusage-local"],
+      "expected Claude marketplace to remain when another vibeusage-local plugin is installed",
+    );
+  } finally {
+    process.stdout.write = prevWrite;
+    if (prevHome === undefined) delete process.env.HOME;
+    else process.env.HOME = prevHome;
+    if (prevCodexHome === undefined) delete process.env.CODEX_HOME;
+    else process.env.CODEX_HOME = prevCodexHome;
+    if (prevToken === undefined) delete process.env.VIBEUSAGE_DEVICE_TOKEN;
+    else process.env.VIBEUSAGE_DEVICE_TOKEN = prevToken;
+    if (prevOpencodeConfigDir === undefined) delete process.env.OPENCODE_CONFIG_DIR;
+    else process.env.OPENCODE_CONFIG_DIR = prevOpencodeConfigDir;
+    if (prevPath === undefined) delete process.env.PATH;
+    else process.env.PATH = prevPath;
+    await fs.rm(tmp, { recursive: true, force: true });
+  }
+});
+
 test("init then uninstall manages Gemini hooks without removing existing hooks", async () => {
   const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "vibeusage-init-uninstall-"));
   const prevHome = process.env.HOME;
