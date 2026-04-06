@@ -1,81 +1,124 @@
-const { probeClaudeHook, upsertClaudeHook, removeClaudeHook } = require("../claude-config");
+const { probeClaudeHook, removeClaudeHook } = require("../claude-config");
+const {
+  installClaudePlugin,
+  probeClaudePluginState,
+  removeClaudePluginConfig,
+} = require("../claude-plugin");
 const { isDir, isFile } = require("./utils");
 
 module.exports = {
   name: "claude",
   summaryLabel: "Claude",
-  statusLabel: "Claude hooks",
+  statusLabel: "Claude plugin",
   async probe(ctx) {
     const hasConfigDir = await isDir(ctx.claude.configDir);
     if (!hasConfigDir) {
       return baseProbe(this, { status: "not_installed", detail: "Config not found" });
     }
 
+    const pluginState = await probeClaudePluginState({
+      home: ctx.home,
+      trackerDir: ctx.trackerPaths.trackerDir,
+    });
+    if (pluginState.unreadable) {
+      return baseProbe(this, { status: "unreadable", detail: pluginState.detail });
+    }
+    if (pluginState.configured) {
+      return baseProbe(this, {
+        status: "ready",
+        detail: "Plugin installed",
+        configured: true,
+        pluginState,
+      });
+    }
+
     const hasSettings = await isFile(ctx.claude.settingsPath);
     if (!hasSettings) {
-      return baseProbe(this, { status: "drifted", detail: "Run vibeusage init to install hooks" });
+      return baseProbe(this, {
+        status: pluginState.pluginFilesReady || pluginState.marketplaceDeclared ? "drifted" : "not_installed",
+        detail:
+          pluginState.pluginFilesReady || pluginState.marketplaceDeclared
+            ? "Run vibeusage init to reconcile plugin"
+            : "Run vibeusage init to install plugin",
+        pluginState,
+      });
     }
 
     const hookState = await probeClaudeHook({
       settingsPath: ctx.claude.settingsPath,
       hookCommand: ctx.claude.hookCommand,
     });
-
-    if (hookState.configured) {
-      return baseProbe(this, {
-        status: "ready",
-        detail: "Hooks installed",
-        configured: true,
-        hookState,
-      });
-    }
-
-    const sessionEndPresent = hookState.eventStates?.SessionEnd === true;
-    const stopPresent = hookState.eventStates?.Stop === true;
-    const status = hookState.anyPresent && sessionEndPresent && !stopPresent
+    const status = hookState.anyPresent
       ? "unsupported_legacy"
-      : "drifted";
+      : pluginState.installed || pluginState.marketplaceDeclared || pluginState.pluginFilesReady
+        ? "drifted"
+        : "not_installed";
     return baseProbe(this, {
       status,
       detail:
         status === "unsupported_legacy"
           ? "Legacy hook config detected; run vibeusage init"
-          : "Run vibeusage init to reconcile hooks",
+          : status === "drifted"
+            ? "Run vibeusage init to reconcile plugin"
+            : "Run vibeusage init to install plugin",
       hookState,
+      pluginState,
     });
   },
   async install(ctx) {
     if (!(await isDir(ctx.claude.configDir))) {
       return action(this, "skipped", false, "Config not found");
     }
-    const result = await upsertClaudeHook({
-      settingsPath: ctx.claude.settingsPath,
-      hookCommand: ctx.claude.hookCommand,
+    const result = await installClaudePlugin({
+      home: ctx.home,
+      trackerDir: ctx.trackerPaths.trackerDir,
+      notifyPath: ctx.notifyPath,
+      env: ctx.env,
     });
+    if (result.skippedReason === "claude-cli-missing") {
+      return action(this, "skipped", false, "Claude CLI not found", {
+        skippedReason: result.skippedReason,
+      });
+    }
+    if (result.configured && (await isFile(ctx.claude.settingsPath))) {
+      await removeClaudeHook({
+        settingsPath: ctx.claude.settingsPath,
+        hookCommand: ctx.claude.hookCommand,
+      }).catch(() => {});
+    }
     return action(
       this,
       result.changed ? "installed" : "set",
       Boolean(result.changed),
-      result.changed ? "Hooks installed" : "Hooks already installed",
+      result.changed ? "Plugin installed" : "Plugin already installed",
     );
   },
   async uninstall(ctx) {
-    if (!(await isFile(ctx.claude.settingsPath))) {
-      return action(this, "skipped", false, "settings.json not found");
-    }
-    const result = await removeClaudeHook({
-      settingsPath: ctx.claude.settingsPath,
-      hookCommand: ctx.claude.hookCommand,
+    const result = await removeClaudePluginConfig({
+      home: ctx.home,
+      trackerDir: ctx.trackerPaths.trackerDir,
+      env: ctx.env,
     });
-    if (result.removed) {
-      return action(this, "removed", true, ctx.claude.settingsPath);
+    if (await isFile(ctx.claude.settingsPath)) {
+      await removeClaudeHook({
+        settingsPath: ctx.claude.settingsPath,
+        hookCommand: ctx.claude.hookCommand,
+      }).catch(() => {});
     }
-    if (result.skippedReason === "hook-missing") {
+    if (result.skippedReason === "claude-cli-missing") {
+      return action(this, "skipped", false, "Claude CLI not found", {
+        skippedReason: result.skippedReason,
+      });
+    }
+    if (result.removed) {
+      return action(this, "removed", true, result.pluginRef || "Claude plugin removed");
+    }
+    if (result.skippedReason === "plugin-missing") {
       return action(this, "unchanged", false, "no change", {
         skippedReason: result.skippedReason,
       });
     }
-    return action(this, "skipped", false, "settings.json not found");
+    return action(this, "skipped", false, "Claude plugin not found");
   },
   renderStatusValue(probe) {
     if (probe.status === "ready") return "set";

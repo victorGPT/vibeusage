@@ -164,7 +164,7 @@ test("status does not migrate legacy tracker directory", async () => {
   }
 });
 
-test("status reports Claude hooks unsupported_legacy when only SessionEnd is configured", async () => {
+test("status reports Claude plugin unsupported_legacy when only SessionEnd is configured", async () => {
   const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "vibeusage-status-claude-"));
   const prevHome = process.env.HOME;
   const prevCodexHome = process.env.CODEX_HOME;
@@ -208,7 +208,7 @@ test("status reports Claude hooks unsupported_legacy when only SessionEnd is con
 
     await cmdStatus();
 
-    assert.match(out, /- Claude hooks: unsupported_legacy/);
+    assert.match(out, /- Claude plugin: unsupported_legacy/);
   } finally {
     process.stdout.write = prevWrite;
     if (prevHome === undefined) delete process.env.HOME;

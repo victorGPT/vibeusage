@@ -32,6 +32,116 @@ function flattenHookEntries(entries) {
   return entries.flatMap((entry) => (Array.isArray(entry?.hooks) ? entry.hooks : [entry]));
 }
 
+async function writeFakeClaudeCli(binDir) {
+  const cliPath = path.join(binDir, "claude");
+  const script = `#!${process.execPath}
+const fs = require("node:fs");
+const path = require("node:path");
+
+const home = process.env.HOME;
+const claudeDir = path.join(home, ".claude");
+const settingsPath = path.join(claudeDir, "settings.json");
+const pluginsDir = path.join(claudeDir, "plugins");
+const installedPluginsPath = path.join(pluginsDir, "installed_plugins.json");
+const knownMarketplacesPath = path.join(pluginsDir, "known_marketplaces.json");
+const args = process.argv.slice(2);
+
+function readJson(filePath, fallback) {
+  try {
+    return JSON.parse(fs.readFileSync(filePath, "utf8"));
+  } catch (_err) {
+    return fallback;
+  }
+}
+
+function writeJson(filePath, value) {
+  fs.mkdirSync(path.dirname(filePath), { recursive: true });
+  fs.writeFileSync(filePath, JSON.stringify(value, null, 2) + "\\n", "utf8");
+}
+
+function ensureSettings() {
+  return readJson(settingsPath, {});
+}
+
+function ensureInstalled() {
+  return readJson(installedPluginsPath, { version: 2, plugins: {} });
+}
+
+function ensureMarketplaces() {
+  return readJson(knownMarketplacesPath, {});
+}
+
+if (args[0] !== "plugin") process.exit(0);
+
+if (args[1] === "marketplace" && args[2] === "add") {
+  const source = args[3];
+  const manifest = readJson(path.join(source, ".claude-plugin", "marketplace.json"), null);
+  const marketplaces = ensureMarketplaces();
+  marketplaces[manifest.name] = {
+    source: { source: "path", path: source },
+    installLocation: path.join(pluginsDir, "marketplaces", manifest.name),
+    lastUpdated: "2026-04-06T00:00:00.000Z",
+  };
+  writeJson(knownMarketplacesPath, marketplaces);
+  process.exit(0);
+}
+
+if (args[1] === "marketplace" && args[2] === "update") {
+  process.exit(0);
+}
+
+if (args[1] === "marketplace" && args[2] === "remove") {
+  const name = args[3];
+  const marketplaces = ensureMarketplaces();
+  delete marketplaces[name];
+  writeJson(knownMarketplacesPath, marketplaces);
+  process.exit(0);
+}
+
+const ref = args[2];
+const [pluginName, marketplaceName] = String(ref || "").split("@");
+
+if (args[1] === "install" || args[1] === "update" || args[1] === "enable") {
+  const settings = ensureSettings();
+  settings.enabledPlugins = settings.enabledPlugins || {};
+  settings.enabledPlugins[ref] = true;
+  writeJson(settingsPath, settings);
+
+  const installed = ensureInstalled();
+  installed.plugins[ref] = [
+    {
+      scope: "user",
+      installPath: path.join(pluginsDir, "cache", marketplaceName || "unknown", pluginName || "unknown", "1.0.0"),
+      version: "1.0.0",
+      installedAt: "2026-04-06T00:00:00.000Z",
+      lastUpdated: "2026-04-06T00:00:00.000Z"
+    }
+  ];
+  writeJson(installedPluginsPath, installed);
+  process.exit(0);
+}
+
+if (args[1] === "uninstall" || args[1] === "remove") {
+  const settings = ensureSettings();
+  if (settings.enabledPlugins) {
+    delete settings.enabledPlugins[ref];
+    if (Object.keys(settings.enabledPlugins).length === 0) delete settings.enabledPlugins;
+  }
+  writeJson(settingsPath, settings);
+
+  const installed = ensureInstalled();
+  delete installed.plugins[ref];
+  writeJson(installedPluginsPath, installed);
+  process.exit(0);
+}
+
+process.exit(0);
+`;
+  await fs.mkdir(binDir, { recursive: true });
+  await fs.writeFile(cliPath, script, "utf8");
+  await fs.chmod(cliPath, 0o755);
+}
+
 test("init then uninstall restores original Codex notify (when pre-existing notify exists)", async () => {
   const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "vibeusage-init-uninstall-"));
   const prevHome = process.env.HOME;
@@ -394,12 +504,13 @@ test("uninstall skips notify restore when no backup and notify not installed", a
   }
 });
 
-test("init then uninstall manages Claude hooks without removing existing hooks", async () => {
+test("init migrates Claude legacy hooks to plugin and uninstall removes plugin without touching other hooks", async () => {
   const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "vibeusage-init-uninstall-"));
   const prevHome = process.env.HOME;
   const prevCodexHome = process.env.CODEX_HOME;
   const prevToken = process.env.VIBEUSAGE_DEVICE_TOKEN;
   const prevOpencodeConfigDir = process.env.OPENCODE_CONFIG_DIR;
+  const prevPath = process.env.PATH;
   const prevWrite = process.stdout.write;
 
   try {
@@ -413,15 +524,28 @@ test("init then uninstall manages Claude hooks without removing existing hooks",
     await fs.writeFile(codexConfigPath, "# empty\n", "utf8");
 
     const claudeDir = path.join(tmp, ".claude");
+    const fakeBinDir = path.join(tmp, "bin");
     await fs.mkdir(claudeDir, { recursive: true });
+    await writeFakeClaudeCli(fakeBinDir);
+    process.env.PATH = `${fakeBinDir}${path.delimiter}${prevPath || ""}`;
+
     const settingsPath = path.join(claudeDir, "settings.json");
     const existingCommand = "echo existing-claude";
+    const hookCommand = buildClaudeHookCommand(path.join(tmp, ".vibeusage", "bin", "notify.cjs"));
     const settings = {
       env: { SAMPLE: "1" },
       hooks: {
         SessionEnd: [
           {
             hooks: [{ command: existingCommand }],
+          },
+          {
+            hooks: [{ type: "command", command: hookCommand }],
+          },
+        ],
+        Stop: [
+          {
+            hooks: [{ type: "command", command: hookCommand }],
           },
         ],
       },
@@ -433,7 +557,6 @@ test("init then uninstall manages Claude hooks without removing existing hooks",
 
     const installedRaw = await fs.readFile(settingsPath, "utf8");
     const installed = JSON.parse(installedRaw);
-    const hookCommand = buildClaudeHookCommand(path.join(tmp, ".vibeusage", "bin", "notify.cjs"));
     const sessionEnd = installed?.hooks?.SessionEnd || [];
     const stop = installed?.hooks?.Stop || [];
     const sessionEndCommands = sessionEnd
@@ -447,10 +570,14 @@ test("init then uninstall manages Claude hooks without removing existing hooks",
       "expected existing Claude hook to remain",
     );
     assert.ok(
-      sessionEndCommands.includes(hookCommand),
-      "expected tracker Claude SessionEnd hook to be added",
+      !sessionEndCommands.includes(hookCommand),
+      "expected legacy VibeUsage Claude SessionEnd hook to be removed after migration",
     );
-    assert.ok(stopCommands.includes(hookCommand), "expected tracker Claude Stop hook to be added");
+    assert.ok(
+      !stopCommands.includes(hookCommand),
+      "expected legacy VibeUsage Claude Stop hook to be removed after migration",
+    );
+    assert.equal(installed?.enabledPlugins?.["vibeusage-claude-sync@vibeusage-local"], true);
 
     await cmdUninstall([]);
 
@@ -474,7 +601,14 @@ test("init then uninstall manages Claude hooks without removing existing hooks",
     );
     assert.ok(
       !restoredStopCommands.includes(hookCommand),
-      "expected tracker Claude Stop hook to be removed",
+      "expected migrated Claude Stop hook to stay removed",
+    );
+    assert.equal(
+      Object.prototype.hasOwnProperty.call(
+        restored?.enabledPlugins || {},
+        "vibeusage-claude-sync@vibeusage-local",
+      ),
+      false,
     );
   } finally {
     process.stdout.write = prevWrite;
@@ -486,6 +620,8 @@ test("init then uninstall manages Claude hooks without removing existing hooks",
     else process.env.VIBEUSAGE_DEVICE_TOKEN = prevToken;
     if (prevOpencodeConfigDir === undefined) delete process.env.OPENCODE_CONFIG_DIR;
     else process.env.OPENCODE_CONFIG_DIR = prevOpencodeConfigDir;
+    if (prevPath === undefined) delete process.env.PATH;
+    else process.env.PATH = prevPath;
     await fs.rm(tmp, { recursive: true, force: true });
   }
 });

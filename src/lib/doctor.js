@@ -310,7 +310,7 @@ function buildDiagnosticsChecks(diagnostics) {
   const notifyConfigured = Boolean(
     notify.codex_notify_configured ||
     notify.every_code_notify_configured ||
-    notify.claude_hook_configured ||
+    notify.claude_plugin_configured ||
     notify.gemini_hook_configured ||
     notify.opencode_plugin_configured ||
     notify.openclaw_session_plugin_configured,

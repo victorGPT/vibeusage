@@ -108,7 +108,7 @@ async function cmdStatus(argv = []) {
       autoRetryLine,
       `- Codex notify: ${renderIntegrationStatus(descriptors.get("codex"), codexProbe)}`,
       `- Every Code notify: ${renderIntegrationStatus(descriptors.get("every-code"), everyCodeProbe)}`,
-      `- Claude hooks: ${renderIntegrationStatus(descriptors.get("claude"), claudeProbe)}`,
+      `- Claude plugin: ${renderIntegrationStatus(descriptors.get("claude"), claudeProbe)}`,
       `- Gemini hooks: ${renderIntegrationStatus(descriptors.get("gemini"), geminiProbe)}`,
       `- Opencode plugin: ${renderIntegrationStatus(descriptors.get("opencode"), opencodeProbe)}`,
       `- OpenCode SQLite DB: ${opencodeDbPresent ? "present" : "missing"}`,

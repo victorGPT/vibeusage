@@ -18,7 +18,7 @@ async function cmdUninstall(argv) {
   });
   const codexConfigExists = await isFile(integrationContext.codex.configPath);
   const codeConfigExists = await isFile(integrationContext.everyCode.configPath);
-  const claudeConfigExists = await isFile(integrationContext.claude.settingsPath);
+  const claudeConfigExists = await isDir(integrationContext.claude.configDir);
   const geminiConfigExists = await isDir(integrationContext.gemini.configDir);
   const opencodeConfigExists = await isDir(integrationContext.opencode.configDir);
   const integrationResults = await uninstallIntegrations(integrationContext);
@@ -58,11 +58,11 @@ async function cmdUninstall(argv) {
       renderHookLine({
         exists: claudeConfigExists,
         result: resultByName.get("claude"),
-        missingText: "- Claude hooks: skipped (settings.json not found)",
+        missingText: `- Claude plugin: skipped (${integrationContext.claude.configDir} not found)`,
         removedText: (result) =>
-          `- Claude hooks removed: ${result.detail || integrationContext.claude.settingsPath}`,
-        noChangeText: "- Claude hooks: no change",
-        skippedText: "- Claude hooks: skipped",
+          `- Claude plugin removed: ${result.detail || integrationContext.claude.settingsPath}`,
+        noChangeText: "- Claude plugin: no change",
+        skippedText: "- Claude plugin: skipped",
       }),
       renderHookLine({
         exists: geminiConfigExists,
@@ -115,6 +115,15 @@ async function isFile(p) {
   try {
     const st = await fs.stat(p);
     return st.isFile();
+  } catch (_e) {
+    return false;
+  }
+}
+
+async function isDir(p) {
+  try {
+    const st = await fs.stat(p);
+    return st.isDirectory();
   } catch (_e) {
     return false;
   }

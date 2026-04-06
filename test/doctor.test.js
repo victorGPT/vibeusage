@@ -98,6 +98,24 @@ test("doctor ignores legacy OpenClaw hook diagnostics when computing checks", as
   assert.equal(notifyConfigured.meta.configured, false);
 });
 
+test("doctor treats Claude plugin diagnostics as configured notify", async () => {
+  const report = await buildDoctorReport({
+    runtime: { baseUrl: "https://example" },
+    fetch: async () => ({ status: 200 }),
+    diagnostics: {
+      notify: {
+        claude_plugin_status: "ready",
+        claude_plugin_configured: true,
+      },
+      upload: { last_error: null },
+      opencode: { sqlite_status: "ok", sqlite_db_present: true },
+    },
+  });
+
+  const notifyConfigured = report.checks.find((c) => c.id === "notify.configured");
+  assert.equal(notifyConfigured.meta.configured, true);
+});
+
 test("doctor marks invalid config.json as critical", async () => {
   const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "vibeusage-doctor-"));
   const trackerDir = path.join(tmp, ".vibeusage", "tracker");

@@ -70,7 +70,7 @@ VibeUsage 会自动检测并配置以下客户端：
 | Every Code | `~/.code/config.toml` + rollout logs |
 | Gemini CLI | `~/.gemini/settings.json` + session files |
 | OpenCode | 全局插件 + 本地 SQLite |
-| Claude Code | `~/.claude/settings.json` |
+| Claude Code | Claude plugin + `~/.claude/projects/**` logs |
 | OpenClaw | Session plugin + 本地 sanitized usage ledger |
 
 ## 安装完成后怎么验证
