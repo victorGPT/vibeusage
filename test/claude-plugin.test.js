@@ -37,6 +37,9 @@ test("ensureClaudePluginFiles writes marketplace + plugin skeleton with Stop and
     );
 
     assert.equal(marketplace.name, CLAUDE_PLUGIN_MARKETPLACE_NAME);
+    assert.equal(marketplace.owner?.name, "VibeUsage");
+    assert.equal(marketplace.plugins?.[0]?.name, CLAUDE_PLUGIN_ID);
+    assert.equal(marketplace.plugins?.[0]?.source, `./plugins/${CLAUDE_PLUGIN_ID}`);
     assert.equal(plugin.name, CLAUDE_PLUGIN_ID);
     assert.ok(Array.isArray(hooks?.hooks?.Stop), "expected Stop hooks array");
     assert.ok(Array.isArray(hooks?.hooks?.SessionEnd), "expected SessionEnd hooks array");

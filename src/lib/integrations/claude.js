@@ -80,6 +80,11 @@ module.exports = {
         skippedReason: result.skippedReason,
       });
     }
+    if (!result.configured) {
+      return action(this, "skipped", false, result.error || "Claude plugin install incomplete", {
+        skippedReason: result.skippedReason || "claude-plugin-install-incomplete",
+      });
+    }
     if (result.configured && (await isFile(ctx.claude.settingsPath))) {
       await removeClaudeHook({
         settingsPath: ctx.claude.settingsPath,

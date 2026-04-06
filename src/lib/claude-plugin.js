@@ -237,11 +237,23 @@ function runClaudeCli(args, env = process.env) {
 function buildMarketplaceManifest() {
   return `${JSON.stringify(
     {
+      $schema: "https://anthropic.com/claude-code/marketplace.schema.json",
       name: CLAUDE_PLUGIN_MARKETPLACE_NAME,
-      source: "./",
-      description: "Local VibeUsage Claude marketplace",
+      description: "Local VibeUsage Claude plugin marketplace.",
+      owner: {
+        name: "VibeUsage",
+        email: "support@vibeusage.cc",
+      },
       version: CLAUDE_PLUGIN_VERSION,
-      strict: false,
+      plugins: [
+        {
+          name: CLAUDE_PLUGIN_ID,
+          source: `./plugins/${CLAUDE_PLUGIN_ID}`,
+          description: "Trigger VibeUsage Claude notify bridge on Claude session lifecycle events.",
+          version: CLAUDE_PLUGIN_VERSION,
+          strict: false,
+        },
+      ],
     },
     null,
     2,
