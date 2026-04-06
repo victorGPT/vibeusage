@@ -62,18 +62,21 @@ async function probeClaudePluginState({ home = os.homedir(), trackerDir } = {}) 
     (await isFile(paths.pluginManifestPath)) &&
     (await isFile(paths.pluginHooksPath));
 
-  if (settings.status === "invalid") {
+  if (settings.status === "invalid" || settings.status === "error") {
     return unreadableState(paths, "Claude settings unreadable");
   }
-  if (known.status === "invalid") {
+  if (known.status === "invalid" || known.status === "error") {
     return unreadableState(paths, "Claude marketplace registry unreadable");
   }
-  if (installed.status === "invalid") {
+  if (installed.status === "invalid" || installed.status === "error") {
     return unreadableState(paths, "Claude plugin registry unreadable");
   }
 
   const enabled = settings.value?.enabledPlugins?.[paths.pluginRef] === true;
-  const declaredMarketplace = isNonEmptyObject(known.value?.[CLAUDE_PLUGIN_MARKETPLACE_NAME]);
+  const declaredMarketplace = marketplaceMatchesPath({
+    marketplaceEntry: known.value?.[CLAUDE_PLUGIN_MARKETPLACE_NAME],
+    marketplaceDir: paths.marketplaceDir,
+  });
   const installedEntries = Array.isArray(installed.value?.plugins?.[paths.pluginRef])
     ? installed.value.plugins[paths.pluginRef]
     : [];
@@ -307,6 +310,17 @@ function unreadableState(paths, detail) {
     detail,
     ...paths,
   };
+}
+
+function marketplaceMatchesPath({ marketplaceEntry, marketplaceDir } = {}) {
+  if (!marketplaceEntry || typeof marketplaceEntry !== "object") return false;
+
+  const source = marketplaceEntry.source;
+  if (!source || typeof source !== "object") return false;
+  if (source.source !== "path") return false;
+  if (typeof source.path !== "string" || source.path.length === 0) return false;
+
+  return path.resolve(source.path) === path.resolve(marketplaceDir);
 }
 
 async function listMarketplaceSiblingPluginRefs({

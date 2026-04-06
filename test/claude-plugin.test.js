@@ -129,6 +129,107 @@ test("probeClaudePluginState detects ready user-scoped plugin", async () => {
   }
 });
 
+test("probeClaudePluginState rejects marketplace entries that point to a different path", async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "vibeusage-claude-plugin-"));
+  const home = path.join(tmp, "home");
+  const trackerDir = path.join(home, ".vibeusage", "tracker");
+  await fs.mkdir(trackerDir, { recursive: true });
+
+  try {
+    const paths = resolveClaudePluginPaths({ home, trackerDir });
+    await ensureClaudePluginFiles({
+      trackerDir,
+      notifyPath: path.join(home, ".vibeusage", "bin", "notify.cjs"),
+    });
+
+    await fs.mkdir(path.dirname(paths.settingsPath), { recursive: true });
+    await fs.mkdir(path.dirname(paths.installedPluginsPath), { recursive: true });
+    await fs.writeFile(
+      paths.settingsPath,
+      JSON.stringify(
+        {
+          enabledPlugins: {
+            [paths.pluginRef]: true,
+          },
+        },
+        null,
+        2,
+      ) + "\n",
+      "utf8",
+    );
+    await fs.writeFile(
+      paths.knownMarketplacesPath,
+      JSON.stringify(
+        {
+          [CLAUDE_PLUGIN_MARKETPLACE_NAME]: {
+            source: { source: "path", path: path.join(tmp, "other-marketplace") },
+            installLocation: path.join(home, ".claude", "plugins", "marketplaces", CLAUDE_PLUGIN_MARKETPLACE_NAME),
+            lastUpdated: "2026-04-06T00:00:00.000Z",
+          },
+        },
+        null,
+        2,
+      ) + "\n",
+      "utf8",
+    );
+    await fs.writeFile(
+      paths.installedPluginsPath,
+      JSON.stringify(
+        {
+          version: 2,
+          plugins: {
+            [paths.pluginRef]: [
+              {
+                scope: "user",
+                installPath: path.join(home, ".claude", "plugins", "cache", CLAUDE_PLUGIN_MARKETPLACE_NAME, CLAUDE_PLUGIN_ID, "1.0.0"),
+                version: "1.0.0",
+                installedAt: "2026-04-06T00:00:00.000Z",
+                lastUpdated: "2026-04-06T00:00:00.000Z",
+              },
+            ],
+          },
+        },
+        null,
+        2,
+      ) + "\n",
+      "utf8",
+    );
+
+    const state = await probeClaudePluginState({ home, trackerDir });
+    assert.equal(state.marketplaceDeclared, false);
+    assert.equal(state.configured, false);
+  } finally {
+    await fs.rm(tmp, { recursive: true, force: true });
+  }
+});
+
+test("probeClaudePluginState returns unreadable when plugin registry cannot be read", async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "vibeusage-claude-plugin-"));
+  const home = path.join(tmp, "home");
+  const trackerDir = path.join(home, ".vibeusage", "tracker");
+  await fs.mkdir(trackerDir, { recursive: true });
+
+  try {
+    const paths = resolveClaudePluginPaths({ home, trackerDir });
+    await ensureClaudePluginFiles({
+      trackerDir,
+      notifyPath: path.join(home, ".vibeusage", "bin", "notify.cjs"),
+    });
+
+    await fs.mkdir(path.dirname(paths.settingsPath), { recursive: true });
+    await fs.mkdir(path.dirname(paths.knownMarketplacesPath), { recursive: true });
+    await fs.writeFile(paths.settingsPath, JSON.stringify({ enabledPlugins: {} }, null, 2) + "\n", "utf8");
+    await fs.writeFile(paths.knownMarketplacesPath, JSON.stringify({}, null, 2) + "\n", "utf8");
+    await fs.mkdir(paths.installedPluginsPath, { recursive: true });
+
+    const state = await probeClaudePluginState({ home, trackerDir });
+    assert.equal(state.unreadable, true);
+    assert.equal(state.detail, "Claude plugin registry unreadable");
+  } finally {
+    await fs.rm(tmp, { recursive: true, force: true });
+  }
+});
+
 test("installClaudePlugin returns skipped when Claude CLI is missing", async () => {
   const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "vibeusage-claude-plugin-"));
   const home = path.join(tmp, "home");
