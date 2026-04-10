@@ -3,6 +3,7 @@ const path = require("node:path");
 const fs = require("node:fs/promises");
 
 const { readJson } = require("./fs");
+const { readLastHermesUsageEvent, resolveHermesUsageLedgerPaths } = require("./hermes-usage-ledger");
 const { normalizeState: normalizeUploadState } = require("./upload-throttle");
 const { createIntegrationContext, probeIntegrations } = require("./integrations");
 
@@ -25,6 +26,7 @@ async function collectTrackerDiagnostics({
   });
   const trackerDir = integrationContext.trackerPaths.trackerDir;
   const configPath = path.join(trackerDir, "config.json");
+  const { ledgerPath: hermesLedgerPath } = resolveHermesUsageLedgerPaths({ trackerDir });
   const queuePath = path.join(trackerDir, "queue.jsonl");
   const queueStatePath = path.join(trackerDir, "queue.state.json");
   const cursorsPath = path.join(trackerDir, "cursors.json");
@@ -45,7 +47,10 @@ async function collectTrackerDiagnostics({
   const probeByName = new Map(probes.map((probe) => [probe.name, probe]));
   const opencodeSqliteCursor =
     cursors?.opencodeSqlite && typeof cursors.opencodeSqlite === "object" ? cursors.opencodeSqlite : {};
+  const hermesLedgerCursor =
+    cursors?.hermesLedger && typeof cursors.hermesLedger === "object" ? cursors.hermesLedger : {};
   const opencodeDbStat = await safeStat(opencodeDbPath);
+  const hermesLedgerStat = await safeStat(hermesLedgerPath);
 
   const queueSize = await safeStatSize(queuePath);
   const offsetBytes = Number(queueState.offset || 0);
@@ -60,6 +65,7 @@ async function collectTrackerDiagnostics({
   const claudeProbe = probeByName.get("claude");
   const geminiProbe = probeByName.get("gemini");
   const opencodeProbe = probeByName.get("opencode");
+  const hermesProbe = probeByName.get("hermes");
   const openclawSessionProbe = probeByName.get("openclaw-session");
 
   const codexNotify = Array.isArray(codexProbe?.currentNotify)
@@ -73,6 +79,7 @@ async function collectTrackerDiagnostics({
     ? new Date(uploadThrottle.lastSuccessMs).toISOString()
     : null;
   const autoRetryAt = parseEpochMsToIso(autoRetry?.retryAtMs);
+  const hermesLastLedgerEvent = await readLastHermesUsageEvent({ trackerDir });
 
   return {
     ok: true,
@@ -92,6 +99,9 @@ async function collectTrackerDiagnostics({
       claude_config: redactValue(integrationContext.claude.settingsPath, home),
       gemini_config: redactValue(integrationContext.gemini.settingsPath, home),
       opencode_config: redactValue(integrationContext.opencode.configDir, home),
+      hermes_home: redactValue(integrationContext.hermes.hermesHome, home),
+      hermes_plugin_dir: redactValue(integrationContext.hermes.pluginDir, home),
+      hermes_ledger: redactValue(hermesLedgerPath, home),
     },
     config: {
       base_url: typeof config?.baseUrl === "string" ? config.baseUrl : null,
@@ -131,6 +141,22 @@ async function collectTrackerDiagnostics({
           ? opencodeSqliteCursor.lastErrorCode
           : null,
     },
+    hermes: {
+      ledger_present: Boolean(hermesLedgerStat?.isFile?.()),
+      ledger_size_bytes: hermesLedgerStat?.isFile?.() ? Number(hermesLedgerStat.size || 0) : 0,
+      ledger_offset:
+        Number.isFinite(Number(hermesLedgerCursor.offset)) ? Math.max(0, Number(hermesLedgerCursor.offset)) : 0,
+      ledger_updated_at:
+        typeof hermesLedgerCursor.updatedAt === "string" ? hermesLedgerCursor.updatedAt : null,
+      last_event_at:
+        typeof hermesLastLedgerEvent?.emitted_at === "string"
+          ? hermesLastLedgerEvent.emitted_at
+          : typeof hermesLedgerCursor.lastEventAt === "string"
+            ? hermesLedgerCursor.lastEventAt
+            : null,
+      last_event_type:
+        typeof hermesLastLedgerEvent?.type === "string" ? hermesLastLedgerEvent.type : null,
+    },
     notify: {
       last_notify: lastNotify,
       last_openclaw_triggered_sync: lastOpenclawSync,
@@ -147,6 +173,8 @@ async function collectTrackerDiagnostics({
       gemini_hook_configured: Boolean(geminiProbe?.configured),
       opencode_plugin_status: opencodeProbe?.status || "unknown",
       opencode_plugin_configured: Boolean(opencodeProbe?.configured),
+      hermes_plugin_status: hermesProbe?.status || "unknown",
+      hermes_plugin_configured: Boolean(hermesProbe?.configured),
       openclaw_session_plugin_status: openclawSessionProbe?.status || "unknown",
       openclaw_session_plugin_configured: Boolean(openclawSessionProbe?.configured),
       openclaw_session_plugin_linked: Boolean(openclawSessionProbe?.linked),

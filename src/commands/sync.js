@@ -22,6 +22,7 @@ const {
 } = require("../lib/rollout");
 const { drainQueueToCloud } = require("../lib/uploader");
 const { readOpenclawUsageLedger } = require("../lib/openclaw-usage-ledger");
+const { readHermesUsageLedger } = require("../lib/hermes-usage-ledger");
 const { collectLocalSubscriptions } = require("../lib/subscriptions");
 const { createProgress, renderBar, formatNumber, formatBytes } = require("../lib/progress");
 const { syncHeartbeat } = require("../lib/vibeusage-api");
@@ -112,6 +113,12 @@ async function cmdSync(argv) {
           )}`,
         );
       },
+    });
+
+    const hermesResult = await parseHermesUsageLedger({
+      trackerDir,
+      cursors,
+      queuePath,
     });
 
     const openclawResult = opts.fromOpenclaw
@@ -369,12 +376,14 @@ async function cmdSync(argv) {
     if (!opts.auto) {
       const totalParsed =
         parseResult.filesProcessed +
+        hermesResult.filesProcessed +
         openclawResult.filesProcessed +
         claudeResult.filesProcessed +
         geminiResult.filesProcessed +
         opencodeResult.filesProcessed;
       const totalBuckets =
         parseResult.bucketsQueued +
+        hermesResult.bucketsQueued +
         openclawResult.bucketsQueued +
         claudeResult.bucketsQueued +
         geminiResult.bucketsQueued +
@@ -435,6 +444,78 @@ function parseArgs(argv) {
 }
 
 module.exports = { cmdSync };
+
+async function parseHermesUsageLedger({ trackerDir, cursors, queuePath }) {
+  const ledgerCursor =
+    cursors?.hermesLedger && typeof cursors.hermesLedger === "object" ? cursors.hermesLedger : {};
+  const offset = Math.max(0, Number(ledgerCursor.offset || 0));
+  const { events, endOffset } = await readHermesUsageLedger({ trackerDir, offset });
+
+  const hourlyState = normalizeHourlyState(cursors?.hourly);
+  const touchedBuckets = new Set();
+  let eventsAggregated = 0;
+
+  for (const event of events) {
+    if (!event || typeof event !== "object") continue;
+    if (event.type !== "usage") continue;
+    const bucketStart = toUtcHalfHourStart(event.emitted_at);
+    if (!bucketStart) continue;
+
+    const model =
+      typeof event.model === "string" && event.model.trim() ? event.model.trim() : "unknown";
+    const source = "hermes";
+    const delta = {
+      input_tokens: Math.max(0, Number(event.input_tokens || 0)),
+      cached_input_tokens: Math.max(
+        0,
+        Number(event.cache_read_tokens || 0) + Number(event.cache_write_tokens || 0),
+      ),
+      output_tokens: Math.max(0, Number(event.output_tokens || 0)),
+      reasoning_output_tokens: Math.max(0, Number(event.reasoning_tokens || 0)),
+      total_tokens: Math.max(0, Number(event.total_tokens || 0)),
+    };
+
+    if (
+      delta.input_tokens === 0 &&
+      delta.cached_input_tokens === 0 &&
+      delta.output_tokens === 0 &&
+      delta.reasoning_output_tokens === 0 &&
+      delta.total_tokens === 0
+    ) {
+      continue;
+    }
+
+    const bucket = getHourlyBucket(hourlyState, source, model, bucketStart);
+    addTotals(bucket.totals, delta);
+    touchedBuckets.add(bucketKey(source, model, bucketStart));
+    eventsAggregated += 1;
+  }
+
+  const bucketsQueued = await enqueueTouchedBuckets({ queuePath, hourlyState, touchedBuckets });
+  const lastUsageEvent = [...events].reverse().find((event) => {
+    if (!event || event.type !== "usage") return false;
+    return Boolean(toUtcHalfHourStart(event.emitted_at));
+  });
+  hourlyState.updatedAt = new Date().toISOString();
+  cursors.hourly = hourlyState;
+  cursors.hermesLedger = {
+    version: 1,
+    offset: endOffset,
+    updatedAt: new Date().toISOString(),
+    lastEventAt:
+      typeof lastUsageEvent?.emitted_at === "string"
+        ? lastUsageEvent.emitted_at
+        : typeof ledgerCursor.lastEventAt === "string"
+          ? ledgerCursor.lastEventAt
+          : null,
+  };
+
+  return {
+    filesProcessed: endOffset > offset ? 1 : 0,
+    eventsAggregated,
+    bucketsQueued,
+  };
+}
 
 async function parseOpenclawSanitizedLedger({ trackerDir, cursors, queuePath }) {
   const ledgerCursor =

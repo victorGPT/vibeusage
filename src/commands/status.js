@@ -6,6 +6,7 @@ const { readJson } = require("../lib/fs");
 const { collectLocalSubscriptions } = require("../lib/subscriptions");
 const { normalizeState: normalizeUploadState } = require("../lib/upload-throttle");
 const { collectTrackerDiagnostics } = require("../lib/diagnostics");
+const { readLastHermesUsageEvent, resolveHermesUsageLedgerPaths } = require("../lib/hermes-usage-ledger");
 const { createIntegrationContext, listIntegrations, probeIntegrations } = require("../lib/integrations");
 const { resolveTrackerPaths } = require("../lib/tracker-paths");
 
@@ -20,6 +21,7 @@ async function cmdStatus(argv = []) {
   const home = os.homedir();
   const { trackerDir } = await resolveTrackerPaths({ home });
   const configPath = path.join(trackerDir, "config.json");
+  const { ledgerPath: hermesLedgerPath } = resolveHermesUsageLedgerPaths({ trackerDir });
   const queuePath = path.join(trackerDir, "queue.jsonl");
   const queueStatePath = path.join(trackerDir, "queue.state.json");
   const cursorsPath = path.join(trackerDir, "cursors.json");
@@ -80,8 +82,10 @@ async function cmdStatus(argv = []) {
   const claudeProbe = probeByName.get("claude");
   const geminiProbe = probeByName.get("gemini");
   const opencodeProbe = probeByName.get("opencode");
+  const hermesProbe = probeByName.get("hermes");
   const openclawSessionProbe = probeByName.get("openclaw-session");
   const opencodeDbPresent = Boolean((await safeStat(opencodeDbPath))?.isFile?.());
+  const hermesLedgerPresent = Boolean((await safeStat(hermesLedgerPath))?.isFile?.());
   const opencodeSqliteState =
     cursors?.opencodeSqlite && typeof cursors.opencodeSqlite === "object"
       ? cursors.opencodeSqlite
@@ -90,6 +94,15 @@ async function cmdStatus(argv = []) {
     typeof opencodeSqliteState.lastStatus === "string" && opencodeSqliteState.lastStatus.trim()
       ? opencodeSqliteState.lastStatus.trim()
       : "never_checked";
+  const hermesLedgerState =
+    cursors?.hermesLedger && typeof cursors.hermesLedger === "object" ? cursors.hermesLedger : {};
+  const hermesLastLedgerEvent = await readLastHermesUsageEvent({ trackerDir });
+  const hermesLastEventAt =
+    typeof hermesLastLedgerEvent?.emitted_at === "string"
+      ? hermesLastLedgerEvent.emitted_at
+      : typeof hermesLedgerState.lastEventAt === "string"
+        ? hermesLedgerState.lastEventAt
+        : "never";
 
   process.stdout.write(
     [
@@ -111,6 +124,9 @@ async function cmdStatus(argv = []) {
       `- Claude plugin: ${renderIntegrationStatus(descriptors.get("claude"), claudeProbe)}`,
       `- Gemini hooks: ${renderIntegrationStatus(descriptors.get("gemini"), geminiProbe)}`,
       `- Opencode plugin: ${renderIntegrationStatus(descriptors.get("opencode"), opencodeProbe)}`,
+      `- Hermes plugin: ${renderIntegrationStatus(descriptors.get("hermes"), hermesProbe)}`,
+      `- Hermes ledger: ${hermesLedgerPresent ? "present" : "missing"}`,
+      `- Hermes last ledger event: ${hermesLastEventAt}`,
       `- OpenCode SQLite DB: ${opencodeDbPresent ? "present" : "missing"}`,
       `- OpenCode SQLite reader: ${opencodeSqliteReader}`,
       `- OpenClaw session plugin: ${renderIntegrationStatus(
