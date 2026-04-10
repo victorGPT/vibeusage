@@ -51,10 +51,10 @@ This document is the single source of truth for repository navigation. Use it to
   - `src/lib/diagnostics.js`
   - `src/commands/uninstall.js`
 - Common hotspots:
-  - init/install flow: `src/commands/init.js`, `src/lib/integrations/`
-  - integration status/diagnostics: `src/commands/status.js`, `src/lib/diagnostics.js`
-  - sync pipeline: `src/commands/sync.js`, `src/lib/rollout.js`, `src/lib/opencode-sqlite.js`, `src/lib/upload.js`
-  - local state/config: `src/lib/runtime-config.js`, `src/lib/tracker-paths.js`, `src/lib/fs.js`
+  - init/install flow: `src/commands/init.js`, `src/lib/integrations/`, `src/lib/hermes-config.js`, `src/templates/hermes-vibeusage-plugin/`
+  - integration status/diagnostics: `src/commands/status.js`, `src/lib/diagnostics.js`, `src/lib/hermes-usage-ledger.js`
+  - sync pipeline: `src/commands/sync.js`, `src/lib/rollout.js`, `src/lib/hermes-usage-ledger.js`, `src/lib/opencode-sqlite.js`, `src/lib/upload.js`
+  - local state/config: `src/lib/runtime-config.js`, `src/lib/tracker-paths.js`, `src/lib/fs.js`, `src/lib/hermes-config.js`
   - InsForge CLI wrappers and device-token flows: `src/lib/insforge-client.js`, `src/lib/vibeusage-api.js`
 - Hard-cut CLI integration contract:
   - `init` is the only supported command that mutates local AI CLI integration config.

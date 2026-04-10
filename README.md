@@ -5,7 +5,7 @@
 # VibeUsage
 
 **Track token usage across AI coding CLIs.**  
-Local parsing, minimal data collection, and a shareable dashboard for Codex CLI, Claude Code, Gemini CLI, OpenCode, OpenClaw, and more.
+Local parsing, minimal data collection, and a shareable dashboard for Codex CLI, Claude Code, Gemini CLI, OpenCode, Hermes, OpenClaw, and more.
 
 [![npm version](https://img.shields.io/npm/v/vibeusage.svg)](https://www.npmjs.com/package/vibeusage)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
@@ -32,7 +32,7 @@ Give the install guide to ChatGPT, Claude, Codex, or your preferred agent — it
 
 VibeUsage is a **token usage tracker for AI agent CLIs**. It installs lightweight local hooks/plugins, reads usage from local logs or local databases, aggregates usage into time buckets on your machine, and syncs only the data needed to power a dashboard, cost breakdowns, project usage views, public profiles, and leaderboards.
 
-It is currently **macOS-first**, with support focused on real developer workflows around **Codex CLI, Every Code, Claude Code, Gemini CLI, OpenCode, and OpenClaw**.
+It is currently **macOS-first**, with support focused on real developer workflows around **Codex CLI, Every Code, Claude Code, Gemini CLI, OpenCode, Hermes, and OpenClaw**.
 
 ## Why VibeUsage
 
@@ -87,7 +87,18 @@ This is useful when you want to copy an install command from the dashboard or le
 | **Claude Code** | Auto-detected | `Stop` + `SessionEnd` hooks | local hook output |
 | **Gemini CLI** | Auto-detected | `SessionEnd` hook | `~/.gemini/tmp/**/chats/session-*.json` |
 | **OpenCode** | Auto-detected | plugin + local parsing | `~/.local/share/opencode/opencode.db` (legacy message files are fallback only) |
+| **Hermes** | Auto-detected when installed | plugin + local parsing | `~/.vibeusage/tracker/hermes.usage.jsonl` |
 | **OpenClaw** | Auto-detected when installed | session plugin | local sanitized usage ledger |
+
+### Hermes note
+
+Hermes uses a dedicated plugin-ledger path:
+
+**`vibeusage init` installs Hermes plugin → Hermes lifecycle hooks append `~/.vibeusage/tracker/hermes.usage.jsonl` → `vibeusage sync` parses only that ledger**
+
+- no prompt / response content upload
+- no fallback parsing of `~/.hermes/state.db`, `~/.hermes/sessions/`, or trajectory files
+- plugin hooks collect locally only; upload still happens in `vibeusage sync`
 
 ### OpenClaw note
 
@@ -140,12 +151,13 @@ graph LR
     C[Claude Code] --> G
     D[Gemini CLI] --> G
     E[OpenCode] --> G
-    F[OpenClaw] --> G
-    G --> H[Local aggregation into 30-min UTC buckets]
-    H --> I[VibeUsage backend]
-    I --> J[Dashboard]
-    I --> K[Project usage]
-    I --> L[Public profile / leaderboard]
+    F[Hermes] --> G
+    H[OpenClaw] --> G
+    G --> I[Local aggregation into 30-min UTC buckets]
+    I --> J[VibeUsage backend]
+    J --> K[Dashboard]
+    J --> L[Project usage]
+    J --> M[Public profile / leaderboard]
 ```
 
 At a high level:
