@@ -40,12 +40,18 @@ async function readHermesUsageLedger({ trackerDir, offset = 0 } = {}) {
   }
 
   const startOffset = Math.max(0, Number(offset || 0));
-  const endOffset = buffer.length;
-  if (startOffset >= endOffset) {
-    return { events: [], endOffset };
+  const fileEndOffset = buffer.length;
+  if (startOffset >= fileEndOffset) {
+    return { events: [], endOffset: fileEndOffset };
   }
 
-  const raw = buffer.subarray(startOffset).toString("utf8");
+  const newlineIndex = buffer.lastIndexOf(0x0a);
+  if (newlineIndex < startOffset) {
+    return { events: [], endOffset: startOffset };
+  }
+
+  const endOffset = newlineIndex + 1;
+  const raw = buffer.subarray(startOffset, endOffset).toString("utf8");
   const events = raw
     .split(/\r?\n/)
     .map((line) => line.trim())

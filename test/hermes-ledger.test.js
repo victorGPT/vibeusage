@@ -8,7 +8,7 @@ const { cmdSync } = require("../src/commands/sync");
 const { cmdStatus } = require("../src/commands/status");
 const { collectTrackerDiagnostics } = require("../src/lib/diagnostics");
 const { resolveTrackerPaths } = require("../src/lib/tracker-paths");
-const { resolveHermesUsageLedgerPaths } = require("../src/lib/hermes-usage-ledger");
+const { readHermesUsageLedger, resolveHermesUsageLedgerPaths } = require("../src/lib/hermes-usage-ledger");
 
 function usageLine(overrides = {}) {
   return {
@@ -89,6 +89,32 @@ test("Hermes sync parses ledger into queue and remains idempotent", async () => 
     else process.env.HOME = prevHome;
     if (prevCodexHome === undefined) delete process.env.CODEX_HOME;
     else process.env.CODEX_HOME = prevCodexHome;
+    await fs.rm(tmp, { recursive: true, force: true });
+  }
+});
+
+test("Hermes ledger reader preserves incomplete trailing JSON for retry", async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "vibeusage-hermes-tail-"));
+
+  try {
+    const trackerDir = path.join(tmp, ".vibeusage", "tracker");
+    await fs.mkdir(trackerDir, { recursive: true });
+    const { ledgerPath } = resolveHermesUsageLedgerPaths({ trackerDir });
+    const first = `${JSON.stringify(usageLine())}\n`;
+    const second = JSON.stringify(usageLine({ session_id: "s2", emitted_at: "2026-04-10T12:40:00.000Z" }));
+    const partial = second.slice(0, Math.floor(second.length / 2));
+    await fs.writeFile(ledgerPath, first + partial, "utf8");
+
+    const firstRead = await readHermesUsageLedger({ trackerDir, offset: 0 });
+    assert.equal(firstRead.events.length, 1);
+    assert.equal(firstRead.events[0].session_id, "s1");
+    assert.equal(firstRead.endOffset, Buffer.byteLength(first, "utf8"));
+
+    await fs.appendFile(ledgerPath, `${second.slice(partial.length)}\n`, "utf8");
+    const secondRead = await readHermesUsageLedger({ trackerDir, offset: firstRead.endOffset });
+    assert.equal(secondRead.events.length, 1);
+    assert.equal(secondRead.events[0].session_id, "s2");
+  } finally {
     await fs.rm(tmp, { recursive: true, force: true });
   }
 });
