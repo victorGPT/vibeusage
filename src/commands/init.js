@@ -190,7 +190,7 @@ function renderWelcome() {
       DIVIDER,
       "",
       "This tool will:",
-      "  - Analyze your local AI CLI configurations (Codex, Every Code, Claude, Gemini, Opencode, OpenClaw)",
+      "  - Analyze your local AI CLI configurations (Codex, Every Code, Claude, Gemini, Opencode, Hermes, OpenClaw)",
       "  - Set up lightweight hooks to track your flow state",
       "  - Link your device to your VibeScore account",
       "",

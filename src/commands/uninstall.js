@@ -21,6 +21,7 @@ async function cmdUninstall(argv) {
   const claudeConfigExists = await isDir(integrationContext.claude.configDir);
   const geminiConfigExists = await isDir(integrationContext.gemini.configDir);
   const opencodeConfigExists = await isDir(integrationContext.opencode.configDir);
+  const hermesConfigExists = await isDir(integrationContext.hermes.hermesHome);
   const integrationResults = await uninstallIntegrations(integrationContext);
   const resultByName = new Map(integrationResults.map((result) => [result.name, result]));
 
@@ -81,6 +82,15 @@ async function cmdUninstall(argv) {
           `- Opencode plugin removed: ${result.detail || integrationContext.opencode.configDir}`,
         noChangeText: "- Opencode plugin: no change",
         skippedText: "- Opencode plugin: skipped (unexpected content)",
+      }),
+      renderHookLine({
+        exists: hermesConfigExists,
+        result: resultByName.get("hermes"),
+        missingText: `- Hermes plugin: skipped (${integrationContext.hermes.hermesHome} not found)`,
+        removedText: (result) =>
+          `- Hermes plugin removed: ${result.detail || integrationContext.hermes.pluginDir}`,
+        noChangeText: "- Hermes plugin: no change",
+        skippedText: "- Hermes plugin: skipped (unexpected content)",
       }),
       renderHookLine({
         exists: true,

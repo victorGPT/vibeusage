@@ -9,6 +9,7 @@ const {
 } = require("../gemini-config");
 const { resolveOpencodeConfigDir } = require("../opencode-config");
 const { resolveOpenclawSessionPluginPaths } = require("../openclaw-session-plugin");
+const { resolveHermesPluginPaths } = require("../hermes-config");
 const { resolveTrackerPaths } = require("../tracker-paths");
 
 async function createIntegrationContext({
@@ -57,6 +58,11 @@ async function createIntegrationContext({
     opencode: {
       configDir: opencodeConfigDir,
     },
+    hermes: resolveHermesPluginPaths({
+      home,
+      env,
+      trackerDir: resolvedTrackerPaths.trackerDir,
+    }),
     openclawSession: resolveOpenclawSessionPluginPaths({
       home,
       trackerDir: resolvedTrackerPaths.trackerDir,

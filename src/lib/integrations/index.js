@@ -4,6 +4,7 @@ const everyCode = require("./every-code");
 const claude = require("./claude");
 const gemini = require("./gemini");
 const opencode = require("./opencode");
+const hermes = require("./hermes");
 const openclawSession = require("./openclaw-session");
 
 const INTEGRATIONS = [
@@ -12,6 +13,7 @@ const INTEGRATIONS = [
   claude,
   gemini,
   opencode,
+  hermes,
   openclawSession,
 ];
 

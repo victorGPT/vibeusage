@@ -1,0 +1,9 @@
+# VIBEUSAGE_HERMES_PLUGIN
+name: vibeusage
+version: "1"
+description: "VibeUsage Hermes usage ledger plugin"
+author: "VibeUsage"
+provides_hooks:
+  - "on_session_start"
+  - "post_api_request"
+  - "on_session_end"
