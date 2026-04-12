@@ -1113,6 +1113,11 @@ test("vibeusage-ingest uses serviceRoleKey as edgeFunctionToken and ingests hour
   assert.equal(postBody[0]?.hour_start, bucket.hour_start);
   assert.equal(postBody[0]?.source, "codex");
   assert.equal(postBody[0]?.model, "unknown");
+  assert.equal(postBody[0]?.input_tokens, "1");
+  assert.equal(postBody[0]?.cached_input_tokens, "1");
+  assert.equal(postBody[0]?.output_tokens, "2");
+  assert.equal(postBody[0]?.reasoning_output_tokens, "0");
+  assert.equal(postBody[0]?.total_tokens, "4");
   assert.equal(postBody[0]?.billable_total_tokens, "3");
   assert.equal(postBody[0]?.billable_rule_version, 1);
 
@@ -1227,7 +1232,11 @@ test("vibeusage-ingest ingests project_hourly buckets and upserts project regist
   assert.equal(usageRows.length, 1);
   assert.equal(usageRows[0]?.project_ref, projectBucket.project_ref);
   assert.equal(usageRows[0]?.project_key, projectBucket.project_key);
-  assert.equal(usageRows[0]?.total_tokens, 6);
+  assert.equal(usageRows[0]?.input_tokens, "3");
+  assert.equal(usageRows[0]?.cached_input_tokens, "2");
+  assert.equal(usageRows[0]?.output_tokens, "1");
+  assert.equal(usageRows[0]?.reasoning_output_tokens, "0");
+  assert.equal(usageRows[0]?.total_tokens, "6");
   assert.equal(usageRows[0]?.billable_total_tokens, "6");
   assert.equal(usageRows[0]?.billable_rule_version, 1);
 
@@ -1248,6 +1257,109 @@ test("vibeusage-ingest ingests project_hourly buckets and upserts project regist
   assert.equal(registryRows[0]?.source, projectBucket.source);
   assert.ok(registryRows[0]?.updated_at, "updated_at missing");
   assert.ok(registryRows[0]?.last_seen_at, "last_seen_at missing");
+});
+
+test("vibeusage-ingest stringifies bigint-scale hourly token payloads", async () => {
+  const fn = await loadEdgeFunction("vibeusage-ingest");
+
+  const calls = [];
+  const fetchCalls = [];
+
+  const tokenRow = {
+    id: "token-id",
+    user_id: "33333333-3333-3333-3333-333333333333",
+    device_id: "44444444-4444-4444-4444-444444444444",
+    revoked_at: null,
+  };
+
+  function from(table) {
+    if (table === "vibeusage_tracker_device_tokens") {
+      return {
+        select: () => ({
+          eq: () => ({
+            maybeSingle: async () => ({ data: tokenRow, error: null }),
+          }),
+        }),
+        update: () => ({ eq: async () => ({ error: null }) }),
+      };
+    }
+
+    if (table === "vibeusage_tracker_devices") {
+      return {
+        update: () => ({ eq: async () => ({ error: null }) }),
+      };
+    }
+
+    throw new Error(`Unexpected table: ${table}`);
+  }
+
+  globalThis.createClient = (args) => {
+    calls.push(args);
+    if (args && args.edgeFunctionToken === SERVICE_ROLE_KEY) {
+      return { database: { from } };
+    }
+    throw new Error(`Unexpected createClient args: ${JSON.stringify(args)}`);
+  };
+
+  globalThis.fetch = async (url, init) => {
+    fetchCalls.push({ url, init });
+    const u = new URL(url);
+
+    if (u.pathname.endsWith("/api/database/records/vibeusage_tracker_hourly")) {
+      return new Response(JSON.stringify([{ hour_start: "2025-12-17T00:00:00.000Z" }]), {
+        status: 201,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    return new Response("not found", { status: 404 });
+  };
+
+  const deviceToken = "device_token_test";
+  const bucket = {
+    hour_start: new Date("2025-12-17T00:00:00.000Z").toISOString(),
+    source: "hermes",
+    model: "gpt-5",
+    input_tokens: "2609396608",
+    cached_input_tokens: "0",
+    output_tokens: "12",
+    reasoning_output_tokens: "0",
+    total_tokens: "2609396620",
+  };
+
+  const req = new Request("http://localhost/functions/vibeusage-ingest", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${deviceToken}` },
+    body: JSON.stringify({ hourly: [bucket] }),
+  });
+
+  const res = await fn(req);
+  assert.equal(res.status, 200);
+
+  const data = await res.json();
+  assert.deepEqual(data, {
+    success: true,
+    inserted: 1,
+    skipped: 0,
+    project_inserted: 0,
+    project_skipped: 0,
+  });
+  assert.equal(fetchCalls.length, 1);
+  const postCall = fetchCalls[0];
+  const postBody = JSON.parse(postCall.init?.body || "[]");
+  assert.equal(postBody.length, 1);
+  assert.equal(postBody[0]?.source, "hermes");
+  assert.equal(postBody[0]?.model, "gpt-5");
+  assert.equal(postBody[0]?.input_tokens, "2609396608");
+  assert.equal(postBody[0]?.cached_input_tokens, "0");
+  assert.equal(postBody[0]?.output_tokens, "12");
+  assert.equal(postBody[0]?.reasoning_output_tokens, "0");
+  assert.equal(postBody[0]?.total_tokens, "2609396620");
+  assert.equal(postBody[0]?.billable_total_tokens, "2609396620");
+  assert.equal(postBody[0]?.billable_rule_version, 1);
+
+  const serviceClientCall = calls.find((c) => c && c.edgeFunctionToken === SERVICE_ROLE_KEY);
+  assert.ok(serviceClientCall, "service client not created");
 });
 
 test("vibeusage-ingest accepts wrapped payload with data.hourly", async () => {
@@ -1339,6 +1451,11 @@ test("vibeusage-ingest accepts wrapped payload with data.hourly", async () => {
   const postBody = JSON.parse(postCall.init?.body || "[]");
   assert.equal(postBody.length, 1);
   assert.equal(postBody[0]?.source, "codex");
+  assert.equal(postBody[0]?.input_tokens, "1");
+  assert.equal(postBody[0]?.cached_input_tokens, "0");
+  assert.equal(postBody[0]?.output_tokens, "2");
+  assert.equal(postBody[0]?.reasoning_output_tokens, "0");
+  assert.equal(postBody[0]?.total_tokens, "3");
 
   const serviceClientCall = calls.find((c) => c && c.edgeFunctionToken === SERVICE_ROLE_KEY);
   assert.ok(serviceClientCall, "service client not created");
@@ -1689,6 +1806,13 @@ test("vibeusage-ingest works without serviceRoleKey via anonKey records API", as
   assert.ok(String(postCall.url).includes("/api/database/records/vibeusage_tracker_hourly"));
   assert.equal(postCall.init?.method, "POST");
   assert.equal(postCall.init?.headers?.Prefer, "return=representation,resolution=merge-duplicates");
+  const postRows = JSON.parse(postCall.init?.body || "[]");
+  assert.equal(postRows.length, 1);
+  assert.equal(postRows[0]?.input_tokens, "1");
+  assert.equal(postRows[0]?.cached_input_tokens, "0");
+  assert.equal(postRows[0]?.output_tokens, "2");
+  assert.equal(postRows[0]?.reasoning_output_tokens, "0");
+  assert.equal(postRows[0]?.total_tokens, "3");
   const postUrl = new URL(postCall.url);
   assert.equal(
     postUrl.searchParams.get("on_conflict"),

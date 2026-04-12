@@ -64,10 +64,26 @@ test("parseHourlyBucket validates half-hour boundaries and tokens", () => {
   });
   assert.equal(valid.ok, true);
   assert.equal(valid.value.hour_start, "2026-01-25T10:30:00.000Z");
-  assert.equal(valid.value.total_tokens, 3);
+  assert.equal(valid.value.total_tokens, "3");
 
   const invalid = ingestCore.parseHourlyBucket({ hour_start: "2026-01-25T10:31:00.000Z" });
   assert.equal(invalid.ok, false);
+});
+
+test("parseHourlyBucket accepts bigint-scale token strings without overflow", () => {
+  const valid = ingestCore.parseHourlyBucket({
+    hour_start: "2026-01-25T10:30:00.000Z",
+    source: "hermes",
+    model: "gpt-5",
+    input_tokens: "2609396608",
+    cached_input_tokens: "0",
+    output_tokens: "12",
+    reasoning_output_tokens: "0",
+    total_tokens: "2609396620",
+  });
+  assert.equal(valid.ok, true);
+  assert.equal(valid.value.input_tokens, "2609396608");
+  assert.equal(valid.value.total_tokens, "2609396620");
 });
 
 test("parseProjectHourlyBucket validates half-hour boundaries and project fields", () => {

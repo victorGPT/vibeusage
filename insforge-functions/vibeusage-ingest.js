@@ -1793,7 +1793,7 @@ if (!usageModelCore2) throw new Error("usage-model core not initialized");
 var usageMetricsCore = globalThis.__vibeusageUsageMetricsCore;
 if (!usageMetricsCore) throw new Error("usage metrics core not initialized");
 var { normalizeIso: normalizeIso2 } = dateCore;
-var { normalizeSource: normalizeSource2 } = runtimePrimitivesCore3;
+var { normalizeSource: normalizeSource2, toBigInt: toBigInt2 } = runtimePrimitivesCore3;
 var { normalizeUsageModel: normalizeUsageModel2 } = usageModelCore2;
 var { computeBillableTotalTokens: computeBillableTotalTokens2 } = usageMetricsCore;
 function normalizeHourlyPayload(data) {
@@ -1854,12 +1854,22 @@ function parseUtcHalfHourStart(value) {
   );
   return hourStart.toISOString();
 }
-function toNonNegativeInt(n) {
-  if (typeof n !== "number") return null;
-  if (!Number.isFinite(n)) return null;
-  if (!Number.isInteger(n)) return null;
-  if (n < 0) return null;
-  return n;
+function toNonNegativeBigInt(n) {
+  if (typeof n === "bigint") return n >= 0n ? n : null;
+  if (typeof n === "number") {
+    if (!Number.isFinite(n) || !Number.isInteger(n) || n < 0) return null;
+    return BigInt(n);
+  }
+  if (typeof n === "string") {
+    const trimmed = n.trim();
+    if (!/^[0-9]+$/.test(trimmed)) return null;
+    try {
+      return BigInt(trimmed);
+    } catch (_error) {
+      return null;
+    }
+  }
+  return null;
 }
 function parseHourlyBucket(raw) {
   if (!raw || typeof raw !== "object") return { ok: false, error: "Invalid half-hour bucket" };
@@ -1869,11 +1879,11 @@ function parseHourlyBucket(raw) {
   }
   const source = normalizeSource2(raw.source);
   const model = normalizeUsageModel2(raw.model) || DEFAULT_MODEL2;
-  const input = toNonNegativeInt(raw.input_tokens);
-  const cached = toNonNegativeInt(raw.cached_input_tokens);
-  const output = toNonNegativeInt(raw.output_tokens);
-  const reasoning = toNonNegativeInt(raw.reasoning_output_tokens);
-  const total = toNonNegativeInt(raw.total_tokens);
+  const input = toNonNegativeBigInt(raw.input_tokens);
+  const cached = toNonNegativeBigInt(raw.cached_input_tokens);
+  const output = toNonNegativeBigInt(raw.output_tokens);
+  const reasoning = toNonNegativeBigInt(raw.reasoning_output_tokens);
+  const total = toNonNegativeBigInt(raw.total_tokens);
   if ([input, cached, output, reasoning, total].some((n) => n == null)) {
     return { ok: false, error: "Token fields must be non-negative integers" };
   }
@@ -1883,11 +1893,11 @@ function parseHourlyBucket(raw) {
       source,
       model,
       hour_start: hourStart,
-      input_tokens: input,
-      cached_input_tokens: cached,
-      output_tokens: output,
-      reasoning_output_tokens: reasoning,
-      total_tokens: total
+      input_tokens: input.toString(),
+      cached_input_tokens: cached.toString(),
+      output_tokens: output.toString(),
+      reasoning_output_tokens: reasoning.toString(),
+      total_tokens: total.toString()
     }
   };
 }
@@ -1902,11 +1912,11 @@ function parseProjectHourlyBucket(raw) {
   const source = normalizeSource2(raw.source);
   const projectKey = typeof raw.project_key === "string" ? raw.project_key.trim() : "";
   const projectRef = typeof raw.project_ref === "string" ? raw.project_ref.trim() : "";
-  const input = toNonNegativeInt(raw.input_tokens);
-  const cached = toNonNegativeInt(raw.cached_input_tokens);
-  const output = toNonNegativeInt(raw.output_tokens);
-  const reasoning = toNonNegativeInt(raw.reasoning_output_tokens);
-  const total = toNonNegativeInt(raw.total_tokens);
+  const input = toNonNegativeBigInt(raw.input_tokens);
+  const cached = toNonNegativeBigInt(raw.cached_input_tokens);
+  const output = toNonNegativeBigInt(raw.output_tokens);
+  const reasoning = toNonNegativeBigInt(raw.reasoning_output_tokens);
+  const total = toNonNegativeBigInt(raw.total_tokens);
   if (!projectKey) return { ok: false, error: "project_key is required" };
   if (!projectRef) return { ok: false, error: "project_ref is required" };
   if ([input, cached, output, reasoning, total].some((n) => n == null)) {
@@ -1919,11 +1929,11 @@ function parseProjectHourlyBucket(raw) {
       project_key: projectKey,
       project_ref: projectRef,
       hour_start: hourStart,
-      input_tokens: input,
-      cached_input_tokens: cached,
-      output_tokens: output,
-      reasoning_output_tokens: reasoning,
-      total_tokens: total
+      input_tokens: input.toString(),
+      cached_input_tokens: cached.toString(),
+      output_tokens: output.toString(),
+      reasoning_output_tokens: reasoning.toString(),
+      total_tokens: total.toString()
     }
   };
 }
@@ -1977,7 +1987,7 @@ function buildRows({ hourly, tokenRow, nowIso, billableRuleVersion = BILLABLE_RU
       reasoning_output_tokens: bucket.reasoning_output_tokens,
       total_tokens: bucket.total_tokens,
       billable_total_tokens: billable.toString(),
-      billable_rule_version: billableRuleVersion,
+      billable_rule_version: Number(toBigInt2(billableRuleVersion) || 1n),
       updated_at: nowIso
     });
   }
@@ -2009,7 +2019,7 @@ function buildProjectRows({ hourly, tokenRow, nowIso }) {
       reasoning_output_tokens: bucket.reasoning_output_tokens,
       total_tokens: bucket.total_tokens,
       billable_total_tokens: billable.toString(),
-      billable_rule_version: BILLABLE_RULE_VERSION,
+      billable_rule_version: Number(toBigInt2(BILLABLE_RULE_VERSION) || 1n),
       updated_at: nowIso
     });
   }
@@ -2070,7 +2080,7 @@ if (!globalThis[CORE_KEY12]) {
       parseHourlyBucket,
       parseProjectHourlyBucket,
       parseUtcHalfHourStart,
-      toNonNegativeInt
+      toNonNegativeBigInt
     },
     configurable: true,
     enumerable: false,
@@ -2166,7 +2176,7 @@ var DEVICE_TOKEN_SELECT = "id,user_id,device_id,revoked_at,last_sync_at";
 var dateCore2 = globalThis.__vibeusageDateCore;
 if (!dateCore2) throw new Error("date core not initialized");
 var { isWithinInterval: isWithinInterval2, normalizeIso: normalizeIso3 } = dateCore2;
-function toNonNegativeInt2(value) {
+function toNonNegativeInt(value) {
   if (typeof value !== "number") return 0;
   if (!Number.isFinite(value)) return 0;
   if (!Number.isInteger(value)) return 0;
@@ -2549,9 +2559,9 @@ async function recordIngestBatchMetrics({
     device_id: tokenRow.device_id,
     device_token_id: tokenRow.id,
     source: typeof source === "string" ? source : null,
-    bucket_count: toNonNegativeInt2(bucketCount),
-    inserted: toNonNegativeInt2(inserted),
-    skipped: toNonNegativeInt2(skipped)
+    bucket_count: toNonNegativeInt(bucketCount),
+    inserted: toNonNegativeInt(inserted),
+    skipped: toNonNegativeInt(skipped)
   };
   try {
     if (serviceClient?.database?.from) {
