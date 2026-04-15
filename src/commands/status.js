@@ -103,22 +103,6 @@ async function cmdStatus(argv = []) {
       : typeof hermesLedgerState.lastEventAt === "string"
         ? hermesLedgerState.lastEventAt
         : "never";
-  const hermesLastProjectKey =
-    typeof hermesLastLedgerEvent?.project_key === "string" && hermesLastLedgerEvent.project_key.trim()
-      ? hermesLastLedgerEvent.project_key.trim()
-      : "unset";
-  const hermesLastProjectRef =
-    typeof hermesLastLedgerEvent?.project_ref === "string" && hermesLastLedgerEvent.project_ref.trim()
-      ? hermesLastLedgerEvent.project_ref.trim()
-      : "unset";
-  const hermesLastProjectStatus =
-    typeof hermesLastLedgerEvent?.project_status === "string" && hermesLastLedgerEvent.project_status.trim()
-      ? hermesLastLedgerEvent.project_status.trim()
-      : "unset";
-  const hermesLastProjectReason =
-    typeof hermesLastLedgerEvent?.project_reason === "string" && hermesLastLedgerEvent.project_reason.trim()
-      ? hermesLastLedgerEvent.project_reason.trim()
-      : "unset";
 
   process.stdout.write(
     [
@@ -143,10 +127,6 @@ async function cmdStatus(argv = []) {
       `- Hermes plugin: ${renderIntegrationStatus(descriptors.get("hermes"), hermesProbe)}`,
       `- Hermes ledger: ${hermesLedgerPresent ? "present" : "missing"}`,
       `- Hermes last ledger event: ${hermesLastEventAt}`,
-      `- Hermes last project key: ${hermesLastProjectKey}`,
-      `- Hermes last project ref: ${hermesLastProjectRef}`,
-      `- Hermes last project status: ${hermesLastProjectStatus}`,
-      `- Hermes last project reason: ${hermesLastProjectReason}`,
       `- OpenCode SQLite DB: ${opencodeDbPresent ? "present" : "missing"}`,
       `- OpenCode SQLite reader: ${opencodeSqliteReader}`,
       `- OpenClaw session plugin: ${renderIntegrationStatus(
