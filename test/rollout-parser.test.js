@@ -803,7 +803,6 @@ test("parseOpencodeIncremental ignores legacy message files when sqlite is unava
     await fs.writeFile(messagePath, JSON.stringify(message), "utf8");
 
     const res = await parseOpencodeIncremental({
-      messageFiles: [messagePath],
       opencodeDbPath: path.join(tmp, "opencode.db"),
       cursors,
       queuePath,
@@ -833,7 +832,6 @@ test("parseOpencodeIncremental ingests sqlite rows when message files are absent
     const cursors = { version: 1, files: {}, updatedAt: null };
 
     const res = await parseOpencodeIncremental({
-      messageFiles: [],
       opencodeDbPath: path.join(tmp, "opencode.db"),
       cursors,
       queuePath,
@@ -889,7 +887,6 @@ test("parseOpencodeIncremental persists missing sqlite db health without buckets
     const cursors = { version: 1, files: {}, updatedAt: null };
 
     const res = await parseOpencodeIncremental({
-      messageFiles: [],
       opencodeDbPath: path.join(tmp, "opencode.db"),
       cursors,
       queuePath,
@@ -925,7 +922,6 @@ test("parseOpencodeIncremental persists missing sqlite3 health without buckets",
     const cursors = { version: 1, files: {}, updatedAt: null };
 
     const res = await parseOpencodeIncremental({
-      messageFiles: [],
       opencodeDbPath: path.join(tmp, "opencode.db"),
       cursors,
       queuePath,
@@ -958,7 +954,6 @@ test("parseOpencodeIncremental persists sqlite query failures without buckets", 
     const cursors = { version: 1, files: {}, updatedAt: null };
 
     const res = await parseOpencodeIncremental({
-      messageFiles: [],
       opencodeDbPath: path.join(tmp, "opencode.db"),
       cursors,
       queuePath,
@@ -1000,7 +995,6 @@ test("parseOpencodeIncremental resolves sqlite project usage from project worktr
     const cursors = { version: 1, files: {}, updatedAt: null };
 
     const res = await parseOpencodeIncremental({
-      messageFiles: [],
       opencodeDbPath: path.join(tmp, "opencode.db"),
       cursors,
       queuePath,

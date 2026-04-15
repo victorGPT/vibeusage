@@ -156,6 +156,22 @@ async function collectTrackerDiagnostics({
             : null,
       last_event_type:
         typeof hermesLastLedgerEvent?.type === "string" ? hermesLastLedgerEvent.type : null,
+      last_project_key:
+        typeof hermesLastLedgerEvent?.project_key === "string" && hermesLastLedgerEvent.project_key.trim()
+          ? hermesLastLedgerEvent.project_key.trim()
+          : null,
+      last_project_ref:
+        typeof hermesLastLedgerEvent?.project_ref === "string" && hermesLastLedgerEvent.project_ref.trim()
+          ? hermesLastLedgerEvent.project_ref.trim()
+          : null,
+      last_project_status:
+        typeof hermesLastLedgerEvent?.project_status === "string" && hermesLastLedgerEvent.project_status.trim()
+          ? hermesLastLedgerEvent.project_status.trim()
+          : null,
+      last_project_reason:
+        typeof hermesLastLedgerEvent?.project_reason === "string" && hermesLastLedgerEvent.project_reason.trim()
+          ? hermesLastLedgerEvent.project_reason.trim()
+          : null,
     },
     notify: {
       last_notify: lastNotify,

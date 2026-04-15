@@ -163,7 +163,6 @@ describe("useRecentUsageData", () => {
     );
     expect(result.current.source).toBe("edge");
   });
-
   it("clears the immediate snapshot override after a failed refresh and reports cache provenance honestly", async () => {
     liveSnapshots.readDashboardLiveSnapshot.mockReturnValue({
       rolling: { last_7d: { totals: { billable_total_tokens: "84" } } },

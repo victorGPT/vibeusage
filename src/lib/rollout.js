@@ -398,14 +398,13 @@ async function parseGeminiIncremental({
 }
 
 async function parseOpencodeIncremental({
-  messageFiles,
   opencodeDbPath,
   cursors,
   queuePath,
   projectQueuePath,
   onProgress,
-  source,
-  publicRepoResolver,
+  source = "opencode",
+  publicRepoResolver = null,
   readSqliteRows,
 }) {
   await ensureDir(path.dirname(queuePath));
@@ -413,8 +412,6 @@ async function parseOpencodeIncremental({
   let eventsAggregated = 0;
 
   const cb = typeof onProgress === "function" ? onProgress : null;
-  const files = [];
-  const totalFiles = 0;
   const hourlyState = normalizeHourlyState(cursors?.hourly);
   const projectEnabled = typeof projectQueuePath === "string" && projectQueuePath.length > 0;
   const projectState = projectEnabled ? normalizeProjectState(cursors?.projectHourly) : null;
@@ -432,101 +429,6 @@ async function parseOpencodeIncremental({
 
   if (!cursors.files || typeof cursors.files !== "object") {
     cursors.files = {};
-  }
-
-  for (let idx = 0; idx < files.length; idx++) {
-    const entry = files[idx];
-    const filePath = typeof entry === "string" ? entry : entry?.path;
-    if (!filePath) continue;
-    const fileSource =
-      typeof entry === "string"
-        ? defaultSource
-        : normalizeSourceInput(entry?.source) || defaultSource;
-    const st = await fs.stat(filePath).catch(() => null);
-    if (!st || !st.isFile()) continue;
-
-    const key = filePath;
-    const prev = cursors.files[key] || null;
-    const inode = st.ino || 0;
-    const size = Number.isFinite(st.size) ? st.size : 0;
-    const mtimeMs = Number.isFinite(st.mtimeMs) ? st.mtimeMs : 0;
-    const unchanged =
-      prev && prev.inode === inode && prev.size === size && prev.mtimeMs === mtimeMs;
-    if (unchanged) {
-      filesProcessed += 1;
-      if (cb) {
-        cb({
-          index: idx + 1,
-          total: totalFiles,
-          filePath,
-          filesProcessed,
-          eventsAggregated,
-          bucketsQueued: touchedBuckets.size,
-        });
-      }
-      continue;
-    }
-
-    const fallbackTotals = prev && typeof prev.lastTotals === "object" ? prev.lastTotals : null;
-    const fallbackMessageKey =
-      prev && typeof prev.messageKey === "string" && prev.messageKey.trim()
-        ? prev.messageKey.trim()
-        : null;
-    const projectContext = projectEnabled
-      ? await resolveProjectContextForFile({
-          filePath,
-          projectMetaCache,
-          publicRepoCache,
-          publicRepoResolver,
-          projectState,
-        })
-      : null;
-    const projectRef = projectContext?.projectRef || null;
-    const projectKey = projectContext?.projectKey || null;
-
-    const result = await parseOpencodeMessageFile({
-      filePath,
-      messageIndex,
-      fallbackTotals,
-      fallbackMessageKey,
-      hourlyState,
-      touchedBuckets,
-      source: fileSource,
-      projectState,
-      projectTouchedBuckets,
-      projectRef,
-      projectKey,
-    });
-
-    cursors.files[key] = {
-      inode,
-      size,
-      mtimeMs,
-      lastTotals: result.lastTotals,
-      messageKey: result.messageKey || null,
-      updatedAt: new Date().toISOString(),
-    };
-
-    filesProcessed += 1;
-    eventsAggregated += result.eventsAggregated;
-
-    if (result.messageKey && result.shouldUpdate) {
-      messageIndex[result.messageKey] = {
-        lastTotals: result.lastTotals,
-        updatedAt: new Date().toISOString(),
-      };
-    }
-
-    if (cb) {
-      cb({
-        index: idx + 1,
-        total: totalFiles,
-        filePath,
-        filesProcessed,
-        eventsAggregated,
-        bucketsQueued: touchedBuckets.size,
-      });
-    }
   }
 
   if (typeof opencodeDbPath === "string" && opencodeDbPath.length > 0) {
