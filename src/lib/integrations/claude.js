@@ -8,7 +8,7 @@ const { isDir, isFile } = require("./utils");
 
 module.exports = {
   name: "claude",
-  summaryLabel: "Claude",
+  summaryLabel: "Claude Code",
   statusLabel: "Claude plugin",
   async probe(ctx) {
     const hasConfigDir = await isDir(ctx.claude.configDir);

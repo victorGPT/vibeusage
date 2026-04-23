@@ -3,8 +3,8 @@ const { isDir } = require("./utils");
 
 module.exports = {
   name: "opencode",
-  summaryLabel: "Opencode Plugin",
-  statusLabel: "Opencode plugin",
+  summaryLabel: "OpenCode Plugin",
+  statusLabel: "OpenCode plugin",
   async probe(ctx) {
     const hasConfigDir = await isDir(ctx.opencode.configDir);
     if (!hasConfigDir) {

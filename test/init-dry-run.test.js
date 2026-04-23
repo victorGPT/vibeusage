@@ -40,7 +40,7 @@ test("dry-run preview reports opencode install when config is missing", async ()
     ]);
 
     const clean = stripAnsi(output);
-    assert.match(clean, /Opencode Plugin/);
+    assert.match(clean, /OpenCode Plugin/);
     assert.match(clean, /\[Will install plugin\]/);
 
     const pluginPath = path.join(
