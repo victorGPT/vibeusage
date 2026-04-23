@@ -43,7 +43,7 @@ export function ConnectionStatus({ status = "STABLE", title, className = "" }) {
     <div
       title={title}
       className={[
-        "matrix-header-chip matrix-header-chip--bare font-mono transition-all duration-700",
+        "btn-chip btn-chip--bare font-mono transition-all duration-700",
         current.color,
         className,
       ]

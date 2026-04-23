@@ -103,6 +103,18 @@ body {
     border-color: var(--ink-bright);
   }
 
+  .btn-chip--bare {
+    background: transparent;
+    background-image: none;
+    border-color: transparent;
+    box-shadow: none;
+  }
+
+  .btn-chip--bare:hover {
+    background: transparent;
+    border-color: transparent;
+  }
+
   @media (max-width: 767px) {
     .btn-chip {
       min-width: auto;

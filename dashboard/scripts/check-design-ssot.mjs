@@ -57,6 +57,12 @@ const CHECKS = [
     label: "redundant /N on rgba-backed ink token (Tailwind ignores it)",
     pattern: /\b(?:border|bg|text|ring|from|via|to)-ink-(?:faint|line|muted|text)\/[0-9]+/,
   },
+  {
+    label:
+      "legacy matrix-* CSS class (deleted in v1 — use btn-chip, fx-scanline, Panel variant)",
+    pattern:
+      /\bmatrix-(?:header-chip|header-action|panel|panel-strong|scanlines|scan-sweep|scanline-overlay|shell-content|scrollbar)\b/,
+  },
 ];
 
 function* walk(dir) {

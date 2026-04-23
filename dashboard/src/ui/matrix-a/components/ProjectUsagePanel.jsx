@@ -153,7 +153,7 @@ export function ProjectUsagePanel({
           >
             <Select.Trigger
               aria-label={limitAria}
-              className="matrix-header-chip matrix-header-action text-caption uppercase font-bold tracking-caps gap-2"
+              className="btn-chip text-caption uppercase font-bold tracking-caps gap-2"
             >
               <Select.Value />
               <span className="text-ink-bright">▾</span>

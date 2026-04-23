@@ -1,3 +1,7 @@
+import { copy } from "../../lib/copy";
+import { MatrixRain } from "../matrix-a/components/MatrixRain.jsx";
+
+// MatrixShell — SSOT: DESIGN.md §5 (fx-scanline single ambient layer), §2 (tokens).
 
 export function MatrixShell({
   headerRight,
