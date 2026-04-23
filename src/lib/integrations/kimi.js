@@ -62,9 +62,6 @@ module.exports = {
     if (!(await isDir(ctx.kimi.configDir))) {
       return action(this, "skipped", false, "config dir not found");
     }
-    if (!(await isFile(ctx.kimi.configPath))) {
-      return action(this, "skipped", false, "config.toml not found");
-    }
     const result = await removeKimiHook({ configPath: ctx.kimi.configPath });
     if (result.removed) {
       return action(this, "removed", true, ctx.kimi.configPath);
