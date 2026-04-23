@@ -82,7 +82,7 @@ body {
   }
 
   .btn-chip:hover {
-    background: var(--surface-strong);
+    background-color: var(--surface-strong);
     border-color: var(--ink-muted);
   }
 
@@ -92,14 +92,14 @@ body {
 
   .btn-chip--primary {
     --corner: var(--surface);
-    background: var(--ink);
+    background-color: var(--ink);
     border-color: var(--ink);
     color: var(--surface);
     box-shadow: 0 0 24px rgba(0, 255, 65, 0.35);
   }
 
   .btn-chip--primary:hover {
-    background: var(--ink-bright);
+    background-color: var(--ink-bright);
     border-color: var(--ink-bright);
   }
 
