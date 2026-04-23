@@ -94,15 +94,21 @@ jobs:
         (needs.changes.outputs.functions == 'false' && needs.mcp-skip.result == 'success')
       )
     timeout-minutes: 10
+    # Required for npm Trusted Publishing (OIDC).
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "18"
+          node-version: "22"
           registry-url: "https://registry.npmjs.org"
           cache: "npm"
+      - name: Upgrade npm for Trusted Publishing
+        run: npm install --global npm@latest
       - name: Install dependencies
         run: npm ci
       - name: Read package metadata
@@ -122,8 +128,6 @@ jobs:
           fi
       - name: Publish to npm
         if: steps.npm.outputs.exists != 'true'
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm publish
       - name: Skip publish (version exists)
         if: steps.npm.outputs.exists == 'true'
