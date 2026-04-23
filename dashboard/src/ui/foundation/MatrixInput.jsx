@@ -4,9 +4,9 @@ import React from "react";
 export function MatrixInput({ label, className = "", ...props }) {
   return (
     <label className={`flex flex-col gap-2 ${className}`}>
-      <span className="text-caption text-matrix-muted uppercase font-bold">{label}</span>
+      <span className="text-caption text-ink-text uppercase font-bold">{label}</span>
       <Input
-        className="h-10 bg-matrix-panel border border-matrix-ghost px-3 text-body text-matrix-bright outline-none focus:border-matrix-primary focus:ring-2 focus:ring-matrix-primary/20"
+        className="h-10 bg-surface-raised border border-ink-faint px-3 text-body text-ink-bright outline-none focus:border-ink focus:ring-2 focus:ring-ink"
         {...props}
       />
     </label>

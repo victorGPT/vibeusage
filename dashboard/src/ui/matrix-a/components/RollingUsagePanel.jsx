@@ -43,12 +43,12 @@ export const RollingUsagePanel = React.memo(function RollingUsagePanel({
         {items.map((item) => (
           <div
             key={item.key}
-            className="flex flex-col items-center text-center gap-2 border border-matrix-ghost px-3 py-4"
+            className="flex flex-col items-center text-center gap-2 border border-ink-faint px-3 py-4"
           >
-            <span className="text-caption uppercase font-bold text-matrix-muted tracking-[0.2em]">
+            <span className="text-caption uppercase font-bold text-ink-text tracking-caps">
               {item.label}
             </span>
-            <span className="text-2xl md:text-3xl font-black text-matrix-bright tabular-nums">
+            <span className="text-display-3 md:text-display-3 font-black text-ink-bright tabular-nums">
               {item.value}
             </span>
           </div>

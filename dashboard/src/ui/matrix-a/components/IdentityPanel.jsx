@@ -17,30 +17,30 @@ export function IdentityPanel({ auth, streakDays = 0, rankLabel }) {
   return (
     <div className="flex items-center space-x-6">
       <div className="relative group">
-        <div className="w-20 h-20 border border-matrix-ghost flex items-center justify-center text-body font-black bg-matrix-panel shadow-[0_0_15px_rgba(0,255,65,0.1)]">
+        <div className="w-20 h-20 border border-ink-faint flex items-center justify-center text-body font-black bg-surface-raised shadow-glow-faint">
           {copy("identity_panel.badge")}
         </div>
-        <div className="absolute -bottom-1 -right-1 bg-white text-black text-caption px-1 font-black uppercase">
+        <div className="absolute -bottom-1 -right-1 bg-ink-bright text-surface text-caption px-1 font-black uppercase">
           {copy("identity_panel.level")}
         </div>
       </div>
 
       <div className="space-y-3 flex-1 min-w-0">
-        <div className="border-l-2 border-matrix-primary pl-3 py-2 bg-matrix-panel">
-          <div className="text-2xl md:text-3xl font-black text-matrix-bright tracking-tight leading-none uppercase truncate">
+        <div className="border-l-2 border-ink pl-3 py-2 bg-surface-raised">
+          <div className="text-display-3 md:text-display-3 font-black text-ink-bright tracking-tight leading-none uppercase truncate">
             {handle}
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-2">
-          <div className="bg-matrix-panel p-2 border border-matrix-ghost text-center">
-            <div className="text-caption text-matrix-muted uppercase font-bold">
+          <div className="bg-surface-raised p-2 border border-ink-faint text-center">
+            <div className="text-caption text-ink-text uppercase font-bold">
               {copy("identity_panel.rank_label")}
             </div>
-            <div className="text-matrix-primary font-black text-body">{rankValue}</div>
+            <div className="text-ink font-black text-body">{rankValue}</div>
           </div>
-          <div className="bg-matrix-panel p-2 border border-matrix-ghost text-center">
-            <div className="text-caption text-matrix-muted uppercase font-bold">
+          <div className="bg-surface-raised p-2 border border-ink-faint text-center">
+            <div className="text-caption text-ink-text uppercase font-bold">
               {copy("identity_panel.streak_label")}
             </div>
             <div className="text-gold font-black tracking-tight text-body">{streakValue}</div>

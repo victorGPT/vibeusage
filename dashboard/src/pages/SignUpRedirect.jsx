@@ -47,5 +47,5 @@ export function SignUpRedirect() {
     run();
   }, [callbackUrl, navigate]);
 
-  return <div className="min-h-screen bg-matrix-dark" />;
+  return <div className="min-h-screen bg-surface" />;
 }

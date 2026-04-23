@@ -74,17 +74,17 @@ export function UpgradeAlertModal({ requiredVersion, installCommand, onClose }) 
   return (
     <div
       ref={bannerRef}
-      className="fixed top-0 left-0 right-0 z-[200] border-b border-gold/30 bg-matrix-dark/95 backdrop-blur-md shadow-[0_0_20px_rgba(255,215,0,0.1)] overflow-hidden"
+      className="fixed top-0 left-0 right-0 z-[200] border-b border-gold/30 bg-surface/95 backdrop-blur-md shadow-gold-faint overflow-hidden"
     >
-      {/* Scanline effect */}
+      {/* Scanline effect — gold variant for gold alert banner. */}
       <div className="absolute inset-0 pointer-events-none opacity-10">
-        <div className="w-full h-full bg-[linear-gradient(rgba(255,215,0,0)_50%,rgba(255,215,0,0.1)_50%)] bg-[length:100%_4px]" />
+        <div className="w-full h-full fx-scanline-gold" />
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-2 relative flex flex-col md:flex-row items-center justify-between gap-4">
         {/* Left Side: Notice & Mission */}
         <div className="flex items-center space-x-3">
-          <span className="text-xl animate-pulse">{sparkleLabel}</span>
+          <span className="text-heading animate-pulse">{sparkleLabel}</span>
           <div className="flex flex-col">
             <h3 className="text-gold font-black text-heading uppercase leading-none">
               {titleLabel}
@@ -95,7 +95,7 @@ export function UpgradeAlertModal({ requiredVersion, installCommand, onClose }) 
 
         {/* Middle: Command Area */}
         <div className="flex-1 flex items-center justify-center max-w-xl w-full">
-          <div className="flex items-center w-full bg-matrix-panel border border-gold/20 pl-3 rounded-sm group hover:border-gold/40 transition-all overflow-hidden">
+          <div className="flex items-center w-full bg-surface-raised border border-gold/20 pl-3 rounded-sm group hover:border-gold/40 transition-all overflow-hidden">
             <span className="text-caption text-gold/80 shrink-0">{promptLabel}</span>
             <Input
               readOnly
@@ -115,7 +115,7 @@ export function UpgradeAlertModal({ requiredVersion, installCommand, onClose }) 
         <div className="flex items-center space-x-4">
           <Button
             onClick={handleDismiss}
-            className="text-caption font-black uppercase text-gold/40 hover:text-gold transition-all tracking-[0.2em]"
+            className="text-caption font-black uppercase text-gold/40 hover:text-gold transition-all tracking-caps"
           >
             {ignoreLabel}
           </Button>

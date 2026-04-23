@@ -7,11 +7,11 @@ export function ClientLogoRow({ className = "" }) {
       {CLIENTS.map(({ id, name, Icon }) => (
         <div
           key={id}
-          className="flex items-center gap-1.5 px-2 py-1 rounded border border-matrix-ghost/50 bg-matrix-panel/50"
+          className="flex items-center gap-1.5 px-2 py-1 rounded border border-ink-faint bg-surface-raised/50"
           title={name}
         >
-          <Icon className="w-4 h-4 text-matrix-primary" />
-          <span className="text-caption text-matrix-bright">{name}</span>
+          <Icon className="w-4 h-4 text-ink" />
+          <span className="text-caption text-ink-bright">{name}</span>
         </div>
       ))}
     </div>

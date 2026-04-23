@@ -125,8 +125,8 @@ export function DashboardView(props) {
       >
         {publicViewInvalid ? (
           <div className="mb-6">
-            <AsciiBox title={publicViewInvalidTitle} className="border-[#00FF41]/40">
-              <p className="text-[10px] opacity-50 mt-0">{publicViewInvalidBody}</p>
+            <AsciiBox title={publicViewInvalidTitle} className="border-ink-muted">
+              <p className="text-micro opacity-50 mt-0">{publicViewInvalidBody}</p>
             </AsciiBox>
           </div>
         ) : null}
@@ -135,12 +135,12 @@ export function DashboardView(props) {
             <AsciiBox
               title={copy("dashboard.session_expired.title")}
               subtitle={copy("dashboard.session_expired.subtitle")}
-              className="border-[#00FF41]/40"
+              className="border-ink-muted"
             >
-              <p className="text-[10px] mt-0 flex flex-wrap items-center gap-2">
+              <p className="text-micro mt-0 flex flex-wrap items-center gap-2">
                 <span className="opacity-50">{copy("dashboard.session_expired.body")}</span>
                 <MatrixButton
-                  className="px-2 py-1 text-[9px] normal-case"
+                  className="px-2 py-1 text-micro normal-case"
                   onClick={handleCopySessionExpired}
                 >
                   {sessionExpiredCopied ? sessionExpiredCopiedLabel : sessionExpiredCopyLabel}
@@ -164,7 +164,7 @@ export function DashboardView(props) {
               subtitle={copy("dashboard.auth_required.subtitle")}
               className="w-full max-w-2xl"
             >
-              <p className="text-[10px] opacity-50 mt-0">{copy("dashboard.auth_required.body")}</p>
+              <p className="text-micro opacity-50 mt-0">{copy("dashboard.auth_required.body")}</p>
 
               <div className="flex flex-wrap gap-3 mt-4">
                 <MatrixButton as="a" primary href={signInUrl}>
@@ -183,10 +183,10 @@ export function DashboardView(props) {
                 {screenshotMode ? (
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex flex-col gap-1">
-                      <span className="text-3xl md:text-4xl font-black text-white tracking-[-0.03em] leading-none glow-text">
+                      <span className="text-display-3 md:text-display-2 font-black text-ink-bright tracking-tight leading-none glow-text">
                         {screenshotTitleLine1}
                       </span>
-                      <span className="text-2xl md:text-3xl font-black text-white tracking-[-0.03em] leading-none glow-text">
+                      <span className="text-display-3 md:text-display-3 font-black text-ink-bright tracking-tight leading-none glow-text">
                         {screenshotTitleLine2}
                       </span>
                     </div>
@@ -214,7 +214,7 @@ export function DashboardView(props) {
                     title={copy("dashboard.auth_optional.title")}
                     subtitle={copy("dashboard.auth_optional.subtitle")}
                   >
-                    <p className="text-[10px] opacity-50 mt-0">
+                    <p className="text-micro opacity-50 mt-0">
                       {copy("dashboard.auth_optional.body")}
                     </p>
                     <div className="flex flex-wrap gap-3 mt-4">
@@ -234,7 +234,7 @@ export function DashboardView(props) {
                     subtitle={copy("dashboard.install.subtitle")}
                     className="relative"
                   >
-                    <div className="text-[12px] tracking-[0.16em] font-semibold text-[#00FF41]/90">
+                    <div className="text-data tracking-label font-semibold text-ink">
                       {installPrompt}
                     </div>
                     <div className="mt-3 flex flex-col gap-2">
@@ -244,14 +244,14 @@ export function DashboardView(props) {
                         title={installCopied ? installCopiedLabel : installCopyLabel}
                         className="w-full justify-between gap-3 normal-case px-3"
                       >
-                        <span className="font-mono text-[11px] md:text-[12px] tracking-[0.02em] normal-case text-left">
+                        <span className="font-mono text-caption md:text-data tracking-data normal-case text-left">
                           {installInitCmdDisplay}
                         </span>
-                        <span className="inline-flex items-center justify-center w-7 h-7 border border-[#00FF41]/30 bg-black/30">
+                        <span className="inline-flex items-center justify-center w-7 h-7 border border-ink-muted bg-surface/30">
                           {installCopied ? (
                             <svg
                               viewBox="0 0 16 16"
-                              className="w-4 h-4 text-[#00FF41]"
+                              className="w-4 h-4 text-ink"
                               fill="currentColor"
                               aria-hidden="true"
                             >
@@ -260,7 +260,7 @@ export function DashboardView(props) {
                           ) : (
                             <svg
                               viewBox="0 0 16 16"
-                              className="w-4 h-4 text-[#00FF41]"
+                              className="w-4 h-4 text-ink"
                               fill="currentColor"
                               aria-hidden="true"
                             >
@@ -271,11 +271,11 @@ export function DashboardView(props) {
                         </span>
                       </MatrixButton>
                       {linkCodeLoading ? (
-                        <span className="text-[12px] opacity-40">
+                        <span className="text-data opacity-40">
                           {copy("dashboard.install.link_code.loading")}
                         </span>
                       ) : linkCodeError ? (
-                        <span className="text-[12px] opacity-40">
+                        <span className="text-data opacity-40">
                           {copy("dashboard.install.link_code.failed")}
                         </span>
                       ) : null}
@@ -297,25 +297,25 @@ export function DashboardView(props) {
                             title={publicViewToggleLabel}
                             className={`relative inline-flex h-6 w-11 items-center border px-[3px] transition-colors ${
                               publicViewEnabled
-                                ? "border-[#00FF41] bg-[#00FF41]/10"
-                                : "border-[#00FF41]/40 bg-black/40"
+                                ? "border-ink bg-ink-faint"
+                                : "border-ink-muted bg-surface/40"
                             } disabled:opacity-50 disabled:cursor-not-allowed`}
                           >
                             <span
                               aria-hidden="true"
-                              className={`inline-block h-3.5 w-3.5 bg-[#00FF41] transition-transform ${
+                              className={`inline-block h-3.5 w-3.5 bg-ink transition-transform ${
                                 publicViewEnabled ? "translate-x-[18px]" : "translate-x-0"
                               }`}
                             />
                           </Button>
-                          <span className="text-[10px] uppercase tracking-[0.2em] text-[#00FF41]/80">
+                          <span className="text-micro uppercase tracking-caps text-ink-text">
                             {publicViewStatusLabel}
                           </span>
                         </div>
                         <MatrixButton
                           onClick={handleCopyPublicView}
                           disabled={!publicViewEnabled || publicViewBusy}
-                          className="px-3 py-2 text-[9px] normal-case"
+                          className="px-3 py-2 text-micro normal-case"
                         >
                           {publicViewCopyButtonLabel}
                         </MatrixButton>
@@ -348,13 +348,13 @@ export function DashboardView(props) {
                       onClick={handleShareToX}
                       aria-label={screenshotTwitterLabel}
                       title={screenshotTwitterLabel}
-                      className="h-12 md:h-14 px-6 text-base tracking-[0.25em]"
+                      className="h-12 md:h-14 px-6 text-body tracking-caps"
                       primary
                       disabled={isCapturing}
                     >
                       {screenshotTwitterButton}
                     </MatrixButton>
-                    <span className="text-[10px] uppercase tracking-[0.2em] text-matrix-muted">
+                    <span className="text-micro uppercase tracking-caps text-ink-text">
                       {screenshotTwitterHint}
                     </span>
                   </div>
@@ -403,23 +403,23 @@ export function DashboardView(props) {
                     subtitle={copy("dashboard.daily.subtitle")}
                   >
                     {!hasDetailsActual ? (
-                      <div className="text-[10px] opacity-40 mb-2">
+                      <div className="text-micro opacity-40 mb-2">
                         {dailyEmptyPrefix}
-                        <code className="px-1 py-0.5 bg-black/40 border border-[#00FF41]/20">
+                        <code className="px-1 py-0.5 bg-surface/40 border border-ink-line">
                           {installSyncCmd}
                         </code>
                         {dailyEmptySuffix}
                       </div>
                     ) : null}
                     <div
-                      className="overflow-auto max-h-[520px] border border-[#00FF41]/10"
+                      className="overflow-auto max-h-[520px] border border-ink-faint"
                       role="region"
                       aria-label={copy("daily.table.aria_label")}
                       tabIndex={0}
                     >
                       <table className="w-full border-collapse">
-                        <thead className="sticky top-0 bg-black/90">
-                          <tr className="border-b border-[#00FF41]/10">
+                        <thead className="sticky top-0 bg-surface/90">
+                          <tr className="border-b border-ink-faint">
                             {detailsColumns.map((c) => (
                               <th
                                 key={c.key}
@@ -430,7 +430,7 @@ export function DashboardView(props) {
                                   type="button"
                                   onClick={() => toggleSort(c.key)}
                                   title={c.title}
-                                  className="w-full px-3 py-2 text-left text-[9px] uppercase tracking-widest font-black opacity-70 hover:opacity-100 hover:bg-[#00FF41]/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00FF41]/30 flex items-center justify-start"
+                                  className="w-full px-3 py-2 text-left text-micro uppercase tracking-caps font-black opacity-70 hover:opacity-100 hover:bg-ink-faint focus:outline-none focus-visible:ring-2 focus-visible:ring-ink-muted flex items-center justify-start"
                                 >
                                   <span className="inline-flex items-center gap-2">
                                     <span>{c.label}</span>
@@ -447,30 +447,30 @@ export function DashboardView(props) {
                               key={String(
                                 r?.[detailsDateKey] || r?.day || r?.hour || r?.month || "",
                               )}
-                              className={`border-b border-[#00FF41]/5 hover:bg-[#00FF41]/5 ${
+                              className={`border-b border-ink-faint hover:bg-ink-faint ${
                                 r.missing
-                                  ? "text-[#00FF41]/50"
+                                  ? "text-ink-muted"
                                   : r.future
-                                    ? "text-[#00FF41]/30"
+                                    ? "text-ink-muted"
                                     : ""
                               }`}
                             >
-                              <td className="px-3 py-2 text-[12px] opacity-80 font-mono">
+                              <td className="px-3 py-2 text-data opacity-80 font-mono">
                                 {renderDetailDate(r)}
                               </td>
-                              <td className="px-3 py-2 text-[12px] font-mono">
+                              <td className="px-3 py-2 text-data font-mono">
                                 {renderDetailCell(r, "total_tokens")}
                               </td>
-                              <td className="px-3 py-2 text-[12px] font-mono">
+                              <td className="px-3 py-2 text-data font-mono">
                                 {renderDetailCell(r, "input_tokens")}
                               </td>
-                              <td className="px-3 py-2 text-[12px] font-mono">
+                              <td className="px-3 py-2 text-data font-mono">
                                 {renderDetailCell(r, "output_tokens")}
                               </td>
-                              <td className="px-3 py-2 text-[12px] font-mono">
+                              <td className="px-3 py-2 text-data font-mono">
                                 {renderDetailCell(r, "cached_input_tokens")}
                               </td>
-                              <td className="px-3 py-2 text-[12px] font-mono">
+                              <td className="px-3 py-2 text-data font-mono">
                                 {renderDetailCell(r, "reasoning_output_tokens")}
                               </td>
                             </tr>
@@ -479,7 +479,7 @@ export function DashboardView(props) {
                       </table>
                     </div>
                     {DETAILS_PAGED_PERIODS.has(period) && detailsPageCount > 1 ? (
-                      <div className="flex items-center justify-between mt-3 text-[9px] uppercase tracking-widest font-black">
+                      <div className="flex items-center justify-between mt-3 text-micro uppercase tracking-caps font-black">
                         <MatrixButton
                           type="button"
                           onClick={() => setDetailsPage((prev) => Math.max(0, prev - 1))}

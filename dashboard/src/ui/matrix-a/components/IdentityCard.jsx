@@ -91,18 +91,11 @@ export function IdentityCard({
   return (
     <AsciiBox title={titleNode} subtitle={subtitle} className={className}>
       <div className="relative overflow-hidden">
-        {scanlines ? (
-          <>
-            <div className="pointer-events-none absolute inset-0 matrix-scanlines opacity-30 mix-blend-screen"></div>
-            <div className="pointer-events-none absolute inset-0 matrix-scan-sweep opacity-20"></div>
-          </>
-        ) : null}
-
         <div className="relative z-10 flex items-center space-x-6 px-2">
           {showAvatar ? (
             <div
               style={{ width: avatarSize, height: avatarSize }}
-              className="relative p-1 bg-matrix-panelStrong border border-matrix-dim overflow-hidden"
+              className="relative p-1 bg-surface-strong border border-ink-muted overflow-hidden"
             >
               <img
                 src={safeAvatarUrl}
@@ -117,7 +110,7 @@ export function IdentityCard({
 
           <div className="flex-1 space-y-2">
             <div>
-              <div className="text-2xl md:text-3xl font-black text-matrix-bright tracking-tight leading-none">
+              <div className="text-display-3 md:text-display-3 font-black text-ink-bright tracking-tight leading-none">
                 {animate ? (
                   <ScrambleText
                     text={displayName}
@@ -137,7 +130,7 @@ export function IdentityCard({
               <Button
                 type="button"
                 onClick={onDecrypt}
-                className="text-caption text-black bg-matrix-primary px-3 py-1 font-bold uppercase hover:bg-white transition-colors"
+                className="text-caption text-surface bg-ink px-3 py-1 font-bold uppercase hover:bg-ink-bright transition-colors"
               >
                 {copy("identity_card.decrypt")}
               </Button>
@@ -145,14 +138,14 @@ export function IdentityCard({
 
             {shouldShowStats ? (
               <div className="grid grid-cols-2 gap-2 pt-1">
-                <div className="bg-matrix-panel p-2 border border-matrix-ghost text-center">
-                  <div className="text-caption text-matrix-muted uppercase font-bold">
+                <div className="bg-surface-raised p-2 border border-ink-faint text-center">
+                  <div className="text-caption text-ink-text uppercase font-bold">
                     {copy("identity_card.rank_label")}
                   </div>
                   <div className="text-gold font-black text-body">{rankValue}</div>
                 </div>
-                <div className="bg-matrix-panel p-2 border border-matrix-ghost text-center">
-                  <div className="text-caption text-matrix-muted uppercase font-bold">
+                <div className="bg-surface-raised p-2 border border-ink-faint text-center">
+                  <div className="text-caption text-ink-text uppercase font-bold">
                     {copy("identity_card.streak_label")}
                   </div>
                   <div className="text-gold font-black tracking-tight text-body">{streakValue}</div>
@@ -162,14 +155,14 @@ export function IdentityCard({
 
             {subscriptionItems.length !== 0 ? (
               <div className="pt-2">
-                <div className="mb-1 text-caption text-matrix-muted uppercase font-bold">
+                <div className="mb-1 text-caption text-ink-text uppercase font-bold">
                   {copy("identity_card.subscriptions_label")}
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {subscriptionItems.map((entry, index) => (
                     <span
                       key={`${entry.tool}:${entry.plan}:${index}`}
-                      className="inline-flex items-center px-2 py-1 border border-matrix-ghost bg-matrix-panel text-[10px] uppercase tracking-[0.14em] text-matrix-bright"
+                      className="inline-flex items-center px-2 py-1 border border-ink-faint bg-surface-raised text-micro uppercase tracking-label text-ink-bright"
                     >
                       {copy("identity_card.subscription_item", {
                         tool: entry.tool,

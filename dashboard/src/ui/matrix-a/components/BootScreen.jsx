@@ -5,23 +5,23 @@ import { copy } from "../../../lib/copy";
 export function BootScreen({ onSkip }) {
   const canSkip = Boolean(onSkip);
 
-  const className = `min-h-screen bg-matrix-dark text-matrix-primary font-matrix flex flex-col items-center justify-center p-8 text-center text-body ${
+  const className = `min-h-screen bg-surface text-ink font-mono flex flex-col items-center justify-center p-8 text-center text-body ${
     canSkip ? "cursor-pointer" : ""
   }`;
 
   const content = (
     <>
-      <pre className="text-caption leading-[1.2] mb-6 text-matrix-muted select-none">
+      <pre className="text-caption leading-[1.2] mb-6 text-ink-text select-none">
         {copy("boot.ascii_art")}
       </pre>
-      <div className="animate-pulse tracking-[0.3em] text-caption font-bold mb-4 uppercase">
+      <div className="animate-pulse tracking-caps text-caption font-bold mb-4 uppercase">
         {copy("boot.prompt")}
       </div>
-      <div className="w-64 h-1 bg-matrix-panelStrong relative overflow-hidden">
-        <div className="absolute inset-0 bg-matrix-primary animate-[loader_2s_linear_infinite]"></div>
+      <div className="w-64 h-1 bg-surface-strong relative overflow-hidden">
+        <div className="absolute inset-0 bg-ink animate-[loader_2s_linear_infinite]"></div>
       </div>
       {canSkip ? (
-        <p className="mt-6 text-caption text-matrix-muted uppercase">{copy("boot.skip_hint")}</p>
+        <p className="mt-6 text-caption text-ink-text uppercase">{copy("boot.skip_hint")}</p>
       ) : null}
       <style>{`@keyframes loader { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }`}</style>
     </>

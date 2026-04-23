@@ -61,12 +61,12 @@ export const UsagePanel = React.memo(function UsagePanel({
   if (showSummaryLoadingPlaceholder) {
     summaryDisplay = (
       <span
-        className="inline-flex h-12 w-24 items-center justify-center border border-matrix-ghost bg-matrix-panelStrong md:h-20 md:w-40"
+        className="inline-flex h-12 w-24 items-center justify-center border border-ink-faint bg-surface-strong md:h-20 md:w-40"
         data-testid="usage-summary-loading"
         aria-label={copy("usage.button.loading")}
       >
         <span className="sr-only">{copy("usage.button.loading")}</span>
-        <span className="h-3 w-12 bg-matrix-bright/70 md:h-4 md:w-20" />
+        <span className="h-3 w-12 bg-ink-bright/70 md:h-4 md:w-20" />
       </span>
     );
   } else if (summaryValue && summaryValue !== "—") {
@@ -116,7 +116,7 @@ export const UsagePanel = React.memo(function UsagePanel({
   return (
     <AsciiBox title={title} className={className}>
       {!hideHeader ? (
-        <div className="flex flex-wrap items-center justify-between border-b border-matrix-ghost mb-3 pb-2 gap-4 px-2">
+        <div className="flex flex-wrap items-center justify-between border-b border-ink-faint mb-3 pb-2 gap-4 px-2">
           <div className="flex flex-wrap gap-4">
             {tabs.map((p) => (
               <Button
@@ -124,8 +124,8 @@ export const UsagePanel = React.memo(function UsagePanel({
                 type="button"
                 className={`text-caption uppercase font-bold ${
                   period === p.key
-                    ? "text-matrix-bright border-b-2 border-matrix-primary"
-                    : "text-matrix-muted"
+                    ? "text-ink-bright border-b-2 border-ink"
+                    : "text-ink-text"
                 }`}
                 onClick={() => onPeriodChange?.(p.key)}
               >
@@ -136,7 +136,7 @@ export const UsagePanel = React.memo(function UsagePanel({
           {onRefresh || statusLabel ? (
             <div className="flex items-center gap-3">
               {statusLabel ? (
-                <span className="text-caption uppercase font-bold text-matrix-primary">
+                <span className="text-caption uppercase font-bold text-ink">
                   {statusLabel}
                 </span>
               ) : null}
@@ -171,14 +171,14 @@ export const UsagePanel = React.memo(function UsagePanel({
       {showSummary || useSummaryLayout ? (
         <div className="flex-1 flex flex-col items-center justify-center space-y-6 opacity-90 py-4">
           <div className="text-center relative">
-            <div className="text-heading text-matrix-muted mb-2">{summaryLabel}</div>
-            <div className="text-5xl md:text-8xl font-black text-white tracking-[-0.06em] tabular-nums leading-none glow-text select-none -translate-y-[5px]">
+            <div className="text-heading text-ink-text mb-2">{summaryLabel}</div>
+            <div className="text-display-2 md:text-display-1 font-black text-ink-bright tracking-tight tabular-nums leading-none glow-text select-none -translate-y-[5px]">
               {summaryDisplay}
             </div>
             {summaryCostValue ? (
               <div className="flex items-center justify-center gap-3 mt-4 md:mt-6">
                 <span className="sr-only">{copy("usage.metric.total_cost")}</span>
-                <span className="text-xl md:text-2xl font-bold text-gold leading-none drop-shadow-[0_0_10px_rgba(255,215,0,0.5)]">
+                <span className="text-heading md:text-display-3 font-bold text-gold leading-none drop-shadow-gold">
                   {summaryCostValue}
                 </span>
                 {onCostInfo ? (
@@ -187,7 +187,7 @@ export const UsagePanel = React.memo(function UsagePanel({
                     onClick={onCostInfo}
                     title={costInfoLabel}
                     aria-label={costInfoLabel}
-                    className="group inline-flex items-center gap-1 text-[10px] uppercase font-black text-gold tracking-[0.25em] transition-all hover:text-gold/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60"
+                    className="group inline-flex items-center gap-1 text-micro uppercase font-black text-gold tracking-caps transition-all hover:text-gold/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60"
                   >
                     {costLabelCore ? (
                       <>
@@ -207,25 +207,25 @@ export const UsagePanel = React.memo(function UsagePanel({
               </div>
             ) : null}
             {summarySubLabel ? (
-              <div className="text-caption text-matrix-muted mt-2">{summarySubLabel}</div>
+              <div className="text-caption text-ink-text mt-2">{summarySubLabel}</div>
             ) : null}
           </div>
 
           {!breakdownCollapsed && breakdownRows.length ? (
             <div className="w-full px-6">
-              <div className="grid grid-cols-2 gap-3 border-t border-b border-matrix-ghost py-4 relative">
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1px] h-full bg-matrix-ghost"></div>
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-[1px] bg-matrix-dim"></div>
+              <div className="grid grid-cols-2 gap-3 border-t border-b border-ink-faint py-4 relative">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1px] h-full bg-ink-faint"></div>
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-[1px] bg-ink-muted"></div>
 
                 {breakdownRows.map((row, idx) => (
                   <div
                     key={`${row.label}-${idx}`}
-                    className="flex flex-col items-center p-3 bg-matrix-panel border border-matrix-ghost"
+                    className="flex flex-col items-center p-3 bg-surface-raised border border-ink-faint"
                   >
-                    <span className="text-caption text-matrix-muted uppercase mb-1">
+                    <span className="text-caption text-ink-text uppercase mb-1">
                       {row.label}
                     </span>
-                    <span className="text-body font-bold text-matrix-primary tracking-tight">
+                    <span className="text-body font-bold text-ink tracking-tight">
                       {row.value}
                     </span>
                   </div>
@@ -239,18 +239,18 @@ export const UsagePanel = React.memo(function UsagePanel({
           {metrics.map((row, idx) => (
             <div
               key={`${row.label}-${idx}`}
-              className="border border-matrix-ghost bg-matrix-panel p-4 text-center"
+              className="border border-ink-faint bg-surface-raised p-4 text-center"
             >
-              <div className="text-caption uppercase text-matrix-muted mb-2">{row.label}</div>
+              <div className="text-caption uppercase text-ink-text mb-2">{row.label}</div>
               <div
-                className={`text-body font-black text-matrix-bright glow-text ${
+                className={`text-body font-black text-ink-bright glow-text ${
                   row.valueClassName || ""
                 }`}
               >
                 {row.value}
               </div>
               {row.subValue ? (
-                <div className="text-caption text-matrix-muted mt-2">{row.subValue}</div>
+                <div className="text-caption text-ink-text mt-2">{row.subValue}</div>
               ) : null}
             </div>
           ))}
@@ -258,7 +258,7 @@ export const UsagePanel = React.memo(function UsagePanel({
       )}
 
       {rangeLabel ? (
-        <div className="mt-3 text-caption uppercase text-matrix-dim font-bold px-2">
+        <div className="mt-3 text-caption uppercase text-ink-muted font-bold px-2">
           {copy("usage.range_label", { range: rangeLabel })}
           {rangeTimeZoneLabel ? ` ${rangeTimeZoneLabel}` : ""}
         </div>

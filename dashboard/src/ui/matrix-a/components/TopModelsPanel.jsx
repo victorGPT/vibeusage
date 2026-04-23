@@ -35,23 +35,23 @@ export const TopModelsPanel = React.memo(function TopModelsPanel({ rows = [], cl
           return (
             <div
               key={rowKey}
-              className="flex items-center justify-between border-b border-matrix-ghost py-2 px-2 last:border-b-0"
+              className="flex items-center justify-between border-b border-ink-faint py-2 px-2 last:border-b-0"
             >
               <div className="flex items-center gap-3 min-w-0">
-                <span className="text-caption text-matrix-dim font-bold tracking-[0.28em]">
+                <span className="text-caption text-ink-muted font-bold tracking-caps">
                   {rankLabel}
                 </span>
                 <span
-                  className="text-body font-black text-matrix-primary uppercase truncate"
+                  className="text-body font-black text-ink uppercase truncate"
                   title={name}
                 >
                   {name}
                 </span>
               </div>
               <div className="flex items-baseline gap-1">
-                <span className="text-body font-black text-matrix-primary">{percent}</span>
+                <span className="text-body font-black text-ink">{percent}</span>
                 {showPercentSymbol ? (
-                  <span className="text-caption text-matrix-primary font-bold">
+                  <span className="text-caption text-ink font-bold">
                     {percentSymbol}
                   </span>
                 ) : null}

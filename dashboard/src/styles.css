@@ -2,22 +2,26 @@
 @tailwind components;
 @tailwind utilities;
 
+/* VibeUsage Design System v1 — Operations Deck
+ * SSOT: dashboard/DESIGN.md. CSS variables below mirror Tailwind tokens
+ * for runtime (JS-reachable) and non-utility CSS usage. */
+
 :root {
   color-scheme: dark;
-  --matrix-bg: #050505;
-  --matrix-panel-bg: rgba(0, 10, 0, 0.7);
-  --matrix-panel-border: rgba(0, 255, 65, 0.18);
-  --matrix-panel-border-strong: rgba(0, 255, 65, 0.32);
-  --matrix-ink: #00ff41;
-  --matrix-ink-bright: #e8ffe9;
-  --matrix-ink-muted: rgba(0, 255, 65, 0.6);
-  --matrix-ink-dim: rgba(0, 255, 65, 0.35);
-  --matrix-ink-ghost: rgba(0, 255, 65, 0.18);
-  --matrix-glow: rgba(0, 255, 65, 0.45);
-  --matrix-display-size: clamp(48px, 6vw, 72px);
-  --matrix-heading-size: 14px;
-  --matrix-body-size: 16px;
-  --matrix-caption-size: 12px;
+
+  /* Ink — green data palette (6 stops, DESIGN.md §2.1) */
+  --ink: #00ff41;
+  --ink-bright: #e8ffe9;
+  --ink-text: rgba(0, 255, 65, 0.6);
+  --ink-muted: rgba(0, 255, 65, 0.35);
+  --ink-line: rgba(0, 255, 65, 0.18);
+  --ink-faint: rgba(0, 255, 65, 0.08);
+  --ink-glow: rgba(0, 255, 65, 0.45);
+
+  /* Surface — neutral ground (DESIGN.md §2.2) */
+  --surface: #050505;
+  --surface-raised: rgba(0, 10, 0, 0.7);
+  --surface-strong: rgba(0, 10, 0, 0.82);
 }
 
 html,
@@ -26,50 +30,40 @@ body {
 }
 
 body {
+  /* Corresponds to text-body (DESIGN.md §3). */
   margin: 0;
-  background: var(--matrix-bg);
-  color: var(--matrix-ink);
+  background: var(--surface);
+  color: var(--ink);
   font-family:
-    "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
-    "Courier New", monospace;
-  font-size: var(--matrix-body-size);
+    "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+  font-size: 13px;
   line-height: 1.5;
 }
 
 @layer components {
-  .matrix-panel {
-    background: var(--matrix-panel-bg);
-    border: 1px solid var(--matrix-panel-border);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    box-shadow:
-      0 0 0 1px rgba(0, 255, 65, 0.08),
-      0 18px 40px rgba(0, 0, 0, 0.45);
-  }
-
-  .matrix-panel-strong {
-    border-color: var(--matrix-panel-border-strong);
-  }
-
-  .matrix-header-chip {
-    height: 40px;
-    min-width: 160px;
-    padding: 0 16px;
+  /* Chip button — corner-cross signature for <MatrixButton size="header">.
+   * SSOT: DESIGN.md §6 MatrixButton. */
+  .btn-chip {
+    --corner: var(--ink);
+    position: relative;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 12px;
-    border: 1px solid var(--matrix-panel-border);
-    background: var(--matrix-panel-bg);
+    height: 40px;
+    min-width: 160px;
+    padding: 0 16px;
+    background: var(--surface-raised);
+    color: var(--ink);
+    border: 1px solid var(--ink-line);
     text-transform: uppercase;
-    position: relative;
     overflow: hidden;
-    --matrix-header-corner: var(--matrix-ink);
     background-image:
-      linear-gradient(var(--matrix-header-corner) 0 0),
-      linear-gradient(var(--matrix-header-corner) 0 0),
-      linear-gradient(var(--matrix-header-corner) 0 0),
-      linear-gradient(var(--matrix-header-corner) 0 0);
+      linear-gradient(var(--corner) 0 0),
+      linear-gradient(var(--corner) 0 0),
+      linear-gradient(var(--corner) 0 0),
+      linear-gradient(var(--corner) 0 0);
     background-repeat: no-repeat;
     background-size:
       10px 1px,
@@ -81,68 +75,36 @@ body {
       top 6px left 6px,
       bottom 6px right 6px,
       bottom 6px right 6px;
-  }
-
-  .matrix-header-chip--bare {
-    border: none;
-    background: transparent;
-    background-image: none;
-    box-shadow: none;
-  }
-
-  .matrix-header-chip--solid {
-    background: var(--matrix-ink);
-    border-color: var(--matrix-ink);
-    color: #000;
-    box-shadow: 0 0 12px rgba(0, 255, 65, 0.35);
-    --matrix-header-corner: #000;
-  }
-
-  .matrix-header-action {
-    transition: all 200ms ease;
-  }
-
-  .matrix-header-action:hover {
-    background: rgba(0, 10, 0, 0.82);
-    border-color: var(--matrix-ink);
-  }
-
-  .matrix-header-action::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      120deg,
-      transparent 0%,
-      rgba(0, 255, 65, 0.2) 45%,
-      rgba(255, 255, 255, 0.2) 50%,
-      rgba(0, 255, 65, 0.2) 55%,
-      transparent 100%
-    );
-    transform: translateX(-120%);
-    opacity: 0;
     transition:
-      transform 300ms ease,
-      opacity 200ms ease;
-    pointer-events: none;
+      background 200ms ease,
+      border-color 200ms ease,
+      transform 120ms ease;
   }
 
-  .matrix-header-action:hover::after {
-    transform: translateX(120%);
-    opacity: 1;
+  .btn-chip:hover {
+    background: var(--surface-strong);
+    border-color: var(--ink-muted);
   }
 
-  .matrix-header-action--ghost:hover {
-    background: transparent;
+  .btn-chip:active {
+    transform: scale(0.98);
   }
 
-  .matrix-header-action--ghost::after,
-  .matrix-header-action--ghost:hover::after {
-    opacity: 0;
+  .btn-chip--primary {
+    --corner: var(--surface);
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--surface);
+    box-shadow: 0 0 24px rgba(0, 255, 65, 0.35);
+  }
+
+  .btn-chip--primary:hover {
+    background: var(--ink-bright);
+    border-color: var(--ink-bright);
   }
 
   @media (max-width: 767px) {
-    .matrix-header-chip {
+    .btn-chip {
       min-width: auto;
       height: 36px;
       padding: 0 10px;
@@ -158,14 +120,11 @@ body {
         bottom 5px right 5px,
         bottom 5px right 5px;
     }
-
-    .matrix-header-action {
-      letter-spacing: 0.12em;
-    }
   }
 }
 
 @layer utilities {
+  /* Hide native scrollbar, keep scroll. */
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
@@ -174,49 +133,57 @@ body {
     scrollbar-width: none;
   }
 
+  /* Single glow text utility (DESIGN.md §5). */
   .glow-text {
-    text-shadow: 0 0 16px var(--matrix-glow);
-  }
-  .glow-text-strong {
-    text-shadow: 0 0 26px var(--matrix-glow);
-  }
-  .shadow-glow {
-    filter: drop-shadow(0 0 2px rgba(0, 255, 65, 0.3));
+    text-shadow: 0 0 16px var(--ink-glow);
   }
 
-  .matrix-shell-content {
-    margin-top: var(--matrix-banner-offset, 0px);
+  /* Gold text-shadow utility for inline-style parity (gold accent text). */
+  .glow-text-gold {
+    text-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
   }
 
-  .matrix-scrollbar {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(0, 255, 65, 0.45) transparent;
-    scrollbar-gutter: stable both-edges;
+  /* App shell content wrapper — banner offset var. */
+  .app-shell-content {
+    margin-top: var(--banner-offset, 0px);
   }
 
-  .matrix-scrollbar::-webkit-scrollbar {
-    height: 8px;
+  /* fx-scanline — the ONE ambient overlay layer for dashboard/shell.
+   * Applied at app root (DESIGN.md §5 Motion). */
+  .fx-scanline {
+    background-image: linear-gradient(
+      to bottom,
+      rgba(18, 16, 16, 0) 50%,
+      rgba(0, 0, 0, 0.1) 50%
+    );
+    background-size: 100% 4px;
   }
 
-  .matrix-scrollbar::-webkit-scrollbar-track {
-    background: transparent;
+  /* fx-scanline-gold — gold-tinted variant for gold alert bars only.
+   * Usage: UpgradeAlertModal. Do not proliferate. */
+  .fx-scanline-gold {
+    background-image: linear-gradient(
+      to bottom,
+      rgba(255, 215, 0, 0) 50%,
+      rgba(255, 215, 0, 0.1) 50%
+    );
+    background-size: 100% 4px;
   }
 
-  .matrix-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(0, 255, 65, 0.35);
-    border-radius: 999px;
-    border: 1px solid rgba(0, 255, 65, 0.4);
+  /* fx-grid — subtle grid background for landing page hero area. */
+  .fx-grid {
+    background-image:
+      linear-gradient(rgba(0, 255, 65, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 255, 65, 0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
   }
 
-  .matrix-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 255, 65, 0.6);
-  }
-
+  /* Heatmap scrubber bar (functional indicator, not atmosphere). */
   .heatmap-scrollbar-track {
     height: 6px;
     border-radius: 999px;
-    background: rgba(0, 255, 65, 0.08);
-    border: 1px solid rgba(0, 255, 65, 0.25);
+    background: var(--ink-faint);
+    border: 1px solid var(--ink-line);
     position: relative;
     overflow: hidden;
   }
@@ -225,29 +192,15 @@ body {
     position: absolute;
     inset: 0 auto 0 0;
     border-radius: 999px;
-    background: rgba(0, 255, 65, 0.55);
-    box-shadow: 0 0 6px rgba(0, 255, 65, 0.35);
+    background: var(--ink-muted);
+    box-shadow: 0 0 6px var(--ink-glow);
     transition: transform 120ms ease-out;
-  }
-
-  .matrix-scanlines {
-    background-image: linear-gradient(to bottom, rgba(0, 255, 65, 0.12) 1px, rgba(0, 0, 0, 0) 1px);
-    background-size: 100% 4px;
-    animation: matrix-scan 6s linear infinite;
-  }
-
-  .matrix-scan-sweep {
-    background: linear-gradient(
-      to bottom,
-      rgba(0, 255, 65, 0),
-      rgba(0, 255, 65, 0.08),
-      rgba(0, 255, 65, 0)
-    );
-    animation: matrix-sweep 4s ease-in-out infinite;
   }
 }
 
-.screenshot-mode .matrix-rain {
+/* Screenshot mode — silence atmospheric layers for deterministic capture. */
+.screenshot-mode .fx-rain,
+.screenshot-mode .fx-scanline {
   display: none !important;
 }
 
@@ -262,43 +215,9 @@ html.screenshot-capture * {
   transition: none !important;
 }
 
-body.screenshot-capture .matrix-scanlines,
-body.screenshot-capture .matrix-scan-sweep,
-body.screenshot-capture .matrix-scanline-overlay {
+body.screenshot-capture .fx-scanline,
+body.screenshot-capture .fx-rain {
   opacity: 0 !important;
-}
-
-body.screenshot-capture .matrix-rain {
-  opacity: 0 !important;
-}
-
-@keyframes matrix-scan {
-  0% {
-    background-position: 0 0;
-  }
-  100% {
-    background-position: 0 40px;
-  }
-}
-
-@keyframes matrix-sweep {
-  0% {
-    transform: translateY(-120%);
-    opacity: 0;
-  }
-  20% {
-    opacity: 0.2;
-  }
-  50% {
-    opacity: 0.35;
-  }
-  80% {
-    opacity: 0.15;
-  }
-  100% {
-    transform: translateY(120%);
-    opacity: 0;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {

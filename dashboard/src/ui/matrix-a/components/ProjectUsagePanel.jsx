@@ -135,7 +135,7 @@ export function ProjectUsagePanel({
       bodyClassName="py-4"
     >
       <div className="flex items-center justify-between gap-3 mb-4">
-        <span className="text-caption text-matrix-muted uppercase tracking-[0.2em]">
+        <span className="text-caption text-ink-text uppercase tracking-caps">
           {limitLabel}
         </span>
         <div className="relative">
@@ -153,24 +153,24 @@ export function ProjectUsagePanel({
           >
             <Select.Trigger
               aria-label={limitAria}
-              className="matrix-header-chip matrix-header-action text-caption uppercase font-bold tracking-[0.2em] gap-2"
+              className="matrix-header-chip matrix-header-action text-caption uppercase font-bold tracking-caps gap-2"
             >
               <Select.Value />
-              <span className="text-matrix-bright">▾</span>
+              <span className="text-ink-bright">▾</span>
             </Select.Trigger>
             <Select.Portal>
               <Select.Positioner align="end" side="bottom" sideOffset={8} className="z-50">
-                <Select.Popup className="w-40 border border-matrix-ghost bg-matrix-panelStrong backdrop-blur-md pointer-events-auto">
+                <Select.Popup className="w-40 border border-ink-faint bg-surface-strong backdrop-blur-md pointer-events-auto">
                   <Select.List aria-label={limitAria} role="listbox">
                     {LIMIT_OPTIONS.map((value) => (
                       <Select.Item
                         key={value}
                         value={value}
                         className={({ selected }) =>
-                          `w-full text-left px-3 py-2 text-caption uppercase tracking-[0.2em] transition-colors ${
+                          `w-full text-left px-3 py-2 text-caption uppercase tracking-caps transition-colors ${
                             selected
-                              ? "bg-matrix-panel border-l-2 border-matrix-primary"
-                              : "hover:bg-matrix-panel data-[highlighted]:bg-matrix-panel"
+                              ? "bg-surface-raised border-l-2 border-ink"
+                              : "hover:bg-surface-raised data-[highlighted]:bg-surface-raised"
                           }`
                         }
                       >
@@ -186,7 +186,7 @@ export function ProjectUsagePanel({
       </div>
 
       {displayEntries.length === 0 ? (
-        <div className="text-caption text-matrix-muted uppercase tracking-[0.2em]">
+        <div className="text-caption text-ink-text uppercase tracking-caps">
           {emptyStateContent}
         </div>
       ) : (
@@ -243,11 +243,11 @@ function ProjectUsageCard({
       href={projectRef || (repoId ? `https://github.com/${repoId}` : "#")}
       target="_blank"
       rel="noopener noreferrer"
-      className="group relative flex h-full min-h-[152px] flex-col gap-3 border border-matrix-ghost bg-matrix-panel px-4 py-5 transition-all duration-200 hover:border-matrix-primary hover:shadow-matrix-glow"
+      className="group relative flex h-full min-h-[152px] flex-col gap-3 border border-ink-faint bg-surface-raised px-4 py-5 transition-all duration-200 hover:border-ink hover:shadow-glow"
       data-project-card="true"
     >
       <div
-        className="absolute right-4 top-4 flex items-center gap-1 text-caption uppercase tracking-[0.2em] text-matrix-muted"
+        className="absolute right-4 top-4 flex items-center gap-1 text-caption uppercase tracking-caps text-ink-text"
         data-card-line="stars"
         data-star-slot="corner"
         data-star-position="top-right"
@@ -256,7 +256,7 @@ function ProjectUsageCard({
         <span className="inline-flex items-center justify-center h-[1.3em] w-[1.3em]">
           <svg
             viewBox="0 0 16 16"
-            className="h-full w-full fill-matrix-primary"
+            className="h-full w-full fill-ink"
             data-star-icon="true"
             aria-hidden="true"
           >
@@ -264,7 +264,7 @@ function ProjectUsageCard({
           </svg>
         </span>
         <span
-          className="inline-flex items-center h-[1.3em] tabular-nums text-matrix-bright"
+          className="inline-flex items-center h-[1.3em] tabular-nums text-ink-bright"
           title={starsFull}
         >
           {starsCompact}
@@ -275,7 +275,7 @@ function ProjectUsageCard({
         className="flex items-center gap-3 min-w-0 pr-12"
         data-card-line="identity"
       >
-        <div className="relative h-12 w-12 rounded-full border border-matrix-ghost overflow-hidden">
+        <div className="relative h-12 w-12 rounded-full border border-ink-faint overflow-hidden">
           {avatarUrl ? (
             <img
               src={avatarUrl}
@@ -283,7 +283,7 @@ function ProjectUsageCard({
               className="h-full w-full object-cover"
             />
           ) : (
-            <div className="h-full w-full bg-matrix-panel" />
+            <div className="h-full w-full bg-surface-raised" />
           )}
         </div>
         <div className="min-w-0 flex-1">
@@ -292,7 +292,7 @@ function ProjectUsageCard({
             data-owner-row="true"
           >
             <div
-              className="text-caption text-matrix-muted uppercase tracking-[0.2em] leading-none h-[1.3em] flex items-center truncate max-w-[10rem] sm:max-w-[12rem]"
+              className="text-caption text-ink-text uppercase tracking-caps leading-none h-[1.3em] flex items-center truncate max-w-[10rem] sm:max-w-[12rem]"
               data-card-field="owner"
             >
               {owner || placeholder}
@@ -301,7 +301,7 @@ function ProjectUsageCard({
         </div>
       </div>
       <div
-        className="text-body font-black text-matrix-bright truncate max-w-[14rem] sm:max-w-[16rem] pr-12"
+        className="text-body font-black text-ink-bright truncate max-w-[14rem] sm:max-w-[16rem] pr-12"
         title={repo || repoKey}
         data-card-line="repo"
         data-card-field="repo"
@@ -309,12 +309,12 @@ function ProjectUsageCard({
         {repo || repoKey || placeholder}
       </div>
       <div
-        className="flex items-center justify-between gap-3 text-caption uppercase tracking-[0.2em] text-matrix-muted"
+        className="flex items-center justify-between gap-3 text-caption uppercase tracking-caps text-ink-text"
         data-card-line="tokens"
       >
         <span>{tokensLabel}</span>
         <span
-          className="text-body font-black text-matrix-primary tabular-nums"
+          className="text-body font-black text-ink tabular-nums"
           title={tokensFull}
         >
           {tokensCompact}
@@ -327,17 +327,17 @@ function ProjectUsageCard({
 function ProjectUsagePlaceholderCard({ placeholder }) {
   return (
     <div
-      className="relative flex h-full min-h-[152px] flex-col gap-3 border border-matrix-ghost bg-matrix-panel px-4 py-5 opacity-60"
+      className="relative flex h-full min-h-[152px] flex-col gap-3 border border-ink-faint bg-surface-raised px-4 py-5 opacity-60"
       data-project-card-placeholder="true"
     >
       <div className="flex items-start gap-3">
-        <div className="h-10 w-10 rounded-full border border-matrix-ghost bg-matrix-panelStrong" />
+        <div className="h-10 w-10 rounded-full border border-ink-faint bg-surface-strong" />
         <div className="flex min-w-0 flex-1 flex-col gap-2">
-          <div className="h-4 w-24 border border-matrix-ghost bg-matrix-panelStrong" />
-          <div className="h-3 w-32 border border-matrix-ghost bg-matrix-panelStrong" />
+          <div className="h-4 w-24 border border-ink-faint bg-surface-strong" />
+          <div className="h-3 w-32 border border-ink-faint bg-surface-strong" />
         </div>
       </div>
-      <div className="mt-auto flex items-center justify-between gap-4 text-caption uppercase tracking-[0.2em] text-matrix-muted">
+      <div className="mt-auto flex items-center justify-between gap-4 text-caption uppercase tracking-caps text-ink-text">
         <span>{placeholder}</span>
         <span>{placeholder}</span>
       </div>

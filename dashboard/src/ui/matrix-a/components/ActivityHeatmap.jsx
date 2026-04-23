@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { copy } from "../../../lib/copy";
+import { INK_RGB } from "./MatrixConstants";
 
 const OPACITY_BY_LEVEL = [0.12, 0.32, 0.5, 0.7, 1];
 const CELL_SIZE = 12;
@@ -359,7 +360,7 @@ export function ActivityHeatmap({
   }, []);
 
   if (!weeks.length) {
-    return <div className="text-caption text-matrix-muted">{copy("heatmap.empty")}</div>;
+    return <div className="text-caption text-ink-text">{copy("heatmap.empty")}</div>;
   }
 
   const gridColumns = {
@@ -414,7 +415,7 @@ export function ActivityHeatmap({
             onPointerDown={onContentPointerDown}
             // Move and Up are handled by window listeners now
           >
-            <div style={gridColumns} className="text-caption uppercase text-matrix-muted mb-2">
+            <div style={gridColumns} className="text-caption uppercase text-ink-text mb-2">
               <span></span>
               {monthMarkers.map((label) => (
                 <span
@@ -430,7 +431,7 @@ export function ActivityHeatmap({
             <div style={gridColumns}>
               <div
                 style={labelRows}
-                className="text-caption uppercase text-matrix-muted sticky left-0 z-10 bg-matrix-panel pr-2"
+                className="text-caption uppercase text-ink-text sticky left-0 z-10 bg-surface-raised pr-2"
               >
                 {dayLabels.map((label) => (
                   <span key={label} className="leading-none">
@@ -455,7 +456,10 @@ export function ActivityHeatmap({
 
                     const level = Number(cell.level) || 0;
                     const opacity = OPACITY_BY_LEVEL[level] ?? 0.3;
-                    const color = level === 0 ? "rgba(0,255,65,0.08)" : `rgba(0,255,65,${opacity})`;
+                    const color =
+                      level === 0
+                        ? `rgba(${INK_RGB}, 0.08)`
+                        : `rgba(${INK_RGB}, ${opacity})`;
 
                     const tzDetail =
                       timeZoneLabel || timeZoneShortLabel || copy("heatmap.legend.utc");
@@ -470,7 +474,7 @@ export function ActivityHeatmap({
                           unit: copy("heatmap.unit.tokens"),
                           tz: tzDetail,
                         })}
-                        className="rounded-[2px] border border-matrix-ghost"
+                        className="rounded-[2px] border border-ink-faint"
                         style={{
                           width: CELL_SIZE,
                           height: CELL_SIZE,
@@ -489,7 +493,7 @@ export function ActivityHeatmap({
       {/* Custom Scrollbar Track */}
       <div
         ref={trackRef}
-        className="heatmap-scrollbar-track relative h-[6px] rounded-full bg-matrix-panelStrong border border-matrix-ghost overflow-visible mt-1 transition-opacity duration-150"
+        className="heatmap-scrollbar-track relative h-[6px] rounded-full bg-surface-strong border border-ink-faint overflow-visible mt-1 transition-opacity duration-150"
         style={{
           opacity: showScrollbar ? 1 : 0,
           pointerEvents: showScrollbar ? "auto" : "none",
@@ -498,7 +502,7 @@ export function ActivityHeatmap({
         {/* Scrollbar Thumb */}
         <div
           ref={thumbRef}
-          className={`absolute top-0 bottom-0 rounded-full bg-[#00FF41]/50 hover:bg-[#00FF41]/70 shadow-[0_0_10px_rgba(0,255,65,0.4)] ${
+          className={`absolute top-0 bottom-0 rounded-full bg-ink-muted hover:bg-ink-text shadow-glow-sm ${
             isDraggingScrollbar ? "cursor-grabbing" : "cursor-grab"
           }`}
           style={{
@@ -513,21 +517,21 @@ export function ActivityHeatmap({
       </div>
 
       {!hideLegend ? (
-        <div className="flex justify-between items-center text-caption border-t border-matrix-ghost pt-2 text-matrix-muted font-bold uppercase">
+        <div className="flex justify-between items-center text-caption border-t border-ink-faint pt-2 text-ink-text font-bold uppercase">
           <div className="flex items-center gap-2">
             <span>{copy("heatmap.legend.less")}</span>
             <div className="flex gap-1">
               {[0, 1, 2, 3, 4].map((level) => (
                 <span
                   key={level}
-                  className="rounded-[2px] border border-matrix-ghost"
+                  className="rounded-[2px] border border-ink-faint"
                   style={{
                     width: 10,
                     height: 10,
                     background:
                       level === 0
-                        ? "rgba(0,255,65,0.08)"
-                        : `rgba(0,255,65,${OPACITY_BY_LEVEL[level]})`,
+                        ? `rgba(${INK_RGB}, 0.08)`
+                        : `rgba(${INK_RGB}, ${OPACITY_BY_LEVEL[level]})`,
                   }}
                 ></span>
               ))}

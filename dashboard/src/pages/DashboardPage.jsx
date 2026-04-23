@@ -50,6 +50,7 @@ import {
 } from "../lib/vibeusage-api";
 import { AsciiBox } from "../ui/foundation/AsciiBox.jsx";
 import { MatrixButton } from "../ui/foundation/MatrixButton.jsx";
+import { COLORS } from "../ui/matrix-a/components/MatrixConstants";
 import { ActivityHeatmap } from "../ui/matrix-a/components/ActivityHeatmap.jsx";
 import { BootScreen } from "../ui/matrix-a/components/BootScreen.jsx";
 import { GithubStar } from "../ui/matrix-a/components/GithubStar.jsx";
@@ -973,7 +974,7 @@ export function DashboardPage({
     try {
       const { toBlob, toPng } = await import("html-to-image");
       const blob = await toBlob(root, {
-        backgroundColor: "#050505",
+        backgroundColor: COLORS.SURFACE,
         pixelRatio: 2,
         cacheBust: true,
         width: scrollWidth,
@@ -987,7 +988,7 @@ export function DashboardPage({
       });
       if (blob) return blob;
       const dataUrl = await toPng(root, {
-        backgroundColor: "#050505",
+        backgroundColor: COLORS.SURFACE,
         pixelRatio: 2,
         cacheBust: true,
         width: scrollWidth,
@@ -1054,7 +1055,7 @@ export function DashboardPage({
       {
         label: copy("usage.metric.total"),
         value: toDisplayNumber(summaryTotalTokens),
-        valueClassName: "text-white",
+        valueClassName: "text-ink-bright",
       },
       {
         label: copy("usage.metric.input"),
@@ -1275,7 +1276,7 @@ export function DashboardPage({
           {copy("dashboard.sign_out")}
         </MatrixButton>
       ) : (
-        <span className="text-[10px] opacity-60">{copy("dashboard.not_signed_in")}</span>
+        <span className="text-micro opacity-60">{copy("dashboard.not_signed_in")}</span>
       )}
     </div>
   );

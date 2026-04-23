@@ -1,6 +1,7 @@
 import React from "react";
 import { copy } from "../lib/copy";
 import { toFiniteNumber } from "../lib/format";
+import { COLORS } from "../ui/matrix-a/components/MatrixConstants";
 
 export function Sparkline({ rows }) {
   const values = (rows || [])
@@ -35,10 +36,10 @@ export function Sparkline({ rows }) {
       aria-label={copy("sparkline.aria_label")}
     >
       <path
-        className="drop-shadow-[0_0_10px_rgba(0,255,65,0.22)]"
+        className="drop-shadow-glow-faint"
         d={d}
         fill="none"
-        stroke="#00FF41"
+        stroke={COLORS.MATRIX}
         strokeWidth="2.5"
         vectorEffect="non-scaling-stroke"
       />

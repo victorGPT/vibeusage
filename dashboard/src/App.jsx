@@ -387,7 +387,7 @@ export default function App() {
     navigate(signInUrl, { replace: true });
   }, [insforgeLoaded, insforgeSession, navigate, signInUrl]);
 
-  const loadingShell = <div className="min-h-screen bg-[#050505]" />;
+  const loadingShell = <div className="min-h-screen bg-surface" />;
   const authPending =
     !publicMode &&
     !mockEnabled &&

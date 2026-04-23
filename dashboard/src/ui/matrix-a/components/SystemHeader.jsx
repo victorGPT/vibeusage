@@ -9,20 +9,20 @@ export function SystemHeader({
 }) {
   return (
     <header
-      className={`flex justify-between border-b border-matrix-ghost p-4 items-center shrink-0 bg-matrix-panel ${className}`}
+      className={`flex justify-between border-b border-ink-faint p-4 items-center shrink-0 bg-surface-raised ${className}`}
     >
       <div className="flex items-center space-x-4">
-        <div className="bg-matrix-primary text-black px-2 py-1 font-black text-heading uppercase skew-x-[-10deg] border border-matrix-primary shadow-[0_0_10px_#00FF41]">
+        <div className="bg-ink text-surface px-2 py-1 font-black text-heading uppercase skew-x-[-10deg] border border-ink shadow-glow-sm">
           {title}
         </div>
         {signalLabel ? (
-          <span className="text-caption text-matrix-muted hidden sm:inline font-bold uppercase animate-pulse">
+          <span className="text-caption text-ink-text hidden sm:inline font-bold uppercase animate-pulse">
             {signalLabel}
           </span>
         ) : null}
       </div>
       {time ? (
-        <div className="text-matrix-primary font-bold text-body tracking-widest">{time}</div>
+        <div className="text-ink font-bold text-body tracking-caps">{time}</div>
       ) : null}
     </header>
   );

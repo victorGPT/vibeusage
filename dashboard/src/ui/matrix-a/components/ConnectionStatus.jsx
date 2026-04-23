@@ -24,7 +24,7 @@ export function ConnectionStatus({ status = "STABLE", title, className = "" }) {
 
   const configs = {
     STABLE: {
-      color: "text-matrix-primary",
+      color: "text-ink",
       indicator: bit,
     },
     UNSTABLE: {
@@ -43,7 +43,7 @@ export function ConnectionStatus({ status = "STABLE", title, className = "" }) {
     <div
       title={title}
       className={[
-        "matrix-header-chip matrix-header-chip--bare font-matrix transition-all duration-700",
+        "matrix-header-chip matrix-header-chip--bare font-mono transition-all duration-700",
         current.color,
         className,
       ]
@@ -51,11 +51,11 @@ export function ConnectionStatus({ status = "STABLE", title, className = "" }) {
         .join(" ")}
     >
       <div className="flex items-center">
-        <span className="text-caption text-matrix-dim mr-1">[</span>
+        <span className="text-caption text-ink-muted mr-1">[</span>
         <span className="text-caption w-[10px] inline-block text-center font-black">
           {current.indicator}
         </span>
-        <span className="text-caption text-matrix-dim ml-1">]</span>
+        <span className="text-caption text-ink-muted ml-1">]</span>
       </div>
     </div>
   );

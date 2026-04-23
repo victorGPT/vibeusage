@@ -25,31 +25,32 @@ export const NeuralAdaptiveFleet = React.memo(function NeuralAdaptiveFleet({
 
   return (
     <div className="w-full space-y-4">
-      <div className="flex justify-between items-baseline border-b border-matrix-ghost pb-2">
+      <div className="flex justify-between items-baseline border-b border-ink-faint pb-2">
         <div className="flex items-baseline gap-2">
-          <span className="text-heading font-black text-matrix-primary uppercase">{label}</span>
-          <span className="text-caption text-matrix-muted">{usageLabel}</span>
+          <span className="text-heading font-black text-ink uppercase">{label}</span>
+          <span className="text-caption text-ink-text">{usageLabel}</span>
         </div>
         <div className="flex items-baseline space-x-1">
-          <span className="text-body font-black text-matrix-primary">{totalPercent}</span>
-          <span className="text-caption text-matrix-dim font-bold">{percentSymbol}</span>
+          <span className="text-body font-black text-ink">{totalPercent}</span>
+          <span className="text-caption text-ink-muted font-bold">{percentSymbol}</span>
         </div>
       </div>
 
-      <div className="h-1 w-full bg-matrix-panel flex overflow-hidden relative">
+      <div className="h-1 w-full bg-surface-raised flex overflow-hidden relative">
         {models.map((model, index) => {
           const styleConfig = TEXTURES[index % TEXTURES.length];
           const modelKey = model?.id ? String(model.id) : `${model.name}-${index}`;
           return (
             <div
               key={modelKey}
-              className="h-full relative transition-all duration-1000 ease-out border-r border-black last:border-none"
+              className={`h-full relative transition-all duration-1000 ease-out border-r border-surface last:border-none ${
+                index === 0 ? "shadow-glow-sm" : ""
+              }`}
               style={{
                 width: `${model.share}%`,
                 backgroundColor: styleConfig.bg,
                 backgroundImage: styleConfig.pattern,
                 backgroundSize: styleConfig.size || "auto",
-                boxShadow: index === 0 ? "0 0 10px rgba(0,255,65,0.2)" : "none",
               }}
             />
           );
@@ -63,7 +64,7 @@ export const NeuralAdaptiveFleet = React.memo(function NeuralAdaptiveFleet({
           return (
             <div key={modelKey} className="flex items-center space-x-2">
               <div
-                className="w-2 h-2 border border-matrix-ghost shrink-0"
+                className="w-2 h-2 border border-ink-faint shrink-0"
                 style={{
                   backgroundColor: styleConfig.bg,
                   backgroundImage: styleConfig.pattern,
@@ -72,12 +73,12 @@ export const NeuralAdaptiveFleet = React.memo(function NeuralAdaptiveFleet({
               />
               <div className="flex items-baseline space-x-2 min-w-0">
                 <span
-                  className="text-caption truncate uppercase text-matrix-primary font-bold"
+                  className="text-caption truncate uppercase text-ink font-bold"
                   title={model.name}
                 >
                   {model.name}
                 </span>
-                <span className="text-caption text-matrix-muted font-bold">
+                <span className="text-caption text-ink-text font-bold">
                   {model.share}
                   {percentSymbol}
                 </span>

@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
 import { copy } from "../../lib/copy";
+import { COLORS } from "../matrix-a/components/MatrixConstants";
 
 function hashCode(value) {
   let hash = 0;
@@ -25,20 +26,16 @@ export function MatrixAvatar({
     return cells;
   }, [hash]);
 
-  const color = isAnon ? "#333" : isTheOne ? "#FFD700" : "#00FF41";
-  const glowFilter = isAnon
-    ? "none"
-    : isTheOne
-      ? "drop-shadow(0 0 8px rgba(255, 215, 0, 0.8)) drop-shadow(0 0 15px rgba(255, 255, 255, 0.5))"
-      : "drop-shadow(0 0 4px rgba(0, 255, 65, 0.6))";
+  const color = isAnon ? COLORS.ANON : isTheOne ? COLORS.GOLD : COLORS.MATRIX;
+  const glowClass = isAnon ? "" : isTheOne ? "drop-shadow-crown" : "drop-shadow-glow-sm";
 
   if (isAnon) {
     return (
       <div
         style={{ width: size, height: size }}
-        className={`bg-matrix-panel border border-matrix-ghost flex items-center justify-center overflow-hidden ${className}`}
+        className={`bg-surface-raised border border-ink-faint flex items-center justify-center overflow-hidden ${className}`}
       >
-        <span className="text-matrix-primary font-black text-body opacity-60">
+        <span className="text-ink font-black text-body opacity-60">
           {copy("shared.placeholder.anon_mark")}
         </span>
       </div>
@@ -51,14 +48,14 @@ export function MatrixAvatar({
       className={`relative p-1 transition-transform duration-300 hover:scale-105 ${
         isTheOne
           ? "bg-yellow-900/20 border border-yellow-500/50"
-          : "bg-matrix-panelStrong border border-matrix-dim"
+          : "bg-surface-strong border border-ink-muted"
       } ${className}`}
     >
       {isTheOne ? (
-        <div className="absolute inset-0 bg-white opacity-10 animate-pulse mix-blend-overlay"></div>
+        <div className="absolute inset-0 bg-ink-bright opacity-10 animate-pulse mix-blend-overlay"></div>
       ) : null}
 
-      <svg viewBox="0 0 5 5" className="w-full h-full" style={{ filter: glowFilter }}>
+      <svg viewBox="0 0 5 5" className={`w-full h-full ${glowClass}`}>
         {grid.map((filled, i) => {
           if (!filled) return null;
           const r = Math.floor(i / 3);

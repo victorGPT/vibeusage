@@ -1,13 +1,14 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { copy } from "../../../lib/copy";
 import { AsciiBox } from "../../foundation/AsciiBox.jsx";
+import { COLORS } from "./MatrixConstants";
 
 // --- Trend Monitor (NeuralFluxMonitor v2.0) ---
 // Industrial TUI style: independent axes, precise grid, physical partitions.
 export function TrendMonitor({
   rows,
   data = [],
-  color = "#00FF41",
+  color = COLORS.MATRIX,
   label = copy("trend.monitor.label"),
   from,
   to,
@@ -342,14 +343,14 @@ export function TrendMonitor({
 
   return (
     <AsciiBox title={label} className={`w-full ${className}`} bodyClassName="flex flex-col gap-3">
-      <div className="flex items-center justify-between text-caption text-matrix-muted px-1">
+      <div className="flex items-center justify-between text-caption text-ink-text px-1">
         <div className="flex gap-3">
           <span>{copy("trend.monitor.max_label", { value: Math.round(max) })}</span>
           <span>{copy("trend.monitor.avg_label", { value: Math.round(avg) })}</span>
         </div>
       </div>
 
-      <div className="flex-1 relative overflow-hidden border border-matrix-ghost bg-matrix-panel">
+      <div className="flex-1 relative overflow-hidden border border-ink-faint bg-surface-raised">
         <div
           className="absolute inset-0 opacity-10 pointer-events-none"
           style={{
@@ -361,7 +362,7 @@ export function TrendMonitor({
           }}
         />
 
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#00FF41]/10 to-transparent w-[50%] h-full animate-[scan-x_3s_linear_infinite] pointer-events-none mix-blend-screen" />
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-ink-faint to-transparent w-[50%] h-full animate-[scan-x_3s_linear_infinite] pointer-events-none mix-blend-screen" />
 
         <svg
           viewBox={`0 0 ${width} ${height}`}
@@ -392,7 +393,7 @@ export function TrendMonitor({
                   stroke={color}
                   strokeWidth="1.5"
                   vectorEffect="non-scaling-stroke"
-                  className="drop-shadow-[0_0_5px_rgba(0,255,65,0.8)]"
+                  className="drop-shadow-glow-sm"
                 />
               </React.Fragment>
             );
@@ -413,7 +414,7 @@ export function TrendMonitor({
 
         <div
           ref={axisRef}
-          className="absolute right-0 top-0 bottom-0 flex flex-col justify-between py-1 px-1 text-caption text-matrix-muted pointer-events-none bg-matrix-panelStrong border-l border-matrix-ghost w-10 text-right"
+          className="absolute right-0 top-0 bottom-0 flex flex-col justify-between py-1 px-1 text-caption text-ink-text pointer-events-none bg-surface-strong border-l border-ink-faint w-10 text-right"
         >
           <span>{formatCompact(max)}</span>
           <span>{formatCompact(max * 0.75)}</span>
@@ -436,22 +437,22 @@ export function TrendMonitor({
               style={{ right: hover.axisWidthPx }}
             >
               <div
-                className="absolute top-0 bottom-0 w-px bg-[#00FF41]/40 shadow-[0_0_6px_rgba(0,255,65,0.35)]"
+                className="absolute top-0 bottom-0 w-px bg-ink-muted shadow-glow-xs"
                 style={{ left: hover.x }}
               ></div>
               <div
-                className="absolute w-2 h-2 rounded-full bg-[#00FF41] shadow-[0_0_6px_rgba(0,255,65,0.8)]"
+                className="absolute w-2 h-2 rounded-full bg-ink shadow-glow-xs"
                 style={{ left: hover.x - 4, top: hover.y - 4 }}
               ></div>
             </div>
             <div
-              className="absolute z-30 px-3 py-2 text-caption bg-matrix-panelStrong border border-matrix-ghost text-matrix-bright pointer-events-none"
+              className="absolute z-30 px-3 py-2 text-caption bg-surface-strong border border-ink-faint text-ink-bright pointer-events-none"
               style={{
                 left: Math.min(hover.x + 10, hover.rectWidth - hover.axisWidthPx - 120),
                 top: Math.max(hover.y - 24, 6),
               }}
             >
-              <div className="text-matrix-muted">{formatTooltipLabel(hover.label)}</div>
+              <div className="text-ink-text">{formatTooltipLabel(hover.label)}</div>
               {hover.missing ? (
                 <div className="font-bold">{copy("shared.status.unsynced")}</div>
               ) : (
@@ -467,13 +468,13 @@ export function TrendMonitor({
         ) : null}
       </div>
 
-      <div className="h-5 flex justify-between items-center px-1 text-caption text-matrix-muted border-t border-matrix-ghost pt-2">
+      <div className="h-5 flex justify-between items-center px-1 text-caption text-ink-text border-t border-ink-faint pt-2">
         {xLabels.map((labelText, idx) => (
           <span
             key={`${labelText}-${idx}`}
             className={
               labelText === copy("trend.monitor.now_label")
-                ? "text-matrix-primary font-bold animate-pulse"
+                ? "text-ink font-bold animate-pulse"
                 : ""
             }
           >
