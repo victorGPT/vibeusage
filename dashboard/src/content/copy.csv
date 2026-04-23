@@ -22,7 +22,7 @@ landing.handle.special,landing,LandingPage,LandingPage,handle_special,"VOLT",,ac
 landing.hero.title_primary,landing,LandingPage,LandingPage,hero_title_primary,"MORE_TOKENS.",,active
 landing.hero.title_secondary,landing,LandingPage,LandingPage,hero_title_secondary,"MORE_VIBE.",,active
 landing.hero.tagline,landing,LandingPage,LandingPage,hero_tagline,"AI AGENT TOKEN TRACKER",,active
-landing.hero.subtagline,landing,LandingPage,LandingPage,hero_subtagline,"Track Codex, Claude Code, OpenCode, Gemini, Kimi, and OpenClaw with minimal data collection and auditable metrics.",,active
+landing.hero.subtagline,landing,LandingPage,LandingPage,hero_subtagline,"Track Codex, Claude Code, OpenCode, Gemini, Kimi, Hermes, and OpenClaw with minimal data collection and auditable metrics.",,active
 landing.screenshot.alt,landing,LandingPage,LandingPage,screenshot_alt,"VibeUsage dashboard screenshot",,active
 landing.screenshot.title,landing,LandingPage,LandingPage,screenshot_title,"DASHBOARD PREVIEW",,active
 landing.nav.login,landing,LandingPage,LandingPage,nav_login,"LOGIN",,active
@@ -30,7 +30,7 @@ landing.nav.signup,landing,LandingPage,LandingPage,nav_signup,"SIGN UP",,active
 landing.nav.login_signup,landing,LandingPage,LandingPage,nav_login_signup,"SIGN IN / SIGN UP",,active
 landing.seo.title,landing,LandingPage,LandingPage,seo_title,"Secure Token Usage Tracking for AI Agent Clients",,active
 landing.features.title,landing,LandingPage,LandingPage,features_title,"FEATURE BRIEF",,active
-landing.seo.summary,landing,LandingPage,LandingPage,seo_summary,"VibeUsage tracks token usage across AI agent clients (Codex, Claude Code, OpenCode, Gemini, Kimi, OpenClaw) with minimal data collection and auditable metrics.",,active
+landing.seo.summary,landing,LandingPage,LandingPage,seo_summary,"VibeUsage tracks token usage across AI agent clients (Codex, Claude Code, OpenCode, Gemini, Kimi, Hermes, OpenClaw) with minimal data collection and auditable metrics.",,active
 landing.install.title,landing,LandingPage,LandingPage,install_title,"INSTALL IN ONE COMMAND",,active
 landing.install.prompt,landing,LandingPage,LandingPage,install_prompt,"Run this in your terminal:",,active
 landing.install.command,landing,LandingPage,LandingPage,install_command,"npx --yes vibeusage init",,active
@@ -60,7 +60,7 @@ share.meta.twitter_card,share,SharePage,Meta,twitter_card,"summary_large_image",
 landing.seo.point1,landing,LandingPage,LandingPage,seo_point_1,"Auto-track AI CLI token usage with zero manual steps.",,active
 landing.seo.point2,landing,LandingPage,LandingPage,seo_point_2,"Matrix-style interface that highlights the signals you care about.",,active
 landing.seo.point3,landing,LandingPage,LandingPage,seo_point_3,"Universal AI CLI leaderboard to compare usage and rank.",,active
-landing.seo.roadmap,landing,LandingPage,LandingPage,seo_roadmap,"Native support for Codex, Claude Code, Gemini, and Kimi CLI.",,active
+landing.seo.roadmap,landing,LandingPage,LandingPage,seo_roadmap,"Native support for Codex, Claude Code, Gemini, Kimi, and Hermes CLI.",,active
 landing.signal.identity_probe,landing,LandingPage,SignalBox,title,"Identity_Probe",,active
 landing.signal.live_sniffer,landing,LandingPage,SignalBox,title,"LIVE_SNIFFER",,active
 landing.handle.label,landing,LandingPage,LandingPage,handle_label,"Set_Handle",,active

@@ -119,12 +119,32 @@ export function KimiIcon({ className = "w-5 h-5" }) {
   );
 }
 
+/**
+ * Hermes Logo (winged disc + H glyph)
+ * Hermes the messenger: winged motif flanking a central disc
+ */
+export function HermesIcon({ className = "w-5 h-5" }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className={className} fill="currentColor" aria-hidden="true">
+      {/* Left wing */}
+      <path d="M3 8c2-2 4.5-2 7-0.5C8 9 5.5 10 3 8z"/>
+      {/* Right wing */}
+      <path d="M21 8c-2-2-4.5-2-7-0.5C16 9 18.5 10 21 8z"/>
+      {/* Central disc */}
+      <circle cx="12" cy="13" r="4.2"/>
+      {/* H glyph */}
+      <path fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" d="M10.3 11.3v3.4M13.7 11.3v3.4M10.3 13h3.4"/>
+    </svg>
+  );
+}
+
 // Client logo data
 export const CLIENTS = [
   { id: "codex", name: "Codex", Icon: OpenAIIcon },
   { id: "claude", name: "Claude Code", Icon: ClaudeIcon },
   { id: "gemini", name: "Gemini", Icon: GeminiIcon },
   { id: "kimi", name: "Kimi", Icon: KimiIcon },
+  { id: "hermes", name: "Hermes", Icon: HermesIcon },
   { id: "opencode", name: "OpenCode", Icon: OpenCodeIcon },
   { id: "openclaw", name: "OpenClaw", Icon: OpenClawIcon },
 ];
