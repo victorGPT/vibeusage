@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-04-23
+
+### Added
+
+- Kimi CLI integration: `vibeusage init` now writes a managed `[[hooks]]` block (SessionEnd / Stop) into `~/.kimi/config.toml`, routing events through the existing `notify.cjs` + `sync --auto` pipeline.
+- Incremental Kimi session parser reads `~/.kimi/sessions/<project>/<session>/wire.jsonl`, maps `StatusUpdate.token_usage` (`input_other`, `input_cache_read`, `input_cache_creation`, `output`) into hourly buckets tagged `source=kimi`.
+- Dashboard Kimi client entry: `KimiIcon` added to `CLIENTS` in `ClientLogos.jsx` so `source=kimi` rows render with a dedicated logo.
+
+### Notes
+
+- Backend `vibeusage_tracker_hourly.source` remains a free-form `text` column with no CHECK constraint; accepting `kimi` required no schema or edge-function changes.
+- Kimi's `StatusUpdate` payload does not include a model field, so buckets are recorded with `model=unknown`.
+
 ## [0.3.0] - 2026-04-02
 
 ### Changed

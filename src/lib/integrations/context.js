@@ -7,6 +7,11 @@ const {
   resolveGeminiSettingsPath,
   buildGeminiHookCommand,
 } = require("../gemini-config");
+const {
+  resolveKimiConfigDir,
+  resolveKimiConfigPath,
+  buildKimiHookCommand,
+} = require("../kimi-config");
 const { resolveOpencodeConfigDir } = require("../opencode-config");
 const { resolveOpenclawSessionPluginPaths } = require("../openclaw-session-plugin");
 const { resolveHermesPluginPaths } = require("../hermes-config");
@@ -25,6 +30,7 @@ async function createIntegrationContext({
   const codeHome = env.CODE_HOME || path.join(home, ".code");
   const claudeDir = path.join(home, ".claude");
   const geminiConfigDir = resolveGeminiConfigDir({ home, env });
+  const kimiConfigDir = resolveKimiConfigDir({ home, env });
   const opencodeConfigDir = resolveOpencodeConfigDir({ home, env });
 
   return {
@@ -54,6 +60,12 @@ async function createIntegrationContext({
       configDir: geminiConfigDir,
       settingsPath: resolveGeminiSettingsPath({ configDir: geminiConfigDir }),
       hookCommand: buildGeminiHookCommand(resolvedNotifyPath),
+    },
+    kimi: {
+      configDir: kimiConfigDir,
+      configPath: resolveKimiConfigPath({ configDir: kimiConfigDir }),
+      hookCommand: buildKimiHookCommand(resolvedNotifyPath),
+      sessionsDir: path.join(kimiConfigDir, "sessions"),
     },
     opencode: {
       configDir: opencodeConfigDir,

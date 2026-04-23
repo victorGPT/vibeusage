@@ -104,11 +104,27 @@ export function OpenClawIcon({ className = "w-5 h-5" }) {
   );
 }
 
+/**
+ * Kimi Logo (Moonshot crescent + K glyph)
+ * Moonshot AI brand theme: lunar motif
+ */
+export function KimiIcon({ className = "w-5 h-5" }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className={className} fill="currentColor" aria-hidden="true">
+      {/* Crescent moon */}
+      <path d="M20.5 14.5A8 8 0 1 1 9.5 3.5a6.5 6.5 0 0 0 11 11z"/>
+      {/* K glyph */}
+      <path fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" d="M8.5 9v6M8.5 12l3-3M8.5 12l3 3"/>
+    </svg>
+  );
+}
+
 // Client logo data
 export const CLIENTS = [
   { id: "codex", name: "Codex", Icon: OpenAIIcon },
   { id: "claude", name: "Claude Code", Icon: ClaudeIcon },
   { id: "gemini", name: "Gemini", Icon: GeminiIcon },
+  { id: "kimi", name: "Kimi", Icon: KimiIcon },
   { id: "opencode", name: "OpenCode", Icon: OpenCodeIcon },
   { id: "openclaw", name: "OpenClaw", Icon: OpenClawIcon },
 ];

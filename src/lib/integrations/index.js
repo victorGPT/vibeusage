@@ -3,6 +3,7 @@ const codex = require("./codex");
 const everyCode = require("./every-code");
 const claude = require("./claude");
 const gemini = require("./gemini");
+const kimi = require("./kimi");
 const opencode = require("./opencode");
 const hermes = require("./hermes");
 const openclawSession = require("./openclaw-session");
@@ -12,6 +13,7 @@ const INTEGRATIONS = [
   everyCode,
   claude,
   gemini,
+  kimi,
   opencode,
   hermes,
   openclawSession,

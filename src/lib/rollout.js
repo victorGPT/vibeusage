@@ -63,6 +63,25 @@ async function listGeminiSessionFiles(tmpDir) {
   return out;
 }
 
+async function listKimiSessionFiles(sessionsDir) {
+  const out = [];
+  const projects = await safeReadDir(sessionsDir);
+  for (const project of projects) {
+    if (!project.isDirectory()) continue;
+    const projectDir = path.join(sessionsDir, project.name);
+    const sessions = await safeReadDir(projectDir);
+    for (const session of sessions) {
+      if (!session.isDirectory()) continue;
+      const wirePath = path.join(projectDir, session.name, "wire.jsonl");
+      const st = await fs.stat(wirePath).catch(() => null);
+      if (!st || !st.isFile()) continue;
+      out.push(wirePath);
+    }
+  }
+  out.sort((a, b) => a.localeCompare(b));
+  return out;
+}
+
 async function listOpencodeMessageFiles(storageDir) {
   const out = [];
   const messageDir = path.join(storageDir, "message");
@@ -365,6 +384,110 @@ async function parseGeminiIncremental({
       lastIndex: result.lastIndex,
       lastTotals: result.lastTotals,
       lastModel: result.lastModel,
+      updatedAt: new Date().toISOString(),
+    };
+
+    filesProcessed += 1;
+    eventsAggregated += result.eventsAggregated;
+
+    if (cb) {
+      cb({
+        index: idx + 1,
+        total: totalFiles,
+        filePath,
+        filesProcessed,
+        eventsAggregated,
+        bucketsQueued: touchedBuckets.size,
+      });
+    }
+  }
+
+  const bucketsQueued = await enqueueTouchedBuckets({ queuePath, hourlyState, touchedBuckets });
+  const projectBucketsQueued = projectEnabled
+    ? await enqueueTouchedProjectBuckets({ projectQueuePath, projectState, projectTouchedBuckets })
+    : 0;
+  hourlyState.updatedAt = new Date().toISOString();
+  cursors.hourly = hourlyState;
+  if (projectState) {
+    projectState.updatedAt = new Date().toISOString();
+    cursors.projectHourly = projectState;
+  }
+
+  return { filesProcessed, eventsAggregated, bucketsQueued, projectBucketsQueued };
+}
+
+async function parseKimiIncremental({
+  sessionFiles,
+  cursors,
+  queuePath,
+  projectQueuePath,
+  onProgress,
+  source,
+  publicRepoResolver,
+}) {
+  await ensureDir(path.dirname(queuePath));
+  let filesProcessed = 0;
+  let eventsAggregated = 0;
+
+  const cb = typeof onProgress === "function" ? onProgress : null;
+  const files = Array.isArray(sessionFiles) ? sessionFiles : [];
+  const totalFiles = files.length;
+  const hourlyState = normalizeHourlyState(cursors?.hourly);
+  const projectEnabled = typeof projectQueuePath === "string" && projectQueuePath.length > 0;
+  const projectState = projectEnabled ? normalizeProjectState(cursors?.projectHourly) : null;
+  const projectTouchedBuckets = projectEnabled ? new Set() : null;
+  const projectMetaCache = projectEnabled ? new Map() : null;
+  const publicRepoCache = projectEnabled ? new Map() : null;
+  const touchedBuckets = new Set();
+  const defaultSource = normalizeSourceInput(source) || "kimi";
+
+  if (!cursors.files || typeof cursors.files !== "object") {
+    cursors.files = {};
+  }
+
+  for (let idx = 0; idx < files.length; idx++) {
+    const entry = files[idx];
+    const filePath = typeof entry === "string" ? entry : entry?.path;
+    if (!filePath) continue;
+    const fileSource =
+      typeof entry === "string"
+        ? defaultSource
+        : normalizeSourceInput(entry?.source) || defaultSource;
+    const st = await fs.stat(filePath).catch(() => null);
+    if (!st || !st.isFile()) continue;
+
+    const key = filePath;
+    const prev = cursors.files[key] || null;
+    const inode = st.ino || 0;
+    const startOffset = prev && prev.inode === inode ? prev.offset || 0 : 0;
+
+    const projectContext = projectEnabled
+      ? await resolveProjectContextForFile({
+          filePath,
+          projectMetaCache,
+          publicRepoCache,
+          publicRepoResolver,
+          projectState,
+        })
+      : null;
+    const projectRef = projectContext?.projectRef || null;
+    const projectKey = projectContext?.projectKey || null;
+
+    const result = await parseKimiFile({
+      filePath,
+      startOffset,
+      hourlyState,
+      touchedBuckets,
+      source: fileSource,
+      projectState,
+      projectTouchedBuckets,
+      projectRef,
+      projectKey,
+    });
+
+    cursors.files[key] = {
+      inode,
+      offset: result.endOffset,
       updatedAt: new Date().toISOString(),
     };
 
@@ -796,6 +919,70 @@ async function parseClaudeFile({
     const bucketStart = toUtcHalfHourStart(tokenTimestamp);
     if (!bucketStart) continue;
 
+    const bucket = getHourlyBucket(hourlyState, source, model, bucketStart);
+    addTotals(bucket.totals, delta);
+    touchedBuckets.add(bucketKey(source, model, bucketStart));
+    if (projectKey && projectState && projectTouchedBuckets) {
+      const projectBucket = getProjectBucket(
+        projectState,
+        projectKey,
+        source,
+        bucketStart,
+        projectRef,
+      );
+      addTotals(projectBucket.totals, delta);
+      projectTouchedBuckets.add(projectBucketKey(projectKey, source, bucketStart));
+    }
+    eventsAggregated += 1;
+  }
+
+  rl.close();
+  stream.close?.();
+  return { endOffset, eventsAggregated };
+}
+
+async function parseKimiFile({
+  filePath,
+  startOffset,
+  hourlyState,
+  touchedBuckets,
+  source,
+  projectState,
+  projectTouchedBuckets,
+  projectRef,
+  projectKey,
+}) {
+  const st = await fs.stat(filePath).catch(() => null);
+  if (!st || !st.isFile()) return { endOffset: startOffset, eventsAggregated: 0 };
+
+  const endOffset = st.size;
+  if (startOffset >= endOffset) return { endOffset, eventsAggregated: 0 };
+
+  const stream = fssync.createReadStream(filePath, { encoding: "utf8", start: startOffset });
+  const rl = readline.createInterface({ input: stream, crlfDelay: Infinity });
+
+  let eventsAggregated = 0;
+  for await (const line of rl) {
+    if (!line || !line.includes("StatusUpdate")) continue;
+    let obj;
+    try {
+      obj = JSON.parse(line);
+    } catch (_e) {
+      continue;
+    }
+    if (!obj || !obj.message || obj.message.type !== "StatusUpdate") continue;
+
+    const payload = obj.message.payload;
+    const delta = normalizeKimiUsage(payload?.token_usage);
+    if (!delta || isAllZeroUsage(delta)) continue;
+
+    const tsIso = kimiTimestampToIso(obj.timestamp);
+    if (!tsIso) continue;
+
+    const bucketStart = toUtcHalfHourStart(tsIso);
+    if (!bucketStart) continue;
+
+    const model = normalizeModelInput(payload?.model) || DEFAULT_MODEL;
     const bucket = getHourlyBucket(hourlyState, source, model, bucketStart);
     addTotals(bucket.totals, delta);
     touchedBuckets.add(bucketKey(source, model, bucketStart));
@@ -2058,6 +2245,32 @@ function normalizeGeminiTokens(tokens) {
   };
 }
 
+function normalizeKimiUsage(usage) {
+  if (!usage || typeof usage !== "object") return null;
+  const inputOther = toNonNegativeInt(usage.input_other);
+  const cacheCreation = toNonNegativeInt(usage.input_cache_creation);
+  const cacheRead = toNonNegativeInt(usage.input_cache_read);
+  const output = toNonNegativeInt(usage.output);
+  const inputTokens = inputOther + cacheCreation;
+  const total = inputTokens + cacheRead + output;
+  return {
+    input_tokens: inputTokens,
+    cached_input_tokens: cacheRead,
+    output_tokens: output,
+    reasoning_output_tokens: 0,
+    total_tokens: total,
+  };
+}
+
+function kimiTimestampToIso(value) {
+  const n = Number(value);
+  if (!Number.isFinite(n) || n <= 0) return null;
+  const ms = n < 1e12 ? Math.floor(n * 1000) : Math.floor(n);
+  const date = new Date(ms);
+  const iso = date.toISOString();
+  return iso;
+}
+
 function normalizeOpencodeTokens(tokens) {
   if (!tokens || typeof tokens !== "object") return null;
   const input = toNonNegativeInt(tokens.input);
@@ -2293,10 +2506,12 @@ module.exports = {
   listRolloutFiles,
   listClaudeProjectFiles,
   listGeminiSessionFiles,
+  listKimiSessionFiles,
   listOpencodeMessageFiles,
   parseRolloutIncremental,
   parseClaudeIncremental,
   parseGeminiIncremental,
+  parseKimiIncremental,
   parseOpencodeIncremental,
   normalizeHourlyState,
   getHourlyBucket,

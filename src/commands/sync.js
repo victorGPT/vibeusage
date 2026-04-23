@@ -8,9 +8,11 @@ const {
   listRolloutFiles,
   listClaudeProjectFiles,
   listGeminiSessionFiles,
+  listKimiSessionFiles,
   parseRolloutIncremental,
   parseClaudeIncremental,
   parseGeminiIncremental,
+  parseKimiIncremental,
   parseOpencodeIncremental,
   normalizeHourlyState,
   getHourlyBucket,
@@ -71,6 +73,8 @@ async function cmdSync(argv) {
     const claudeProjectsDir = path.join(home, ".claude", "projects");
     const geminiHome = process.env.GEMINI_HOME || path.join(home, ".gemini");
     const geminiTmpDir = path.join(geminiHome, "tmp");
+    const kimiHome = process.env.KIMI_HOME || path.join(home, ".kimi");
+    const kimiSessionsDir = path.join(kimiHome, "sessions");
     const xdgDataHome = process.env.XDG_DATA_HOME || path.join(home, ".local", "share");
     const opencodeHome = process.env.OPENCODE_HOME || path.join(xdgDataHome, "opencode");
     const opencodeDbPath = path.join(opencodeHome, "opencode.db");
@@ -176,6 +180,32 @@ async function cmdSync(argv) {
           );
         },
         source: "gemini",
+      });
+    }
+
+    const kimiFiles = await listKimiSessionFiles(kimiSessionsDir);
+    let kimiResult = { filesProcessed: 0, eventsAggregated: 0, bucketsQueued: 0 };
+    if (kimiFiles.length > 0) {
+      if (progress?.enabled) {
+        progress.start(
+          `Parsing Kimi ${renderBar(0)} 0/${formatNumber(kimiFiles.length)} files | buckets 0`,
+        );
+      }
+      kimiResult = await parseKimiIncremental({
+        sessionFiles: kimiFiles,
+        cursors,
+        queuePath,
+        projectQueuePath,
+        onProgress: (p) => {
+          if (!progress?.enabled) return;
+          const pct = p.total > 0 ? p.index / p.total : 1;
+          progress.update(
+            `Parsing Kimi ${renderBar(pct)} ${formatNumber(p.index)}/${formatNumber(p.total)} files | buckets ${formatNumber(
+              p.bucketsQueued,
+            )}`,
+          );
+        },
+        source: "kimi",
       });
     }
 
@@ -362,6 +392,7 @@ async function cmdSync(argv) {
         openclawResult.filesProcessed +
         claudeResult.filesProcessed +
         geminiResult.filesProcessed +
+        kimiResult.filesProcessed +
         opencodeResult.filesProcessed;
       const totalBuckets =
         parseResult.bucketsQueued +
@@ -369,6 +400,7 @@ async function cmdSync(argv) {
         openclawResult.bucketsQueued +
         claudeResult.bucketsQueued +
         geminiResult.bucketsQueued +
+        kimiResult.bucketsQueued +
         opencodeResult.bucketsQueued;
       process.stdout.write(
         [
