@@ -326,13 +326,16 @@ function getStrategy(id) {
     case "claude":
       // eslint-disable-next-line global-require
       return require("./sources/claude");
+    case "opencode":
+      // eslint-disable-next-line global-require
+      return require("./sources/opencode");
     default:
       return null;
   }
 }
 
 function listRegisteredSources() {
-  return ["claude"];
+  return ["claude", "opencode"];
 }
 
 module.exports = {
