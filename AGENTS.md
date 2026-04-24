@@ -91,6 +91,37 @@ Keep this managed block so 'openspec update' can refresh the instructions.
   - `npm run ci:local`
 - 若 GitHub Actions 的 `CI` 工作流未通过，不得标记“发布完成”。
 
+# 新 AI CLI Source 接入 Checklist（强制）
+
+> 来源：2026-04-24 Claude Usage Parser Severe Under-Counting 复盘。
+> 适用：新增任何 AI CLI token usage source 的 PR（`src/lib/integrations/*.js` + `src/lib/rollout.js` 内 `normalize<Source>Usage` + `parse<Source>*` 家族）。
+
+任何新 source 接入 PR 必须同时满足以下三项，缺一不通过评审：
+
+1. **定义去重键（Dedupe Key）**
+   - parser 必须能识别同一 upstream 请求/响应的重复写入，按稳定 id 去重（优先顺序：上游 `message.id` → `request_id` → 其它跨机器唯一值）。
+   - cursor 端持久化最近 N 个已处理 id（默认 500），覆盖跨 sync 切片的重复。
+   - 没有 upstream 唯一 id 的 source，必须在 PR 描述里显式声明"无去重键"并论证为何安全（例如：源数据本身就是 append-once、或每行已是独立事件）。
+
+2. **`total_tokens` 含所有 token 通道**
+   - `normalize<Source>Usage` 返回的 `total_tokens` 必须等于 `input_tokens + cached_input_tokens + output_tokens + reasoning_output_tokens`（按 source 有的那几项求和，不能遗漏 cache_read / cache_creation / reasoning 这些"非主通道"）。
+   - 若 upstream payload 直接给 total，可 trust it；否则 fallback 公式必须覆盖全部通道。参考正例：`normalizeKimiUsage`（`src/lib/rollout.js`）。
+   - 反例（已修复）：`normalizeClaudeUsage` 与 `normalizeOpencodeTokens` 曾漏 cache_read，导致 dashboard 显示 ~5–15% 的真实消耗。
+
+3. **Real-session fixture 回归测试**
+   - 提交 `test/rollout-<source>-*.test.js` 至少覆盖三类 case：
+     - 单条消息的 total 与分通道分别正确（显式断言 `input_tokens / cached_input_tokens / output_tokens / total_tokens`）
+     - 去重键命中（同 id 出现两次应聚合一次）
+     - 游标续读（第二次 sync 只处理新增行）
+   - 以上 fixture 数字应该是**用纸笔能对账**的小数，不要依赖真实 session 大数据；否则断言会沦为 snapshot。
+   - 若 source 支持 cache_read，必须有一条"大 cache_read、小 input/output"的 fixture 确保 total 没再漏 cache（参考 `rollout-parser.test.js` 的 `Opus long-session regression` 测试）。
+
+**附加强烈建议（非强制，评审时优先鼓励）：**
+
+- Dashboard 侧 `ClientLogos.jsx` 的 `CLIENTS` 注册一条 entry，使 `source=<name>` 的数据在 UI 上可见。
+- Landing copy（`dashboard/src/content/copy.csv` 的 `landing.*` 客户端列表）一并更新。
+- CHANGELOG 条目在下一次版本 bump 时含 source 名。
+
 # 复盘协议（Retrospective Contract，CLI 无关）
 
 > 目标：让 Codex/Claude/OpenCode/Gemini 等任何 AI CLI 都走同一条复盘流程。
