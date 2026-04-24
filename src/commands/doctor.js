@@ -70,9 +70,12 @@ async function cmdDoctor(argv = []) {
 
 function runAuditTokens({ opts, config }) {
   const sourceId = opts.auditSource || "claude";
+  if (sourceId === "all") {
+    return runAuditTokensAll({ opts, config });
+  }
   const strategy = getAuditStrategy(sourceId);
   if (!strategy) {
-    const registered = listRegisteredSources().join(", ");
+    const registered = ["all", ...listRegisteredSources()].join(", ");
     const message = `unknown --source '${sourceId}'. Registered: ${registered}.`;
     if (opts.json) {
       process.stdout.write(`${JSON.stringify({ ok: false, error: "unknown-source", message })}\n`);
@@ -148,6 +151,76 @@ function runAuditTokens({ opts, config }) {
     );
     process.exitCode = 1;
   }
+}
+
+function runAuditTokensAll({ opts, config }) {
+  const ids = listRegisteredSources();
+  const perSource = [];
+  let anyExceeds = false;
+  let anyHardError = false;
+
+  for (const id of ids) {
+    const strategy = getAuditStrategy(id);
+    let result;
+    try {
+      result = runSourceAudit({
+        strategy,
+        days: opts.auditDays,
+        threshold: opts.auditThreshold,
+        deviceId: config.deviceId || null,
+        // --db-json is source-specific so we skip it under --source=all; the
+        // only sane paths are insforge auto-mode or no-local-sessions.
+      });
+    } catch (err) {
+      result = { ok: false, source: id, error: "audit-error", message: err?.message || String(err) };
+      anyHardError = true;
+    }
+    if (result.ok && result.exceedsThreshold) anyExceeds = true;
+    // no-local-sessions is informational, not a hard error; other non-ok states
+    // (cannot-resolve-user-id, insforge-db-query-failed, etc.) count as errors.
+    if (!result.ok && result.error !== "no-local-sessions") anyHardError = true;
+    perSource.push(result);
+  }
+
+  if (opts.json) {
+    process.stdout.write(
+      `${JSON.stringify({ ok: !anyHardError, thresholdPct: opts.auditThreshold, days: opts.auditDays, sources: perSource }, null, 2)}\n`,
+    );
+  } else {
+    process.stdout.write(
+      `Token audit across all registered sources (last ${opts.auditDays} days)\n\n`,
+    );
+    process.stdout.write(
+      `${"source".padEnd(12)}  ${"status".padEnd(22)}  ${"max drift".padStart(10)}  ${"files".padStart(6)}  ${"events".padStart(6)}\n`,
+    );
+    process.stdout.write(`${"-".repeat(70)}\n`);
+    for (const r of perSource) {
+      if (r.ok) {
+        const statusText = r.exceedsThreshold
+          ? `FAIL > ${opts.auditThreshold}%`
+          : `ok`;
+        const drift = `${r.maxDriftPct.toFixed(1)}%`;
+        process.stdout.write(
+          `${r.source.padEnd(12)}  ${statusText.padEnd(22)}  ${drift.padStart(10)}  ${String(r.filesScanned).padStart(6)}  ${String(r.usageLines).padStart(6)}\n`,
+        );
+      } else {
+        const statusText =
+          r.error === "no-local-sessions" ? "no local sessions" : `ERR ${r.error}`;
+        process.stdout.write(
+          `${r.source.padEnd(12)}  ${statusText.padEnd(22)}  ${"—".padStart(10)}  ${"—".padStart(6)}  ${"—".padStart(6)}\n`,
+        );
+      }
+    }
+    process.stdout.write(
+      `\nThreshold ${opts.auditThreshold}%. ` +
+        (anyExceeds
+          ? `At least one source exceeds threshold — rerun \`vibeusage doctor --audit-tokens --source <id>\` for details.\n`
+          : `All sources within threshold.\n`),
+    );
+  }
+
+  if (anyHardError) process.exitCode = 2;
+  else if (anyExceeds) process.exitCode = 1;
 }
 
 function parseArgs(argv) {
