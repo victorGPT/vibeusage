@@ -4,6 +4,32 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-04-24
+
+### Added
+
+- **Per-source token audit** across every CLI vibeusage knows about. `vibeusage doctor --audit-tokens --source <id>` walks local sessions (or ledgers), dedupes by upstream id where available, sums channels to a day total, and compares against `vibeusage_tracker_hourly`. Exit 0 within threshold, 1 over threshold, 2 on hard errors.
+  - Supported ids: `claude`, `opencode`, `codex`, `every-code`, `gemini`, `kimi`, `hermes`, `openclaw`.
+  - `--source all` runs every strategy and prints one status row per source so you can eyeball drift without memorising names.
+  - `--days N --threshold PCT --db-json PATH --json` flags behave the same as in 0.5.0; `--db-json` stays a single-source concept.
+- **Strategy framework** in `src/lib/ops/audit-source.js` + `src/lib/ops/sources/<id>.js`. New sources plug in by filling a small strategy object (`sessionRoot`, `walkSessions`, `extractUsage`, optional `iterateRecords`). The backwards-compatible `audit-claude.js` shim stays for any downstream import.
+- **Token-conservation property test** (`test/parser-total-conservation.test.js`) fuzzes every `normalize*Usage` with ~200 deterministic LCG inputs and asserts `total_tokens === input + cached + output + reasoning` on compose-based normalizers (Claude / Kimi / OpenCode). The April 2026 Claude under-count would have failed this on the first fuzz input.
+- **`AGENTS.md` "新 AI CLI Source 接入 Checklist" (强制)**: documents the three invariants every new source PR must satisfy (dedupe key, total_tokens covers all channels, fixture-backed regression tests).
+- **Defensive ops**:
+  - `scripts/ops/compare-claude-ground-truth.cjs` CLI wrapper for maintainers who want a standalone script instead of `doctor`.
+  - Claude parser now returns a `dedupSkipped` metric; `sync` writes a `claude_dedup_spike` line to `notify.debug.jsonl` when the skip ratio goes above 50% — early-warning signal if Claude Code ever changes its session-log write pattern again.
+
+### Changed
+
+- CI workflows bumped from Node 18 to Node 20 (`deploy-preflight.yml`, `guardrails.yml`, `release.yml preflight`). `npm-publish` stays on Node 22 because Trusted Publishing requires npm ≥ 11.5.1.
+- Landing copy and dashboard `CLIENTS` registry updated to include Kimi and Hermes alongside Codex / Claude Code / Gemini / OpenCode / OpenClaw.
+- Integration labels brought in line with official brand names: "Claude" → "Claude Code", "Opencode Plugin" → "OpenCode Plugin".
+
+### Notes
+
+- No parser formula changed in this release — the 0.5.0 cache_read + dedupe fixes remain authoritative. 0.6.0 is the "observability + framework" cut: the thing that stops a similar bug from lasting months next time.
+- Retrospective at `docs/retrospective/vibeusage/2026-04-24-claude-usage-parser-under-counting.md` remains the reference post-mortem for the April incident.
+
 ## [0.5.0] - 2026-04-24
 
 ### Fixed
