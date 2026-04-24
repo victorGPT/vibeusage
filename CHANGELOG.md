@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-04-24
+
+### Fixed
+
+- **Claude Code / OpenCode token under-counting (Severity S1)**. The parser was producing dashboard numbers that were roughly 5–15% of actual consumption. Two independent bugs in `src/lib/rollout.js`:
+  - `normalizeClaudeUsage` (and `normalizeOpencodeTokens`) composed `total_tokens` without `cache_read_input_tokens`. On long Claude Opus sessions cache-read is ~99% of spend, which alone caused ~200× under-count.
+  - `parseClaudeFile` aggregated each raw `"usage"` line it saw, but Claude Code writes the same assistant message to its session `.jsonl` multiple times (different outer `uuid`, identical `message.id` / `requestId`). A ground-truth survey found 35,163 usage rows collapsing to only 15,046 unique `message.id`s — a 2.337× multiplier (some messages duplicated up to 14×).
+- Parser now dedupes on `message.id` (falling back to `requestId`) and persists the last 500 seen ids into the per-file cursor so duplicates that straddle sync invocations are still skipped. `total_tokens` includes cache-read for both Claude and OpenCode when upstream payload omits `total_tokens` (Anthropic's Messages API always does).
+
+### Notes
+
+- Rewinding your historical data is optional. On each machine: back up `~/.vibeusage/tracker/cursors.json`, scrub the `files` entries whose path contains `.claude/projects/` or `/opencode/storage/` and the `hourly.buckets` entries keyed by `claude|…` or `opencode|…`, then run `vibeusage sync --drain`. The ingest endpoint upserts with `resolution=merge-duplicates` against `(user_id, device_id, source, model, hour_start)`, so corrected values replace the old ones.
+- Full retrospective: `docs/retrospective/vibeusage/2026-04-24-claude-usage-parser-under-counting.md`.
+
 ## [0.4.0] - 2026-04-23
 
 ### Added

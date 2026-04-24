@@ -1,5 +1,10 @@
 # vibeusage Retrospectives (L1 Cards)
 
+- **2026-04-24 — Claude Usage Parser Severe Under-Counting** (`backend`, `claude-usage-parser`, `S1`)
+  - file: `2026-04-24-claude-usage-parser-under-counting.md`
+  - tags: `design_mismatch=yes`, `detection_gap=yes`
+  - quick take: Two independent parser bugs (cache_read dropped from total_tokens + same message.id double-counted) drove dashboard Claude totals to ~10% of reality; plugin-ization of the hook never touched the compute layer where the bugs lived.
+
 - **2026-03-30 — Insforge ESM Hard Cut Runtime Contract Mismatch** (`backend`, `insforge-esm-runtime-contract`, `S1`)
   - file: `2026-03-30-insforge-esm-hard-cut-runtime-contract-mismatch.md`
   - tags: `design_mismatch=yes`, `detection_gap=yes`
