@@ -340,13 +340,19 @@ function getStrategy(id) {
     case "kimi":
       // eslint-disable-next-line global-require
       return require("./sources/kimi");
+    case "hermes":
+      // eslint-disable-next-line global-require
+      return require("./sources/hermes");
+    case "openclaw":
+      // eslint-disable-next-line global-require
+      return require("./sources/openclaw");
     default:
       return null;
   }
 }
 
 function listRegisteredSources() {
-  return ["claude", "opencode", "codex", "every-code", "gemini", "kimi"];
+  return ["claude", "opencode", "codex", "every-code", "gemini", "kimi", "hermes", "openclaw"];
 }
 
 module.exports = {
