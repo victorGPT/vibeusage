@@ -39,6 +39,16 @@ const { spawnSync } = require("node:child_process");
 const DEFAULT_DAYS = 14;
 const DEFAULT_THRESHOLD_PCT = 25;
 
+// `resolveUserIdViaInsforge` and `queryDbTotalsViaInsforge` interpolate these
+// values into a SQL string handed to `insforge db query` (argv, not shell, but
+// the argv reaches a SQL executor with service-role authority). The three
+// values are validated against strict whitelists so a malicious / typo flag
+// like --user-id "foo'; DROP TABLE users; --" cannot reach the DB.
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const SOURCE_ID_RE = /^[a-z][a-z0-9-]*$/;
+const ISO_TIMESTAMP_RE =
+  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z$/;
+
 function runSourceAudit({
   strategy,
   days = DEFAULT_DAYS,
@@ -246,7 +256,7 @@ function nonneg(v) {
 }
 
 function resolveUserIdViaInsforge({ deviceId }) {
-  if (!deviceId) return null;
+  if (!deviceId || !UUID_RE.test(String(deviceId))) return null;
   const r = spawnSync(
     "insforge",
     [
@@ -264,6 +274,27 @@ function resolveUserIdViaInsforge({ deviceId }) {
 }
 
 function queryDbTotalsViaInsforge({ userId, source, windowStartIso }) {
+  if (!userId || !UUID_RE.test(String(userId))) {
+    return {
+      ok: false,
+      error: "invalid-user-id",
+      message: `refusing to query DB with non-UUID user id '${String(userId).slice(0, 40)}'`,
+    };
+  }
+  if (!source || !SOURCE_ID_RE.test(String(source))) {
+    return {
+      ok: false,
+      error: "invalid-source-id",
+      message: `refusing to query DB with non-identifier source '${String(source).slice(0, 40)}'`,
+    };
+  }
+  if (!windowStartIso || !ISO_TIMESTAMP_RE.test(String(windowStartIso))) {
+    return {
+      ok: false,
+      error: "invalid-window-start",
+      message: `refusing to query DB with non-ISO windowStartIso '${String(windowStartIso).slice(0, 40)}'`,
+    };
+  }
   const sql =
     `SELECT DATE(hour_start) AS day, SUM(total_tokens) AS tokens ` +
     `FROM vibeusage_tracker_hourly ` +
@@ -361,4 +392,8 @@ module.exports = {
   runSourceAudit,
   getStrategy,
   listRegisteredSources,
+  // Exported for targeted tests that assert the SQL-interpolation inputs are
+  // validated before reaching `insforge db query`.
+  queryDbTotalsViaInsforge,
+  resolveUserIdViaInsforge,
 };
