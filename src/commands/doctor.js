@@ -9,8 +9,10 @@ const { buildDoctorReport } = require("../lib/doctor");
 const {
   DEFAULT_DAYS: AUDIT_DEFAULT_DAYS,
   DEFAULT_THRESHOLD_PCT: AUDIT_DEFAULT_THRESHOLD,
-  runAudit: runClaudeAudit,
-} = require("../lib/ops/audit-claude");
+  runSourceAudit,
+  getStrategy: getAuditStrategy,
+  listRegisteredSources,
+} = require("../lib/ops/audit-source");
 
 async function cmdDoctor(argv = []) {
   const opts = parseArgs(argv);
@@ -67,9 +69,24 @@ async function cmdDoctor(argv = []) {
 }
 
 function runAuditTokens({ opts, config }) {
+  const sourceId = opts.auditSource || "claude";
+  const strategy = getAuditStrategy(sourceId);
+  if (!strategy) {
+    const registered = listRegisteredSources().join(", ");
+    const message = `unknown --source '${sourceId}'. Registered: ${registered}.`;
+    if (opts.json) {
+      process.stdout.write(`${JSON.stringify({ ok: false, error: "unknown-source", message })}\n`);
+    } else {
+      process.stderr.write(`doctor --audit-tokens: ${message}\n`);
+    }
+    process.exitCode = 2;
+    return;
+  }
+
   let result;
   try {
-    result = runClaudeAudit({
+    result = runSourceAudit({
+      strategy,
       days: opts.auditDays,
       threshold: opts.auditThreshold,
       deviceId: config.deviceId || null,
@@ -100,7 +117,7 @@ function runAuditTokens({ opts, config }) {
   }
 
   process.stdout.write(
-    `Claude token audit (last ${result.days} days, window >= ${result.windowStartIso})\n`,
+    `${result.displayName || result.source} token audit (last ${result.days} days, window >= ${result.windowStartIso})\n`,
   );
   process.stdout.write(
     `Scanned ${result.filesScanned} .jsonl files, ${formatNumber(result.usageLines)} usage lines, ` +
@@ -142,6 +159,7 @@ function parseArgs(argv) {
     auditDays: AUDIT_DEFAULT_DAYS,
     auditThreshold: AUDIT_DEFAULT_THRESHOLD,
     auditDbJson: null,
+    auditSource: "claude",
   };
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
@@ -158,7 +176,11 @@ function parseArgs(argv) {
       if (!Number.isFinite(n) || n < 0) throw new Error(`--threshold expects a non-negative number`);
       out.auditThreshold = n;
     } else if (arg === "--db-json") out.auditDbJson = argv[++i] || null;
-    else throw new Error(`Unknown option: ${arg}`);
+    else if (arg === "--source") {
+      const raw = argv[++i];
+      if (!raw) throw new Error(`--source expects a value`);
+      out.auditSource = String(raw).trim().toLowerCase();
+    } else throw new Error(`Unknown option: ${arg}`);
   }
   return out;
 }
