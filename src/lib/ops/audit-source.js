@@ -334,13 +334,16 @@ function getStrategy(id) {
     case "every-code":
       // eslint-disable-next-line global-require
       return require("./sources/every-code");
+    case "gemini":
+      // eslint-disable-next-line global-require
+      return require("./sources/gemini");
     default:
       return null;
   }
 }
 
 function listRegisteredSources() {
-  return ["claude", "opencode", "codex", "every-code"];
+  return ["claude", "opencode", "codex", "every-code", "gemini"];
 }
 
 module.exports = {
