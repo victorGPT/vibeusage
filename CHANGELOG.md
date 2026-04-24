@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.6.1] - 2026-04-25
+
+### Security
+
+- **Close SQL-interpolation face in audit helpers**. A post-merge Codex review (2026-04-24) flagged that `queryDbTotalsViaInsforge` and `resolveUserIdViaInsforge` in `src/lib/ops/audit-source.js` interpolated `userId`, `source`, and `windowStartIso` into a SQL string handed to `insforge db query` via argv. The subprocess reaches a SQL executor with service-role authority, so a maintainer-only typo such as `--user-id "foo'; DROP TABLE users; --"` could have run arbitrary SQL. Inputs are now gated by strict regexes (UUID for user/device ids, lowercase-kebab for source ids, ISO-8601 with Z for timestamps); malformed values short-circuit with `{ok: false, error: "invalid-*"}` and never reach `spawnSync`.
+- No change for end-users: CLI flags and config values that were already well-formed (all production callers use UUID device ids and the hardcoded source whitelist) continue to work.
+
 ## [0.6.0] - 2026-04-24
 
 ### Added
