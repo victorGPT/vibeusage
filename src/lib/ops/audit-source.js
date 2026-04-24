@@ -67,7 +67,11 @@ function runSourceAudit({
   }
 
   const root = sessionRootOverride || strategy.sessionRoot({ home, env });
-  const files = strategy.walkSessions({ root });
+  const now = new Date();
+  const start = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  start.setUTCDate(start.getUTCDate() - (days - 1));
+  const windowStartIso = start.toISOString();
+  const files = strategy.walkSessions({ root, windowStartIso });
   if (!files || files.length === 0) {
     return {
       ok: false,
@@ -78,11 +82,6 @@ function runSourceAudit({
       maxDriftPct: 0,
     };
   }
-
-  const now = new Date();
-  const start = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
-  start.setUTCDate(start.getUTCDate() - (days - 1));
-  const windowStartIso = start.toISOString();
 
   const local = computeLocalTotals({ files, windowStartIso, strategy });
 
@@ -329,13 +328,19 @@ function getStrategy(id) {
     case "opencode":
       // eslint-disable-next-line global-require
       return require("./sources/opencode");
+    case "codex":
+      // eslint-disable-next-line global-require
+      return require("./sources/codex");
+    case "every-code":
+      // eslint-disable-next-line global-require
+      return require("./sources/every-code");
     default:
       return null;
   }
 }
 
 function listRegisteredSources() {
-  return ["claude", "opencode"];
+  return ["claude", "opencode", "codex", "every-code"];
 }
 
 module.exports = {
