@@ -337,13 +337,16 @@ function getStrategy(id) {
     case "gemini":
       // eslint-disable-next-line global-require
       return require("./sources/gemini");
+    case "kimi":
+      // eslint-disable-next-line global-require
+      return require("./sources/kimi");
     default:
       return null;
   }
 }
 
 function listRegisteredSources() {
-  return ["claude", "opencode", "codex", "every-code", "gemini"];
+  return ["claude", "opencode", "codex", "every-code", "gemini", "kimi"];
 }
 
 module.exports = {
