@@ -132,7 +132,7 @@ async function cmdSync(argv) {
       : { filesProcessed: 0, eventsAggregated: 0, bucketsQueued: 0 };
 
     const claudeFiles = await listClaudeProjectFiles(claudeProjectsDir);
-    let claudeResult = { filesProcessed: 0, eventsAggregated: 0, bucketsQueued: 0 };
+    let claudeResult = { filesProcessed: 0, eventsAggregated: 0, bucketsQueued: 0, dedupSkipped: 0 };
     if (claudeFiles.length > 0) {
       if (progress?.enabled) {
         progress.start(
@@ -155,6 +155,7 @@ async function cmdSync(argv) {
         },
         source: "claude",
       });
+      await maybeWarnClaudeDedupSpike({ trackerDir, claudeResult });
     }
 
     const geminiFiles = await listGeminiSessionFiles(geminiTmpDir);
@@ -590,6 +591,33 @@ async function parseOpenclawSanitizedLedger({ trackerDir, cursors, queuePath }) 
     eventsAggregated,
     bucketsQueued,
   };
+}
+
+// Claude Code occasionally writes the same assistant message multiple times to
+// its session .jsonl (same message.id, different outer uuid). Parser dedup
+// silently skips the dup rows, but a sudden spike in the dedup-skipped ratio
+// usually means an upstream change that deserves human attention. Emit a
+// debug.jsonl line when the ratio crosses 50% so vibeusage doctor / retro
+// reviewers can find it; intentionally non-blocking.
+async function maybeWarnClaudeDedupSpike({ trackerDir, claudeResult }) {
+  const events = Number(claudeResult?.eventsAggregated || 0);
+  const skipped = Number(claudeResult?.dedupSkipped || 0);
+  const total = events + skipped;
+  if (total === 0) return;
+  const ratio = skipped / total;
+  if (ratio <= 0.5) return;
+  const line =
+    JSON.stringify({
+      ts: new Date().toISOString(),
+      event: "claude_dedup_spike",
+      source: "claude",
+      events_aggregated: events,
+      dedup_skipped: skipped,
+      ratio: Number(ratio.toFixed(3)),
+      hint: "Unusual duplicate rate from ~/.claude/projects jsonl; run `vibeusage doctor --audit-tokens` to compare local vs DB totals.",
+    }) + "\n";
+  const logPath = path.join(trackerDir, "notify.debug.jsonl");
+  await fs.appendFile(logPath, line, "utf8").catch(() => {});
 }
 
 async function safeStatSize(p) {

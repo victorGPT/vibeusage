@@ -214,6 +214,7 @@ async function parseClaudeIncremental({
   await ensureDir(path.dirname(queuePath));
   let filesProcessed = 0;
   let eventsAggregated = 0;
+  let dedupSkipped = 0;
 
   const cb = typeof onProgress === "function" ? onProgress : null;
   const files = Array.isArray(projectFiles) ? projectFiles : [];
@@ -283,6 +284,7 @@ async function parseClaudeIncremental({
 
     filesProcessed += 1;
     eventsAggregated += result.eventsAggregated;
+    dedupSkipped += result.dedupSkipped || 0;
 
     if (cb) {
       cb({
@@ -307,7 +309,13 @@ async function parseClaudeIncremental({
     cursors.projectHourly = projectState;
   }
 
-  return { filesProcessed, eventsAggregated, bucketsQueued, projectBucketsQueued };
+  return {
+    filesProcessed,
+    eventsAggregated,
+    bucketsQueued,
+    projectBucketsQueued,
+    dedupSkipped,
+  };
 }
 
 async function parseGeminiIncremental({
@@ -801,16 +809,18 @@ async function parseClaudeFile({
 
   const st = await fs.stat(filePath).catch(() => null);
   if (!st || !st.isFile()) {
-    return { endOffset: startOffset, eventsAggregated: 0, seenIds: seenOrder };
+    return { endOffset: startOffset, eventsAggregated: 0, dedupSkipped: 0, seenIds: seenOrder };
   }
 
   const endOffset = st.size;
-  if (startOffset >= endOffset) return { endOffset, eventsAggregated: 0, seenIds: seenOrder };
+  if (startOffset >= endOffset)
+    return { endOffset, eventsAggregated: 0, dedupSkipped: 0, seenIds: seenOrder };
 
   const stream = fssync.createReadStream(filePath, { encoding: "utf8", start: startOffset });
   const rl = readline.createInterface({ input: stream, crlfDelay: Infinity });
 
   let eventsAggregated = 0;
+  let dedupSkipped = 0;
   for await (const line of rl) {
     if (!line || !line.includes('\"usage\"')) continue;
     let obj;
@@ -827,7 +837,10 @@ async function parseClaudeFile({
     // (same `message.id` / `requestId`, different outer `uuid`). Aggregate once per
     // upstream Anthropic response to avoid multi-counting token usage.
     const dedupeId = obj?.message?.id || obj?.requestId || null;
-    if (dedupeId && seenSet.has(dedupeId)) continue;
+    if (dedupeId && seenSet.has(dedupeId)) {
+      dedupSkipped += 1;
+      continue;
+    }
 
     const model = normalizeModelInput(obj?.message?.model || obj?.model) || DEFAULT_MODEL;
     const tokenTimestamp = typeof obj?.timestamp === "string" ? obj.timestamp : null;
@@ -866,7 +879,7 @@ async function parseClaudeFile({
     seenOrder.length > CLAUDE_SEEN_IDS_LIMIT
       ? seenOrder.slice(seenOrder.length - CLAUDE_SEEN_IDS_LIMIT)
       : seenOrder;
-  return { endOffset, eventsAggregated, seenIds: trimmedSeenIds };
+  return { endOffset, eventsAggregated, dedupSkipped, seenIds: trimmedSeenIds };
 }
 
 async function parseKimiFile({
