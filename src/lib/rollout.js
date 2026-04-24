@@ -2181,7 +2181,10 @@ function normalizeOpencodeTokens(tokens) {
   const cached = toNonNegativeInt(tokens.cache?.read);
   const cacheWrite = toNonNegativeInt(tokens.cache?.write);
   const inputTokens = input + cacheWrite;
-  const total = inputTokens + output + reasoning;
+  // Include cache-read tokens in the total so OpenCode sessions do not
+  // under-count the way Claude did before the parallel fix; cache-read is
+  // real spend the user pays for on every turn.
+  const total = inputTokens + cached + output + reasoning;
 
   return {
     input_tokens: inputTokens,
@@ -2304,12 +2307,19 @@ function normalizeUsage(u) {
 function normalizeClaudeUsage(u) {
   const inputTokens =
     toNonNegativeInt(u?.input_tokens) + toNonNegativeInt(u?.cache_creation_input_tokens);
+  const cachedInputTokens = toNonNegativeInt(u?.cache_read_input_tokens);
   const outputTokens = toNonNegativeInt(u?.output_tokens);
   const hasTotal = u && Object.prototype.hasOwnProperty.call(u, "total_tokens");
-  const totalTokens = hasTotal ? toNonNegativeInt(u?.total_tokens) : inputTokens + outputTokens;
+  // Claude's Messages API does not emit `total_tokens`. When absent, compose it
+  // from all four channels (input / cache_creation / cache_read / output). The
+  // old formula omitted cache_read, which is ~99% of token spend on long
+  // Claude Opus sessions and was the main driver of user-visible under-counts.
+  const totalTokens = hasTotal
+    ? toNonNegativeInt(u?.total_tokens)
+    : inputTokens + cachedInputTokens + outputTokens;
   return {
     input_tokens: inputTokens,
-    cached_input_tokens: toNonNegativeInt(u?.cache_read_input_tokens),
+    cached_input_tokens: cachedInputTokens,
     output_tokens: outputTokens,
     reasoning_output_tokens: 0,
     total_tokens: totalTokens,

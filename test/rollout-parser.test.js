@@ -874,7 +874,8 @@ test("parseOpencodeIncremental ingests sqlite rows when message files are absent
     assert.equal(queued.length, 1);
     assert.equal(queued[0].source, "opencode");
     assert.equal(queued[0].model, "gpt-5");
-    assert.equal(queued[0].total_tokens, 18);
+    // total = input(10) + cacheWrite(5) + cached(3) + output(2) + reasoning(1)
+    assert.equal(queued[0].total_tokens, 21);
   } finally {
     await fs.rm(tmp, { recursive: true, force: true });
   }
@@ -1800,7 +1801,47 @@ test("parseClaudeIncremental counts cache creation as input and cache read separ
     assert.equal(queued[0].input_tokens, 8);
     assert.equal(queued[0].cached_input_tokens, 4);
     assert.equal(queued[0].output_tokens, 2);
-    assert.equal(queued[0].total_tokens, 10);
+    // total includes cache-read so long Claude sessions do not under-count
+    // (input 5 + cache_creation 3 + cache_read 4 + output 2 = 14).
+    assert.equal(queued[0].total_tokens, 14);
+  } finally {
+    await fs.rm(tmp, { recursive: true, force: true });
+  }
+});
+
+test("parseClaudeIncremental total_tokens includes cache_read (Opus long-session regression)", async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "vibescore-claude-"));
+  try {
+    const claudePath = path.join(tmp, "agent-claude.jsonl");
+    const queuePath = path.join(tmp, "queue.jsonl");
+    const cursors = { version: 1, files: {}, updatedAt: null };
+
+    // Realistic Claude Opus bucket: tiny input, huge cache_read, modest output.
+    // Prior parser computed total = input + cache_creation + output and missed
+    // the ~99% cache-read slice, causing dashboards to under-count by ~95%.
+    const lines = [
+      buildClaudeUsageLine({
+        ts: "2026-04-23T11:00:00.000Z",
+        input: 321906,
+        output: 224178,
+        cacheCreation: 923000,
+        cacheRead: 97255588,
+      }),
+    ];
+    await fs.writeFile(claudePath, lines.join("\n") + "\n", "utf8");
+
+    const res = await parseClaudeIncremental({
+      projectFiles: [{ path: claudePath, source: "claude" }],
+      cursors,
+      queuePath,
+    });
+    assert.equal(res.filesProcessed, 1);
+
+    const queued = await readJsonLines(queuePath);
+    assert.equal(queued.length, 1);
+    assert.equal(queued[0].cached_input_tokens, 97255588);
+    // Expected total: input(321906) + cache_creation(923000) + cache_read(97255588) + output(224178)
+    assert.equal(queued[0].total_tokens, 321906 + 923000 + 97255588 + 224178);
   } finally {
     await fs.rm(tmp, { recursive: true, force: true });
   }
