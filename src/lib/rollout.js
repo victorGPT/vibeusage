@@ -246,6 +246,8 @@ async function parseClaudeIncremental({
     const prev = cursors.files[key] || null;
     const inode = st.ino || 0;
     const startOffset = prev && prev.inode === inode ? prev.offset || 0 : 0;
+    const priorSeenIds =
+      prev && prev.inode === inode && Array.isArray(prev.seenIds) ? prev.seenIds : [];
 
     const projectContext = projectEnabled
       ? await resolveProjectContextForFile({
@@ -269,11 +271,13 @@ async function parseClaudeIncremental({
       projectTouchedBuckets,
       projectRef,
       projectKey,
+      priorSeenIds,
     });
 
     cursors.files[key] = {
       inode,
       offset: result.endOffset,
+      seenIds: result.seenIds,
       updatedAt: new Date().toISOString(),
     };
 
@@ -778,6 +782,8 @@ async function parseRolloutFile({
   return { endOffset, lastTotal: totals, lastModel: model, eventsAggregated };
 }
 
+const CLAUDE_SEEN_IDS_LIMIT = 500;
+
 async function parseClaudeFile({
   filePath,
   startOffset,
@@ -788,12 +794,18 @@ async function parseClaudeFile({
   projectTouchedBuckets,
   projectRef,
   projectKey,
+  priorSeenIds,
 }) {
+  const seenOrder = Array.isArray(priorSeenIds) ? priorSeenIds.slice() : [];
+  const seenSet = new Set(seenOrder);
+
   const st = await fs.stat(filePath).catch(() => null);
-  if (!st || !st.isFile()) return { endOffset: startOffset, eventsAggregated: 0 };
+  if (!st || !st.isFile()) {
+    return { endOffset: startOffset, eventsAggregated: 0, seenIds: seenOrder };
+  }
 
   const endOffset = st.size;
-  if (startOffset >= endOffset) return { endOffset, eventsAggregated: 0 };
+  if (startOffset >= endOffset) return { endOffset, eventsAggregated: 0, seenIds: seenOrder };
 
   const stream = fssync.createReadStream(filePath, { encoding: "utf8", start: startOffset });
   const rl = readline.createInterface({ input: stream, crlfDelay: Infinity });
@@ -810,6 +822,12 @@ async function parseClaudeFile({
 
     const usage = obj?.message?.usage || obj?.usage;
     if (!usage || typeof usage !== "object") continue;
+
+    // Claude Code writes the same assistant message multiple times in the session log
+    // (same `message.id` / `requestId`, different outer `uuid`). Aggregate once per
+    // upstream Anthropic response to avoid multi-counting token usage.
+    const dedupeId = obj?.message?.id || obj?.requestId || null;
+    if (dedupeId && seenSet.has(dedupeId)) continue;
 
     const model = normalizeModelInput(obj?.message?.model || obj?.model) || DEFAULT_MODEL;
     const tokenTimestamp = typeof obj?.timestamp === "string" ? obj.timestamp : null;
@@ -835,12 +853,20 @@ async function parseClaudeFile({
       addTotals(projectBucket.totals, delta);
       projectTouchedBuckets.add(projectBucketKey(projectKey, source, bucketStart));
     }
+    if (dedupeId) {
+      seenSet.add(dedupeId);
+      seenOrder.push(dedupeId);
+    }
     eventsAggregated += 1;
   }
 
   rl.close();
   stream.close?.();
-  return { endOffset, eventsAggregated };
+  const trimmedSeenIds =
+    seenOrder.length > CLAUDE_SEEN_IDS_LIMIT
+      ? seenOrder.slice(seenOrder.length - CLAUDE_SEEN_IDS_LIMIT)
+      : seenOrder;
+  return { endOffset, eventsAggregated, seenIds: trimmedSeenIds };
 }
 
 async function parseKimiFile({
