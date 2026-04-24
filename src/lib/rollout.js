@@ -2470,4 +2470,13 @@ module.exports = {
   bucketKey,
   enqueueTouchedBuckets,
   toUtcHalfHourStart,
+  // Exported for the token-conservation property test (see
+  // test/parser-total-conservation.test.js and AGENTS.md "新 AI CLI Source
+  // 接入 Checklist"). If you add a new normalize<Source>Usage function,
+  // export it here so the conservation test covers it automatically.
+  normalizeUsage,
+  normalizeClaudeUsage,
+  normalizeGeminiTokens,
+  normalizeKimiUsage,
+  normalizeOpencodeTokens,
 };
