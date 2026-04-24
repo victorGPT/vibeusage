@@ -39,7 +39,7 @@ export function Text({
   }
   const toneClass = TONE[tone] ?? TONE["ink-text"];
   const glowClass = glow ? "glow-text" : "";
-  const finalClass = `${sizeClass} ${toneClass} ${glowClass} ${className ?? ""}`.trim();
+  const finalClass = `${sizeClass} ${toneClass} ${glowClass} ${className}`.trim();
   return (
     <Comp className={finalClass} {...props}>
       {children}
