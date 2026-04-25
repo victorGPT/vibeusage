@@ -372,6 +372,15 @@ export function DashboardView(props) {
                   metrics={metricsRows}
                   showSummary={period === "total"}
                   useSummaryLayout
+                  weight="primary"
+                  stamped={screenshotMode}
+                  stampHandle={identityDisplayName}
+                  stampPeriod={
+                    period
+                      ? String(period).toUpperCase() +
+                        (rangeLabel ? ` · ${rangeLabel}` : "")
+                      : undefined
+                  }
                   summaryLabel={summaryLabel}
                   summaryValue={summaryValue}
                   summaryCostValue={summaryCostValue}

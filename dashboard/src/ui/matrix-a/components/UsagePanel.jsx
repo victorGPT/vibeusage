@@ -48,6 +48,11 @@ export const UsagePanel = React.memo(function UsagePanel({
   summaryScrambleDurationMs = 2200,
   hideHeader = false,
   className = "",
+  weight = "secondary",
+  stamped = false,
+  stampHandle,
+  stampPeriod,
+  stampLogo,
 }) {
   const tabs = normalizePeriods(periods);
   const toggleLabel = breakdownCollapsed ? expandLabel : collapseLabel;
@@ -114,7 +119,15 @@ export const UsagePanel = React.memo(function UsagePanel({
           .filter(Boolean);
 
   return (
-    <AsciiBox title={title} className={className}>
+    <AsciiBox
+      title={title}
+      className={className}
+      weight={weight}
+      stamped={stamped}
+      stampHandle={stampHandle}
+      stampPeriod={stampPeriod}
+      stampLogo={stampLogo}
+    >
       {!hideHeader ? (
         <div className="flex flex-wrap items-center justify-between border-b border-ink-faint mb-3 pb-2 gap-4 px-2">
           <div className="flex flex-wrap gap-4">

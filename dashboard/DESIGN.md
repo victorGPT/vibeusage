@@ -220,17 +220,45 @@ All respect `prefers-reduced-motion: reduce` and `screenshot-capture` mode.
 ### `<Panel>`
 
 ```jsx
-<Panel variant="ascii" tone="default" title="..." subtitle="...">
+<Panel
+  variant="ascii"
+  weight="primary"
+  tone="default"
+  stamped
+  stampHandle="vibeuser"
+  stampPeriod="WEEK · 2025-W52"
+  title="..."
+  subtitle="..."
+>
   {children}
 </Panel>
 ```
 
-| Prop       | Values                          | Default     |
-| ---------- | ------------------------------- | ----------- |
-| `variant`  | `ascii` \| `plain` \| `bare`    | `plain`     |
-| `tone`     | `default` \| `strong`           | `default`   |
-| `title`    | string \| ReactNode             | —           |
-| `subtitle` | string \| ReactNode             | —           |
+| Prop          | Values                                       | Default      |
+| ------------- | -------------------------------------------- | ------------ |
+| `variant`     | `ascii` \| `plain` \| `bare`                 | `plain`      |
+| `weight`      | `primary` \| `secondary` \| `tertiary`       | `secondary`  |
+| `tone`        | `default` \| `strong`                        | `default`    |
+| `stamped`     | `boolean` — show corner stamps               | `false`      |
+| `stampHandle` | string — `@HANDLE` upper-left corner stamp   | —            |
+| `stampPeriod` | string — period label upper-right stamp      | —            |
+| `stampLogo`   | string — lower-right brand stamp             | `vibeusage.cc` |
+| `title`       | string \| ReactNode                          | —            |
+| `subtitle`    | string \| ReactNode                          | —            |
+
+**Weight ladder** (DESIGN.md §6 v3):
+- `primary` — double-line ASCII (`╔ ╗ ╚ ╝ ═ ║`), frame `text-ink`, `shadow-glow-sm`. Reserved for **the** hero panel of any view (one per route).
+- `secondary` — default single-line (`┌ ┐ └ ┘ ─ │`), `text-ink-muted`. The everyday panel.
+- `tertiary` — dotted (`·`), `text-ink-faint`. Stacked / supporting / footer panels.
+
+Use **at most one** `primary` per visible viewport. Two primaries cancel each other out.
+
+**Stamping** is screenshot armor. When `stamped` is on, the panel renders three corner labels so a single-panel crop is self-explanatory:
+- upper-left: `@{handle}` — owner identity
+- upper-right: `{period}` — time scope (e.g. `WEEK · 2025-W52`)
+- lower-right: `{logo}` — origin watermark, defaults to `vibeusage.cc`
+
+Stamps use `text-micro` `tracking-caps` `text-ink-muted/faint` so they read as instrumentation, not as decoration.
 
 - `ascii`: ASCII box drawing + corner-cross (signature).
 - `plain`: 1px ink-line border + surface-raised bg + backdrop blur.
