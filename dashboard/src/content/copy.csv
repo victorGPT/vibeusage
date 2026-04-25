@@ -400,6 +400,8 @@ live_sniffer.event.capture,ui,LiveSniffer,LiveSniffer,event,"> CAPTURE: +128 NEU
 keyboard.cheatsheet.title,ui,KeyboardCheatsheet,KeyboardCheatsheet,title,"keymap.help",,active
 keyboard.cheatsheet.dismiss_hint,ui,KeyboardCheatsheet,KeyboardCheatsheet,hint,"esc · close",,active
 keyboard.cheatsheet.aria_label,ui,KeyboardCheatsheet,KeyboardCheatsheet,aria_label,"Keyboard shortcuts",,active
+keyboard.cheatsheet.close_label,ui,KeyboardCheatsheet,KeyboardCheatsheet,close_button,"[ × ]",,active
+keyboard.cheatsheet.close_aria,ui,KeyboardCheatsheet,KeyboardCheatsheet,close_aria,"Close shortcuts",,active
 keyboard.cheatsheet.footer_note,ui,KeyboardCheatsheet,KeyboardCheatsheet,note,"// single-key bindings · ignored while typing in inputs",,active
 keyboard.cheatsheet.row.toggle,ui,KeyboardCheatsheet,KeyboardCheatsheet,row,"toggle this cheatsheet",,active
 keyboard.cheatsheet.row.day,ui,KeyboardCheatsheet,KeyboardCheatsheet,row,"switch to DAY",,active

@@ -1286,10 +1286,13 @@ export function DashboardPage({
 
   // Global keybind layer — DESIGN.md §11. Disabled in screenshot mode and
   // before the boot screen finishes (handlers may not be ready).
+  // While the cheatsheet is open the modal owns the keyboard: only ? and esc
+  // route through (toggle / close); period / refresh / share are silenced so
+  // they don't bleed past the overlay.
   useGlobalKeybinds({
-    onTogglePeriod: setSelectedPeriod,
-    onRefresh: refreshAll,
-    onShare: handleShareToX,
+    onTogglePeriod: cheatsheetOpen ? undefined : setSelectedPeriod,
+    onRefresh: cheatsheetOpen ? undefined : refreshAll,
+    onShare: cheatsheetOpen ? undefined : handleShareToX,
     onToggleCheatsheet: () => setCheatsheetOpen((o) => !o),
     onCloseCheatsheet: () => setCheatsheetOpen(false),
     enabled: booted && !screenshotMode,
