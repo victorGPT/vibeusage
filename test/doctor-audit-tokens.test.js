@@ -110,6 +110,41 @@ test("runAudit flags drift when DB totals disagree with local ground truth", asy
   });
 });
 
+test("runAudit includes subagent jsonl files nested under <session>/subagents/", async () => {
+  await withTempDir(async (dir) => {
+    const projects = path.join(dir, "projects");
+    const sessionDir = path.join(projects, "proj", "sess-1", "subagents");
+    await fs.mkdir(sessionDir, { recursive: true });
+    const mainJsonl = path.join(projects, "proj", "session.jsonl");
+    const subJsonl = path.join(sessionDir, "agent-abc.jsonl");
+
+    const now = new Date();
+    const y = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 1));
+    const yIso = `${y.toISOString().slice(0, 10)}T10:00:00.000Z`;
+    const day = yIso.slice(0, 10);
+
+    await fs.writeFile(
+      mainJsonl,
+      `${assistantLine({ ts: yIso, messageId: "main_1", input: 1, cr: 9, output: 0 })}\n`,
+      "utf8",
+    );
+    await fs.writeFile(
+      subJsonl,
+      `${assistantLine({ ts: yIso, messageId: "sub_1", input: 100, cr: 900, output: 0 })}\n`,
+      "utf8",
+    );
+
+    const dbJson = JSON.stringify([{ day, tokens: 1010 }]);
+    const res = runAudit({ days: 3, threshold: 5, dbJson, projectsDir: projects });
+
+    assert.equal(res.ok, true);
+    assert.equal(res.uniqueMessages, 2, "main + subagent both counted");
+    const row = res.rows.find((r) => r.day === day);
+    assert.equal(row.truth, 1010, "subagent token included in truth");
+    assert.equal(res.exceedsThreshold, false);
+  });
+});
+
 test("runAudit returns an error shape when no sessions are available", async () => {
   await withTempDir(async (dir) => {
     const res = runAudit({

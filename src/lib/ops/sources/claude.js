@@ -11,14 +11,25 @@ module.exports = {
   },
   walkSessions({ root }) {
     if (!fs.existsSync(root)) return [];
+    // Recurse: Claude Code writes the main thread under
+    // `projects/<project>/<session>.jsonl` AND subagent threads under
+    // `projects/<project>/<sessionId>/subagents/agent-*.jsonl`. Subagents
+    // burn real Anthropic tokens, so the audit must include them. Sync's
+    // walkClaudeProjects (rollout.js) already recurses; this mirrors it.
     const out = [];
-    for (const entry of fs.readdirSync(root, { withFileTypes: true })) {
-      if (!entry.isDirectory()) continue;
-      const dir = path.join(root, entry.name);
-      for (const f of fs.readdirSync(dir, { withFileTypes: true })) {
-        if (!f.isFile()) continue;
-        if (!f.name.endsWith(".jsonl")) continue;
-        out.push(path.join(dir, f.name));
+    const stack = [root];
+    while (stack.length) {
+      const dir = stack.pop();
+      let entries;
+      try {
+        entries = fs.readdirSync(dir, { withFileTypes: true });
+      } catch (_err) {
+        continue;
+      }
+      for (const entry of entries) {
+        const p = path.join(dir, entry.name);
+        if (entry.isDirectory()) stack.push(p);
+        else if (entry.isFile() && entry.name.endsWith(".jsonl")) out.push(p);
       }
     }
     return out;
