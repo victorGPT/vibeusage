@@ -1,6 +1,7 @@
 import React, { Suspense, useState } from "react";
 import { DecodingText } from "../../foundation/DecodingText.jsx";
 import { MatrixButton } from "../../foundation/MatrixButton.jsx";
+import { Panel } from "../../foundation/Panel.jsx";
 import { GithubStar } from "../components/GithubStar.jsx";
 import { ClientLogoRow } from "../components/ClientLogoRow.jsx";
 
@@ -14,21 +15,6 @@ const LandingExtras = React.lazy(() =>
     default: mod.LandingExtras,
   })),
 );
-
-// Unified Matrix card shell (clean + consistent)
-function MatrixCard({ children, className = "", header }) {
-  return (
-    <section className={`relative overflow-hidden border border-ink-muted bg-surface-strong ${className}`}>
-      <div className="pointer-events-none absolute inset-0 fx-scanline opacity-25" />
-      {header ? (
-        <header className="relative border-b border-ink-line px-5 py-3">
-          <span className="font-mono text-caption uppercase tracking-label text-ink-text">{header}</span>
-        </header>
-      ) : null}
-      <div className="relative p-5">{children}</div>
-    </section>
-  );
-}
 
 // Terminal-style command display
 function TerminalCommand({ command, copied, onCopy, label, helper }) {
@@ -173,7 +159,7 @@ export function LandingView({
         )}
 
         {/* AI Agent Install Card */}
-        <MatrixCard className="w-full max-w-2xl" header={copy("landing.ai_agent.title")}>
+        <Panel variant="plain" tone="strong" className="w-full max-w-2xl overflow-hidden" title={copy("landing.ai_agent.title")}>
           <div className="space-y-4">
             <p className="text-body text-ink-text leading-relaxed">
               {copy("landing.ai_agent.description")}
@@ -186,10 +172,15 @@ export function LandingView({
               helper={copy("landing.ai_agent.helper")}
             />
           </div>
-        </MatrixCard>
+        </Panel>
 
         {/* Quick Install Card */}
-        <MatrixCard className="w-full max-w-2xl" header={copy("landing.install.title")}>
+        <Panel
+          variant="plain"
+          tone="strong"
+          className="w-full max-w-2xl overflow-hidden"
+          title={copy("landing.install.title")}
+        >
           <TerminalCommand
             command={installCommand}
             copied={installCopied}
@@ -197,10 +188,15 @@ export function LandingView({
             label={copy("landing.install.prompt")}
             helper={copy("landing.install.helper")}
           />
-        </MatrixCard>
+        </Panel>
 
         {/* Screenshot */}
-        <MatrixCard className="w-full max-w-4xl" header={copy("landing.screenshot.title")}>
+        <Panel
+          variant="plain"
+          tone="strong"
+          className="w-full max-w-4xl overflow-hidden"
+          title={copy("landing.screenshot.title")}
+        >
           <div className="relative overflow-hidden border border-ink-muted bg-surface/60">
             <img
               src="/landing-dashboard.jpg"
@@ -209,12 +205,16 @@ export function LandingView({
               loading="lazy"
               decoding="async"
             />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-ink-faint via-transparent to-transparent" />
           </div>
-        </MatrixCard>
+        </Panel>
 
         {/* Features Card */}
-        <MatrixCard className="w-full max-w-2xl" header={copy("landing.features.title")}>
+        <Panel
+          variant="plain"
+          tone="strong"
+          className="w-full max-w-2xl overflow-hidden"
+          title={copy("landing.features.title")}
+        >
           <div className="space-y-5">
             <h2 className="text-heading sm:text-display-3 font-bold text-ink tracking-tight">
               {copy("landing.seo.title")}
@@ -236,7 +236,7 @@ export function LandingView({
               </p>
             </div>
           </div>
-        </MatrixCard>
+        </Panel>
 
         {/* CTA */}
         <div className="w-full max-w-sm">
@@ -268,16 +268,6 @@ export function LandingView({
         </div>
       </main>
       
-      {/* Add scan animation keyframes */}
-      <style>{`
-        @keyframes scan {
-          0% { transform: translateX(-100%); }
-          100% { transform: translateX(100%); }
-        }
-        .animate-scan {
-          animation: scan 3s linear infinite;
-        }
-      `}</style>
     </div>
   );
 }
