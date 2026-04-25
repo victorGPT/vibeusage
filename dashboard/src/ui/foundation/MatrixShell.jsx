@@ -80,7 +80,7 @@ export function MatrixShell({
             aria-hidden="true"
             className="hidden md:inline font-mono tracking-caps text-ink-faint select-none"
           >
-            {"< ¬‿¬ >  // observing"}
+            {copy("shell.footer.observer_mascot")}
           </span>
           <div className="flex items-center gap-3">
             {footerRight || <span>{copy("shell.footer.neural_index")}</span>}

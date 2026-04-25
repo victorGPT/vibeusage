@@ -3,7 +3,7 @@ import { copy } from "../../../lib/copy";
 
 // Decorative katakana band — chrome only, no semantic meaning.
 // DESIGN.md §5 v3 deco-katakana. Removing it must not lose information.
-const KATAKANA_DECO = "カタカナ ベンチマーク プロトコル ▰▰▰▱▱▱";
+// Text source: copy.csv (system.header.katakana_deco) per AGENTS.md.
 
 export function SystemHeader({
   title = copy("system.header.title_default"),
@@ -28,7 +28,7 @@ export function SystemHeader({
           aria-hidden="true"
           className="deco-katakana hidden md:inline text-micro"
         >
-          {KATAKANA_DECO}
+          {copy("system.header.katakana_deco")}
         </span>
       </div>
       {time ? (

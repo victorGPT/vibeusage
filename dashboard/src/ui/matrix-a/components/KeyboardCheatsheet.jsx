@@ -1,18 +1,20 @@
 import React, { useEffect, useRef } from "react";
+import { copy } from "../../../lib/copy";
 
 // KeyboardCheatsheet — DESIGN.md §11 v3 keyboard layer.
 // Static ASCII-styled overlay. Renders only when open=true.
 // Esc / backdrop click both close (handled via onClose).
+// All visible text routed through copy.csv per AGENTS.md.
 
 const KEY_ROWS = [
-  ["?", "toggle this cheatsheet"],
-  ["d", "switch to DAY"],
-  ["w", "switch to WEEK"],
-  ["m", "switch to MONTH"],
-  ["t", "switch to TOTAL"],
-  ["r", "refresh data"],
-  ["s", "share screenshot to X"],
-  ["esc", "close overlays"],
+  ["?", "keyboard.cheatsheet.row.toggle"],
+  ["d", "keyboard.cheatsheet.row.day"],
+  ["w", "keyboard.cheatsheet.row.week"],
+  ["m", "keyboard.cheatsheet.row.month"],
+  ["t", "keyboard.cheatsheet.row.total"],
+  ["r", "keyboard.cheatsheet.row.refresh"],
+  ["s", "keyboard.cheatsheet.row.share"],
+  ["esc", "keyboard.cheatsheet.row.close"],
 ];
 
 export function KeyboardCheatsheet({ open, onClose }) {
@@ -34,7 +36,7 @@ export function KeyboardCheatsheet({ open, onClose }) {
       className="fixed inset-0 z-[60] flex items-center justify-center bg-surface/80 backdrop-blur-panel"
       role="dialog"
       aria-modal="true"
-      aria-label="Keyboard shortcuts"
+      aria-label={copy("keyboard.cheatsheet.aria_label")}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose?.();
       }}
@@ -46,14 +48,14 @@ export function KeyboardCheatsheet({ open, onClose }) {
       >
         <div className="flex items-baseline justify-between border-b border-ink-line pb-3 mb-4">
           <span className="text-heading text-ink uppercase tracking-label">
-            keymap.help
+            {copy("keyboard.cheatsheet.title")}
           </span>
           <span className="text-micro text-ink-muted uppercase tracking-caps">
-            esc · close
+            {copy("keyboard.cheatsheet.dismiss_hint")}
           </span>
         </div>
         <ul className="space-y-2">
-          {KEY_ROWS.map(([key, desc]) => (
+          {KEY_ROWS.map(([key, descKey]) => (
             <li
               key={key}
               className="flex items-center justify-between gap-4 text-data"
@@ -62,13 +64,13 @@ export function KeyboardCheatsheet({ open, onClose }) {
                 {key}
               </kbd>
               <span className="flex-1 text-ink-text uppercase tracking-label text-caption">
-                {desc}
+                {copy(descKey)}
               </span>
             </li>
           ))}
         </ul>
         <div className="mt-5 pt-3 border-t border-ink-faint text-micro text-ink-faint uppercase tracking-caps">
-          // single-key bindings · ignored while typing in inputs
+          {copy("keyboard.cheatsheet.footer_note")}
         </div>
       </div>
     </div>
