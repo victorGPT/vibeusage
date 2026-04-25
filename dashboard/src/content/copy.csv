@@ -185,7 +185,7 @@ dashboard.cost_breakdown.footer,ui,CostAnalysisModal,CostAnalysisModal,footer,"A
 trend.chart.unit_label,ui,TrendChart,TrendChart,unit_label,"TKNS",,active
 trend.chart.left_label,ui,TrendChart,TrendChart,left_label,"T-24H",,active
 trend.chart.right_label,ui,TrendChart,TrendChart,right_label,"Realtime_Flow",,active
-trend.chart.empty,ui,TrendChart,TrendChart,empty_state,"No trend data.",,active
+trend.chart.empty,ui,TrendChart,TrendChart,empty_state,"// trend ▒▒▒ awaiting_sync",,active
 trend.chart.peak,ui,TrendChart,TrendChart,peak_label,"Peak: {{value}} {{unit}}",,active
 
 trend.monitor.label,ui,TrendMonitor,TrendMonitor,label,"TREND",,active
@@ -224,7 +224,7 @@ trend.monitor.month.nov,ui,TrendMonitor,TrendMonitor,month_label,"NOV",,active
 trend.monitor.month.dec,ui,TrendMonitor,TrendMonitor,month_label,"DEC",,active
 
 heatmap.aria_label,ui,ActivityHeatmap,ActivityHeatmap,aria_label,"Activity heatmap",,active
-heatmap.empty,ui,ActivityHeatmap,ActivityHeatmap,empty_state,"No activity data yet.",,active
+heatmap.empty,ui,ActivityHeatmap,ActivityHeatmap,empty_state,"// activity ▒▒▒ awaiting_sync",,active
 heatmap.legend.less,ui,ActivityHeatmap,ActivityHeatmap,legend_less,"Less",,active
 heatmap.legend.more,ui,ActivityHeatmap,ActivityHeatmap,legend_more,"More",,active
 heatmap.legend.utc,ui,ActivityHeatmap,ActivityHeatmap,legend_utc,"UTC",,active
@@ -370,7 +370,7 @@ dashboard.activity.subtitle,dashboard,DashboardPage,AsciiBox,subtitle,"52W_LOCAL
 
 dashboard.daily.title,dashboard,DashboardPage,AsciiBox,title,"DETAILS",,active
 dashboard.daily.subtitle,dashboard,DashboardPage,AsciiBox,subtitle,"Sortable",,active
-dashboard.daily.empty,dashboard,DashboardPage,AsciiBox,empty_state,"No data yet. Use your AI CLI then run {{cmd}}.",,active
+dashboard.daily.empty,dashboard,DashboardPage,AsciiBox,empty_state,"// no_data ▒▒▒ run {{cmd}} to sync",,active
 
 dashboard.identity.title,dashboard,DashboardPage,IdentityCard,title,"Identity_Core",,active
 dashboard.identity.subtitle,dashboard,DashboardPage,IdentityCard,subtitle,"Authorized",,active
