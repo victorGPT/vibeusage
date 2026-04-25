@@ -55,7 +55,9 @@ import { ActivityHeatmap } from "../ui/matrix-a/components/ActivityHeatmap.jsx";
 import { BootScreen } from "../ui/matrix-a/components/BootScreen.jsx";
 import { GithubStar } from "../ui/matrix-a/components/GithubStar.jsx";
 import { ProjectUsagePanel } from "../ui/matrix-a/components/ProjectUsagePanel.jsx";
+import { KeyboardCheatsheet } from "../ui/matrix-a/components/KeyboardCheatsheet.jsx";
 import { DashboardView } from "../ui/matrix-a/views/DashboardView.jsx";
+import { useGlobalKeybinds } from "../hooks/use-global-keybinds";
 
 const PERIODS = ["day", "week", "month", "total"];
 const DETAILS_DATE_KEYS = new Set(["day", "hour", "month"]);
@@ -432,6 +434,7 @@ export function DashboardPage({
   const mockNow = useMemo(() => getMockNow(), []);
   const cacheKey = publicMode ? null : auth?.userId || auth?.email || null;
   const [selectedPeriod, setSelectedPeriod] = useState("week");
+  const [cheatsheetOpen, setCheatsheetOpen] = useState(false);
   const period = screenshotMode ? "total" : selectedPeriod;
   const range = useMemo(
     () =>
@@ -1281,6 +1284,17 @@ export function DashboardPage({
     </div>
   );
 
+  // Global keybind layer — DESIGN.md §11. Disabled in screenshot mode and
+  // before the boot screen finishes (handlers may not be ready).
+  useGlobalKeybinds({
+    onTogglePeriod: setSelectedPeriod,
+    onRefresh: refreshAll,
+    onShare: handleShareToX,
+    onToggleCheatsheet: () => setCheatsheetOpen((o) => !o),
+    onCloseCheatsheet: () => setCheatsheetOpen(false),
+    enabled: booted && !screenshotMode,
+  });
+
   if (!booted) {
     return <BootScreen onSkip={() => setBooted(true)} />;
   }
@@ -1290,6 +1304,7 @@ export function DashboardPage({
   const showAuthGate = requireAuthGate && !publicMode;
 
   return (
+    <>
     <DashboardView
       copy={copy}
       headerStatus={headerStatus}
@@ -1389,5 +1404,10 @@ export function DashboardPage({
       costModalOpen={costModalOpen}
       closeCostModal={closeCostModal}
     />
+    <KeyboardCheatsheet
+      open={cheatsheetOpen}
+      onClose={() => setCheatsheetOpen(false)}
+    />
+    </>
   );
 }

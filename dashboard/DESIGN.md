@@ -437,3 +437,30 @@ Planned extensions (not in v1):
 4. Use it.
 5. Never hard-code a new value in a component, not even once.
 
+---
+
+## 11. Keyboard Layer (v3)
+
+Hacker / cyberpunk register expects power-user keyboard control. The
+dashboard ships single-key bindings via `useGlobalKeybinds` (see
+`dashboard/src/hooks/use-global-keybinds.ts`).
+
+| Key   | Action                                              |
+| ----- | --------------------------------------------------- |
+| `?`   | Toggle keyboard cheatsheet overlay (`<KeyboardCheatsheet>`) |
+| `d`   | Switch period to DAY                                |
+| `w`   | Switch period to WEEK                               |
+| `m`   | Switch period to MONTH                              |
+| `t`   | Switch period to TOTAL                              |
+| `r`   | Refresh dashboard data                              |
+| `s`   | Trigger share-to-X screenshot flow                  |
+| `esc` | Close any open overlay                              |
+
+**Rules**:
+
+- All bindings are **single-key, no modifier**. Modified keys (`Cmd/Ctrl/Alt + X`) belong to the OS and the browser.
+- Bindings are **suppressed while a text input is focused** (input / textarea / select / contentEditable). Typing in the search bar does not trigger period switching.
+- The cheatsheet is the **only** in-app surface that documents these keys. There is no settings page for re-binding (this is a feature, not a missing piece — opinionated minimalism is part of the brand).
+- New bindings require a row in this table **and** a row in `KeyboardCheatsheet`'s `KEY_ROWS`. CI does not enforce parity yet — keep them in sync by hand.
+- `screenshot-capture` mode disables the layer (`enabled: !screenshotMode`).
+
