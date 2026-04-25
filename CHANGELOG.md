@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.6.2] - 2026-04-25
+
+### Fixed
+
+- **Claude audit no longer under-counts subagent tokens.** `src/lib/ops/sources/claude.js#walkSessions` only walked `~/.claude/projects/<project>/*.jsonl`, missing every Task/Agent thread Claude Code writes under `<sessionId>/subagents/agent-*.jsonl`. Subagents consume real Anthropic tokens, so doctor's `truth` column under-counted by 0.5%–11% per day (worst: 19.9M tokens / day). Sync's `walkClaudeProjects` already recursed, so the DB had the right numbers — the audit was comparing an incomplete `truth` against a correct `db`, producing phantom drift signals (e.g. 22.6% on 04-16, 22.5% on 04-17).
+- After the fix, `doctor --audit-tokens --source claude` scans 844 jsonl (was 161); `truth ≈ db` on every settled day in the 14-day window (04-13/15/18/22 sit at 0.0% drift; 04-14/16/19/20/23 ≤0.4%). Remaining drift on the current/previous day is sync lag, not a calculation bug.
+- Cross-checked against Claude Code itself: SDK `usage` JSON returned by `claude -p ... --fork-session` matches the same message's `usage` field in the written jsonl byte-for-byte (input / cache_creation / cache_read / output).
+
+### Notes
+
+- No parser formula or DB schema changed. Other sources (codex, opencode, gemini, kimi, hermes, openclaw) verified via filesystem inspection to lack nested subagent dirs, so they are unaffected.
+
 ## [0.6.1] - 2026-04-25
 
 ### Security
