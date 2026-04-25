@@ -1,7 +1,8 @@
-# VibeUsage Design System v1 — Operations Deck
+# VibeUsage Design System v3 — Retro-Cyberpunk Operations Deck
 
-**Status**: v1 · hard cut · **no backward compat**
-**Last updated**: 2026-04-23
+**Status**: v3 · hard cut · **no backward compat**
+**Last updated**: 2026-04-25
+**Heritage**: extends v1 Operations Deck (token SSOT, CI guardrail) with retro + cyberpunk material — see PRODUCT.md three-word brand: `hacker · 复古 · cyberpunk`.
 
 ---
 
@@ -85,6 +86,7 @@ hue except the arbitrary-use `gold` accent.
 
 | Token       | Size / LineHt / Tracking / Weight / Case    | Usage                                       |
 | ----------- | ------------------------------------------- | ------------------------------------------- |
+| `display-0` | 96 / 0.95 / -0.03em / 900 / none            | **outsized hero** (dashboard total, CORE_INDEX, X-screenshot moment) |
 | `display-1` | 60 / 1.00 / -0.02em / 900 / none            | landing hero title                          |
 | `display-2` | 40 / 1.05 / -0.02em / 900 / none            | big number, screenshot title                |
 | `display-3` | 28 / 1.10 / -0.02em / 900 / none            | mid-size hero (leaderboard title, identity) |
@@ -184,6 +186,32 @@ No `glow-text-strong`. No ad-hoc `drop-shadow-[...]` / `shadow-[...]` in classNa
 
 Reserved for **landing page only**. Removed from dashboard routes. Always
 hidden in `screenshot-capture` mode.
+
+### v3 retro-cyberpunk fx layers
+
+Three new ambient layers, each load-bearing (carry signal, not decoration).
+All respect `prefers-reduced-motion: reduce` and `screenshot-capture` mode.
+
+| Class            | Effect                                                                | Where used                                       |
+| ---------------- | --------------------------------------------------------------------- | ------------------------------------------------ |
+| `fx-crt`         | Subtle screen-edge curvature (radial inner shadow) + phosphor warmth  | `<MatrixShell>` root, fixed full-bleed overlay   |
+| `fx-glitch`      | 2-frame RGB-shift jitter on hover or 7s-interval tick                 | `display-0` hero number, primary CTA on hover    |
+| `deco-katakana`  | Monospaced katakana band (`カタカナ ベンチマーク ...`), 1-line, low alpha | header right margin, section divider, panel chrome |
+
+`fx-crt` is **a single fixed overlay**, like `fx-scanline`. Never nested.
+
+`fx-glitch` triggers on:
+- `:hover` of an element it's attached to (manual user)
+- a 7-second `data-glitch-tick` event (rare ambient signal — only on `display-0`)
+
+`deco-katakana` uses font family `font-katakana` (defined below), is `text-ink-faint`, and never carries semantic meaning. If removed, no information is lost — purely chrome.
+
+### Font families
+
+| Family          | Stack                                                                             | Usage                                          |
+| --------------- | --------------------------------------------------------------------------------- | ---------------------------------------------- |
+| `font-mono`     | `Geist Mono` → ui-monospace fallbacks                                             | default for everything                         |
+| `font-katakana` | `Hiragino Sans` → `Yu Gothic` → `MS Gothic` → `Geist Mono` (latin glyphs fallback) | `deco-katakana` ONLY — never body / data / label |
 
 ---
 

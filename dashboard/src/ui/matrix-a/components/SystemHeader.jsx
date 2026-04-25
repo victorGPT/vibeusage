@@ -1,6 +1,10 @@
 import React from "react";
 import { copy } from "../../../lib/copy";
 
+// Decorative katakana band — chrome only, no semantic meaning.
+// DESIGN.md §5 v3 deco-katakana. Removing it must not lose information.
+const KATAKANA_DECO = "カタカナ ベンチマーク プロトコル ▰▰▰▱▱▱";
+
 export function SystemHeader({
   title = copy("system.header.title_default"),
   signalLabel,
@@ -20,6 +24,12 @@ export function SystemHeader({
             {signalLabel}
           </span>
         ) : null}
+        <span
+          aria-hidden="true"
+          className="deco-katakana hidden md:inline text-micro"
+        >
+          {KATAKANA_DECO}
+        </span>
       </div>
       {time ? (
         <div className="text-ink font-bold text-body tracking-caps">{time}</div>

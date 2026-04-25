@@ -26,6 +26,7 @@ export function MatrixShell({
     >
       <MatrixRain />
       <div className="fx-scanline pointer-events-none fixed inset-0 z-50"></div>
+      <div className="fx-crt pointer-events-none fixed inset-0 z-40"></div>
 
       <div
         className={`relative z-10 flex flex-col min-h-screen app-shell-content ${contentClassName}`}

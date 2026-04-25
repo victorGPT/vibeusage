@@ -4,8 +4,10 @@ import React from "react";
 // Enforces typography tokens at the component boundary.
 
 const SIZE = {
+  "display-0": "text-display-0",
   "display-1": "text-display-1",
   "display-2": "text-display-2",
+  "display-3": "text-display-3",
   heading: "text-heading uppercase",
   body: "text-body",
   data: "text-data tabular-nums",

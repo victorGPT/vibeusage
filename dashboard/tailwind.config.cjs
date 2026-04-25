@@ -10,8 +10,19 @@ module.exports = {
     extend: {
       fontFamily: {
         mono: ['"Geist Mono"', ...defaultTheme.fontFamily.mono],
+        katakana: [
+          '"Hiragino Sans"',
+          '"Yu Gothic"',
+          '"MS Gothic"',
+          '"Geist Mono"',
+          ...defaultTheme.fontFamily.mono,
+        ],
       },
       fontSize: {
+        "display-0": [
+          "96px",
+          { lineHeight: "0.95", letterSpacing: "-0.03em", fontWeight: "900" },
+        ],
         "display-1": [
           "60px",
           { lineHeight: "1", letterSpacing: "-0.02em", fontWeight: "900" },

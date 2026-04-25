@@ -172,13 +172,13 @@ export const UsagePanel = React.memo(function UsagePanel({
         <div className="flex-1 flex flex-col items-center justify-center space-y-6 opacity-90 py-4">
           <div className="text-center relative">
             <div className="text-heading text-ink-text mb-2">{summaryLabel}</div>
-            <div className="text-display-2 md:text-display-1 font-black text-ink-bright tracking-tight tabular-nums leading-none glow-text select-none -translate-y-[5px]">
+            <div className="fx-glitch text-display-1 md:text-display-0 font-black text-ink-bright tracking-tight tabular-nums leading-none glow-text select-none -translate-y-[5px]">
               {summaryDisplay}
             </div>
             {summaryCostValue ? (
               <div className="flex items-center justify-center gap-3 mt-4 md:mt-6">
                 <span className="sr-only">{copy("usage.metric.total_cost")}</span>
-                <span className="text-heading md:text-display-3 font-bold text-gold leading-none drop-shadow-gold">
+                <span className="text-display-3 md:text-display-2 font-black text-gold leading-none drop-shadow-gold tabular-nums">
                   {summaryCostValue}
                 </span>
                 {onCostInfo ? (

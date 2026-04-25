@@ -190,6 +190,59 @@ body {
     background-size: 50px 50px;
   }
 
+  /* fx-crt — DESIGN.md §5 v3. Single fixed full-bleed overlay layer:
+   * radial inner shadow simulating CRT screen-edge curvature + phosphor warmth.
+   * Like fx-scanline, never nested. Pointer-events: none from caller. */
+  .fx-crt {
+    background:
+      radial-gradient(
+        ellipse at center,
+        transparent 55%,
+        rgba(0, 0, 0, 0.35) 100%
+      );
+    box-shadow:
+      inset 0 0 80px rgba(0, 255, 65, 0.04),
+      inset 0 0 160px rgba(0, 0, 0, 0.55);
+  }
+
+  /* fx-glitch — DESIGN.md §5 v3. 2-frame RGB-shift jitter on hover.
+   * Apply to display-0 hero numbers + primary CTAs.
+   * Respects prefers-reduced-motion via global rule below. */
+  .fx-glitch {
+    position: relative;
+    transition: text-shadow 160ms ease-out;
+  }
+  .fx-glitch:hover {
+    animation: fx-glitch-shift 360ms steps(2, end);
+    text-shadow:
+      -1px 0 rgba(255, 0, 64, 0.55),
+      1px 0 rgba(0, 200, 255, 0.55),
+      0 0 16px var(--ink-glow);
+  }
+
+  @keyframes fx-glitch-shift {
+    0%, 100% { transform: translate(0, 0); }
+    20% { transform: translate(-1px, 1px); }
+    40% { transform: translate(1px, -1px); }
+    60% { transform: translate(-1px, 0); }
+    80% { transform: translate(1px, 0); }
+  }
+
+  /* deco-katakana — DESIGN.md §5 v3. Monospaced katakana decorative band.
+   * Chrome only. Removing it must not lose information.
+   * Wrap content in a span with .deco-katakana; provide actual chars from
+   * copy.csv or hard-coded fallback (latin-only environments still render). */
+  .deco-katakana {
+    font-family: "Hiragino Sans", "Yu Gothic", "MS Gothic", "Geist Mono",
+      ui-monospace, monospace;
+    color: var(--ink-faint);
+    letter-spacing: 0.18em;
+    user-select: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: clip;
+  }
+
   /* Heatmap scrubber bar (functional indicator, not atmosphere). */
   .heatmap-scrollbar-track {
     height: 6px;
@@ -212,7 +265,8 @@ body {
 
 /* Screenshot mode — silence atmospheric layers for deterministic capture. */
 .screenshot-mode .fx-rain,
-.screenshot-mode .fx-scanline {
+.screenshot-mode .fx-scanline,
+.screenshot-mode .fx-crt {
   display: none !important;
 }
 
@@ -228,7 +282,8 @@ html.screenshot-capture * {
 }
 
 body.screenshot-capture .fx-scanline,
-body.screenshot-capture .fx-rain {
+body.screenshot-capture .fx-rain,
+body.screenshot-capture .fx-crt {
   opacity: 0 !important;
 }
 
@@ -237,5 +292,9 @@ body.screenshot-capture .fx-rain {
   .animate-spin,
   .animate-bounce {
     animation: none !important;
+  }
+  .fx-glitch:hover {
+    animation: none !important;
+    text-shadow: 0 0 16px var(--ink-glow) !important;
   }
 }
