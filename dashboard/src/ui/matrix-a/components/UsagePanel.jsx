@@ -130,7 +130,7 @@ export const UsagePanel = React.memo(function UsagePanel({
     >
       {!hideHeader ? (
         <div className="flex flex-wrap items-center justify-between border-b border-ink-faint mb-3 pb-2 gap-4 px-2">
-          <div className="overflow-x-auto no-scrollbar">
+          <div className="overflow-x-auto no-scrollbar min-w-0 max-w-full">
             <div className="flex gap-4">
               {tabs.map((p) => (
                 <Button
