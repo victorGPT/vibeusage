@@ -2,22 +2,15 @@ import { act, render } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { CostAnalysisModal } from "../CostAnalysisModal.jsx";
 
-it("invokes onClose when clicking the backdrop", async () => {
+it("invokes onClose when the user dismisses via Escape", async () => {
   const onClose = vi.fn();
   const user = userEvent.setup();
-  const { container } = render(
+  render(
     <CostAnalysisModal isOpen={true} onClose={onClose} fleetData={[]} />,
   );
 
-  const backdropSelector = '[data-cost-analysis-backdrop="true"]';
-  const backdrop = document.querySelector(backdropSelector) ?? container.firstElementChild;
-
-  if (!backdrop) {
-    throw new Error(`Expected backdrop element (${backdropSelector}) to exist.`);
-  }
-
   await act(async () => {
-    await user.click(backdrop);
+    await user.keyboard("{Escape}");
   });
 
   expect(onClose).toHaveBeenCalledTimes(1);

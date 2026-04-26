@@ -1,8 +1,12 @@
-import { Dialog } from "@base-ui/react/dialog";
 import React from "react";
 import { copy } from "../../../lib/copy";
 import { formatUsdCurrency, toFiniteNumber } from "../../../lib/format";
 import { AsciiBox } from "../../foundation/AsciiBox.jsx";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+} from "../../shadcn/dialog";
 
 function formatUsdValue(value) {
   if (!Number.isFinite(value)) return copy("shared.placeholder.short");
@@ -15,8 +19,6 @@ export const CostAnalysisModal = React.memo(function CostAnalysisModal({
   onClose,
   fleetData = [],
 }) {
-  if (!isOpen) return null;
-
   const percentSymbol = copy("shared.unit.percent");
   const calcPrefix = copy("dashboard.cost_breakdown.calc_prefix");
   const calcFallback = copy("dashboard.cost_breakdown.calc_dynamic");
@@ -51,77 +53,72 @@ export const CostAnalysisModal = React.memo(function CostAnalysisModal({
   const totalUsdLabel = formatUsdValue(totalUsd);
 
   return (
-    <Dialog.Root
-      open={isOpen}
-      onOpenChange={(open) => {
-        if (!open) onClose?.();
+    <Dialog
+      open={!!isOpen}
+      onOpenChange={(next) => {
+        if (!next) onClose?.();
       }}
     >
-      <Dialog.Portal>
-        <Dialog.Backdrop
-          className="fixed inset-0 z-[100] bg-surface/95 backdrop-blur-md"
-          data-cost-analysis-backdrop="true"
-        />
-        <Dialog.Viewport className="fixed inset-0 z-[101] flex items-center justify-center p-4">
-          <Dialog.Popup className="w-full max-w-2xl transform animate-in fade-in zoom-in duration-200">
-            <AsciiBox title={copy("dashboard.cost_breakdown.title")}>
-              <div className="space-y-8 py-4">
-                <div className="text-center pb-6 border-b border-ink-faint">
-                  <div className="text-caption text-ink-text uppercase mb-2 font-bold">
-                    {copy("dashboard.cost_breakdown.total_label")}
-                  </div>
-                  <div className="text-body font-black text-gold tracking-tight glow-text-gold">
-                    {totalUsdLabel}
-                  </div>
-                </div>
-
-                <div className="space-y-6 max-h-[45vh] overflow-y-auto no-scrollbar pr-2">
-                  {normalizedFleet.map((fleet, index) => (
-                    <div key={`${fleet.label}-${index}`} className="space-y-3">
-                      <div className="flex justify-between items-baseline border-b border-ink-faint pb-2">
-                        <span className="text-body font-black text-ink-bright uppercase tracking-caps">
-                          {fleet.label}
-                        </span>
-                        <span className="text-body font-bold text-gold">{fleet.usdLabel}</span>
-                      </div>
-                      <div className="grid grid-cols-1 gap-1.5">
-                        {fleet.models.map((model, modelIndex) => {
-                          const modelKey = model?.id || `${model.name}-${modelIndex}`;
-                          return (
-                            <div
-                              key={modelKey}
-                              className="flex justify-between text-caption text-ink-text"
-                            >
-                              <span>
-                                {model.name} ({model.shareLabel})
-                              </span>
-                              <span className="opacity-40">
-                                {calcPrefix} {model.calcValue}
-                              </span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="pt-6 border-t border-ink-faint flex justify-between items-center">
-                  <Dialog.Close
-                    className="text-caption font-bold uppercase text-ink border border-ink-muted px-6 py-2 hover:bg-ink hover:text-surface transition-all"
-                    type="button"
-                  >
-                    {copy("dashboard.cost_breakdown.close")}
-                  </Dialog.Close>
-                  <p className="text-caption text-ink-muted uppercase">
-                    {copy("dashboard.cost_breakdown.footer")}
-                  </p>
-                </div>
+      <DialogContent
+        aria-label={copy("dashboard.cost_breakdown.title")}
+        className="w-full max-w-2xl mx-4 bg-transparent border-0 p-0 shadow-none gap-0 block font-mono"
+      >
+        <AsciiBox title={copy("dashboard.cost_breakdown.title")}>
+          <div className="space-y-8 py-4">
+            <div className="text-center pb-6 border-b border-ink-faint">
+              <div className="text-caption text-ink-text uppercase mb-2 font-bold">
+                {copy("dashboard.cost_breakdown.total_label")}
               </div>
-            </AsciiBox>
-          </Dialog.Popup>
-        </Dialog.Viewport>
-      </Dialog.Portal>
-    </Dialog.Root>
+              <div className="text-body font-black text-gold tracking-tight glow-text-gold">
+                {totalUsdLabel}
+              </div>
+            </div>
+
+            <div className="space-y-6 max-h-[45vh] overflow-y-auto no-scrollbar pr-2">
+              {normalizedFleet.map((fleet, index) => (
+                <div key={`${fleet.label}-${index}`} className="space-y-3">
+                  <div className="flex justify-between items-baseline border-b border-ink-faint pb-2">
+                    <span className="text-body font-black text-ink-bright uppercase tracking-caps">
+                      {fleet.label}
+                    </span>
+                    <span className="text-body font-bold text-gold">{fleet.usdLabel}</span>
+                  </div>
+                  <div className="grid grid-cols-1 gap-1.5">
+                    {fleet.models.map((model, modelIndex) => {
+                      const modelKey = model?.id || `${model.name}-${modelIndex}`;
+                      return (
+                        <div
+                          key={modelKey}
+                          className="flex justify-between text-caption text-ink-text"
+                        >
+                          <span>
+                            {model.name} ({model.shareLabel})
+                          </span>
+                          <span className="opacity-40">
+                            {calcPrefix} {model.calcValue}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="pt-6 border-t border-ink-faint flex justify-between items-center">
+              <DialogClose
+                type="button"
+                className="text-caption font-bold uppercase text-ink border border-ink-muted px-6 py-2 hover:bg-ink hover:text-surface transition-all"
+              >
+                {copy("dashboard.cost_breakdown.close")}
+              </DialogClose>
+              <p className="text-caption text-ink-muted uppercase">
+                {copy("dashboard.cost_breakdown.footer")}
+              </p>
+            </div>
+          </div>
+        </AsciiBox>
+      </DialogContent>
+    </Dialog>
   );
 });
