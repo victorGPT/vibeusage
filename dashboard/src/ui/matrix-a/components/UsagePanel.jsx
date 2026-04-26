@@ -130,21 +130,23 @@ export const UsagePanel = React.memo(function UsagePanel({
     >
       {!hideHeader ? (
         <div className="flex flex-wrap items-center justify-between border-b border-ink-faint mb-3 pb-2 gap-4 px-2">
-          <div className="flex flex-wrap gap-4">
-            {tabs.map((p) => (
-              <Button
-                key={p.key}
-                type="button"
-                className={`text-caption uppercase font-bold ${
-                  period === p.key
-                    ? "text-ink-bright border-b-2 border-ink"
-                    : "text-ink-text"
-                }`}
-                onClick={() => onPeriodChange?.(p.key)}
-              >
-                {p.label}
-              </Button>
-            ))}
+          <div className="overflow-x-auto no-scrollbar">
+            <div className="flex gap-4">
+              {tabs.map((p) => (
+                <Button
+                  key={p.key}
+                  type="button"
+                  className={`text-caption uppercase font-bold ${
+                    period === p.key
+                      ? "text-ink-bright border-b-2 border-ink"
+                      : "text-ink-text"
+                  }`}
+                  onClick={() => onPeriodChange?.(p.key)}
+                >
+                  {p.label}
+                </Button>
+              ))}
+            </div>
           </div>
           {onRefresh || statusLabel ? (
             <div className="flex items-center gap-3">
@@ -238,7 +240,7 @@ export const UsagePanel = React.memo(function UsagePanel({
                     <span className="text-caption text-ink-text uppercase mb-1">
                       {row.label}
                     </span>
-                    <span className="text-body font-bold text-ink tracking-tight">
+                    <span className="text-display-3 md:text-body font-bold text-ink tracking-tight">
                       {row.value}
                     </span>
                   </div>
@@ -256,7 +258,7 @@ export const UsagePanel = React.memo(function UsagePanel({
             >
               <div className="text-caption uppercase text-ink-text mb-2">{row.label}</div>
               <div
-                className={`text-body font-black text-ink-bright glow-text ${
+                className={`text-display-3 md:text-body font-black text-ink-bright glow-text ${
                   row.valueClassName || ""
                 }`}
               >

@@ -205,6 +205,14 @@ body {
       inset 0 0 160px rgba(0, 0, 0, 0.55);
   }
 
+  @media (max-width: 767px) {
+    .fx-crt {
+      box-shadow:
+        inset 0 0 80px rgba(0, 255, 65, 0.025),
+        inset 0 0 160px rgba(0, 0, 0, 0.55);
+    }
+  }
+
   /* fx-glitch — DESIGN.md §5 v3. 2-frame RGB-shift jitter on hover.
    * Apply to display-0 hero numbers + primary CTAs.
    * Respects prefers-reduced-motion via global rule below. */
