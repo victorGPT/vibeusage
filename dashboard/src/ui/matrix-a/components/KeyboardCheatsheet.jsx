@@ -1,9 +1,15 @@
-import React, { useEffect, useRef } from "react";
+import React from "react";
 import { copy } from "../../../lib/copy";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogTitle,
+} from "../../shadcn/dialog";
 
 // KeyboardCheatsheet — DESIGN.md §11 v3 keyboard layer.
-// Static ASCII-styled overlay. Renders only when open=true.
-// Esc / backdrop click both close (handled via onClose).
+// shadcn Dialog handles focus trap, initial focus, focus restore, Esc, and
+// outside-click dismissal natively — no hand-rolled a11y wiring required.
 // All visible text routed through copy.csv per AGENTS.md.
 
 const KEY_ROWS = [
@@ -18,53 +24,21 @@ const KEY_ROWS = [
 ];
 
 export function KeyboardCheatsheet({ open, onClose }) {
-  const dialogRef = useRef(null);
-  const closeButtonRef = useRef(null);
-
-  useEffect(() => {
-    if (!open) return undefined;
-    const previouslyFocused = document.activeElement;
-    // Move initial focus onto the close button so the only focusable
-    // control inside the modal owns focus from the start (a11y review).
-    closeButtonRef.current?.focus();
-    return () => {
-      if (previouslyFocused instanceof HTMLElement) previouslyFocused.focus();
-    };
-  }, [open]);
-
-  // Focus trap: with a single focusable control inside the dialog, any Tab /
-  // Shift+Tab must keep focus pinned to the close button. Without this, a
-  // keyboard user tabs out of the aria-modal back into the page underneath
-  // (PR review red flag).
-  function handleDialogKeyDown(event) {
-    if (event.key === "Tab") {
-      event.preventDefault();
-      closeButtonRef.current?.focus();
-    }
-  }
-
-  if (!open) return null;
-
   return (
-    <div
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-surface/80 backdrop-blur-panel"
-      role="dialog"
-      aria-modal="true"
-      aria-label={copy("keyboard.cheatsheet.aria_label")}
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose?.();
+    <Dialog
+      open={!!open}
+      onOpenChange={(next) => {
+        if (!next) onClose?.();
       }}
     >
-      <div
-        ref={dialogRef}
-        tabIndex={-1}
-        onKeyDown={handleDialogKeyDown}
-        className="relative w-full max-w-md mx-4 bg-surface-strong border border-ink shadow-glow font-mono p-6 outline-none"
+      <DialogContent
+        aria-label={copy("keyboard.cheatsheet.aria_label")}
+        className="max-w-md mx-4 bg-surface-strong border-ink font-mono gap-0 block"
       >
         <div className="flex items-baseline justify-between border-b border-ink-line pb-3 mb-4">
-          <span className="text-heading text-ink uppercase tracking-label">
+          <DialogTitle className="text-heading text-ink uppercase tracking-label font-normal">
             {copy("keyboard.cheatsheet.title")}
-          </span>
+          </DialogTitle>
           <div className="flex items-center gap-3">
             <span
               aria-hidden="true"
@@ -72,15 +46,12 @@ export function KeyboardCheatsheet({ open, onClose }) {
             >
               {copy("keyboard.cheatsheet.dismiss_hint")}
             </span>
-            <button
-              ref={closeButtonRef}
-              type="button"
-              onClick={onClose}
+            <DialogClose
               aria-label={copy("keyboard.cheatsheet.close_aria")}
               className="text-caption text-ink uppercase tracking-caps border border-ink-muted bg-surface px-2 py-0.5 hover:bg-ink-faint focus:outline-none focus-visible:border-ink"
             >
               {copy("keyboard.cheatsheet.close_label")}
-            </button>
+            </DialogClose>
           </div>
         </div>
         <ul className="space-y-2">
@@ -101,7 +72,7 @@ export function KeyboardCheatsheet({ open, onClose }) {
         <div className="mt-5 pt-3 border-t border-ink-faint text-micro text-ink-faint uppercase tracking-caps">
           {copy("keyboard.cheatsheet.footer_note")}
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }
