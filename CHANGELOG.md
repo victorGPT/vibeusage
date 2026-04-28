@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.6.3] - 2026-04-28
+
+### Fixed
+
+- **`sync.lock` orphan deadlock.** The pre-fix `openLock` used `fs.open(path, "wx")` and never wrote a payload — when a sync died abnormally (SIGKILL, system restart, panic before `release()`), the leftover zero-byte lock file froze every subsequent run with `Another sync is already running.` until the operator manually `rm`'d it. Reproduced in the wild: a 01:50 UTC crash blocked all auto-sync attempts for ~24h, so 04-27 reached the dashboard with `db=0` while local jsonl had 339 sessions. `openLock` now uses [`proper-lockfile`](https://www.npmjs.com/package/proper-lockfile) — mkdir-based atomic acquire + 10s heartbeat / 60s stale window. Holders that die abnormally release the lock automatically once the heartbeat goes stale; no operator action needed.
+- **Pre-fix legacy lock files migrate safely.** Earlier installs left zero-byte `sync.lock` *files* on disk. `proper-lockfile` expects a directory at the same path, so naive upgrade would crash with `mkdir EEXIST → rmdir ENOTDIR`. New code lstats the path on entry: directory ⇒ already migrated; file with PID payload + dead pid ⇒ unlink and migrate; file with PID payload + alive pid ⇒ yield (an old-format sync may genuinely still be running); zero-byte / corrupt payload ⇒ yield with a stderr notice including the exact `rm` command (refusing to auto-delete a file we cannot prove orphaned, since a still-running legacy holder owns that exact file).
+
+### Added
+
+- **`vibeusage sync --rebuild=<source>`** (sources: `claude | codex | every-code | gemini | kimi | opencode | hermes | openclaw`). Atomically scrubs every cursor surface that participates in re-aggregation for the named source, then drains: `cursors.files` entries under the source's session root, `cursors.hourly.buckets` keyed `<source>|...`, `cursors.hourly.groupQueued` for the source, `cursors.projectHourly.buckets` keyed `<project>|<source>|<hour>` (middle-segment match — a project key like `codexlab/foo` paired with `claude` source survives a `--rebuild=codex`), and per-source ledger fields (`opencode`, `opencodeSqlite`, `hermesLedger`, `openclawLedger`). For OpenClaw, `parseArgs` also forces `fromOpenclaw=true` so the gated ledger-parse branch actually runs on a rebuild path. Implicitly enables `--drain` so the rebuilt buckets upload immediately. Validated end-to-end: max Claude drift across the 14-day window dropped from 100% (post-doubling-bug) to 0.51% after a single rebuild + drain.
+
+### Changed
+
+- **doctor's audit-tokens failure hint** now points at `vibeusage sync --rebuild=<source>` instead of the previous "scrub the Claude/OpenCode cursor block in cursors.json and rerun sync --drain" guidance. Following the old hint literally only cleared `cursors.files` while `cursors.hourly.buckets` retained the previous accumulated totals, so the re-parse added on top of the cached values and roughly doubled every Claude row in the DB. The new flag clears all four cursor surfaces in lockstep, which is the only safe rebuild sequence.
+
 ## [0.6.2] - 2026-04-25
 
 ### Fixed
