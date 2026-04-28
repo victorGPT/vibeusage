@@ -1,9 +1,9 @@
 import React from "react";
 import { copy } from "../../../lib/copy";
 
-// Decorative katakana band — chrome only, no semantic meaning.
-// DESIGN.md §5 v3 deco-katakana. Removing it must not lose information.
-// Text source: copy.csv (system.header.katakana_deco) per AGENTS.md.
+// Decorative band — chrome only, no semantic meaning.
+// Uses ASCII text from copy.csv (system.header.katakana_deco) so the band stays
+// legible on systems without CJK fonts installed (no tofu boxes).
 
 export function SystemHeader({
   title = copy("system.header.title_default"),
@@ -26,7 +26,7 @@ export function SystemHeader({
         ) : null}
         <span
           aria-hidden="true"
-          className="deco-katakana hidden md:inline text-micro"
+          className="hidden md:inline text-micro tracking-caps text-ink-faint whitespace-nowrap select-none"
         >
           {copy("system.header.katakana_deco")}
         </span>

@@ -61,7 +61,7 @@ export function MatrixShell({
                 </div>
                 <span
                   aria-hidden="true"
-                  className="deco-katakana hidden md:inline text-micro"
+                  className="hidden md:inline text-micro tracking-caps text-ink-faint whitespace-nowrap select-none"
                 >
                   {copy("system.header.katakana_deco")}
                 </span>

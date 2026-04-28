@@ -103,7 +103,7 @@ boot.skip_hint,ui,BootScreen,BootScreen,skip_hint,"Click to skip",,active
 boot.skip_aria,ui,BootScreen,BootScreen,aria_label,"Skip boot screen",,active
 
 system.header.title_default,ui,SystemHeader,SystemHeader,title_default,"VIBE_OS_v9.0",,active
-system.header.katakana_deco,ui,SystemHeader,SystemHeader,decoration,"カタカナ ベンチマーク プロトコル ▰▰▰▱▱▱",,active
+system.header.katakana_deco,ui,SystemHeader,SystemHeader,decoration,"BENCHMARK · OPERATIONS · PROTOCOL ▰▰▰▱▱▱",,active
 
 signalbox.title_default,ui,SignalBox,SignalBox,title_default,"LINK",,active
 
