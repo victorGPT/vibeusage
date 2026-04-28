@@ -48,8 +48,10 @@ primary number, identity handle. **Not** for label / button / caption.
 
 ## 2. Color Tokens
 
-Two tracks only: green ink (data) and neutral surface (ground). No third
-hue except the arbitrary-use `gold` accent.
+Two tracks for prose / surfaces / accents: green ink (data) and neutral
+surface (ground), with one `gold` accent. A narrow status escape hatch
+(`warn` / `err`) extends the palette **only** for status indicators —
+never for prose, accents, or surfaces (see §2.4).
 
 ### 2.1 `ink.*` — green data ink
 
@@ -77,6 +79,26 @@ hue except the arbitrary-use `gold` accent.
 | Token  | Value       | Usage                                |
 | ------ | ----------- | ------------------------------------ |
 | `gold` | `#FFD700`   | leaderboard #1 only                  |
+
+### 2.4 Status escape hatch
+
+The green-on-green ladder can't carry severity for status indicators —
+verified in kit chat2 user feedback. Two tokens fill that gap, and only
+that gap.
+
+| Token  | Tailwind                            | Value       | Usage                                |
+| ------ | ----------------------------------- | ----------- | ------------------------------------ |
+| `warn` | `text-warn` `border-warn` `bg-warn` | `#FFB300`   | degraded / rate-limited status indicator |
+| `err`  | `text-err` `border-err` `bg-err`    | `#FF3344`   | failure / error status indicator     |
+
+Matching `box-shadow` glows: `shadow-warn-glow` / `shadow-err-glow`.
+CSS-var mirrors: `--warn` / `--warn-glow` / `--err` / `--err-glow`.
+
+**Hard rule.** `warn` / `err` are reserved for connection state,
+banners reporting an error, and similar status surfaces. They are
+**never** valid for prose copy, accent text, surface backgrounds,
+iconography, or hover / focus rings. If a non-status component needs
+to communicate severity, redesign the layout — don't reach for these.
 
 ---
 
