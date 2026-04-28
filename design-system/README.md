@@ -45,7 +45,7 @@ Developers active on X / Twitter who already screenshot their dev tools and year
 
 ## Visual thesis
 
-Operations Deck. **Material**: zero radius (except the status dot), thin 1px lines, low-noise surfaces, numbers as the hero. **Energy**: restrained neon green + density + a single scanline layer. **Pocket color**: Matrix Green `#00FF41` — appears only on data, active state, hover-lines, and single-glow text. Never as a filled surface larger than a button.
+Operations Deck. **Material**: zero radius on every data surface (the only `border-radius: 999px` exceptions are the status dot, identity / project avatars, and floating action buttons — see §Visual foundations / Corner radii), thin 1px lines, low-noise surfaces, numbers as the hero. **Energy**: restrained neon green + density + a single scanline layer. **Pocket color**: Matrix Green `#00FF41` — appears only on data, active state, hover-lines, and single-glow text. Never as a filled surface larger than a button.
 
 **Signature**: single 1px hairline panel + corner-cross title chip on the top rule. (Earlier iterations used box-drawing glyphs `┌─┐│└─┘`; v3 dropped them — the seams between adjacent glyphs always read as "broken up".)
 **Signature micro-interaction**: `decoding-reveal` / scramble — characters converge on the final string. Reserved for first-paint hero title, display-2 primary number, and identity handle. Not for labels.
@@ -189,7 +189,7 @@ VibeUsage's iconography is **almost entirely typographic**. Where most products 
 - **Box-drawing characters**: `┌ ┐ └ ┘ ─ │ ╔ ╗ ═ ║ · ■` for panel frames, separators, and density indicators (heatmap cells).
 - **ASCII glyphs**: `[F1]`, `[F2]`, `<<<`, `>>>`, `_` (cursor), `0x2A1F` (hex labels), `█ ▓ ▒ ░` for inline progress bars.
 - **Bracket capsules**: `[ COPY ]`, `[ DECRYPT ]`, `[ REFRESH ]` — square brackets are the brand's stand-in for buttons.
-- **Status dots**: a single 6px circle (`border-radius: 999px`) — the **only** rounded thing in the system. Pulses when "live".
+- **Status dots**: a single 6px circle (`border-radius: 999px`) — pulses when "live". One of three rounded exceptions in the system (alongside identity / project avatars and floating action buttons — see §Visual foundations / Corner radii).
 - **Identicon avatars**: 5×5 mirror-symmetric grids generated from a hash of the user's handle (`MatrixAvatar.jsx`). Rendered as inline SVG `<rect>`s, no library.
 
 ### Logo

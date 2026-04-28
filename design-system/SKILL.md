@@ -17,7 +17,7 @@ If the user invokes this skill without any other guidance, ask them what they wa
 - **Font**: Geist Mono only (system fallback to ui-monospace). No exceptions.
 - **Signature**: single 1px hairline panel + corner-cross title chip on the top rule + scanline overlay. (v3 dropped the earlier box-drawing-glyph frames; see `chats/chat2.md`.)
 - **Drop-in tokens**: `colors_and_type.css` — covers all colors, type, spacing, shadows, animations.
-- **Hard rules**: zero radius (except status dot), 1px solid borders only, no emoji, uppercase labels, tabular numerals.
+- **Hard rules**: zero radius on every data surface (only the status dot, avatars, and floating action buttons round — see README §Corner radii), 1px solid borders only, no emoji, uppercase labels, tabular numerals.
 - **Reference recreation**: `ui_kits/dashboard/` — open `index.html` to see the product.
 
 ## Hard "do not" list
