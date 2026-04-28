@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import react from "@vitejs/plugin-react";
+import { transformSync } from "esbuild";
 import { defineConfig, loadEnv } from "vite";
 import copyRegistryModule from "../src/shared/copy-registry.cjs";
 
@@ -130,6 +131,28 @@ function richLinkMetaPlugin() {
   };
 }
 
+// Transform `.cjs` files imported from outside the dashboard root into ESM
+// during dev. Vite 7 stopped doing this automatically for files served via
+// `/@fs/`, so the dashboard hits a "module does not provide default export"
+// error on `import x from "../../../src/shared/*.cjs"`.
+function cjsToEsmPlugin() {
+  return {
+    name: "vibeusage-cjs-to-esm",
+    enforce: "pre",
+    transform(code, id) {
+      if (!id.endsWith(".cjs")) return null;
+      const result = transformSync(code, {
+        loader: "js",
+        format: "esm",
+        target: "esnext",
+        sourcefile: id,
+        sourcemap: false,
+      });
+      return { code: result.code, map: null };
+    },
+  };
+}
+
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, ROOT_DIR, "VITE_");
   const fallbackVersion = loadAppVersion();
@@ -140,7 +163,7 @@ export default defineConfig(({ mode }) => {
   }
 
   return {
-    plugins: [react(), richLinkMetaPlugin()],
+    plugins: [cjsToEsmPlugin(), react(), richLinkMetaPlugin()],
     ...(Object.keys(define).length ? { define } : {}),
     build: {
       rollupOptions: {
