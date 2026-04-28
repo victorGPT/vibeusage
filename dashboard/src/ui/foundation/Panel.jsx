@@ -1,25 +1,13 @@
 import React from "react";
 
-// Panel — SSOT: DESIGN.md §6 Component Contracts.
-// variants: ascii (signature), plain (default), bare (stacked sections)
+// Panel — single 1px hairline card.
+// SSOT: DESIGN.md §6 Component Contracts (v3 — kit chat: "single 1px hairline").
+// variants: plain (default 1px border + raised surface), bare (no border, stacked sections)
 // tone:     default, strong (chip / modal elevation)
-// weight:   primary (hero, double-line ASCII), secondary (default), tertiary (faint)
+// weight:   primary (hero — adds shadow-glow-sm), secondary (default), tertiary (no-op, kept for API stability)
 // stamped:  embeds corner labels (handle / period / logo) for self-contained screenshots
 
-const ASCII_WEIGHT = {
-  primary: { TL: "╔", TR: "╗", BL: "╚", BR: "╝", H: "═", V: "║" },
-  secondary: { TL: "┌", TR: "┐", BL: "└", BR: "┘", H: "─", V: "│" },
-  tertiary: { TL: "·", TR: "·", BL: "·", BR: "·", H: "·", V: "·" },
-};
-
-const FRAME_TONE = {
-  primary: "text-ink",
-  secondary: "text-ink-muted",
-  tertiary: "text-ink-faint",
-};
-
 const VARIANT = {
-  ascii: "bg-surface-raised backdrop-blur-panel shadow-panel",
   plain: "bg-surface-raised backdrop-blur-panel border border-ink-line shadow-panel",
   bare: "bg-surface-raised backdrop-blur-panel",
 };
@@ -75,63 +63,23 @@ export function Panel({
   bodyClassName = "",
   children,
 }) {
-  const variantClass = VARIANT[variant] ?? VARIANT.plain;
+  // Back-compat: legacy callers pass variant="ascii". The ASCII corner glyph
+  // mode was removed in v3 — fold it into the plain hairline variant.
+  const resolvedVariant = variant === "ascii" ? "plain" : variant;
+  const variantClass = VARIANT[resolvedVariant] ?? VARIANT.plain;
   const toneClass = TONE[tone] ?? TONE.default;
   const weightShadow = weight === "primary" ? "shadow-glow-sm" : "";
   const rootClass =
     `relative flex flex-col ${variantClass} ${toneClass} ${weightShadow} ${className}`.trim();
 
-  const stamps = (
-    <CornerStamps
-      stamped={stamped}
-      stampHandle={stampHandle}
-      stampPeriod={stampPeriod}
-      stampLogo={stampLogo}
-    />
-  );
-
-  if (variant === "ascii") {
-    const ASCII = ASCII_WEIGHT[weight] ?? ASCII_WEIGHT.secondary;
-    const frameTone = FRAME_TONE[weight] ?? FRAME_TONE.secondary;
-    return (
-      <div className={rootClass}>
-        {stamps}
-        <div className="flex items-center leading-none">
-          <span className={`shrink-0 ${frameTone}`}>{ASCII.TL}</span>
-          {title ? (
-            <span className="mx-3 shrink-0 px-2 py-1 text-heading text-ink uppercase bg-surface-strong border border-ink-faint">
-              {title}
-            </span>
-          ) : null}
-          {subtitle ? (
-            <span className="mr-2 text-caption text-ink-text uppercase">[{subtitle}]</span>
-          ) : null}
-          <span className={`flex-1 overflow-hidden whitespace-nowrap ${frameTone}`}>
-            {ASCII.H.repeat(100)}
-          </span>
-          <span className={`shrink-0 ${frameTone}`}>{ASCII.TR}</span>
-        </div>
-
-        <div className="flex flex-1">
-          <div className="shrink-0 w-3" aria-hidden="true" />
-          <div className={`flex-1 min-w-0 relative z-10 py-4 px-4 ${bodyClassName}`}>
-            {children}
-          </div>
-          <div className="shrink-0 w-3" aria-hidden="true" />
-        </div>
-
-        <div className={`flex items-center leading-none ${frameTone}`}>
-          <span className="shrink-0">{ASCII.BL}</span>
-          <span className="flex-1 overflow-hidden whitespace-nowrap">{ASCII.H.repeat(100)}</span>
-          <span className="shrink-0">{ASCII.BR}</span>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className={rootClass}>
-      {stamps}
+      <CornerStamps
+        stamped={stamped}
+        stampHandle={stampHandle}
+        stampPeriod={stampPeriod}
+        stampLogo={stampLogo}
+      />
       {title || subtitle ? (
         <div className="flex items-baseline gap-3 px-4 pt-4">
           {title ? <span className="text-heading text-ink uppercase">{title}</span> : null}
