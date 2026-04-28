@@ -100,7 +100,7 @@ The user feels **seen and slightly called out** — like an old terminal friend 
 
 - **Geist Mono only**, monospace everywhere — body, data, label, tag. The katakana band uses `Hiragino Sans → Yu Gothic → MS Gothic → Geist Mono` and is decorative chrome only.
 - **9 size stops**, no `text-[Npx]`: `display-0` 96px, `display-1` 60px, `display-2` 40px, `display-3` 28px, `heading` 14px, `body` 13px, `data` 12px tabular, `caption` 11px, `micro` 10px.
-- **4 letter-spacing values only**: `-0.02em` (display tight), `0` (body, data), `0.12em` (heading, caption), `0.22em` (micro, divider). Nothing in between.
+- **Letter-spacing canonicals** — `-0.03em` (display-0 only), `-0.02em` (display-1/2/3 tight), `0` (body, data), `0.12em` (heading, caption), `0.22em` (micro, divider). Five values; nothing in between (no `0.16em`, no `0.04em` ad-hoc).
 - **Hierarchy ratio ≥ 1.25 is non-negotiable.** Display tokens carry the weight; captions and headings exist to label numbers, never to compete.
 - **Tabular numerals** on every datum (`font-variant-numeric: tabular-nums`) — columns of numbers must align.
 
@@ -111,7 +111,7 @@ The user feels **seen and slightly called out** — like an old terminal friend 
 ### Backgrounds
 
 - **Page**: solid `#050505`, never gradient.
-- **Imagery**: there is essentially no photography in the brand. The hero "image" is a **canvas-rendered Matrix rain** (`MatrixRain.jsx`) — characters `01XYZA@#$%`, base font 16px scaled to 0.5×, 8 fps, 12% trail alpha, rendered at 20% canvas opacity. **Reserved for landing page only.** Never in dashboard routes.
+- **Imagery**: there is essentially no photography in the brand. The hero "image" is a **canvas-rendered Matrix rain** (`MatrixRain.jsx`) — characters `01XYZA@#$%`, base font 16px scaled to 0.5×, 8 fps, 12% trail alpha, rendered at 20% canvas opacity. **Production rule: landing page only — never in dashboard routes.** (The `ui_kits/dashboard/` demo here intentionally renders rain so the kit can be opened standalone and still feel "in-brand"; production must not.)
 - **Patterns**: thin scanlines (4px stripe at 6% black), CRT vignette (`inset 0 0 200px rgba(0,0,0,0.6)` + phosphor warmth), occasional dotted/striped fills built from `repeating-linear-gradient` at 33-alpha green. No textures. No noise SVGs.
 - **Color vibe of imagery**: the only "imagery" is product screenshots and the icon set (the hourglass + bracket logo). All single-hue green-on-black. No grain. No film tints. No warm/cool variation.
 
@@ -131,7 +131,13 @@ There is no rounded SaaS card here. Cards are:
 
 ### Corner radii
 
-**Zero. Always.** The single exception is the status dot (`border-radius: 999px`).
+**Zero on every data surface.** The narrow exceptions, all using `border-radius: 999px`:
+
+- **Status dot** (the one signature use) — pulses on "live".
+- **Avatar** thumbnails inside project / leaderboard cards — circles read as user/repo identity, not as data.
+- **Floating action buttons** (cheatsheet trigger, settings) — circle is the conventional FAB shape; chrome only, never carries data.
+
+Nothing else gets a radius. No `rounded-md` cards, no `rounded-full` data chips, no soft corners on inputs.
 
 ### Inner / outer shadows
 

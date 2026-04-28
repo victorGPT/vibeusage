@@ -75,15 +75,20 @@
   box-shadow: inset 0 0 0 1px var(--idle);
 }
 
-.tok {
-  margin-left: auto;
-  color: var(--ink-muted);
+.legend {
+  padding: 12px 20px 16px;
+  border-top: 1px solid var(--ink-faint);
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
   font-family: var(--font-mono);
   font-size: 10px;
-  letter-spacing: 0.10em;
+  letter-spacing: 0.18em;
   font-weight: 700;
   text-transform: uppercase;
+  color: var(--ink-muted);
 }
+.legend b { font-weight: 700; }
 </style></head>
 <body>
 <div class="card-shell">
@@ -93,36 +98,31 @@
 
     <div class="row">
       <span class="cap">Live</span>
-      <div class="dots">
-        <span class="dot live"></span>
-        <span class="tok">--ink&nbsp;·&nbsp;#00FF41&nbsp;·&nbsp;pulse</span>
-      </div>
+      <div class="dots"><span class="dot live"></span></div>
     </div>
 
     <div class="row">
       <span class="cap">Warning</span>
-      <div class="dots">
-        <span class="dot warn"></span>
-        <span class="tok">--warn&nbsp;·&nbsp;#FFB300</span>
-      </div>
+      <div class="dots"><span class="dot warn"></span></div>
     </div>
 
     <div class="row">
       <span class="cap">Error</span>
-      <div class="dots">
-        <span class="dot err"></span>
-        <span class="tok">--err&nbsp;·&nbsp;#FF3344</span>
-      </div>
+      <div class="dots"><span class="dot err"></span></div>
     </div>
 
     <div class="row">
       <span class="cap">Offline</span>
-      <div class="dots">
-        <span class="dot off"></span>
-        <span class="tok">--idle&nbsp;·&nbsp;hollow&nbsp;ring</span>
-      </div>
+      <div class="dots"><span class="dot off"></span></div>
     </div>
 
+  </div>
+
+  <div class="legend">
+    <span><b style="color:var(--ink)">--ink</b> #00FF41</span>
+    <span><b style="color:var(--warn)">--warn</b> #FFB300</span>
+    <span><b style="color:var(--err)">--err</b> #FF3344</span>
+    <span><b>--idle</b> hollow</span>
   </div>
 </div>
 </body></html>

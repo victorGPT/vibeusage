@@ -10,8 +10,8 @@ for real. This directory is the slimmed, in-repo copy.
 ## What you should do — IMPORTANT
 
 **Read the chat transcripts first.** Two transcripts in `chats/`:
-- `chat1.md` — initial system build, dashboard rewrite, font + brand asset import
-- `chat2.md` — per-CLI breakdown, status states, type scale, dashboard mojibake fix, single-hairline panel border
+- `chats/chat1.md` — initial system build, dashboard rewrite, font + brand asset import
+- `chats/chat2.md` — per-CLI breakdown, status states, type scale, dashboard mojibake fix, single-hairline panel border
 
 The transcripts show the full back-and-forth between the user and the design
 assistant — they tell you **what the user actually wants** and **where they
@@ -51,7 +51,7 @@ design-system/
 ├── assets/
 │   ├── icon.svg         — brand mark (hourglass + bracket frame)
 │   └── brand/           — Codex / Claude / Gemini / GitHub SVGs
-├── preview/             — 20 design-system preview cards (HTML)
+├── preview/             — 19 design-system preview cards (HTML) + `_card.css`
 └── ui_kits/
     └── dashboard/       — full Operations Deck recreation
 ```
