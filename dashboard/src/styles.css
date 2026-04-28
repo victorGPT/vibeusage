@@ -22,6 +22,14 @@
   --surface: #050505;
   --surface-raised: rgba(0, 10, 0, 0.7);
   --surface-strong: rgba(0, 10, 0, 0.82);
+
+  /* Status escape hatch (DESIGN.md §2 v3). Reserved for status indicators
+   * where the green-on-green ladder can't carry severity. Do not use as
+   * accent for prose, surfaces, or icons. */
+  --warn: #ffb300;
+  --warn-glow: rgba(255, 179, 0, 0.4);
+  --err: #ff3344;
+  --err-glow: rgba(255, 51, 68, 0.45);
 }
 
 html,

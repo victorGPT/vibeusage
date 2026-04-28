@@ -28,11 +28,11 @@ export function ConnectionStatus({ status = "STABLE", title, className = "" }) {
       indicator: bit,
     },
     UNSTABLE: {
-      color: "text-yellow-400",
+      color: "text-warn",
       indicator: "!",
     },
     LOST: {
-      color: "text-red-500/90",
+      color: "text-err",
       indicator: "×",
     },
   };

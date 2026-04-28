@@ -71,6 +71,10 @@ module.exports = {
           strong: "rgba(0, 10, 0, 0.82)",
         },
         gold: "#FFD700",
+        // Status escape hatch — DESIGN.md §2 v3 (kit chat2). Used only for
+        // status indicators where green-on-green can't carry severity.
+        warn: "#FFB300",
+        err: "#FF3344",
       },
       boxShadow: {
         panel: "0 0 0 1px rgba(0, 255, 65, 0.08), 0 18px 40px rgba(0, 0, 0, 0.45)",
@@ -81,6 +85,8 @@ module.exports = {
         gold: "0 0 18px rgba(255, 215, 0, 0.35)",
         "gold-sm": "0 0 10px rgba(255, 215, 0, 0.3)",
         "gold-faint": "0 0 20px rgba(255, 215, 0, 0.1)",
+        "warn-glow": "0 0 10px rgba(255, 179, 0, 0.40)",
+        "err-glow": "0 0 10px rgba(255, 51, 68, 0.45)",
       },
       dropShadow: {
         glow: "0 0 8px rgba(0, 255, 65, 0.8)",

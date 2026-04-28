@@ -178,7 +178,7 @@ export const UsagePanel = React.memo(function UsagePanel({
       ) : null}
 
       {error ? (
-        <div className="text-caption text-red-400/90 px-2 py-1">
+        <div className="text-caption text-err px-2 py-1">
           {copy("shared.error.prefix", { error })}
         </div>
       ) : null}
