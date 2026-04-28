@@ -51,6 +51,50 @@ test("sync --from-openclaw records last OpenClaw trigger marker", async () => {
   }
 });
 
+test("sync --rebuild=openclaw forces fromOpenclaw so the ledger is actually re-aggregated", async () => {
+  // Regression: argv validation accepting --rebuild=openclaw without
+  // turning on the OpenClaw parsing branch would scrub the OpenClaw
+  // cursors and persist the cleared state, leaving totals stale until
+  // a later plugin-triggered sync. The signal file is the load-bearing
+  // proof that fromOpenclaw was set: it is only written by the sync
+  // entry path when opts.fromOpenclaw is truthy.
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "vibeusage-sync-rebuild-openclaw-"));
+  const prevHome = process.env.HOME;
+  const prevCodexHome = process.env.CODEX_HOME;
+  const prevCodeHome = process.env.CODE_HOME;
+  const prevGeminiHome = process.env.GEMINI_HOME;
+  const prevOpencodeHome = process.env.OPENCODE_HOME;
+
+  try {
+    process.env.HOME = tmp;
+    process.env.CODEX_HOME = path.join(tmp, ".codex");
+    process.env.CODE_HOME = path.join(tmp, ".code");
+    process.env.GEMINI_HOME = path.join(tmp, ".gemini");
+    process.env.OPENCODE_HOME = path.join(tmp, ".opencode");
+
+    await cmdSync(["--rebuild=openclaw"]);
+
+    const markerPath = path.join(tmp, ".vibeusage", "tracker", "openclaw.signal");
+    const marker = (await fs.readFile(markerPath, "utf8")).trim();
+    assert.ok(
+      marker.length > 0,
+      "rebuild=openclaw must write the openclaw.signal marker (proves fromOpenclaw was forced on)",
+    );
+  } finally {
+    if (prevHome === undefined) delete process.env.HOME;
+    else process.env.HOME = prevHome;
+    if (prevCodexHome === undefined) delete process.env.CODEX_HOME;
+    else process.env.CODEX_HOME = prevCodexHome;
+    if (prevCodeHome === undefined) delete process.env.CODE_HOME;
+    else process.env.CODE_HOME = prevCodeHome;
+    if (prevGeminiHome === undefined) delete process.env.GEMINI_HOME;
+    else process.env.GEMINI_HOME = prevGeminiHome;
+    if (prevOpencodeHome === undefined) delete process.env.OPENCODE_HOME;
+    else process.env.OPENCODE_HOME = prevOpencodeHome;
+    await fs.rm(tmp, { recursive: true, force: true });
+  }
+});
+
 test("sync --from-openclaw ignores transcript files and previous-total fallback env", async () => {
   const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "vibeusage-sync-openclaw-hard-cut-"));
   const prevHome = process.env.HOME;

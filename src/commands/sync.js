@@ -501,6 +501,13 @@ function parseArgs(argv) {
     // A rebuild always wants a full upload pass, otherwise the freshly-rebuilt
     // buckets would sit in queue.jsonl behind the default 10-batch cap.
     out.drain = true;
+    // OpenClaw is the only source whose ledger parsing is gated behind an
+    // explicit flag (see sync flow's `opts.fromOpenclaw ? parseOpenclaw... : noop`).
+    // A `--rebuild=openclaw` that doesn't also turn that flag on would scrub
+    // the OpenClaw cursors and persist the cleared state without ever re-
+    // aggregating from the ledger — leaving totals stale until a later
+    // plugin-triggered sync. Force the flag so rebuild actually rebuilds.
+    if (out.rebuild === "openclaw") out.fromOpenclaw = true;
   }
   return out;
 }
