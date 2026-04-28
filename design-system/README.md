@@ -199,7 +199,7 @@ VibeUsage's iconography is **almost entirely typographic**. Where most products 
 
 ### Third-party icon libraries
 
-**No Lucide. No Heroicons. No Font Awesome.** No icon font is bundled. Where the upstream codebase needs a third-party brand mark (Codex, Claude Code, Gemini, GitHub), it ships hand-authored single-color SVGs in `dashboard/src/ui/matrix-a/components/ClientLogos.jsx`, all forced to `fill="#00FF41"` to enter the green-only palette.
+**No Lucide. No Heroicons. No Font Awesome.** No icon font is bundled. Where the upstream codebase needs a third-party brand mark (Codex, Claude Code, Gemini, GitHub), it ships hand-authored single-color SVGs in `dashboard/src/ui/matrix-a/components/ClientLogos.jsx`, all forced to `fill="#00FF41"` so they read as green ink — iconography stays green-only even though the broader palette has gold + warn/err escape hatches (see §Visual foundations / Colors).
 
 ### Emoji
 
