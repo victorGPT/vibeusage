@@ -47,7 +47,7 @@ Developers active on X / Twitter who already screenshot their dev tools and year
 
 Operations Deck. **Material**: zero radius on every data surface (the only `border-radius: 999px` exceptions are the status dot, identity / project avatars, and floating action buttons — see §Visual foundations / Corner radii), thin 1px lines, low-noise surfaces, numbers as the hero. **Energy**: restrained neon green + density + a single scanline layer. **Pocket color**: Matrix Green `#00FF41` — appears only on data, active state, hover-lines, and single-glow text. Never as a filled surface larger than a button.
 
-**Signature**: single 1px hairline panel + corner-cross title chip on the top rule. (Earlier iterations used box-drawing glyphs `┌─┐│└─┘`; v3 dropped them — the seams between adjacent glyphs always read as "broken up".)
+**Signature**: ASCII-frame panel + corner-cross marks (`<Panel variant="ascii">`).
 **Signature micro-interaction**: `decoding-reveal` / scramble — characters converge on the final string. Reserved for first-paint hero title, display-2 primary number, and identity handle. Not for labels.
 
 ---
@@ -123,9 +123,9 @@ All borders are **1px solid**. No dashed / dotted / `border-[Npx]`. Ladder: `bor
 
 There is no rounded SaaS card here. Cards are:
 
-- Default `<Panel variant="plain">` — single 1px hairline (`1px solid var(--ink-line)`) on `bg-surface-raised` + `backdrop-filter: blur(10px)` + `box-shadow: var(--shadow-panel)`. Title sits in a corner-cross chip on the top rule. Pass `weight="primary"` for the hero panel — it adds a subtle `shadow-glow-sm`. Use **at most one primary** per visible viewport.
+- ASCII-framed `<Panel variant="ascii">` — top/bottom rule built from `┌ ─ ┐ │ └ ┘`, with the panel title sitting **inside** a small chip on the top rule. Three weight ladders: `primary` uses double-line `╔ ═ ╚`, `secondary` is the default single-line, `tertiary` is dotted `·`. Use **at most one primary** per visible viewport.
+- Plain `<Panel variant="plain">` — `1px solid var(--ink-line)` on `bg-surface-raised` + `backdrop-filter: blur(10px)` + `box-shadow: var(--shadow-panel)`.
 - Bare `<Panel variant="bare">` — `bg-surface-raised` only, no border (for stacked sub-sections).
-- _Legacy_: `variant="ascii"` is kept as a back-compat alias that maps to `plain`. Don't reach for it in new code.
 
 `box-shadow` always carries a 1px `0 0 0 1px rgba(0,255,65,0.08)` outline plus a deep `0 18px 40px rgba(0,0,0,0.45)` lift. Never a soft fintech shadow.
 

@@ -15,7 +15,7 @@ If the user invokes this skill without any other guidance, ask them what they wa
 - **Brand**: VibeUsage — Bloomberg terminal × The Matrix. Three words: `hacker · 复古 · cyberpunk`.
 - **Pocket color**: Matrix Green `#00FF41` on `#050505`. Single gold accent `#FFD700` reserved for leaderboard #1 / cost.
 - **Font**: Geist Mono only (system fallback to ui-monospace). No exceptions.
-- **Signature**: single 1px hairline panel + corner-cross title chip on the top rule + scanline overlay. (v3 dropped the earlier box-drawing-glyph frames; see `chats/chat2.md`.)
+- **Signature**: ASCII-frame panel + corner-cross title chip + scanline overlay.
 - **Drop-in tokens**: `colors_and_type.css` — covers all colors, type, spacing, shadows, animations.
 - **Hard rules**: zero radius on every data surface (only the status dot, avatars, and floating action buttons round — see README §Corner radii), 1px solid borders only, no emoji, uppercase labels, tabular numerals.
 - **Reference recreation**: `ui_kits/dashboard/` — open `index.html` to see the product.
