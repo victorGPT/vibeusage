@@ -1,5 +1,6 @@
 const fs = require("node:fs/promises");
 const path = require("node:path");
+const lockfile = require("proper-lockfile");
 
 async function ensureDir(p) {
   await fs.mkdir(p, { recursive: true });
@@ -47,22 +48,128 @@ async function chmod600IfPossible(filePath) {
   } catch (_e) {}
 }
 
-async function openLock(lockPath, { quietIfLocked }) {
+// proper-lockfile gives us atomic mkdir-based mutual exclusion plus a heart-
+// beat mechanism that auto-recovers from orphan locks without TOCTOU races:
+//
+//   - The holder process refreshes the lock-directory's mtime every `update`
+//     ms. As long as that interval keeps running, the lock is "fresh".
+//   - Any acquirer that finds the existing lock with mtime older than `stale`
+//     ms takes it over via a compare-and-swap that is safe under concurrent
+//     attempts (the library's own contract).
+//   - If the holder dies (crash, SIGKILL, reboot) the heartbeat stops; the
+//     next acquirer sees the stale mtime and recovers automatically.
+//
+// We deliberately set `stale` larger than the default to give a working sync
+// some headroom against transient event-loop pauses (large JSON.parse, GC).
+// We pass `realpath: false` because the lock target may not exist as a file
+// — proper-lockfile creates the lock-directory at `lockPath` directly.
+const LOCK_STALE_MS = 60_000;
+const LOCK_UPDATE_MS = 10_000;
+
+async function openLock(lockPath, { quietIfLocked } = {}) {
+  // Migration path: pre-proper-lockfile versions of vibeusage created the
+  // lock as a regular *file* (fs.open with "wx"). proper-lockfile creates
+  // it as a *directory* (mkdir). If we hand a stale legacy file off to
+  // proper-lockfile, its mkdir will EEXIST and its internal rmdir-fallback
+  // will then ENOTDIR, throwing instead of returning ELOCKED. Detect and
+  // resolve that mismatch up front.
+  const migration = await migrateLegacyLockFile(lockPath);
+  if (migration === "yield-to-legacy-holder") {
+    if (!quietIfLocked) process.stdout.write("Another sync is already running.\n");
+    return null;
+  }
+
+  let release;
   try {
-    const handle = await fs.open(lockPath, "wx");
-    return {
-      async release() {
-        await handle.close().catch(() => {});
-      },
-    };
+    release = await lockfile.lock(lockPath, {
+      lockfilePath: lockPath,
+      realpath: false,
+      stale: LOCK_STALE_MS,
+      update: LOCK_UPDATE_MS,
+      retries: 0,
+    });
   } catch (e) {
-    if (e && e.code === "EEXIST") {
-      if (!quietIfLocked) {
-        process.stdout.write("Another sync is already running.\n");
-      }
+    if (e && e.code === "ELOCKED") {
+      if (!quietIfLocked) process.stdout.write("Another sync is already running.\n");
       return null;
     }
     throw e;
+  }
+  return {
+    async release() {
+      try {
+        await release();
+      } catch (_e) {
+        // Best-effort cleanup. proper-lockfile throws if the lock was already
+        // compromised (e.g. taken over by another process while we were
+        // running) — there is nothing useful to do at that point.
+      }
+    },
+  };
+}
+
+// Detect a leftover lock file from the previous wx-based scheme. Three cases:
+//   - "orphan"        — proven dead by PID liveness; safe to unlink and migrate.
+//   - "alive"         — recorded PID is still running; yield with the standard
+//                       "another sync running" UX.
+//   - "indeterminate" — empty / corrupt / unreadable file. The original
+//                       production openLock wrote a *zero-byte* file (it never
+//                       called writeFile after fs.open(path, "wx")), so this
+//                       is the **expected** legacy format. We cannot prove
+//                       its holder is dead and we MUST NOT auto-delete: a
+//                       still-running legacy sync would lose its lock and a
+//                       new-format sync would start in parallel. Yield and
+//                       print an actionable manual-cleanup notice.
+async function migrateLegacyLockFile(lockPath) {
+  let stat;
+  try {
+    stat = await fs.lstat(lockPath);
+  } catch (e) {
+    if (e && e.code === "ENOENT") return "no-legacy";
+    throw e;
+  }
+  if (stat.isDirectory()) return "no-legacy"; // already in proper-lockfile format
+
+  const verdict = await classifyLegacyFileLock(lockPath);
+  if (verdict === "orphan") {
+    await fs.unlink(lockPath).catch(() => {});
+    return "migrated";
+  }
+  if (verdict === "indeterminate") {
+    process.stderr.write(
+      `vibeusage: legacy sync.lock at ${lockPath} carries no PID payload, ` +
+        `so we cannot prove its owner is dead. Auto-deletion is unsafe — a ` +
+        `still-running legacy sync would lose its lock. If no legacy ` +
+        `vibeusage sync is actually running, remove it manually: rm ${JSON.stringify(
+          lockPath,
+        )}\n`,
+    );
+  }
+  return "yield-to-legacy-holder";
+}
+
+async function classifyLegacyFileLock(lockPath) {
+  let raw;
+  try {
+    raw = await fs.readFile(lockPath, "utf8");
+  } catch (_e) {
+    return "indeterminate";
+  }
+  if (!raw) return "indeterminate";
+  let parsed;
+  try {
+    parsed = JSON.parse(raw);
+  } catch (_e) {
+    return "indeterminate";
+  }
+  const pid = parsed?.pid;
+  if (!Number.isFinite(pid)) return "indeterminate";
+  try {
+    process.kill(pid, 0);
+    return "alive";
+  } catch (e) {
+    if (e && e.code === "ESRCH") return "orphan";
+    return "alive"; // EPERM = pid exists but belongs to another user
   }
 }
 

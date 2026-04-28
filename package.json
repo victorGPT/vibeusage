@@ -49,7 +49,8 @@
     "validate:ui-hardcode": "node scripts/ops/validate-ui-hardcode.cjs"
   },
   "dependencies": {
-    "@insforge/sdk": "1.2.2"
+    "@insforge/sdk": "1.2.2",
+    "proper-lockfile": "^4.1.2"
   },
   "devDependencies": {
     "@sourcegraph/scip-typescript": "^0.3.6",
@@ -60,5 +61,8 @@
   ],
   "engines": {
     "node": "20.x"
-  }
+  },
+  "bundleDependencies": [
+    "@insforge/sdk"
+  ]
 }
