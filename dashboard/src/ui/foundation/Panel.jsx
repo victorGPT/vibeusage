@@ -1,14 +1,15 @@
 import React from "react";
 
-// Panel — single 1px hairline card.
-// SSOT: DESIGN.md §6 Component Contracts (v3 — kit chat: "single 1px hairline").
+// Panel — 1px hairline card with a SEPARATE little title box pinned to the
+// top-left corner (like a tab). No header bar, no chip on a horizontal rule.
+// SSOT: DESIGN.md §6 Component Contracts.
 // variants: plain (default 1px border + raised surface), bare (no border, stacked sections)
 // tone:     default, strong (chip / modal elevation)
-// weight:   primary (hero — adds shadow-glow-sm), secondary (default), tertiary (no-op, kept for API stability)
+// weight:   primary (hero — bumps border to ink-muted + adds shadow-glow-faint), secondary (default), tertiary (no-op, kept for API stability)
 // stamped:  embeds corner labels (handle / period / logo) for self-contained screenshots
 
 const VARIANT = {
-  plain: "bg-surface-raised backdrop-blur-panel border border-ink-line shadow-panel",
+  plain: "bg-surface-raised backdrop-blur-panel border border-ink-line",
   bare: "bg-surface-raised backdrop-blur-panel",
 };
 
@@ -68,9 +69,23 @@ export function Panel({
   const resolvedVariant = variant === "ascii" ? "plain" : variant;
   const variantClass = VARIANT[resolvedVariant] ?? VARIANT.plain;
   const toneClass = TONE[tone] ?? TONE.default;
-  const weightShadow = weight === "primary" ? "shadow-glow-sm" : "";
+  const isPrimary = weight === "primary";
+  const primaryClass = isPrimary ? "border-ink-muted shadow-glow-faint" : "";
   const rootClass =
-    `relative flex flex-col ${variantClass} ${toneClass} ${weightShadow} ${className}`.trim();
+    `relative flex flex-col ${variantClass} ${toneClass} ${primaryClass} ${className}`.trim();
+
+  // Title chip — independent little box pinned to the top-left corner (like
+  // a tab); subtitle takes the same look pinned to the top-right.
+  const hasTitleBox = Boolean(title || subtitle);
+  const titleChipClass = isPrimary
+    ? "border-ink-muted text-ink-bright"
+    : "border-ink-line text-ink";
+  const titleStyle = isPrimary
+    ? { textShadow: "0 0 8px var(--ink-glow)" }
+    : undefined;
+  // Push the body down so it clears the absolutely-positioned title box.
+  // Inline so it wins over caller-supplied bodyClassName (e.g. "py-3").
+  const bodyStyle = hasTitleBox ? { paddingTop: 36 } : undefined;
 
   return (
     <div className={rootClass}>
@@ -80,15 +95,20 @@ export function Panel({
         stampPeriod={stampPeriod}
         stampLogo={stampLogo}
       />
-      {title || subtitle ? (
-        <div className="flex items-baseline gap-3 px-4 pt-4">
-          {title ? <span className="text-heading text-ink uppercase">{title}</span> : null}
-          {subtitle ? (
-            <span className="text-caption text-ink-text uppercase">[{subtitle}]</span>
-          ) : null}
-        </div>
+      {title ? (
+        <span
+          className={`absolute top-2.5 left-3 z-[2] inline-flex items-center gap-1 border ${titleChipClass} bg-surface-strong px-2.5 py-1 text-micro uppercase leading-none whitespace-nowrap`}
+          style={titleStyle}
+        >
+          {title}
+        </span>
       ) : null}
-      <div className={`px-4 py-4 ${bodyClassName}`}>{children}</div>
+      {subtitle ? (
+        <span className="absolute top-2.5 right-3 z-[2] border border-ink-line bg-surface-strong px-2.5 py-1 text-micro uppercase leading-none text-ink-text">
+          {subtitle}
+        </span>
+      ) : null}
+      <div className={`px-4 py-4 ${bodyClassName}`} style={bodyStyle}>{children}</div>
     </div>
   );
 }
