@@ -36,7 +36,7 @@ export const NeuralAdaptiveFleet = React.memo(function NeuralAdaptiveFleet({
         </div>
       </div>
 
-      <div className="h-1 w-full bg-surface-raised flex overflow-hidden relative">
+      <div className="h-1 w-full bg-ink-faint flex overflow-hidden relative">
         {models.map((model, index) => {
           const styleConfig = TEXTURES[index % TEXTURES.length];
           const modelKey = model?.id ? String(model.id) : `${model.name}-${index}`;
