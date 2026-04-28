@@ -146,8 +146,11 @@ function runAuditTokens({ opts, config }) {
   if (result.exceedsThreshold) {
     process.stderr.write(
       `\nFAIL drift ${result.maxDriftPct.toFixed(2)}% exceeds threshold ${result.thresholdPct}%.\n` +
-        `If vibeusage >= 0.5.0, scrub the Claude/OpenCode cursor block in\n` +
-        `~/.vibeusage/tracker/cursors.json and rerun \`vibeusage sync --drain\`.\n`,
+        `Rebuild this source from its local session files: ` +
+        `\`vibeusage sync --rebuild ${result.source}\`\n` +
+        `(That clears the source's file/bucket/group cursors atomically and ` +
+        `re-parses every session — fixing drift caused by interrupted uploads ` +
+        `or partial cursor edits.)\n`,
     );
     process.exitCode = 1;
   }
