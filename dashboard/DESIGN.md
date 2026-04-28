@@ -82,7 +82,26 @@ hue except the arbitrary-use `gold` accent.
 
 ## 3. Typography Tokens
 
-`Geist Mono` is the only font-family. 7 size stops. No `text-[Npx]`.
+`Geist Mono` is the only font-family. No `text-[Npx]`.
+
+### 3.1 Canonical text scale (use these by default)
+
+Per kit chat2 ("Type / Text + data scale: 会不会太多样式了"), there are
+exactly **3** canonical non-display text styles. Reach for one of these
+first; only fall back to the auxiliary stops in §3.2 when a layout truly
+needs a finer granularity.
+
+| Token     | Size / LineHt / Tracking / Weight / Case | Usage                       |
+| --------- | ---------------------------------------- | --------------------------- |
+| `heading` | 14 / 1.25 / 0.12em / 700 / UPPERCASE     | label, panel title, nav     |
+| `body`    | 13 / 1.50 / 0     / 500 / none           | prose                       |
+| `data`    | 12 / 1.40 / 0     / 500 tabular-nums     | numbers, table cells        |
+
+### 3.2 Display + auxiliary stops
+
+Display tokens are unchanged. `caption` / `micro` are kept as tactical
+aliases (existing call sites and dense status pills); avoid them in new
+code unless `heading` / `data` genuinely won't fit.
 
 | Token       | Size / LineHt / Tracking / Weight / Case    | Usage                                       |
 | ----------- | ------------------------------------------- | ------------------------------------------- |
@@ -90,11 +109,8 @@ hue except the arbitrary-use `gold` accent.
 | `display-1` | 60 / 1.00 / -0.02em / 900 / none            | landing hero title                          |
 | `display-2` | 40 / 1.05 / -0.02em / 900 / none            | big number, screenshot title                |
 | `display-3` | 28 / 1.10 / -0.02em / 900 / none            | mid-size hero (leaderboard title, identity) |
-| `heading`   | 14 / 1.25 /  0.12em / 700 / UPPERCASE       | panel title, nav primary                    |
-| `body`      | 13 / 1.50 /  0     / 500 / none             | body paragraph                              |
-| `data`      | 12 / 1.40 /  0     / 500 tabular-nums       | numbers, table cells                        |
-| `caption`   | 11 / 1.30 /  0.12em / 600 / UPPERCASE       | label, sub-title                            |
-| `micro`     | 10 / 1.20 /  0.22em / 700 / UPPERCASE       | tag, status, pagination                     |
+| `caption`   | 11 / 1.30 /  0.12em / 600 / UPPERCASE       | _legacy_ — prefer `heading`                 |
+| `micro`     | 10 / 1.20 /  0.22em / 700 / UPPERCASE       | _legacy_ — prefer `heading` (or `data`)     |
 
 ### Letter-spacing (4 canonical values only)
 
