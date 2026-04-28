@@ -47,7 +47,7 @@ Developers active on X / Twitter who already screenshot their dev tools and year
 
 Operations Deck. **Material**: zero radius (except the status dot), thin 1px lines, low-noise surfaces, numbers as the hero. **Energy**: restrained neon green + density + a single scanline layer. **Pocket color**: Matrix Green `#00FF41` — appears only on data, active state, hover-lines, and single-glow text. Never as a filled surface larger than a button.
 
-**Signature**: ASCII-frame panel + corner-cross marks (`<Panel variant="ascii">`).
+**Signature**: single 1px hairline panel + corner-cross title chip on the top rule. (Earlier iterations used box-drawing glyphs `┌─┐│└─┘`; v3 dropped them — the seams between adjacent glyphs always read as "broken up".)
 **Signature micro-interaction**: `decoding-reveal` / scramble — characters converge on the final string. Reserved for first-paint hero title, display-2 primary number, and identity handle. Not for labels.
 
 ---
@@ -90,10 +90,11 @@ The user feels **seen and slightly called out** — like an old terminal friend 
 
 ### Colors
 
-- **Two tracks only**: green ink (data) and neutral surface (ground). One accent (`gold #FFD700`) reserved for **leaderboard #1** and total-cost callouts.
+- **Two tracks for prose / surfaces / accents**: green ink (data) and neutral surface (ground). One accent (`gold #FFD700`) reserved for **leaderboard #1** and total-cost callouts.
 - **Green ink** has exactly **6 alpha stops**: `#00FF41` (ink), `#E8FFE9` (ink-bright), `60%` (ink-text), `35%` (ink-muted), `18%` (ink-line), `8%` (ink-faint). No `/5`, `/12`, `/25`, `/45` — pick one.
 - **Surfaces** are near-black: `#050505` (page), `rgba(0,10,0,0.70)` (panel), `rgba(0,10,0,0.82)` (chip / modal). Always paired with `backdrop-filter: blur(10px)` on raised surfaces.
-- **No third hue**, no purple-pink-cyan dapp gradient, no SaaS navy/slate. Information layering does **not** depend on color discrimination — alpha-stop ladder carries hierarchy.
+- **Status escape hatch**: `warn #FFB300` and `err #FF3344` (with matching `--warn-glow` / `--err-glow`) are reserved for status indicators **only** — connection state, error banners. Never as prose / accent / surface. They are the only hue extension allowed beyond the green-ink + gold palette.
+- **No fourth hue**, no purple-pink-cyan dapp gradient, no SaaS navy/slate. Information layering does **not** depend on color discrimination — alpha-stop ladder carries hierarchy.
 
 ### Type
 
@@ -122,9 +123,9 @@ All borders are **1px solid**. No dashed / dotted / `border-[Npx]`. Ladder: `bor
 
 There is no rounded SaaS card here. Cards are:
 
-- ASCII-framed `<Panel variant="ascii">` — top/bottom rule built from `┌ ─ ┐ │ └ ┘`, with the panel title sitting **inside** a small chip on the top rule. Three weight ladders: `primary` uses double-line `╔ ═ ╚`, `secondary` is the default single-line, `tertiary` is dotted `·`. Use **at most one primary** per visible viewport.
-- Plain `<Panel variant="plain">` — `1px solid var(--ink-line)` on `bg-surface-raised` + `backdrop-filter: blur(10px)` + `box-shadow: var(--shadow-panel)`.
+- Default `<Panel variant="plain">` — single 1px hairline (`1px solid var(--ink-line)`) on `bg-surface-raised` + `backdrop-filter: blur(10px)` + `box-shadow: var(--shadow-panel)`. Title sits in a corner-cross chip on the top rule. Pass `weight="primary"` for the hero panel — it adds a subtle `shadow-glow-sm`. Use **at most one primary** per visible viewport.
 - Bare `<Panel variant="bare">` — `bg-surface-raised` only, no border (for stacked sub-sections).
+- _Legacy_: `variant="ascii"` is kept as a back-compat alias that maps to `plain`. Don't reach for it in new code.
 
 `box-shadow` always carries a 1px `0 0 0 1px rgba(0,255,65,0.08)` outline plus a deep `0 18px 40px rgba(0,0,0,0.45)` lift. Never a soft fintech shadow.
 
@@ -237,4 +238,4 @@ Files at the project root:
 
 - **Geist Mono** is self-hosted from `fonts/` (4 weights, SIL OFL-1.1, Vercel official via `unpkg.com/geist@1.3.1/dist/fonts/geist-mono/`). Production runtime uses the same files via `@fontsource/geist-mono`.
 - **Hiragino Sans / Yu Gothic / MS Gothic** are system fonts on macOS / Windows. We do not bundle a CJK fallback; the katakana band degrades to Geist Mono's latin glyphs on Linux without those families installed.
-- **Brand client logos** (Codex / Claude / Gemini / GitHub) are **not** copied into `assets/` — they are fork-of-trademark material owned by their respective companies. Use `dashboard/src/ui/matrix-a/components/ClientLogos.jsx` upstream as a reference if you need them in a mock.
+- **Brand client logos** (Claude / OpenAI · Codex / Gemini / GitHub) live under `assets/brand/` as single-file SVGs from [simple-icons](https://simpleicons.org/), already tinted to `#00FF41`. They are fork-of-trademark material owned by their respective companies — use them only for in-product attribution. For the live dashboard's React renderer (with avatar fallbacks etc.), see upstream `dashboard/src/ui/matrix-a/components/ClientLogos.jsx`.

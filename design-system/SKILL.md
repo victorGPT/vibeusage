@@ -15,7 +15,7 @@ If the user invokes this skill without any other guidance, ask them what they wa
 - **Brand**: VibeUsage — Bloomberg terminal × The Matrix. Three words: `hacker · 复古 · cyberpunk`.
 - **Pocket color**: Matrix Green `#00FF41` on `#050505`. Single gold accent `#FFD700` reserved for leaderboard #1 / cost.
 - **Font**: Geist Mono only (system fallback to ui-monospace). No exceptions.
-- **Signature**: ASCII-frame panel + corner-cross title chip + scanline overlay.
+- **Signature**: single 1px hairline panel + corner-cross title chip on the top rule + scanline overlay. (v3 dropped the earlier box-drawing-glyph frames; see `chats/chat2.md`.)
 - **Drop-in tokens**: `colors_and_type.css` — covers all colors, type, spacing, shadows, animations.
 - **Hard rules**: zero radius (except status dot), 1px solid borders only, no emoji, uppercase labels, tabular numerals.
 - **Reference recreation**: `ui_kits/dashboard/` — open `index.html` to see the product.
@@ -24,7 +24,7 @@ If the user invokes this skill without any other guidance, ask them what they wa
 
 - Don't add emoji.
 - Don't use `text-[Npx]`, `[#hex]`, `tracking-[Xem]`, `shadow-[…]`, `opacity-30..90`, `rounded-*`, `bg-white`, `text-white`.
-- Don't introduce a third hue. Two ink stops + one gold + neutral surfaces.
+- Don't introduce a third hue for prose / surfaces / accents. Palette ceiling is **two ink stops + one gold + neutral surfaces + the warn/err status escape hatch** (warn `#FFB300` / err `#FF3344`, status indicators only).
 - Don't use bouncy / spring easing. Linear / ease only, 200ms.
 - Don't use SaaS rounded cards, gradient headers, or icon-tile grids.
 - Don't soften numbers ("~1M"). Show `1,042,318`.
