@@ -1,0 +1,16 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="_card.css"><style>
+.row { display: flex; align-items: center; gap: 14px; padding: 8px 0; }
+.dot { width: 24px; height: 24px; background: var(--ink); }
+.lbl { color: var(--ink); font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; font-weight: 700; width: 30px; }
+.val { color: var(--ink-text); font-size: 11px; font-variant-numeric: tabular-nums; width: 60px; }
+.demo { flex: 1; height: 16px; background: var(--ink-faint); display: flex; align-items: center; padding: 0 4px; box-sizing: border-box; }
+.usage { color: var(--ink-muted); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 600; width: 130px; text-align: right; }
+</style></head><body><div class="card">
+<div class="row"><div class="lbl">0</div><div class="val">0px</div><div class="demo" style="height:0px"></div><div class="usage">collapsed</div></div>
+<div class="row"><div class="lbl">1</div><div class="val">4px</div><div class="demo" style="height:4px"></div><div class="usage">hairline gap</div></div>
+<div class="row"><div class="lbl">2</div><div class="val">8px</div><div class="demo" style="height:8px"></div><div class="usage">label↔value</div></div>
+<div class="row"><div class="lbl">3</div><div class="val">12px</div><div class="demo" style="height:12px"></div><div class="usage">card padding</div></div>
+<div class="row"><div class="lbl">4</div><div class="val">16px</div><div class="demo" style="height:16px"></div><div class="usage">panel padding</div></div>
+<div class="row"><div class="lbl">6</div><div class="val">24px</div><div class="demo" style="height:24px"></div><div class="usage">section gap</div></div>
+<div class="row"><div class="lbl">8</div><div class="val">32px</div><div class="demo" style="height:32px"></div><div class="usage">block gap</div></div>
+</div></body></html>

@@ -1,0 +1,273 @@
+/* =====================================================================
+   VibeUsage — Colors + Typography Tokens
+   Source of truth: dashboard/DESIGN.md (v3 Retro-Cyberpunk Operations Deck)
+   Heritage: Bloomberg terminal × The Matrix
+   ===================================================================== */
+
+/* --- Fonts -------------------------------------------------------- */
+/* Geist Mono — Vercel's official monospace, SIL OFL-1.1.
+   Self-hosted from /fonts so the design system runs offline / air-gapped. */
+@font-face {
+  font-family: "Geist Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("fonts/GeistMono-Regular.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Geist Mono";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("fonts/GeistMono-Medium.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Geist Mono";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("fonts/GeistMono-Bold.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Geist Mono";
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url("fonts/GeistMono-Black.woff2") format("woff2");
+}
+
+:root {
+  /* === Color: ink (Matrix Green data ink) =========================== */
+  /* Six alpha stops only. No /5, /12, /25, /45. Pick one. */
+  --ink:        #00FF41;                    /* primary data, active state, primary btn */
+  --ink-bright: #E8FFE9;                    /* display emphasis, selection foreground  */
+  --ink-text:   rgba(0, 255, 65, 0.60);     /* body text, value label                  */
+  --ink-muted:  rgba(0, 255, 65, 0.35);     /* secondary text, hover line              */
+  --ink-line:   rgba(0, 255, 65, 0.18);     /* default separator, panel border         */
+  --ink-faint:  rgba(0, 255, 65, 0.08);     /* weakest rule, subtle hover bg           */
+  --ink-glow:   rgba(0, 255, 65, 0.40);     /* shadow color used by .glow-text         */
+
+  /* === Color: surface (background ground) =========================== */
+  --surface:         #050505;
+  --surface-raised:  rgba(0, 10, 0, 0.70);  /* + backdrop-blur(10px) on panels */
+  --surface-strong:  rgba(0, 10, 0, 0.82);  /* chip / sticky header / modal    */
+
+  /* === Color: gold (single accent — leaderboard #1 only) ============ */
+  --gold:       #FFD700;
+  --gold-glow:  rgba(255, 215, 0, 0.40);
+
+  /* === Status escape hatch (kit chat2) ============================== */
+  /* Reserved for status indicators where green-on-green can't carry
+     severity. Never use for prose, surfaces, or accents. */
+  --warn:       #FFB300;
+  --warn-glow:  rgba(255, 179, 0, 0.40);
+  --err:        #FF3344;
+  --err-glow:   rgba(255, 51, 68, 0.45);
+
+  /* === Type: families =============================================== */
+  --font-mono:     "Geist Mono", ui-monospace, "SFMono-Regular", "Menlo", monospace;
+  --font-katakana: "Hiragino Sans", "Yu Gothic", "MS Gothic", "Geist Mono", monospace;
+
+  /* === Type: size + line-height + tracking + weight stack =========== */
+  /* 9 sizes — every value flows from one of these tokens. */
+  --fs-display-0: 96px;  --lh-display-0: 0.95; --tr-display-0: -0.03em; --fw-display-0: 900;
+  --fs-display-1: 60px;  --lh-display-1: 1.00; --tr-display-1: -0.02em; --fw-display-1: 900;
+  --fs-display-2: 40px;  --lh-display-2: 1.05; --tr-display-2: -0.02em; --fw-display-2: 900;
+  --fs-display-3: 28px;  --lh-display-3: 1.10; --tr-display-3: -0.02em; --fw-display-3: 900;
+  --fs-heading:   14px;  --lh-heading:   1.25; --tr-heading:    0.12em; --fw-heading:   700;
+  --fs-body:      13px;  --lh-body:      1.50; --tr-body:       0;      --fw-body:      500;
+  --fs-data:      12px;  --lh-data:      1.40; --tr-data:       0;      --fw-data:      500;
+  --fs-caption:   11px;  --lh-caption:   1.30; --tr-caption:    0.12em; --fw-caption:   600;
+  --fs-micro:     10px;  --lh-micro:     1.20; --tr-micro:      0.22em; --fw-micro:     700;
+
+  /* === Letter-spacing canonicals (4 only) =========================== */
+  --tracking-tight: -0.02em;
+  --tracking-data:   0;
+  --tracking-label:  0.12em;
+  --tracking-caps:   0.22em;
+
+  /* === Spacing (4px grid, restricted stops) ========================= */
+  --sp-0:  0;
+  --sp-1:  4px;
+  --sp-2:  8px;
+  --sp-3:  12px;
+  --sp-4:  16px;
+  --sp-6:  24px;
+  --sp-8:  32px;
+  --sp-12: 48px;
+  --sp-16: 64px;
+
+  /* === Radius — zero radius (signature). Dot exception only. ======== */
+  --radius:     0;
+  --radius-dot: 999px;     /* status dot only */
+
+  /* === Borders — 1px solid, no dashed, no dotted ==================== */
+  --border-faint: 1px solid var(--ink-faint);
+  --border-line:  1px solid var(--ink-line);
+  --border-muted: 1px solid var(--ink-muted);
+  --border-ink:   1px solid var(--ink);
+
+  /* === Shadow tokens (box-shadow) =================================== */
+  --shadow-panel:       0 0 0 1px rgba(0,255,65,0.08), 0 18px 40px rgba(0,0,0,0.45);
+  --shadow-glow-xs:     0 0 6px rgba(0,255,65,0.35);
+  --shadow-glow-sm:     0 0 10px rgba(0,255,65,0.35);
+  --shadow-glow:        0 0 24px rgba(0,255,65,0.35);
+  --shadow-glow-faint:  0 0 15px rgba(0,255,65,0.10);
+  --shadow-gold:        0 0 18px rgba(255,215,0,0.35);
+  --shadow-gold-sm:     0 0 10px rgba(255,215,0,0.30);
+  --shadow-gold-faint:  0 0 20px rgba(255,215,0,0.10);
+
+  /* === Drop-shadow (svg / filter) =================================== */
+  --drop-shadow-glow:        drop-shadow(0 0 8px rgba(0,255,65,0.8));
+  --drop-shadow-glow-sm:     drop-shadow(0 0 5px rgba(0,255,65,0.6));
+  --drop-shadow-glow-faint:  drop-shadow(0 0 10px rgba(0,255,65,0.22));
+  --drop-shadow-gold:        drop-shadow(0 0 10px rgba(255,215,0,0.5));
+
+  /* === Backdrop blur ================================================ */
+  --backdrop-panel: blur(10px);
+
+  /* === Motion ======================================================= */
+  --transition: 200ms ease;
+  --press-scale: 0.98;
+}
+
+/* =====================================================================
+   Semantic element styles — drop colors_and_type.css into a page and
+   the basic primitives below already render in-brand.
+   ===================================================================== */
+
+html, body {
+  background: var(--surface);
+  color: var(--ink-text);
+  font-family: var(--font-mono);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  letter-spacing: var(--tracking-data);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: geometricPrecision;
+}
+
+::selection {
+  background: var(--ink);
+  color: var(--surface);
+}
+
+/* --- Display + heading ladder ------------------------------------- */
+h1, .display-1 {
+  font-size: var(--fs-display-1);
+  line-height: var(--lh-display-1);
+  letter-spacing: var(--tr-display-1);
+  font-weight: var(--fw-display-1);
+  color: var(--ink-bright);
+  text-shadow: 0 0 16px var(--ink-glow);
+  margin: 0;
+}
+h2, .display-2 {
+  font-size: var(--fs-display-2);
+  line-height: var(--lh-display-2);
+  letter-spacing: var(--tr-display-2);
+  font-weight: var(--fw-display-2);
+  color: var(--ink-bright);
+  margin: 0;
+}
+h3, .display-3 {
+  font-size: var(--fs-display-3);
+  line-height: var(--lh-display-3);
+  letter-spacing: var(--tr-display-3);
+  font-weight: var(--fw-display-3);
+  color: var(--ink-bright);
+  margin: 0;
+}
+.display-0 {
+  font-size: var(--fs-display-0);
+  line-height: var(--lh-display-0);
+  letter-spacing: var(--tr-display-0);
+  font-weight: var(--fw-display-0);
+  color: var(--ink-bright);
+  text-shadow: 0 0 16px var(--ink-glow);
+}
+h4, .heading {
+  font-size: var(--fs-heading);
+  line-height: var(--lh-heading);
+  letter-spacing: var(--tr-heading);
+  font-weight: var(--fw-heading);
+  color: var(--ink);
+  text-transform: uppercase;
+  margin: 0;
+}
+
+/* --- Inline tokens ------------------------------------------------- */
+p, .body  { font-size: var(--fs-body);    line-height: var(--lh-body);    color: var(--ink-text); margin: 0; }
+.data     { font-size: var(--fs-data);    line-height: var(--lh-data);    font-variant-numeric: tabular-nums; color: var(--ink); }
+small, .caption { font-size: var(--fs-caption); line-height: var(--lh-caption); letter-spacing: var(--tr-caption); font-weight: var(--fw-caption); text-transform: uppercase; color: var(--ink-text); }
+.micro    { font-size: var(--fs-micro);   line-height: var(--lh-micro);   letter-spacing: var(--tr-micro);   font-weight: var(--fw-micro);   text-transform: uppercase; color: var(--ink-muted); }
+
+/* --- code / pre ---------------------------------------------------- */
+code, kbd, pre, samp {
+  font-family: var(--font-mono);
+  font-size: var(--fs-data);
+  color: var(--ink);
+}
+pre {
+  background: var(--surface-strong);
+  border: var(--border-line);
+  padding: var(--sp-4);
+  overflow-x: auto;
+}
+
+a {
+  color: var(--ink);
+  text-decoration: none;
+  border-bottom: 1px solid var(--ink-muted);
+  transition: var(--transition);
+}
+a:hover { color: var(--ink-bright); border-color: var(--ink); }
+
+hr { border: 0; border-top: var(--border-faint); margin: var(--sp-6) 0; }
+
+/* --- Glow text utility (signature) -------------------------------- */
+.glow-text      { text-shadow: 0 0 16px var(--ink-glow); }
+.glow-text-gold { text-shadow: 0 0 20px rgba(255,215,0,0.4); color: var(--gold); }
+
+/* --- Decorative katakana band (chrome only, no signal) ------------ */
+.deco-katakana {
+  font-family: var(--font-katakana);
+  color: var(--ink-faint);
+  letter-spacing: var(--tracking-caps);
+  white-space: nowrap;
+  user-select: none;
+}
+
+/* --- Ambient layers ----------------------------------------------- */
+/* Single fixed scanline overlay — never nest, never duplicate. */
+.fx-scanline::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(rgba(0,0,0,0) 50%, rgba(0,0,0,0.06) 50%);
+  background-size: 100% 4px;
+  z-index: 50;
+}
+/* CRT screen-edge curvature + phosphor warmth. Single fixed overlay. */
+.fx-crt::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  box-shadow: inset 0 0 200px rgba(0,0,0,0.6), inset 0 0 60px rgba(0,255,65,0.04);
+  z-index: 40;
+}
+/* RGB-shift glitch on hover or 7s tick. Use sparingly. */
+@keyframes fx-glitch-tick {
+  0%, 96%, 100% { text-shadow: 0 0 16px var(--ink-glow); }
+  97% { text-shadow: -2px 0 var(--gold), 2px 0 var(--ink); }
+  98% { text-shadow: 2px 0 var(--gold), -2px 0 var(--ink); }
+  99% { text-shadow: 0 0 16px var(--ink-glow); }
+}
+.fx-glitch { animation: fx-glitch-tick 7s infinite linear; }
+.fx-glitch:hover { animation: fx-glitch-tick 240ms steps(2) 2; }
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-glitch, .fx-glitch:hover { animation: none; }
+}

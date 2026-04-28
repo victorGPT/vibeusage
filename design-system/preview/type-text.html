@@ -1,0 +1,41 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="_card.css"><style>
+.wrap { padding: 16px 18px 18px; display: flex; flex-direction: column; }
+.row {
+  display: grid;
+  grid-template-columns: 90px 1fr 130px;
+  align-items: baseline;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--ink-faint);
+}
+.row:last-child { border-bottom: 0; }
+.tok  { color: var(--ink); font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; font-weight: 700; }
+.meta { color: var(--ink-muted); font-size: 10px; letter-spacing: 0.10em; text-transform: uppercase; font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+
+.heading { font-size: 14px; line-height: 1.25; letter-spacing: 0.12em; font-weight: 700; text-transform: uppercase; color: var(--ink); }
+.body    { font-size: 13px; line-height: 1.5;  color: var(--ink-text); }
+.data    { font-size: 12px; line-height: 1.4;  font-variant-numeric: tabular-nums; color: var(--ink); }
+</style></head>
+<body>
+<div class="card-shell">
+  <div class="card-title"><span>TYPE</span> · TEXT&nbsp;+&nbsp;DATA</div>
+
+  <div class="wrap">
+    <div class="row">
+      <div class="tok">heading</div>
+      <div class="heading">Realtime Telemetry</div>
+      <div class="meta">14 / 1.25 / +0.12em</div>
+    </div>
+    <div class="row">
+      <div class="tok">body</div>
+      <div class="body">Track token usage across AI coding agents.</div>
+      <div class="meta">13 / 1.5 / 0</div>
+    </div>
+    <div class="row">
+      <div class="tok">data</div>
+      <div class="data">142,892,317 tokens · $58.21</div>
+      <div class="meta">12 / 1.4 / tabular</div>
+    </div>
+  </div>
+</div>
+</body></html>

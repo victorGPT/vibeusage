@@ -1,0 +1,21 @@
+@import url("../colors_and_type.css");
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--surface);
+  color: var(--ink-text);
+  font-family: var(--font-mono);
+  overflow: hidden;
+}
+.card {
+  width: 700px;
+  padding: 16px 20px;
+  box-sizing: border-box;
+  position: relative;
+}
+.row { display: flex; align-items: center; gap: 12px; }
+.col { display: flex; flex-direction: column; gap: 4px; }
+.divider { height: 1px; background: var(--ink-faint); margin: 12px 0; }
+.label { font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-muted); font-weight: 700; }
+.mono { font-family: var(--font-mono); }

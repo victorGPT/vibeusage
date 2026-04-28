@@ -1,0 +1,18 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="_card.css"><style>
+.wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.cell { padding: 12px; background: rgba(0,10,0,0.70); border: 1px solid rgba(0,255,65,0.18); position: relative; min-height: 72px; }
+.cell.bg { overflow: hidden; }
+.cell.bg::before { content: ""; position: absolute; inset: 0; background: linear-gradient(transparent 50%, rgba(0,255,65,0.03) 50%); background-size: 100% 4px; pointer-events: none; }
+.lbl { color: var(--ink-muted); font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; font-weight: 700; }
+.val { color: var(--ink); font-size: 24px; font-weight: 900; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; text-shadow: 0 0 16px rgba(0,255,65,0.4); margin-top: 4px; }
+.note { color: var(--ink-text); font-size: 10px; margin-top: 2px; }
+.crt { position: relative; overflow: hidden; }
+.crt::after { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.5)); pointer-events: none; }
+</style></head><body><div class="card">
+<div class="wrap">
+<div class="cell bg crt"><div class="lbl">scanline · fx-scanline</div><div class="val">Active</div><div class="note">4px fixed overlay</div></div>
+<div class="cell crt"><div class="lbl">CRT · fx-crt</div><div class="val">On</div><div class="note">vignette + warmth</div></div>
+<div class="cell"><div class="lbl">glitch · 7s tick</div><div class="val" style="filter: drop-shadow(2px 0 0 rgba(255,0,0,0.7)) drop-shadow(-2px 0 0 rgba(0,255,255,0.7))">142,892</div><div class="note">RGB-shift on hover</div></div>
+<div class="cell"><div class="lbl">decoding-reveal</div><div class="val">V█B█U░░GE</div><div class="note">scramble→string</div></div>
+</div>
+</div></body></html>

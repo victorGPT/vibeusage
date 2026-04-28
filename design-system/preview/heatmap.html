@@ -1,0 +1,30 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="_card.css"><style>
+.heat { display: grid; grid-template-columns: repeat(20, 1fr); gap: 3px; padding: 8px; }
+.cell { aspect-ratio: 1; background: rgba(0,255,65,0.06); }
+.cell.l1 { background: rgba(0,255,65,0.18); }
+.cell.l2 { background: rgba(0,255,65,0.35); }
+.cell.l3 { background: rgba(0,255,65,0.60); }
+.cell.l4 { background: var(--ink); box-shadow: 0 0 6px rgba(0,255,65,0.7); }
+.legend { display: flex; align-items: center; gap: 8px; padding: 6px 8px; color: var(--ink-muted); font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; font-weight: 700; }
+.swatch { width: 12px; height: 12px; }
+</style></head><body><div class="card">
+<div class="legend"><span>less</span>
+<span class="swatch" style="background:rgba(0,255,65,0.06)"></span>
+<span class="swatch" style="background:rgba(0,255,65,0.18)"></span>
+<span class="swatch" style="background:rgba(0,255,65,0.35)"></span>
+<span class="swatch" style="background:rgba(0,255,65,0.60)"></span>
+<span class="swatch" style="background:#00FF41"></span>
+<span>more · streak 12_days</span></div>
+<div class="heat" id="h"></div>
+<script>
+const h = document.getElementById('h');
+let seed = 7;
+function r(){ seed = (seed*9301+49297)%233280; return seed/233280; }
+for (let i=0;i<140;i++){
+  const x = r();
+  let cls = '';
+  if (x>0.92) cls='l4'; else if (x>0.78) cls='l3'; else if (x>0.55) cls='l2'; else if (x>0.30) cls='l1';
+  const c = document.createElement('div'); c.className = 'cell '+cls; h.appendChild(c);
+}
+</script>
+</div></body></html>

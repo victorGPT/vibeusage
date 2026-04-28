@@ -1,0 +1,22 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="_card.css"><style>
+.grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+.tile { background: rgba(0,10,0,0.70); backdrop-filter: blur(10px); padding: 14px; min-height: 90px; display: flex; flex-direction: column; justify-content: center; gap: 6px; }
+.t-panel { box-shadow: 0 0 0 1px rgba(0,255,65,0.08), 0 18px 40px rgba(0,0,0,0.45); border: 1px solid rgba(0,255,65,0.18); }
+.t-glow-xs { box-shadow: 0 0 6px rgba(0,255,65,0.35); border: 1px solid var(--ink); }
+.t-glow-sm { box-shadow: 0 0 10px rgba(0,255,65,0.35); border: 1px solid var(--ink); }
+.t-glow { box-shadow: 0 0 24px rgba(0,255,65,0.35); border: 1px solid var(--ink); }
+.t-glow-faint { box-shadow: 0 0 15px rgba(0,255,65,0.10); border: 1px solid var(--ink-line); }
+.t-gold { box-shadow: 0 0 18px rgba(255,215,0,0.35); border: 1px solid #FFD700; }
+.tok { color: var(--ink); font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; font-weight: 700; }
+.t-gold .tok { color: #FFD700; }
+.val { color: var(--ink-text); font-size: 10px; }
+</style></head><body><div class="card">
+<div class="grid">
+<div class="tile t-panel"><div class="tok">panel</div><div class="val">default · 1px+lift</div></div>
+<div class="tile t-glow-xs"><div class="tok">glow-xs</div><div class="val">6px · point/dot</div></div>
+<div class="tile t-glow-sm"><div class="tok">glow-sm</div><div class="val">10px · accent</div></div>
+<div class="tile t-glow"><div class="tok">glow</div><div class="val">24px · primary</div></div>
+<div class="tile t-glow-faint"><div class="tok">glow-faint</div><div class="val">15px · ambient</div></div>
+<div class="tile t-gold"><div class="tok">gold</div><div class="val">18px · #1 only</div></div>
+</div>
+</div></body></html>

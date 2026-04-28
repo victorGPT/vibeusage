@@ -1,0 +1,356 @@
+/* Dashboard kit — VibeUsage Operations Deck (faithful recreation)
+   Imports tokens from ../../colors_and_type.css */
+@import url("../../colors_and_type.css");
+
+* { box-sizing: border-box; }
+
+html, body, #root { margin: 0; padding: 0; min-height: 100vh; }
+
+body {
+  background: var(--surface);
+  color: var(--ink-text);
+  font-family: var(--font-mono);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  overflow-x: hidden;
+}
+
+button { font-family: inherit; cursor: pointer; }
+
+/* ── ambient layers ────────────────────────────────────────────── */
+.fx-rain { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.18; }
+.vu-rain { display: block; width: 100%; height: 100%; }
+.fx-crt-overlay { position: fixed; inset: 0; z-index: 40; pointer-events: none;
+  box-shadow: inset 0 0 200px rgba(0,0,0,0.6), inset 0 0 60px rgba(0,255,65,0.04); }
+.fx-scan { position: fixed; inset: 0; z-index: 50; pointer-events: none;
+  background: linear-gradient(transparent 50%, rgba(0,0,0,0.08) 50%); background-size: 100% 4px; }
+
+/* ── shell ─────────────────────────────────────────────────────── */
+.vu-shell { position: relative; z-index: 10; padding: 18px 28px 60px; max-width: 1500px; margin: 0 auto; }
+
+/* ─────────────────────────────────────────────────────────────────
+   HEADER
+   ───────────────────────────────────────────────────────────────── */
+.vu-header { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 4px 0 16px; margin-bottom: 16px; }
+.vu-brand { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1; }
+.vu-logo { width: 28px; height: 28px; display: block; }
+.vu-wordmark { color: var(--ink); font-size: 28px; font-weight: 900; letter-spacing: -0.01em;
+  text-shadow: 0 0 16px var(--ink-glow); text-transform: uppercase; line-height: 1; }
+.vu-wordmark-sub { color: var(--ink-muted); font-size: 11px; font-weight: 700; letter-spacing: 0.22em;
+  text-transform: uppercase; padding-left: 4px; }
+.vu-status-pip { color: var(--ink-muted); font-family: var(--font-mono); font-size: 12px; padding: 0 6px;
+  display: inline-flex; align-items: center; gap: 2px; letter-spacing: 0; }
+.vu-pip-dot { display: inline-block; width: 6px; height: 6px; border-radius: 999px; background: var(--ink);
+  box-shadow: var(--shadow-glow-xs); animation: vu-pulse 1.6s infinite ease-in-out; }
+@keyframes vu-pulse { 0%,100% { opacity: 1 } 50% { opacity: 0.35 } }
+.vu-deco-band { color: var(--ink-faint); font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 0.22em; text-transform: uppercase; font-weight: 700;
+  flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; padding-left: 16px; opacity: 0.6; }
+
+.vu-header-actions { display: flex; gap: 10px; flex-shrink: 0; }
+
+/* ─────────────────────────────────────────────────────────────────
+   PILL BUTTON — 4 ASCII corner ticks
+   ───────────────────────────────────────────────────────────────── */
+.vu-pill { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  height: 30px; padding: 0 18px; background: transparent; color: var(--ink); border: 1px solid var(--ink-muted);
+  font-family: var(--font-mono); font-size: 11px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase;
+  text-decoration: none; transition: var(--transition); white-space: nowrap; }
+.vu-pill:hover { border-color: var(--ink); background: rgba(0,255,65,0.04); box-shadow: var(--shadow-glow-xs); }
+.vu-pill.is-primary { background: var(--ink); color: var(--surface); border-color: var(--ink);
+  box-shadow: var(--shadow-glow-sm); }
+.vu-pill.is-primary:hover { background: var(--ink-bright); border-color: var(--ink-bright); }
+.vu-pill-tick { position: absolute; font-family: var(--font-mono); font-size: 10px; line-height: 1;
+  color: var(--ink); pointer-events: none; }
+.vu-pill-tick.tl { top: -5px; left: -5px; }
+.vu-pill-tick.tr { top: -5px; right: -5px; }
+.vu-pill-tick.bl { bottom: -5px; left: -5px; }
+.vu-pill-tick.br { bottom: -5px; right: -5px; }
+.vu-pill.is-primary .vu-pill-tick { color: var(--ink); }
+.vu-pill-label { display: inline-flex; align-items: center; }
+
+/* ─────────────────────────────────────────────────────────────────
+   GRID — 4/8 split
+   ───────────────────────────────────────────────────────────────── */
+.vu-grid { display: grid; grid-template-columns: minmax(300px, 340px) 1fr; gap: 16px; }
+.vu-col-left, .vu-col-right { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+
+/* ─────────────────────────────────────────────────────────────────
+   PANEL — title chip on top rule, ASCII corners, body, bottom rule
+   ───────────────────────────────────────────────────────────────── */
+/* Card border — single uniform 1px hairline (was: ASCII corners + split top/bottom rules).
+   Matches _card.css used by the preview cards. */
+.vu-panel { display: flex; flex-direction: column; background: var(--surface-raised);
+  backdrop-filter: var(--backdrop-panel); -webkit-backdrop-filter: var(--backdrop-panel);
+  position: relative; border: 1px solid var(--ink-line); }
+.frame-primary { border-color: var(--ink-muted); box-shadow: var(--shadow-glow-faint); }
+
+/* Hide ASCII corner glyphs + horizontal rules — no longer used */
+.vu-frame-top, .vu-frame-bot { position: relative; display: flex; align-items: center;
+  height: 32px; padding: 0 14px; user-select: none; border-bottom: 1px solid var(--ink-line); }
+.vu-frame-bot { border-bottom: 0; border-top: 1px solid var(--ink-line); height: auto; min-height: 0; padding: 0; }
+.vu-frame-bot:empty { display: none; }
+.vu-corner, .vu-frame-h { display: none; }
+
+.vu-title-chip { position: static; padding: 0; background: transparent;
+  color: var(--ink); font-size: 11px; letter-spacing: 0.22em; font-weight: 700; text-transform: uppercase;
+  white-space: nowrap; line-height: 1; transform: none; display: inline-flex; align-items: center; gap: 4px; }
+.vu-title-sub { color: var(--ink-muted); font-weight: 700; }
+.frame-primary .vu-title-chip { color: var(--ink-bright); text-shadow: 0 0 8px var(--ink-glow); }
+
+.vu-title-right { position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+  background: transparent; padding: 0; }
+
+.vu-bot-stamp { padding: 6px 14px; background: transparent;
+  color: var(--ink-muted); font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; font-weight: 700; }
+
+.vu-frame-body { padding: 16px 20px; flex: 1; border: 0; }
+
+/* ─────────────────────────────────────────────────────────────────
+   IDENTITY CARD
+   ───────────────────────────────────────────────────────────────── */
+.vu-iden-row { display: flex; gap: 16px; align-items: flex-start; }
+.vu-iden-wrap { flex-shrink: 0; padding: 6px; background: var(--surface-strong); border: var(--border-faint); }
+.vu-iden { display: block; }
+.vu-iden rect { fill: var(--ink); }
+.vu-iden.is-gold rect { fill: var(--gold); }
+.vu-iden-meta { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.vu-iden-handle { color: var(--ink-bright); font-size: 26px; font-weight: 900; letter-spacing: -0.02em;
+  text-shadow: 0 0 16px var(--ink-glow); line-height: 1; word-break: break-all; }
+.vu-iden-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.vu-stat { padding: 6px 8px; background: var(--surface-raised); border: var(--border-faint); text-align: center; }
+.vu-stat-lbl { color: var(--ink-text); font-size: 9px; letter-spacing: 0.22em; font-weight: 700; text-transform: uppercase; }
+.vu-stat-val { font-size: 12px; font-weight: 900; font-variant-numeric: tabular-nums; margin-top: 2px;
+  white-space: nowrap; }
+.vu-gold { color: var(--gold); }
+
+.vu-subs { padding-top: 4px; }
+.vu-subs-lbl { color: var(--ink-text); font-size: 9px; letter-spacing: 0.22em; font-weight: 700;
+  text-transform: uppercase; margin-bottom: 6px; }
+.vu-subs-list { display: flex; flex-wrap: wrap; gap: 4px; }
+.vu-sub-chip { display: inline-flex; align-items: center; padding: 3px 6px; border: var(--border-faint);
+  background: var(--surface-raised); color: var(--ink-bright); font-size: 9px; letter-spacing: 0.12em;
+  font-weight: 700; text-transform: uppercase; white-space: nowrap; }
+
+/* ─────────────────────────────────────────────────────────────────
+   ROLLING USAGE — 3 tiles
+   ───────────────────────────────────────────────────────────────── */
+.vu-rolling { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.vu-rolling-tile { padding: 10px 6px; border: var(--border-faint); background: var(--surface-raised); text-align: center; }
+.vu-rolling-lbl { color: var(--ink-text); font-size: 9px; letter-spacing: 0.22em; font-weight: 700; text-transform: uppercase; }
+.vu-rolling-val { color: var(--ink-bright); font-size: 26px; font-weight: 900; letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums; margin-top: 4px; line-height: 1; text-shadow: 0 0 12px var(--ink-glow); }
+
+/* ─────────────────────────────────────────────────────────────────
+   TOP MODELS
+   ───────────────────────────────────────────────────────────────── */
+.vu-tm { display: flex; flex-direction: column; }
+.vu-tm-row { display: grid; grid-template-columns: auto 1fr auto; align-items: baseline; gap: 12px;
+  padding: 10px 4px; border-bottom: var(--border-faint); }
+.vu-tm-row:last-child { border-bottom: 0; }
+.vu-tm-rank { color: var(--ink-muted); font-size: 11px; font-weight: 700; letter-spacing: 0.12em; font-variant-numeric: tabular-nums; }
+.vu-tm-name { color: var(--ink); font-size: 13px; font-weight: 900; letter-spacing: 0.04em; text-transform: uppercase;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.vu-tm-pct { color: var(--ink); font-size: 14px; font-weight: 900; font-variant-numeric: tabular-nums; }
+.vu-tm-pct-unit { color: var(--ink); font-size: 11px; font-weight: 700; margin-left: 1px; }
+
+/* ─────────────────────────────────────────────────────────────────
+   PUBLIC PROFILE
+   ───────────────────────────────────────────────────────────────── */
+.vu-pp { display: flex; align-items: center; gap: 12px; }
+.vu-toggle { position: relative; width: 28px; height: 18px; padding: 2px; border: 1px solid var(--ink-muted);
+  background: var(--surface-strong); cursor: pointer; transition: var(--transition); flex-shrink: 0; }
+.vu-toggle.is-on { border-color: var(--ink); background: rgba(0,255,65,0.06); }
+.vu-toggle-dot { display: block; width: 10px; height: 12px; background: var(--ink); transition: transform var(--transition); }
+.vu-toggle.is-on .vu-toggle-dot { transform: translateX(12px); box-shadow: var(--shadow-glow-xs); }
+.vu-toggle:not(.is-on) .vu-toggle-dot { background: var(--ink-muted); transform: translateX(0); }
+.vu-pp-lbl { color: var(--ink); font-size: 11px; letter-spacing: 0.22em; font-weight: 700; text-transform: uppercase; }
+.vu-pp-copy { margin-left: auto; padding: 6px 10px; border: 1px solid var(--ink-muted); background: transparent;
+  color: var(--ink-text); font-size: 10px; font-weight: 700; transition: var(--transition); white-space: nowrap;
+  font-family: var(--font-mono); }
+.vu-pp-copy:hover:not(:disabled) { border-color: var(--ink); color: var(--ink); }
+.vu-pp-copy:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ─────────────────────────────────────────────────────────────────
+   PROJECT USAGE — top toolbar + card grid
+   ───────────────────────────────────────────────────────────────── */
+.vu-proj-toolbar { display: inline-flex; align-items: center; gap: 8px; padding: 0 6px; background: var(--surface); }
+.vu-toolbar-lbl { color: var(--ink-text); font-size: 11px; letter-spacing: 0.22em; font-weight: 700; text-transform: uppercase; }
+.vu-chip-select { padding: 4px 10px; border: var(--border-muted); background: transparent; color: var(--ink);
+  font-size: 11px; letter-spacing: 0.22em; font-weight: 700; text-transform: uppercase; transition: var(--transition);
+  display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.vu-chip-select:hover { border-color: var(--ink); }
+.vu-chip-caret { color: var(--ink-bright); font-size: 9px; }
+
+.vu-projs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.vu-proj { position: relative; display: flex; flex-direction: column; gap: 10px; padding: 14px;
+  border: var(--border-faint); background: var(--surface-raised); text-decoration: none; min-height: 132px;
+  transition: var(--transition); }
+.vu-proj:hover { border-color: var(--ink); box-shadow: var(--shadow-glow-faint); }
+.vu-proj-stars { position: absolute; top: 10px; right: 12px; display: inline-flex; align-items: center; gap: 4px;
+  color: var(--ink); font-size: 11px; font-weight: 700; letter-spacing: 0.12em; }
+.vu-proj-stars svg { color: var(--ink); fill: var(--ink); }
+.vu-proj-stars-num { color: var(--ink-bright); font-variant-numeric: tabular-nums; }
+
+.vu-proj-id { display: flex; align-items: center; gap: 8px; padding-right: 60px; }
+.vu-proj-avatar { width: 28px; height: 28px; border: var(--border-faint); border-radius: 999px; overflow: hidden;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: var(--surface-strong); }
+.vu-proj-avatar svg { width: 22px !important; height: 22px !important; }
+.vu-proj-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.vu-proj-owner { color: var(--ink-text); font-size: 10px; letter-spacing: 0.18em; font-weight: 700;
+  text-transform: lowercase; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+
+.vu-proj-repo { color: var(--ink-bright); font-size: 18px; font-weight: 900; letter-spacing: -0.01em;
+  line-height: 1.1; text-shadow: 0 0 10px var(--ink-glow); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.vu-proj-tokens-row { display: flex; align-items: baseline; justify-content: space-between; margin-top: auto; }
+.vu-proj-tokens-lbl { color: var(--ink-text); font-size: 10px; letter-spacing: 0.22em; font-weight: 700; text-transform: uppercase; }
+.vu-proj-tokens-val { color: var(--ink); font-size: 18px; font-weight: 900; font-variant-numeric: tabular-nums; }
+
+/* ─────────────────────────────────────────────────────────────────
+   CORE INDEX
+   ───────────────────────────────────────────────────────────────── */
+.vu-core-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.vu-tabs { display: flex; gap: 0; }
+.vu-tab { background: transparent; border: 0; color: var(--ink-muted); font-size: 11px; font-weight: 700;
+  letter-spacing: 0.22em; text-transform: uppercase; padding: 8px 12px; transition: var(--transition);
+  border-bottom: 1px solid transparent; font-family: var(--font-mono); }
+.vu-tab:hover { color: var(--ink); }
+.vu-tab.is-active { color: var(--ink); border-bottom-color: var(--ink); text-shadow: 0 0 12px var(--ink-glow); }
+
+.vu-core-meta { display: inline-flex; align-items: center; gap: 8px; }
+.vu-meta-lbl { color: var(--ink-text); font-size: 10px; letter-spacing: 0.22em; font-weight: 700; text-transform: uppercase; }
+.vu-meta-val { color: var(--ink); font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
+.vu-meta-sep { color: var(--ink-bright); font-size: 11px; }
+
+.vu-core-body { text-align: center; padding: 28px 0 16px; }
+.vu-core-lbl { color: var(--ink-muted); font-size: 11px; letter-spacing: 0.22em; font-weight: 700; text-transform: uppercase; margin-bottom: 14px; }
+.vu-core-num { color: var(--ink-bright); font-size: 88px; font-weight: 900; letter-spacing: -0.03em; line-height: 1;
+  text-shadow: 0 0 28px rgba(0,255,65,0.45); font-variant-numeric: tabular-nums; }
+.vu-core-cost { color: var(--gold); font-size: 32px; font-weight: 900; letter-spacing: -0.02em;
+  margin-top: 14px; text-shadow: 0 0 18px var(--gold-glow); font-variant-numeric: tabular-nums; }
+.vu-key { color: var(--ink-muted); font-size: 10px; letter-spacing: 0.22em; font-weight: 700; margin-left: 6px; vertical-align: middle; }
+
+.vu-core-foot { color: var(--ink-muted); font-size: 10px; letter-spacing: 0.18em; text-align: center;
+  padding-top: 12px; margin-top: 12px; border-top: var(--border-faint); font-weight: 600; text-transform: uppercase; }
+
+/* ─────────────────────────────────────────────────────────────────
+   MODEL BREAKDOWN — grouped per source
+   ───────────────────────────────────────────────────────────────── */
+.vu-mbd { display: flex; flex-direction: column; gap: 22px; }
+.vu-mbd-group { display: flex; flex-direction: column; gap: 6px; }
+.vu-mbd-head { display: flex; align-items: baseline; gap: 12px; }
+.vu-mbd-name { color: var(--ink); font-size: 14px; font-weight: 900; letter-spacing: 0.12em; text-transform: uppercase; }
+.vu-mbd-usage { color: var(--ink-text); font-size: 10px; letter-spacing: 0.22em; font-weight: 700; text-transform: uppercase; }
+.vu-mbd-pct { margin-left: auto; color: var(--ink); font-size: 18px; font-weight: 900; font-variant-numeric: tabular-nums; }
+.vu-mbd-pct-unit { color: var(--ink); font-size: 12px; font-weight: 700; margin-left: 1px; }
+.vu-mbd-bar { height: 4px; background: var(--ink-faint); position: relative; }
+.vu-mbd-fill { height: 100%; background: var(--ink); box-shadow: var(--shadow-glow-xs); transition: width 400ms ease; }
+.vu-mbd-subs { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px 16px; padding-top: 4px; }
+.vu-mbd-sub { display: flex; align-items: center; gap: 6px; color: var(--ink-text); font-size: 11px;
+  letter-spacing: 0.04em; font-weight: 700; text-transform: uppercase; min-width: 0; }
+.vu-mbd-sub-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.vu-mbd-square { width: 8px; height: 8px; background: var(--ink); display: inline-block; flex-shrink: 0; }
+.vu-mbd-sub-name__legacy { color: var(--ink); }
+.vu-mbd-sub-pct { color: var(--ink-bright); margin-left: auto; font-variant-numeric: tabular-nums; }
+
+/* ─────────────────────────────────────────────────────────────────
+   DETAILS TABLE
+   ───────────────────────────────────────────────────────────────── */
+.vu-details { border: var(--border-faint); overflow-x: auto; }
+.vu-details table { width: 100%; border-collapse: collapse; }
+.vu-details th { padding: 0; background: var(--surface-strong); border-bottom: var(--border-faint); }
+.vu-details th button { width: 100%; display: inline-flex; align-items: center; justify-content: flex-start;
+  gap: 6px; padding: 10px 14px; background: transparent; border: 0; color: var(--ink-text); font-size: 10px;
+  letter-spacing: 0.22em; font-weight: 900; text-transform: uppercase; cursor: pointer; transition: var(--transition); font-family: var(--font-mono); }
+.vu-details th button:hover { color: var(--ink); background: rgba(0,255,65,0.04); }
+.vu-th-arrow { color: var(--ink-bright); font-size: 10px; }
+.vu-details td { padding: 10px 14px; border-bottom: var(--border-faint); color: var(--ink-text); font-size: 12px;
+  font-variant-numeric: tabular-nums; font-weight: 600; }
+.vu-details tr:last-child td { border-bottom: 0; }
+.vu-details tr:hover td { background: rgba(0,255,65,0.03); }
+.vu-td-date { color: var(--ink); }
+
+/* ─────────────────────────────────────────────────────────────────
+   TREND CHART (small)
+   ───────────────────────────────────────────────────────────────── */
+.vu-trend-meta { color: var(--ink-text); font-size: 10px; letter-spacing: 0.22em; font-weight: 700;
+  text-transform: uppercase; margin-bottom: 6px; }
+.vu-trend-num { color: var(--ink); font-weight: 700; letter-spacing: 0.14em; }
+.vu-trend-svg { width: 100%; height: 156px; display: block; overflow: visible; }
+.vu-trend-yt { fill: var(--ink); font-size: 9px; font-family: var(--font-mono); font-weight: 700;
+  letter-spacing: 0.06em; }
+.vu-trend-axis { display: flex; justify-content: space-between; padding: 6px 38px 0 8px;
+  color: var(--ink); font-size: 10px; letter-spacing: 0.18em; font-weight: 700;
+  text-transform: uppercase; }
+
+/* ─────────────────────────────────────────────────────────────────
+   ACTIVITY HEATMAP
+   ───────────────────────────────────────────────────────────────── */
+.vu-heat-wrap { display: flex; flex-direction: column; gap: 6px; }
+.vu-heat-months { display: grid; padding-left: 30px; color: var(--ink-text); font-size: 9px;
+  letter-spacing: 0.22em; font-weight: 700; text-transform: uppercase; text-align: left; }
+.vu-heat-body { display: grid; grid-template-columns: 28px 1fr; gap: 4px; }
+.vu-heat-days { display: grid; grid-template-rows: repeat(7, 1fr); gap: 2px; color: var(--ink-text);
+  font-size: 8px; letter-spacing: 0.18em; font-weight: 700; text-transform: uppercase; align-items: center; }
+.vu-heat-grid { display: grid; gap: 2px; }
+.vu-heat-c { aspect-ratio: 1; min-width: 0; }
+.vu-heat-l0 { background: var(--ink-faint); }
+.vu-heat-l1 { background: rgba(0,255,65,0.18); }
+.vu-heat-l2 { background: rgba(0,255,65,0.35); }
+.vu-heat-l3 { background: rgba(0,255,65,0.6); }
+.vu-heat-l4 { background: var(--ink); box-shadow: var(--shadow-glow-xs); }
+.vu-heat-foot { display: flex; justify-content: space-between; align-items: center; padding-top: 8px;
+  border-top: var(--border-faint); color: var(--ink-text); font-size: 9px; letter-spacing: 0.22em;
+  font-weight: 700; text-transform: uppercase; }
+.vu-heat-legend { display: inline-flex; align-items: center; gap: 4px; }
+.vu-heat-foot .vu-heat-c { display: inline-block; width: 10px; height: 10px; aspect-ratio: auto; }
+
+/* ─────────────────────────────────────────────────────────────────
+   FLOATING CHROME
+   ───────────────────────────────────────────────────────────────── */
+.vu-floating { position: fixed; right: 16px; top: 50%; transform: translateY(-50%); z-index: 35;
+  display: flex; flex-direction: column; gap: 8px; }
+.vu-fab { width: 32px; height: 32px; border: var(--border-muted); background: var(--surface-strong);
+  color: var(--ink); display: inline-flex; align-items: center; justify-content: center; transition: var(--transition);
+  border-radius: 999px; }
+.vu-fab:hover { border-color: var(--ink); box-shadow: var(--shadow-glow-xs); color: var(--ink-bright); }
+
+.vu-version { position: fixed; bottom: 16px; right: 16px; z-index: 35; display: flex; flex-direction: column;
+  align-items: flex-end; padding: 6px 10px; border: var(--border-faint); background: var(--surface-strong); }
+.vu-version-lbl { color: var(--ink-muted); font-size: 9px; letter-spacing: 0.22em; font-weight: 700; text-transform: uppercase; }
+.vu-version-num { color: var(--ink); font-size: 12px; font-weight: 900; font-variant-numeric: tabular-nums; }
+
+/* ─────────────────────────────────────────────────────────────────
+   CHEATSHEET MODAL
+   ───────────────────────────────────────────────────────────────── */
+.vu-modal { position: fixed; inset: 0; background: rgba(5,5,5,0.7); backdrop-filter: blur(4px); z-index: 60;
+  display: flex; align-items: center; justify-content: center; }
+.vu-modal-panel { width: min(360px, 90vw); }
+.vu-cheats { display: flex; flex-direction: column; gap: 6px; }
+.vu-cheats-row { display: flex; align-items: center; gap: 12px; padding: 6px 4px; border-bottom: var(--border-faint); }
+.vu-cheats-row:last-child { border-bottom: 0; }
+.vu-cheats kbd { display: inline-flex; align-items: center; justify-content: center; min-width: 28px; height: 24px;
+  padding: 0 6px; border: var(--border-muted); background: var(--surface-strong); color: var(--ink);
+  font-family: var(--font-mono); font-size: 11px; font-weight: 900; }
+.vu-cheats-row span { color: var(--ink-text); font-size: 12px; }
+
+/* ─────────────────────────────────────────────────────────────────
+   FOOTER + TOAST
+   ───────────────────────────────────────────────────────────────── */
+.vu-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 24px; padding-top: 12px;
+  border-top: var(--border-faint); color: var(--ink-faint); font-size: 10px; letter-spacing: 0.22em;
+  font-weight: 700; text-transform: uppercase; }
+
+.vu-toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); padding: 10px 16px;
+  background: var(--surface-strong); border: 1px solid var(--ink); color: var(--ink); font-size: 11px;
+  letter-spacing: 0.22em; font-weight: 700; text-transform: uppercase; z-index: 70; box-shadow: var(--shadow-glow-sm); }
+
+/* ─── responsive ──────────────────────────────────────────────── */
+@media (max-width: 980px) {
+  .vu-grid { grid-template-columns: 1fr; }
+  .vu-projs { grid-template-columns: 1fr; }
+  .vu-core-num { font-size: 56px; }
+  .vu-deco-band { display: none; }
+  .vu-floating { display: none; }
+}

@@ -1,0 +1,74 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="_card.css"><style>
+/* Mirrors ui_kits/dashboard/parts.jsx → ModelBreakdownPanel
+   + ui_kits/dashboard/styles.css → .vu-mbd-* rules (live site).
+   Every CLI is one uniform band: head row, thin bar, 2-col sub-model grid. */
+
+.wrap { padding: 16px 18px 20px; display: flex; flex-direction: column; gap: 22px; }
+
+.group { display: flex; flex-direction: column; gap: 6px; }
+.head  { display: flex; align-items: baseline; gap: 12px; }
+.name  { color: var(--ink); font-size: 14px; font-weight: 900;
+  letter-spacing: 0.12em; text-transform: uppercase; }
+.usage { color: var(--ink-text); font-size: 10px; letter-spacing: 0.22em;
+  font-weight: 700; text-transform: uppercase; }
+.pct   { margin-left: auto; color: var(--ink); font-size: 18px; font-weight: 900;
+  font-variant-numeric: tabular-nums; line-height: 1; }
+.pct .u { color: var(--ink); font-size: 12px; font-weight: 700; margin-left: 1px; }
+
+.bar  { height: 4px; background: var(--ink-faint); position: relative; }
+.fill { height: 100%; background: var(--ink); box-shadow: 0 0 6px rgba(0,255,65,0.35);
+  transition: width 400ms ease; }
+
+.subs { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px 16px; padding-top: 4px; }
+.sub  { display: flex; align-items: center; gap: 6px; color: var(--ink-text);
+  font-size: 11px; letter-spacing: 0.04em; font-weight: 700;
+  text-transform: uppercase; min-width: 0; }
+.sq        { width: 8px; height: 8px; background: var(--ink); flex-shrink: 0; }
+.sub-name  { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sub-pct   { color: var(--ink-bright); margin-left: auto; font-variant-numeric: tabular-nums; }
+</style></head>
+<body>
+<div class="card-shell">
+  <div class="card-title"><span>COMPONENTS</span> · MODEL&nbsp;BREAKDOWN</div>
+
+  <div class="wrap">
+
+    <div class="group">
+      <div class="head">
+        <span class="name">HERMES</span>
+        <span class="usage">USAGE: 4M</span>
+        <span class="pct">80.8<span class="u">%</span></span>
+      </div>
+      <div class="bar"><div class="fill" style="width:80.8%"></div></div>
+      <div class="subs">
+        <span class="sub"><span class="sq"></span><span class="sub-name">GPT-5.4</span><span class="sub-pct">100%</span></span>
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="head">
+        <span class="name">OPENCLAW</span>
+        <span class="usage">USAGE: 789.6K</span>
+        <span class="pct">15.8<span class="u">%</span></span>
+      </div>
+      <div class="bar"><div class="fill" style="width:15.8%"></div></div>
+      <div class="subs">
+        <span class="sub"><span class="sq"></span><span class="sub-name">KIMI-K2.5</span><span class="sub-pct">100%</span></span>
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="head">
+        <span class="name">CLAUDE</span>
+        <span class="usage">USAGE: 168K</span>
+        <span class="pct">3.4<span class="u">%</span></span>
+      </div>
+      <div class="bar"><div class="fill" style="width:3.4%"></div></div>
+      <div class="subs">
+        <span class="sub"><span class="sq"></span><span class="sub-name">CLAUDE-OPUS-4…</span><span class="sub-pct">100%</span></span>
+      </div>
+    </div>
+
+  </div>
+</div>
+</body></html>

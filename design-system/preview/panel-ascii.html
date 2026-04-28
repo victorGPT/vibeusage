@@ -1,0 +1,72 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="_card.css"><style>
+.stack { display: flex; flex-direction: column; gap: 18px; padding: 6px 0; }
+.row { display: grid; grid-template-columns: 84px 1fr; align-items: stretch; gap: 16px; }
+.tok { color: var(--ink); font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase;
+  font-weight: 700; align-self: center; }
+
+/* Panel: clean 1px continuous border + corner-cross title chip.
+   Avoids the box-drawing-glyph seams that look "broken up". */
+.panel { position: relative; height: 80px; padding: 22px 16px 0; }
+.panel::before {
+  content: ""; position: absolute; inset: 0;
+  border: 1px solid currentColor;
+  pointer-events: none;
+}
+.chip {
+  position: absolute; top: -8px; left: 14px;
+  padding: 0 8px; height: 16px; line-height: 16px;
+  font-size: 10px; letter-spacing: 0.22em; font-weight: 700; text-transform: uppercase;
+  background: var(--surface);
+  border: 1px solid currentColor;
+}
+.body { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;
+  color: inherit; opacity: 0.9; }
+
+/* WEIGHT 1 — primary, hero. Bright + glow. */
+.p1 { color: var(--ink); }
+.p1::before { box-shadow: 0 0 0 1px rgba(0,255,65,0.4), 0 0 14px rgba(0,255,65,0.18); }
+.p1 .chip { box-shadow: 0 0 0 1px rgba(0,255,65,0.4); text-shadow: 0 0 8px rgba(0,255,65,0.5); }
+
+/* WEIGHT 2 — default, structural. Quiet 1px solid. */
+.p2 { color: var(--ink-muted); }
+
+/* WEIGHT 3 — tertiary, sub-section / aside / empty-state.
+   Same 1px solid (no dashed — the system is solid-only) but on the faintest
+   ink stop so it reads as background structure, not foreground content. */
+.p3 { color: var(--ink-faint); }
+.p3 .chip { color: var(--ink-muted); }
+.p3 .body { color: var(--ink-muted); }
+</style></head>
+<body>
+<div class="card-shell">
+  <div class="card-title"><span>COMPONENTS</span> · ASCII&nbsp;PANEL&nbsp;WEIGHTS</div>
+
+  <div class="stack" style="padding: 14px 18px 22px;">
+
+    <div class="row">
+      <div class="tok">primary</div>
+      <div class="panel p1">
+        <span class="chip">HERO</span>
+        <div class="body">Solid 1px · glow halo · bright ink</div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="tok">default</div>
+      <div class="panel p2">
+        <span class="chip">PANEL</span>
+        <div class="body">Solid 1px · muted ink · structural</div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="tok">tertiary</div>
+      <div class="panel p3">
+        <span class="chip">SUB-SECTION</span>
+        <div class="body">Solid 1px · faint ink · nested / aside / empty-state</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</body></html>

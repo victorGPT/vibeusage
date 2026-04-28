@@ -1,0 +1,26 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="_card.css"><style>
+.wrap { padding: 12px; display: flex; align-items: center; gap: 16px; }
+.av { width: 64px; height: 64px; background: var(--surface); border: 1px solid var(--ink-muted); padding: 4px; box-sizing: border-box; }
+.av svg { width: 100%; height: 100%; filter: drop-shadow(0 0 5px rgba(0,255,65,0.6)); }
+.av.gold { border-color: #FFD700; }
+.av.gold svg rect { fill: #FFD700 !important; }
+.av.anon { border-color: var(--ink-faint); }
+.av.anon::after { content: "?"; display: flex; height: 100%; align-items: center; justify-content: center; color: var(--ink); font-size: 24px; font-weight: 900; }
+.col { display: flex; flex-direction: column; gap: 6px; }
+.label { color: var(--ink-muted); font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; font-weight: 700; }
+.handle { color: var(--ink-bright); font-size: 16px; font-weight: 900; letter-spacing: -0.02em; }
+.gold .handle { color: #FFD700; text-shadow: 0 0 20px rgba(255,215,0,0.4); }
+</style></head><body><div class="card wrap">
+
+<div style="text-align:center"><div class="av"><svg viewBox="0 0 5 5"><rect x="1" y="0" width="1" height="1" fill="#00FF41"/><rect x="3" y="0" width="1" height="1" fill="#00FF41"/><rect x="0" y="1" width="1" height="1" fill="#00FF41"/><rect x="4" y="1" width="1" height="1" fill="#00FF41"/><rect x="2" y="2" width="1" height="1" fill="#00FF41"/><rect x="1" y="3" width="1" height="1" fill="#00FF41"/><rect x="3" y="3" width="1" height="1" fill="#00FF41"/><rect x="0" y="4" width="1" height="1" fill="#00FF41"/><rect x="4" y="4" width="1" height="1" fill="#00FF41"/></svg></div><div class="label" style="margin-top:6px">@trinity_404</div></div>
+
+<div class="col gold" style="text-align:center"><div class="av gold"><svg viewBox="0 0 5 5"><rect x="0" y="0" width="1" height="1"/><rect x="4" y="0" width="1" height="1"/><rect x="2" y="1" width="1" height="1"/><rect x="1" y="2" width="1" height="1"/><rect x="3" y="2" width="1" height="1"/><rect x="0" y="3" width="1" height="1"/><rect x="2" y="3" width="1" height="1"/><rect x="4" y="3" width="1" height="1"/><rect x="1" y="4" width="1" height="1"/><rect x="3" y="4" width="1" height="1"/></svg></div><div class="label" style="color:#FFD700;margin-top:6px">@neo_codes #1</div></div>
+
+<div style="text-align:center"><div class="av anon"></div><div class="label" style="margin-top:6px">anon</div></div>
+
+<div class="col" style="flex:1">
+  <div class="label">Identicon spec</div>
+  <div style="color:var(--ink-text);font-size:11px;line-height:1.5">5×5 mirror-symmetric grid · seeded from <span style="color:var(--ink)">hash(handle)</span> · single-color SVG · no library · gold for #1, anon "?" for unsigned</div>
+</div>
+
+</div></body></html>

@@ -1,0 +1,20 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="_card.css"><style>
+.row3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.swatch { display: flex; flex-direction: column; gap: 6px; }
+.chip { height: 70px; border: 1px solid var(--ink-line); position: relative; }
+.chip.surface { background: var(--surface); }
+.chip.raised { background: rgba(0,10,0,0.70); backdrop-filter: blur(10px); }
+.chip.strong { background: rgba(0,10,0,0.82); backdrop-filter: blur(10px); }
+.name { font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; font-weight: 700; color: var(--ink); }
+.val { font-size: 10px; color: var(--ink-text); }
+.bg-stripe { position: absolute; inset: 0; z-index: -1; background:
+  repeating-linear-gradient(45deg, rgba(0,255,65,0.06) 0 6px, transparent 6px 12px); }
+.wrap { position: relative; }
+</style></head><body><div class="card">
+<div class="row3 wrap">
+<div class="bg-stripe"></div>
+<div class="swatch"><div class="chip surface"></div><div class="name">surface</div><div class="val">#050505</div></div>
+<div class="swatch"><div class="chip raised"></div><div class="name">raised</div><div class="val">rgba(0,10,0,.70)</div></div>
+<div class="swatch"><div class="chip strong"></div><div class="name">strong</div><div class="val">rgba(0,10,0,.82)</div></div>
+</div>
+</div></body></html>
