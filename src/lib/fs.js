@@ -1,6 +1,11 @@
 const fs = require("node:fs/promises");
 const path = require("node:path");
-const lockfile = require("proper-lockfile");
+
+// proper-lockfile is required lazily inside openLock(): some callers copy
+// src/lib/fs.js into sandboxes that have no node_modules (e.g. the openclaw
+// session plugin test, which materializes src/ under a tmp dir to test the
+// ledger). Those callers only use ensureDir/readJson/etc and would crash on
+// a top-level require.
 
 async function ensureDir(p) {
   await fs.mkdir(p, { recursive: true });
@@ -67,6 +72,9 @@ const LOCK_STALE_MS = 60_000;
 const LOCK_UPDATE_MS = 10_000;
 
 async function openLock(lockPath, { quietIfLocked } = {}) {
+  // Lazy require: see top-of-file note about sandboxed callers.
+  const lockfile = require("proper-lockfile");
+
   // Migration path: pre-proper-lockfile versions of vibeusage created the
   // lock as a regular *file* (fs.open with "wx"). proper-lockfile creates
   // it as a *directory* (mkdir). If we hand a stale legacy file off to
