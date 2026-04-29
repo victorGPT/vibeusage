@@ -67,14 +67,13 @@ function splitPrefix(token) {
 // does NOT ban /N on them, so we preserve the user's alpha intent there
 // (Codex feedback: don't collapse valid alpha semantics).
 const GUARDRAIL_BANS_SLASH = new Set([
-  "ink-faint",
   "ink-line",
   "ink-muted",
   "ink-text",
 ]);
 
 function targetTokenName(replacement) {
-  // "bg-ink-faint" → "ink-faint". Used to compare against the ban list.
+  // "bg-ink-line" → "ink-line". Used to compare against the ban list.
   const m = replacement.match(
     /^(?:bg|text|border|ring|fill|stroke|from|via|to|outline)-(.+)$/,
   );
@@ -292,7 +291,7 @@ const SELF_TESTS = [
   {
     name: "data-[state=open] variant on bg-accent",
     in: 'className="data-[state=open]:bg-accent"',
-    out: 'className="data-[state=open]:bg-ink-faint"',
+    out: 'className="data-[state=open]:bg-ink-line"',
   },
   {
     name: "data-[state=closed] strips dark: chained variant",
@@ -302,7 +301,7 @@ const SELF_TESTS = [
   {
     name: "aria-selected variant",
     in: 'className="aria-selected:bg-accent"',
-    out: 'className="aria-selected:bg-ink-faint"',
+    out: 'className="aria-selected:bg-ink-line"',
   },
   {
     name: "peer-disabled variant on opacity-50 strips token",
@@ -357,12 +356,12 @@ const SELF_TESTS = [
   {
     name: "ternary with nested call inside cn — both branches and tail rewritten",
     in: 'cn(condition ? cls(x) : "bg-accent text-foreground", "border-border")',
-    out: 'cn(condition ? cls(x) : "bg-ink-faint text-ink-bright", "border-ink-line")',
+    out: 'cn(condition ? cls(x) : "bg-ink-line text-ink-bright", "border-ink-line")',
   },
   {
     name: "deeply nested cva inside cn — strings at every level rewritten",
     in: 'cn(cva({ base: "p-2 rounded-md bg-muted" })(props), "bg-primary")',
-    out: 'cn(cva({ base: "p-2 bg-ink-faint" })(props), "bg-ink")',
+    out: 'cn(cva({ base: "p-2 bg-ink-line" })(props), "bg-ink")',
   },
   {
     name: "literal containing parens does not break paren scan",
@@ -377,12 +376,12 @@ const SELF_TESTS = [
   {
     name: "opacity-slash on guardrail-banned rgba target strips /N",
     in: 'className="bg-muted/80"',
-    out: 'className="bg-ink-faint"',
+    out: 'className="bg-ink-line"',
   },
   {
     name: "opacity-slash with variant prefix on banned rgba strips /N",
     in: 'className="hover:bg-accent/50"',
-    out: 'className="hover:bg-ink-faint"',
+    out: 'className="hover:bg-ink-line"',
   },
   {
     name: "opacity-slash with variant prefix on hex target keeps /N",
@@ -412,7 +411,7 @@ const SELF_TESTS = [
   {
     name: "arbitrary-opacity bracket value stripped on banned rgba target",
     in: 'className="bg-muted/[0.32]"',
-    out: 'className="bg-ink-faint"',
+    out: 'className="bg-ink-line"',
   },
 ];
 

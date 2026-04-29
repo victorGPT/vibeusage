@@ -152,7 +152,7 @@ export function LeaderboardProfilePage({
       <div className="w-full overflow-x-auto">
         <table className="w-full text-left text-data">
           <thead className="uppercase text-ink-muted tracking-caps text-micro">
-            <tr className="border-b border-ink-faint">
+            <tr className="border-b border-ink-line">
               <th className="px-4 py-3">{copy("leaderboard.column.rank")}</th>
               <th className="px-4 py-3">{copy("leaderboard.column.total")}</th>
               <th className="px-4 py-3">{copy("leaderboard.column.gpt")}</th>
@@ -161,7 +161,7 @@ export function LeaderboardProfilePage({
             </tr>
           </thead>
           <tbody>
-            <tr className="border-b border-ink-faint bg-transparent">
+            <tr className="border-b border-ink-line bg-transparent">
               <td className="px-4 py-3 font-bold">
                 {entry?.rank ?? copy("shared.placeholder.short")}
               </td>

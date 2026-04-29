@@ -474,7 +474,7 @@ export function ActivityHeatmap({
                           unit: copy("heatmap.unit.tokens"),
                           tz: tzDetail,
                         })}
-                        className="rounded-[2px] border border-ink-faint"
+                        className="rounded-[2px] border border-ink-line"
                         style={{
                           width: CELL_SIZE,
                           height: CELL_SIZE,
@@ -493,7 +493,7 @@ export function ActivityHeatmap({
       {/* Custom Scrollbar Track */}
       <div
         ref={trackRef}
-        className="heatmap-scrollbar-track relative h-[6px] rounded-full bg-surface-strong border border-ink-faint overflow-visible mt-1 transition-opacity duration-150"
+        className="heatmap-scrollbar-track relative h-[6px] rounded-full bg-surface-strong border border-ink-line overflow-visible mt-1 transition-opacity duration-150"
         style={{
           opacity: showScrollbar ? 1 : 0,
           pointerEvents: showScrollbar ? "auto" : "none",
@@ -517,14 +517,14 @@ export function ActivityHeatmap({
       </div>
 
       {!hideLegend ? (
-        <div className="flex justify-between items-center text-caption border-t border-ink-faint pt-2 text-ink-text font-bold uppercase">
+        <div className="flex justify-between items-center text-caption border-t border-ink-line pt-2 text-ink-text font-bold uppercase">
           <div className="flex items-center gap-2">
             <span>{copy("heatmap.legend.less")}</span>
             <div className="flex gap-1">
               {[0, 1, 2, 3, 4].map((level) => (
                 <span
                   key={level}
-                  className="rounded-[2px] border border-ink-faint"
+                  className="rounded-[2px] border border-ink-line"
                   style={{
                     width: 10,
                     height: 10,

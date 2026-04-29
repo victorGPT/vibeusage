@@ -21,7 +21,6 @@ const TONE = {
   "ink-text": "text-ink-text",
   "ink-muted": "text-ink-muted",
   "ink-line": "text-ink-line",
-  "ink-faint": "text-ink-faint",
 };
 
 export function Text({

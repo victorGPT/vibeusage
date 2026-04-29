@@ -160,7 +160,7 @@ export function ProjectUsagePanel({
             </Select.Trigger>
             <Select.Portal>
               <Select.Positioner align="end" side="bottom" sideOffset={8} className="z-50">
-                <Select.Popup className="w-40 border border-ink-faint bg-surface-strong backdrop-blur-md pointer-events-auto">
+                <Select.Popup className="w-40 border border-ink-line bg-surface-strong backdrop-blur-md pointer-events-auto">
                   <Select.List aria-label={limitAria} role="listbox">
                     {LIMIT_OPTIONS.map((value) => (
                       <Select.Item
@@ -243,7 +243,7 @@ function ProjectUsageCard({
       href={projectRef || (repoId ? `https://github.com/${repoId}` : "#")}
       target="_blank"
       rel="noopener noreferrer"
-      className="group relative flex h-full min-h-[152px] flex-col gap-3 border border-ink-faint bg-surface-raised px-4 py-5 transition-all duration-200 hover:border-ink hover:shadow-glow"
+      className="group relative flex h-full min-h-[152px] flex-col gap-3 border border-ink-line bg-surface-raised px-4 py-5 transition-all duration-200 hover:border-ink hover:shadow-glow"
       data-project-card="true"
     >
       <div
@@ -275,7 +275,7 @@ function ProjectUsageCard({
         className="flex items-center gap-3 min-w-0 pr-12"
         data-card-line="identity"
       >
-        <div className="relative h-12 w-12 rounded-full border border-ink-faint overflow-hidden">
+        <div className="relative h-12 w-12 rounded-full border border-ink-line overflow-hidden">
           {avatarUrl ? (
             <img
               src={avatarUrl}
@@ -327,14 +327,14 @@ function ProjectUsageCard({
 function ProjectUsagePlaceholderCard({ placeholder }) {
   return (
     <div
-      className="relative flex h-full min-h-[152px] flex-col gap-3 border border-ink-faint bg-surface-raised px-4 py-5 opacity-60"
+      className="relative flex h-full min-h-[152px] flex-col gap-3 border border-ink-line bg-surface-raised px-4 py-5 opacity-60"
       data-project-card-placeholder="true"
     >
       <div className="flex items-start gap-3">
-        <div className="h-10 w-10 rounded-full border border-ink-faint bg-surface-strong" />
+        <div className="h-10 w-10 rounded-full border border-ink-line bg-surface-strong" />
         <div className="flex min-w-0 flex-1 flex-col gap-2">
-          <div className="h-4 w-24 border border-ink-faint bg-surface-strong" />
-          <div className="h-3 w-32 border border-ink-faint bg-surface-strong" />
+          <div className="h-4 w-24 border border-ink-line bg-surface-strong" />
+          <div className="h-3 w-32 border border-ink-line bg-surface-strong" />
         </div>
       </div>
       <div className="mt-auto flex items-center justify-between gap-4 text-caption uppercase tracking-caps text-ink-text">

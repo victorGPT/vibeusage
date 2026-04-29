@@ -66,7 +66,7 @@ export const UsagePanel = React.memo(function UsagePanel({
   if (showSummaryLoadingPlaceholder) {
     summaryDisplay = (
       <span
-        className="inline-flex h-12 w-24 items-center justify-center border border-ink-faint bg-surface-strong md:h-20 md:w-40"
+        className="inline-flex h-12 w-24 items-center justify-center border border-ink-line bg-surface-strong md:h-20 md:w-40"
         data-testid="usage-summary-loading"
         aria-label={copy("usage.button.loading")}
       >
@@ -129,7 +129,7 @@ export const UsagePanel = React.memo(function UsagePanel({
       stampLogo={stampLogo}
     >
       {!hideHeader ? (
-        <div className="flex flex-wrap items-center justify-between border-b border-ink-faint mb-3 pb-2 gap-4 px-2">
+        <div className="flex flex-wrap items-center justify-between border-b border-ink-line mb-3 pb-2 gap-4 px-2">
           <div className="overflow-x-auto no-scrollbar min-w-0 max-w-full">
             <div className="flex gap-4">
               {tabs.map((p) => (
@@ -228,14 +228,14 @@ export const UsagePanel = React.memo(function UsagePanel({
 
           {!breakdownCollapsed && breakdownRows.length ? (
             <div className="w-full px-6">
-              <div className="grid grid-cols-2 gap-3 border-t border-b border-ink-faint py-4 relative">
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1px] h-full bg-ink-faint"></div>
+              <div className="grid grid-cols-2 gap-3 border-t border-b border-ink-line py-4 relative">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1px] h-full bg-ink-line"></div>
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-[1px] bg-ink-muted"></div>
 
                 {breakdownRows.map((row, idx) => (
                   <div
                     key={`${row.label}-${idx}`}
-                    className="flex flex-col items-center p-3 bg-surface-raised border border-ink-faint"
+                    className="flex flex-col items-center p-3 bg-surface-raised border border-ink-line"
                   >
                     <span className="text-caption text-ink-text uppercase mb-1">
                       {row.label}
@@ -254,7 +254,7 @@ export const UsagePanel = React.memo(function UsagePanel({
           {metrics.map((row, idx) => (
             <div
               key={`${row.label}-${idx}`}
-              className="border border-ink-faint bg-surface-raised p-4 text-center"
+              className="border border-ink-line bg-surface-raised p-4 text-center"
             >
               <div className="text-caption uppercase text-ink-text mb-2">{row.label}</div>
               <div

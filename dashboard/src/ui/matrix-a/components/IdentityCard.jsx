@@ -138,13 +138,13 @@ export function IdentityCard({
 
             {shouldShowStats ? (
               <div className="grid grid-cols-2 gap-2 pt-1">
-                <div className="bg-surface-raised p-2 border border-ink-faint text-center">
+                <div className="bg-surface-raised p-2 border border-ink-line text-center">
                   <div className="text-caption text-ink-text uppercase font-bold">
                     {copy("identity_card.rank_label")}
                   </div>
                   <div className="text-gold font-black text-body">{rankValue}</div>
                 </div>
-                <div className="bg-surface-raised p-2 border border-ink-faint text-center">
+                <div className="bg-surface-raised p-2 border border-ink-line text-center">
                   <div className="text-caption text-ink-text uppercase font-bold">
                     {copy("identity_card.streak_label")}
                   </div>
@@ -162,7 +162,7 @@ export function IdentityCard({
                   {subscriptionItems.map((entry, index) => (
                     <span
                       key={`${entry.tool}:${entry.plan}:${index}`}
-                      className="inline-flex items-center px-2 py-1 border border-ink-faint bg-surface-raised text-micro uppercase tracking-label text-ink-bright"
+                      className="inline-flex items-center px-2 py-1 border border-ink-line bg-surface-raised text-micro uppercase tracking-label text-ink-bright"
                     >
                       {copy("identity_card.subscription_item", {
                         tool: entry.tool,

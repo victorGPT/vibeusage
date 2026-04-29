@@ -91,7 +91,7 @@ The user feels **seen and slightly called out** — like an old terminal friend 
 ### Colors
 
 - **Two tracks for prose / surfaces / accents**: green ink (data) and neutral surface (ground). One accent (`gold #FFD700`) reserved for **leaderboard #1** and total-cost callouts.
-- **Green ink** has exactly **6 alpha stops**: `#00FF41` (ink), `#E8FFE9` (ink-bright), `60%` (ink-text), `35%` (ink-muted), `18%` (ink-line), `8%` (ink-faint). No `/5`, `/12`, `/25`, `/45` — pick one.
+- **Green ink** has exactly **5 alpha stops**: `#00FF41` (ink), `#E8FFE9` (ink-bright), `60%` (ink-text), `35%` (ink-muted), `18%` (ink-line). No `/5`, `/8`, `/12`, `/25`, `/45` — pick one.
 - **Surfaces** are near-black: `#050505` (page), `rgba(0,10,0,0.70)` (panel), `rgba(0,10,0,0.82)` (chip / modal). Always paired with `backdrop-filter: blur(10px)` on raised surfaces.
 - **Status escape hatch**: `warn #FFB300` and `err #FF3344` (with matching `--warn-glow` / `--err-glow`) are reserved for status indicators **only** — connection state, error banners. Never as prose / accent / surface. They are the only hue extension allowed beyond the green-ink + gold palette.
 - **No fourth hue**, no purple-pink-cyan dapp gradient, no SaaS navy/slate. Information layering does **not** depend on color discrimination — alpha-stop ladder carries hierarchy.
@@ -117,7 +117,7 @@ The user feels **seen and slightly called out** — like an old terminal friend 
 
 ### Borders
 
-All borders are **1px solid**. No dashed / dotted / `border-[Npx]`. Ladder: `border-ink-faint` (weak), `border-ink-line` (default panel), `border-ink-muted` (hover), `border-ink` (active / selected).
+All borders are **1px solid**. No dashed / dotted / `border-[Npx]`. Ladder: `border-ink-line` (default panel + weak rule), `border-ink-muted` (hover), `border-ink` (active / selected).
 
 ### Cards
 

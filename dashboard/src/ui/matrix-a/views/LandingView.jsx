@@ -40,7 +40,7 @@ function TerminalCommand({ command, copied, onCopy, label, helper }) {
           <button
             type="button"
             onClick={onCopy}
-            className="shrink-0 px-4 py-3 border-l border-ink-line text-ink-text hover:text-ink hover:bg-ink-faint transition-colors duration-200"
+            className="shrink-0 px-4 py-3 border-l border-ink-line text-ink-text hover:text-ink hover:bg-ink-line transition-colors duration-200"
             title={copied ? "Copied!" : "Copy to clipboard"}
           >
             {copied ? (
@@ -92,8 +92,8 @@ export function LandingView({
   };
   const extrasSkeleton = (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-3xl">
-      <div className="h-44 border border-ink-faint bg-ink-faint animate-pulse" />
-      <div className="h-44 border border-ink-faint bg-ink-faint animate-pulse" />
+      <div className="h-44 border border-ink-line bg-ink-line animate-pulse" />
+      <div className="h-44 border border-ink-line bg-ink-line animate-pulse" />
     </div>
   );
 

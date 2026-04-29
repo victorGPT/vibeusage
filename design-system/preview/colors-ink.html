@@ -1,15 +1,14 @@
 <!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="_card.css"><style>
 .swatch { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 0; }
-.chip { height: 56px; border: 1px solid var(--ink-faint); position: relative; }
+.chip { height: 56px; border: 1px solid var(--ink-line); position: relative; }
 .chip.bg-ink { background: var(--ink); }
 .chip.bg-ink-bright { background: var(--ink-bright); }
 .chip.bg-ink-text { background: rgba(0,255,65,0.60); }
 .chip.bg-ink-muted { background: rgba(0,255,65,0.35); }
 .chip.bg-ink-line { background: rgba(0,255,65,0.18); }
-.chip.bg-ink-faint { background: rgba(0,255,65,0.08); }
 .name { font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; font-weight: 700; color: var(--ink); }
 .val { font-size: 10px; color: var(--ink-text); letter-spacing: 0; font-variant-numeric: tabular-nums; }
-.grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
+.grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
 </style></head><body><div class="card">
 <div class="grid">
 <div class="swatch"><div class="chip bg-ink"></div><div class="name">ink</div><div class="val">#00FF41</div></div>
@@ -17,6 +16,5 @@
 <div class="swatch"><div class="chip bg-ink-text"></div><div class="name">text</div><div class="val">/ 60</div></div>
 <div class="swatch"><div class="chip bg-ink-muted"></div><div class="name">muted</div><div class="val">/ 35</div></div>
 <div class="swatch"><div class="chip bg-ink-line"></div><div class="name">line</div><div class="val">/ 18</div></div>
-<div class="swatch"><div class="chip bg-ink-faint"></div><div class="name">faint</div><div class="val">/ 8</div></div>
 </div>
 </div></body></html>

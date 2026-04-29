@@ -48,7 +48,7 @@ export function KeyboardCheatsheet({ open, onClose }) {
             </span>
             <DialogClose
               aria-label={copy("keyboard.cheatsheet.close_aria")}
-              className="text-caption text-ink uppercase tracking-caps border border-ink-muted bg-surface px-2 py-0.5 hover:bg-ink-faint focus:outline-none focus-visible:border-ink"
+              className="text-caption text-ink uppercase tracking-caps border border-ink-muted bg-surface px-2 py-0.5 hover:bg-ink-line focus:outline-none focus-visible:border-ink"
             >
               {copy("keyboard.cheatsheet.close_label")}
             </DialogClose>
@@ -69,7 +69,7 @@ export function KeyboardCheatsheet({ open, onClose }) {
             </li>
           ))}
         </ul>
-        <div className="mt-5 pt-3 border-t border-ink-faint text-micro text-ink-faint uppercase tracking-caps">
+        <div className="mt-5 pt-3 border-t border-ink-line text-micro text-ink-line uppercase tracking-caps">
           {copy("keyboard.cheatsheet.footer_note")}
         </div>
       </DialogContent>

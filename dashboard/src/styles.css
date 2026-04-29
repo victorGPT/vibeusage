@@ -9,13 +9,12 @@
 :root {
   color-scheme: dark;
 
-  /* Ink — green data palette (6 stops, DESIGN.md §2.1) */
+  /* Ink — green data palette (5 stops, DESIGN.md §2.1) */
   --ink: #00ff41;
   --ink-bright: #e8ffe9;
   --ink-text: rgba(0, 255, 65, 0.6);
   --ink-muted: rgba(0, 255, 65, 0.35);
   --ink-line: rgba(0, 255, 65, 0.18);
-  --ink-faint: rgba(0, 255, 65, 0.08);
   --ink-glow: rgba(0, 255, 65, 0.45);
 
   /* Surface — neutral ground (DESIGN.md §2.2) */
@@ -251,7 +250,7 @@ body {
   .deco-katakana {
     font-family: "Hiragino Sans", "Yu Gothic", "MS Gothic", "Geist Mono",
       ui-monospace, monospace;
-    color: var(--ink-faint);
+    color: var(--ink-line);
     letter-spacing: 0.18em;
     user-select: none;
     white-space: nowrap;
@@ -263,7 +262,7 @@ body {
   .heatmap-scrollbar-track {
     height: 6px;
     border-radius: 999px;
-    background: var(--ink-faint);
+    background: var(--ink-line);
     border: 1px solid var(--ink-line);
     position: relative;
     overflow: hidden;

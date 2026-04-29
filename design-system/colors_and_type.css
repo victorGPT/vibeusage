@@ -38,13 +38,12 @@
 
 :root {
   /* === Color: ink (Matrix Green data ink) =========================== */
-  /* Six alpha stops only. No /5, /12, /25, /45. Pick one. */
+  /* Five alpha stops only. No /5, /12, /25, /45. Pick one. */
   --ink:        #00FF41;                    /* primary data, active state, primary btn */
   --ink-bright: #E8FFE9;                    /* display emphasis, selection foreground  */
   --ink-text:   rgba(0, 255, 65, 0.60);     /* body text, value label                  */
   --ink-muted:  rgba(0, 255, 65, 0.35);     /* secondary text, hover line              */
-  --ink-line:   rgba(0, 255, 65, 0.18);     /* default separator, panel border         */
-  --ink-faint:  rgba(0, 255, 65, 0.08);     /* weakest rule, subtle hover bg           */
+  --ink-line:   rgba(0, 255, 65, 0.18);     /* default separator, panel border, weakest rule */
   --ink-glow:   rgba(0, 255, 65, 0.40);     /* shadow color used by .glow-text         */
 
   /* === Color: surface (background ground) =========================== */
@@ -102,7 +101,6 @@
   --radius-dot: 999px;     /* status dot only */
 
   /* === Borders — 1px solid, no dashed, no dotted ==================== */
-  --border-faint: 1px solid var(--ink-faint);
   --border-line:  1px solid var(--ink-line);
   --border-muted: 1px solid var(--ink-muted);
   --border-ink:   1px solid var(--ink);
@@ -223,7 +221,7 @@ a {
 }
 a:hover { color: var(--ink-bright); border-color: var(--ink); }
 
-hr { border: 0; border-top: var(--border-faint); margin: var(--sp-6) 0; }
+hr { border: 0; border-top: var(--border-line); margin: var(--sp-6) 0; }
 
 /* --- Glow text utility (signature) -------------------------------- */
 .glow-text      { text-shadow: 0 0 16px var(--ink-glow); }
@@ -232,7 +230,7 @@ hr { border: 0; border-top: var(--border-faint); margin: var(--sp-6) 0; }
 /* --- Decorative katakana band (chrome only, no signal) ------------ */
 .deco-katakana {
   font-family: var(--font-katakana);
-  color: var(--ink-faint);
+  color: var(--ink-line);
   letter-spacing: var(--tracking-caps);
   white-space: nowrap;
   user-select: none;

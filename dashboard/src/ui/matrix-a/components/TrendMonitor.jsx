@@ -350,7 +350,7 @@ export function TrendMonitor({
         </div>
       </div>
 
-      <div className="flex-1 relative overflow-hidden border border-ink-faint bg-surface-raised">
+      <div className="flex-1 relative overflow-hidden border border-ink-line bg-surface-raised">
         <div
           className="absolute inset-0 opacity-10 pointer-events-none"
           style={{
@@ -362,7 +362,7 @@ export function TrendMonitor({
           }}
         />
 
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-ink-faint to-transparent w-[50%] h-full animate-[scan-x_3s_linear_infinite] pointer-events-none mix-blend-screen" />
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-ink-line to-transparent w-[50%] h-full animate-[scan-x_3s_linear_infinite] pointer-events-none mix-blend-screen" />
 
         <svg
           viewBox={`0 0 ${width} ${height}`}
@@ -414,7 +414,7 @@ export function TrendMonitor({
 
         <div
           ref={axisRef}
-          className="absolute right-0 top-0 bottom-0 flex flex-col justify-between py-1 px-1 text-caption text-ink-text pointer-events-none bg-surface-strong border-l border-ink-faint w-10 text-right"
+          className="absolute right-0 top-0 bottom-0 flex flex-col justify-between py-1 px-1 text-caption text-ink-text pointer-events-none bg-surface-strong border-l border-ink-line w-10 text-right"
         >
           <span>{formatCompact(max)}</span>
           <span>{formatCompact(max * 0.75)}</span>
@@ -446,7 +446,7 @@ export function TrendMonitor({
               ></div>
             </div>
             <div
-              className="absolute z-30 px-3 py-2 text-caption bg-surface-strong border border-ink-faint text-ink-bright pointer-events-none"
+              className="absolute z-30 px-3 py-2 text-caption bg-surface-strong border border-ink-line text-ink-bright pointer-events-none"
               style={{
                 left: Math.min(hover.x + 10, hover.rectWidth - hover.axisWidthPx - 120),
                 top: Math.max(hover.y - 24, 6),
@@ -468,7 +468,7 @@ export function TrendMonitor({
         ) : null}
       </div>
 
-      <div className="h-5 flex justify-between items-center px-1 text-caption text-ink-text border-t border-ink-faint pt-2">
+      <div className="h-5 flex justify-between items-center px-1 text-caption text-ink-text border-t border-ink-line pt-2">
         {xLabels.map((labelText, idx) => (
           <span
             key={`${labelText}-${idx}`}

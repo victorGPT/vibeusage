@@ -17,7 +17,7 @@ export function IdentityPanel({ auth, streakDays = 0, rankLabel }) {
   return (
     <div className="flex items-center space-x-6">
       <div className="relative group">
-        <div className="w-20 h-20 border border-ink-faint flex items-center justify-center text-body font-black bg-surface-raised shadow-glow-faint">
+        <div className="w-20 h-20 border border-ink-line flex items-center justify-center text-body font-black bg-surface-raised shadow-glow-faint">
           {copy("identity_panel.badge")}
         </div>
         <div className="absolute -bottom-1 -right-1 bg-ink-bright text-surface text-caption px-1 font-black uppercase">
@@ -33,13 +33,13 @@ export function IdentityPanel({ auth, streakDays = 0, rankLabel }) {
         </div>
 
         <div className="grid grid-cols-2 gap-2">
-          <div className="bg-surface-raised p-2 border border-ink-faint text-center">
+          <div className="bg-surface-raised p-2 border border-ink-line text-center">
             <div className="text-caption text-ink-text uppercase font-bold">
               {copy("identity_panel.rank_label")}
             </div>
             <div className="text-ink font-black text-body">{rankValue}</div>
           </div>
-          <div className="bg-surface-raised p-2 border border-ink-faint text-center">
+          <div className="bg-surface-raised p-2 border border-ink-line text-center">
             <div className="text-caption text-ink-text uppercase font-bold">
               {copy("identity_panel.streak_label")}
             </div>

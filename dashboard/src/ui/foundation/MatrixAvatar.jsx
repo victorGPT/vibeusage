@@ -33,7 +33,7 @@ export function MatrixAvatar({
     return (
       <div
         style={{ width: size, height: size }}
-        className={`bg-surface-raised border border-ink-faint flex items-center justify-center overflow-hidden ${className}`}
+        className={`bg-surface-raised border border-ink-line flex items-center justify-center overflow-hidden ${className}`}
       >
         <span className="text-ink font-black text-body opacity-60">
           {copy("shared.placeholder.anon_mark")}

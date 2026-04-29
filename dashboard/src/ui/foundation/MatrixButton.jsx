@@ -16,7 +16,7 @@ const VARIANT = {
   default:
     "bg-surface-raised text-ink border border-ink-line hover:bg-surface-strong hover:border-ink-muted",
   primary: "bg-ink text-surface border border-ink hover:bg-ink-bright hover:border-ink-bright",
-  ghost: "bg-transparent text-ink border border-transparent hover:bg-ink-faint",
+  ghost: "bg-transparent text-ink border border-transparent hover:bg-ink-line",
 };
 
 const VARIANT_HEADER = {

@@ -23,7 +23,7 @@ export function ArchiveHeatmap({
           </div>
         ) : null}
         {showFooter ? (
-          <div className="mt-auto pt-3 border-t border-ink-faint text-caption text-ink-text flex justify-between uppercase">
+          <div className="mt-auto pt-3 border-t border-ink-line text-caption text-ink-text flex justify-between uppercase">
             <span>{footerLeft}</span>
             {footerRight ? <span>{footerRight}</span> : null}
           </div>

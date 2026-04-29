@@ -13,7 +13,7 @@ export function SystemHeader({
 }) {
   return (
     <header
-      className={`flex justify-between border-b border-ink-faint p-4 items-center shrink-0 bg-surface-raised ${className}`}
+      className={`flex justify-between border-b border-ink-line p-4 items-center shrink-0 bg-surface-raised ${className}`}
     >
       <div className="flex items-center space-x-4">
         <div className="bg-ink text-surface px-2 py-1 font-black text-heading uppercase skew-x-[-10deg] border border-ink shadow-glow-sm">
@@ -26,7 +26,7 @@ export function SystemHeader({
         ) : null}
         <span
           aria-hidden="true"
-          className="hidden md:inline text-micro tracking-caps text-ink-faint whitespace-nowrap select-none"
+          className="hidden md:inline text-micro tracking-caps text-ink-line whitespace-nowrap select-none"
         >
           {copy("system.header.katakana_deco")}
         </span>

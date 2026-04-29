@@ -65,7 +65,7 @@ export const CostAnalysisModal = React.memo(function CostAnalysisModal({
       >
         <AsciiBox title={copy("dashboard.cost_breakdown.title")}>
           <div className="space-y-8 py-4">
-            <div className="text-center pb-6 border-b border-ink-faint">
+            <div className="text-center pb-6 border-b border-ink-line">
               <div className="text-caption text-ink-text uppercase mb-2 font-bold">
                 {copy("dashboard.cost_breakdown.total_label")}
               </div>
@@ -77,7 +77,7 @@ export const CostAnalysisModal = React.memo(function CostAnalysisModal({
             <div className="space-y-6 max-h-[45vh] overflow-y-auto no-scrollbar pr-2">
               {normalizedFleet.map((fleet, index) => (
                 <div key={`${fleet.label}-${index}`} className="space-y-3">
-                  <div className="flex justify-between items-baseline border-b border-ink-faint pb-2">
+                  <div className="flex justify-between items-baseline border-b border-ink-line pb-2">
                     <span className="text-body font-black text-ink-bright uppercase tracking-caps">
                       {fleet.label}
                     </span>
@@ -105,7 +105,7 @@ export const CostAnalysisModal = React.memo(function CostAnalysisModal({
               ))}
             </div>
 
-            <div className="pt-6 border-t border-ink-faint flex justify-between items-center">
+            <div className="pt-6 border-t border-ink-line flex justify-between items-center">
               <DialogClose
                 type="button"
                 className="text-caption font-bold uppercase text-ink border border-ink-muted px-6 py-2 hover:bg-ink hover:text-surface transition-all"

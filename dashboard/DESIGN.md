@@ -61,10 +61,9 @@ never for prose, accents, or surfaces (see §2.4).
 | `ink-bright` | `text-ink-bright`                     | `#E8FFE9`                    | display emphasis, selection foreground    |
 | `ink-text`   | `text-ink-text`                       | `rgba(0, 255, 65, 0.60)`     | body text, value label                    |
 | `ink-muted`  | `text-ink-muted` `border-ink-muted`   | `rgba(0, 255, 65, 0.35)`     | secondary text, hover line                |
-| `ink-line`   | `border-ink-line`                     | `rgba(0, 255, 65, 0.18)`     | default separator, panel border           |
-| `ink-faint`  | `border-ink-faint` `bg-ink-faint`     | `rgba(0, 255, 65, 0.08)`     | weakest rule, subtle hover background     |
+| `ink-line`   | `border-ink-line` `bg-ink-line`       | `rgba(0, 255, 65, 0.18)`     | default separator, panel border, weak rule |
 
-**6 alpha stops. That's it.** No `/5`, `/12`, `/25`, `/45`. Pick one.
+**5 alpha stops. That's it.** No `/5`, `/8`, `/12`, `/25`, `/45`. Pick one.
 
 ### 2.2 `surface.*` — background ground
 
@@ -164,12 +163,11 @@ the surrounding layout instead.
 
 ### Border
 
-| Usage          | Class                   |
-| -------------- | ----------------------- |
-| weak rule      | `border border-ink-faint` |
-| panel, table   | `border border-ink-line`  |
-| hover          | `border-ink-muted`      |
-| active, selected | `border-ink`          |
+| Usage              | Class                    |
+| ------------------ | ------------------------ |
+| panel, table, weak rule | `border border-ink-line` |
+| hover              | `border-ink-muted`       |
+| active, selected   | `border-ink`             |
 
 All borders are **1px solid**. No dashed / dotted. No `border-[Npx]`.
 
@@ -242,7 +240,7 @@ All respect `prefers-reduced-motion: reduce` and `screenshot-capture` mode.
 - `:hover` of an element it's attached to (manual user)
 - a 7-second `data-glitch-tick` event (rare ambient signal — only on `display-0`)
 
-`deco-katakana` uses font family `font-katakana` (defined below), is `text-ink-faint`, and never carries semantic meaning. If removed, no information is lost — purely chrome.
+`deco-katakana` uses font family `font-katakana` (defined below), is `text-ink-line`, and never carries semantic meaning. If removed, no information is lost — purely chrome.
 
 ### Font families
 
@@ -287,7 +285,7 @@ All respect `prefers-reduced-motion: reduce` and `screenshot-capture` mode.
 **Weight ladder** (DESIGN.md §6 v3):
 - `primary` — double-line ASCII (`╔ ╗ ╚ ╝ ═ ║`), frame `text-ink`, `shadow-glow-sm`. Reserved for **the** hero panel of any view (one per route).
 - `secondary` — default single-line (`┌ ┐ └ ┘ ─ │`), `text-ink-muted`. The everyday panel.
-- `tertiary` — dotted (`·`), `text-ink-faint`. Stacked / supporting / footer panels.
+- `tertiary` — dotted (`·`), `text-ink-line`. Stacked / supporting / footer panels.
 
 Use **at most one** `primary` per visible viewport. Two primaries cancel each other out.
 
@@ -296,7 +294,7 @@ Use **at most one** `primary` per visible viewport. Two primaries cancel each ot
 - upper-right: `{period}` — time scope (e.g. `WEEK · 2025-W52`)
 - lower-right: `{logo}` — origin watermark, defaults to `vibeusage.cc`
 
-Stamps use `text-micro` `tracking-caps` `text-ink-muted/faint` so they read as instrumentation, not as decoration.
+Stamps use `text-micro` `tracking-caps` `text-ink-muted` / `text-ink-line` so they read as instrumentation, not as decoration.
 
 - `ascii`: ASCII box drawing + corner-cross (signature).
 - `plain`: 1px ink-line border + surface-raised bg + backdrop blur.
@@ -313,7 +311,7 @@ Stamps use `text-micro` `tracking-caps` `text-ink-muted/faint` so they read as i
 | ------- | ---------------------------------------------------------------------- | ------- |
 | `size`  | `display-1` \| `display-2` \| `heading` \| `body` \| `data` \| `caption` \| `micro` | required |
 | `as`    | any HTML tag                                                           | `span`  |
-| `tone`  | `ink` \| `ink-bright` \| `ink-text` \| `ink-muted` \| `ink-line` \| `ink-faint` | `ink-text` |
+| `tone`  | `ink` \| `ink-bright` \| `ink-text` \| `ink-muted` \| `ink-line` | `ink-text` |
 | `glow`  | `boolean`                                                              | `false` |
 
 Enforces typography + color tokens at the component boundary.
@@ -378,16 +376,16 @@ historical reviewer guide — do not author legacy names into new code.
 | `border-matrix-primary`         | `border-ink`                         |
 | `border-matrix-primary/30`      | `border-ink-muted`                   |
 | `border-matrix-primary/20`      | `border-ink-line`                    |
-| `border-matrix-primary/10`      | `border-ink-faint`                   |
-| `border-matrix-ghost`           | `border-ink-faint`                   |
+| `border-matrix-primary/10`      | `border-ink-line`                    |
+| `border-matrix-ghost`           | `border-ink-line`                    |
 | `border-matrix-dim`             | `border-ink-muted`                   |
 | `border-matrix-muted`           | `border-ink-muted`                   |
 | `bg-matrix-dark`                | `bg-surface`                         |
 | `bg-matrix-panel`               | `bg-surface-raised`                  |
 | `bg-matrix-panelStrong`         | `bg-surface-strong`                  |
 | `bg-matrix-primary`             | `bg-ink`                             |
-| `bg-matrix-primary/10`          | `bg-ink-faint`                       |
-| `bg-matrix-primary/5`           | `bg-ink-faint`                       |
+| `bg-matrix-primary/10`          | `bg-ink-line`                        |
+| `bg-matrix-primary/5`           | `bg-ink-line`                        |
 | `font-matrix`                   | `font-mono` (Geist Mono is default)  |
 | `shadow-matrix-glow`            | `shadow-glow`                        |
 | `shadow-matrix-gold`            | `shadow-gold`                        |
@@ -396,8 +394,7 @@ historical reviewer guide — do not author legacy names into new code.
 
 | Deleted alpha                   | Replacement                          |
 | ------------------------------- | ------------------------------------ |
-| `/5`, `/8`, `/10`, `/12`        | `bg-ink-faint` / `border-ink-faint`  |
-| `/18`, `/20`, `/25`             | `border-ink-line`                    |
+| `/5`, `/8`, `/10`, `/12`, `/18`, `/20`, `/25` | `bg-ink-line` / `border-ink-line`    |
 | `/30`, `/32`, `/40`             | `border-ink-muted`                   |
 | `/60`, `/70`, `/80`, `/90`      | `text-ink-text` or `text-ink`        |
 

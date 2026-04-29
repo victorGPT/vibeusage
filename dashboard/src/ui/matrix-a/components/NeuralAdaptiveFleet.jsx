@@ -25,7 +25,7 @@ export const NeuralAdaptiveFleet = React.memo(function NeuralAdaptiveFleet({
 
   return (
     <div className="w-full space-y-4">
-      <div className="flex justify-between items-baseline border-b border-ink-faint pb-2">
+      <div className="flex justify-between items-baseline border-b border-ink-line pb-2">
         <div className="flex items-baseline gap-2">
           <span className="text-heading font-black text-ink uppercase">{label}</span>
           <span className="text-caption text-ink-text">{usageLabel}</span>
@@ -36,7 +36,7 @@ export const NeuralAdaptiveFleet = React.memo(function NeuralAdaptiveFleet({
         </div>
       </div>
 
-      <div className="h-1 w-full bg-ink-faint flex overflow-hidden relative">
+      <div className="h-1 w-full bg-ink-line flex overflow-hidden relative">
         {models.map((model, index) => {
           const styleConfig = TEXTURES[index % TEXTURES.length];
           const modelKey = model?.id ? String(model.id) : `${model.name}-${index}`;
@@ -64,7 +64,7 @@ export const NeuralAdaptiveFleet = React.memo(function NeuralAdaptiveFleet({
           return (
             <div key={modelKey} className="flex items-center space-x-2">
               <div
-                className="w-2 h-2 border border-ink-faint shrink-0"
+                className="w-2 h-2 border border-ink-line shrink-0"
                 style={{
                   backgroundColor: styleConfig.bg,
                   backgroundImage: styleConfig.pattern,

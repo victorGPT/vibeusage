@@ -297,7 +297,7 @@ export function DashboardView(props) {
                             title={publicViewToggleLabel}
                             className={`relative inline-flex h-6 w-11 items-center border px-[3px] transition-colors ${
                               publicViewEnabled
-                                ? "border-ink bg-ink-faint"
+                                ? "border-ink bg-ink-line"
                                 : "border-ink-muted bg-surface/40"
                             } disabled:opacity-50 disabled:cursor-not-allowed`}
                           >
@@ -421,14 +421,14 @@ export function DashboardView(props) {
                       </div>
                     ) : null}
                     <div
-                      className="overflow-auto max-h-[520px] border border-ink-faint"
+                      className="overflow-auto max-h-[520px] border border-ink-line"
                       role="region"
                       aria-label={copy("daily.table.aria_label")}
                       tabIndex={0}
                     >
                       <table className="w-full border-collapse">
                         <thead className="sticky top-0 bg-surface/90">
-                          <tr className="border-b border-ink-faint">
+                          <tr className="border-b border-ink-line">
                             {detailsColumns.map((c) => (
                               <th
                                 key={c.key}
@@ -439,7 +439,7 @@ export function DashboardView(props) {
                                   type="button"
                                   onClick={() => toggleSort(c.key)}
                                   title={c.title}
-                                  className="w-full px-3 py-2 text-left text-micro uppercase tracking-caps font-black opacity-70 hover:opacity-100 hover:bg-ink-faint focus:outline-none focus-visible:ring-2 focus-visible:ring-ink-muted flex items-center justify-start"
+                                  className="w-full px-3 py-2 text-left text-micro uppercase tracking-caps font-black opacity-70 hover:opacity-100 hover:bg-ink-line focus:outline-none focus-visible:ring-2 focus-visible:ring-ink-muted flex items-center justify-start"
                                 >
                                   <span className="inline-flex items-center gap-2">
                                     <span>{c.label}</span>
@@ -456,7 +456,7 @@ export function DashboardView(props) {
                               key={String(
                                 r?.[detailsDateKey] || r?.day || r?.hour || r?.month || "",
                               )}
-                              className={`border-b border-ink-faint hover:bg-ink-faint ${
+                              className={`border-b border-ink-line hover:bg-ink-line ${
                                 r.missing
                                   ? "text-ink-muted"
                                   : r.future

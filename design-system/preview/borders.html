@@ -2,14 +2,12 @@
 .row { display: grid; grid-template-columns: 100px 1fr 130px; align-items: center; gap: 16px; padding: 12px 0; }
 .tok { color: var(--ink); font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; font-weight: 700; }
 .demo { height: 32px; background: rgba(0,10,0,0.70); }
-.faint { border: 1px solid rgba(0,255,65,0.08); }
 .line { border: 1px solid rgba(0,255,65,0.18); }
 .muted { border: 1px solid rgba(0,255,65,0.35); }
 .active { border: 1px solid #00FF41; box-shadow: 0 0 6px rgba(0,255,65,0.35); }
 .use { color: var(--ink-muted); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 600; text-align: right; }
 </style></head><body><div class="card">
-<div class="row"><div class="tok">faint</div><div class="demo faint"></div><div class="use">weak rule</div></div>
-<div class="row"><div class="tok">line</div><div class="demo line"></div><div class="use">panel default</div></div>
+<div class="row"><div class="tok">line</div><div class="demo line"></div><div class="use">panel default · weak rule</div></div>
 <div class="row"><div class="tok">muted</div><div class="demo muted"></div><div class="use">hover</div></div>
 <div class="row"><div class="tok">ink</div><div class="demo active"></div><div class="use">active / selected</div></div>
 </div></body></html>

@@ -15,7 +15,7 @@ const ASCII_WEIGHT = {
 const FRAME_TONE = {
   primary: "text-ink",
   secondary: "text-ink-muted",
-  tertiary: "text-ink-faint",
+  tertiary: "text-ink-line",
 };
 
 const VARIANT = {
@@ -52,7 +52,7 @@ function CornerStamps({ stamped, stampHandle, stampPeriod, stampLogo = "vibeusag
       {stampLogo ? (
         <span
           aria-hidden="true"
-          className="pointer-events-none absolute right-3 bottom-0 translate-y-1/2 bg-surface-strong px-2 text-micro uppercase tracking-caps text-ink-faint"
+          className="pointer-events-none absolute right-3 bottom-0 translate-y-1/2 bg-surface-strong px-2 text-micro uppercase tracking-caps text-ink-line"
         >
           {stampLogo}
         </span>
@@ -99,7 +99,7 @@ export function Panel({
         <div className="flex items-center leading-none">
           <span className={`shrink-0 ${frameTone}`}>{ASCII.TL}</span>
           {title ? (
-            <span className="mx-3 shrink-0 px-2 py-1 text-heading text-ink uppercase bg-surface-strong border border-ink-faint">
+            <span className="mx-3 shrink-0 px-2 py-1 text-heading text-ink uppercase bg-surface-strong border border-ink-line">
               {title}
             </span>
           ) : null}

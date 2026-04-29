@@ -50,7 +50,7 @@ export const LiveSniffer = () => {
   return (
     <div className="font-mono text-caption text-ink-text space-y-2 h-full flex flex-col justify-end">
       {logs.map((log, idx) => (
-        <div key={idx} className="animate-pulse border-l-2 border-ink-faint pl-2 truncate">
+        <div key={idx} className="animate-pulse border-l-2 border-ink-line pl-2 truncate">
           {log}
         </div>
       ))}

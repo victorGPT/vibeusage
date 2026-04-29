@@ -2,7 +2,7 @@ import React from "react";
 
 export function DataRow({ label, value, subValue, valueClassName = "" }) {
   return (
-    <div className="flex justify-between items-center border-b border-ink-faint py-2 group hover:bg-surface-raised transition-colors px-2">
+    <div className="flex justify-between items-center border-b border-ink-line py-2 group hover:bg-surface-raised transition-colors px-2">
       <span className="text-caption text-ink-text uppercase font-bold leading-none">
         {label}
       </span>

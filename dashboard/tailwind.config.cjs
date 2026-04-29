@@ -63,7 +63,6 @@ module.exports = {
           text: "rgba(0, 255, 65, 0.60)",
           muted: "rgba(0, 255, 65, 0.35)",
           line: "rgba(0, 255, 65, 0.18)",
-          faint: "rgba(0, 255, 65, 0.08)",
         },
         surface: {
           DEFAULT: "#050505",

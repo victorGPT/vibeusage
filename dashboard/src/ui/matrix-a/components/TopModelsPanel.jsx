@@ -35,7 +35,7 @@ export const TopModelsPanel = React.memo(function TopModelsPanel({ rows = [], cl
           return (
             <div
               key={rowKey}
-              className="flex items-center justify-between border-b border-ink-faint py-2 px-2 last:border-b-0"
+              className="flex items-center justify-between border-b border-ink-line py-2 px-2 last:border-b-0"
             >
               <div className="flex items-center gap-3 min-w-0">
                 <span className="text-caption text-ink-muted font-bold tracking-caps">

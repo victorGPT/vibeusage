@@ -335,7 +335,7 @@ export function LeaderboardPage({
             <col className="w-[112px]" />
           </colgroup>
           <thead className="uppercase text-ink-muted tracking-caps text-micro">
-            <tr className="border-b border-ink-faint">
+            <tr className="border-b border-ink-line">
               <th className="px-4 py-3">{copy("leaderboard.column.rank")}</th>
               <th className="px-4 py-3">{copy("leaderboard.column.user")}</th>
               <th className="px-4 py-3">{copy("leaderboard.column.total")}</th>
@@ -361,7 +361,7 @@ export function LeaderboardPage({
                 return (
                   <tr
                     key={`row-${entry?.rank}-${name}`}
-                    className="border-b border-ink-faint"
+                    className="border-b border-ink-line"
                   >
                     <td colSpan={6} className="px-0 py-2">
                       <div className="rounded-none ring-1 ring-inset ring-ink bg-surface-strong/70 backdrop-blur-panel shadow-glow">
@@ -393,7 +393,7 @@ export function LeaderboardPage({
               return (
                 <tr
                   key={`row-${entry?.rank}-${name}`}
-                  className={`border-b border-ink-faint bg-transparent ${
+                  className={`border-b border-ink-line bg-transparent ${
                     rowClickable ? "cursor-pointer hover:bg-surface-raised/40" : ""
                   }`}
                   onClick={
@@ -558,8 +558,8 @@ export function LeaderboardPage({
                       disabled={publicProfileBusy}
                       className={`relative inline-flex h-6 w-11 items-center border px-[3px] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ink disabled:opacity-60 disabled:cursor-not-allowed ${
                         publicProfileEnabled
-                          ? "border-ink bg-ink-faint"
-                          : "border-ink-faint bg-surface-strong/40"
+                          ? "border-ink bg-ink-line"
+                          : "border-ink-line bg-surface-strong/40"
                       }`}
                     >
                       <span

@@ -40,7 +40,7 @@ export const GithubStar = ({
   const baseClasses =
     size === "header"
       ? "btn-chip text-caption uppercase font-bold tracking-caps select-none group gap-3 no-underline overflow-hidden"
-      : "group flex items-center gap-3 px-4 py-2 bg-surface-raised border border-ink-faint backdrop-blur-md transition-all duration-300 hover:border-ink hover:bg-surface-strong no-underline overflow-hidden";
+      : "group flex items-center gap-3 px-4 py-2 bg-surface-raised border border-ink-line backdrop-blur-md transition-all duration-300 hover:border-ink hover:bg-surface-strong no-underline overflow-hidden";
   const positionClasses = isFixed ? "fixed top-6 right-6 z-[100]" : "relative";
 
   return (

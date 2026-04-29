@@ -43,7 +43,7 @@ button { font-family: inherit; cursor: pointer; }
 .vu-pip-dot { display: inline-block; width: 6px; height: 6px; border-radius: 999px; background: var(--ink);
   box-shadow: var(--shadow-glow-xs); animation: vu-pulse 1.6s infinite ease-in-out; }
 @keyframes vu-pulse { 0%,100% { opacity: 1 } 50% { opacity: 0.35 } }
-.vu-deco-band { color: var(--ink-faint); font-family: var(--font-mono); font-size: 10px;
+.vu-deco-band { color: var(--ink-line); font-family: var(--font-mono); font-size: 10px;
   letter-spacing: 0.22em; text-transform: uppercase; font-weight: 700;
   flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; padding-left: 16px; opacity: 0.6; }
 
@@ -110,7 +110,7 @@ button { font-family: inherit; cursor: pointer; }
    IDENTITY CARD
    ───────────────────────────────────────────────────────────────── */
 .vu-iden-row { display: flex; gap: 16px; align-items: flex-start; }
-.vu-iden-wrap { flex-shrink: 0; padding: 6px; background: var(--surface-strong); border: var(--border-faint); }
+.vu-iden-wrap { flex-shrink: 0; padding: 6px; background: var(--surface-strong); border: var(--border-line); }
 .vu-iden { display: block; }
 .vu-iden rect { fill: var(--ink); }
 .vu-iden.is-gold rect { fill: var(--gold); }
@@ -118,7 +118,7 @@ button { font-family: inherit; cursor: pointer; }
 .vu-iden-handle { color: var(--ink-bright); font-size: 26px; font-weight: 900; letter-spacing: -0.02em;
   text-shadow: 0 0 16px var(--ink-glow); line-height: 1; word-break: break-all; }
 .vu-iden-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-.vu-stat { padding: 6px 8px; background: var(--surface-raised); border: var(--border-faint); text-align: center; }
+.vu-stat { padding: 6px 8px; background: var(--surface-raised); border: var(--border-line); text-align: center; }
 .vu-stat-lbl { color: var(--ink-text); font-size: 9px; letter-spacing: 0.22em; font-weight: 700; text-transform: uppercase; }
 .vu-stat-val { font-size: 12px; font-weight: 900; font-variant-numeric: tabular-nums; margin-top: 2px;
   white-space: nowrap; }
@@ -128,7 +128,7 @@ button { font-family: inherit; cursor: pointer; }
 .vu-subs-lbl { color: var(--ink-text); font-size: 9px; letter-spacing: 0.22em; font-weight: 700;
   text-transform: uppercase; margin-bottom: 6px; }
 .vu-subs-list { display: flex; flex-wrap: wrap; gap: 4px; }
-.vu-sub-chip { display: inline-flex; align-items: center; padding: 3px 6px; border: var(--border-faint);
+.vu-sub-chip { display: inline-flex; align-items: center; padding: 3px 6px; border: var(--border-line);
   background: var(--surface-raised); color: var(--ink-bright); font-size: 9px; letter-spacing: 0.12em;
   font-weight: 700; text-transform: uppercase; white-space: nowrap; }
 
@@ -136,7 +136,7 @@ button { font-family: inherit; cursor: pointer; }
    ROLLING USAGE — 3 tiles
    ───────────────────────────────────────────────────────────────── */
 .vu-rolling { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-.vu-rolling-tile { padding: 10px 6px; border: var(--border-faint); background: var(--surface-raised); text-align: center; }
+.vu-rolling-tile { padding: 10px 6px; border: var(--border-line); background: var(--surface-raised); text-align: center; }
 .vu-rolling-lbl { color: var(--ink-text); font-size: 9px; letter-spacing: 0.22em; font-weight: 700; text-transform: uppercase; }
 .vu-rolling-val { color: var(--ink-bright); font-size: 26px; font-weight: 900; letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums; margin-top: 4px; line-height: 1; text-shadow: 0 0 12px var(--ink-glow); }
@@ -146,7 +146,7 @@ button { font-family: inherit; cursor: pointer; }
    ───────────────────────────────────────────────────────────────── */
 .vu-tm { display: flex; flex-direction: column; }
 .vu-tm-row { display: grid; grid-template-columns: auto 1fr auto; align-items: baseline; gap: 12px;
-  padding: 10px 4px; border-bottom: var(--border-faint); }
+  padding: 10px 4px; border-bottom: var(--border-line); }
 .vu-tm-row:last-child { border-bottom: 0; }
 .vu-tm-rank { color: var(--ink-muted); font-size: 11px; font-weight: 700; letter-spacing: 0.12em; font-variant-numeric: tabular-nums; }
 .vu-tm-name { color: var(--ink); font-size: 13px; font-weight: 900; letter-spacing: 0.04em; text-transform: uppercase;
@@ -184,7 +184,7 @@ button { font-family: inherit; cursor: pointer; }
 
 .vu-projs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
 .vu-proj { position: relative; display: flex; flex-direction: column; gap: 10px; padding: 14px;
-  border: var(--border-faint); background: var(--surface-raised); text-decoration: none; min-height: 132px;
+  border: var(--border-line); background: var(--surface-raised); text-decoration: none; min-height: 132px;
   transition: var(--transition); }
 .vu-proj:hover { border-color: var(--ink); box-shadow: var(--shadow-glow-faint); }
 .vu-proj-stars { position: absolute; top: 10px; right: 12px; display: inline-flex; align-items: center; gap: 4px;
@@ -193,7 +193,7 @@ button { font-family: inherit; cursor: pointer; }
 .vu-proj-stars-num { color: var(--ink-bright); font-variant-numeric: tabular-nums; }
 
 .vu-proj-id { display: flex; align-items: center; gap: 8px; padding-right: 60px; }
-.vu-proj-avatar { width: 28px; height: 28px; border: var(--border-faint); border-radius: 999px; overflow: hidden;
+.vu-proj-avatar { width: 28px; height: 28px; border: var(--border-line); border-radius: 999px; overflow: hidden;
   display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: var(--surface-strong); }
 .vu-proj-avatar svg { width: 22px !important; height: 22px !important; }
 .vu-proj-avatar img { width: 100%; height: 100%; object-fit: cover; }
@@ -232,7 +232,7 @@ button { font-family: inherit; cursor: pointer; }
 .vu-key { color: var(--ink-muted); font-size: 10px; letter-spacing: 0.22em; font-weight: 700; margin-left: 6px; vertical-align: middle; }
 
 .vu-core-foot { color: var(--ink-muted); font-size: 10px; letter-spacing: 0.18em; text-align: center;
-  padding-top: 12px; margin-top: 12px; border-top: var(--border-faint); font-weight: 600; text-transform: uppercase; }
+  padding-top: 12px; margin-top: 12px; border-top: var(--border-line); font-weight: 600; text-transform: uppercase; }
 
 /* ─────────────────────────────────────────────────────────────────
    MODEL BREAKDOWN — grouped per source
@@ -244,7 +244,7 @@ button { font-family: inherit; cursor: pointer; }
 .vu-mbd-usage { color: var(--ink-text); font-size: 10px; letter-spacing: 0.22em; font-weight: 700; text-transform: uppercase; }
 .vu-mbd-pct { margin-left: auto; color: var(--ink); font-size: 18px; font-weight: 900; font-variant-numeric: tabular-nums; }
 .vu-mbd-pct-unit { color: var(--ink); font-size: 12px; font-weight: 700; margin-left: 1px; }
-.vu-mbd-bar { height: 4px; background: var(--ink-faint); position: relative; }
+.vu-mbd-bar { height: 4px; background: var(--ink-line); position: relative; }
 .vu-mbd-fill { height: 100%; background: var(--ink); box-shadow: var(--shadow-glow-xs); transition: width 400ms ease; }
 .vu-mbd-subs { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px 16px; padding-top: 4px; }
 .vu-mbd-sub { display: flex; align-items: center; gap: 6px; color: var(--ink-text); font-size: 11px;
@@ -257,15 +257,15 @@ button { font-family: inherit; cursor: pointer; }
 /* ─────────────────────────────────────────────────────────────────
    DETAILS TABLE
    ───────────────────────────────────────────────────────────────── */
-.vu-details { border: var(--border-faint); overflow-x: auto; }
+.vu-details { border: var(--border-line); overflow-x: auto; }
 .vu-details table { width: 100%; border-collapse: collapse; }
-.vu-details th { padding: 0; background: var(--surface-strong); border-bottom: var(--border-faint); }
+.vu-details th { padding: 0; background: var(--surface-strong); border-bottom: var(--border-line); }
 .vu-details th button { width: 100%; display: inline-flex; align-items: center; justify-content: flex-start;
   gap: 6px; padding: 10px 14px; background: transparent; border: 0; color: var(--ink-text); font-size: 10px;
   letter-spacing: 0.22em; font-weight: 900; text-transform: uppercase; cursor: pointer; transition: var(--transition); font-family: var(--font-mono); }
 .vu-details th button:hover { color: var(--ink); background: rgba(0,255,65,0.04); }
 .vu-th-arrow { color: var(--ink-bright); font-size: 10px; }
-.vu-details td { padding: 10px 14px; border-bottom: var(--border-faint); color: var(--ink-text); font-size: 12px;
+.vu-details td { padding: 10px 14px; border-bottom: var(--border-line); color: var(--ink-text); font-size: 12px;
   font-variant-numeric: tabular-nums; font-weight: 600; }
 .vu-details tr:last-child td { border-bottom: 0; }
 .vu-details tr:hover td { background: rgba(0,255,65,0.03); }
@@ -295,13 +295,13 @@ button { font-family: inherit; cursor: pointer; }
   font-size: 8px; letter-spacing: 0.18em; font-weight: 700; text-transform: uppercase; align-items: center; }
 .vu-heat-grid { display: grid; gap: 2px; }
 .vu-heat-c { aspect-ratio: 1; min-width: 0; }
-.vu-heat-l0 { background: var(--ink-faint); }
+.vu-heat-l0 { background: var(--ink-line); }
 .vu-heat-l1 { background: rgba(0,255,65,0.18); }
 .vu-heat-l2 { background: rgba(0,255,65,0.35); }
 .vu-heat-l3 { background: rgba(0,255,65,0.6); }
 .vu-heat-l4 { background: var(--ink); box-shadow: var(--shadow-glow-xs); }
 .vu-heat-foot { display: flex; justify-content: space-between; align-items: center; padding-top: 8px;
-  border-top: var(--border-faint); color: var(--ink-text); font-size: 9px; letter-spacing: 0.22em;
+  border-top: var(--border-line); color: var(--ink-text); font-size: 9px; letter-spacing: 0.22em;
   font-weight: 700; text-transform: uppercase; }
 .vu-heat-legend { display: inline-flex; align-items: center; gap: 4px; }
 .vu-heat-foot .vu-heat-c { display: inline-block; width: 10px; height: 10px; aspect-ratio: auto; }
@@ -317,7 +317,7 @@ button { font-family: inherit; cursor: pointer; }
 .vu-fab:hover { border-color: var(--ink); box-shadow: var(--shadow-glow-xs); color: var(--ink-bright); }
 
 .vu-version { position: fixed; bottom: 16px; right: 16px; z-index: 35; display: flex; flex-direction: column;
-  align-items: flex-end; padding: 6px 10px; border: var(--border-faint); background: var(--surface-strong); }
+  align-items: flex-end; padding: 6px 10px; border: var(--border-line); background: var(--surface-strong); }
 .vu-version-lbl { color: var(--ink-muted); font-size: 9px; letter-spacing: 0.22em; font-weight: 700; text-transform: uppercase; }
 .vu-version-num { color: var(--ink); font-size: 12px; font-weight: 900; font-variant-numeric: tabular-nums; }
 
@@ -328,7 +328,7 @@ button { font-family: inherit; cursor: pointer; }
   display: flex; align-items: center; justify-content: center; }
 .vu-modal-panel { width: min(360px, 90vw); }
 .vu-cheats { display: flex; flex-direction: column; gap: 6px; }
-.vu-cheats-row { display: flex; align-items: center; gap: 12px; padding: 6px 4px; border-bottom: var(--border-faint); }
+.vu-cheats-row { display: flex; align-items: center; gap: 12px; padding: 6px 4px; border-bottom: var(--border-line); }
 .vu-cheats-row:last-child { border-bottom: 0; }
 .vu-cheats kbd { display: inline-flex; align-items: center; justify-content: center; min-width: 28px; height: 24px;
   padding: 0 6px; border: var(--border-muted); background: var(--surface-strong); color: var(--ink);
@@ -339,7 +339,7 @@ button { font-family: inherit; cursor: pointer; }
    FOOTER + TOAST
    ───────────────────────────────────────────────────────────────── */
 .vu-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 24px; padding-top: 12px;
-  border-top: var(--border-faint); color: var(--ink-faint); font-size: 10px; letter-spacing: 0.22em;
+  border-top: var(--border-line); color: var(--ink-line); font-size: 10px; letter-spacing: 0.22em;
   font-weight: 700; text-transform: uppercase; }
 
 .vu-toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); padding: 10px 16px;
