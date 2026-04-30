@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.6.4] - 2026-04-30
+
+### Fixed
+
+- **Hermes usage field name fallback.** The `post_api_request` hook in Hermes may pass usage dicts with short field names (`output`, `input`, `cache_read`, etc.) instead of the expected long names (`output_tokens`, `input_tokens`, `cache_read_tokens`, etc.). The plugin template now falls back from the long name to the short name for all six fields (`input_tokens`, `output_tokens`, `cache_read_tokens`, `cache_write_tokens`, `reasoning_tokens`, `total_tokens`). This fixes the bug where `output_tokens` was permanently 0 in the ledger because the plugin only looked for the long field name while Hermes passed the short name.
+- **Sync total_tokens safety net.** `parseHermesUsageLedger` now routes `total_tokens` into `output_tokens` when all fine-grained channels are 0 but `total_tokens > 0`. This prevents events from being silently dropped when an upstream plugin only reports the total.
+
 ## [0.6.3] - 2026-04-28
 
 ### Fixed
