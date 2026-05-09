@@ -1,5 +1,5 @@
 {
-  "$schema": "https://agentskills.io/schemas/agent-skills-index-v0.2.json",
+  "$schema": "https://schemas.agentskills.io/discovery/0.2.0/schema.json",
   "version": "0.2.0",
   "generated_at": "2026-05-09T09:30:00Z",
   "entries": [

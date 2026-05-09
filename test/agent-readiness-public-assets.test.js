@@ -89,6 +89,7 @@ test("well-known agent discovery files are valid JSON", () => {
   assert.equal(plugin.schema_version, "v1");
   assert.equal(plugin.api.url, "https://www.vibeusage.cc/openapi.json");
   assert.equal(card.name, "VibeUsage");
+  assert.equal(skillsIndex.$schema, "https://schemas.agentskills.io/discovery/0.2.0/schema.json");
   assert.equal(skillsIndex.version, "0.2.0");
   assert.equal(skillsIndex.entries[0].type, "skill-md");
   assert.match(skillsIndex.entries[0].digest, /^sha256:[a-f0-9]{64}$/);
