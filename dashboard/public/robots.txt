@@ -4,4 +4,7 @@ Sitemap: https://www.vibeusage.cc/sitemap.xml
 
 # AI/agent discovery helpers
 # llms: https://www.vibeusage.cc/llms.txt
+# openapi: https://www.vibeusage.cc/openapi.json
+# mcp: https://www.vibeusage.cc/.well-known/mcp/manifest.json
+# developers: https://www.vibeusage.cc/developers
 # feed: https://www.vibeusage.cc/feed.xml

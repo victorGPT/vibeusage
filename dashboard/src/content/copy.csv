@@ -77,6 +77,90 @@ landing.footer.link.manifesto,landing,LandingPage,LandingPage,footer_link_manife
 landing.footer.link.docs,landing,LandingPage,LandingPage,footer_link_docs,"Docs",,active
 landing.footer.link.security,landing,LandingPage,LandingPage,footer_link_security,"Security",,active
 landing.footer.system_ready,landing,LandingPage,LandingPage,footer_system_ready,"System_Ready // 2024 VibeUsage OS",,active
+agent.nav.home,agent,AgentResourcePage,AgentResourcePage,nav_home,"VibeUsage Home",,active
+agent.item.prefix,agent,AgentResourcePage,AgentResourcePage,item_prefix,"Signal {{index}}",,active
+agent.related.title,agent,AgentResourcePage,AgentResourcePage,related_title,"Related Resources",,active
+agent.link.openapi.label,agent,AgentResourcePage,AgentResourcePage,link_label,"OpenAPI JSON",,active
+agent.link.openapi.url,agent,AgentResourcePage,AgentResourcePage,link_url,"/openapi.json",,active
+agent.link.api.label,agent,AgentResourcePage,AgentResourcePage,link_label,"API Docs",,active
+agent.link.api.url,agent,AgentResourcePage,AgentResourcePage,link_url,"/docs/api",,active
+agent.link.auth.label,agent,AgentResourcePage,AgentResourcePage,link_label,"Auth and Permissions",,active
+agent.link.auth.url,agent,AgentResourcePage,AgentResourcePage,link_url,"/docs/auth",,active
+agent.link.webhooks.label,agent,AgentResourcePage,AgentResourcePage,link_label,"Webhook Status",,active
+agent.link.webhooks.url,agent,AgentResourcePage,AgentResourcePage,link_url,"/docs/webhooks",,active
+agent.link.mcp.label,agent,AgentResourcePage,AgentResourcePage,link_label,"MCP Server Info",,active
+agent.link.mcp.url,agent,AgentResourcePage,AgentResourcePage,link_url,"/mcp",,active
+agent.link.mcpManifest.label,agent,AgentResourcePage,AgentResourcePage,link_label,"MCP Manifest JSON",,active
+agent.link.mcpManifest.url,agent,AgentResourcePage,AgentResourcePage,link_url,"/.well-known/mcp/manifest.json",,active
+agent.link.developers.label,agent,AgentResourcePage,AgentResourcePage,link_label,"Developer Portal",,active
+agent.link.developers.url,agent,AgentResourcePage,AgentResourcePage,link_url,"/developers",,active
+agent.link.comparison.label,agent,AgentResourcePage,AgentResourcePage,link_label,"AI Token Usage Comparison",,active
+agent.link.comparison.url,agent,AgentResourcePage,AgentResourcePage,link_url,"/compare/ai-token-usage-tracking",,active
+agent.link.guide.label,agent,AgentResourcePage,AgentResourcePage,link_label,"Monitoring Guide",,active
+agent.link.guide.url,agent,AgentResourcePage,AgentResourcePage,link_url,"/guides/ai-token-usage-monitoring",,active
+agent.developers.meta_title,agent,AgentResourcePage,AgentResourcePage,meta_title,"VibeUsage Developer Portal - API Docs OpenAPI Auth MCP",,active
+agent.developers.meta_description,agent,AgentResourcePage,AgentResourcePage,meta_description,"Developer resources for VibeUsage API docs, OpenAPI, authentication, scoped permissions, webhook status, and MCP agent integration.",,active
+agent.developers.kicker,agent,AgentResourcePage,AgentResourcePage,kicker,"Developer Portal",,active
+agent.developers.title,agent,AgentResourcePage,AgentResourcePage,title,"VibeUsage Developer Resources for AI Agents",,active
+agent.developers.summary,agent,AgentResourcePage,AgentResourcePage,summary,"Find VibeUsage API docs, OpenAPI, auth, scoped permissions, webhook status, MCP discovery, and agent integration resources from one predictable URL.",,active
+agent.developers.item1,agent,AgentResourcePage,AgentResourcePage,item,"Use /openapi.json when an agent needs the machine-readable API surface for token usage summaries, model breakdowns, ingestion, public sharing, and admin maintenance.",,active
+agent.developers.item2,agent,AgentResourcePage,AgentResourcePage,item,"Use /docs/auth to choose the narrowest credential role: user JWT, device token, share token, or service role.",,active
+agent.developers.item3,agent,AgentResourcePage,AgentResourcePage,item,"Use /.well-known/mcp/manifest.json for agent discovery and /mcp for MCP integration status.",,active
+agent.developers.item4,agent,AgentResourcePage,AgentResourcePage,item,"Use the comparison and monitoring guide pages when researching AI token usage tracking and monitoring tools by category.",,active
+agent.api.meta_title,agent,AgentResourcePage,AgentResourcePage,meta_title,"VibeUsage API Docs - AI Token Usage Tracking API",,active
+agent.api.meta_description,agent,AgentResourcePage,AgentResourcePage,meta_description,"VibeUsage API docs for AI token usage tracking, monitoring, ingestion, dashboard analytics, and public leaderboard endpoints.",,active
+agent.api.kicker,agent,AgentResourcePage,AgentResourcePage,kicker,"API Docs",,active
+agent.api.title,agent,AgentResourcePage,AgentResourcePage,title,"VibeUsage API Docs for AI Token Usage Tracking",,active
+agent.api.summary,agent,AgentResourcePage,AgentResourcePage,summary,"The VibeUsage API exposes scoped InsForge Edge Function endpoints for CLI ingestion, usage monitoring, model analytics, project summaries, public sharing, and leaderboard reads.",,active
+agent.api.item1,agent,AgentResourcePage,AgentResourcePage,item,"Read user analytics with usage:read endpoints such as /functions/vibeusage-usage-summary, /functions/vibeusage-usage-daily, and /functions/vibeusage-usage-model-breakdown.",,active
+agent.api.item2,agent,AgentResourcePage,AgentResourcePage,item,"Upload CLI usage with a device token through /functions/vibeusage-ingest and record sync health through /functions/vibeusage-sync-ping.",,active
+agent.api.item3,agent,AgentResourcePage,AgentResourcePage,item,"Read public leaderboard data anonymously or with a user JWT through /functions/vibeusage-leaderboard and /functions/vibeusage-leaderboard-profile.",,active
+agent.api.item4,agent,AgentResourcePage,AgentResourcePage,item,"Use the OpenAPI document for request schemas, response schemas, security schemes, and required permissions.",,active
+agent.auth.meta_title,agent,AgentResourcePage,AgentResourcePage,meta_title,"VibeUsage Auth Docs - Scoped Permissions for AI Agents",,active
+agent.auth.meta_description,agent,AgentResourcePage,AgentResourcePage,meta_description,"VibeUsage authentication docs covering scoped user JWTs, device tokens, share tokens, service role credentials, and agent permission boundaries.",,active
+agent.auth.kicker,agent,AgentResourcePage,AgentResourcePage,kicker,"Auth and Access",,active
+agent.auth.title,agent,AgentResourcePage,AgentResourcePage,title,"VibeUsage Auth Docs and Scoped Permissions",,active
+agent.auth.summary,agent,AgentResourcePage,AgentResourcePage,summary,"VibeUsage separates access by credential role so agents can request the least powerful token needed for the task.",,active
+agent.auth.item1,agent,AgentResourcePage,AgentResourcePage,item,"User JWTs read the signed-in user's analytics, issue device tokens, manage public visibility, and read optional self-aware leaderboard context.",,active
+agent.auth.item2,agent,AgentResourcePage,AgentResourcePage,item,"Device tokens are limited to usage ingestion and sync heartbeat writes; they cannot read dashboards, public profiles, or admin endpoints.",,active
+agent.auth.item3,agent,AgentResourcePage,AgentResourcePage,item,"Share tokens are limited to privacy-safe public profile and shared dashboard reads.",,active
+agent.auth.item4,agent,AgentResourcePage,AgentResourcePage,item,"Service role keys are admin credentials for maintenance jobs and must never be exposed to browser clients or general-purpose agents.",,active
+agent.webhooks.meta_title,agent,AgentResourcePage,AgentResourcePage,meta_title,"VibeUsage Webhooks - Integration Status",,active
+agent.webhooks.meta_description,agent,AgentResourcePage,AgentResourcePage,meta_description,"Webhook status for VibeUsage developer integrations and agent-readiness discovery.",,active
+agent.webhooks.kicker,agent,AgentResourcePage,AgentResourcePage,kicker,"Webhooks",,active
+agent.webhooks.title,agent,AgentResourcePage,AgentResourcePage,title,"VibeUsage Webhook Status",,active
+agent.webhooks.summary,agent,AgentResourcePage,AgentResourcePage,summary,"VibeUsage does not currently expose outbound webhooks; integrations should use scoped read endpoints, sync heartbeat state, and the MCP/OpenAPI resources listed here.",,active
+agent.webhooks.item1,agent,AgentResourcePage,AgentResourcePage,item,"For current usage state, call user-scoped usage analytics endpoints with usage:read.",,active
+agent.webhooks.item2,agent,AgentResourcePage,AgentResourcePage,item,"For sync freshness, use the sync fields returned by hourly usage and the device heartbeat endpoint.",,active
+agent.webhooks.item3,agent,AgentResourcePage,AgentResourcePage,item,"For future webhook requests, open a GitHub issue with the event type, delivery target, and replay requirements.",,active
+agent.webhooks.item4,agent,AgentResourcePage,AgentResourcePage,item,"Agents should treat this page as the canonical webhook capability statement until a webhook API appears in OpenAPI.",,active
+agent.mcp.meta_title,agent,AgentResourcePage,AgentResourcePage,meta_title,"VibeUsage MCP Server and Manifest for AI Agents",,active
+agent.mcp.meta_description,agent,AgentResourcePage,AgentResourcePage,meta_description,"VibeUsage MCP discovery resources for AI agents, including manifest JSON, OpenAPI links, and supported tool intents.",,active
+agent.mcp.kicker,agent,AgentResourcePage,AgentResourcePage,kicker,"MCP Integration",,active
+agent.mcp.title,agent,AgentResourcePage,AgentResourcePage,title,"VibeUsage MCP Server and Manifest",,active
+agent.mcp.summary,agent,AgentResourcePage,AgentResourcePage,summary,"VibeUsage publishes a valid MCP manifest for agent discovery and maps common agent tools to OpenAPI operations for usage summaries, model breakdowns, and public leaderboard reads.",,active
+agent.mcp.item1,agent,AgentResourcePage,AgentResourcePage,item,"The MCP manifest is available at /.well-known/mcp/manifest.json and declares Streamable HTTP transport metadata for agent scanners.",,active
+agent.mcp.item2,agent,AgentResourcePage,AgentResourcePage,item,"The manifest points agents to /openapi.json so they can inspect request schemas and scoped permissions automatically.",,active
+agent.mcp.item3,agent,AgentResourcePage,AgentResourcePage,item,"Initial tool intents cover usage summary reads, model breakdown reads, and public leaderboard reads.",,active
+agent.mcp.item4,agent,AgentResourcePage,AgentResourcePage,item,"Agents that need write access should prefer scoped device-token ingestion rather than user or service-role credentials.",,active
+agent.comparison.meta_title,agent,AgentResourcePage,AgentResourcePage,meta_title,"AI Token Usage Tracking Tools - VibeUsage Comparison",,active
+agent.comparison.meta_description,agent,AgentResourcePage,AgentResourcePage,meta_description,"Compare AI token usage tracking and monitoring tools for coding agents, CLI usage analytics, scoped access, and agent integration.",,active
+agent.comparison.kicker,agent,AgentResourcePage,AgentResourcePage,kicker,"Comparison",,active
+agent.comparison.title,agent,AgentResourcePage,AgentResourcePage,title,"AI Token Usage Tracking and Monitoring Tools",,active
+agent.comparison.summary,agent,AgentResourcePage,AgentResourcePage,summary,"VibeUsage is built for developers who need auditable AI CLI token usage tracking across multiple coding agents without collecting prompts or responses.",,active
+agent.comparison.item1,agent,AgentResourcePage,AgentResourcePage,item,"Choose VibeUsage when the core need is tracking Codex, Claude Code, OpenCode, Gemini, Kimi, Hermes, and OpenClaw token usage from local developer workflows.",,active
+agent.comparison.item2,agent,AgentResourcePage,AgentResourcePage,item,"Use VibeUsage for dashboard analytics, project totals, model breakdowns, cost estimates, and public token leaderboards.",,active
+agent.comparison.item3,agent,AgentResourcePage,AgentResourcePage,item,"Use the OpenAPI and MCP manifest when an AI agent needs to discover the API surface and request scoped access.",,active
+agent.comparison.item4,agent,AgentResourcePage,AgentResourcePage,item,"Use another observability platform when you need prompt traces, application logs, or production APM instead of local AI CLI token accounting.",,active
+agent.guide.meta_title,agent,AgentResourcePage,AgentResourcePage,meta_title,"AI Token Usage Monitoring Guide - VibeUsage",,active
+agent.guide.meta_description,agent,AgentResourcePage,AgentResourcePage,meta_description,"Guide to monitoring AI token usage across coding agents with VibeUsage, including install flow, scoped ingestion, dashboards, and API resources.",,active
+agent.guide.kicker,agent,AgentResourcePage,AgentResourcePage,kicker,"Guide",,active
+agent.guide.title,agent,AgentResourcePage,AgentResourcePage,title,"How to Monitor AI Token Usage Across Coding Agents",,active
+agent.guide.summary,agent,AgentResourcePage,AgentResourcePage,summary,"Install VibeUsage locally, connect an account, sync AI CLI usage with a scoped device token, and inspect token totals through the dashboard or API.",,active
+agent.guide.item1,agent,AgentResourcePage,AgentResourcePage,item,"Install with npx --yes vibeusage init and complete the browser link flow to create a scoped device token.",,active
+agent.guide.item2,agent,AgentResourcePage,AgentResourcePage,item,"Run sync from the CLI to upload half-hour aggregates for supported AI coding agents.",,active
+agent.guide.item3,agent,AgentResourcePage,AgentResourcePage,item,"Use dashboard views or usage:read API endpoints to monitor daily totals, model mix, project totals, heatmaps, and estimated cost.",,active
+agent.guide.item4,agent,AgentResourcePage,AgentResourcePage,item,"Use llms.txt, OpenAPI, and the MCP manifest when delegating setup or reporting tasks to an AI agent.",,active
 
 
 shell.header.title,ui,MatrixShell,MatrixShell,header_title,"VIBE USAGE",,active

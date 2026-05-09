@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VibeUsage Webhooks - Integration Status</title>
+    <meta name="description" content="Webhook status for VibeUsage developer integrations and agent-readiness discovery." />
+  </head>
+  <body>
+    <main>
+      <h1>VibeUsage Webhook Status</h1>
+      <p>VibeUsage does not currently expose outbound webhooks. Integrations should use scoped read endpoints, sync heartbeat state, and the MCP/OpenAPI resources listed here.</p>
+      <ul>
+        <li>For current usage state, call user-scoped usage analytics endpoints with <code>usage:read</code>.</li>
+        <li>For sync freshness, use hourly usage sync fields and <code>POST /functions/vibeusage-sync-ping</code>.</li>
+        <li>Agents should treat this page as the canonical webhook capability statement until a webhook API appears in OpenAPI.</li>
+      </ul>
+    </main>
+  </body>
+</html>

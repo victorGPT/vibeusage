@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VibeUsage MCP Server and Manifest for AI Agents</title>
+    <meta name="description" content="VibeUsage MCP discovery resources for AI agents, including manifest JSON, OpenAPI links, and supported tool intents." />
+  </head>
+  <body>
+    <main>
+      <h1>VibeUsage MCP Server and Manifest</h1>
+      <p>VibeUsage publishes a valid MCP manifest for agent discovery and maps common agent tools to OpenAPI operations for usage summaries, model breakdowns, and public leaderboard reads.</p>
+      <p>The MCP manifest is available at <a href="/.well-known/mcp/manifest.json">/.well-known/mcp/manifest.json</a>. It points agents to <a href="/openapi.json">/openapi.json</a> for request schemas and scoped permissions.</p>
+      <p>A callable Streamable HTTP MCP transport is not yet exposed on the public website. Agents should use the OpenAPI contract until the backend MCP endpoint is deployed.</p>
+    </main>
+  </body>
+</html>

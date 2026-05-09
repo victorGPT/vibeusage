@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VibeUsage Auth Docs - Scoped Permissions for AI Agents</title>
+    <meta name="description" content="VibeUsage authentication docs covering scoped user JWTs, device tokens, share tokens, service role credentials, and agent permission boundaries." />
+  </head>
+  <body>
+    <main>
+      <h1>VibeUsage Auth Docs and Scoped Permissions</h1>
+      <p>VibeUsage separates access by credential role so agents can request the least powerful token needed for the task.</p>
+      <ul>
+        <li><strong>User JWT</strong>: reads the signed-in user's analytics, issues device tokens, manages public visibility, and reads optional self-aware leaderboard context.</li>
+        <li><strong>Device token</strong>: limited to usage ingestion and sync heartbeat writes. It cannot read dashboards, public profiles, or admin endpoints.</li>
+        <li><strong>Share token</strong>: limited to privacy-safe public profile and shared dashboard reads.</li>
+        <li><strong>Service role key</strong>: admin credential for maintenance jobs. Never expose it to browser clients or general-purpose agents.</li>
+      </ul>
+      <p>See <a href="/openapi.json">/openapi.json</a> for operation-level <code>x-required-permissions</code>.</p>
+    </main>
+  </body>
+</html>

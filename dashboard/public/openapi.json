@@ -1,0 +1,1106 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "VibeUsage API",
+    "version": "0.6.4",
+    "summary": "Token usage tracking and monitoring API for AI agent CLI clients.",
+    "description": "VibeUsage exposes scoped endpoints for AI token usage ingestion, user usage analytics, public leaderboard views, and admin maintenance. Agents should request the narrowest role or permission listed on each operation.",
+    "contact": {
+      "name": "VibeUsage developer support",
+      "url": "https://github.com/victorGPT/vibeusage/issues"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://github.com/victorGPT/vibeusage/blob/main/LICENSE"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://5tmappuk.us-east.insforge.app",
+      "description": "Production InsForge Edge Functions API"
+    },
+    {
+      "url": "https://www.vibeusage.cc",
+      "description": "VibeUsage public site and agent discovery resources"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Device Tokens",
+      "description": "Scoped device-token issuance and CLI linking."
+    },
+    {
+      "name": "Usage Ingest",
+      "description": "Device-scoped token usage upload and sync heartbeat."
+    },
+    {
+      "name": "Usage Analytics",
+      "description": "User-scoped token usage summaries, trends, model breakdowns, and heatmaps."
+    },
+    {
+      "name": "Public Sharing",
+      "description": "Share-token and public leaderboard access."
+    },
+    {
+      "name": "Admin",
+      "description": "Service-role maintenance endpoints."
+    },
+    {
+      "name": "Diagnostics",
+      "description": "Low-risk authentication diagnostics."
+    }
+  ],
+  "paths": {
+    "/functions/vibeusage-device-token-issue": {
+      "post": {
+        "operationId": "issueDeviceToken",
+        "tags": ["Device Tokens"],
+        "summary": "Issue a scoped device token for CLI ingestion.",
+        "description": "Creates a long-lived device token for the authenticated user. The returned token is scoped to device ingestion and sync heartbeat writes.",
+        "security": [{ "UserJWT": [] }, { "ServiceRoleKey": [] }],
+        "x-required-permissions": ["device_tokens:write"],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/DeviceTokenIssueRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Device token issued.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/DeviceTokenIssueResponse" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/functions/vibeusage-link-code-init": {
+      "post": {
+        "operationId": "initLinkCode",
+        "tags": ["Device Tokens"],
+        "summary": "Create a short-lived CLI link code.",
+        "security": [{ "UserJWT": [] }],
+        "x-required-permissions": ["device_tokens:write"],
+        "responses": {
+          "200": {
+            "description": "Link code issued.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/LinkCodeInitResponse" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/functions/vibeusage-link-code-exchange": {
+      "post": {
+        "operationId": "exchangeLinkCode",
+        "tags": ["Device Tokens"],
+        "summary": "Exchange a link code for a scoped device token.",
+        "description": "Public CLI bootstrap endpoint. Replay safety is enforced by request_id.",
+        "security": [],
+        "x-required-permissions": ["device_tokens:exchange"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/LinkCodeExchangeRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Device token returned.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/LinkCodeExchangeResponse" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "409": { "$ref": "#/components/responses/Conflict" }
+        }
+      }
+    },
+    "/functions/vibeusage-ingest": {
+      "post": {
+        "operationId": "ingestUsage",
+        "tags": ["Usage Ingest"],
+        "summary": "Ingest half-hour AI token usage aggregates.",
+        "description": "Accepts usage buckets from one registered device. The device token role cannot read user analytics or admin data.",
+        "security": [{ "DeviceToken": [] }],
+        "x-required-permissions": ["usage:ingest"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/IngestRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Usage batch processed.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/IngestResponse" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "429": {
+            "description": "Ingest backpressure limit exceeded."
+          }
+        }
+      }
+    },
+    "/functions/vibeusage-sync-ping": {
+      "post": {
+        "operationId": "recordSyncPing",
+        "tags": ["Usage Ingest"],
+        "summary": "Record a device sync heartbeat.",
+        "security": [{ "DeviceToken": [] }],
+        "x-required-permissions": ["sync:write"],
+        "responses": {
+          "200": {
+            "description": "Sync heartbeat recorded.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/SyncPingResponse" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/functions/vibeusage-user-status": {
+      "get": {
+        "operationId": "getUserStatus",
+        "tags": ["Usage Analytics"],
+        "summary": "Read authenticated user plan and subscription status.",
+        "security": [{ "UserJWT": [] }],
+        "x-required-permissions": ["user_status:read"],
+        "responses": {
+          "200": {
+            "description": "User status.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UserStatusResponse" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/functions/vibeusage-usage-summary": {
+      "get": {
+        "operationId": "getUsageSummary",
+        "tags": ["Usage Analytics"],
+        "summary": "Read token usage totals for the authenticated user.",
+        "security": [{ "UserJWT": [] }],
+        "x-required-permissions": ["usage:read"],
+        "parameters": [
+          { "$ref": "#/components/parameters/FromDate" },
+          { "$ref": "#/components/parameters/ToDate" },
+          { "$ref": "#/components/parameters/Source" },
+          { "$ref": "#/components/parameters/Model" },
+          { "$ref": "#/components/parameters/Timezone" },
+          { "$ref": "#/components/parameters/TimezoneOffsetMinutes" },
+          { "$ref": "#/components/parameters/Debug" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Usage totals.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UsageSummaryResponse" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/functions/vibeusage-project-usage-summary": {
+      "get": {
+        "operationId": "getProjectUsageSummary",
+        "tags": ["Usage Analytics"],
+        "summary": "Read top project token usage totals.",
+        "security": [{ "UserJWT": [] }],
+        "x-required-permissions": ["usage:read", "projects:read"],
+        "parameters": [
+          { "$ref": "#/components/parameters/Source" },
+          { "$ref": "#/components/parameters/LimitSmall" },
+          { "$ref": "#/components/parameters/Debug" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Project usage totals.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ProjectUsageSummaryResponse" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/functions/vibeusage-usage-model-breakdown": {
+      "get": {
+        "operationId": "getUsageModelBreakdown",
+        "tags": ["Usage Analytics"],
+        "summary": "Read per-source and per-model token usage aggregates.",
+        "security": [{ "UserJWT": [] }],
+        "x-required-permissions": ["usage:read"],
+        "parameters": [
+          { "$ref": "#/components/parameters/FromDate" },
+          { "$ref": "#/components/parameters/ToDate" },
+          { "$ref": "#/components/parameters/Source" },
+          { "$ref": "#/components/parameters/Timezone" },
+          { "$ref": "#/components/parameters/TimezoneOffsetMinutes" },
+          { "$ref": "#/components/parameters/Debug" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Model breakdown.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UsageModelBreakdownResponse" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/functions/vibeusage-usage-daily": {
+      "get": {
+        "operationId": "getUsageDaily",
+        "tags": ["Usage Analytics"],
+        "summary": "Read daily token usage aggregates.",
+        "security": [{ "UserJWT": [] }],
+        "x-required-permissions": ["usage:read"],
+        "parameters": [
+          { "$ref": "#/components/parameters/FromDate" },
+          { "$ref": "#/components/parameters/ToDate" },
+          { "$ref": "#/components/parameters/Source" },
+          { "$ref": "#/components/parameters/Model" },
+          { "$ref": "#/components/parameters/Timezone" },
+          { "$ref": "#/components/parameters/TimezoneOffsetMinutes" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Daily usage data.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UsageDailyResponse" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/functions/vibeusage-usage-hourly": {
+      "get": {
+        "operationId": "getUsageHourly",
+        "tags": ["Usage Analytics"],
+        "summary": "Read half-hour token usage buckets for one day.",
+        "security": [{ "UserJWT": [] }],
+        "x-required-permissions": ["usage:read"],
+        "parameters": [
+          {
+            "name": "day",
+            "in": "query",
+            "schema": { "type": "string", "format": "date" }
+          },
+          { "$ref": "#/components/parameters/Source" },
+          { "$ref": "#/components/parameters/Model" },
+          { "$ref": "#/components/parameters/Timezone" },
+          { "$ref": "#/components/parameters/TimezoneOffsetMinutes" },
+          { "$ref": "#/components/parameters/Debug" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Hourly usage data.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UsageHourlyResponse" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/functions/vibeusage-usage-monthly": {
+      "get": {
+        "operationId": "getUsageMonthly",
+        "tags": ["Usage Analytics"],
+        "summary": "Read monthly token usage aggregates.",
+        "security": [{ "UserJWT": [] }],
+        "x-required-permissions": ["usage:read"],
+        "parameters": [
+          {
+            "name": "months",
+            "in": "query",
+            "schema": { "type": "integer", "minimum": 1, "maximum": 24, "default": 24 }
+          },
+          { "$ref": "#/components/parameters/ToDate" },
+          { "$ref": "#/components/parameters/Source" },
+          { "$ref": "#/components/parameters/Model" },
+          { "$ref": "#/components/parameters/Timezone" },
+          { "$ref": "#/components/parameters/TimezoneOffsetMinutes" },
+          { "$ref": "#/components/parameters/Debug" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Monthly usage data.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UsageMonthlyResponse" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/functions/vibeusage-usage-heatmap": {
+      "get": {
+        "operationId": "getUsageHeatmap",
+        "tags": ["Usage Analytics"],
+        "summary": "Read activity heatmap usage data.",
+        "security": [{ "UserJWT": [] }],
+        "x-required-permissions": ["usage:read"],
+        "parameters": [
+          {
+            "name": "weeks",
+            "in": "query",
+            "schema": { "type": "integer", "minimum": 1, "maximum": 104, "default": 52 }
+          },
+          { "$ref": "#/components/parameters/ToDate" },
+          {
+            "name": "week_starts_on",
+            "in": "query",
+            "schema": { "type": "string", "enum": ["sun", "mon"], "default": "sun" }
+          },
+          { "$ref": "#/components/parameters/Source" },
+          { "$ref": "#/components/parameters/Model" },
+          { "$ref": "#/components/parameters/Timezone" },
+          { "$ref": "#/components/parameters/TimezoneOffsetMinutes" },
+          { "$ref": "#/components/parameters/Debug" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Heatmap data.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UsageHeatmapResponse" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/functions/vibeusage-leaderboard": {
+      "get": {
+        "operationId": "getLeaderboard",
+        "tags": ["Public Sharing"],
+        "summary": "Read the public token usage leaderboard.",
+        "description": "Anonymous requests return public rows only. Authenticated requests may include the caller's private rank in me.",
+        "security": [{}, { "UserJWT": [] }],
+        "x-required-permissions": ["leaderboard:read"],
+        "parameters": [
+          {
+            "name": "period",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string", "enum": ["week", "month", "total"] }
+          },
+          {
+            "name": "metric",
+            "in": "query",
+            "schema": { "type": "string", "enum": ["all", "gpt", "claude", "other"], "default": "all" }
+          },
+          { "$ref": "#/components/parameters/LimitLarge" },
+          { "$ref": "#/components/parameters/Offset" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Leaderboard page.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/LeaderboardResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/functions/vibeusage-leaderboard-profile": {
+      "get": {
+        "operationId": "getLeaderboardProfile",
+        "tags": ["Public Sharing"],
+        "summary": "Read one public leaderboard profile.",
+        "security": [{}, { "UserJWT": [] }],
+        "x-required-permissions": ["leaderboard:read"],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "period",
+            "in": "query",
+            "schema": { "type": "string", "enum": ["week", "month", "total"], "default": "week" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Leaderboard profile.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/LeaderboardProfileResponse" }
+              }
+            }
+          },
+          "403": { "$ref": "#/components/responses/Forbidden" }
+        }
+      }
+    },
+    "/functions/vibeusage-public-view-profile": {
+      "get": {
+        "operationId": "getPublicViewProfile",
+        "tags": ["Public Sharing"],
+        "summary": "Read privacy-safe public profile fields for a share token.",
+        "security": [{ "ShareToken": [] }],
+        "x-required-permissions": ["public_profile:read"],
+        "responses": {
+          "200": {
+            "description": "Public profile.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PublicProfileResponse" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/functions/vibeusage-public-visibility": {
+      "get": {
+        "operationId": "getPublicVisibility",
+        "tags": ["Public Sharing"],
+        "summary": "Read public visibility for the authenticated user.",
+        "security": [{ "UserJWT": [] }],
+        "x-required-permissions": ["public_visibility:read"],
+        "responses": {
+          "200": {
+            "description": "Public visibility state.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PublicVisibilityResponse" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      },
+      "post": {
+        "operationId": "setPublicVisibility",
+        "tags": ["Public Sharing"],
+        "summary": "Toggle public visibility for the authenticated user.",
+        "security": [{ "UserJWT": [] }],
+        "x-required-permissions": ["public_visibility:write"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/PublicVisibilityRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Public visibility state.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PublicVisibilityResponse" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/functions/vibeusage-leaderboard-refresh": {
+      "post": {
+        "operationId": "refreshLeaderboard",
+        "tags": ["Admin"],
+        "summary": "Refresh leaderboard snapshots.",
+        "security": [{ "ServiceRoleKey": [] }],
+        "x-required-permissions": ["leaderboard:refresh"],
+        "parameters": [
+          {
+            "name": "period",
+            "in": "query",
+            "schema": { "type": "string", "enum": ["week", "month", "total"] }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Leaderboard refresh result.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AdminActionResponse" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" }
+        }
+      }
+    },
+    "/functions/vibeusage-pricing-sync": {
+      "post": {
+        "operationId": "syncPricing",
+        "tags": ["Admin"],
+        "summary": "Sync model pricing metadata.",
+        "security": [{ "ServiceRoleKey": [] }],
+        "x-required-permissions": ["pricing:write"],
+        "responses": {
+          "200": {
+            "description": "Pricing sync result.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AdminActionResponse" }
+              }
+            }
+          },
+          "403": { "$ref": "#/components/responses/Forbidden" }
+        }
+      }
+    },
+    "/functions/vibeusage-events-retention": {
+      "post": {
+        "operationId": "purgeEvents",
+        "tags": ["Admin"],
+        "summary": "Purge legacy tracker events older than a cutoff.",
+        "security": [{ "ServiceRoleKey": [] }],
+        "x-required-permissions": ["retention:write"],
+        "responses": {
+          "200": {
+            "description": "Retention result.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AdminActionResponse" }
+              }
+            }
+          },
+          "403": { "$ref": "#/components/responses/Forbidden" }
+        }
+      }
+    },
+    "/functions/vibeusage-debug-auth": {
+      "get": {
+        "operationId": "debugAuth",
+        "tags": ["Diagnostics"],
+        "summary": "Report non-secret auth diagnostic state.",
+        "security": [{}, { "UserJWT": [] }],
+        "x-required-permissions": ["diagnostics:read"],
+        "responses": {
+          "200": {
+            "description": "Auth diagnostic state.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/DebugAuthResponse" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "UserJWT": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Hosted user session token. Use only for the signed-in user's analytics, public visibility settings, device-token issuance, and optional self-aware leaderboard reads.",
+        "x-vibeusage-role": "user",
+        "x-vibeusage-permissions": [
+          "usage:read",
+          "projects:read",
+          "user_status:read",
+          "device_tokens:write",
+          "public_visibility:read",
+          "public_visibility:write",
+          "leaderboard:read",
+          "diagnostics:read"
+        ]
+      },
+      "DeviceToken": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "opaque-device-token",
+        "description": "Scoped CLI device token. It can ingest usage and write sync heartbeats, but it cannot read analytics, user profile data, or admin endpoints.",
+        "x-vibeusage-role": "device",
+        "x-vibeusage-permissions": ["usage:ingest", "sync:write"]
+      },
+      "ShareToken": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "opaque-share-token",
+        "description": "Public share token scoped to privacy-safe public profile and shared dashboard reads.",
+        "x-vibeusage-role": "share",
+        "x-vibeusage-permissions": ["public_profile:read"]
+      },
+      "ServiceRoleKey": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "service-role-key",
+        "description": "Administrative service role credential. Never expose to browsers or AI agents that only need user-scoped usage data.",
+        "x-vibeusage-role": "service_role",
+        "x-vibeusage-permissions": [
+          "entitlements:write",
+          "leaderboard:refresh",
+          "pricing:write",
+          "retention:write"
+        ]
+      }
+    },
+    "parameters": {
+      "FromDate": {
+        "name": "from",
+        "in": "query",
+        "schema": { "type": "string", "format": "date" }
+      },
+      "ToDate": {
+        "name": "to",
+        "in": "query",
+        "schema": { "type": "string", "format": "date" }
+      },
+      "Source": {
+        "name": "source",
+        "in": "query",
+        "schema": {
+          "type": "string",
+          "examples": ["codex", "claude", "opencode", "gemini", "kimi", "hermes", "openclaw"]
+        }
+      },
+      "Model": {
+        "name": "model",
+        "in": "query",
+        "schema": { "type": "string", "examples": ["gpt-5.2-codex"] }
+      },
+      "Timezone": {
+        "name": "tz",
+        "in": "query",
+        "schema": { "type": "string", "examples": ["America/Los_Angeles", "Asia/Tokyo"] }
+      },
+      "TimezoneOffsetMinutes": {
+        "name": "tz_offset_minutes",
+        "in": "query",
+        "schema": { "type": "integer" }
+      },
+      "Debug": {
+        "name": "debug",
+        "in": "query",
+        "schema": { "type": "string", "enum": ["1"] }
+      },
+      "LimitSmall": {
+        "name": "limit",
+        "in": "query",
+        "schema": { "type": "integer", "minimum": 1, "maximum": 10, "default": 3 }
+      },
+      "LimitLarge": {
+        "name": "limit",
+        "in": "query",
+        "schema": { "type": "integer", "minimum": 1, "maximum": 100, "default": 20 }
+      },
+      "Offset": {
+        "name": "offset",
+        "in": "query",
+        "schema": { "type": "integer", "minimum": 0, "maximum": 10000, "default": 0 }
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "Invalid request."
+      },
+      "Unauthorized": {
+        "description": "Missing or invalid bearer token."
+      },
+      "Forbidden": {
+        "description": "Authenticated credential does not have the required role."
+      },
+      "Conflict": {
+        "description": "Request conflicts with existing state."
+      }
+    },
+    "schemas": {
+      "TokenTotals": {
+        "type": "object",
+        "properties": {
+          "total_tokens": { "type": "string" },
+          "input_tokens": { "type": "string" },
+          "cached_input_tokens": { "type": "string" },
+          "output_tokens": { "type": "string" },
+          "reasoning_output_tokens": { "type": "string" },
+          "total_cost_usd": { "type": "string" }
+        },
+        "additionalProperties": true
+      },
+      "Pricing": {
+        "type": "object",
+        "properties": {
+          "model": { "type": ["string", "null"] },
+          "pricing_mode": { "type": "string" },
+          "source": { "type": "string" },
+          "effective_from": { "type": "string", "format": "date" }
+        },
+        "additionalProperties": true
+      },
+      "DeviceTokenIssueRequest": {
+        "type": "object",
+        "properties": {
+          "device_name": { "type": "string" },
+          "platform": { "type": "string" },
+          "user_id": { "type": "string", "format": "uuid" }
+        },
+        "additionalProperties": false
+      },
+      "DeviceTokenIssueResponse": {
+        "type": "object",
+        "properties": {
+          "device_id": { "type": "string", "format": "uuid" },
+          "token": { "type": "string" },
+          "created_at": { "type": "string", "format": "date-time" }
+        },
+        "required": ["device_id", "token"]
+      },
+      "LinkCodeInitResponse": {
+        "type": "object",
+        "properties": {
+          "link_code": { "type": "string" },
+          "expires_at": { "type": "string", "format": "date-time" }
+        },
+        "required": ["link_code", "expires_at"]
+      },
+      "LinkCodeExchangeRequest": {
+        "type": "object",
+        "properties": {
+          "link_code": { "type": "string" },
+          "request_id": { "type": "string" },
+          "device_name": { "type": "string" },
+          "platform": { "type": "string" }
+        },
+        "required": ["link_code", "request_id"],
+        "additionalProperties": false
+      },
+      "LinkCodeExchangeResponse": {
+        "type": "object",
+        "properties": {
+          "token": { "type": "string" },
+          "device_id": { "type": "string", "format": "uuid" },
+          "user_id": { "type": "string", "format": "uuid" }
+        },
+        "required": ["token", "device_id", "user_id"]
+      },
+      "UsageBucket": {
+        "type": "object",
+        "properties": {
+          "hour_start": { "type": "string", "format": "date-time" },
+          "source": { "type": "string" },
+          "model": { "type": "string" },
+          "input_tokens": { "type": "integer", "minimum": 0 },
+          "cached_input_tokens": { "type": "integer", "minimum": 0 },
+          "output_tokens": { "type": "integer", "minimum": 0 },
+          "reasoning_output_tokens": { "type": "integer", "minimum": 0 },
+          "total_tokens": { "type": "integer", "minimum": 0 }
+        },
+        "required": ["hour_start", "total_tokens"]
+      },
+      "DeviceSubscription": {
+        "type": "object",
+        "properties": {
+          "tool": { "type": "string" },
+          "provider": { "type": "string" },
+          "product": { "type": "string" },
+          "planType": { "type": "string" },
+          "rateLimitTier": { "type": "string" }
+        },
+        "additionalProperties": true
+      },
+      "IngestRequest": {
+        "type": "object",
+        "properties": {
+          "hourly": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/UsageBucket" }
+          },
+          "device_subscriptions": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/DeviceSubscription" }
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "hourly": {
+                "type": "array",
+                "items": { "$ref": "#/components/schemas/UsageBucket" }
+              }
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "IngestResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "inserted": { "type": "integer" },
+          "skipped": { "type": "integer" },
+          "project_inserted": { "type": "integer" },
+          "project_skipped": { "type": "integer" }
+        },
+        "required": ["success"]
+      },
+      "SyncPingResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "updated": { "type": "boolean" },
+          "last_sync_at": { "type": "string", "format": "date-time" },
+          "min_interval_minutes": { "type": "integer" }
+        },
+        "required": ["success"]
+      },
+      "UserStatusResponse": {
+        "type": "object",
+        "properties": {
+          "user_id": { "type": "string", "format": "uuid" },
+          "created_at": { "type": ["string", "null"], "format": "date-time" },
+          "pro": { "type": "object", "additionalProperties": true },
+          "subscriptions": { "type": "object", "additionalProperties": true }
+        },
+        "additionalProperties": true
+      },
+      "UsageSummaryResponse": {
+        "type": "object",
+        "properties": {
+          "from": { "type": "string", "format": "date" },
+          "to": { "type": "string", "format": "date" },
+          "days": { "type": "integer" },
+          "model_id": { "type": ["string", "null"] },
+          "model": { "type": ["string", "null"] },
+          "totals": { "$ref": "#/components/schemas/TokenTotals" },
+          "pricing": { "$ref": "#/components/schemas/Pricing" }
+        },
+        "required": ["totals"]
+      },
+      "ProjectUsageSummaryResponse": {
+        "type": "object",
+        "properties": {
+          "all_time": { "type": "boolean" },
+          "generated_at": { "type": "string", "format": "date-time" },
+          "entries": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "project_key": { "type": "string" },
+                "project_ref": { "type": "string" },
+                "total_tokens": { "type": "string" },
+                "billable_total_tokens": { "type": "string" }
+              },
+              "additionalProperties": true
+            }
+          }
+        },
+        "required": ["entries"]
+      },
+      "UsageModelBreakdownResponse": {
+        "type": "object",
+        "properties": {
+          "from": { "type": "string", "format": "date" },
+          "to": { "type": "string", "format": "date" },
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "source": { "type": "string" },
+                "totals": { "$ref": "#/components/schemas/TokenTotals" },
+                "models": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "model_id": { "type": "string" },
+                      "model": { "type": "string" },
+                      "totals": { "$ref": "#/components/schemas/TokenTotals" }
+                    },
+                    "additionalProperties": true
+                  }
+                }
+              },
+              "additionalProperties": true
+            }
+          },
+          "pricing": { "$ref": "#/components/schemas/Pricing" }
+        },
+        "required": ["sources"]
+      },
+      "UsageDailyResponse": {
+        "type": "object",
+        "properties": {
+          "from": { "type": "string", "format": "date" },
+          "to": { "type": "string", "format": "date" },
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "day": { "type": "string", "format": "date" },
+                "total_tokens": { "type": "string" }
+              },
+              "additionalProperties": true
+            }
+          },
+          "summary": { "type": "object", "additionalProperties": true }
+        },
+        "required": ["data"]
+      },
+      "UsageHourlyResponse": {
+        "type": "object",
+        "properties": {
+          "day": { "type": "string", "format": "date" },
+          "data": {
+            "type": "array",
+            "items": { "type": "object", "additionalProperties": true }
+          },
+          "sync": { "type": "object", "additionalProperties": true }
+        },
+        "required": ["data"]
+      },
+      "UsageMonthlyResponse": {
+        "type": "object",
+        "properties": {
+          "from": { "type": "string", "format": "date" },
+          "to": { "type": "string", "format": "date" },
+          "months": { "type": "integer" },
+          "data": {
+            "type": "array",
+            "items": { "type": "object", "additionalProperties": true }
+          }
+        },
+        "required": ["data"]
+      },
+      "UsageHeatmapResponse": {
+        "type": "object",
+        "properties": {
+          "from": { "type": "string", "format": "date" },
+          "to": { "type": "string", "format": "date" },
+          "week_starts_on": { "type": "string" },
+          "thresholds": { "type": "object", "additionalProperties": true },
+          "active_days": { "type": "integer" },
+          "streak_days": { "type": "integer" },
+          "weeks": {
+            "type": "array",
+            "items": { "type": "array" }
+          }
+        },
+        "required": ["weeks"]
+      },
+      "LeaderboardResponse": {
+        "type": "object",
+        "properties": {
+          "period": { "type": "string" },
+          "metric": { "type": "string" },
+          "entries": {
+            "type": "array",
+            "items": { "type": "object", "additionalProperties": true }
+          },
+          "me": { "type": ["object", "null"], "additionalProperties": true }
+        },
+        "required": ["entries"]
+      },
+      "LeaderboardProfileResponse": {
+        "type": "object",
+        "properties": {
+          "period": { "type": "string" },
+          "entry": { "type": "object", "additionalProperties": true }
+        },
+        "required": ["entry"]
+      },
+      "PublicProfileResponse": {
+        "type": "object",
+        "properties": {
+          "display_name": { "type": ["string", "null"] },
+          "avatar_url": { "type": ["string", "null"], "format": "uri" }
+        }
+      },
+      "PublicVisibilityRequest": {
+        "type": "object",
+        "properties": {
+          "enabled": { "type": "boolean" }
+        },
+        "required": ["enabled"],
+        "additionalProperties": false
+      },
+      "PublicVisibilityResponse": {
+        "type": "object",
+        "properties": {
+          "enabled": { "type": "boolean" },
+          "updated_at": { "type": "string", "format": "date-time" },
+          "share_token": { "type": "string" }
+        },
+        "required": ["enabled"]
+      },
+      "AdminActionResponse": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "DebugAuthResponse": {
+        "type": "object",
+        "properties": {
+          "hasAnonKey": { "type": "boolean" },
+          "hasBearer": { "type": "boolean" },
+          "authOk": { "type": "boolean" },
+          "userId": { "type": ["string", "null"], "format": "uuid" },
+          "error": { "type": ["string", "null"] }
+        },
+        "required": ["hasAnonKey", "hasBearer", "authOk"]
+      }
+    }
+  },
+  "externalDocs": {
+    "description": "VibeUsage developer resources",
+    "url": "https://www.vibeusage.cc/developers"
+  },
+  "x-agent-discovery": {
+    "llms": "https://www.vibeusage.cc/llms.txt",
+    "mcp_manifest": "https://www.vibeusage.cc/.well-known/mcp/manifest.json",
+    "auth_docs": "https://www.vibeusage.cc/docs/auth",
+    "webhooks_docs": "https://www.vibeusage.cc/docs/webhooks"
+  }
+}

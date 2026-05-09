@@ -1,0 +1,71 @@
+{
+  "schema_version": "2025-06-18",
+  "name": "VibeUsage",
+  "title": "VibeUsage MCP Manifest",
+  "version": "0.6.4",
+  "description": "Agent discovery manifest for VibeUsage, an AI token usage tracking and monitoring tool for Codex, Claude Code, OpenCode, Gemini, Kimi, Hermes, and OpenClaw.",
+  "homepage_url": "https://www.vibeusage.cc/",
+  "documentation_url": "https://www.vibeusage.cc/developers",
+  "openapi_url": "https://www.vibeusage.cc/openapi.json",
+  "support_url": "https://github.com/victorGPT/vibeusage/issues",
+  "transport_status": "documented",
+  "transport_notes": "VibeUsage publishes MCP discovery metadata and OpenAPI tool mappings here. A callable Streamable HTTP MCP transport will be added when the backend MCP endpoint is deployed.",
+  "auth": {
+    "type": "bearer",
+    "roles_supported": ["user", "device", "share", "service_role"],
+    "permissions_supported": [
+      "usage:read",
+      "usage:ingest",
+      "sync:write",
+      "projects:read",
+      "device_tokens:write",
+      "public_visibility:read",
+      "public_visibility:write",
+      "leaderboard:read",
+      "public_profile:read",
+      "leaderboard:refresh",
+      "pricing:write",
+      "retention:write",
+      "diagnostics:read"
+    ]
+  },
+  "resources": [
+    {
+      "name": "OpenAPI specification",
+      "url": "https://www.vibeusage.cc/openapi.json",
+      "media_type": "application/json"
+    },
+    {
+      "name": "Developer portal",
+      "url": "https://www.vibeusage.cc/developers",
+      "media_type": "text/html"
+    },
+    {
+      "name": "Authentication and scoped permissions",
+      "url": "https://www.vibeusage.cc/docs/auth",
+      "media_type": "text/html"
+    },
+    {
+      "name": "Webhook status",
+      "url": "https://www.vibeusage.cc/docs/webhooks",
+      "media_type": "text/html"
+    }
+  ],
+  "tools": [
+    {
+      "name": "get_usage_summary",
+      "description": "Read authenticated AI token usage totals from VibeUsage.",
+      "input_schema_ref": "https://www.vibeusage.cc/openapi.json#/paths/~1functions~1vibeusage-usage-summary/get"
+    },
+    {
+      "name": "get_usage_model_breakdown",
+      "description": "Read per-source and per-model token usage aggregates.",
+      "input_schema_ref": "https://www.vibeusage.cc/openapi.json#/paths/~1functions~1vibeusage-usage-model-breakdown/get"
+    },
+    {
+      "name": "get_leaderboard",
+      "description": "Read the public VibeUsage token leaderboard.",
+      "input_schema_ref": "https://www.vibeusage.cc/openapi.json#/paths/~1functions~1vibeusage-leaderboard/get"
+    }
+  ]
+}

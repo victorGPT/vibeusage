@@ -43,6 +43,7 @@ import { isMockEnabled } from "./lib/mock-data";
 import { fetchLatestTrackerVersion } from "./lib/npm-version";
 import { isScreenshotModeEnabled } from "./lib/screenshot-mode";
 import { probeBackend } from "./lib/vibeusage-api";
+import { resolveAgentResourceRoute } from "./pages/agent-resource-routes.js";
 import { LandingPage } from "./pages/LandingPage.jsx";
 import { UpgradeAlertModal } from "./ui/matrix-a/components/UpgradeAlertModal.jsx";
 import { VersionBadge } from "./ui/matrix-a/components/VersionBadge.jsx";
@@ -71,6 +72,12 @@ const LeaderboardPage = React.lazy(() =>
 const LeaderboardProfilePage = React.lazy(() =>
   import("./pages/LeaderboardProfilePage.jsx").then((mod) => ({
     default: mod.LeaderboardProfilePage,
+  })),
+);
+
+const AgentResourcePage = React.lazy(() =>
+  import("./pages/AgentResourcePage.jsx").then((mod) => ({
+    default: mod.AgentResourcePage,
   })),
 );
 
@@ -388,8 +395,12 @@ export default function App() {
   }, [insforgeLoaded, insforgeSession, navigate, signInUrl]);
 
   const loadingShell = <div className="min-h-screen bg-surface" />;
+  const normalizedPath = pathname.replace(/\/+$/, "") || "/";
+  const agentResourceRoute = resolveAgentResourceRoute(normalizedPath);
+  const agentResourceMode = Boolean(agentResourceRoute);
   const authPending =
     !publicMode &&
+    !agentResourceMode &&
     !mockEnabled &&
     !sessionSoftExpired &&
     (!insforgeLoaded || insforgeSession === undefined);
@@ -400,7 +411,6 @@ export default function App() {
     signedIn,
     authPending,
   });
-  const normalizedPath = pathname.replace(/\/+$/, "") || "/";
   const leaderboardProfileMatch = normalizedPath.match(/^\/leaderboard\/u\/([^/]+)$/i);
   const leaderboardProfileUserId = leaderboardProfileMatch ? leaderboardProfileMatch[1] : null;
   const PageComponent = leaderboardProfileUserId
@@ -409,7 +419,13 @@ export default function App() {
       ? LeaderboardPage
       : DashboardPage;
   let content = null;
-  if (gate === "loading") {
+  if (agentResourceMode) {
+    content = (
+      <Suspense fallback={loadingShell}>
+        <AgentResourcePage route={agentResourceRoute} />
+      </Suspense>
+    );
+  } else if (gate === "loading") {
     content = loadingShell;
   } else if (gate === "landing") {
     content = <LandingPage signInUrl={signInUrl} signUpUrl={signUpUrl} />;

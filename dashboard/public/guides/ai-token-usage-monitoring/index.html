@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Token Usage Monitoring Guide - VibeUsage</title>
+    <meta name="description" content="Guide to monitoring AI token usage across coding agents with VibeUsage, including install flow, scoped ingestion, dashboards, and API resources." />
+  </head>
+  <body>
+    <main>
+      <h1>How to Monitor AI Token Usage Across Coding Agents</h1>
+      <ol>
+        <li>Install with <code>npx --yes vibeusage init</code> and complete the browser link flow to create a scoped device token.</li>
+        <li>Run sync from the CLI to upload half-hour aggregates for supported AI coding agents.</li>
+        <li>Use dashboard views or <code>usage:read</code> API endpoints to monitor daily totals, model mix, project totals, heatmaps, and estimated cost.</li>
+        <li>Use <a href="/llms.txt">llms.txt</a>, <a href="/openapi.json">OpenAPI</a>, and the <a href="/.well-known/mcp/manifest.json">MCP manifest</a> when delegating setup or reporting tasks to an AI agent.</li>
+      </ol>
+    </main>
+  </body>
+</html>

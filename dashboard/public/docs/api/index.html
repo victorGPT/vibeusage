@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VibeUsage API Docs - AI Token Usage Tracking API</title>
+    <meta name="description" content="VibeUsage API docs for AI token usage tracking, monitoring, ingestion, dashboard analytics, and public leaderboard endpoints." />
+  </head>
+  <body>
+    <main>
+      <h1>VibeUsage API Docs for AI Token Usage Tracking</h1>
+      <p>The VibeUsage API exposes scoped InsForge Edge Function endpoints for CLI ingestion, usage monitoring, model analytics, project summaries, public sharing, and leaderboard reads.</p>
+      <h2>Core endpoints</h2>
+      <ul>
+        <li><code>GET /functions/vibeusage-usage-summary</code>, read authenticated token totals with <code>usage:read</code>.</li>
+        <li><code>GET /functions/vibeusage-usage-model-breakdown</code>, read per-source and per-model usage aggregates.</li>
+        <li><code>POST /functions/vibeusage-ingest</code>, upload half-hour aggregates with a scoped device token.</li>
+        <li><code>POST /functions/vibeusage-sync-ping</code>, record device sync freshness.</li>
+        <li><code>GET /functions/vibeusage-leaderboard</code>, read public token leaderboard rows.</li>
+      </ul>
+      <p>Machine-readable schema: <a href="/openapi.json">/openapi.json</a>.</p>
+      <p>Authentication and permission boundaries: <a href="/docs/auth">/docs/auth</a>.</p>
+    </main>
+  </body>
+</html>

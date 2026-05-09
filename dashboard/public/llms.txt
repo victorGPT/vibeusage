@@ -8,6 +8,13 @@ VibeUsage tracks token usage across AI coding agent clients (Codex, Claude Code,
 ## Priority URLs
 - [Homepage](https://www.vibeusage.cc/)
 - [Share dashboard view](https://www.vibeusage.cc/share)
+- [Developer portal](https://www.vibeusage.cc/developers)
+- [OpenAPI spec](https://www.vibeusage.cc/openapi.json)
+- [API docs](https://www.vibeusage.cc/docs/api)
+- [Auth and scoped permissions](https://www.vibeusage.cc/docs/auth)
+- [Webhook docs](https://www.vibeusage.cc/docs/webhooks)
+- [MCP manifest](https://www.vibeusage.cc/.well-known/mcp/manifest.json)
+- [MCP server info](https://www.vibeusage.cc/mcp)
 - [Sitemap](https://www.vibeusage.cc/sitemap.xml)
 - [RSS feed](https://www.vibeusage.cc/feed.xml)
 
@@ -15,6 +22,22 @@ VibeUsage tracks token usage across AI coding agent clients (Codex, Claude Code,
 - Install command: `npx --yes vibeusage init`
 - [NPM package](https://www.npmjs.com/package/vibeusage)
 - [Source repository](https://github.com/victorGPT/vibeusage)
+- Category: AI token usage tracking and monitoring tool for AI coding agents.
+- Supported AI CLI clients: Codex, Claude Code, OpenCode, Gemini, Kimi, Hermes, and OpenClaw.
+
+## Developer Resources
+- [VibeUsage developer portal](https://www.vibeusage.cc/developers)
+- [VibeUsage API docs](https://www.vibeusage.cc/docs/api)
+- [VibeUsage OpenAPI JSON](https://www.vibeusage.cc/openapi.json)
+- [VibeUsage auth docs and scoped permissions](https://www.vibeusage.cc/docs/auth)
+- [VibeUsage webhook docs](https://www.vibeusage.cc/docs/webhooks)
+- [VibeUsage MCP manifest](https://www.vibeusage.cc/.well-known/mcp/manifest.json)
+- [VibeUsage MCP server info](https://www.vibeusage.cc/mcp)
+
+## Use-case Discovery
+- [AI token usage tracking comparison](https://www.vibeusage.cc/compare/ai-token-usage-tracking)
+- [AI token usage monitoring guide](https://www.vibeusage.cc/guides/ai-token-usage-monitoring)
+- Primary use cases: AI agent usage monitoring, token cost tracking, multi-client CLI usage analytics, public token leaderboards, and auditable usage dashboards.
 
 ## Policy and Discovery
 - [robots.txt](https://www.vibeusage.cc/robots.txt)
