@@ -1,0 +1,9 @@
+# VibeUsage Developer LLMs Index
+
+- Developer portal: https://www.vibeusage.cc/developers
+- Developer markdown: https://www.vibeusage.cc/developers.md
+- OpenAPI: https://www.vibeusage.cc/openapi.json
+- MCP manifest: https://www.vibeusage.cc/.well-known/mcp/manifest.json
+- A2A card: https://www.vibeusage.cc/.well-known/agent-card.json
+- OpenAI plugin manifest: https://www.vibeusage.cc/.well-known/ai-plugin.json
+- Agent Skills index: https://www.vibeusage.cc/.well-known/agent-skills/index.json

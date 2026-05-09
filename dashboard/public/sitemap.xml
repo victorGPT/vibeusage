@@ -21,9 +21,24 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://www.vibeusage.cc/index.md</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.vibeusage.cc/developers.md</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://www.vibeusage.cc/docs/api</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.vibeusage.cc/docs/api.md</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.vibeusage.cc/docs/auth</loc>
@@ -31,9 +46,19 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://www.vibeusage.cc/docs/auth.md</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://www.vibeusage.cc/docs/webhooks</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.vibeusage.cc/docs/webhooks.md</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
   </url>
   <url>
     <loc>https://www.vibeusage.cc/mcp</loc>
@@ -44,6 +69,26 @@
     <loc>https://www.vibeusage.cc/.well-known/mcp/manifest.json</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.vibeusage.cc/.well-known/mcp/server-card.json</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.vibeusage.cc/.well-known/ai-plugin.json</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.vibeusage.cc/.well-known/agent-card.json</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.vibeusage.cc/.well-known/agent-skills/index.json</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.vibeusage.cc/compare/ai-token-usage-tracking</loc>

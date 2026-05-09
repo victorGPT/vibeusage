@@ -90,7 +90,7 @@ This document is the single source of truth for repository navigation. Use it to
   - `dashboard/src/content/copy.csv`
 - Public web assets:
   - `dashboard/public/`
-  - Agent-readiness discovery assets live in `dashboard/public/openapi.json`, `dashboard/public/.well-known/mcp/manifest.json`, `dashboard/public/llms.txt`, and `dashboard/public/sitemap.xml`.
+  - Agent-readiness discovery assets live in `dashboard/public/openapi.json`, `dashboard/public/.well-known/`, `dashboard/public/llms.txt`, `dashboard/public/*/llms.txt`, `dashboard/public/*.md`, and `dashboard/public/sitemap.xml`.
   - Public developer-resource routes start at `dashboard/src/pages/AgentResourcePage.jsx`.
 - Model display rule:
   - Usage dashboards should prefer backend-provided `display_model` for presentation.

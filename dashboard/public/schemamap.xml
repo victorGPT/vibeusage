@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemamap xmlns="https://www.w3.org/ns/schemamap">
+  <url>
+    <loc>https://www.vibeusage.cc/schema/software.jsonld</loc>
+    <type>https://schema.org/SoftwareApplication</type>
+  </url>
+  <url>
+    <loc>https://www.vibeusage.cc/schema/developer-resources.jsonld</loc>
+    <type>https://schema.org/TechArticle</type>
+  </url>
+</schemamap>

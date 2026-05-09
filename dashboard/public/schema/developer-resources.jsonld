@@ -1,0 +1,13 @@
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "VibeUsage Developer Resources",
+  "url": "https://www.vibeusage.cc/developers",
+  "description": "API docs, OpenAPI, auth docs, scoped permissions, webhook status, and MCP discovery resources for VibeUsage.",
+  "about": [
+    "AI token usage tracking",
+    "AI agent usage monitoring",
+    "OpenAPI",
+    "MCP"
+  ]
+}

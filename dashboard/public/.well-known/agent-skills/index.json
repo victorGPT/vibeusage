@@ -1,0 +1,25 @@
+{
+  "$schema": "https://agentskills.io/schemas/agent-skills-index-v0.2.json",
+  "version": "0.2.0",
+  "generated_at": "2026-05-09T09:30:00Z",
+  "entries": [
+    {
+      "id": "vibeusage-agent-readiness",
+      "type": "skill-md",
+      "name": "VibeUsage Agent Readiness",
+      "description": "Use VibeUsage to track AI coding agent token usage and find scoped API documentation.",
+      "url": "https://www.vibeusage.cc/.well-known/agent-skills/vibeusage-agent-readiness/SKILL.md",
+      "digest": "sha256:04edb943a206e124e91fcaad05918271494fe7b0f5f5ca6b2c340e02c69782c0"
+    }
+  ],
+  "skills": [
+    {
+      "id": "vibeusage-agent-readiness",
+      "type": "skill-md",
+      "name": "VibeUsage Agent Readiness",
+      "description": "Use VibeUsage to track AI coding agent token usage and find scoped API documentation.",
+      "url": "https://www.vibeusage.cc/.well-known/agent-skills/vibeusage-agent-readiness/SKILL.md",
+      "digest": "sha256:04edb943a206e124e91fcaad05918271494fe7b0f5f5ca6b2c340e02c69782c0"
+    }
+  ]
+}

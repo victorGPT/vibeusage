@@ -1,0 +1,11 @@
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "VibeUsage",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "macOS, Linux, Windows",
+  "url": "https://www.vibeusage.cc/",
+  "downloadUrl": "https://www.npmjs.com/package/vibeusage",
+  "description": "AI token usage tracking and monitoring for coding agents including Codex, Claude Code, OpenCode, Gemini, Kimi, Hermes, and OpenClaw.",
+  "softwareHelp": "https://www.vibeusage.cc/developers"
+}

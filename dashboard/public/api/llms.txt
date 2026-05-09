@@ -1,0 +1,9 @@
+# VibeUsage API LLMs Index
+
+- OpenAPI: https://www.vibeusage.cc/openapi.json
+- API docs: https://www.vibeusage.cc/docs/api
+- API markdown: https://www.vibeusage.cc/docs/api.md
+- Auth docs: https://www.vibeusage.cc/docs/auth
+- Auth markdown: https://www.vibeusage.cc/docs/auth.md
+
+Security schemes are role-scoped: user JWT, device token, share token, and service role key.

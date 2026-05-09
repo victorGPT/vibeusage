@@ -14,8 +14,13 @@ VibeUsage tracks token usage across AI coding agent clients (Codex, Claude Code,
 - [Auth and scoped permissions](https://www.vibeusage.cc/docs/auth)
 - [Webhook docs](https://www.vibeusage.cc/docs/webhooks)
 - [MCP manifest](https://www.vibeusage.cc/.well-known/mcp/manifest.json)
+- [OpenAI plugin manifest](https://www.vibeusage.cc/.well-known/ai-plugin.json)
+- [A2A agent card](https://www.vibeusage.cc/.well-known/agent-card.json)
+- [Agent Skills index](https://www.vibeusage.cc/.well-known/agent-skills/index.json)
 - [MCP server info](https://www.vibeusage.cc/mcp)
+- [Homepage markdown](https://www.vibeusage.cc/index.md)
 - [Sitemap](https://www.vibeusage.cc/sitemap.xml)
+- [Schema map](https://www.vibeusage.cc/schemamap.xml)
 - [RSS feed](https://www.vibeusage.cc/feed.xml)
 
 ## Product
@@ -27,12 +32,20 @@ VibeUsage tracks token usage across AI coding agent clients (Codex, Claude Code,
 
 ## Developer Resources
 - [VibeUsage developer portal](https://www.vibeusage.cc/developers)
+- [VibeUsage developer markdown](https://www.vibeusage.cc/developers.md)
 - [VibeUsage API docs](https://www.vibeusage.cc/docs/api)
+- [VibeUsage API markdown](https://www.vibeusage.cc/docs/api.md)
 - [VibeUsage OpenAPI JSON](https://www.vibeusage.cc/openapi.json)
 - [VibeUsage auth docs and scoped permissions](https://www.vibeusage.cc/docs/auth)
+- [VibeUsage auth markdown](https://www.vibeusage.cc/docs/auth.md)
 - [VibeUsage webhook docs](https://www.vibeusage.cc/docs/webhooks)
+- [VibeUsage webhook markdown](https://www.vibeusage.cc/docs/webhooks.md)
 - [VibeUsage MCP manifest](https://www.vibeusage.cc/.well-known/mcp/manifest.json)
+- [VibeUsage MCP server card](https://www.vibeusage.cc/.well-known/mcp/server-card.json)
 - [VibeUsage MCP server info](https://www.vibeusage.cc/mcp)
+- [Developer llms.txt](https://www.vibeusage.cc/developers/llms.txt)
+- [Docs llms.txt](https://www.vibeusage.cc/docs/llms.txt)
+- [API llms.txt](https://www.vibeusage.cc/api/llms.txt)
 
 ## Use-case Discovery
 - [AI token usage tracking comparison](https://www.vibeusage.cc/compare/ai-token-usage-tracking)

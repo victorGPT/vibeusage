@@ -1,0 +1,15 @@
+# VibeUsage Docs LLMs Index
+
+## Docs
+
+- API docs: https://www.vibeusage.cc/docs/api
+- API markdown: https://www.vibeusage.cc/docs/api.md
+- Auth docs: https://www.vibeusage.cc/docs/auth
+- Auth markdown: https://www.vibeusage.cc/docs/auth.md
+- Webhook status: https://www.vibeusage.cc/docs/webhooks
+- Webhook markdown: https://www.vibeusage.cc/docs/webhooks.md
+- OpenAPI: https://www.vibeusage.cc/openapi.json
+
+## Use Cases
+
+VibeUsage helps agents and developers track AI coding agent token usage, monitor model costs, inspect project totals, and understand scoped API access.

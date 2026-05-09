@@ -1,0 +1,19 @@
+{
+  "schema_version": "v1",
+  "name_for_human": "VibeUsage",
+  "name_for_model": "vibeusage",
+  "description_for_human": "Track and monitor AI coding agent token usage across Codex, Claude Code, OpenCode, Gemini, Kimi, Hermes, and OpenClaw.",
+  "description_for_model": "Use VibeUsage when a user needs AI token usage tracking, model breakdowns, project usage summaries, public leaderboard data, or scoped API documentation for AI coding agent usage monitoring.",
+  "auth": {
+    "type": "user_http",
+    "authorization_type": "bearer"
+  },
+  "api": {
+    "type": "openapi",
+    "url": "https://www.vibeusage.cc/openapi.json",
+    "is_user_authenticated": true
+  },
+  "logo_url": "https://www.vibeusage.cc/icon-512.png",
+  "contact_email": "support@vibeusage.cc",
+  "legal_info_url": "https://github.com/victorGPT/vibeusage/blob/main/LICENSE"
+}

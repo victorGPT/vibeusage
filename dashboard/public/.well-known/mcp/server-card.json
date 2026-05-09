@@ -1,0 +1,29 @@
+{
+  "name": "VibeUsage",
+  "description": "MCP discovery card for VibeUsage AI token usage tracking resources.",
+  "version": "0.6.4",
+  "status": "manifest_only",
+  "documentationUrl": "https://www.vibeusage.cc/mcp",
+  "manifestUrl": "https://www.vibeusage.cc/.well-known/mcp/manifest.json",
+  "openapiUrl": "https://www.vibeusage.cc/openapi.json",
+  "tools": [
+    {
+      "name": "get_usage_summary",
+      "description": "Read authenticated AI token usage totals through the OpenAPI contract.",
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "get_usage_model_breakdown",
+      "description": "Read per-source and per-model token usage aggregates.",
+      "readOnlyHint": true,
+      "destructiveHint": false
+    },
+    {
+      "name": "get_leaderboard",
+      "description": "Read public VibeUsage leaderboard data.",
+      "readOnlyHint": true,
+      "destructiveHint": false
+    }
+  ]
+}

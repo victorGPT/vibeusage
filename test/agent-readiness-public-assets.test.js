@@ -79,3 +79,43 @@ test("developer discovery pages have no-JS static HTML fallbacks", () => {
     assert.ok(!html.includes('id="root"'), `${relPath} should not require React hydration`);
   }
 });
+
+test("well-known agent discovery files are valid JSON", () => {
+  const plugin = readJson("dashboard/public/.well-known/ai-plugin.json");
+  const card = readJson("dashboard/public/.well-known/agent-card.json");
+  const skillsIndex = readJson("dashboard/public/.well-known/agent-skills/index.json");
+  const mcpServerCard = readJson("dashboard/public/.well-known/mcp/server-card.json");
+
+  assert.equal(plugin.schema_version, "v1");
+  assert.equal(plugin.api.url, "https://www.vibeusage.cc/openapi.json");
+  assert.equal(card.name, "VibeUsage");
+  assert.equal(skillsIndex.version, "0.2.0");
+  assert.equal(skillsIndex.entries[0].type, "skill-md");
+  assert.match(skillsIndex.entries[0].digest, /^sha256:[a-f0-9]{64}$/);
+  assert.equal(mcpServerCard.status, "manifest_only");
+});
+
+test("markdown and modular llms fallbacks exist", () => {
+  for (const relPath of [
+    "dashboard/public/index.md",
+    "dashboard/public/developers.md",
+    "dashboard/public/docs/api.md",
+    "dashboard/public/docs/auth.md",
+    "dashboard/public/docs/webhooks.md",
+    "dashboard/public/developers/llms.txt",
+    "dashboard/public/docs/llms.txt",
+    "dashboard/public/api/llms.txt",
+  ]) {
+    const body = read(relPath);
+    assert.match(body, /^# /, `${relPath} should start with a markdown heading`);
+    assert.ok(body.includes("VibeUsage"), `${relPath} should name VibeUsage`);
+  }
+});
+
+test("robots advertises AI crawler policy and schema map", () => {
+  const robots = read("dashboard/public/robots.txt");
+  assert.ok(robots.includes("Content-Signal: search=yes, ai-input=yes, ai-train=no"));
+  assert.ok(robots.includes("Schemamap: https://www.vibeusage.cc/schemamap.xml"));
+  assert.ok(robots.includes("User-agent: ChatGPT-User"));
+  assert.ok(robots.includes("User-agent: CCBot"));
+});

@@ -1,0 +1,41 @@
+{
+  "schemaVersion": "0.2.0",
+  "name": "VibeUsage",
+  "description": "Agent-readable product card for VibeUsage, an AI token usage tracking and monitoring tool for coding agents.",
+  "url": "https://www.vibeusage.cc/",
+  "version": "0.6.4",
+  "provider": {
+    "name": "VibeUsage",
+    "url": "https://github.com/victorGPT/vibeusage"
+  },
+  "capabilities": {
+    "streaming": false,
+    "pushNotifications": false,
+    "stateTransitionHistory": false
+  },
+  "defaultInputModes": ["application/json", "text/plain"],
+  "defaultOutputModes": ["application/json", "text/markdown"],
+  "skills": [
+    {
+      "id": "usage_summary",
+      "name": "Usage summary",
+      "description": "Read authenticated token totals and cost estimates through the VibeUsage OpenAPI contract.",
+      "tags": ["usage", "analytics", "tokens"]
+    },
+    {
+      "id": "model_breakdown",
+      "name": "Model breakdown",
+      "description": "Read per-source and per-model token usage aggregates.",
+      "tags": ["models", "analytics", "cost"]
+    },
+    {
+      "id": "leaderboard",
+      "name": "Public leaderboard",
+      "description": "Read public VibeUsage token leaderboard rows.",
+      "tags": ["leaderboard", "public"]
+    }
+  ],
+  "documentationUrl": "https://www.vibeusage.cc/developers",
+  "openapiUrl": "https://www.vibeusage.cc/openapi.json",
+  "mcpManifestUrl": "https://www.vibeusage.cc/.well-known/mcp/manifest.json"
+}
