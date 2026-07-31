@@ -20,7 +20,6 @@ const {
   BACKEND_RUNTIME_UNAVAILABLE_MESSAGE: BACKEND_RUNTIME_UNAVAILABLE,
   FUNCTION_PREFIX,
   FUNCTION_SLUGS: PATHS,
-  LEGACY_FUNCTION_PREFIX,
 } = vibeusageFunctionContract as any;
 const REQUEST_KIND = {
   business: "business",
@@ -507,12 +506,11 @@ async function requestJson({
   const retryOptions = normalizeRetryOptions(retry, "GET");
   const normalizedRequestKind = skipSessionExpiry ? REQUEST_KIND.probe : requestKind;
   let attempt = 0;
-  const { primaryPath, fallbackPath } = buildFunctionPaths(slug);
+  const path = buildFunctionPath(slug);
   const requestKey = buildInFlightGetKey({
     baseUrl,
     accessToken: activeAccessToken,
-    primaryPath,
-    fallbackPath,
+    path,
     params,
     requestKind: normalizedRequestKind,
     fetchOptions,
@@ -521,13 +519,7 @@ async function requestJson({
   const executeRequest = async () => {
     while (true) {
       try {
-        const result = await requestWithFallback({
-          http,
-          primaryPath,
-          fallbackPath,
-          params,
-          fetchOptions,
-        });
+        const result = await http.get(path, { params, ...(fetchOptions || {}) });
         clearSessionSoftExpiredIfNeeded({
           hadAccessToken,
           accessToken: activeAccessToken,
@@ -561,13 +553,7 @@ async function requestJson({
             hadAccessToken = true;
             http = retryHttp;
             try {
-              const retryResult = await requestWithFallback({
-                http: retryHttp,
-                primaryPath,
-                fallbackPath,
-                params,
-                fetchOptions,
-              });
+              const retryResult = await retryHttp.get(path, { params, ...(fetchOptions || {}) });
               clearSessionSoftExpiredIfNeeded({
                 hadAccessToken: true,
                 accessToken: refreshedToken,
@@ -665,18 +651,12 @@ async function requestPostJson({
   const retryOptions = normalizeRetryOptions(retry, "POST");
   const normalizedRequestKind = skipSessionExpiry ? REQUEST_KIND.probe : requestKind;
   let attempt = 0;
-  const { primaryPath, fallbackPath } = buildFunctionPaths(slug);
+  const path = buildFunctionPath(slug);
 
   return await scheduleFunctionRequest(async () => {
     while (true) {
       try {
-        const result = await requestWithFallbackPost({
-          http,
-          primaryPath,
-          fallbackPath,
-          body,
-          fetchOptions,
-        });
+        const result = await requestWithAuthRetryPost({ http, path, body, fetchOptions });
         clearSessionSoftExpiredIfNeeded({
           hadAccessToken,
           accessToken: activeAccessToken,
@@ -710,10 +690,9 @@ async function requestPostJson({
             hadAccessToken = true;
             http = retryHttp;
             try {
-              const retryResult = await requestWithFallbackPost({
+              const retryResult = await requestWithAuthRetryPost({
                 http: retryHttp,
-                primaryPath,
-                fallbackPath,
+                path,
                 body,
                 fetchOptions,
               });
@@ -774,18 +753,14 @@ async function requestPostJson({
   }, fetchOptions?.signal);
 }
 
-function buildFunctionPaths(slug: any) {
-  const normalized = normalizeFunctionSlug(slug);
-  const primaryPath = `${normalizePrefix(FUNCTION_PREFIX)}/${normalized}`;
-  const fallbackPath = `${normalizePrefix(LEGACY_FUNCTION_PREFIX)}/${normalized}`;
-  return { primaryPath, fallbackPath };
+function buildFunctionPath(slug: any) {
+  return `${normalizePrefix(FUNCTION_PREFIX)}/${normalizeFunctionSlug(slug)}`;
 }
 
 function buildInFlightGetKey({
   baseUrl,
   accessToken,
-  primaryPath,
-  fallbackPath,
+  path,
   params,
   requestKind,
   fetchOptions,
@@ -793,16 +768,14 @@ function buildInFlightGetKey({
   if (fetchOptions?.signal) return null;
   const normalizedBaseUrl = typeof baseUrl === "string" ? baseUrl.trim() : "";
   const normalizedToken = hasAccessTokenValue(accessToken) ? String(accessToken) : "";
-  const normalizedPrimaryPath = typeof primaryPath === "string" ? primaryPath : "";
-  const normalizedFallbackPath = typeof fallbackPath === "string" ? fallbackPath : "";
+  const normalizedPath = typeof path === "string" ? path : "";
   const normalizedRequestKind = typeof requestKind === "string" ? requestKind : REQUEST_KIND.business;
   const normalizedParams = serializeRequestParams(params);
   return [
     normalizedBaseUrl,
     normalizedToken,
     normalizedRequestKind,
-    normalizedPrimaryPath,
-    normalizedFallbackPath,
+    normalizedPath,
     normalizedParams,
   ].join("::");
 }
@@ -882,56 +855,8 @@ function normalizePrefix(prefix: any) {
   return raw.endsWith("/") ? raw.slice(0, -1) : raw;
 }
 
-async function requestWithFallback({
-  http,
-  primaryPath,
-  fallbackPath,
-  params,
-  fetchOptions,
-}: AnyRecord = {}) {
-  try {
-    return await http.get(primaryPath, { params, ...(fetchOptions || {}) });
-  } catch (err) {
-    if (!shouldFallbackToLegacy(err, primaryPath)) throw err;
-    return await http.get(fallbackPath, { params, ...(fetchOptions || {}) });
-  }
-}
-
-async function requestWithFallbackPost({
-  http,
-  primaryPath,
-  fallbackPath,
-  body,
-  fetchOptions,
-}: AnyRecord = {}) {
-  try {
-    return await requestWithAuthRetryPost({
-      http,
-      path: primaryPath,
-      body,
-      fetchOptions,
-    });
-  } catch (err) {
-    if (!shouldFallbackToLegacy(err, primaryPath)) throw err;
-    return await requestWithAuthRetryPost({
-      http,
-      path: fallbackPath,
-      body,
-      fetchOptions,
-    });
-  }
-}
-
 async function requestWithAuthRetryPost({ http, path, body, fetchOptions }: AnyRecord = {}) {
   return await http.post(path, body, { ...(fetchOptions || {}) });
-}
-
-function shouldFallbackToLegacy(error: any, primaryPath: any) {
-  if (!primaryPath || !primaryPath.startsWith(`${normalizePrefix(FUNCTION_PREFIX)}/`)) {
-    return false;
-  }
-  const status = error?.statusCode ?? error?.status;
-  return status === 404;
 }
 
 function normalizeSdkError(

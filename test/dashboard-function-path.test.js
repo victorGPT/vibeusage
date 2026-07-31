@@ -24,42 +24,36 @@ afterEach(() => {
   else globalThis.fetch = ORIGINAL_FETCH;
 });
 
-test("usage summary prefers /functions and falls back on 404", async () => {
+// /api/functions/{slug} is the admin management API, not an invocation route.
+// Falling back to it on 404 turned a backend outage into a bogus
+// "Admin access required" permission error, so a 404 now surfaces as-is.
+test("usage summary surfaces 404 instead of falling back to the admin API", async () => {
   const { getUsageSummary } = await loadVibescoreApi();
   const calls = [];
 
   globalThis.fetch = async (url) => {
     const target = String(url);
     calls.push(target);
-
-    if (target.includes("/api/functions/vibeusage-usage-summary")) {
-      return jsonResponse(
-        {
-          from: "2025-01-01",
-          to: "2025-01-01",
-          days: 1,
-          totals: { total_tokens: "0" },
-        },
-        200,
-      );
-    }
     if (target.includes("/functions/vibeusage-usage-summary")) {
       return jsonResponse({ error: "Not Found", message: "Not Found" }, 404);
     }
-
     return jsonResponse({ error: "Unexpected", message: "Unexpected" }, 500);
   };
 
-  const res = await getUsageSummary({
-    baseUrl: "https://example.test",
-    accessToken: "token",
-    from: "2025-01-01",
-    to: "2025-01-01",
-  });
+  await assert.rejects(
+    () =>
+      getUsageSummary({
+        baseUrl: "https://example.test",
+        accessToken: "token",
+        from: "2025-01-01",
+        to: "2025-01-01",
+      }),
+    (err) => Number(err?.status) === 404 || Number(err?.statusCode) === 404,
+  );
 
-  assert.equal(res?.totals?.total_tokens, "0");
+  assert.equal(calls.length, 1);
   assert.ok(calls[0]?.includes("/functions/"));
-  assert.ok(calls[1]?.includes("/api/functions/"));
+  assert.ok(!calls.some((c) => c.includes("/api/functions/")));
 });
 
 test("usage summary does not fall back on 401", async () => {
@@ -95,15 +89,14 @@ test("usage summary does not fall back on 401", async () => {
   assert.ok(calls[0]?.includes("/functions/"));
 });
 
-test("project usage summary prefers /functions and falls back on 404", async () => {
+test("project usage summary reads from /functions only", async () => {
   const { getProjectUsageSummary } = await loadVibescoreApi();
   const calls = [];
 
   globalThis.fetch = async (url) => {
     const target = String(url);
     calls.push(target);
-
-    if (target.includes("/api/functions/vibeusage-project-usage-summary")) {
+    if (target.includes("/functions/vibeusage-project-usage-summary")) {
       return jsonResponse(
         {
           from: "2025-01-01",
@@ -120,10 +113,6 @@ test("project usage summary prefers /functions and falls back on 404", async () 
         200,
       );
     }
-    if (target.includes("/functions/vibeusage-project-usage-summary")) {
-      return jsonResponse({ error: "Not Found", message: "Not Found" }, 404);
-    }
-
     return jsonResponse({ error: "Unexpected", message: "Unexpected" }, 500);
   };
 
@@ -134,19 +123,18 @@ test("project usage summary prefers /functions and falls back on 404", async () 
   });
 
   assert.equal(res?.entries?.[0]?.project_key, "acme/alpha");
-  assert.ok(calls[0]?.includes("/functions/"));
-  assert.ok(calls[1]?.includes("/api/functions/"));
+  assert.equal(calls.length, 1);
+  assert.ok(!calls.some((c) => c.includes("/api/functions/")));
 });
 
-test("leaderboard prefers /functions and falls back on 404", async () => {
+test("leaderboard reads from /functions only", async () => {
   const { getLeaderboard } = await loadVibescoreApi();
   const calls = [];
 
   globalThis.fetch = async (url) => {
     const target = String(url);
     calls.push(target);
-
-    if (target.includes("/api/functions/vibeusage-leaderboard")) {
+    if (target.includes("/functions/vibeusage-leaderboard")) {
       return jsonResponse(
         {
           period: "total",
@@ -158,10 +146,6 @@ test("leaderboard prefers /functions and falls back on 404", async () => {
         200,
       );
     }
-    if (target.includes("/functions/vibeusage-leaderboard")) {
-      return jsonResponse({ error: "Not Found", message: "Not Found" }, 404);
-    }
-
     return jsonResponse({ error: "Unexpected", message: "Unexpected" }, 500);
   };
 
@@ -173,8 +157,8 @@ test("leaderboard prefers /functions and falls back on 404", async () => {
   });
 
   assert.equal(res?.entries?.[0]?.display_name, "NEO");
-  assert.ok(calls[0]?.includes("/functions/"));
-  assert.ok(calls[1]?.includes("/api/functions/"));
+  assert.equal(calls.length, 1);
+  assert.ok(!calls.some((c) => c.includes("/api/functions/")));
 });
 
 test("link code init posts to /functions", async () => {

@@ -1,7 +1,6 @@
 "use strict";
 
 const FUNCTION_PREFIX = "/functions";
-const LEGACY_FUNCTION_PREFIX = "/api/functions";
 const BACKEND_RUNTIME_UNAVAILABLE_MESSAGE =
   "Backend runtime unavailable (InsForge). Please retry later.";
 
@@ -28,7 +27,6 @@ const FUNCTION_SLUGS = Object.freeze({
 
 module.exports = {
   FUNCTION_PREFIX,
-  LEGACY_FUNCTION_PREFIX,
   BACKEND_RUNTIME_UNAVAILABLE_MESSAGE,
   FUNCTION_SLUGS,
 };

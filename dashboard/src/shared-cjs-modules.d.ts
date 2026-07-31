@@ -65,13 +65,11 @@ declare module "../../../src/shared/copy-registry.cjs" {
 
 declare module "../../../src/shared/vibeusage-function-contract.cjs" {
   export const FUNCTION_PREFIX: string;
-  export const LEGACY_FUNCTION_PREFIX: string;
   export const BACKEND_RUNTIME_UNAVAILABLE_MESSAGE: string;
   export const FUNCTION_SLUGS: Record<string, string>;
 
   const vibeusageFunctionContract: {
     FUNCTION_PREFIX: string;
-    LEGACY_FUNCTION_PREFIX: string;
     BACKEND_RUNTIME_UNAVAILABLE_MESSAGE: string;
     FUNCTION_SLUGS: Record<string, string>;
   };
