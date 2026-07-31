@@ -50,6 +50,48 @@ function createUserJwt(userId, { expiresInSeconds = 3600 } = {}) {
   return signJwt({ sub: userId, exp }, JWT_SECRET);
 }
 
+// Insforge signs user tokens with RS256 and publishes the public key at
+// /.well-known/jwks.json; these helpers reproduce that in-process.
+async function createRs256Identity(userId, { kid = "kid_test", expiresInSeconds = 3600 } = {}) {
+  const pair = await webcrypto.subtle.generateKey(
+    {
+      name: "RSASSA-PKCS1-v1_5",
+      modulusLength: 2048,
+      publicExponent: new Uint8Array([1, 0, 1]),
+      hash: "SHA-256",
+    },
+    true,
+    ["sign", "verify"],
+  );
+  const publicJwk = await webcrypto.subtle.exportKey("jwk", pair.publicKey);
+  const header = toBase64Url(JSON.stringify({ alg: "RS256", typ: "JWT", kid }));
+  const body = toBase64Url(
+    JSON.stringify({ sub: userId, exp: Math.floor(Date.now() / 1000) + expiresInSeconds }),
+  );
+  const signature = await webcrypto.subtle.sign(
+    "RSASSA-PKCS1-v1_5",
+    pair.privateKey,
+    new TextEncoder().encode(`${header}.${body}`),
+  );
+  return {
+    token: `${header}.${body}.${Buffer.from(signature).toString("base64url")}`,
+    jwks: { keys: [{ kty: "RSA", n: publicJwk.n, e: publicJwk.e, alg: "RS256", use: "sig", kid }] },
+  };
+}
+
+function stubJwksFetch(jwks) {
+  const original = globalThis.fetch;
+  globalThis.fetch = async (url) => {
+    if (String(url).includes("/.well-known/jwks.json")) {
+      return { ok: true, json: async () => jwks };
+    }
+    throw new Error(`Unexpected fetch: ${url}`);
+  };
+  return () => {
+    globalThis.fetch = original;
+  };
+}
+
 function setDenoEnv(env) {
   const merged = { INSFORGE_JWT_SECRET: JWT_SECRET, ...env };
   globalThis.Deno = {
@@ -303,7 +345,10 @@ test("local jwt verification rejects when secret missing", async () => {
   assert.equal(res.code, "missing_jwt_secret");
 });
 
-test("getEdgeClientAndUserIdFast falls back to jwt claims when jwt secret missing", async () => {
+test("getEdgeClientAndUserIdFast rejects HS256 claims when jwt secret missing", async () => {
+  // Used to fall back to decoding claims without verifying the signature, which
+  // let anyone impersonate any user by hand-crafting a token. RS256 tokens are
+  // verified against JWKS instead; HS256 without a secret is now a hard reject.
   const userId = "22222222-2222-2222-2222-222222222224";
   const userJwt = createUserJwt(userId);
   globalThis.createClient = () => ({});
@@ -311,8 +356,8 @@ test("getEdgeClientAndUserIdFast falls back to jwt claims when jwt secret missin
   setDenoEnv({ INSFORGE_JWT_SECRET: undefined, INSFORGE_ANON_KEY: ANON_KEY });
   const { getEdgeClientAndUserIdFast } = require("../insforge-src/shared/auth");
   const res = await getEdgeClientAndUserIdFast({ baseUrl: BASE_URL, bearer: userJwt });
-  assert.equal(res.ok, true);
-  assert.equal(res.userId, userId);
+  assert.equal(res.ok, false);
+  assert.equal(res.status, 401);
 });
 
 test("getEdgeClientAndUserIdFast rejects malformed jwt claims when jwt secret missing", async () => {
@@ -3573,7 +3618,7 @@ test("vibeusage-usage-hourly honors alias effective_from across day", async () =
   assert.ok(filterCalls.some((entry) => entry.value?.includes?.("model.ilike.gpt-foo")));
 });
 
-test("vibeusage-usage-hourly derives user id from jwt claims when jwt secret missing", async () => {
+test("vibeusage-usage-hourly derives user id from an RS256 token verified via JWKS", async () => {
   setDenoEnv({
     INSFORGE_INTERNAL_URL: BASE_URL,
     ANON_KEY,
@@ -3584,7 +3629,9 @@ test("vibeusage-usage-hourly derives user id from jwt claims when jwt secret mis
   const fn = await loadEdgeFunction("vibeusage-usage-hourly");
 
   const userId = "44444444-4444-4444-4444-444444444444";
-  const userJwt = createUserJwt(userId);
+  const identity = await createRs256Identity(userId, { kid: "kid_usage_hourly" });
+  const userJwt = identity.token;
+  const restoreFetch = stubJwksFetch(identity.jwks);
   const filters = [];
   const orders = [];
   const rows = [
@@ -3638,7 +3685,12 @@ test("vibeusage-usage-hourly derives user id from jwt claims when jwt secret mis
     },
   );
 
-  const res = await fn(req);
+  let res;
+  try {
+    res = await fn(req);
+  } finally {
+    restoreFetch();
+  }
   assert.equal(res.status, 200);
 
   assert.ok(filters.some((f) => f.op === "eq" && f.col === "user_id" && f.value === userId));

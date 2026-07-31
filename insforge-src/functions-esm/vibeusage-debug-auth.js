@@ -1,4 +1,4 @@
-import { getBearerToken, verifyUserJwtHs256 } from "./shared/auth.js";
+import { getBearerToken, verifyUserJwt } from "./shared/auth.js";
 import { getAnonKey } from "./shared/env.js";
 import { handleOptions, json, requireMethod } from "./shared/http.js";
 
@@ -38,7 +38,7 @@ export default async function (request) {
     );
   }
 
-  const local = await verifyUserJwtHs256({ token: bearer });
+  const local = await verifyUserJwt({ token: bearer });
   return json(
     {
       hasAnonKey: true,

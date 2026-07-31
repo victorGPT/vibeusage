@@ -124,31 +124,100 @@ async function verifyUserJwtHs256({ token, jwtSecret }) {
   if (!userId) return { ok: false, userId: null, error: "Missing sub" };
   return { ok: true, userId, error: null };
 }
-function getClaimedJwtUser({ token }) {
+function decodeBase64UrlBytes(value) {
+  const raw = decodeBase64Url(value);
+  if (raw == null) return null;
+  const bytes = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; i += 1) bytes[i] = raw.charCodeAt(i);
+  return bytes;
+}
+var jwksKeyCache = /* @__PURE__ */ new Map();
+async function loadJwksKeys({ jwksUrl, fetchImpl }) {
+  const doFetch = typeof fetchImpl === "function" ? fetchImpl : globalThis.fetch;
+  if (typeof doFetch !== "function") return false;
+  const res = await doFetch(jwksUrl);
+  if (!res?.ok) return false;
+  const body = await res.json();
+  const keys = Array.isArray(body?.keys) ? body.keys : [];
+  let imported = false;
+  for (const jwk of keys) {
+    if (jwk?.kty !== "RSA" || typeof jwk.kid !== "string") continue;
+    if (jwk.alg && jwk.alg !== "RS256") continue;
+    const key = await globalThis.crypto.subtle.importKey(
+      "jwk",
+      { kty: jwk.kty, n: jwk.n, e: jwk.e, alg: "RS256", ext: true },
+      { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
+      false,
+      ["verify"]
+    );
+    jwksKeyCache.set(jwk.kid, key);
+    imported = true;
+  }
+  return imported;
+}
+async function getJwksKey({ jwksUrl, kid, fetchImpl }) {
+  if (typeof kid !== "string" || kid.length === 0) return null;
+  const cached = jwksKeyCache.get(kid);
+  if (cached) return cached;
+  await loadJwksKeys({ jwksUrl, fetchImpl });
+  return jwksKeyCache.get(kid) || null;
+}
+async function verifyUserJwtRs256({ token, jwksUrl, fetchImpl }) {
+  if (typeof jwksUrl !== "string" || jwksUrl.length === 0) {
+    return { ok: false, userId: null, error: "Missing jwks url", code: "missing_jwks_url" };
+  }
+  if (typeof token !== "string") return { ok: false, userId: null, error: "Invalid token" };
+  const parts = token.split(".");
+  if (parts.length !== 3) return { ok: false, userId: null, error: "Invalid token" };
   const header = decodeJwtHeader(token);
-  if (!header || header.alg !== "HS256") {
-    return { ok: false, userId: null, code: "invalid_jwt" };
+  if (!header || header.alg !== "RS256") {
+    return { ok: false, userId: null, error: "Unsupported alg" };
   }
   const payload = decodeJwtPayload(token);
-  if (!payload || isJwtExpired(payload)) {
-    return { ok: false, userId: null, code: "invalid_jwt" };
+  if (!payload) return { ok: false, userId: null, error: "Invalid payload" };
+  if (!Number.isFinite(Number(payload?.exp))) {
+    return { ok: false, userId: null, error: "Missing exp" };
   }
+  if (isJwtExpired(payload)) return { ok: false, userId: null, error: "Token expired" };
+  const cryptoSubtle = globalThis.crypto?.subtle;
+  if (!cryptoSubtle) return { ok: false, userId: null, error: "Crypto unavailable" };
+  const signature = decodeBase64UrlBytes(parts[2]);
+  if (!signature) return { ok: false, userId: null, error: "Invalid signature" };
+  let key = null;
+  try {
+    key = await getJwksKey({ jwksUrl, kid: header.kid, fetchImpl });
+  } catch (_error) {
+    return { ok: false, userId: null, error: "Jwks unavailable", code: "jwks_unavailable" };
+  }
+  if (!key) return { ok: false, userId: null, error: "Unknown signing key", code: "unknown_kid" };
+  const verified = await cryptoSubtle.verify(
+    "RSASSA-PKCS1-v1_5",
+    key,
+    signature,
+    new TextEncoder().encode(`${parts[0]}.${parts[1]}`)
+  );
+  if (!verified) return { ok: false, userId: null, error: "Invalid signature" };
   const userId = typeof payload.sub === "string" ? payload.sub : null;
-  if (!userId) return { ok: false, userId: null, code: "invalid_jwt" };
-  return { ok: true, userId, code: null };
+  if (!userId) return { ok: false, userId: null, error: "Missing sub" };
+  return { ok: true, userId, error: null };
+}
+async function verifyUserJwt({ token, jwtSecret, jwksUrl, fetchImpl }) {
+  const header = decodeJwtHeader(token);
+  const alg = header?.alg;
+  if (alg === "RS256") return verifyUserJwtRs256({ token, jwksUrl, fetchImpl });
+  if (alg === "HS256") return verifyUserJwtHs256({ token, jwtSecret });
+  return { ok: false, userId: null, error: "Unsupported alg", code: "invalid_jwt" };
 }
 async function getEdgeClientAndUserIdFast({
   baseUrl,
   bearer,
   createUserEdgeClient,
-  jwtSecret
+  jwtSecret,
+  jwksUrl,
+  fetchImpl
 } = {}) {
-  const edgeClient = typeof createUserEdgeClient === "function" ? await createUserEdgeClient({ baseUrl, bearer }) : null;
-  const local = await verifyUserJwtHs256({ token: bearer, jwtSecret });
-  if (local.ok) {
-    return { ok: true, edgeClient, userId: local.userId };
-  }
-  if (local?.code !== "missing_jwt_secret") {
+  const local = await verifyUserJwt({ token: bearer, jwtSecret, jwksUrl, fetchImpl });
+  if (!local.ok) {
     return {
       ok: false,
       edgeClient: null,
@@ -158,30 +227,24 @@ async function getEdgeClientAndUserIdFast({
       code: local?.code || "invalid_jwt"
     };
   }
-  const claimed = getClaimedJwtUser({ token: bearer });
-  if (!claimed.ok) {
-    return {
-      ok: false,
-      edgeClient: null,
-      userId: null,
-      status: 401,
-      error: "Unauthorized",
-      code: claimed.code || "invalid_jwt"
-    };
-  }
-  return { ok: true, edgeClient, userId: claimed.userId };
+  const edgeClient = typeof createUserEdgeClient === "function" ? await createUserEdgeClient({ baseUrl, bearer }) : null;
+  return { ok: true, edgeClient, userId: local.userId };
 }
 async function getEdgeClientAndUserId({
   baseUrl,
   bearer,
   createUserEdgeClient,
-  jwtSecret
+  jwtSecret,
+  jwksUrl,
+  fetchImpl
 } = {}) {
   const auth = await getEdgeClientAndUserIdFast({
     baseUrl,
     bearer,
     createUserEdgeClient,
-    jwtSecret
+    jwtSecret,
+    jwksUrl,
+    fetchImpl
   });
   if (!auth.ok) {
     return {
@@ -201,6 +264,8 @@ async function getAccessContext({
   allowPublic = false,
   createUserEdgeClient,
   jwtSecret,
+  jwksUrl,
+  fetchImpl,
   isPublicShareToken: isPublicShareToken3,
   resolvePublicView: resolvePublicView4
 } = {}) {
@@ -219,7 +284,9 @@ async function getAccessContext({
     baseUrl,
     bearer,
     createUserEdgeClient,
-    jwtSecret
+    jwtSecret,
+    jwksUrl,
+    fetchImpl
   });
   if (auth.ok) {
     return { ok: true, edgeClient: auth.edgeClient, userId: auth.userId, accessType: "user" };
@@ -270,6 +337,8 @@ if (!globalThis[CORE_KEY]) {
       getBearerToken,
       isProjectAdminBearer,
       verifyUserJwtHs256,
+      verifyUserJwtRs256,
+      verifyUserJwt,
       getEdgeClientAndUserIdFast,
       getEdgeClientAndUserId,
       getAccessContext
