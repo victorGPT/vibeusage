@@ -36,4 +36,10 @@
 - [x] Production: 28/28 functions deployed; 35/35 live.
 - [x] Production: forged HS256 and forged RS256 (unknown `kid`) both return 401 at the auth layer.
 - [x] Production: CLI device-token ingest unaffected (`sync` uploaded rows successfully).
-- [ ] Production: signed-in dashboard loads data with a real RS256 session token (needs a browser session; not verifiable from CLI).
+- [x] Production: signed-in dashboard loads data with a real RS256 session token (confirmed by the maintainer in a browser after the frontend deploy; not verifiable from CLI).
+
+## 6. Deployment
+
+- [x] Edge functions deployed to production (bulk PUT needs backoff; InsForge rate-limits function writes).
+- [x] Dashboard deployed to Vercel production; `vibeusage.cc` serves the new bundle.
+- [x] Add `.vercelignore` — Vercel ignores `.gitignore`, so `.worktrees/` pushed the upload past the 15000-file limit and had been blocking manual deploys.
