@@ -1,0 +1,12 @@
+# Vercel does not apply .gitignore, and .worktrees/ holds ~34 full repo copies —
+# without this the upload blows past Vercel's 15000-file limit.
+.worktrees
+node_modules
+.git
+dist
+.tmp
+tmp
+backups
+
+# SCIP code-graph indexes, tens of MB and irrelevant to the build
+*.scip
