@@ -57,6 +57,9 @@ async function createInsforgeClient({ baseUrl, accessToken } = {}) {
     baseUrl,
     anonKey: anonKey || undefined,
     edgeFunctionToken: accessToken || undefined,
+    // SDK 1.2.2 defaults to {appKey}.functions.insforge.app and only falls back on 404,
+    // so a network-level block there fails every upload. Use the baseUrl gateway path.
+    functionsUrl: `${String(baseUrl).replace(/\/+$/, "")}/functions`,
     fetch: createTimeoutFetch(globalThis.fetch),
   });
 }
