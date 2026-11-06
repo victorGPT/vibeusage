@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.6.5] - 2026-11-06
+
+### Fixed
+
+- **CLI uploads failing with `fetch failed` (dashboard shows 0).** `@insforge/sdk@1.2.2` routes `functions.invoke` to `https://{appKey}.functions.insforge.app` first and only falls back to `${baseUrl}/functions` on HTTP 404, so a network-level failure on that host (TLS reset since 2026-10-29) broke every ingest. `createInsforgeClient` now pins `functionsUrl` to `${baseUrl}/functions`. (#202, #203)
+
 ## [0.6.4] - 2026-04-30
 
 ### Fixed
