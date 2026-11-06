@@ -20,3 +20,9 @@ test("getHttpTimeoutMs reads only VIBEUSAGE_HTTP_TIMEOUT_MS", () => {
     20_000,
   );
 });
+
+test("createInsforgeClient routes functions via baseUrl gateway, not *.functions.insforge.app", async () => {
+  const { createInsforgeClient } = require("../src/lib/insforge-client");
+  const client = await createInsforgeClient({ baseUrl: "https://abc.us-east.insforge.app/" });
+  assert.equal(client.functions.functionsUrl, "https://abc.us-east.insforge.app/functions");
+});
