@@ -221,6 +221,9 @@ test("pi compaction usage is counted under the session's last model, across sync
     const queuePath = path.join(dir, "queue.jsonl");
     const cursors = { version: 1, files: {}, updatedAt: null };
     await syncOnce([p], cursors, queuePath);
+    // An idle sync (no new lines) must not drop the remembered model.
+    await syncOnce([p], cursors, queuePath);
+    assert.equal(cursors.files[p].lastModel, "glm-5");
 
     // Shape from pi 1.5.0 compaction entries: top-level usage, no model.
     const compaction = JSON.stringify({

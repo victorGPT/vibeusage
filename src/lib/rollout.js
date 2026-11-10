@@ -537,9 +537,12 @@ async function parseJsonlFilesIncremental({
       projectKey,
     });
 
+    // Carry parser-owned cursor fields forward on resume so early returns (no new lines) keep them.
+    const { inode: _i, offset: _o, updatedAt: _u, ...prevExtra } = startOffset > 0 && prev ? prev : {};
     cursors.files[key] = {
       inode,
       offset: result.endOffset,
+      ...prevExtra,
       ...(result.cursorExtra || {}),
       updatedAt: new Date().toISOString(),
     };
