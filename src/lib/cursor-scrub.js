@@ -55,7 +55,9 @@ const SOURCES = {
   },
   pi: {
     sessionRoot: ({ home, env }) =>
-      path.join(env.PI_CODING_AGENT_DIR || path.join(home, ".pi", "agent"), "sessions"),
+      // eslint-disable-next-line global-require
+      path.join(require("./rollout").resolvePiAgentDir({ home, env }), "sessions"),
+    extraCursorKeys: ["piSeen"],
   },
   opencode: {
     extraCursorKeys: ["opencode", "opencodeSqlite"],

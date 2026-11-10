@@ -11,6 +11,7 @@ const {
   listGeminiSessionFiles,
   listKimiSessionFiles,
   listPiSessionFiles,
+  resolvePiAgentDir,
   parseRolloutIncremental,
   parseClaudeIncremental,
   parseGeminiIncremental,
@@ -102,7 +103,7 @@ async function cmdSync(argv) {
     const geminiTmpDir = path.join(geminiHome, "tmp");
     const kimiHome = process.env.KIMI_HOME || path.join(home, ".kimi");
     const kimiSessionsDir = path.join(kimiHome, "sessions");
-    const piSessionsDir = path.join(process.env.PI_CODING_AGENT_DIR || path.join(home, ".pi", "agent"), "sessions");
+    const piSessionsDir = path.join(resolvePiAgentDir({ home, env: process.env }), "sessions");
     const xdgDataHome = process.env.XDG_DATA_HOME || path.join(home, ".local", "share");
     const opencodeHome = process.env.OPENCODE_HOME || path.join(xdgDataHome, "opencode");
     const opencodeDbPath = path.join(opencodeHome, "opencode.db");

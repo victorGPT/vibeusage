@@ -1,5 +1,6 @@
 const fs = require("node:fs/promises");
 const fssync = require("node:fs");
+const os = require("node:os");
 const path = require("node:path");
 const readline = require("node:readline");
 
@@ -445,8 +446,21 @@ async function parseKimiIncremental(opts) {
   return parseJsonlFilesIncremental({ ...opts, defaultSourceId: "kimi", parseFile: parseKimiFile });
 }
 
+// ponytail: recent-N dedupe keys; a fork of a parent whose keys already aged out
+// of the window double counts. Raise PI_SEEN_LIMIT if forks of huge/old sessions matter.
+const PI_SEEN_LIMIT = 10000;
+
 async function parsePiIncremental(opts) {
-  return parseJsonlFilesIncremental({ ...opts, defaultSourceId: "pi", parseFile: parsePiFile });
+  const cursors = opts.cursors;
+  const seen = new Set(Array.isArray(cursors.piSeen) ? cursors.piSeen : []);
+  const result = await parseJsonlFilesIncremental({
+    ...opts,
+    defaultSourceId: "pi",
+    parseFile: (args) => parsePiFile({ ...args, seen }),
+    projectStartDir: readPiSessionCwd,
+  });
+  cursors.piSeen = [...seen].slice(-PI_SEEN_LIMIT);
+  return result;
 }
 
 // Shared offset/inode cursor loop for append-only JSONL session logs (Kimi, Pi).
@@ -460,6 +474,7 @@ async function parseJsonlFilesIncremental({
   publicRepoResolver,
   defaultSourceId,
   parseFile,
+  projectStartDir = async (filePath) => path.dirname(filePath),
 }) {
   await ensureDir(path.dirname(queuePath));
   let filesProcessed = 0;
@@ -498,8 +513,8 @@ async function parseJsonlFilesIncremental({
     const startOffset = prev && prev.inode === inode ? prev.offset || 0 : 0;
 
     const projectContext = projectEnabled
-      ? await resolveProjectContextForFile({
-          filePath,
+      ? await resolveProjectContextForPath({
+          startDir: await projectStartDir(filePath),
           projectMetaCache,
           publicRepoCache,
           publicRepoResolver,
@@ -512,7 +527,6 @@ async function parseJsonlFilesIncremental({
     const result = await parseFile({
       filePath,
       startOffset,
-      prev,
       hourlyState,
       touchedBuckets,
       source: fileSource,
@@ -525,7 +539,6 @@ async function parseJsonlFilesIncremental({
     cursors.files[key] = {
       inode,
       offset: result.endOffset,
-      ...(result.forkedAt ? { forkedAt: result.forkedAt } : {}),
       updatedAt: new Date().toISOString(),
     };
 
@@ -973,15 +986,14 @@ async function parseKimiFile({
 }
 
 // Pi (pi-coding-agent) session logs: <agentDir>/sessions/<cwd-slug>/<ts>_<uuid>.jsonl.
-// Usage sits on assistant `message` entries. Files are append-only, except that
-// /fork and branch-to-new-session copy the parent's entries verbatim into a new
-// file whose header has `parentSession`; entries timestamped before that header
-// are copies already counted from the parent, so they are skipped. Dedupe key
-// is therefore (file, byte offset) plus the fork cut-off, not an id set.
+// Usage sits on assistant `message` entries and top-level `usage` entries
+// (cache-warm refreshes). /fork and branch-to-new-session copy the parent's
+// entries verbatim into a new file, so every usage entry is deduped by a stable
+// key (responseId, else `${id}|${timestamp}`) kept in `seen` across files/syncs.
 async function parsePiFile({
   filePath,
   startOffset,
-  prev,
+  seen,
   hourlyState,
   touchedBuckets,
   source,
@@ -992,8 +1004,7 @@ async function parsePiFile({
 }) {
   const st = await fs.stat(filePath).catch(() => null);
   if (!st || !st.isFile()) return { endOffset: startOffset, eventsAggregated: 0 };
-  let forkedAt = startOffset > 0 && prev ? prev.forkedAt || null : null;
-  if (startOffset >= st.size) return { endOffset: st.size, eventsAggregated: 0, forkedAt };
+  if (startOffset >= st.size) return { endOffset: st.size, eventsAggregated: 0 };
 
   // ponytail: reads the unread tail into memory; stream it if session files reach hundreds of MB.
   const fh = await fs.open(filePath, "r");
@@ -1006,7 +1017,7 @@ async function parsePiFile({
   }
   // Only consume complete lines so a line pi is still writing is read next time.
   const lastNewline = buf.lastIndexOf(0x0a);
-  if (lastNewline === -1) return { endOffset: startOffset, eventsAggregated: 0, forkedAt };
+  if (lastNewline === -1) return { endOffset: startOffset, eventsAggregated: 0 };
   const endOffset = startOffset + lastNewline + 1;
 
   let eventsAggregated = 0;
@@ -1018,21 +1029,26 @@ async function parsePiFile({
     } catch (_e) {
       continue;
     }
-    if (obj?.type === "session") {
-      if (typeof obj.parentSession === "string" && obj.parentSession) forkedAt = obj.timestamp || null;
-      continue;
-    }
-    if (obj?.type !== "message" || obj.message?.role !== "assistant") continue;
+    let carrier = null;
+    if (obj?.type === "message" && obj.message?.role === "assistant") carrier = obj.message;
+    else if (obj?.type === "usage") carrier = obj;
+    if (!carrier) continue;
     const tsIso = typeof obj.timestamp === "string" ? obj.timestamp : null;
     if (!tsIso) continue;
-    if (forkedAt && Date.parse(tsIso) < Date.parse(forkedAt)) continue;
 
-    const delta = normalizePiUsage(obj.message.usage);
+    const delta = normalizePiUsage(carrier.usage);
     if (!delta || isAllZeroUsage(delta)) continue;
     const bucketStart = toUtcHalfHourStart(tsIso);
     if (!bucketStart) continue;
 
-    const model = normalizeModelInput(obj.message.model) || DEFAULT_MODEL;
+    const dedupeKey =
+      typeof carrier.responseId === "string" && carrier.responseId
+        ? carrier.responseId
+        : `${obj.id}|${tsIso}`;
+    if (seen.has(dedupeKey)) continue;
+    seen.add(dedupeKey);
+
+    const model = normalizeModelInput(carrier.model) || DEFAULT_MODEL;
     const bucket = getHourlyBucket(hourlyState, source, model, bucketStart);
     addTotals(bucket.totals, delta);
     touchedBuckets.add(bucketKey(source, model, bucketStart));
@@ -1043,7 +1059,33 @@ async function parsePiFile({
     }
     eventsAggregated += 1;
   }
-  return { endOffset, eventsAggregated, forkedAt };
+  return { endOffset, eventsAggregated };
+}
+
+async function readPiSessionCwd(filePath) {
+  const fh = await fs.open(filePath, "r").catch(() => null);
+  if (!fh) return null;
+  try {
+    const buf = Buffer.alloc(64 * 1024);
+    const { bytesRead } = await fh.read(buf, 0, buf.length, 0);
+    const text = buf.toString("utf8", 0, bytesRead);
+    const nl = text.indexOf("\n");
+    const header = JSON.parse(nl === -1 ? text : text.slice(0, nl));
+    return header?.type === "session" && typeof header.cwd === "string" ? header.cwd : null;
+  } catch (_e) {
+    return null;
+  } finally {
+    await fh.close();
+  }
+}
+
+// pi's getAgentDir(): PI_CODING_AGENT_DIR with ~ expanded, else ~/.pi/agent.
+function resolvePiAgentDir({ home = os.homedir(), env = process.env } = {}) {
+  const raw = typeof env.PI_CODING_AGENT_DIR === "string" ? env.PI_CODING_AGENT_DIR : "";
+  if (!raw) return path.join(home, ".pi", "agent");
+  if (raw === "~") return home;
+  if (raw.startsWith("~/")) return path.join(home, raw.slice(2));
+  return raw;
 }
 
 async function parseGeminiFile({
@@ -2577,6 +2619,7 @@ module.exports = {
   listGeminiSessionFiles,
   listKimiSessionFiles,
   listPiSessionFiles,
+  resolvePiAgentDir,
   listOpencodeMessageFiles,
   parseRolloutIncremental,
   parseClaudeIncremental,

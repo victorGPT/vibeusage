@@ -132,7 +132,107 @@ test("parsePiIncremental does not lose a line that was half-written during sync"
   });
 });
 
-test("parsePiIncremental skips entries a fork copied from its parent session", async () => {
+async function syncOnce(files, cursors, queuePath, extra = {}) {
+  return parsePiIncremental({ sessionFiles: files, cursors, queuePath, ...extra });
+}
+
+async function bucketTotal(queuePath) {
+  return latestBySourceModel(await readQueue(queuePath)).reduce((s, r) => s + r.total_tokens, 0);
+}
+
+test("pi fork whose copied entry has the same ms as the fork header is counted once (separate syncs)", async () => {
+  await withTempDir(async (dir) => {
+    const ts = "2026-04-01T00:10:00.000Z";
+    const copied = assistant({ id: "a1", ts, usage: usage({ input: 10, output: 4 }) });
+    const parent = await writeSession(dir, "parent.jsonl", [header(), copied]);
+    const queuePath = path.join(dir, "queue.jsonl");
+    const cursors = { version: 1, files: {}, updatedAt: null };
+    await syncOnce([parent], cursors, queuePath);
+    const fork = await writeSession(dir, "fork.jsonl", [header({ ts, parentSession: parent }), copied]);
+    await syncOnce([parent, fork], cursors, queuePath);
+    assert.equal(await bucketTotal(queuePath), 14);
+  });
+});
+
+test("pi entry re-appended with the same id after a sync is not counted again", async () => {
+  await withTempDir(async (dir) => {
+    const line = assistant({ id: "a1", ts: "2026-04-01T00:05:00.000Z", usage: usage({ input: 10, output: 4 }) });
+    const p = await writeSession(dir, "a.jsonl", [header(), line]);
+    const queuePath = path.join(dir, "queue.jsonl");
+    const cursors = { version: 1, files: {}, updatedAt: null };
+    await syncOnce([p], cursors, queuePath);
+    await fs.appendFile(p, line + "\n");
+    const r = await syncOnce([p], cursors, queuePath);
+    assert.equal(r.eventsAggregated, 0);
+    assert.equal(await bucketTotal(queuePath), 14);
+  });
+});
+
+test("pi fork whose parent was never scanned still counts the inherited usage once", async () => {
+  await withTempDir(async (dir) => {
+    const copied = assistant({ id: "a1", ts: "2026-04-01T00:05:00.000Z", usage: usage({ input: 10, output: 4 }) });
+    const fork = await writeSession(dir, "fork.jsonl", [
+      header({ ts: "2026-04-01T00:10:00.000Z", parentSession: "/elsewhere/parent.jsonl" }),
+      copied,
+      assistant({ id: "b1", ts: "2026-04-01T00:11:00.000Z", usage: usage({ input: 1, output: 1 }) }),
+    ]);
+    const queuePath = path.join(dir, "queue.jsonl");
+    const cursors = { version: 1, files: {}, updatedAt: null };
+    await syncOnce([fork], cursors, queuePath);
+    await syncOnce([fork], cursors, queuePath);
+    assert.equal(await bucketTotal(queuePath), 16);
+  });
+});
+
+test("pi top-level type:usage entries (cache-warm refreshes) are counted under their model", async () => {
+  await withTempDir(async (dir) => {
+    // Shape from pi 1.5.0 SessionManager.appendUsage.
+    const warm = JSON.stringify({
+      type: "usage",
+      id: "w1",
+      parentId: null,
+      timestamp: "2026-04-01T00:07:00.000Z",
+      kind: "cache_warm",
+      provider: "anthropic",
+      model: "claude-x",
+      usage: usage({ input: 3, cacheRead: 200, output: 1 }),
+    });
+    const p = await writeSession(dir, "a.jsonl", [header(), warm]);
+    const queuePath = path.join(dir, "queue.jsonl");
+    const cursors = { version: 1, files: {}, updatedAt: null };
+    const r = await syncOnce([p], cursors, queuePath);
+    assert.equal(r.eventsAggregated, 1);
+    const [b] = latestBySourceModel(await readQueue(queuePath));
+    assert.equal(b.model, "claude-x");
+    assert.equal(b.cached_input_tokens, 200);
+    assert.equal(b.total_tokens, 204);
+  });
+});
+
+test("pi project attribution uses the session header cwd, not the sessions dir", async () => {
+  await withTempDir(async (dir) => {
+    const repoRoot = path.join(dir, "repo");
+    await fs.mkdir(path.join(repoRoot, ".git"), { recursive: true });
+    await fs.writeFile(path.join(repoRoot, ".git", "config"), `[remote "origin"]\n\turl = https://github.com/acme/alpha.git\n`);
+    const projectDir = path.join(dir, "sessions", "--repo--");
+    await fs.mkdir(projectDir, { recursive: true });
+    const p = path.join(projectDir, "a.jsonl");
+    const head = JSON.stringify({ type: "session", version: 3, id: "s1", timestamp: "2026-04-01T00:00:00.000Z", cwd: repoRoot });
+    await fs.writeFile(p, [head, assistant({ id: "a1", ts: "2026-04-01T00:05:00.000Z", usage: usage({ input: 10, output: 4 }) })].join("\n") + "\n");
+    const queuePath = path.join(dir, "queue.jsonl");
+    const projectQueuePath = path.join(dir, "project.queue.jsonl");
+    const cursors = { version: 1, files: {}, updatedAt: null };
+    const publicRepoResolver = async ({ projectRef }) => ({ status: "public_verified", projectKey: "acme/alpha", projectRef });
+    await syncOnce([p], cursors, queuePath, { projectQueuePath, publicRepoResolver });
+    const rows = await readQueue(projectQueuePath);
+    assert.equal(rows.length, 1);
+    assert.equal(rows[0].project_key, "acme/alpha");
+    assert.equal(rows[0].source, "pi");
+    assert.equal(rows[0].total_tokens, 14);
+  });
+});
+
+test("parsePiIncremental counts entries a fork copied from its parent session once", async () => {
   await withTempDir(async (dir) => {
     const copied = assistant({ id: "a1", ts: "2026-04-01T00:05:00.000Z", usage: usage({ input: 10, output: 4 }) });
     const parent = await writeSession(dir, "parent.jsonl", [header(), copied]);
