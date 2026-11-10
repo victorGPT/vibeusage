@@ -527,6 +527,7 @@ async function parseJsonlFilesIncremental({
     const result = await parseFile({
       filePath,
       startOffset,
+      prevCursor: startOffset > 0 ? prev : null,
       hourlyState,
       touchedBuckets,
       source: fileSource,
@@ -539,6 +540,7 @@ async function parseJsonlFilesIncremental({
     cursors.files[key] = {
       inode,
       offset: result.endOffset,
+      ...(result.cursorExtra || {}),
       updatedAt: new Date().toISOString(),
     };
 
@@ -993,6 +995,7 @@ async function parseKimiFile({
 async function parsePiFile({
   filePath,
   startOffset,
+  prevCursor,
   seen,
   hourlyState,
   touchedBuckets,
@@ -1021,6 +1024,8 @@ async function parsePiFile({
   const endOffset = startOffset + lastNewline + 1;
 
   let eventsAggregated = 0;
+  // Compaction entries carry usage but no model: attribute them to the session's last model.
+  let lastModel = typeof prevCursor?.lastModel === "string" ? prevCursor.lastModel : null;
   for (const line of buf.toString("utf8", 0, lastNewline).split("\n")) {
     if (!line) continue;
     let obj;
@@ -1029,10 +1034,12 @@ async function parsePiFile({
     } catch (_e) {
       continue;
     }
+    if (obj?.type === "model_change" && typeof obj.modelId === "string") lastModel = obj.modelId;
     let carrier = null;
     if (obj?.type === "message" && obj.message?.role === "assistant") carrier = obj.message;
-    else if (obj?.type === "usage") carrier = obj;
+    else if (obj?.type === "usage" || obj?.type === "compaction") carrier = obj;
     if (!carrier) continue;
+    if (typeof carrier.model === "string" && carrier.model) lastModel = carrier.model;
     const tsIso = typeof obj.timestamp === "string" ? obj.timestamp : null;
     if (!tsIso) continue;
 
@@ -1048,7 +1055,7 @@ async function parsePiFile({
     if (seen.has(dedupeKey)) continue;
     seen.add(dedupeKey);
 
-    const model = normalizeModelInput(carrier.model) || DEFAULT_MODEL;
+    const model = normalizeModelInput(carrier.model || lastModel) || DEFAULT_MODEL;
     const bucket = getHourlyBucket(hourlyState, source, model, bucketStart);
     addTotals(bucket.totals, delta);
     touchedBuckets.add(bucketKey(source, model, bucketStart));
@@ -1059,7 +1066,7 @@ async function parsePiFile({
     }
     eventsAggregated += 1;
   }
-  return { endOffset, eventsAggregated };
+  return { endOffset, eventsAggregated, cursorExtra: lastModel ? { lastModel } : null };
 }
 
 async function readPiSessionCwd(filePath) {

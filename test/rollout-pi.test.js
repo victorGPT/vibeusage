@@ -209,6 +209,37 @@ test("pi top-level type:usage entries (cache-warm refreshes) are counted under t
   });
 });
 
+test("pi compaction usage is counted under the session's last model, across syncs", async () => {
+  await withTempDir(async (dir) => {
+    const a1 = assistant({
+      id: "a1",
+      ts: "2026-04-01T00:05:00.000Z",
+      model: "glm-5",
+      usage: usage({ input: 10, output: 4 }),
+    });
+    const p = await writeSession(dir, "a.jsonl", [header(), a1]);
+    const queuePath = path.join(dir, "queue.jsonl");
+    const cursors = { version: 1, files: {}, updatedAt: null };
+    await syncOnce([p], cursors, queuePath);
+
+    // Shape from pi 1.5.0 compaction entries: top-level usage, no model.
+    const compaction = JSON.stringify({
+      type: "compaction",
+      id: "c1",
+      parentId: "a1",
+      timestamp: "2026-04-01T00:06:00.000Z",
+      tokensBefore: 113747,
+      usage: usage({ input: 50, output: 7 }),
+    });
+    await fs.appendFile(p, compaction + "\n");
+    const r = await syncOnce([p], cursors, queuePath);
+    assert.equal(r.eventsAggregated, 1);
+    const [b] = latestBySourceModel(await readQueue(queuePath));
+    assert.equal(b.model, "glm-5");
+    assert.equal(b.total_tokens, 71);
+  });
+});
+
 test("pi project attribution uses the session header cwd, not the sessions dir", async () => {
   await withTempDir(async (dir) => {
     const repoRoot = path.join(dir, "repo");
