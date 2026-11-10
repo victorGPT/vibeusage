@@ -1,5 +1,6 @@
 const fs = require("node:fs/promises");
 const fssync = require("node:fs");
+const os = require("node:os");
 const path = require("node:path");
 const readline = require("node:readline");
 
@@ -76,6 +77,19 @@ async function listKimiSessionFiles(sessionsDir) {
       const st = await fs.stat(wirePath).catch(() => null);
       if (!st || !st.isFile()) continue;
       out.push(wirePath);
+    }
+  }
+  out.sort((a, b) => a.localeCompare(b));
+  return out;
+}
+
+async function listPiSessionFiles(sessionsDir) {
+  const out = [];
+  for (const project of await safeReadDir(sessionsDir)) {
+    if (!project.isDirectory()) continue;
+    const projectDir = path.join(sessionsDir, project.name);
+    for (const f of await safeReadDir(projectDir)) {
+      if (f.isFile() && f.name.endsWith(".jsonl")) out.push(path.join(projectDir, f.name));
     }
   }
   out.sort((a, b) => a.localeCompare(b));
@@ -428,7 +442,29 @@ async function parseGeminiIncremental({
   return { filesProcessed, eventsAggregated, bucketsQueued, projectBucketsQueued };
 }
 
-async function parseKimiIncremental({
+async function parseKimiIncremental(opts) {
+  return parseJsonlFilesIncremental({ ...opts, defaultSourceId: "kimi", parseFile: parseKimiFile });
+}
+
+// ponytail: recent-N dedupe keys; a fork of a parent whose keys already aged out
+// of the window double counts. Raise PI_SEEN_LIMIT if forks of huge/old sessions matter.
+const PI_SEEN_LIMIT = 10000;
+
+async function parsePiIncremental(opts) {
+  const cursors = opts.cursors;
+  const seen = new Set(Array.isArray(cursors.piSeen) ? cursors.piSeen : []);
+  const result = await parseJsonlFilesIncremental({
+    ...opts,
+    defaultSourceId: "pi",
+    parseFile: (args) => parsePiFile({ ...args, seen }),
+    projectStartDir: readPiSessionCwd,
+  });
+  cursors.piSeen = [...seen].slice(-PI_SEEN_LIMIT);
+  return result;
+}
+
+// Shared offset/inode cursor loop for append-only JSONL session logs (Kimi, Pi).
+async function parseJsonlFilesIncremental({
   sessionFiles,
   cursors,
   queuePath,
@@ -436,6 +472,9 @@ async function parseKimiIncremental({
   onProgress,
   source,
   publicRepoResolver,
+  defaultSourceId,
+  parseFile,
+  projectStartDir = async (filePath) => path.dirname(filePath),
 }) {
   await ensureDir(path.dirname(queuePath));
   let filesProcessed = 0;
@@ -451,7 +490,7 @@ async function parseKimiIncremental({
   const projectMetaCache = projectEnabled ? new Map() : null;
   const publicRepoCache = projectEnabled ? new Map() : null;
   const touchedBuckets = new Set();
-  const defaultSource = normalizeSourceInput(source) || "kimi";
+  const defaultSource = normalizeSourceInput(source) || defaultSourceId;
 
   if (!cursors.files || typeof cursors.files !== "object") {
     cursors.files = {};
@@ -474,8 +513,8 @@ async function parseKimiIncremental({
     const startOffset = prev && prev.inode === inode ? prev.offset || 0 : 0;
 
     const projectContext = projectEnabled
-      ? await resolveProjectContextForFile({
-          filePath,
+      ? await resolveProjectContextForPath({
+          startDir: await projectStartDir(filePath),
           projectMetaCache,
           publicRepoCache,
           publicRepoResolver,
@@ -485,7 +524,7 @@ async function parseKimiIncremental({
     const projectRef = projectContext?.projectRef || null;
     const projectKey = projectContext?.projectKey || null;
 
-    const result = await parseKimiFile({
+    const result = await parseFile({
       filePath,
       startOffset,
       hourlyState,
@@ -944,6 +983,109 @@ async function parseKimiFile({
   rl.close();
   stream.close?.();
   return { endOffset, eventsAggregated };
+}
+
+// Pi (pi-coding-agent) session logs: <agentDir>/sessions/<cwd-slug>/<ts>_<uuid>.jsonl.
+// Usage sits on assistant `message` entries and top-level `usage` entries
+// (cache-warm refreshes). /fork and branch-to-new-session copy the parent's
+// entries verbatim into a new file, so every usage entry is deduped by a stable
+// key (responseId, else `${id}|${timestamp}`) kept in `seen` across files/syncs.
+async function parsePiFile({
+  filePath,
+  startOffset,
+  seen,
+  hourlyState,
+  touchedBuckets,
+  source,
+  projectState,
+  projectTouchedBuckets,
+  projectRef,
+  projectKey,
+}) {
+  const st = await fs.stat(filePath).catch(() => null);
+  if (!st || !st.isFile()) return { endOffset: startOffset, eventsAggregated: 0 };
+  if (startOffset >= st.size) return { endOffset: st.size, eventsAggregated: 0 };
+
+  // ponytail: reads the unread tail into memory; stream it if session files reach hundreds of MB.
+  const fh = await fs.open(filePath, "r");
+  let buf;
+  try {
+    buf = Buffer.alloc(st.size - startOffset);
+    await fh.read(buf, 0, buf.length, startOffset);
+  } finally {
+    await fh.close();
+  }
+  // Only consume complete lines so a line pi is still writing is read next time.
+  const lastNewline = buf.lastIndexOf(0x0a);
+  if (lastNewline === -1) return { endOffset: startOffset, eventsAggregated: 0 };
+  const endOffset = startOffset + lastNewline + 1;
+
+  let eventsAggregated = 0;
+  for (const line of buf.toString("utf8", 0, lastNewline).split("\n")) {
+    if (!line) continue;
+    let obj;
+    try {
+      obj = JSON.parse(line);
+    } catch (_e) {
+      continue;
+    }
+    let carrier = null;
+    if (obj?.type === "message" && obj.message?.role === "assistant") carrier = obj.message;
+    else if (obj?.type === "usage") carrier = obj;
+    if (!carrier) continue;
+    const tsIso = typeof obj.timestamp === "string" ? obj.timestamp : null;
+    if (!tsIso) continue;
+
+    const delta = normalizePiUsage(carrier.usage);
+    if (!delta || isAllZeroUsage(delta)) continue;
+    const bucketStart = toUtcHalfHourStart(tsIso);
+    if (!bucketStart) continue;
+
+    const dedupeKey =
+      typeof carrier.responseId === "string" && carrier.responseId
+        ? carrier.responseId
+        : `${obj.id}|${tsIso}`;
+    if (seen.has(dedupeKey)) continue;
+    seen.add(dedupeKey);
+
+    const model = normalizeModelInput(carrier.model) || DEFAULT_MODEL;
+    const bucket = getHourlyBucket(hourlyState, source, model, bucketStart);
+    addTotals(bucket.totals, delta);
+    touchedBuckets.add(bucketKey(source, model, bucketStart));
+    if (projectKey && projectState && projectTouchedBuckets) {
+      const projectBucket = getProjectBucket(projectState, projectKey, source, bucketStart, projectRef);
+      addTotals(projectBucket.totals, delta);
+      projectTouchedBuckets.add(projectBucketKey(projectKey, source, bucketStart));
+    }
+    eventsAggregated += 1;
+  }
+  return { endOffset, eventsAggregated };
+}
+
+async function readPiSessionCwd(filePath) {
+  const fh = await fs.open(filePath, "r").catch(() => null);
+  if (!fh) return null;
+  try {
+    const buf = Buffer.alloc(64 * 1024);
+    const { bytesRead } = await fh.read(buf, 0, buf.length, 0);
+    const text = buf.toString("utf8", 0, bytesRead);
+    const nl = text.indexOf("\n");
+    const header = JSON.parse(nl === -1 ? text : text.slice(0, nl));
+    return header?.type === "session" && typeof header.cwd === "string" ? header.cwd : null;
+  } catch (_e) {
+    return null;
+  } finally {
+    await fh.close();
+  }
+}
+
+// pi's getAgentDir(): PI_CODING_AGENT_DIR with ~ expanded, else ~/.pi/agent.
+function resolvePiAgentDir({ home = os.homedir(), env = process.env } = {}) {
+  const raw = typeof env.PI_CODING_AGENT_DIR === "string" ? env.PI_CODING_AGENT_DIR : "";
+  if (!raw) return path.join(home, ".pi", "agent");
+  if (raw === "~") return home;
+  if (raw.startsWith("~/")) return path.join(home, raw.slice(2));
+  return raw;
 }
 
 async function parseGeminiFile({
@@ -2203,6 +2345,24 @@ function normalizeKimiUsage(usage) {
   };
 }
 
+// pi-ai Usage: `input` excludes cacheRead/cacheWrite; `reasoning` is a subset of
+// `output`. Cache writes fold into input_tokens (Claude convention) and
+// reasoning is split out of output so the four channels stay disjoint.
+function normalizePiUsage(usage) {
+  if (!usage || typeof usage !== "object") return null;
+  const input = toNonNegativeInt(usage.input) + toNonNegativeInt(usage.cacheWrite);
+  const cached = toNonNegativeInt(usage.cacheRead);
+  const outputAll = toNonNegativeInt(usage.output);
+  const reasoning = Math.min(toNonNegativeInt(usage.reasoning), outputAll);
+  return {
+    input_tokens: input,
+    cached_input_tokens: cached,
+    output_tokens: outputAll - reasoning,
+    reasoning_output_tokens: reasoning,
+    total_tokens: input + cached + outputAll,
+  };
+}
+
 function kimiTimestampToIso(value) {
   const n = Number(value);
   if (!Number.isFinite(n) || n <= 0) return null;
@@ -2458,11 +2618,14 @@ module.exports = {
   listClaudeProjectFiles,
   listGeminiSessionFiles,
   listKimiSessionFiles,
+  listPiSessionFiles,
+  resolvePiAgentDir,
   listOpencodeMessageFiles,
   parseRolloutIncremental,
   parseClaudeIncremental,
   parseGeminiIncremental,
   parseKimiIncremental,
+  parsePiIncremental,
   parseOpencodeIncremental,
   normalizeHourlyState,
   getHourlyBucket,
@@ -2478,5 +2641,6 @@ module.exports = {
   normalizeClaudeUsage,
   normalizeGeminiTokens,
   normalizeKimiUsage,
+  normalizePiUsage,
   normalizeOpencodeTokens,
 };

@@ -53,6 +53,12 @@ const SOURCES = {
     sessionRoot: ({ home, env }) =>
       path.join(env.KIMI_HOME || path.join(home, ".kimi"), "sessions"),
   },
+  pi: {
+    sessionRoot: ({ home, env }) =>
+      // eslint-disable-next-line global-require
+      path.join(require("./rollout").resolvePiAgentDir({ home, env }), "sessions"),
+    extraCursorKeys: ["piSeen"],
+  },
   opencode: {
     extraCursorKeys: ["opencode", "opencodeSqlite"],
   },
