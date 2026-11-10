@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+
+- **Pi coding agent support (`source=pi`).** `vibeusage sync` now reads Pi session logs from `~/.pi/agent/sessions/**/*.jsonl` (or `$PI_CODING_AGENT_DIR/sessions`) and queues assistant-message usage into half-hour buckets. Channels: `input_tokens = input + cacheWrite`, `cached_input_tokens = cacheRead`, `output_tokens = output − reasoning`, `reasoning_output_tokens = reasoning`, total = sum of all four. Parsing resumes by byte offset, only consumes complete lines, and skips entries that `/fork` copied from a parent session so they are not counted twice. No Pi extension is installed; Pi usage is picked up whenever sync runs from another client's hook or manually. `sync --rebuild pi` is supported. (#205)
+
 ## [0.6.5] - 2026-11-06
 
 ### Fixed

@@ -4,6 +4,7 @@ const { test } = require("node:test");
 const {
   normalizeClaudeUsage,
   normalizeKimiUsage,
+  normalizePiUsage,
   normalizeOpencodeTokens,
   normalizeGeminiTokens,
   normalizeUsage,
@@ -88,6 +89,20 @@ const COMPOSE_CASES = [
       };
     },
     fn: normalizeKimiUsage,
+  },
+  {
+    name: "normalizePiUsage",
+    build(rand) {
+      const output = randomInt(rand, 5000);
+      return {
+        input: randomInt(rand, 5000),
+        cacheRead: randomInt(rand, 100_000),
+        cacheWrite: randomInt(rand, 20_000),
+        output,
+        reasoning: randomInt(rand, output + 1),
+      };
+    },
+    fn: normalizePiUsage,
   },
   {
     name: "normalizeOpencodeTokens",

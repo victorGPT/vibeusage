@@ -53,6 +53,10 @@ const SOURCES = {
     sessionRoot: ({ home, env }) =>
       path.join(env.KIMI_HOME || path.join(home, ".kimi"), "sessions"),
   },
+  pi: {
+    sessionRoot: ({ home, env }) =>
+      path.join(env.PI_CODING_AGENT_DIR || path.join(home, ".pi", "agent"), "sessions"),
+  },
   opencode: {
     extraCursorKeys: ["opencode", "opencodeSqlite"],
   },

@@ -82,6 +82,19 @@ async function listKimiSessionFiles(sessionsDir) {
   return out;
 }
 
+async function listPiSessionFiles(sessionsDir) {
+  const out = [];
+  for (const project of await safeReadDir(sessionsDir)) {
+    if (!project.isDirectory()) continue;
+    const projectDir = path.join(sessionsDir, project.name);
+    for (const f of await safeReadDir(projectDir)) {
+      if (f.isFile() && f.name.endsWith(".jsonl")) out.push(path.join(projectDir, f.name));
+    }
+  }
+  out.sort((a, b) => a.localeCompare(b));
+  return out;
+}
+
 async function listOpencodeMessageFiles(storageDir) {
   const out = [];
   const messageDir = path.join(storageDir, "message");
@@ -428,7 +441,16 @@ async function parseGeminiIncremental({
   return { filesProcessed, eventsAggregated, bucketsQueued, projectBucketsQueued };
 }
 
-async function parseKimiIncremental({
+async function parseKimiIncremental(opts) {
+  return parseJsonlFilesIncremental({ ...opts, defaultSourceId: "kimi", parseFile: parseKimiFile });
+}
+
+async function parsePiIncremental(opts) {
+  return parseJsonlFilesIncremental({ ...opts, defaultSourceId: "pi", parseFile: parsePiFile });
+}
+
+// Shared offset/inode cursor loop for append-only JSONL session logs (Kimi, Pi).
+async function parseJsonlFilesIncremental({
   sessionFiles,
   cursors,
   queuePath,
@@ -436,6 +458,8 @@ async function parseKimiIncremental({
   onProgress,
   source,
   publicRepoResolver,
+  defaultSourceId,
+  parseFile,
 }) {
   await ensureDir(path.dirname(queuePath));
   let filesProcessed = 0;
@@ -451,7 +475,7 @@ async function parseKimiIncremental({
   const projectMetaCache = projectEnabled ? new Map() : null;
   const publicRepoCache = projectEnabled ? new Map() : null;
   const touchedBuckets = new Set();
-  const defaultSource = normalizeSourceInput(source) || "kimi";
+  const defaultSource = normalizeSourceInput(source) || defaultSourceId;
 
   if (!cursors.files || typeof cursors.files !== "object") {
     cursors.files = {};
@@ -485,9 +509,10 @@ async function parseKimiIncremental({
     const projectRef = projectContext?.projectRef || null;
     const projectKey = projectContext?.projectKey || null;
 
-    const result = await parseKimiFile({
+    const result = await parseFile({
       filePath,
       startOffset,
+      prev,
       hourlyState,
       touchedBuckets,
       source: fileSource,
@@ -500,6 +525,7 @@ async function parseKimiIncremental({
     cursors.files[key] = {
       inode,
       offset: result.endOffset,
+      ...(result.forkedAt ? { forkedAt: result.forkedAt } : {}),
       updatedAt: new Date().toISOString(),
     };
 
@@ -944,6 +970,80 @@ async function parseKimiFile({
   rl.close();
   stream.close?.();
   return { endOffset, eventsAggregated };
+}
+
+// Pi (pi-coding-agent) session logs: <agentDir>/sessions/<cwd-slug>/<ts>_<uuid>.jsonl.
+// Usage sits on assistant `message` entries. Files are append-only, except that
+// /fork and branch-to-new-session copy the parent's entries verbatim into a new
+// file whose header has `parentSession`; entries timestamped before that header
+// are copies already counted from the parent, so they are skipped. Dedupe key
+// is therefore (file, byte offset) plus the fork cut-off, not an id set.
+async function parsePiFile({
+  filePath,
+  startOffset,
+  prev,
+  hourlyState,
+  touchedBuckets,
+  source,
+  projectState,
+  projectTouchedBuckets,
+  projectRef,
+  projectKey,
+}) {
+  const st = await fs.stat(filePath).catch(() => null);
+  if (!st || !st.isFile()) return { endOffset: startOffset, eventsAggregated: 0 };
+  let forkedAt = startOffset > 0 && prev ? prev.forkedAt || null : null;
+  if (startOffset >= st.size) return { endOffset: st.size, eventsAggregated: 0, forkedAt };
+
+  // ponytail: reads the unread tail into memory; stream it if session files reach hundreds of MB.
+  const fh = await fs.open(filePath, "r");
+  let buf;
+  try {
+    buf = Buffer.alloc(st.size - startOffset);
+    await fh.read(buf, 0, buf.length, startOffset);
+  } finally {
+    await fh.close();
+  }
+  // Only consume complete lines so a line pi is still writing is read next time.
+  const lastNewline = buf.lastIndexOf(0x0a);
+  if (lastNewline === -1) return { endOffset: startOffset, eventsAggregated: 0, forkedAt };
+  const endOffset = startOffset + lastNewline + 1;
+
+  let eventsAggregated = 0;
+  for (const line of buf.toString("utf8", 0, lastNewline).split("\n")) {
+    if (!line) continue;
+    let obj;
+    try {
+      obj = JSON.parse(line);
+    } catch (_e) {
+      continue;
+    }
+    if (obj?.type === "session") {
+      if (typeof obj.parentSession === "string" && obj.parentSession) forkedAt = obj.timestamp || null;
+      continue;
+    }
+    if (obj?.type !== "message" || obj.message?.role !== "assistant") continue;
+    const tsIso = typeof obj.timestamp === "string" ? obj.timestamp : null;
+    if (!tsIso) continue;
+    if (forkedAt && Date.parse(tsIso) < Date.parse(forkedAt)) continue;
+
+    const delta = normalizePiUsage(obj.message.usage);
+    if (!delta || isAllZeroUsage(delta)) continue;
+    const bucketStart = toUtcHalfHourStart(tsIso);
+    if (!bucketStart) continue;
+
+    const model = normalizeModelInput(obj.message.model) || DEFAULT_MODEL;
+    const bucket = getHourlyBucket(hourlyState, source, model, bucketStart);
+    addTotals(bucket.totals, delta);
+    touchedBuckets.add(bucketKey(source, model, bucketStart));
+    if (projectKey && projectState && projectTouchedBuckets) {
+      const projectBucket = getProjectBucket(projectState, projectKey, source, bucketStart, projectRef);
+      addTotals(projectBucket.totals, delta);
+      projectTouchedBuckets.add(projectBucketKey(projectKey, source, bucketStart));
+    }
+    eventsAggregated += 1;
+  }
+  return { endOffset, eventsAggregated, forkedAt };
 }
 
 async function parseGeminiFile({
@@ -2203,6 +2303,24 @@ function normalizeKimiUsage(usage) {
   };
 }
 
+// pi-ai Usage: `input` excludes cacheRead/cacheWrite; `reasoning` is a subset of
+// `output`. Cache writes fold into input_tokens (Claude convention) and
+// reasoning is split out of output so the four channels stay disjoint.
+function normalizePiUsage(usage) {
+  if (!usage || typeof usage !== "object") return null;
+  const input = toNonNegativeInt(usage.input) + toNonNegativeInt(usage.cacheWrite);
+  const cached = toNonNegativeInt(usage.cacheRead);
+  const outputAll = toNonNegativeInt(usage.output);
+  const reasoning = Math.min(toNonNegativeInt(usage.reasoning), outputAll);
+  return {
+    input_tokens: input,
+    cached_input_tokens: cached,
+    output_tokens: outputAll - reasoning,
+    reasoning_output_tokens: reasoning,
+    total_tokens: input + cached + outputAll,
+  };
+}
+
 function kimiTimestampToIso(value) {
   const n = Number(value);
   if (!Number.isFinite(n) || n <= 0) return null;
@@ -2458,11 +2576,13 @@ module.exports = {
   listClaudeProjectFiles,
   listGeminiSessionFiles,
   listKimiSessionFiles,
+  listPiSessionFiles,
   listOpencodeMessageFiles,
   parseRolloutIncremental,
   parseClaudeIncremental,
   parseGeminiIncremental,
   parseKimiIncremental,
+  parsePiIncremental,
   parseOpencodeIncremental,
   normalizeHourlyState,
   getHourlyBucket,
@@ -2478,5 +2598,6 @@ module.exports = {
   normalizeClaudeUsage,
   normalizeGeminiTokens,
   normalizeKimiUsage,
+  normalizePiUsage,
   normalizeOpencodeTokens,
 };
