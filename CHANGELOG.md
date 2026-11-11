@@ -4,10 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-11-12
+
 ### Added
 
-- **Pi coding agent support (`source=pi`).** `vibeusage sync` now reads Pi session logs from `~/.pi/agent/sessions/**/*.jsonl` (or `$PI_CODING_AGENT_DIR/sessions`) and queues usage from assistant messages and `type:"usage"` entries (cache-warm refreshes) into half-hour buckets, attributing it to the project in the session header's `cwd`. `~` in `PI_CODING_AGENT_DIR` is expanded the same way pi expands it. Channels: `input_tokens = input + cacheWrite`, `cached_input_tokens = cacheRead`, `output_tokens = output − reasoning`, `reasoning_output_tokens = reasoning`, total = sum of all four. Parsing resumes by byte offset, only consumes complete lines, and dedupes each entry by a stable key (`responseId`, else entry id + timestamp; the most recent 10k keys are kept in the cursor), so entries copied by `/fork` are counted once. No Pi extension is installed; Pi usage is picked up whenever sync runs from another client's hook or manually. `sync --rebuild pi` is supported. (#205)
-- **Pi compaction usage counted.** Pi `compaction` entries carry the summarization call's `usage` but no model; they are now counted under the session's most recent model (tracked across syncs in the file cursor).
+- **Pi coding agent support (`source=pi`).** `vibeusage sync` now reads Pi session logs from `~/.pi/agent/sessions/**/*.jsonl` (or `$PI_CODING_AGENT_DIR/sessions`) and queues usage from assistant messages and `type:"usage"` entries (cache-warm refreshes) into half-hour buckets, attributing it to the project in the session header's `cwd`. `~` in `PI_CODING_AGENT_DIR` is expanded the same way pi expands it. Channels: `input_tokens = input + cacheWrite`, `cached_input_tokens = cacheRead`, `output_tokens = output − reasoning`, `reasoning_output_tokens = reasoning`, total = sum of all four. Parsing resumes by byte offset, only consumes complete lines, and dedupes each entry by a stable key (`responseId`, else entry id + timestamp; the most recent 10k keys are kept in the cursor), so entries copied by `/fork` are counted once. No Pi extension is installed; Pi usage is picked up whenever sync runs from another client's hook or manually. `sync --rebuild pi` is supported. (#205, #206)
+- **Pi compaction usage counted.** Pi `compaction` entries carry the summarization call's `usage` but no model; they are now counted under the session's most recent model (tracked across syncs in the file cursor). (#207)
 
 ## [0.6.5] - 2026-11-06
 
