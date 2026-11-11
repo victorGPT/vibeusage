@@ -4,9 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.7.1] - 2026-11-12
+
 ### Fixed
 
-- **Local runtime crashed with `Cannot find module 'yaml'` after `npx vibeusage init`.** `init` copies only the package's own `node_modules` into `~/.vibeusage/tracker/app`, but `yaml` and `proper-lockfile` were not bundled, so under npx they were hoisted outside the package and never copied; every hook-triggered sync then crashed before uploading. A second `bundleDependencies` key in `package.json` also overrode the intended list. Both runtime deps are now bundled (single key), with a test asserting every runtime dependency is bundled.
+- **Local runtime crashed with `Cannot find module 'yaml'` after `npx vibeusage init`.** `init` copies only the package's own `node_modules` into `~/.vibeusage/tracker/app`, but `yaml` and `proper-lockfile` were not bundled, so under npx they were hoisted outside the package and never copied; every hook-triggered sync then crashed before uploading. A second `bundleDependencies` key in `package.json` also overrode the intended list. Both runtime deps are now bundled (single key), with a test asserting every runtime dependency is bundled. (#209)
 
 ## [0.7.0] - 2026-11-12
 
