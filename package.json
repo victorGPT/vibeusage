@@ -57,13 +57,12 @@
     "@sourcegraph/scip-typescript": "^0.3.6",
     "esbuild": "0.27.2"
   },
-  "bundledDependencies": [
-    "@insforge/sdk"
-  ],
   "engines": {
     "node": "20.x"
   },
   "bundleDependencies": [
-    "@insforge/sdk"
+    "@insforge/sdk",
+    "proper-lockfile",
+    "yaml"
   ]
 }
