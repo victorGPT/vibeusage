@@ -6,6 +6,7 @@ import { DailyTable } from "../DailyTable";
 import { DotHeatmap } from "../DotHeatmap";
 import { IdentityBar } from "../IdentityBar";
 import { MyRank } from "../MyRank";
+import { Projects } from "../Projects";
 import { RankRail } from "../RankRail";
 import { RankTable } from "../RankTable";
 import { Readout } from "../Readout";
@@ -283,5 +284,24 @@ describe("Trend export", () => {
       [null, "var(--color-primary)"],
       ["var(--color-primary)", "none"],
     ]);
+  });
+});
+
+describe("links", () => {
+  it("opens a project's repo in a new tab and says so", () => {
+    render(<Projects entries={[{ project_key: "acme/rocket", project_ref: "https://github.com/acme/rocket", total_tokens: 5 }]} limit={3} />);
+    const link = screen.getByRole("link", { name: "rocket (opens in a new tab)" });
+    expect(link.getAttribute("href")).toBe("https://github.com/acme/rocket");
+    expect(link.getAttribute("target")).toBe("_blank");
+    expect(link.getAttribute("rel")).toBe("noopener noreferrer");
+  });
+
+  it("keeps an internal profile link in the same tab", () => {
+    const rows = [{ rank: 1, display_name: "nullbyte", total_tokens: 9 }];
+    render(<RankList entries={rows} period="week" handle="me" profileHref={() => "/u/nullbyte"} />);
+    const link = screen.getByRole("link");
+    expect(link.getAttribute("href")).toBe("/u/nullbyte");
+    expect(link.hasAttribute("target")).toBe(false);
+    expect(link.textContent).not.toContain("new tab");
   });
 });
