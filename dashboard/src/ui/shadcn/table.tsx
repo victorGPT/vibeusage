@@ -5,11 +5,13 @@ import { cn } from "#src/lib/utils.ts";
 // SSOT: design/2049/source/Table.dc.html. Rows are 40px (12px padding around 15px Saira), the
 // header rule is the input color and body rules the border color. The wrapper scrolls sideways
 // so a wide table never makes the page scroll.
-function Table({ className, ...props }: ComponentProps<"table">) {
+function Table({ className, label, ...props }: ComponentProps<"table"> & { label: string }) {
   return (
     <div
       data-slot="table-container"
       tabIndex={0}
+      role="region"
+      aria-label={label}
       className="w-full overflow-x-auto outline-none focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring"
     >
       <table

@@ -65,7 +65,7 @@ export function DailyTable({ rows, pageSize = 10, dateKey = "day", paged = true 
           />
         </div>
       </div>
-      <Table className="min-w-160">
+      <Table label={copy("ui2049.daily_table.scroll_aria")} className="min-w-160">
         <TableHeader>
           <TableRow>
             <TableHead>{copy("daily.sort.date.label")}</TableHead>

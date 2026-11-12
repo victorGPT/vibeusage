@@ -261,7 +261,7 @@ describe("Badge, Card, Table", () => {
 describe("Table", () => {
   it("lets keyboard users reach the scroll container to scroll a wide table", async () => {
     render(
-      <Table>
+      <Table label="t">
         <TableBody>
           <TableRow>
             <TableCell>{1}</TableCell>
@@ -271,5 +271,19 @@ describe("Table", () => {
     );
     await userEvent.tab();
     expect(document.activeElement?.getAttribute("data-slot")).toBe("table-container");
+  });
+
+  it("names the focusable scroll container as a region for screen readers", async () => {
+    render(
+      <Table label="Daily usage">
+        <TableBody>
+          <TableRow>
+            <TableCell>{1}</TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>,
+    );
+    await userEvent.tab();
+    expect(document.activeElement).toBe(screen.getByRole("region", { name: "Daily usage" }));
   });
 });

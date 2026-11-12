@@ -89,7 +89,7 @@ export function RankTable(props: RankTableProps) {
           </div>
         ) : null}
       </div>
-      <Table className="min-w-170">
+      <Table label={copy("ui2049.rank_table.scroll_aria")} className="min-w-170">
         <TableHeader>
           <TableRow>
             <TableHead className="w-22">{copy("leaderboard.column.rank")}</TableHead>

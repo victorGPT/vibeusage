@@ -1,10 +1,12 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { isAccessTokenReady, resolveAuthAccessToken } from "../lib/auth-token";
+import { getAppVersion } from "../lib/app-version";
 import { copy } from "../lib/copy";
 import { clampInt } from "../lib/leaderboard-ui";
 import { isMockEnabled } from "../lib/mock-data";
 import { getLeaderboard } from "../lib/vibeusage-api";
+import { PageFooter } from "../ui/2049/base/PageFooter.tsx";
 import { PageHeader } from "../ui/2049/base/PageHeader.tsx";
 import { boardMeta } from "../ui/2049/blocks/format.ts";
 import { periodLabel } from "../ui/2049/blocks/shared.ts";
@@ -322,6 +324,10 @@ export function LeaderboardPage({
           />
         </div>
         {board}
+        <PageFooter
+          left={copy("ui2049.page_footer.leaderboard_time")}
+          right={copy("ui2049.page_footer.version", { version: getAppVersion(import.meta.env) })}
+        />
       </div>
     </main>
   );

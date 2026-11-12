@@ -607,3 +607,6 @@ ui2049.page_header.updated_h,ui,*,PageHeader,updated_h,"updated {{n}} h ago",,ac
 ui2049.page_header.updated_d,ui,*,PageHeader,updated_d,"updated {{n}} d ago",,active
 ui2049.top_nav.github_href,ui,*,TopNav,github_href,"https://github.com/victorGPT/vibeusage",,active
 ui2049.page_footer.version,ui,*,PageFooter,version,"v{{version}}",,active
+ui2049.daily_table.scroll_aria,ui,*,DailyTable,scroll_aria,"Daily usage rows",,active
+ui2049.rank_table.scroll_aria,ui,*,RankTable,scroll_aria,"Ranking rows",,active
+ui2049.page_footer.leaderboard_time,ui,*,PageFooter,leaderboard_time,"Boards in UTC",,active
