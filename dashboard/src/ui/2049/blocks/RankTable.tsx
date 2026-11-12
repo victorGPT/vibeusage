@@ -48,7 +48,10 @@ function Row({ entry, me, user, href, pinned = false }: RowProps) {
       <TableCell className={cn("font-sans font-medium", me ? "text-primary" : "text-hero", cell)}>
         <span className="-my-1 flex max-w-80 items-center gap-2">
           {href ? (
-            <a href={href} className="truncate underline-offset-4 hover:underline">
+            <a
+              href={href}
+              className="truncate underline-offset-4 outline-none hover:underline focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-ring"
+            >
               {user}
             </a>
           ) : (
