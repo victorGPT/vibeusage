@@ -9,6 +9,9 @@ import {
   paginationRange,
 } from "#src/ui/shadcn/pagination.tsx";
 
+// A disabled Prev or Next keeps keyboard focus; at 45% opacity its ring would fall under 3:1.
+const FOCUSED_DISABLED = "data-disabled:focus-visible:opacity-100";
+
 type PagerProps = { summary: string; page: number; pageCount: number; onPageChange: (page: number) => void };
 
 // SSOT: design/2049/source/Pagination.dc.html. The wrapper takes the margin, so Pagination keeps
@@ -21,7 +24,7 @@ export function Pager({ summary, page, pageCount, onPageChange }: PagerProps) {
         <Pagination aria-label={summary}>
           <PaginationContent className="w-auto flex-wrap justify-end">
             <PaginationItem>
-              <PaginationLink disabled={page <= 1} onClick={() => onPageChange(page - 1)}>
+              <PaginationLink disabled={page <= 1} focusableWhenDisabled className={FOCUSED_DISABLED} onClick={() => onPageChange(page - 1)}>
                 {copy("details.pagination.prev")}
               </PaginationLink>
             </PaginationItem>
@@ -37,7 +40,7 @@ export function Pager({ summary, page, pageCount, onPageChange }: PagerProps) {
               </PaginationItem>
             ))}
             <PaginationItem>
-              <PaginationLink disabled={page >= pageCount} onClick={() => onPageChange(page + 1)}>
+              <PaginationLink disabled={page >= pageCount} focusableWhenDisabled className={FOCUSED_DISABLED} onClick={() => onPageChange(page + 1)}>
                 {copy("details.pagination.next")}
               </PaginationLink>
             </PaginationItem>

@@ -10,29 +10,33 @@ import { Stamp } from "#src/ui/2049/base/Stamp.tsx";
 import { Stat } from "#src/ui/2049/base/Stat.tsx";
 
 import { abbr, num, range } from "./format";
-import { ahead, neighbours } from "./rank";
+import { ahead, counted, neighbours } from "./rank";
 import { displayName, periodLabel, rankText, SCREEN_FILL, you } from "./shared";
-import type { LeaderboardEntry, LeaderboardMe, LeaderboardPeriod } from "./types";
+import type { LeaderboardEntry, LeaderboardMe, LeaderboardMetric, LeaderboardPeriod } from "./types";
 
 type MyRankProps = {
   me: LeaderboardMe | null;
   entries: LeaderboardEntry[];
   totalEntries: number;
   period: LeaderboardPeriod;
+  metric?: LeaderboardMetric;
   from: string;
   to: string;
   handle: string;
 };
 
-function Neighbour({ entry }: { entry: LeaderboardEntry }) {
-  return <RankRow rank={rankText(entry.rank)} user={displayName(entry)} value={abbr(entry.total_tokens)} />;
+function Neighbour({ entry, metric }: { entry: LeaderboardEntry; metric: LeaderboardMetric }) {
+  return <RankRow rank={rankText(entry.rank)} user={displayName(entry)} value={abbr(counted(entry, metric))} />;
 }
 
 // SSOT: design/2049/source/MyRank.dc.html. Up to three neighbours on each side fill the screen
 // to the height of the RankList beside it.
-export function MyRank({ me, entries, totalEntries, period, from, to, handle }: MyRankProps) {
+export function MyRank({ me, entries, totalEntries, period, metric = "all", from, to, handle }: MyRankProps) {
   const label = periodLabel(period);
-  const kicker = copy("ui2049.my_rank.kicker", { period: label });
+  const kicker =
+    metric === "all"
+      ? copy("ui2049.my_rank.kicker", { period: label })
+      : copy("ui2049.my_rank.kicker_metric", { period: label, metric: copy(`leaderboard.metric.${metric}`) });
   const next = ahead(entries, me);
   const { above, below } = neighbours(entries, me?.rank ?? null, 3);
   return (
@@ -50,25 +54,25 @@ export function MyRank({ me, entries, totalEntries, period, from, to, handle }: 
               <Label text={copy("ui2049.my_rank.of_ranked", { count: totalEntries })} />
             </div>
             <div className="ml-auto grid grid-cols-2 gap-x-4">
-              <Stat label={copy("ui2049.my_rank.tokens")} value={abbr(me?.total_tokens)} />
+              <Stat label={copy("ui2049.my_rank.tokens")} value={abbr(me && counted(me, metric))} />
               {next && me ? (
                 <Stat
                   label={copy("ui2049.my_rank.to_pass", { rank: next.rank })}
-                  value={`+${abbr(num(next.total_tokens) - num(me.total_tokens))}`}
+                  value={`+${abbr(num(counted(next, metric)) - num(counted(me, metric)))}`}
                   divider
                 />
               ) : null}
             </div>
           </div>
           <div className="flex flex-col border-t border-border">
-            {above.map((entry) => (
-              <Neighbour key={entry.rank} entry={entry} />
+            {above.map((entry, i) => (
+              <Neighbour key={entry.user_id ?? `${entry.rank}-${i}`} entry={entry} metric={metric} />
             ))}
             {me?.rank == null ? null : (
-              <RankRow rank={rankText(me.rank)} user={you(handle)} value={abbr(me.total_tokens)} me />
+              <RankRow rank={rankText(me.rank)} user={you(handle)} value={abbr(counted(me, metric))} me />
             )}
-            {below.map((entry) => (
-              <Neighbour key={entry.rank} entry={entry} />
+            {below.map((entry, i) => (
+              <Neighbour key={entry.user_id ?? `${entry.rank}-${i}`} entry={entry} metric={metric} />
             ))}
           </div>
           <Stamp handle={handle} range={`${label} · ${range(from, to)}`} />

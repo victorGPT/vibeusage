@@ -155,7 +155,7 @@ function RankTableDemo() {
 }
 
 export function Blocks() {
-  const nav = { stars: 57, dashboardHref: HREF, leaderboardHref: HREF, githubHref: HREF };
+  const nav = { dashboardHref: HREF, leaderboardHref: HREF, githubHref: HREF };
   return (
     <div className="flex flex-col gap-16" data-gallery="blocks">
       <Group title="Blocks · Dashboard">

@@ -19,6 +19,7 @@ type StateScreenProps = {
   compact?: boolean;
   linkCode?: string;
   visitor?: { name: string; totals: UsageTotals };
+  kicker?: string;
   onSignIn?: () => void;
   onRetry?: () => void;
 };
@@ -38,8 +39,9 @@ function header(variant: StateVariant, name: string): { kicker: string; tag: str
 
 // SSOT: design/2049/source/StateScreen.dc.html. Stands in for the main screen, so it keeps the
 // Readout's height unless `compact`.
-export function StateScreen({ variant, compact = false, linkCode, visitor, onSignIn, onRetry }: StateScreenProps) {
-  const { kicker, tag, tone } = header(variant, visitor?.name ?? "");
+export function StateScreen({ variant, compact = false, linkCode, visitor, onSignIn, onRetry, kicker: ownKicker }: StateScreenProps) {
+  const { tag, tone, ...named } = header(variant, visitor?.name ?? "");
+  const kicker = ownKicker ?? named.kicker;
   return (
     <section aria-label={kicker} aria-busy={variant === "loading" ? true : undefined}>
       <ScreenFx className={cn(compact ? "min-h-66" : "min-h-96", SCREEN_FILL)}>

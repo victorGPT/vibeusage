@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { DailyTable } from "../DailyTable";
 import { DotHeatmap } from "../DotHeatmap";
@@ -187,5 +187,79 @@ describe("DotHeatmap", () => {
     expect(screen.getByText("2026-11-08 · 1K tokens")).toBeTruthy();
     fireEvent.blur(screen.getByRole("img"));
     expect(screen.getByText("Dot size = tokens that day")).toBeTruthy();
+  });
+});
+
+describe("MyRank metric", () => {
+  const me = { rank: 2, total_tokens: 50 };
+  const entries = [1, 2, 3].map((rank) => ({ rank, display_name: `u${rank}`, total_tokens: 100 - rank }));
+
+  it("names the metric the ranks were sorted by", () => {
+    const { rerender } = render(
+      <MyRank me={me} entries={entries} totalEntries={3} period="week" metric="gpt" from="2026-11-06" to="2026-11-12" handle="h" />,
+    );
+    expect(screen.getByRole("region", { name: "My rank · Week · GPT" })).toBeTruthy();
+    rerender(<MyRank me={me} entries={entries} totalEntries={3} period="week" metric="all" from="2026-11-06" to="2026-11-12" handle="h" />);
+    expect(screen.getByRole("region", { name: "My rank · Week · all models" })).toBeTruthy();
+  });
+});
+
+describe("MyRank under a channel metric", () => {
+  it("counts tokens and the pass gap in the ranked channel", () => {
+    const me = { rank: 2, total_tokens: 1000, gpt_tokens: 100 };
+    const entries = [
+      { rank: 1, display_name: "a", total_tokens: 200, gpt_tokens: 200 },
+      { rank: 3, display_name: "c", total_tokens: 5000, gpt_tokens: 50 },
+    ];
+    render(<MyRank me={me} entries={entries} totalEntries={3} period="week" metric="gpt" from="2026-11-06" to="2026-11-12" handle="h" />);
+    const region = screen.getByRole("region", { name: "My rank · Week · GPT" });
+    expect(within(region).getByText("+100")).toBeTruthy();
+    expect(within(region).getAllByText("100").length).toBeGreaterThan(0);
+    expect(within(region).getByText("50")).toBeTruthy();
+    expect(within(region).queryByText("5K")).toBeNull();
+  });
+});
+
+describe("tied ranks", () => {
+  const tied = [
+    { rank: 1, user_id: "a", display_name: "a", total_tokens: 9 },
+    { rank: 1, user_id: "b", display_name: "b", total_tokens: 9 },
+    { rank: 2, user_id: "c", display_name: "c", total_tokens: 5 },
+    { rank: 3, user_id: null, display_name: "Anonymous", total_tokens: 2 },
+    { rank: 3, user_id: null, display_name: "Anonymous", total_tokens: 2 },
+  ];
+
+  it("keeps every tied row in RankList and RankTable", () => {
+    const error = vi.spyOn(console, "error").mockImplementation(() => {});
+    render(
+      <>
+        <RankList entries={tied} period="week" handle="h" />
+        <RankTable entries={tied} me={null} handle="h" page={1} totalPages={1} totalEntries={5} period="week" onPageChange={() => {}} />
+      </>,
+    );
+    expect(screen.getAllByText("a")).toHaveLength(2);
+    expect(screen.getAllByText("b")).toHaveLength(2);
+    expect(screen.getAllByText("Anonymous")).toHaveLength(4);
+    expect(error.mock.calls.some(([msg]) => String(msg).includes("same key"))).toBe(false);
+    error.mockRestore();
+  });
+});
+
+describe("RankList under a channel metric", () => {
+  it("shows the ranked channel's tokens", () => {
+    const entries = [{ rank: 1, display_name: "a", total_tokens: 5000, gpt_tokens: 300 }];
+    render(<RankList entries={entries} period="week" metric="gpt" handle="h" />);
+    expect(screen.getByText("300")).toBeTruthy();
+    expect(screen.queryByText("5K")).toBeNull();
+  });
+});
+
+describe("Pager at the last page", () => {
+  it("keeps a disabled Next focusable so keyboard focus stays on it", () => {
+    render(<RankTable entries={[]} me={null} handle="h" page={3} totalPages={3} totalEntries={0} period="week" onPageChange={() => {}} />);
+    const next = screen.getByRole("button", { name: "Next" });
+    next.focus();
+    expect(document.activeElement).toBe(next);
+    expect(next.getAttribute("aria-disabled")).toBe("true");
   });
 });

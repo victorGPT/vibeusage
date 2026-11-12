@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { abbr, cost, daysBetween, full, pct, range } from "../format";
+import { abbr, cost, daysBetween, full, pct, range, updated } from "../format";
 import { groupByCli, groupByModel } from "../grouping";
 import { neighbours, pinnedMe } from "../rank";
 import { cliNames } from "../shared";
@@ -31,6 +31,17 @@ describe("format", () => {
     expect(cost(undefined)).toBe("$0.00");
     expect(pct(22.0004)).toBe("22.0%");
     expect(pct(68.56)).toBe("68.6%");
+  });
+
+  it("says how long ago the board was refreshed", () => {
+    const now = Date.parse("2026-11-13T12:00:00Z");
+    expect(updated("2026-11-13T11:59:40Z", now)).toBe("updated just now");
+    expect(updated("2026-11-13T12:00:05Z", now)).toBe("updated just now");
+    expect(updated("2026-11-13T11:56:00Z", now)).toBe("updated 4 min ago");
+    expect(updated("2026-11-13T09:00:00Z", now)).toBe("updated 3 h ago");
+    expect(updated("2026-11-11T11:00:00Z", now)).toBe("updated 2 d ago");
+    expect(updated("not a date", now)).toBeNull();
+    expect(updated(null, now)).toBeNull();
   });
 
   it("counts inclusive days and joins a range", () => {
@@ -70,8 +81,11 @@ describe("pinnedMe", () => {
   it("pins me when my rank is not on the page", () => {
     expect(pinnedMe([1, 2].map(entry), me)).toBe(me);
   });
-  it("does not pin when my rank is on the page, I am unranked, or signed out", () => {
-    expect(pinnedMe([200, 201].map(entry), me)).toBeNull();
+  it("pins me when someone else tied at my rank is on the page", () => {
+    expect(pinnedMe([200, 201].map(entry), me)).toBe(me);
+  });
+  it("does not pin when my row is on the page, I am unranked, or signed out", () => {
+    expect(pinnedMe([{ ...entry(201), is_me: true }], me)).toBeNull();
     expect(pinnedMe([1].map(entry), { rank: null, total_tokens: 0 })).toBeNull();
     expect(pinnedMe([1].map(entry), null)).toBeNull();
   });

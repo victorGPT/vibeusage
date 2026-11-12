@@ -1,11 +1,14 @@
+import { useEffect, useState } from "react";
+
 import { copy } from "#src/lib/copy.ts";
+import { fetchGithubRepoMeta } from "#src/lib/github-repo-meta.ts";
+import { isScreenshotModeEnabled } from "#src/lib/screenshot-mode.js";
 import { cn } from "#src/lib/utils.ts";
 import { Button } from "#src/ui/shadcn/button.tsx";
 
 type TopNavProps = {
   active: "dashboard" | "leaderboard" | null;
   signedIn: boolean;
-  stars?: number | null;
   dashboardHref: string;
   leaderboardHref: string;
   githubHref: string;
@@ -17,9 +20,28 @@ type TopNavProps = {
 const LINK =
   "block border-b pb-2 font-sans text-label/none font-semibold uppercase tracking-label no-underline outline-none focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-4 focus-visible:outline-ring";
 
+const REPO = "victorGPT/vibeusage";
+
+// Screenshot mode skips the fetch so captures stay stable; a failed fetch leaves plain "GitHub".
+function useGithubStars() {
+  const [stars, setStars] = useState<number | null>(null);
+  useEffect(() => {
+    if (isScreenshotModeEnabled(window.location.search)) return undefined;
+    let active = true;
+    fetchGithubRepoMeta(REPO)
+      .then((meta) => active && setStars(meta.stars))
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, []);
+  return stars;
+}
+
 // SSOT: design/2049/source/TopNav.dc.html.
 export function TopNav(props: TopNavProps) {
-  const { active, signedIn, stars, dashboardHref, leaderboardHref, githubHref, onSignIn, onSignOut } = props;
+  const stars = useGithubStars();
+  const { active, signedIn, dashboardHref, leaderboardHref, githubHref, onSignIn, onSignOut } = props;
   const links = [
     { key: "dashboard", href: dashboardHref, label: copy("ui2049.top_nav.dashboard") },
     { key: "leaderboard", href: leaderboardHref, label: copy("leaderboard.title") },

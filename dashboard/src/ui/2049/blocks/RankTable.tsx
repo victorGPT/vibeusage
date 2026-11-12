@@ -101,9 +101,9 @@ export function RankTable(props: RankTableProps) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {entries.map((entry) => (
+          {entries.map((entry, i) => (
             <Row
-              key={entry.rank}
+              key={entry.user_id ?? `${entry.rank}-${i}`}
               entry={entry}
               me={Boolean(entry.is_me)}
               user={entry.is_me ? you(handle) : displayName(entry)}
