@@ -65,6 +65,14 @@ describe("CommandBox", () => {
     rerender(<CommandBox command="npx --yes vibeusage sync" />);
     expect(screen.getByRole("button", { name: "Copy" })).toBeTruthy();
   });
+
+  it("takes its own copy label and still copies the command", async () => {
+    const user = userEvent.setup();
+    render(<CommandBox command="https://example.test/guide.md" prefix="↳" copyLabel="Copy link" />);
+    await user.click(screen.getByRole("button", { name: "Copy link" }));
+    expect(await navigator.clipboard.readText()).toBe("https://example.test/guide.md");
+    expect(await screen.findByRole("button", { name: "Copied" })).toBeTruthy();
+  });
 });
 
 describe("RankRow", () => {

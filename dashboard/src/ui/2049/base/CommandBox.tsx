@@ -4,7 +4,8 @@ import { copy } from "#src/lib/copy.ts";
 import { Button } from "#src/ui/shadcn/button.tsx";
 
 // SSOT: design/2049/source/CommandBox.dc.html.
-export function CommandBox({ command, prefix = "$" }: { command: string; prefix?: string }) {
+export function CommandBox(props: { command: string; prefix?: string; copyLabel?: string }) {
+  const { command, prefix = "$", copyLabel = copy("ui2049.command_box.copy") } = props;
   // Remember which command was copied, so a new command shows Copy again.
   const [copiedCommand, setCopiedCommand] = useState<string | null>(null);
   const copied = copiedCommand === command;
@@ -23,7 +24,7 @@ export function CommandBox({ command, prefix = "$" }: { command: string; prefix?
       </code>
       <div className="flex items-center border-l border-input px-1">
         <Button variant="ghost" onClick={onCopy}>
-          {copied ? copy("ui2049.command_box.copied") : copy("ui2049.command_box.copy")}
+          {copied ? copy("ui2049.command_box.copied") : copyLabel}
         </Button>
       </div>
       {/* Stays mounted so screen readers hear the change, not a new region. */}

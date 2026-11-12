@@ -29,7 +29,7 @@ export function LandingHero({ signInHref }: { signInHref: string }) {
         <CommandBox command={copy("landing.install.command")} />
         <div className="flex flex-col gap-2">
           <Label text={copy("ui2049.landing_hero.agent")} />
-          <CommandBox command={copy("landing.ai_agent.command")} prefix="↳" />
+          <CommandBox command={copy("landing.ai_agent.command")} prefix="↳" copyLabel={copy("landing.ai_agent.copy_label")} />
         </div>
       </div>
       <div>

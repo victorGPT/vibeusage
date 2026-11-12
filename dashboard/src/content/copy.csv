@@ -40,7 +40,7 @@ landing.install.action.copied,landing,LandingPage,LandingPage,install_copied,"CO
 landing.ai_agent.title,landing,LandingPage,LandingPage,ai_agent_title,"LET AI INSTALL FOR YOU",,active
 landing.ai_agent.description,landing,LandingPage,LandingPage,ai_agent_description,"Copy this guide and paste to ChatGPT, Claude, or any AI assistant. It will install VibeUsage automatically.",,active
 landing.ai_agent.command,landing,LandingPage,LandingPage,ai_agent_command,"https://github.com/victorGPT/vibeusage/blob/main/docs/AI_AGENT_INSTALL.md",,active
-landing.ai_agent.copy_label,landing,LandingPage,LandingPage,ai_agent_copy_label,"Copy Guide Link",,active
+landing.ai_agent.copy_label,landing,LandingPage,LandingPage,ai_agent_copy_label,"Copy link",,active
 landing.ai_agent.helper,landing,LandingPage,LandingPage,ai_agent_helper,"Or click to open the guide and copy manually.",,active
 landing.ai_agent.guide_url,landing,LandingPage,LandingPage,ai_agent_guide_url,"https://github.com/victorGPT/vibeusage/blob/main/docs/AI_AGENT_INSTALL.md",,active
 landing.meta.title,landing,LandingPage,Meta,title,"VibeUsage — Token Usage Tracker for AI Agent CLIs",,active
