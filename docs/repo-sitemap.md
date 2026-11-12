@@ -33,8 +33,8 @@ This document is the single source of truth for repository navigation. Use it to
   - Node test suite for CLI, edge functions, scripts, and regression coverage.
 - `docs/`
   - Runbooks, plans, PR notes, retrospective records, and navigation docs.
-- `openspec/`
-  - Change proposals, tasks, designs, and stable requirements.
+- `db/migrations/`
+  - Historical database migration SQL, one folder per change.
 
 ## Core Runtime Areas
 
@@ -174,16 +174,6 @@ This document is the single source of truth for repository navigation. Use it to
   - `docs/coordination/tasks/`
 - Architecture/navigation source of truth:
   - `docs/repo-sitemap.md`
-
-## OpenSpec Map
-
-- Project conventions:
-  - `openspec/project.md`
-  - `openspec/AGENTS.md`
-- Active changes:
-  - `openspec/changes/`
-- Stable requirements:
-  - `openspec/specs/vibeusage-tracker/spec.md`
 
 ## Update Triggers
 

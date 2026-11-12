@@ -335,7 +335,6 @@ npm run smoke
 
 - 阅读 [`AGENTS.md`](AGENTS.md)
 - 阅读 [`docs/repo-sitemap.md`](docs/repo-sitemap.md)
-- 对重要产品 / 架构变更走 OpenSpec 流程
 - 所有用户可见文案统一维护在 `dashboard/src/content/copy.csv`
 
 ## Roadmap

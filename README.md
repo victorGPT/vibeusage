@@ -347,7 +347,6 @@ Before opening a larger change:
 
 - read [`AGENTS.md`](AGENTS.md)
 - read [`docs/repo-sitemap.md`](docs/repo-sitemap.md)
-- use the OpenSpec workflow for significant product or architecture changes
 - keep user-facing copy in `dashboard/src/content/copy.csv`
 
 ## Roadmap
