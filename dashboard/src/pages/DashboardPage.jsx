@@ -35,6 +35,8 @@ import {
   getPublicViewProfile,
   requestInstallLinkCode,
 } from "../lib/vibeusage-api";
+import { Heading } from "../ui/2049/base/Heading";
+import { Label } from "../ui/2049/base/Label";
 import { PageFooter } from "../ui/2049/base/PageFooter";
 import { DailyTable } from "../ui/2049/blocks/DailyTable";
 import { DotHeatmap } from "../ui/2049/blocks/DotHeatmap";
@@ -1008,10 +1010,17 @@ export function DashboardPage({
     <div className="min-h-screen bg-background px-8 pb-12 font-sans text-foreground">
       <div className="mx-auto flex max-w-304 flex-col gap-4">
         {screenshotMode ? (
-          <div data-screenshot-exclude="true" className="flex min-h-20 items-center justify-end">
-            <Button onClick={handleShareToX} disabled={isCapturing}>
-              {copy("dashboard.screenshot.twitter_button")}
-            </Button>
+          <div className="flex min-h-20 flex-wrap items-center justify-between gap-4 pt-8">
+            <div>
+              <Heading text={copy("dashboard.screenshot.title_line1")} size="m" level={1} />
+              <Heading text={copy("dashboard.screenshot.title_line2")} size="xl" level={1} />
+            </div>
+            <div data-screenshot-exclude="true" className="flex flex-wrap items-center gap-3">
+              <Label text={copy("dashboard.screenshot.twitter_hint")} />
+              <Button onClick={handleShareToX} disabled={isCapturing}>
+                {copy("dashboard.screenshot.twitter_button")}
+              </Button>
+            </div>
           </div>
         ) : (
           <TopNav

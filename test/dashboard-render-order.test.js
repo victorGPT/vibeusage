@@ -99,3 +99,16 @@ test("mainScreen picks the first matching state in priority order", () => {
 test("screenshot mode gives the Readout no period handler, so it shows no tabs", () => {
   assert.match(readPage(), /onPeriodChange=\{screenshotMode \? undefined : transitionSelectedPeriod\}/);
 });
+
+test("screenshot mode titles the exported image and keeps the share hint out of it", () => {
+  const src = readPage();
+  const start = src.indexOf("{screenshotMode ? (");
+  const block = src.slice(start, src.indexOf("<TopNav", start));
+  const exclude = block.indexOf('data-screenshot-exclude="true"');
+  const line1 = block.search(/<Heading text=\{copy\("dashboard\.screenshot\.title_line1"\)\}/);
+  const line2 = block.search(/<Heading text=\{copy\("dashboard\.screenshot\.title_line2"\)\}/);
+  const hint = block.search(/<Label text=\{copy\("dashboard\.screenshot\.twitter_hint"\)\}/);
+  assert.ok(line1 !== -1 && line2 > line1, "expected the two title lines as Headings");
+  assert.ok(exclude > line2, "expected the title outside the excluded share controls");
+  assert.ok(hint > exclude, "expected the hint inside the excluded share controls");
+});
