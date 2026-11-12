@@ -40,7 +40,7 @@ landing.install.action.copied,landing,LandingPage,LandingPage,install_copied,"CO
 landing.ai_agent.title,landing,LandingPage,LandingPage,ai_agent_title,"LET AI INSTALL FOR YOU",,active
 landing.ai_agent.description,landing,LandingPage,LandingPage,ai_agent_description,"Copy this guide and paste to ChatGPT, Claude, or any AI assistant. It will install VibeUsage automatically.",,active
 landing.ai_agent.command,landing,LandingPage,LandingPage,ai_agent_command,"https://github.com/victorGPT/vibeusage/blob/main/docs/AI_AGENT_INSTALL.md",,active
-landing.ai_agent.copy_label,landing,LandingPage,LandingPage,ai_agent_copy_label,"Copy Guide Link",,active
+landing.ai_agent.copy_label,landing,LandingPage,LandingPage,ai_agent_copy_label,"Copy link",,active
 landing.ai_agent.helper,landing,LandingPage,LandingPage,ai_agent_helper,"Or click to open the guide and copy manually.",,active
 landing.ai_agent.guide_url,landing,LandingPage,LandingPage,ai_agent_guide_url,"https://github.com/victorGPT/vibeusage/blob/main/docs/AI_AGENT_INSTALL.md",,active
 landing.meta.title,landing,LandingPage,Meta,title,"VibeUsage — Token Usage Tracker for AI Agent CLIs",,active
@@ -595,3 +595,8 @@ ui2049.features.privacy_body,ui,*,Features,privacy_body,"Only token totals in ha
 ui2049.features.compete_kicker,ui,*,Features,compete_kicker,"Compete",,active
 ui2049.features.compete_title,ui,*,Features,compete_title,"One board for every CLI",,active
 ui2049.features.compete_body,ui,*,Features,compete_body,"Weekly, monthly and all-time ranks across Codex, Claude Code, Gemini and the rest.",,active
+ui2049.landing.cta_title,ui,LandingPage,CtaBand,cta_title,"See where you rank this week.",,active
+ui2049.landing.cta_meta,ui,LandingPage,CtaBand,cta_meta,"v{{version}} · open source",,active
+ui2049.landing.sample_handle,ui,LandingPage,Readout,sample_handle,"your_handle",,active
+ui2049.top_nav.new_tab,ui,*,TopNav,new_tab,"(opens in a new tab)",,active
+ui2049.landing.sample_names,ui,LandingPage,Readout,sample_names,"nullbyte,kernel_panic,sudo_rm",,active

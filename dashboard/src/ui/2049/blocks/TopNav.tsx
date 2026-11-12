@@ -51,8 +51,14 @@ export function TopNav(props: TopNavProps) {
         </ul>
       </nav>
       <div className="ml-auto flex gap-2">
-        <Button variant="outline" className="max-sm:hidden" nativeButton={false} render={<a href={githubHref} />}>
+        <Button
+          variant="outline"
+          className="max-sm:hidden"
+          nativeButton={false}
+          render={<a href={githubHref} target="_blank" rel="noopener noreferrer" />}
+        >
           {stars == null ? copy("ui2049.top_nav.github") : copy("ui2049.top_nav.github_stars", { stars })}
+          <span className="sr-only">{` ${copy("ui2049.top_nav.new_tab")}`}</span>
         </Button>
         {signedIn ? (
           <Button variant="outline" onClick={onSignOut}>

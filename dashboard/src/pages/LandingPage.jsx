@@ -1,118 +1,123 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { copy } from "../lib/copy";
 import { getAppVersion } from "../lib/app-version";
-import { safeWriteClipboard } from "../lib/safe-browser";
+import { formatDateUTC } from "../lib/date-range";
+import { fetchGithubRepoMeta } from "../lib/github-repo-meta";
 import { isScreenshotModeEnabled } from "../lib/screenshot-mode";
-import { LandingView } from "../ui/matrix-a/views/LandingView.jsx";
-import { shouldDeferMount } from "./should-defer-mount.js";
+import { CtaBand } from "../ui/2049/base/CtaBand";
+import { Heading } from "../ui/2049/base/Heading";
+import { Label } from "../ui/2049/base/Label";
+import { Text } from "../ui/2049/base/Text";
+import { Features } from "../ui/2049/blocks/Features";
+import { LandingHero } from "../ui/2049/blocks/LandingHero";
+import { Readout } from "../ui/2049/blocks/Readout";
+import { TopNav } from "../ui/2049/blocks/TopNav";
 
-function usePrefersReducedMotion() {
-  return useMemo(() => {
-    if (typeof window === "undefined" || !window.matchMedia) return false;
-    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  }, []);
-}
+const REPO = "victorGPT/vibeusage";
+const COL_6 = "min-w-[min(100%,420px)] flex-[1_1_calc((100%-176px)*6/12+80px)]";
 
-function useDeferredMount(delayMs = 0, shouldDefer = true) {
-  const [mounted, setMounted] = useState(() => !shouldDefer);
+// The landing board's sample account, frozen so the hero never depends on a signed-in fetch.
+const SAMPLE_TOTALS = { total_tokens: 195_893_152, total_cost_usd: "60.28" };
+const SAMPLE_TOKENS = [589_300_000, 489_700_000, 407_500_000];
 
+function useGithubStars(enabled) {
+  const [stars, setStars] = useState(null);
   useEffect(() => {
-    if (!shouldDefer) {
-      setMounted(true);
-      return undefined;
-    }
-    let timer = null;
-    let idleId = null;
-    const run = () => setMounted(true);
-
-    if (typeof window !== "undefined" && "requestIdleCallback" in window) {
-      idleId = window.requestIdleCallback(run, { timeout: delayMs || 200 });
-      return () => {
-        if (typeof window.cancelIdleCallback === "function" && idleId != null) {
-          window.cancelIdleCallback(idleId);
-        }
-      };
-    }
-
-    timer = window.setTimeout(run, delayMs);
+    if (!enabled) return undefined;
+    let active = true;
+    fetchGithubRepoMeta(REPO)
+      .then((meta) => active && setStars(meta?.stars ?? null))
+      .catch(() => {});
     return () => {
-      if (timer != null) window.clearTimeout(timer);
+      active = false;
     };
-  }, [delayMs, shouldDefer]);
-
-  return mounted;
+  }, [enabled]);
+  return stars;
 }
 
-export function LandingPage({ signInUrl, signUpUrl }) {
+export function LandingPage({ signUpUrl }) {
   const appVersion = useMemo(() => getAppVersion(import.meta.env), []);
-  const specialHandle = copy("landing.handle.special");
-  const defaultHandle = copy("landing.handle.default");
-  const loginLabel = copy("landing.nav.login");
-  const signupLabel = copy("landing.nav.signup");
-  const [handle, setHandle] = useState(defaultHandle);
-  const reduceMotion = usePrefersReducedMotion();
-  const screenshotMode = useMemo(() => {
-    if (typeof window === "undefined") return false;
-    return isScreenshotModeEnabled(window.location.search);
+  const screenshotMode = useMemo(
+    () =>
+      typeof window !== "undefined" &&
+      isScreenshotModeEnabled(window.location.search),
+    [],
+  );
+  const stars = useGithubStars(!screenshotMode);
+  const sampleRange = useMemo(() => {
+    const today = Date.now();
+    return {
+      from: formatDateUTC(new Date(today - 6 * 86_400_000)),
+      to: formatDateUTC(new Date(today)),
+    };
   }, []);
-  const deferMount = shouldDeferMount({
-    prefersReducedMotion: reduceMotion,
-    screenshotMode,
-  });
-  const effectsReady = useDeferredMount(250, deferMount);
-  const installEntryKey = "vibeusage.dashboard.from_landing.v1";
+
+  const sampleBoard = useMemo(() => {
+    const names = String(copy("ui2049.landing.sample_names")).split(",");
+    return SAMPLE_TOKENS.map((total, i) => ({
+      rank: i + 1,
+      display_name: names[i] ?? null,
+      total_tokens: total,
+    }));
+  }, []);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
     try {
-      window.sessionStorage.setItem(installEntryKey, "1");
+      window.sessionStorage.setItem("vibeusage.dashboard.from_landing.v1", "1");
     } catch (_e) {
-      // ignore write errors (private mode/quota)
+      // private mode or quota: the flag is best-effort
     }
-  }, [installEntryKey]);
-
-  const handlePlaceholder = useMemo(
-    () => copy("landing.handle.placeholder", { handle: specialHandle }),
-    [specialHandle],
-  );
-
-  const rankLabel = useMemo(() => {
-    const rank =
-      handle === specialHandle ? copy("landing.rank.singularity") : copy("landing.rank.unranked");
-    return copy("landing.rank.expectation", { rank });
-  }, [handle, specialHandle]);
-
-  const installCommand = copy("landing.install.command");
-  const [installCopied, setInstallCopied] = useState(false);
-
-  const handleChange = (event) => {
-    setHandle(event.target.value.toUpperCase());
-  };
-
-  const handleCopyInstall = async () => {
-    const didCopy = await safeWriteClipboard(installCommand);
-    if (!didCopy) return;
-    setInstallCopied(true);
-    window.setTimeout(() => setInstallCopied(false), 2000);
-  };
+  }, []);
 
   return (
-    <LandingView
-      copy={copy}
-      appVersion={appVersion}
-      effectsReady={effectsReady}
-      signInUrl={signInUrl}
-      signUpUrl={signUpUrl}
-      loginLabel={loginLabel}
-      signupLabel={signupLabel}
-      handle={handle}
-      onHandleChange={handleChange}
-      specialHandle={specialHandle}
-      handlePlaceholder={handlePlaceholder}
-      rankLabel={rankLabel}
-      installCommand={installCommand}
-      installCopied={installCopied}
-      onCopyInstallCommand={handleCopyInstall}
-    />
+    <main className="min-h-screen bg-background px-4 pb-12 font-sans text-copy-m font-medium text-foreground md:px-8">
+      <div className="mx-auto flex max-w-[1216px] flex-col gap-12">
+        <TopNav
+          active={null}
+          signedIn={false}
+          stars={stars}
+          dashboardHref="/"
+          leaderboardHref="/leaderboard"
+          githubHref={`https://github.com/${REPO}`}
+          onSignIn={() => window.location.assign(signUpUrl)}
+        />
+        <div className="flex flex-wrap items-center gap-4">
+          <div className={COL_6}>
+            <LandingHero signInHref={signUpUrl} />
+          </div>
+          <div className={COL_6}>
+            <Readout
+              mode="sample"
+              period="week"
+              totals={SAMPLE_TOTALS}
+              from={sampleRange.from}
+              to={sampleRange.to}
+              handle={copy("ui2049.landing.sample_handle")}
+              board={sampleBoard}
+            />
+          </div>
+        </div>
+        <Features />
+        <section className="flex max-w-[72ch] flex-col gap-4">
+          <Label text={copy("landing.features.title")} />
+          <Heading text={copy("landing.seo.title")} size="s" level={2} />
+          <Text text={copy("landing.seo.summary")} tone="muted" />
+          <ul className="m-0 flex list-none flex-col gap-2 p-0">
+            {["point1", "point2", "point3"].map((k) => (
+              <li key={k}>
+                <Text text={copy(`landing.seo.${k}`)} tone="muted" />
+              </li>
+            ))}
+          </ul>
+          <Text text={copy("landing.seo.roadmap")} size="s" tone="muted" />
+        </section>
+        <CtaBand
+          title={copy("ui2049.landing.cta_title")}
+          buttonLabel={copy("ui2049.state_screen.sign_in")}
+          href={signUpUrl}
+          meta={copy("ui2049.landing.cta_meta", { version: appVersion })}
+        />
+      </div>
+    </main>
   );
 }

@@ -63,15 +63,14 @@ function parseCsv(raw) {
   return rows;
 }
 
-test("LandingPage includes screenshot image and copy alt key", () => {
-  const src = read("dashboard/src/ui/matrix-a/views/LandingView.jsx");
-  assert.match(src, /landing\.screenshot\.alt/);
-  assert.match(src, /landing-dashboard\.jpg/);
-});
-
-test("copy registry includes landing screenshot alt", () => {
-  const src = read("dashboard/src/content/copy.csv");
-  assert.ok(src.includes("landing.screenshot.alt"));
+test("LandingPage renders the 2049 landing blocks in board order", () => {
+  const src = read("dashboard/src/pages/LandingPage.jsx");
+  const order = ["<TopNav", "<LandingHero", "<Readout", "<Features", "<CtaBand"];
+  const positions = order.map((tag) => src.indexOf(tag));
+  for (const [i, pos] of positions.entries()) assert.ok(pos > 0, `expected ${order[i]} in LandingPage`);
+  assert.deepEqual([...positions].sort((a, b) => a - b), positions);
+  assert.match(src, /<Readout[^>]*mode="sample"/);
+  assert.doesNotMatch(src, /matrix-a/);
 });
 
 test("copy registry includes landing/share meta keys", () => {
