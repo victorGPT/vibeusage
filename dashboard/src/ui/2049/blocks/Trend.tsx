@@ -44,11 +44,12 @@ export function Trend({ rows, dateKey = "day", period, rolling }: TrendProps) {
         aria-label={copy("ui2049.trend.img_aria", { value: peak })}
         className="block min-h-44 w-full flex-auto"
       >
-        <line x1="0" y1="40" x2="560" y2="40" className="stroke-border" vectorEffect="non-scaling-stroke" />
-        <line x1="0" y1="80" x2="560" y2="80" className="stroke-border" vectorEffect="non-scaling-stroke" />
-        <line x1="0" y1="119" x2="560" y2="119" className="stroke-input" vectorEffect="non-scaling-stroke" />
-        <path d={area} className="fill-primary/10" />
-        <path d={line} className="fill-none stroke-primary" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
+        {/* Colors are attributes, not classes: html-to-image drops class styles on SVG children. */}
+        <line x1="0" y1="40" x2="560" y2="40" stroke="var(--color-border)" vectorEffect="non-scaling-stroke" />
+        <line x1="0" y1="80" x2="560" y2="80" stroke="var(--color-border)" vectorEffect="non-scaling-stroke" />
+        <line x1="0" y1="119" x2="560" y2="119" stroke="var(--color-input)" vectorEffect="non-scaling-stroke" />
+        <path d={area} fill="var(--color-primary)" fillOpacity={0.1} />
+        <path d={line} fill="none" stroke="var(--color-primary)" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
       </svg>
       <div className="flex justify-between gap-2">
         <Label text={label(shown[0])} />

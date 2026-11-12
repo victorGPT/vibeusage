@@ -263,3 +263,19 @@ describe("Pager at the last page", () => {
     expect(next.getAttribute("aria-disabled")).toBe("true");
   });
 });
+
+describe("Trend export", () => {
+  it("colors the chart with SVG attributes, which the Share on X image export keeps", () => {
+    const rows = [{ day: "2026-11-01", total_tokens: 10 }, { day: "2026-11-02", total_tokens: 30 }];
+    const { container } = render(<Trend rows={rows} period="week" />);
+    const svg = container.querySelector("svg[role=img]")!;
+    const painted = [...svg.querySelectorAll("line, path")].map((el) => [el.getAttribute("stroke"), el.getAttribute("fill")]);
+    expect(painted).toEqual([
+      ["var(--color-border)", null],
+      ["var(--color-border)", null],
+      ["var(--color-input)", null],
+      [null, "var(--color-primary)"],
+      ["var(--color-primary)", "none"],
+    ]);
+  });
+});
