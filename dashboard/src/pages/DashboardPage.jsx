@@ -916,8 +916,15 @@ export function DashboardPage({
     activeDays,
     hasActiveDeviceToken,
   });
+  // The heatmap covers 52 weeks and Total covers 24 months, so a quiet year alone is not "no data".
   const showEmpty =
-    !publicMode && accessEnabled && !heatmapPending && activeDays === 0 && hasActiveDeviceToken;
+    !publicMode &&
+    accessEnabled &&
+    !heatmapPending &&
+    activeDays === 0 &&
+    hasActiveDeviceToken &&
+    Boolean(summary) &&
+    !hasUsageValue(summaryTotalTokens);
   const publicViewBusy = publicViewLoading || publicViewActionLoading;
   const publicViewUrl = useMemo(() => {
     if (!publicViewToken || typeof window === "undefined") return "";
