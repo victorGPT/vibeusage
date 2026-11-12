@@ -1043,9 +1043,9 @@ export function DashboardPage({
           since={identityStartDate}
           activeDays={activeDays}
           subscriptions={identitySubscriptions}
-          owner={!publicMode && signedIn && !sessionSoftExpired}
+          owner={!publicMode && signedIn}
           publicEnabled={publicViewEnabled}
-          publicBusy={publicViewBusy}
+          publicBusy={publicViewBusy || sessionSoftExpired}
           onPublicChange={handleTogglePublicView}
           onCopyShareLink={handleCopyPublicView}
           shareCopied={publicViewCopied}
