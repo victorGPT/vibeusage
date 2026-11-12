@@ -14,3 +14,9 @@ export function pinnedMe(entries: LeaderboardEntry[], me: LeaderboardMe | null) 
   if (me?.rank == null || entries.some((e) => e.rank === me.rank)) return null;
   return me;
 }
+
+// The entry one rank above mine, the one to pass.
+export function ahead(entries: LeaderboardEntry[], me: LeaderboardMe | null) {
+  if (me?.rank == null) return undefined;
+  return entries.find((e) => e.rank === (me.rank as number) - 1);
+}
