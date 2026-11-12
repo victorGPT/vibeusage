@@ -36,7 +36,8 @@ describe("format", () => {
   it("counts inclusive days and joins a range", () => {
     expect(daysBetween("2025-11-13", "2026-11-12")).toBe(365);
     expect(daysBetween("2026-11-12", "2026-11-12")).toBe(1);
-    expect(range("2026-11-06", "2026-11-12")).toBe("2026-11-06 → 2026-11-12");
+    expect(range("2026-11-06", "2026-11-12")).toBe("2026-11-06 → 11-12");
+    expect(range("2025-11-13", "2026-11-12")).toBe("2025-11-13 → 2026-11-12");
     expect(range("1970-01-01", "9999-12-31")).toBe("ALL TIME");
     expect(range("2026-11-06", "2026-11-12", "short")).toBe("11-06 → 11-12");
     expect(range("1970-01-01", "9999-12-31", "short")).toBe("ALL TIME");

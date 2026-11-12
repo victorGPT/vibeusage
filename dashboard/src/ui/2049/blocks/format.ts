@@ -36,7 +36,9 @@ export function daysBetween(from: string, to: string): number {
 }
 
 // The leaderboard's Total window starts at the epoch; a date there means "no start".
+// The full form drops the end's year when both ends share it, as the boards draw it.
 export function range(from: string, to: string, form: "full" | "short" = "full"): string {
   if (from <= "1970-01-01") return copy("leaderboard.range.total");
-  return form === "short" ? `${from.slice(5)} → ${to.slice(5)}` : `${from} → ${to}`;
+  if (form === "short") return `${from.slice(5)} → ${to.slice(5)}`;
+  return `${from} → ${from.slice(0, 4) === to.slice(0, 4) ? to.slice(5) : to}`;
 }
