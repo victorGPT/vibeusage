@@ -538,9 +538,6 @@ ui2049.state_screen.expired_tag,ui,*,StateScreen,expired_tag,"Expired",,active
 ui2049.state_screen.expired_title,ui,*,StateScreen,expired_title,"Your session expired.",,active
 ui2049.state_screen.expired_body,ui,*,StateScreen,expired_body,"Your data is safe. Sign in again to keep syncing.",,active
 ui2049.state_screen.sign_in,ui,*,StateScreen,sign_in,"Sign in with GitHub",,active
-ui2049.state_screen.visitor_kicker,ui,*,StateScreen,visitor_kicker,"Public profile · {{name}}",,active
-ui2049.state_screen.visitor_tag,ui,*,StateScreen,visitor_tag,"Read only",,active
-ui2049.state_screen.visitor_meta,ui,*,StateScreen,visitor_meta,"All time · {{name}}",,active
 ui2049.state_screen.invalid_tag,ui,*,StateScreen,invalid_tag,"Not found",,active
 ui2049.state_screen.invalid_title,ui,*,StateScreen,invalid_title,"This profile is private or the link is wrong.",,active
 ui2049.state_screen.invalid_body,ui,*,StateScreen,invalid_body,"Ask the owner for a new share link.",,active
