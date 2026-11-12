@@ -70,3 +70,11 @@ test("empty state waits for the heatmap and never shows on a public page", async
   assert.equal(shouldShowEmptyState({ ...installedQuietWeek, publicMode: true }), false);
   assert.equal(shouldShowEmptyState({ ...installedQuietWeek, activeDays: 3 }), false);
 });
+
+test("a token the server saw in use also keeps the readout, even if the device row was never touched", async () => {
+  const shouldShowEmptyState = await loadShouldShowEmptyState();
+  assert.equal(
+    shouldShowEmptyState({ ...installedQuietWeek, latestDeviceSeenAt: null, latestTokenActivityAt: "2025-06-01T00:00:00Z" }),
+    false,
+  );
+});

@@ -923,6 +923,7 @@ export function DashboardPage({
     activeDays,
     hasActiveDeviceToken,
     latestDeviceSeenAt: userStatus?.install?.latest_device_seen_at,
+    latestTokenActivityAt: userStatus?.install?.latest_token_activity_at,
   });
   const publicViewBusy = publicViewLoading || publicViewActionLoading;
   const publicViewUrl = useMemo(() => {

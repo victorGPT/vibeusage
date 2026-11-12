@@ -12,7 +12,8 @@ export function shouldShowInstallCard({
   return accessEnabled && !heatmapLoading && activeDays === 0 && !hasActiveDeviceToken;
 }
 
-// A quiet week or year is not "no data": only a device that never synced is.
+// A quiet week or year is not "no data": only an install the server has never heard from is.
+// Both timestamps are checked because ingest swallows a failed device touch.
 export function shouldShowEmptyState({
   publicMode,
   accessEnabled,
@@ -20,9 +21,15 @@ export function shouldShowEmptyState({
   activeDays,
   hasActiveDeviceToken,
   latestDeviceSeenAt,
+  latestTokenActivityAt,
 } = {}) {
   if (publicMode) return false;
   return (
-    accessEnabled && !heatmapLoading && activeDays === 0 && hasActiveDeviceToken && !latestDeviceSeenAt
+    accessEnabled &&
+    !heatmapLoading &&
+    activeDays === 0 &&
+    hasActiveDeviceToken &&
+    !latestDeviceSeenAt &&
+    !latestTokenActivityAt
   );
 }
