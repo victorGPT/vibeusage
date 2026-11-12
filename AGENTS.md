@@ -1,25 +1,3 @@
-<!-- OPENSPEC:START -->
-
-# OpenSpec Instructions
-
-These instructions are for AI assistants working in this project.
-
-Always open `@/openspec/AGENTS.md` when the request:
-
-- Mentions planning or proposals (words like proposal, spec, change, plan)
-- Introduces new capabilities, breaking changes, architecture shifts, or big performance/security work
-- Sounds ambiguous and you need the authoritative spec before coding
-
-Use `@/openspec/AGENTS.md` to learn:
-
-- How to create and apply change proposals
-- Spec format and conventions
-- Project structure and guidelines
-
-Keep this managed block so 'openspec update' can refresh the instructions.
-
-<!-- OPENSPEC:END -->
-
 # 仓库站点地图规则
 
 - 非 trivial 变更前先阅读 `docs/repo-sitemap.md`，用它确定当前模块边界、入口文件与首读路径。
@@ -55,11 +33,6 @@ Keep this managed block so 'openspec update' can refresh the instructions.
 - 查询原则：只输出最小结果集（几十/几百行以内），禁止全量导出。
 - 模板优先：使用 `docs/graph/sql-templates.md` 的固定 SQL，避免手写出错。
 - 目标定位：SQLite 仅负责“符号级事实定位”，输出结果再交给 AI。
-
-# OpenSpec 使用范围
-
-- 默认使用 skill 工作流，不强制走 OpenSpec。
-- 仅在以下“重大模块”场景触发 OpenSpec：外部集成、跨模块核心流程、DB schema 变更、安全/权限边界变化、破坏性变更。
 
 # 文案规则（Copy Registry）
 

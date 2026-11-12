@@ -96,7 +96,7 @@
 - npm publish: skipped
 - Vercel check: expected via Git integration on commit `8f4f5fce`
 - MCP deploy: updated `vibeusage-leaderboard`, `vibeusage-leaderboard-refresh`, `vibeusage-leaderboard-profile`, `vibeusage-leaderboard-settings`
-- Freeze artifact: commit `8f4f5fce` + DB SQL `openspec/changes/2026-02-09-add-leaderboard-period-month-total/sql/001_leaderboard_month_total.sql`
+- Freeze artifact: commit `8f4f5fce` + DB SQL `db/migrations/2026-02-09-add-leaderboard-period-month-total/001_leaderboard_month_total.sql`
 - Cold regression step: `npm test`, `npm --prefix dashboard test`, `npm run build:insforge:check` (pass)
 - Synthetic acceptance: seed `month` + `total` rows in `vibeusage_leaderboard_snapshots` and verify counts are non-zero
 

@@ -7,10 +7,9 @@ test("link code table allows authenticated inserts for owner", () => {
   const sqlPath = path.join(
     __dirname,
     "..",
-    "openspec",
-    "changes",
+    "db",
+    "migrations",
     "2025-12-28-add-one-login-link-code",
-    "sql",
     "001_create_link_codes.sql",
   );
   const sql = fs.readFileSync(sqlPath, "utf8");
