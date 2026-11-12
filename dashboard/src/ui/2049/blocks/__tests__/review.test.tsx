@@ -203,3 +203,19 @@ describe("MyRank metric", () => {
     expect(screen.getByRole("region", { name: "My rank · Week · all models" })).toBeTruthy();
   });
 });
+
+describe("MyRank under a channel metric", () => {
+  it("counts tokens and the pass gap in the ranked channel", () => {
+    const me = { rank: 2, total_tokens: 1000, gpt_tokens: 100 };
+    const entries = [
+      { rank: 1, display_name: "a", total_tokens: 200, gpt_tokens: 200 },
+      { rank: 3, display_name: "c", total_tokens: 5000, gpt_tokens: 50 },
+    ];
+    render(<MyRank me={me} entries={entries} totalEntries={3} period="week" metric="gpt" from="2026-11-06" to="2026-11-12" handle="h" />);
+    const region = screen.getByRole("region", { name: "My rank · Week · GPT" });
+    expect(within(region).getByText("+100")).toBeTruthy();
+    expect(within(region).getAllByText("100").length).toBeGreaterThan(0);
+    expect(within(region).getByText("50")).toBeTruthy();
+    expect(within(region).queryByText("5K")).toBeNull();
+  });
+});

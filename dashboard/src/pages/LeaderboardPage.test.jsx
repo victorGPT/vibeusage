@@ -93,6 +93,36 @@ describe("LeaderboardPage", () => {
     expect(api.getLeaderboard.mock.calls.every(([args]) => args.period === "month")).toBe(true);
   });
 
+  it("finds my row and neighbours when tied ranks push me past my rank's page", async () => {
+    // dense_rank: ranks 1..60 each held by two rows, so rank r sits at rows 2r-1 and 2r.
+    const rows = Array.from({ length: 120 }, (_, i) => ({
+      rank: Math.floor(i / 2) + 1,
+      user_id: `u${i}`,
+      is_public: true,
+      is_me: i === 79,
+      display_name: `n${i}`,
+      total_tokens: String(10_000 - i),
+    }));
+    const me = { rank: 40, total_tokens: rows[79].total_tokens };
+    api.getLeaderboard.mockImplementation(async ({ offset = 0, limit = 20 }) => ({
+      period: "week",
+      from: "2026-11-06",
+      to: "2026-11-12",
+      page: Math.floor(offset / limit) + 1,
+      total_pages: 6,
+      total_entries: 120,
+      entries: rows.slice(offset, offset + limit),
+      me,
+    }));
+    renderPage();
+    const myRank = await screen.findByRole("region", { name: /^My rank/ });
+    await waitFor(() => expect(within(myRank).getAllByText("#39")).toHaveLength(2));
+    expect(within(myRank).getByText("#42")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Jump to me · #40" }));
+    await screen.findByText("Page 4 of 6");
+    await waitFor(() => expect(table().querySelector("tbody").textContent).toContain("victor · you"));
+  });
+
   it("offers a retry when the board fails to load", async () => {
     api.getLeaderboard.mockRejectedValue(new Error("boom"));
     renderPage();

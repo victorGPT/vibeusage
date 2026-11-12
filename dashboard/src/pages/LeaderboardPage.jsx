@@ -57,14 +57,40 @@ function handleFromIdentity(identity) {
   return label.replace(/[^a-zA-Z0-9._-]/g, "_");
 }
 
-// A slice of the board beside the paged table: the leaders for Top 10, the ranks around mine for MyRank.
-function useBoardSlice({ enabled, baseUrl, authToken, period, metric, offset, limit, reloadToken }) {
-  const [entries, setEntries] = useState([]);
+const NO_ROWS = [];
+const NO_PLACE = { position: null, near: NO_ROWS };
+
+const loadLeaders = (rows) => rows(0, 10);
+
+// Ranks are dense (tied rows share one), so my row sits at or after row meRank - 1, never before.
+// ponytail: walks at most five windows of 100 rows, so more than ~500 tied rows above me gives up.
+async function locateMe(rows, meRank) {
+  let offset = Math.max(0, meRank - 4);
+  for (let step = 0; step < 5; step += 1) {
+    const page = await rows(offset, 100);
+    const index = page.findIndex((entry) => entry?.is_me);
+    if (index >= 0) {
+      const position = offset + index;
+      const near =
+        index + 4 <= page.length
+          ? page.slice(Math.max(0, index - 3), index + 4)
+          : await rows(Math.max(0, position - 3), 7);
+      return { position, near };
+    }
+    if (page.length === 0 || page[page.length - 1].rank > meRank) break;
+    offset += page.length;
+  }
+  return NO_PLACE;
+}
+
+// Reads the board beside the paged table: the leaders for Top 10, my row position for MyRank and Jump to me.
+function useBoardSide({ enabled, baseUrl, authToken, period, metric, reloadToken }, load, arg, initial) {
+  const [value, setValue] = useState(initial);
   useEffect(() => {
-    if (!enabled || offset == null) return;
+    if (!enabled || arg === null) return;
     let active = true;
     const controller = new AbortController();
-    (async () => {
+    const rows = async (offset, limit) => {
       const token = authToken ? await resolveAuthAccessToken(authToken) : null;
       const data = await getLeaderboard({
         baseUrl,
@@ -75,16 +101,18 @@ function useBoardSlice({ enabled, baseUrl, authToken, period, metric, offset, li
         offset,
         signal: controller.signal,
       });
-      if (active) setEntries(Array.isArray(data?.entries) ? data.entries : []);
-    })().catch(() => {
-      if (active) setEntries([]);
-    });
+      return Array.isArray(data?.entries) ? data.entries : NO_ROWS;
+    };
+    load(rows, arg).then(
+      (next) => active && setValue(next),
+      () => active && setValue(initial),
+    );
     return () => {
       active = false;
       controller.abort();
     };
-  }, [authToken, baseUrl, enabled, limit, metric, offset, period, reloadToken]);
-  return entries;
+  }, [arg, authToken, baseUrl, enabled, initial, load, metric, period, reloadToken]);
+  return value;
 }
 
 export function LeaderboardPage({
@@ -200,12 +228,8 @@ export function LeaderboardPage({
     metric,
     reloadToken: listReloadToken,
   };
-  const leaders = useBoardSlice({ ...slice, offset: 0, limit: 10 });
-  const nearMe = useBoardSlice({
-    ...slice,
-    offset: meRank == null ? null : Math.max(0, meRank - 4),
-    limit: 7,
-  });
+  const leaders = useBoardSide(slice, loadLeaders, 0, NO_ROWS);
+  const place = useBoardSide(slice, locateMe, meRank, NO_PLACE);
 
   const handle = handleFromIdentity(currentIdentity);
   const from = listData?.from || "";
@@ -228,7 +252,7 @@ export function LeaderboardPage({
           <div className="lg:col-span-8">
             <MyRank
               me={me}
-              entries={nearMe}
+              entries={place.near}
               totalEntries={totalEntries}
               period={period}
               metric={metric}
@@ -250,7 +274,16 @@ export function LeaderboardPage({
           totalEntries={totalEntries}
           period={period}
           onPageChange={setListPage}
-          onJumpToMe={meRank == null ? undefined : () => setListPage(Math.ceil(meRank / PAGE_LIMIT))}
+          onJumpToMe={
+            meRank == null
+              ? undefined
+              : () =>
+                  setListPage(
+                    place.position == null
+                      ? Math.ceil(meRank / PAGE_LIMIT)
+                      : Math.floor(place.position / PAGE_LIMIT) + 1,
+                  )
+          }
           profileHref={profileHref}
         />
       </>

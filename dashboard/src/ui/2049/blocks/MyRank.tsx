@@ -25,8 +25,12 @@ type MyRankProps = {
   handle: string;
 };
 
-function Neighbour({ entry }: { entry: LeaderboardEntry }) {
-  return <RankRow rank={rankText(entry.rank)} user={displayName(entry)} value={abbr(entry.total_tokens)} />;
+// Under GPT or Claude the ranks follow that channel, so every count on the screen does too.
+const counted = (entry: LeaderboardMe, metric: LeaderboardMetric) =>
+  metric === "all" ? entry.total_tokens : entry[`${metric}_tokens`];
+
+function Neighbour({ entry, metric }: { entry: LeaderboardEntry; metric: LeaderboardMetric }) {
+  return <RankRow rank={rankText(entry.rank)} user={displayName(entry)} value={abbr(counted(entry, metric))} />;
 }
 
 // SSOT: design/2049/source/MyRank.dc.html. Up to three neighbours on each side fill the screen
@@ -54,11 +58,11 @@ export function MyRank({ me, entries, totalEntries, period, metric = "all", from
               <Label text={copy("ui2049.my_rank.of_ranked", { count: totalEntries })} />
             </div>
             <div className="ml-auto grid grid-cols-2 gap-x-4">
-              <Stat label={copy("ui2049.my_rank.tokens")} value={abbr(me?.total_tokens)} />
+              <Stat label={copy("ui2049.my_rank.tokens")} value={abbr(me && counted(me, metric))} />
               {next && me ? (
                 <Stat
                   label={copy("ui2049.my_rank.to_pass", { rank: next.rank })}
-                  value={`+${abbr(num(next.total_tokens) - num(me.total_tokens))}`}
+                  value={`+${abbr(num(counted(next, metric)) - num(counted(me, metric)))}`}
                   divider
                 />
               ) : null}
@@ -66,13 +70,13 @@ export function MyRank({ me, entries, totalEntries, period, metric = "all", from
           </div>
           <div className="flex flex-col border-t border-border">
             {above.map((entry) => (
-              <Neighbour key={entry.rank} entry={entry} />
+              <Neighbour key={entry.user_id ?? entry.rank} entry={entry} metric={metric} />
             ))}
             {me?.rank == null ? null : (
-              <RankRow rank={rankText(me.rank)} user={you(handle)} value={abbr(me.total_tokens)} me />
+              <RankRow rank={rankText(me.rank)} user={you(handle)} value={abbr(counted(me, metric))} me />
             )}
             {below.map((entry) => (
-              <Neighbour key={entry.rank} entry={entry} />
+              <Neighbour key={entry.user_id ?? entry.rank} entry={entry} metric={metric} />
             ))}
           </div>
           <Stamp handle={handle} range={`${label} · ${range(from, to)}`} />
