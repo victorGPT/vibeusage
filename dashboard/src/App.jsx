@@ -45,7 +45,7 @@ import { probeBackend } from "./lib/vibeusage-api";
 import { resolveAgentResourceRoute } from "./pages/agent-resource-routes.js";
 import { LandingPage } from "./pages/LandingPage.jsx";
 import { StateScreen } from "./ui/2049/blocks/StateScreen";
-import { UpgradeAlertModal } from "./ui/matrix-a/components/UpgradeAlertModal.jsx";
+import { UpgradeBanner } from "./ui/2049/blocks/UpgradeBanner";
 
 function buildAuthEntryUrl(basePath, nextPath) {
   if (typeof basePath !== "string" || basePath.length === 0) return "/";
@@ -445,7 +445,7 @@ export default function App() {
     content = (
       <Suspense fallback={loadingShell}>
         {!publicMode && !screenshotMode ? (
-          <UpgradeAlertModal requiredVersion={latestVersion} />
+          <UpgradeBanner requiredVersion={latestVersion} />
         ) : null}
         <PageComponent
           baseUrl={baseUrl}
