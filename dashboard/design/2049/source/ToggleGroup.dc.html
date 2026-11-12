@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Toggle group</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div role="group" aria-label="{{ariaLabel}}" style="display: flex; flex-wrap: wrap; gap: 16px; background: {{bg}}; padding: {{pad}}; font-family: Barlow, sans-serif; color: #6fa79e">
+  <sc-for list="{{items}}" as="t" hint-placeholder-count="4">
+    <sc-if value="{{t.isLink}}" hint-placeholder-val="{{false}}">
+      <a href="{{t.href}}" aria-current="{{t.current}}" onMouseEnter="{{t.enter}}" onMouseLeave="{{t.leave}}" onFocus="{{t.focus}}" onBlur="{{t.blur}}" style="{{t.style}}">{{t.label}}</a>
+    </sc-if>
+    <sc-if value="{{t.isButton}}" hint-placeholder-val="{{true}}">
+      <button type="button" aria-pressed="{{t.on}}" onClick="{{t.pick}}" onMouseEnter="{{t.enter}}" onMouseLeave="{{t.leave}}" onFocus="{{t.focus}}" onBlur="{{t.blur}}" style="{{t.style}}">{{t.label}}</button>
+    </sc-if>
+  </sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"items":{"editor":null},"value":{"editor":"text","default":"total"},"onValueChange":{"editor":null},"ariaLabel":{"editor":"text","default":"Period"},"forceState":{"editor":"enum","options":["","focus"],"default":""},"$preview":{"width":360,"height":48}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const solo = Object.keys(this.props).filter((k) => k[0] !== '$' && k !== 'children').length === 0;
+    const items = this.props.items ?? [{ key: 'day', label: 'Day' }, { key: 'week', label: 'Week' }, { key: 'month', label: 'Month' }, { key: 'total', label: 'Total' }];
+    // single-select, controlled when `value` is passed, else falls back to own state
+    const cur = this.props.value ?? this.state?.v ?? items[items.length - 1].key;
+    const fs = this.props.forceState || '';
+    const s = this.state || {};
+    return {
+      ariaLabel: this.props.ariaLabel ?? 'Period',
+      bg: solo ? '#03100f' : 'transparent', pad: solo ? '16px' : '0',
+      items: items.map((it) => {
+        const on = it.key === cur;
+        const hov = !fs && s.hov === it.key;
+        const foc = fs === 'focus' ? on : (!fs && s.foc === it.key);
+        return {
+          enter: () => { if (!fs) this.setState({ hov: it.key }); },
+          leave: () => { if (!fs) this.setState({ hov: null }); },
+          focus: (e) => { if (!fs && e && e.target && e.target.matches && e.target.matches(':focus-visible')) this.setState({ foc: it.key }); },
+          blur: () => { if (!fs) this.setState({ foc: null }); },
+          label: it.label, href: it.href || '', isLink: !!it.href, isButton: !it.href, on, current: on ? 'page' : 'false',
+          pick: () => {
+            if (this.props.value === undefined) this.setState({ v: it.key });
+            if (this.props.onValueChange) this.props.onValueChange(it.key);
+          },
+          style: 'background: none; border: 0; border-bottom: 1px solid ' + (on ? '#e0b04a; color: #e0b04a' : (hov ? '#2c6b63; color: #bfe9e1' : 'transparent; color: #6fa79e')) +
+            '; padding: 0 0 8px; cursor: pointer; text-decoration: none; font: 600 11px/1 Barlow, sans-serif; letter-spacing: 0.12em; text-transform: uppercase; border-radius: 0; outline: ' +
+            (foc ? '2px solid #e0b04a; outline-offset: 4px' : 'none')
+        };
+      })
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Badge</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<span style="display: inline-flex; max-width: 100%; background: {{bg}}; padding: {{pad}}; font-family: Barlow, sans-serif; color: #bfe9e1">
+  <span style="{{style}}">{{text}}</span>
+</span>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"text":{"editor":"text","default":"Codex"},"variant":{"editor":"enum","options":["outline","accent"],"default":"outline"},"$preview":{"width":160,"height":40}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const solo = Object.keys(this.props).filter((k) => k[0] !== '$' && k !== 'children').length === 0;
+    const accent = (this.props.variant ?? 'outline') === 'accent';
+    const style = 'display: inline-block; box-sizing: border-box; max-width: 100%; overflow: hidden; text-overflow: ellipsis; vertical-align: middle; border-radius: 3px; text-transform: uppercase; white-space: nowrap; font-family: Barlow, sans-serif; font-weight: 600; ' +
+      // 两个变体同一尺寸（20px 高），只靠颜色区分；Badge 不能长得像按钮
+      'padding: 4px 8px; font-size: 10px; line-height: 1; letter-spacing: 0.12em; ' +
+      (accent ? 'border: 1px solid #7fd9cb; color: #7fd9cb' : 'border: 1px solid #2c6b63; color: #bfe9e1');
+    return { text: this.props.text ?? 'Codex', style, bg: solo ? '#03100f' : 'transparent', pad: solo ? '8px' : '0' };
+  }
+}
+</script>
+</body>
+</html>

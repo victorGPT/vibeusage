@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>2049 规范</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&amp;family=Saira:wght@200;300;400&amp;family=JetBrains+Mono:wght@500&amp;family=Noto+Sans+SC:wght@400;600&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div style="width: 1280px; height: 1100px; box-sizing: border-box; padding: 48px; background: #03100f; color: #bfe9e1; font-family: Barlow, 'Noto Sans SC', sans-serif; display: flex; flex-direction: column; gap: 32px">
+  <div style="display: flex; align-items: baseline; gap: 20px">
+    <h1 style="margin: 0; font: 200 44px/1 Saira, sans-serif; color: #e2f8f3; letter-spacing: 0.02em">VibeUsage 2049 规范</h1>
+    <span style="font: 600 11px/1 Barlow, sans-serif; letter-spacing: 0.12em; text-transform: uppercase; color: #6fa79e">所有组件只从这里取值</span>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px">
+    <div style="display: flex; flex-direction: column; gap: 12px">
+      <span style="font: 600 11px/1 Barlow, sans-serif; letter-spacing: 0.12em; text-transform: uppercase; color: #6fa79e">颜色 · 每种只有一个用途</span>
+      <div style="display: grid; grid-template-columns: 40px 1fr; gap: 8px 12px; align-items: center; font-size: 13px">
+        <div style="height: 28px; background: #03100f; border: 1px solid #1f4e48; border-radius: 3px"></div><div>#03100f 页面底</div>
+        <div style="height: 28px; background: #061716; border: 1px solid #1f4e48; border-radius: 3px"></div><div>#061716 面板</div>
+        <div style="height: 28px; background: #1f4e48; border-radius: 3px"></div><div>#1f4e48 线</div>
+        <div style="height: 28px; background: #6fa79e; border-radius: 3px"></div><div>#6fa79e 标签、次要字</div>
+        <div style="height: 28px; background: #bfe9e1; border-radius: 3px"></div><div>#bfe9e1 正文</div>
+        <div style="height: 28px; background: #e2f8f3; border-radius: 3px"></div><div>#e2f8f3 主数字</div>
+        <div style="height: 28px; background: #e0b04a; border-radius: 3px"></div><div>#e0b04a 琥珀：花费、“我”、数据条、选中</div>
+        <div style="height: 28px; background: #e5484d; border-radius: 3px"></div><div>#e5484d 红：只给名次下降、报错</div>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 12px">
+      <span style="font: 600 11px/1 Barlow, sans-serif; letter-spacing: 0.12em; text-transform: uppercase; color: #6fa79e">字号 · 六档</span>
+      <div style="display: flex; flex-direction: column; gap: 16px">
+        <div style="font: 200 64px/1 Saira, sans-serif; color: #e2f8f3">4,733</div>
+        <div style="font-size: 12px; color: #6fa79e">Display · Saira 200 · 64–88px，只在主屏</div>
+        <div style="font: 300 28px/1 Saira, sans-serif; color: #e2f8f3">$1,456.46</div>
+        <div style="font-size: 12px; color: #6fa79e">Value-L · Saira 300 · 28px</div>
+        <div style="font: 400 18px/1 Saira, sans-serif; color: #e2f8f3">195.9M</div>
+        <div style="font-size: 12px; color: #6fa79e">Value-S · Saira 400 · 18px</div>
+        <div style="font: 500 15px/1.4 Barlow, sans-serif; color: #bfe9e1">Codex · Claude Code</div>
+        <div style="font-size: 12px; color: #6fa79e">Body · Barlow 500 · 15px（表格 14px）</div>
+        <div style="font: 600 11px/1 Barlow, sans-serif; letter-spacing: 0.12em; text-transform: uppercase; color: #6fa79e">Week rank</div>
+        <div style="font-size: 12px; color: #6fa79e">Label · Barlow 600 · 11px · 字距 0.12em · 大写</div>
+        <div style="font: 500 14px/1 'JetBrains Mono', monospace; color: #e2f8f3">npx --yes vibeusage init</div>
+        <div style="font-size: 12px; color: #6fa79e">Mono · 只给命令和链接，不做装饰</div>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 12px">
+      <span style="font: 600 11px/1 Barlow, sans-serif; letter-spacing: 0.12em; text-transform: uppercase; color: #6fa79e">形状 · 圆角只有三档</span>
+      <div style="display: flex; gap: 16px; align-items: flex-end">
+        <div style="display: flex; flex-direction: column; gap: 8px; align-items: center"><div style="width: 72px; height: 32px; border: 1px solid #7fd9cb; border-radius: 3px"></div><span style="font-size: 12px; color: #6fa79e">3px 控件</span></div>
+        <div style="display: flex; flex-direction: column; gap: 8px; align-items: center"><div style="width: 96px; height: 64px; background: #061716; border: 1px solid #1f4e48; border-radius: 8px"></div><span style="font-size: 12px; color: #6fa79e">8px 面板</span></div>
+        <div style="display: flex; flex-direction: column; gap: 8px; align-items: center"><div style="width: 120px; height: 80px; background: #0a2321; border: 1px solid #2c6b63; border-radius: 18px"></div><span style="font-size: 12px; color: #6fa79e">18px 主屏</span></div>
+      </div>
+      <span style="font: 600 11px/1 Barlow, sans-serif; letter-spacing: 0.12em; text-transform: uppercase; color: #6fa79e; margin-top: 16px">间距 · 8 点栅格（细节用 4）</span>
+      <div style="font-size: 13px; line-height: 1.7">刻度只用 4 · 8 · 12 · 16 · 24 · 32 · 48 · 64。面板和主屏内边距都是 24 · 面板间距 16 · 区块间距 32 · 边框一律 1px</div>
+      <div style="font-size: 13px; line-height: 1.7">栅格：12 栏 · 栏间距 16 · 页边距 32 · 内容最宽 1216。每行元素按栏占位（8+4、6+6、4+4+4），左右边都落在栏线上。同一行并排的面板用同一个最小高度，底边对齐</div>
+      <div style="font-size: 13px; line-height: 1.7">远近即分组：组内间距一定小于组间距（标签→数值 8，组→组 24，内容→操作 24 起）。控件高 32（默认）/ 48（大），列表和表格行高 40。图标、圆点、边框可例外</div>
+      <span style="font: 600 11px/1 Barlow, sans-serif; letter-spacing: 0.12em; text-transform: uppercase; color: #6fa79e; margin-top: 16px">禁止</span>
+      <div style="font-size: 13px; line-height: 1.7">框里套框（面板内部用分隔线）· 胶囊按钮 · 斜体点缀词 · 01/02/03 编号 · 等宽字体做装饰 · 无意义渐变 · 金色</div>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px">
+    <div style="display: flex; flex-direction: column; gap: 12px">
+      <span style="font: 600 11px/1 Barlow, sans-serif; letter-spacing: 0.12em; text-transform: uppercase; color: #6fa79e">控件</span>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center">
+        <button type="button" style="height: 32px; padding: 0 16px; background: #e0b04a; color: #03100f; border: 1px solid #e0b04a; border-radius: 3px; font: 600 11px/1 Barlow, sans-serif; letter-spacing: 0.12em; text-transform: uppercase">Sign in</button>
+        <button type="button" style="height: 32px; padding: 0 16px; background: transparent; color: #bfe9e1; border: 1px solid #2c6b63; border-radius: 3px; font: 600 11px/1 Barlow, sans-serif; letter-spacing: 0.12em; text-transform: uppercase">Copy link</button>
+      </div>
+      <div style="display: flex; gap: 16px; font: 600 11px/1 Barlow, sans-serif; letter-spacing: 0.12em; text-transform: uppercase">
+        <span style="color: #6fa79e; padding-bottom: 8px">Day</span><span style="color: #6fa79e; padding-bottom: 8px">Week</span><span style="color: #e0b04a; padding-bottom: 8px; border-bottom: 1px solid #e0b04a">Total</span>
+      </div>
+      <div style="font-size: 12px; color: #6fa79e">切换一律用下划线式，不用方块组</div>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 12px">
+      <span style="font: 600 11px/1 Barlow, sans-serif; letter-spacing: 0.12em; text-transform: uppercase; color: #6fa79e">材质 · 只给主屏</span>
+      <div style="font-size: 13px; line-height: 1.7">扫描线 + 颗粒 + 暗角 + 18px 圆角 + 细字主数字发光。每页只有一块，用来标出“这页最重要的数”。普通面板是平面玻璃：纯色底 + 1px 线。</div>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 12px">
+      <span style="font: 600 11px/1 Barlow, sans-serif; letter-spacing: 0.12em; text-transform: uppercase; color: #6fa79e">Stamp · 只给可截图块</span>
+      <div style="display: flex; justify-content: space-between; border-top: 1px solid #1f4e48; padding-top: 12px; font: 600 11px/1 Barlow, sans-serif; letter-spacing: 0.12em; text-transform: uppercase; color: #6fa79e"><span>@your_handle</span><span>2026-11-06 → 11-12</span><span>vibeusage.cc</span></div>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 12px; border-top: 1px solid #1f4e48; padding-top: 24px">
+    <span style="font: 600 11px/1 Barlow, sans-serif; letter-spacing: 0.12em; text-transform: uppercase; color: #6fa79e">Token 对照 · shadcn/ui CSS 变量 → 2049 取值</span>
+    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px 32px; font: 500 13px/1.5 Barlow, sans-serif; color: #bfe9e1">
+      <span>--background · #03100f</span><span>--card · #061716</span><span>--border · #1f4e48</span><span>--input · #2c6b63</span>
+      <span>--foreground · #bfe9e1</span><span>--muted-foreground · #6fa79e</span><span>--primary · #e0b04a</span><span>--primary-foreground · #03100f</span>
+      <span>--destructive · #e5484d</span><span>--ring · #e0b04a</span><span>--radius-sm · 3px（控件）</span><span>--radius-md · 8px（面板）</span>
+      <span>--radius-lg · 18px（主屏）</span><span>--font-display · Saira</span><span>--font-sans · Barlow</span><span>--font-mono · JetBrains Mono</span>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1100}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

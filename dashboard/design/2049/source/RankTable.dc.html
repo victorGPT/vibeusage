@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>All users</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&amp;family=Saira:wght@200;300;400&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<section aria-label="All users" style="box-sizing: border-box; width: 100%; display: flex; flex-direction: column; gap: 12px; background: #061716; border: 1px solid #1f4e48; border-radius: 8px; padding: 24px; color: #bfe9e1; font-family: Barlow, sans-serif">
+  <div style="display: flex; align-items: center; gap: 12px">
+    <dc-import name="Label" text="All users · week · 137 ranked" hint-size="200px,11px"></dc-import>
+    <div style="margin-left: auto"><dc-import name="Button" label="Jump to me · #7" variant="outline" hint-size="140px,32px"></dc-import></div>
+  </div>
+  <dc-import name="Table" columns="{{columns}}" rows="{{rows}}" pinned="{{pinned}}" min-width="{{680}}" hint-size="100%,520px"></dc-import>
+  <dc-import name="Pagination" page="{{page}}" total="{{7}}" on-page-change="{{setPage}}" hint-size="100%,32px"></dc-import>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":660}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const data = [
+      ['nullbyte', 589.3, 0, 0.61], ['kernel_panic', 489.7, 1, 0.22], ['sudo_rm', 407.5, -1, 0.48], ['tabs_not_spaces', 318.2, 2, 0.8],
+      ['segfault_sam', 276.4, 0, 0.35], ['heap_of_trouble', 234.6, 3, 0.52], ['your_handle', 195.9, -2, 0.6], ['dev_null_dan', 188.0, 1, 0.44],
+      ['0xdeadbeef', 171.3, -1, 0.7], ['rubber_duck', 150.8, 4, 0.29], ['grep_monk', 141.2, 0, 0.55], ['Anonymous', 133.9, -3, 0.4]
+    ];
+    const m = (n) => n.toFixed(1) + 'M';
+    const row = ([u, t, d, g], i, pinnedTag) => {
+      const c = (1 - g) * 0.75, me = u === 'your_handle';
+      return {
+        me, lead: i === 0,
+        cells: [
+          { text: '#' + (i + 1), delta: d, dim: true },
+          { text: me ? u + ' · you' : u, name: true, badge: i === 0 ? 'Leader' : '' },
+          { text: m(t), strong: true }, { text: m(t * g) }, { text: m(t * c) }, { text: m(t * (1 - g - c)) }
+        ]
+      };
+    };
+    return {
+      columns: [{ label: 'Rank', width: '88px' }, { label: 'User' }, { label: 'Total', align: 'right', active: true }, { label: 'GPT', align: 'right' }, { label: 'Claude', align: 'right' }, { label: 'Other', align: 'right' }],
+      rows: data.map((r, i) => row(r, i, false)),
+      // 只有“我”不在当前页时才置顶（示例里“我”在第 1 页第 7 名）
+      pinned: (this.state?.page ?? 1) === 1 ? null : row(data[6], 6, true),
+      page: this.state?.page ?? 1, setPage: (n) => this.setState({ page: n })
+    };
+  }
+}
+</script>
+</body>
+</html>

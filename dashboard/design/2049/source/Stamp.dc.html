@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Stamp</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div style="box-sizing: border-box; width: 100%; display: flex; flex-wrap: nowrap; align-items: baseline; gap: 16px; margin-top: auto; border-top: 1px solid #1f4e48; padding: {{pad}}; background: {{bg}}; font: 600 11px/1 Barlow, sans-serif; letter-spacing: 0.12em; text-transform: uppercase; color: #6fa79e">
+  <span style="flex: 0 1 auto; max-width: 40%; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">@{{handle}}</span>
+  <span style="flex: 1 1 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center">{{range}}</span>
+  <span style="flex: none; white-space: nowrap">vibeusage.cc</span>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"handle":{"editor":"text","default":"your_handle"},"range":{"editor":"text","default":"2026-11-06 → 11-12"},"$preview":{"width":600,"height":48}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const solo = Object.keys(this.props).filter((k) => k[0] !== '$' && k !== 'children').length === 0;
+    return {
+      handle: this.props.handle ?? 'your_handle', range: this.props.range ?? '2026-11-06 → 11-12',
+      pad: solo ? '12px 16px 16px' : '12px 0 0', bg: solo ? '#03100f' : 'transparent'
+    };
+  }
+}
+</script>
+</body>
+</html>

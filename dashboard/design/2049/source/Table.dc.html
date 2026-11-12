@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Table</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&amp;family=Saira:wght@200;300;400&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div style="box-sizing: border-box; width: 100%; overflow-x: auto; background: {{bg}}; padding: {{pad}}; font-family: Barlow, sans-serif; color: #bfe9e1">
+  <table style="width: 100%; min-width: {{minW}}px; border-collapse: collapse; font: 400 15px/1 Saira, sans-serif; font-variant-numeric: tabular-nums">
+    <thead>
+      <tr>
+        <sc-for list="{{columns}}" as="c" hint-placeholder-count="6">
+          <th scope="col" style="{{c.style}}">{{c.label}}</th>
+        </sc-for>
+      </tr>
+      <sc-if value="{{hasPinned}}" hint-placeholder-val="{{false}}">
+        <tr style="{{pinned.style}}">
+          <sc-for list="{{pinned.cells}}" as="x" hint-placeholder-count="6">
+            <td style="{{x.style}}"><span style="{{x.wrap}}"><span style="{{x.textStyle}}">{{x.text}}</span><sc-if value="{{x.hasDelta}}" hint-placeholder-val="{{false}}"><dc-import name="Delta" value="{{x.delta}}" hint-size="28px,11px"></dc-import></sc-if></span></td>
+          </sc-for>
+        </tr>
+      </sc-if>
+    </thead>
+    <tbody>
+      <sc-for list="{{rows}}" as="r" hint-placeholder-count="10">
+        <tr style="{{r.style}}">
+          <sc-for list="{{r.cells}}" as="x" hint-placeholder-count="6">
+            <td style="{{x.style}}"><span style="{{x.wrap}}"><span style="{{x.textStyle}}">{{x.text}}</span><sc-if value="{{x.hasDelta}}" hint-placeholder-val="{{false}}"><dc-import name="Delta" value="{{x.delta}}" hint-size="28px,11px"></dc-import></sc-if><sc-if value="{{x.hasBadge}}" hint-placeholder-val="{{false}}"><dc-import name="Badge" text="{{x.badge}}" variant="accent" hint-size="56px,16px"></dc-import></sc-if></span></td>
+          </sc-for>
+        </tr>
+      </sc-for>
+    </tbody>
+  </table>
+  <sc-if value="{{isEmpty}}" hint-placeholder-val="{{false}}">
+    <div style="padding: 32px 0; border-bottom: 1px solid #1f4e48; text-align: center">
+      <dc-import name="Text" text="{{emptyText}}" tone="muted" hint-size="100%,22px"></dc-import>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"columns":{"editor":null},"rows":{"editor":null},"pinned":{"editor":null},"minWidth":{"editor":"int","default":640},"emptyText":{"editor":"text","default":"No rows yet."},"$preview":{"width":1216,"height":320}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const solo = Object.keys(this.props).filter((k) => k[0] !== '$' && k !== 'children').length === 0;
+    const columns = this.props.columns ?? [{ label: 'Date' }, { label: 'Total', align: 'right', active: true }, { label: 'Input', align: 'right' }, { label: 'Output', align: 'right' }];
+    const rows = this.props.rows ?? [
+      { cells: [{ text: '2026-11-12' }, { text: '26,100,392', strong: true }, { text: '5,742,086' }, { text: '1,827,027' }] },
+      { cells: [{ text: '2026-11-11' }, { text: '27,200,784', strong: true }, { text: '5,984,172' }, { text: '1,904,055' }] }
+    ];
+    const align = (i) => (columns[i] && columns[i].align) || 'left';
+    const cellify = (cells, row, isPinned) => cells.map((x, i) => {
+      const ink = row.me ? '#e0b04a' : (x.strong || x.name ? '#e2f8f3' : (x.dim ? '#6fa79e' : '#bfe9e1'));
+      const font = x.name ? '500 15px/1 Barlow, sans-serif' : '400 15px/1 Saira, sans-serif';
+      return {
+        text: x.text, delta: x.delta,
+        wrap: 'display: inline-flex; align-items: center; gap: 8px; vertical-align: middle' + (x.name ? '; max-width: 320px' : ''),
+        textStyle: x.name ? 'min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap' : '', hasDelta: x.delta !== undefined && x.delta !== null && x.delta !== 0,
+        badge: x.badge, hasBadge: !!x.badge,
+        style: 'text-align: ' + align(i) + '; padding: 12px 0; white-space: nowrap; font: ' + font + '; color: ' + ink + '; border-bottom: 1px solid ' + (isPinned ? '#2c6b63' : '#1f4e48')
+      };
+    });
+    const rowStyle = (r) => (r.me ? 'background: rgba(224, 176, 74, 0.08)' : '') + (r.lead ? '; box-shadow: inset 0 3px 0 -1px #7fd9cb' : '');
+    const pinned = this.props.pinned;
+    return {
+      columns: columns.map((c, i) => ({
+        label: c.label,
+        style: 'text-align: ' + align(i) + '; padding: 12px 0; border-bottom: 1px solid #2c6b63; font: 600 11px/1 Barlow, sans-serif; letter-spacing: 0.12em; text-transform: uppercase; color: ' + (c.active ? '#e0b04a' : '#6fa79e') + (c.width ? '; width: ' + c.width : '')
+      })),
+      rows: rows.map((r) => ({ style: rowStyle(r), cells: cellify(r.cells, r, false) })),
+      hasPinned: !!pinned,
+      pinned: pinned ? { style: rowStyle(pinned), cells: cellify(pinned.cells, pinned, true) } : { style: '', cells: [] },
+      minW: this.props.minWidth ?? 640,
+      isEmpty: rows.length === 0, emptyText: this.props.emptyText ?? 'No rows yet.',
+      bg: solo ? '#061716' : 'transparent', pad: solo ? '16px' : '0'
+    };
+  }
+}
+</script>
+</body>
+</html>

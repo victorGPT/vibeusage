@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Stat</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&amp;family=Saira:wght@200;300;400&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div style="box-sizing: border-box; display: flex; flex-direction: column; gap: 8px; min-width: 0; border-left: {{bl}}; padding: {{pad}}; background: {{bg}}; font-family: Barlow, sans-serif; color: #bfe9e1">
+  <sc-if value="{{hasLabel}}" hint-placeholder-val="{{true}}"><dc-import name="Label" text="{{label}}" hint-size="80px,11px"></dc-import></sc-if>
+  <div style="display: flex; align-items: baseline; gap: 8px; min-width: 0">
+    <span style="font: {{vfont}}; color: {{vcolor}}; font-variant-numeric: tabular-nums; white-space: nowrap">{{value}}</span>
+    <sc-if value="{{hasSub}}" hint-placeholder-val="{{false}}"><span style="font: 400 15px/1 Saira, sans-serif; color: #6fa79e; white-space: nowrap">{{sub}}</span></sc-if>
+  </div>
+  <sc-if value="{{hasPct}}" hint-placeholder-val="{{false}}"><dc-import name="Meter" pct="{{pct}}" hint-size="100%,3px"></dc-import></sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"label":{"editor":"text","default":"Last 7 days"},"value":{"editor":"text","default":"195.9M"},"sub":{"editor":"text","default":""},"size":{"editor":"enum","options":["L","S"],"default":"L"},"tone":{"editor":"enum","options":["light","amber"],"default":"light"},"divider":{"editor":"boolean","default":false},"pct":{"editor":"float","default":null},"$preview":{"width":280,"height":96}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const solo = Object.keys(this.props).filter((k) => k[0] !== '$' && k !== 'children').length === 0;
+    const divider = !!this.props.divider;
+    const label = this.props.label ?? (solo ? 'Last 7 days' : '');
+    const sub = this.props.sub ?? '';
+    const pct = this.props.pct;
+    return {
+      label, hasLabel: !!label,
+      value: this.props.value ?? '195.9M',
+      sub, hasSub: !!sub,
+      pct, hasPct: pct !== undefined && pct !== null && pct !== '',
+      vfont: (this.props.size ?? 'L') === 'S' ? '400 18px/1 Saira, sans-serif' : '300 28px/1 Saira, sans-serif',
+      vcolor: (this.props.tone ?? 'light') === 'amber' ? '#e0b04a' : '#e2f8f3',
+      bl: divider ? '1px solid #1f4e48' : '0',
+      pad: solo ? '16px' : (divider ? '0 0 0 16px' : '0'),
+      bg: solo ? '#03100f' : 'transparent'
+    };
+  }
+}
+</script>
+</body>
+</html>

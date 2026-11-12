@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Text</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<p style="box-sizing: border-box; margin: 0; max-width: {{mw}}; background: {{bg}}; padding: {{pad}}; font: {{weight}} {{size}}px/1.5 Barlow, sans-serif; overflow-wrap: anywhere; color: {{color}}">{{text}}</p>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"text":{"editor":"text","default":"13.0M tokens a day. Codex took 58.0% of it."},"size":{"editor":"enum","options":["s","m","l"],"default":"m"},"tone":{"editor":"enum","options":["body","muted","light"],"default":"body"},"weight":{"editor":"enum","options":["500","600"],"default":"500"},"maxCh":{"editor":"int","default":0},"$preview":{"width":600,"height":64}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const solo = Object.keys(this.props).filter((k) => k[0] !== '$' && k !== 'children').length === 0;
+    const Z = { s: 14, m: 15, l: 17 };
+    const C = { body: '#bfe9e1', muted: '#6fa79e', light: '#e2f8f3' };
+    const mc = Number(this.props.maxCh ?? 0);
+    return {
+      text: this.props.text ?? '13.0M tokens a day. Codex took 58.0% of it.',
+      size: Z[this.props.size] || 15, color: C[this.props.tone] || C.body, weight: this.props.weight ?? '500',
+      mw: mc > 0 ? mc + 'ch' : 'none',
+      bg: solo ? '#03100f' : 'transparent', pad: solo ? '16px' : '0'
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Readout</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&amp;family=Saira:wght@200;300;400&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<section aria-label="Total usage" style="position: relative; box-sizing: border-box; width: 100%; min-height: {{minH}}; display: flex; flex-direction: column; overflow: hidden; border-radius: 18px; border: 1px solid #2c6b63; background: radial-gradient(130% 100% at 50% 40%, #0c2c29 0%, #061716 65%, #020807 100%); box-shadow: inset 0 0 40px rgba(127, 217, 203, 0.1); padding: 24px; color: #bfe9e1; font-family: Barlow, sans-serif">
+  <dc-import name="ScreenFx" embedded="{{yes}}" hint-size="0px,0px"></dc-import>
+  <div style="position: relative; display: flex; flex-direction: column; gap: 12px; flex: 1 1 auto">
+    <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 24px">
+      <dc-import name="Label" text="{{kicker}}" hint-size="160px,11px"></dc-import>
+      <sc-if value="{{showTabs}}" hint-placeholder-val="{{true}}">
+        <div style="margin-left: auto">
+          <dc-import name="ToggleGroup" items="{{periods}}" value="{{period}}" on-value-change="{{setPeriod}}" aria-label="Period" hint-size="260px,17px"></dc-import>
+        </div>
+      </sc-if>
+    </div>
+    <dc-import name="Display" text="{{value}}" size="76" hint-size="100%,76px"></dc-import>
+    <div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 12px">
+      <dc-import name="Display" text="{{cost}}" size="28" weight="300" tone="amber" glow="{{no}}" hint-size="120px,28px"></dc-import>
+      <dc-import name="Label" text="Spent at list price" hint-size="140px,11px"></dc-import>
+      <sc-if value="{{showTabs}}" hint-placeholder-val="{{true}}">
+        <dc-import name="Button" label="Cost breakdown" variant="outline" hint-size="140px,32px"></dc-import>
+      </sc-if>
+    </div>
+    <sc-if value="{{showLine}}" hint-placeholder-val="{{true}}"><dc-import name="Text" text="{{line}}" hint-size="100%,22px"></dc-import></sc-if>
+    <sc-if value="{{showTabs}}" hint-placeholder-val="{{true}}">
+      <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); column-gap: 16px; border-top: 1px solid #1f4e48; padding-top: 16px; margin-top: 4px">
+        <sc-for list="{{kinds}}" as="k" hint-placeholder-count="4">
+          <dc-import name="Stat" label="{{k.label}}" value="{{k.v}}" sub="{{k.p}}" pct="{{k.pct}}" divider="{{k.divider}}" hint-size="100%,68px"></dc-import>
+        </sc-for>
+      </div>
+    </sc-if>
+    <sc-if value="{{showBoard}}" hint-placeholder-val="{{false}}">
+      <div style="display: flex; flex-direction: column; gap: 4px; border-top: 1px solid #1f4e48; padding-top: 12px">
+        <dc-import name="Label" text="This week's board" hint-size="140px,11px"></dc-import>
+        <sc-for list="{{board}}" as="r" hint-placeholder-count="3">
+          <dc-import name="RankRow" rank="{{r.rank}}" user="{{r.name}}" value="{{r.v}}" lead="{{r.lead}}" me="{{no}}" hint-size="100%,40px"></dc-import>
+        </sc-for>
+      </div>
+    </sc-if>
+    <div style="margin-top: auto">
+      <dc-import name="Stamp" handle="your_handle" range="{{range}}" hint-size="100%,22px"></dc-import>
+    </div>
+  </div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"mode":{"editor":"enum","options":["dashboard","sample"],"default":"dashboard"},"minH":{"editor":"text","default":"auto"},"$preview":{"width":840,"height":384}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const P = {
+      day: ['Day', '26,100,392', '$8.03', '2026-11-12', '26.1M today. Codex took 61% of it.'],
+      week: ['Week', '195,893,152', '$60.28', '2026-11-06 → 11-12', '28.0M tokens a day this week.'],
+      month: ['Month', '753,104,880', '$231.73', '2026-10-14 → 11-12', '25.1M tokens a day over 30 days.'],
+      total: ['Total', '4,733,386,712', '$1,456.46', '2025-11-13 → 2026-11-12', '13.0M tokens a day. Codex took 58.0% of it.']
+    };
+    const sample = (this.props.mode ?? 'dashboard') === 'sample';
+    const cur = sample ? 'week' : (this.state?.period ?? 'total');
+    const p = P[cur];
+    const n = Number(p[1].replace(/,/g, ''));
+    const abbr = (x) => x >= 1e9 ? (x / 1e9).toFixed(2) + 'B' : x >= 1e6 ? (x / 1e6).toFixed(1) + 'M' : Math.round(x / 1e3) + 'K';
+    const kinds = [['Input', 0.22], ['Output', 0.07], ['Cached input', 0.685], ['Reasoning', 0.025]].map(([label, s], i) => ({
+      label, v: abbr(n * s), p: (s * 100).toFixed(1) + '%', pct: s * 100, divider: i > 0
+    }));
+    return {
+      yes: true, no: false,
+      kicker: sample ? 'Sample account · week' : 'Core index · ' + p[0],
+      value: p[1], cost: p[2], range: p[3], line: p[4], showLine: !sample,
+      periods: Object.keys(P).map((k) => ({ key: k, label: P[k][0] })), period: cur,
+      setPeriod: (k) => this.setState({ period: k }),
+      showTabs: !sample, showBoard: sample, kinds,
+      board: [
+        { rank: '#1', name: 'nullbyte', v: '589.3M', lead: true },
+        { rank: '#2', name: 'kernel_panic', v: '489.7M', lead: false },
+        { rank: '#3', name: 'sudo_rm', v: '407.5M', lead: false }
+      ],
+      minH: this.props.minH ?? 'auto'
+    };
+  }
+}
+</script>
+</body>
+</html>

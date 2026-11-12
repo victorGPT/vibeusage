@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Identity bar</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&amp;family=Saira:wght@200;300;400&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div style="box-sizing: border-box; width: 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; min-height: 72px; padding: 0; background: #03100f; color: #bfe9e1; font-family: Barlow, sans-serif">
+  <div aria-hidden="true" style="width: 36px; height: 36px; box-sizing: border-box; padding: 4px; border: 1px solid #2c6b63; border-radius: 3px; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 1px">
+    <sc-for list="{{pix}}" as="p" hint-placeholder-count="25"><i style="{{p.style}}"></i></sc-for>
+  </div>
+  <dc-import name="Heading" text="{{handle}}" size="xs" level="2" hint-size="140px,26px"></dc-import>
+  <dc-import name="Label" text="Since 2025-11-13 · 326 active days" hint-size="260px,11px"></dc-import>
+  <div style="margin-left: auto; display: flex; align-items: center; gap: 16px">
+    <sc-if value="{{owner}}" hint-placeholder-val="{{true}}">
+      <dc-import name="Switch" label="Public profile" checked="{{on}}" on-checked-change="{{setPublic}}" hint-size="150px,18px"></dc-import>
+      <dc-import name="Button" label="Copy share link" variant="outline" disabled="{{off}}" hint-size="140px,32px"></dc-import>
+    </sc-if>
+    <sc-if value="{{visitor}}" hint-placeholder-val="{{false}}">
+      <dc-import name="Label" text="Public profile · read only" hint-size="200px,11px"></dc-import>
+    </sc-if>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"handle":{"editor":"text","default":"your_handle"},"owner":{"editor":"boolean","default":true},"$preview":{"width":1280,"height":72}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const handle = this.props.handle ?? 'your_handle';
+    const owner = this.props.owner ?? true;
+    const on = this.state?.pub ?? true;
+    let x = 7;
+    for (const c of handle) x = (x * 31 + c.charCodeAt(0)) >>> 0;
+    const pix = [];
+    for (let r = 0; r < 5; r++) for (let c = 0; c < 5; c++) {
+      const col = c < 3 ? c : 4 - c;
+      pix.push({ style: 'display: block; background: ' + (((x >> (r * 3 + col)) & 1) ? '#e0b04a' : 'transparent') });
+    }
+    return { handle, owner, visitor: !owner, pix, on, off: !on, setPublic: (v) => this.setState({ pub: v }) };
+  }
+}
+</script>
+</body>
+</html>

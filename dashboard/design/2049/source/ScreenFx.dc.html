@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Screen material</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>body{margin:0}</style>
+</helmet>
+<div aria-hidden="true" style="position: {{pos}}; inset: 0; width: 100%; height: {{h}}; pointer-events: none; background: {{bg}}; font-family: Barlow, sans-serif; color: #bfe9e1">
+  <div style="position: absolute; inset: 0; background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.22) 0 1px, transparent 1px 3px)"></div>
+  <svg style="position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0.1"><filter id="screenfx-grain"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"></feTurbulence></filter><rect width="100%" height="100%" filter="url(#screenfx-grain)"></rect></svg>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":240,"height":120}}'>
+class Component extends DCLogic {
+  renderVals() {
+    // ponytail: importers pass no props either, so "solo" can't be detected; importer marks itself with embedded
+    const embedded = !!this.props.embedded;
+    return { pos: embedded ? 'absolute' : 'relative', h: embedded ? '100%' : '120px', bg: embedded ? 'transparent' : '#0a2321' };
+  }
+}
+</script>
+</body>
+</html>

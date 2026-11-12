@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Features</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&amp;family=Saira:wght@200;300;400&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<section aria-label="How it works" style="box-sizing: border-box; width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; background: #03100f; color: #bfe9e1; font-family: Barlow, sans-serif">
+  <sc-for list="{{items}}" as="f" hint-placeholder-count="3">
+    <div style="display: flex; flex-direction: column; gap: 8px; min-width: 0; background: #061716; border: 1px solid #1f4e48; border-radius: 8px; padding: 24px">
+      <dc-import name="Label" text="{{f.kicker}}" hint-size="60px,11px"></dc-import>
+      <dc-import name="Heading" text="{{f.title}}" size="xs" level="3" hint-size="100%,26px"></dc-import>
+      <dc-import name="Text" text="{{f.body}}" hint-size="100%,45px"></dc-import>
+    </div>
+  </sc-for>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":220}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      items: [
+        { kicker: 'Install', title: 'Zero manual steps', body: 'One command hooks into every CLI it finds. Numbers show up within minutes.' },
+        { kicker: 'Privacy', title: 'Counts, not content', body: 'Only token totals in half-hour buckets are uploaded. Prompts and code stay local.' },
+        { kicker: 'Compete', title: 'One board for every CLI', body: 'Weekly, monthly and all-time ranks across Codex, Claude Code, Gemini and the rest.' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

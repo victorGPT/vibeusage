@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Spec · Type</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&amp;family=Saira:wght@200;300;400&amp;display=swap">
+<style>body{margin:0;background:#03100f}</style>
+</helmet>
+<div style="box-sizing: border-box; width: 100%; min-height: 100vh; background: #03100f; padding: 32px; font-family: Barlow, sans-serif; color: #bfe9e1">
+  <div style="max-width: 1216px; margin: 0 auto; display: flex; flex-direction: column; gap: 48px">
+    <dc-import name="PageHeader" title="Spec · Type" meta="Label, Heading, Text, Display, Badge — every size × tone" hint-size="100%,96px"></dc-import>
+
+    <section style="display: flex; flex-direction: column; gap: 16px">
+      <dc-import name="Heading" text="Label" size="s" hint-size="100%,28px"></dc-import>
+      <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px 16px">
+        <sc-for list="{{labels}}" as="c" hint-placeholder-count="4">
+          <div style="display: flex; flex-direction: column; gap: 8px; min-width: 0">
+            <dc-import name="Label" text="{{c.cap}}" hint-size="100%,11px"></dc-import>
+            <dc-import name="Label" text="Week rank" tone="{{c.tone}}" hint-size="100%,11px"></dc-import>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 16px">
+      <dc-import name="Heading" text="Heading" size="s" hint-size="100%,28px"></dc-import>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 16px">
+        <sc-for list="{{headings}}" as="c" hint-placeholder-count="12">
+          <div style="display: flex; flex-direction: column; gap: 8px; min-width: 0">
+            <dc-import name="Label" text="{{c.cap}}" hint-size="100%,11px"></dc-import>
+            <dc-import name="Heading" text="Install the tracker" size="{{c.size}}" upper="{{c.upper}}" tone="{{c.tone}}" level="3" hint-size="100%,40px"></dc-import>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 16px">
+      <dc-import name="Heading" text="Text" size="s" hint-size="100%,28px"></dc-import>
+      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px 16px">
+        <sc-for list="{{texts}}" as="c" hint-placeholder-count="9">
+          <div style="display: flex; flex-direction: column; gap: 8px; min-width: 0">
+            <dc-import name="Label" text="{{c.cap}}" hint-size="100%,11px"></dc-import>
+            <dc-import name="Text" text="13.0M tokens a day. Codex took 58.0% of it." size="{{c.size}}" tone="{{c.tone}}" hint-size="100%,22px"></dc-import>
+          </div>
+        </sc-for>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px; min-width: 0">
+        <dc-import name="Label" text="m · body · maxCh 48 · wraps" hint-size="100%,11px"></dc-import>
+        <dc-import name="Text" text="{{longText}}" max-ch="48" hint-size="100%,66px"></dc-import>
+      </div>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 16px">
+      <dc-import name="Heading" text="Display" size="s" hint-size="100%,28px"></dc-import>
+      <div style="display: flex; flex-direction: column; gap: 24px">
+        <sc-for list="{{displays}}" as="c" hint-placeholder-count="6">
+          <div style="display: flex; flex-direction: column; gap: 8px; min-width: 0">
+            <dc-import name="Label" text="{{c.cap}}" hint-size="100%,11px"></dc-import>
+            <dc-import name="Display" text="4,733,386,712" size="{{c.size}}" tone="{{c.tone}}" glow="{{c.glow}}" hint-size="100%,88px"></dc-import>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 16px">
+      <dc-import name="Heading" text="Badge" size="s" hint-size="100%,28px"></dc-import>
+      <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px 16px">
+        <sc-for list="{{badges}}" as="c" hint-placeholder-count="4">
+          <div style="display: flex; flex-direction: column; gap: 8px; min-width: 0">
+            <dc-import name="Label" text="{{c.cap}}" hint-size="100%,11px"></dc-import>
+            <div style="min-width: 0; max-width: 160px"><dc-import name="Badge" text="{{c.text}}" variant="{{c.variant}}" hint-size="80px,20px"></dc-import></div>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":2100}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const headings = [];
+    ['xl', 'l', 'm', 's', 'xs'].forEach((size) => [false, true].forEach((upper) => headings.push({ cap: size + ' · upper ' + (upper ? 'on' : 'off'), size, upper, tone: 'light' })));
+    headings.push({ cap: 'm · amber', size: 'm', upper: false, tone: 'amber' }, { cap: 's · upper · amber', size: 's', upper: true, tone: 'amber' });
+    const texts = [];
+    ['s', 'm', 'l'].forEach((size) => ['body', 'muted', 'light'].forEach((tone) => texts.push({ cap: size + ' · ' + tone, size, tone })));
+    const displays = [];
+    [88, 76, 28].forEach((size) => [true, false].forEach((glow) => displays.push({ cap: size + ' · glow ' + (glow ? 'on' : 'off'), size, glow, tone: 'light' })));
+    displays.push({ cap: '76 · amber · glow on', size: 76, glow: true, tone: 'amber' });
+    return {
+      labels: ['muted', 'accent', 'alert', 'teal'].map((tone) => ({ cap: 'tone · ' + tone, tone })),
+      headings, texts, displays,
+      longText: 'Every token your agents burn is counted locally, summed per model and per project, then synced once a day. Nothing leaves your machine except the totals.',
+      badges: [
+        { cap: 'outline', text: 'Codex', variant: 'outline' },
+        { cap: 'accent', text: 'Leader', variant: 'accent' },
+        { cap: 'outline · long · truncates', text: 'claude-opus-4-1-20250805-thinking', variant: 'outline' },
+        { cap: 'accent · long · truncates', text: 'Top contributor this week', variant: 'accent' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

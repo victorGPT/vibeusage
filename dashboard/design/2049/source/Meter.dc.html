@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Meter</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>body{margin:0}</style>
+</helmet>
+<div style="box-sizing: border-box; width: 100%; background: {{bg}}; padding: {{pad}}; font-family: Barlow, sans-serif; color: #bfe9e1">
+  <div role="img" aria-label="{{aria}}" style="width: 100%; height: {{h}}px; background: #1f4e48">
+    <div style="height: 100%; width: {{w}}%; background: #e0b04a"></div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"pct":{"editor":"range","min":0,"max":100,"step":0.1,"default":58},"height":{"editor":"int","default":3},"$preview":{"width":280,"height":24}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const solo = Object.keys(this.props).filter((k) => k[0] !== '$' && k !== 'children').length === 0;
+    const pct = Math.max(0, Math.min(100, Number(this.props.pct ?? 58)));
+    return { w: pct.toFixed(1), aria: pct.toFixed(1) + '%', h: this.props.height ?? 3, bg: solo ? '#03100f' : 'transparent', pad: solo ? '12px' : '0' };
+  }
+}
+</script>
+</body>
+</html>

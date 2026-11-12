@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Spec · Actions</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&amp;family=Saira:wght@200;300;400&amp;family=JetBrains+Mono:wght@500&amp;display=swap">
+<style>body{margin:0;background:#03100f}</style>
+</helmet>
+<div style="box-sizing: border-box; width: 100%; min-height: 100vh; background: #03100f; padding: 32px; font-family: Barlow, sans-serif; color: #bfe9e1">
+  <div style="max-width: 1216px; margin: 0 auto; display: flex; flex-direction: column; gap: 48px">
+    <dc-import name="PageHeader" title="Spec · Actions" meta="Variant × size × state for every interactive base component" hint-size="100%,96px"></dc-import>
+
+    <section style="display: flex; flex-direction: column; gap: 16px">
+      <dc-import name="Heading" text="Button" size="s" hint-size="100%,28px"></dc-import>
+      <div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 24px 16px">
+        <sc-for list="{{buttons}}" as="c" hint-placeholder-count="30">
+          <div style="display: flex; flex-direction: column; gap: 8px; min-width: 0">
+            <dc-import name="Label" text="{{c.label}}" hint-size="100%,11px"></dc-import>
+            <div><dc-import name="Button" label="{{c.text}}" variant="{{c.variant}}" size="{{c.size}}" disabled="{{c.disabled}}" force-state="{{c.fs}}" hint-size="120px,44px"></dc-import></div>
+          </div>
+        </sc-for>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 24px 16px">
+        <sc-for list="{{links}}" as="c" hint-placeholder-count="3">
+          <div style="display: flex; flex-direction: column; gap: 8px; min-width: 0">
+            <dc-import name="Label" text="{{c.label}}" hint-size="100%,11px"></dc-import>
+            <div><dc-import name="Button" label="Open guide" variant="{{c.variant}}" href="#" hint-size="120px,32px"></dc-import></div>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 16px">
+      <dc-import name="Heading" text="ToggleGroup" size="s" hint-size="100%,28px"></dc-import>
+      <div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 24px 16px">
+        <sc-for list="{{toggles}}" as="c" hint-placeholder-count="5">
+          <div style="display: flex; flex-direction: column; gap: 8px; min-width: 0">
+            <dc-import name="Label" text="{{c.label}}" hint-size="100%,11px"></dc-import>
+            <dc-import name="ToggleGroup" items="{{c.items}}" value="{{c.value}}" force-state="{{c.fs}}" aria-label="{{c.label}}" hint-size="100%,20px"></dc-import>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 16px">
+      <dc-import name="Heading" text="Switch" size="s" hint-size="100%,28px"></dc-import>
+      <div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 24px 16px">
+        <sc-for list="{{switches}}" as="c" hint-placeholder-count="5">
+          <div style="display: flex; flex-direction: column; gap: 8px; min-width: 0">
+            <dc-import name="Label" text="{{c.label}}" hint-size="100%,11px"></dc-import>
+            <div><dc-import name="Switch" label="Public profile" checked="{{c.checked}}" disabled="{{c.disabled}}" force-state="{{c.fs}}" hint-size="160px,20px"></dc-import></div>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 16px">
+      <dc-import name="Heading" text="Select" size="s" hint-size="100%,28px"></dc-import>
+      <div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 24px 16px">
+        <sc-for list="{{selects}}" as="c" hint-placeholder-count="2">
+          <div style="display: flex; flex-direction: column; gap: 8px; min-width: 0">
+            <dc-import name="Label" text="{{c.label}}" hint-size="100%,11px"></dc-import>
+            <div><dc-import name="Select" label="Show" value="{{c.value}}" hint-size="140px,32px"></dc-import></div>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 16px">
+      <dc-import name="Heading" text="Pagination" size="s" hint-size="100%,28px"></dc-import>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 16px">
+        <sc-for list="{{pages}}" as="c" hint-placeholder-count="6">
+          <div style="display: flex; flex-direction: column; gap: 8px; min-width: 0">
+            <dc-import name="Label" text="{{c.label}}" hint-size="100%,11px"></dc-import>
+            <dc-import name="Pagination" page="{{c.page}}" total="{{c.total}}" hint-size="100%,32px"></dc-import>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 16px">
+      <dc-import name="Heading" text="CommandBox" size="s" hint-size="100%,28px"></dc-import>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 16px">
+        <sc-for list="{{commands}}" as="c" hint-placeholder-count="4">
+          <div style="display: flex; flex-direction: column; gap: 8px; min-width: 0">
+            <dc-import name="Label" text="{{c.label}}" hint-size="100%,11px"></dc-import>
+            <dc-import name="CommandBox" cmd="{{c.cmd}}" prefix="{{c.prefix}}" copy-label="{{c.copy}}" force-state="{{c.fs}}" hint-size="100%,48px"></dc-import>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1960}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const states = [['normal', ''], ['hover', 'hover'], ['focus', 'focus'], ['active', 'active'], ['disabled', '']];
+    const buttons = [];
+    ['default', 'outline', 'ghost'].forEach((variant) => ['default', 'lg'].forEach((size) => states.forEach(([st, fs]) => {
+      buttons.push({ label: variant + ' · ' + size + ' · ' + st, text: variant === 'default' ? 'Sign in' : 'Copy link', variant, size, fs, disabled: st === 'disabled' });
+    })));
+    const two = [{ key: 'cli', label: 'By CLI' }, { key: 'model', label: 'By model' }];
+    const four = [{ key: 'day', label: 'Day' }, { key: 'week', label: 'Week' }, { key: 'month', label: 'Month' }, { key: 'total', label: 'Total' }];
+    return {
+      buttons,
+      links: ['default', 'outline', 'ghost'].map((variant) => ({ label: variant + ' · href (link)', variant })),
+      toggles: [
+        { label: '2 items · first', items: two, value: 'cli', fs: '' },
+        { label: '2 items · last', items: two, value: 'model', fs: '' },
+        { label: '4 items · first', items: four, value: 'day', fs: '' },
+        { label: '4 items · last', items: four, value: 'total', fs: '' },
+        { label: '4 items · focus', items: four, value: 'week', fs: 'focus' }
+      ],
+      switches: [
+        { label: 'on', checked: true, disabled: false, fs: '' },
+        { label: 'off', checked: false, disabled: false, fs: '' },
+        { label: 'disabled · on', checked: true, disabled: true, fs: '' },
+        { label: 'disabled · off', checked: false, disabled: true, fs: '' },
+        { label: 'focus', checked: true, disabled: false, fs: 'focus' }
+      ],
+      selects: [{ label: 'default · top 3', value: '3' }, { label: 'selected · top 10', value: '10' }],
+      pages: [
+        { label: '3 pages · first', page: 1, total: 3 }, { label: '38 pages · first', page: 1, total: 38 },
+        { label: '3 pages · middle', page: 2, total: 3 }, { label: '38 pages · middle', page: 19, total: 38 },
+        { label: '3 pages · last', page: 3, total: 3 }, { label: '38 pages · last', page: 38, total: 38 }
+      ],
+      commands: [
+        { label: 'command', cmd: 'npx --yes vibeusage init', prefix: '$', copy: 'Copy', fs: '' },
+        { label: 'link · ↳ prefix', cmd: 'vibeusage.cc/agent-install', prefix: '↳', copy: 'Copy link', fs: '' },
+        { label: 'long command · wraps', cmd: 'npx --yes vibeusage sync --rebuild=claude --from-openclaw --since 2025-11-13T00:00:00Z', prefix: '$', copy: 'Copy', fs: '' },
+        { label: 'copied', cmd: 'npx --yes vibeusage init', prefix: '$', copy: 'Copy', fs: 'copied' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

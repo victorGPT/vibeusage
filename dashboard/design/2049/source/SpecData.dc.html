@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Spec · Data</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&amp;family=Saira:wght@200;300;400&amp;display=swap">
+<style>body{margin:0;background:#03100f}</style>
+</helmet>
+<div style="box-sizing: border-box; width: 100%; min-height: 100vh; background: #03100f; padding: 32px; font-family: Barlow, sans-serif; color: #bfe9e1">
+  <div style="max-width: 1216px; margin: 0 auto; display: flex; flex-direction: column; gap: 48px">
+    <dc-import name="PageHeader" title="Spec · Data" meta="Stat, Meter, Delta, ShareRow, RankRow — edge values included" hint-size="100%,96px"></dc-import>
+
+    <section style="display: flex; flex-direction: column; gap: 16px">
+      <dc-import name="Heading" text="Stat" size="s" hint-size="100%,28px"></dc-import>
+      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px 16px">
+        <sc-for list="{{stats}}" as="c" hint-placeholder-count="9">
+          <div style="display: flex; flex-direction: column; gap: 8px; min-width: 0">
+            <dc-import name="Text" text="{{c.cap}}" size="s" tone="muted" hint-size="100%,20px"></dc-import>
+            <dc-import name="Stat" label="Last 7 days" value="{{c.value}}" size="{{c.size}}" sub="{{c.sub}}" pct="{{c.pct}}" divider="{{c.divider}}" tone="{{c.tone}}" hint-size="100%,64px"></dc-import>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 16px">
+      <dc-import name="Heading" text="Meter" size="s" hint-size="100%,28px"></dc-import>
+      <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px 16px">
+        <sc-for list="{{meters}}" as="c" hint-placeholder-count="4">
+          <div style="display: flex; flex-direction: column; gap: 8px; min-width: 0">
+            <dc-import name="Label" text="{{c.cap}}" hint-size="100%,11px"></dc-import>
+            <dc-import name="Meter" pct="{{c.pct}}" hint-size="100%,3px"></dc-import>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 16px">
+      <dc-import name="Heading" text="Delta" size="s" hint-size="100%,28px"></dc-import>
+      <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px 16px">
+        <sc-for list="{{deltas}}" as="c" hint-placeholder-count="4">
+          <div style="display: flex; flex-direction: column; gap: 8px; min-width: 0">
+            <dc-import name="Label" text="{{c.cap}}" hint-size="100%,11px"></dc-import>
+            <div><dc-import name="Delta" value="{{c.value}}" suffix="{{c.suffix}}" hint-size="120px,15px"></dc-import></div>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 16px">
+      <dc-import name="Heading" text="ShareRow" size="s" hint-size="100%,28px"></dc-import>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 16px">
+        <sc-for list="{{shares}}" as="c" hint-placeholder-count="2">
+          <div style="display: flex; flex-direction: column; gap: 8px; min-width: 0">
+            <dc-import name="Label" text="{{c.cap}}" hint-size="100%,11px"></dc-import>
+            <dc-import name="ShareRow" label="{{c.label}}" value="{{c.value}}" pct-text="{{c.pct}}" bar="{{c.bar}}" sub="{{c.sub}}" hint-size="100%,72px"></dc-import>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 16px">
+      <dc-import name="Heading" text="RankRow" size="s" hint-size="100%,28px"></dc-import>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 40px">
+        <sc-for list="{{ranks}}" as="c" hint-placeholder-count="6">
+          <div style="display: flex; flex-direction: column; gap: 8px; min-width: 0">
+            <dc-import name="Label" text="{{c.cap}}" hint-size="100%,11px"></dc-import>
+            <dc-import name="RankRow" rank="{{c.rank}}" user="{{c.user}}" value="{{c.value}}" delta="{{c.delta}}" me="{{c.me}}" lead="{{c.lead}}" hint-size="100%,40px"></dc-import>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1400}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const s = (cap, o) => Object.assign({ cap, value: '195.9M', size: 'L', sub: '', pct: null, divider: false, tone: 'light' }, o);
+    const r = (cap, o) => Object.assign({ cap, rank: '#4', user: 'night_shift_dev', value: '312.4M', delta: 3, me: false, lead: false }, o);
+    return {
+      stats: [
+        s('L', {}), s('S', { size: 'S' }), s('L · divider', { divider: true }),
+        s('L · sub', { sub: '+12% wk' }), s('L · pct 58', { pct: 58 }), s('L · amber', { tone: 'amber' }),
+        s('L · long value', { value: '21,410,592,118' }), s('S · long value · divider', { size: 'S', value: '21,410,592,118', divider: true }), s('L · value 0', { value: '0', pct: 0 })
+      ],
+      meters: [0, 3, 50, 100].map((pct) => ({ cap: 'pct ' + pct, pct })),
+      deltas: [
+        { cap: '+3', value: 3, suffix: '' }, { cap: '−2', value: -2, suffix: '' },
+        { cap: '0', value: 0, suffix: '' }, { cap: '−2 · suffix', value: -2, suffix: 'vs last week' }
+      ],
+      shares: [
+        { cap: 'normal', label: 'Codex', value: '2.75B', pct: '58.0%', bar: 100, sub: 'gpt-5.2-codex 64%   gpt-5.2 18%' },
+        { cap: 'long name · truncates', label: 'claude-opus-4-1-20250805-thinking via openrouter-proxy', value: '412.0M', pct: '8.7%', bar: 15, sub: '' }
+      ],
+      ranks: [
+        r('normal', {}),
+        r('me', { rank: '#7', user: 'your_handle · you', value: '195.9M', delta: -2, me: true }),
+        r('lead', { rank: '#1', user: 'tokenfurnace', value: '4.73B', delta: 0, lead: true }),
+        r('lead + me', { rank: '#1', user: 'your_handle · you', value: '4.73B', delta: 1, me: true, lead: true }),
+        r('long name · truncates', { user: 'an_unreasonably_long_handle_that_keeps_going_forever' }),
+        r('no delta', { rank: '#12', user: 'new_here', value: '8.1M', delta: null })
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

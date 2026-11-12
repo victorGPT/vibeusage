@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Rank row</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&amp;family=Saira:wght@200;300;400&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div style="box-sizing: border-box; display: flex; align-items: center; gap: 12px; min-height: 40px; padding: {{pad}}; margin: {{margin}}; background: {{bg}}; border-top: {{bt}}; border-bottom: 1px solid #1f4e48; font-family: Barlow, sans-serif; color: #bfe9e1">
+  <span style="width: 40px; font: 400 18px/1 Saira, sans-serif; font-variant-numeric: tabular-nums; color: {{rankColor}}">{{rank}}</span>
+  <span style="flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: 8px; font: 500 15px/1 Barlow, sans-serif; color: {{nameColor}}">
+    <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{user}}</span>
+    <sc-if value="{{lead}}" hint-placeholder-val="{{false}}"><dc-import name="Badge" text="Leader" variant="accent" hint-size="56px,16px"></dc-import></sc-if>
+  </span>
+  <sc-if value="{{hasDelta}}" hint-placeholder-val="{{false}}"><span style="width: 44px; text-align: right"><dc-import name="Delta" value="{{delta}}" hint-size="32px,11px"></dc-import></span></sc-if>
+  <span style="width: 72px; text-align: right; font: 400 18px/1 Saira, sans-serif; font-variant-numeric: tabular-nums; color: {{valueColor}}">{{value}}</span>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"rank":{"editor":"text","default":"#7"},"user":{"editor":"text","default":"your_handle · you"},"value":{"editor":"text","default":"195.9M"},"delta":{"editor":"int","default":-2},"me":{"editor":"boolean","default":true},"lead":{"editor":"boolean","default":false},"$preview":{"width":560,"height":48}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const solo = Object.keys(this.props).filter((k) => k[0] !== '$' && k !== 'children').length === 0;
+    const me = this.props.me ?? solo;
+    const lead = !!this.props.lead;
+    const delta = this.props.delta ?? (solo ? -2 : null);
+    const ink = me ? '#e0b04a' : null;
+    return {
+      rank: this.props.rank ?? '#7', user: this.props.user ?? 'your_handle · you', value: this.props.value ?? '195.9M',
+      lead, delta, hasDelta: delta !== null && delta !== undefined && delta !== '',
+      rankColor: ink || '#6fa79e', nameColor: ink || '#e2f8f3', valueColor: ink || '#bfe9e1',
+      // 所有行统一 12px 左右内边距，“我”的高亮不再靠负边距外扩
+      pad: '0 12px', margin: '0',
+      bg: me ? (solo ? '#1a1f12' : 'rgba(224, 176, 74, 0.08)') : (solo ? '#03100f' : 'transparent'),
+      bt: lead ? '1px solid #7fd9cb' : '0'
+    };
+  }
+}
+</script>
+</body>
+</html>

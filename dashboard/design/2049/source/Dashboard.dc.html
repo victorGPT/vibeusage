@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Dashboard</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&amp;family=Saira:wght@200;300;400&amp;family=JetBrains+Mono:wght@500&amp;display=swap">
+<style>body{margin:0;background:#03100f}</style>
+</helmet>
+<div style="box-sizing: border-box; width: 100%; min-height: 100vh; background: #03100f; color: #bfe9e1; font-family: Barlow, sans-serif; padding: 0 32px 48px">
+  <div style="max-width: 1216px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px">
+    <dc-import name="TopNav" active="dashboard" signed-in="{{yes}}" hint-size="100%,80px"></dc-import>
+    <dc-import name="IdentityBar" handle="your_handle" owner="{{yes}}" hint-size="100%,72px"></dc-import>
+    <div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: stretch">
+      <div style="flex: 1 1 calc((100% - 176px) * 8 / 12 + 112px); min-width: min(100%, 480px)"><dc-import name="Readout" mode="dashboard" min-h="384px" hint-size="100%,384px"></dc-import></div>
+      <div style="flex: 1 1 calc((100% - 176px) * 4 / 12 + 48px); min-width: min(100%, 300px)"><dc-import name="RankRail" min-h="384px" hint-size="100%,384px"></dc-import></div>
+    </div>
+    <div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start">
+      <div style="flex: 1 1 calc((100% - 176px) * 6 / 12 + 80px); min-width: min(100%, 420px)"><dc-import name="Models" min-h="704px" hint-size="100%,704px"></dc-import></div>
+      <div style="flex: 1 1 calc((100% - 176px) * 6 / 12 + 80px); min-width: min(100%, 420px); display: flex; flex-direction: column; gap: 16px">
+        <dc-import name="DotHeatmap" min-h="264px" hint-size="100%,264px"></dc-import>
+        <dc-import name="Trend" min-h="424px" hint-size="100%,424px"></dc-import>
+      </div>
+    </div>
+    <dc-import name="Projects" hint-size="100%,240px"></dc-import>
+    <dc-import name="DailyTable" hint-size="100%,540px"></dc-import>
+    <dc-import name="PageFooter" left="Synced 4 min ago · UTC" right="v0.7.1" hint-size="100%,28px"></dc-import>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":2080}}'>
+class Component extends DCLogic {
+  renderVals() { return { yes: true }; }
+}
+</script>
+</body>
+</html>
