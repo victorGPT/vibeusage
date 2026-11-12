@@ -1,3 +1,5 @@
+import type { CSSProperties } from "react";
+
 import { cn } from "#src/lib/utils.ts";
 
 const SIZE = {
@@ -16,6 +18,9 @@ const TONE = {
   alert: ["text-destructive", "text-shadow-display-glow-alert"],
 } as const;
 
+// Main-screen totals step down to fit their card on one line; ranks are short and sit beside a Delta.
+const FIT = { 76: "--text-screen-l", 64: "--text-screen-s" } as const;
+
 type DisplayProps = {
   text: string;
   size?: keyof typeof SIZE;
@@ -27,17 +32,21 @@ type DisplayProps = {
 // SSOT: design/2049/source/Display.dc.html. The one big number on a main screen.
 export function Display({ text, size = 76, weight = 200, tone = "light", glow = true }: DisplayProps) {
   const [color, shadow] = TONE[tone];
-  return (
+  const fit = size in FIT ? FIT[size as keyof typeof FIT] : null;
+  const number = (
     <div
       className={cn(
         "font-display tracking-[0.01em] tabular-nums wrap-anywhere",
         SIZE[size],
+        fit && "text-[length:min(var(--fit-max),calc(100cqi/var(--fit-chars)*1.6))]/none",
         WEIGHT[weight],
         color,
         glow && shadow,
       )}
+      style={fit ? ({ "--fit-max": `var(${fit})`, "--fit-chars": text.length } as CSSProperties) : undefined}
     >
       {text}
     </div>
   );
+  return fit ? <div className="@container w-full">{number}</div> : number;
 }
