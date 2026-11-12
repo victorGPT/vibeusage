@@ -1,0 +1,102 @@
+import React from "react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+import { getMockLeaderboard } from "../lib/mock-data";
+import { LeaderboardPage } from "./LeaderboardPage.jsx";
+
+const api = vi.hoisted(() => ({ getLeaderboard: vi.fn() }));
+vi.mock("../lib/vibeusage-api", async (importOriginal) => ({
+  ...(await importOriginal()),
+  getLeaderboard: api.getLeaderboard,
+}));
+
+const ME = getMockLeaderboard({ period: "week" }).me;
+
+function renderPage() {
+  return render(
+    <MemoryRouter initialEntries={["/leaderboard?mock=1"]}>
+      <LeaderboardPage baseUrl="http://x" signedIn currentIdentity={{ displayName: "victor" }} />
+    </MemoryRouter>,
+  );
+}
+
+const regionNames = () => screen.getAllByRole("region").map((r) => r.getAttribute("aria-label"));
+const region = (name) => screen.getByRole("region", { name });
+const table = () => region(/^All users/);
+
+beforeEach(() => {
+  window.history.pushState({}, "", "/leaderboard?mock=1");
+  api.getLeaderboard.mockImplementation(async (args) => getMockLeaderboard(args));
+});
+
+afterEach(() => {
+  api.getLeaderboard.mockReset();
+});
+
+describe("LeaderboardPage", () => {
+  it("shows MyRank and Top 10 side by side, then the full table", async () => {
+    renderPage();
+    await screen.findByRole("region", { name: /^All users · Week · 250 ranked$/ });
+    expect(regionNames()).toEqual(["My rank · Week · all models", "Top 10 · Week", "All users · Week · 250 ranked"]);
+    expect(screen.getByRole("heading", { level: 1, name: "LEADERBOARD" })).toBeTruthy();
+  });
+
+  it("shows three neighbours on each side of my rank", async () => {
+    renderPage();
+    const myRank = await screen.findByRole("region", { name: /^My rank/ });
+    await waitFor(() => expect(within(myRank).getByText(`#${ME.rank - 3}`)).toBeTruthy());
+    expect(within(myRank).getByText(`#${ME.rank + 3}`)).toBeTruthy();
+    expect(within(myRank).getByText("victor · you")).toBeTruthy();
+  });
+
+  it("pins my row under the table from page 2 on and keeps Top 10 on the leaders", async () => {
+    renderPage();
+    await screen.findByText("Page 1 of 13");
+    fireEvent.click(within(table()).getByRole("button", { name: "2" }));
+    await screen.findByText("Page 2 of 13");
+    await waitFor(() => expect(within(table()).getByText("#21")).toBeTruthy());
+    const pinned = table().querySelector("tfoot");
+    expect(within(pinned).getByText("victor · you")).toBeTruthy();
+    expect(within(pinned).getByText(`#${ME.rank}`)).toBeTruthy();
+    expect(within(region(/^Top 10/)).getByText("#1")).toBeTruthy();
+    expect(within(region(/^Top 10/)).queryByText("#21")).toBeNull();
+  });
+
+  it("jumps to the page that holds my row", async () => {
+    renderPage();
+    fireEvent.click(await screen.findByRole("button", { name: `Jump to me · #${ME.rank}` }));
+    const myPage = Math.ceil(ME.rank / 20);
+    await screen.findByText(`Page ${myPage} of 13`);
+    await waitFor(() => expect(table().querySelector("tbody").textContent).toContain("victor · you"));
+    expect(table().querySelector("tfoot")).toBeNull();
+  });
+
+  it("refetches every block for the chosen metric and names it in MyRank", async () => {
+    renderPage();
+    await screen.findByText("Page 1 of 13");
+    api.getLeaderboard.mockClear();
+    fireEvent.click(screen.getByRole("button", { name: "GPT" }));
+    await screen.findByRole("region", { name: "My rank · Week · GPT" });
+    await waitFor(() => expect(api.getLeaderboard).toHaveBeenCalledWith(expect.objectContaining({ offset: 0, limit: 20, metric: "gpt" })));
+    expect(api.getLeaderboard.mock.calls.every(([args]) => args.metric === "gpt")).toBe(true);
+  });
+
+  it("refetches every block for the chosen period", async () => {
+    renderPage();
+    await screen.findByText("Page 1 of 13");
+    api.getLeaderboard.mockClear();
+    fireEvent.click(screen.getByRole("button", { name: "Month" }));
+    await screen.findByRole("region", { name: /^All users · Month/ });
+    await waitFor(() => expect(api.getLeaderboard.mock.calls.length).toBeGreaterThanOrEqual(3));
+    expect(api.getLeaderboard.mock.calls.every(([args]) => args.period === "month")).toBe(true);
+  });
+
+  it("offers a retry when the board fails to load", async () => {
+    api.getLeaderboard.mockRejectedValue(new Error("boom"));
+    renderPage();
+    fireEvent.click(await screen.findByRole("button", { name: "Retry" }));
+    await waitFor(() => expect(api.getLeaderboard.mock.calls.length).toBeGreaterThan(1));
+  });
+});

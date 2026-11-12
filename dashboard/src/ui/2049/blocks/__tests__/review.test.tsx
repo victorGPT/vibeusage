@@ -189,3 +189,17 @@ describe("DotHeatmap", () => {
     expect(screen.getByText("Dot size = tokens that day")).toBeTruthy();
   });
 });
+
+describe("MyRank metric", () => {
+  const me = { rank: 2, total_tokens: 50 };
+  const entries = [1, 2, 3].map((rank) => ({ rank, display_name: `u${rank}`, total_tokens: 100 - rank }));
+
+  it("names the metric the ranks were sorted by", () => {
+    const { rerender } = render(
+      <MyRank me={me} entries={entries} totalEntries={3} period="week" metric="gpt" from="2026-11-06" to="2026-11-12" handle="h" />,
+    );
+    expect(screen.getByRole("region", { name: "My rank · Week · GPT" })).toBeTruthy();
+    rerender(<MyRank me={me} entries={entries} totalEntries={3} period="week" metric="all" from="2026-11-06" to="2026-11-12" handle="h" />);
+    expect(screen.getByRole("region", { name: "My rank · Week · all models" })).toBeTruthy();
+  });
+});

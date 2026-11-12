@@ -1,27 +1,19 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { BackendStatus } from "../components/BackendStatus.jsx";
 import { isAccessTokenReady, resolveAuthAccessToken } from "../lib/auth-token";
 import { copy } from "../lib/copy";
-import { toDisplayNumber } from "../lib/format";
 import { isMockEnabled } from "../lib/mock-data";
 import { getLeaderboardProfile } from "../lib/vibeusage-api";
-import { AsciiBox } from "../ui/foundation/AsciiBox.jsx";
-import { MatrixButton } from "../ui/foundation/MatrixButton.jsx";
-import { MatrixShell } from "../ui/foundation/MatrixShell.jsx";
-import { GithubStar } from "../ui/matrix-a/components/GithubStar.jsx";
-
-function normalizeProfileError(err) {
-  if (!err) return copy("shared.error.prefix", { error: copy("leaderboard.error.unknown") });
-  const msg = err?.message || String(err);
-  const safe = String(msg || "").trim() || copy("leaderboard.error.unknown");
-  return copy("shared.error.prefix", { error: safe });
-}
-
-function normalizeName(value) {
-  if (typeof value !== "string") return "";
-  return value.trim();
-}
+import { Label } from "../ui/2049/base/Label.tsx";
+import { PageHeader } from "../ui/2049/base/PageHeader.tsx";
+import { Stat } from "../ui/2049/base/Stat.tsx";
+import { abbr, range } from "../ui/2049/blocks/format.ts";
+import { IdentityBar } from "../ui/2049/blocks/IdentityBar.tsx";
+import { displayName, periodLabel, rankText } from "../ui/2049/blocks/shared.ts";
+import { StateScreen } from "../ui/2049/blocks/StateScreen.tsx";
+import { TopNav } from "../ui/2049/blocks/TopNav.tsx";
+import { Card } from "../ui/shadcn/card.tsx";
+import { GITHUB_URL } from "./LeaderboardPage.jsx";
 
 function normalizePeriod(value) {
   if (typeof value !== "string") return null;
@@ -59,29 +51,7 @@ export function LeaderboardProfilePage({
   }, [location?.search]);
   const periodSearch = location?.search || "";
 
-  let headerStatus = null;
-  if (authTokenAllowed && authTokenReady) {
-    headerStatus = <BackendStatus baseUrl={baseUrl} accessToken={effectiveAuthToken} />;
-  }
-
-  const headerRight = (
-    <div className="ml-auto flex w-max min-w-max items-center gap-2 sm:gap-3 md:gap-4">
-      <MatrixButton as="a" size="header" href={`/leaderboard${periodSearch}`}>
-        {copy("leaderboard.profile.nav.back")}
-      </MatrixButton>
-      <GithubStar isFixed={false} size="header" className="hidden sm:inline-flex" />
-      {signedIn ? (
-        <MatrixButton onClick={signOut} size="header">
-          {copy("dashboard.sign_out")}
-        </MatrixButton>
-      ) : (
-        <MatrixButton as="a" size="header" href={signInUrl}>
-          {copy("shared.button.sign_in")}
-        </MatrixButton>
-      )}
-    </div>
-  );
-
+  const [reloadToken, setReloadToken] = useState(0);
   const [profileState, setProfileState] = useState(() => ({
     loading: false,
     error: null,
@@ -108,112 +78,70 @@ export function LeaderboardProfilePage({
       setProfileState({ loading: false, error: null, data });
     })().catch((err) => {
       if (!active) return;
-      setProfileState({ loading: false, error: normalizeProfileError(err), data: null });
+      setProfileState({ loading: false, error: err || new Error("unknown"), data: null });
     });
     return () => {
       active = false;
       controller.abort();
     };
-  }, [authTokenAllowed, authTokenReady, baseUrl, effectiveAuthToken, mockEnabled, period, userId]);
+  }, [authTokenAllowed, authTokenReady, baseUrl, effectiveAuthToken, mockEnabled, period, reloadToken, userId]);
 
   const data = profileState.data;
-  const from = data?.from || null;
-  const to = data?.to || null;
-  const generatedAt = data?.generated_at || null;
   const entry = data?.entry || null;
-
-  const displayName = normalizeName(entry?.display_name) || copy("leaderboard.anon_label");
-  const weekLabel = copy("leaderboard.period.week");
-  const monthLabel = copy("leaderboard.period.month");
-  const totalLabel = copy("leaderboard.period.total");
-  const periodLabel = period === "month" ? monthLabel : period === "total" ? totalLabel : weekLabel;
+  const notFound = !userId || profileState.error?.status === 404 || (data && !entry);
+  const name = entry ? displayName(entry) : null;
+  const kicker = copy("leaderboard.profile.card.subtitle", { period: periodLabel(period) });
+  const stats = entry
+    ? [
+        [copy("leaderboard.column.rank"), rankText(entry.rank)],
+        [copy("daily.sort.total.label"), abbr(entry.total_tokens)],
+        [copy("leaderboard.metric.gpt"), abbr(entry.gpt_tokens)],
+        [copy("leaderboard.metric.claude"), abbr(entry.claude_tokens)],
+        [copy("ui2049.rank_table.other"), abbr(entry.other_tokens)],
+      ]
+    : [];
 
   let body = null;
-  if (!userId) {
-    body = (
-      <div className="px-4">
-        <p className="text-micro uppercase text-ink-muted mt-0">{copy("leaderboard.empty")}</p>
-      </div>
-    );
-  } else if (profileState.loading) {
-    body = (
-      <div className="px-4">
-        <p className="text-micro uppercase text-ink-muted mt-0">{copy("leaderboard.loading")}</p>
-      </div>
-    );
+  if (notFound) {
+    body = <StateScreen variant="invalid" />;
   } else if (profileState.error) {
-    body = (
-      <div className="px-4">
-        <p className="text-micro uppercase text-ink-muted mt-0">{profileState.error}</p>
-      </div>
-    );
-  } else if (entry) {
-    body = (
-      <div className="w-full overflow-x-auto">
-        <table className="w-full text-left text-data">
-          <thead className="uppercase text-ink-muted tracking-caps text-micro">
-            <tr className="border-b border-ink-line">
-              <th className="px-4 py-3">{copy("leaderboard.column.rank")}</th>
-              <th className="px-4 py-3">{copy("leaderboard.column.total")}</th>
-              <th className="px-4 py-3">{copy("leaderboard.column.gpt")}</th>
-              <th className="px-4 py-3">{copy("leaderboard.column.claude")}</th>
-              <th className="px-4 py-3">{copy("leaderboard.column.other")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr className="border-b border-ink-line bg-transparent">
-              <td className="px-4 py-3 font-bold">
-                {entry?.rank ?? copy("shared.placeholder.short")}
-              </td>
-              <td className="px-4 py-3">{toDisplayNumber(entry?.total_tokens)}</td>
-              <td className="px-4 py-3">{toDisplayNumber(entry?.gpt_tokens)}</td>
-              <td className="px-4 py-3">{toDisplayNumber(entry?.claude_tokens)}</td>
-              <td className="px-4 py-3">{toDisplayNumber(entry?.other_tokens)}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    );
+    body = <StateScreen variant="error" onRetry={() => setReloadToken((v) => v + 1)} />;
+  } else if (!entry) {
+    body = <StateScreen variant="loading" />;
   } else {
     body = (
-      <div className="px-4">
-        <p className="text-micro uppercase text-ink-muted mt-0">{copy("leaderboard.empty")}</p>
-      </div>
+      <>
+        <IdentityBar handle={name} owner={false} />
+        <Card role="region" aria-label={kicker} className="gap-6">
+          <Label text={kicker} />
+          <div className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-5">
+            {stats.map(([label, value]) => (
+              <Stat key={label} label={label} value={value} />
+            ))}
+          </div>
+        </Card>
+      </>
     );
   }
 
   return (
-    <MatrixShell headerStatus={headerStatus} headerRight={headerRight}>
-      <div className="max-w-4xl mx-auto flex flex-col gap-6">
-        <div className="flex flex-col gap-2">
-          <div className="flex flex-wrap items-baseline justify-between gap-3">
-            <h1 className="text-heading md:text-display-3 font-black tracking-tight glow-text">
-              {displayName}
-            </h1>
-            <div className="text-micro uppercase tracking-caps text-ink-text">
-              {period === "total"
-                ? copy("leaderboard.range.total")
-                : from && to
-                  ? copy("leaderboard.range", { period: periodLabel, from, to })
-                  : copy("leaderboard.range_loading", { period: periodLabel })}
-            </div>
-          </div>
-          {generatedAt ? (
-            <div className="text-micro uppercase text-ink-muted">
-              {copy("leaderboard.generated_at", { ts: generatedAt })}
-            </div>
-          ) : null}
-        </div>
-
-        <AsciiBox
-          title={copy("leaderboard.profile.card.title")}
-          subtitle={copy("leaderboard.profile.card.subtitle", { period: periodLabel })}
-          className=""
-          bodyClassName="px-0"
-        >
-          {body}
-        </AsciiBox>
+    <main className="min-h-screen bg-background px-4 pb-12 font-sans text-copy-m font-medium text-foreground md:px-8">
+      <div className="mx-auto flex max-w-304 flex-col gap-4">
+        <TopNav
+          active={null}
+          signedIn={Boolean(signedIn)}
+          dashboardHref="/"
+          leaderboardHref={`/leaderboard${periodSearch}`}
+          githubHref={GITHUB_URL}
+          onSignIn={() => window.location.assign(signInUrl)}
+          onSignOut={signOut}
+        />
+        <PageHeader
+          title={name ?? copy("leaderboard.title")}
+          meta={data?.from && data?.to ? range(data.from, data.to) : undefined}
+        />
+        {body}
       </div>
-    </MatrixShell>
+    </main>
   );
 }
