@@ -5,6 +5,9 @@ import { formatDateUTC } from "../lib/date-range";
 import { fetchGithubRepoMeta } from "../lib/github-repo-meta";
 import { isScreenshotModeEnabled } from "../lib/screenshot-mode";
 import { CtaBand } from "../ui/2049/base/CtaBand";
+import { Heading } from "../ui/2049/base/Heading";
+import { Label } from "../ui/2049/base/Label";
+import { Text } from "../ui/2049/base/Text";
 import { Features } from "../ui/2049/blocks/Features";
 import { LandingHero } from "../ui/2049/blocks/LandingHero";
 import { Readout } from "../ui/2049/blocks/Readout";
@@ -95,6 +98,19 @@ export function LandingPage({ signUpUrl }) {
           </div>
         </div>
         <Features />
+        <section className="flex max-w-[72ch] flex-col gap-4">
+          <Label text={copy("landing.features.title")} />
+          <Heading text={copy("landing.seo.title")} size="s" level={2} />
+          <Text text={copy("landing.seo.summary")} tone="muted" />
+          <ul className="m-0 flex list-none flex-col gap-2 p-0">
+            {["point1", "point2", "point3"].map((k) => (
+              <li key={k}>
+                <Text text={copy(`landing.seo.${k}`)} tone="muted" />
+              </li>
+            ))}
+          </ul>
+          <Text text={copy("landing.seo.roadmap")} size="s" tone="muted" />
+        </section>
         <CtaBand
           title={copy("ui2049.landing.cta_title")}
           buttonLabel={copy("ui2049.state_screen.sign_in")}
