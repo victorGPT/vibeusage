@@ -70,8 +70,11 @@ describe("pinnedMe", () => {
   it("pins me when my rank is not on the page", () => {
     expect(pinnedMe([1, 2].map(entry), me)).toBe(me);
   });
-  it("does not pin when my rank is on the page, I am unranked, or signed out", () => {
-    expect(pinnedMe([200, 201].map(entry), me)).toBeNull();
+  it("pins me when someone else tied at my rank is on the page", () => {
+    expect(pinnedMe([200, 201].map(entry), me)).toBe(me);
+  });
+  it("does not pin when my row is on the page, I am unranked, or signed out", () => {
+    expect(pinnedMe([{ ...entry(201), is_me: true }], me)).toBeNull();
     expect(pinnedMe([1].map(entry), { rank: null, total_tokens: 0 })).toBeNull();
     expect(pinnedMe([1].map(entry), null)).toBeNull();
   });

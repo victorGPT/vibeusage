@@ -10,8 +10,9 @@ export function neighbours(entries: LeaderboardEntry[], meRank: number | null, n
 }
 
 // My row is pinned under the table whenever I am ranked but not on the page shown.
+// Ranks tie, so a row at my rank may be someone else's: only is_me says the row is mine.
 export function pinnedMe(entries: LeaderboardEntry[], me: LeaderboardMe | null) {
-  if (me?.rank == null || entries.some((e) => e.rank === me.rank)) return null;
+  if (me?.rank == null || entries.some((e) => e.is_me)) return null;
   return me;
 }
 
