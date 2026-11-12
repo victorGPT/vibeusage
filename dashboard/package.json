@@ -52,5 +52,10 @@
     "typescript": "^5.9.3",
     "vite": "^7.3.0",
     "vitest": "^2.1.0"
+  },
+  "overrides": {
+    "react-router-dom": {
+      "react-router": "8.3.0"
+    }
   }
 }
