@@ -60,4 +60,16 @@ describe("LeaderboardProfilePage", () => {
     renderPage();
     expect(await screen.findByRole("button", { name: "Retry" })).toBeTruthy();
   });
+
+  it("asks an expired session to sign in again instead of loading forever", async () => {
+    window.history.pushState({}, "", "/leaderboard/u/u-1");
+    render(
+      <MemoryRouter initialEntries={["/leaderboard/u/u-1"]}>
+        <LeaderboardProfilePage baseUrl="http://x" signedIn sessionSoftExpired userId="u-1" />
+      </MemoryRouter>,
+    );
+    expect(await screen.findByText("Your session expired.")).toBeTruthy();
+    expect(screen.getByRole("button", { name: /sign in/i })).toBeTruthy();
+    expect(api.getLeaderboardProfile).not.toHaveBeenCalled();
+  });
 });

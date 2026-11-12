@@ -25,8 +25,8 @@ export function RankList({ entries, period, metric = "all", handle, profileHref 
     <Card role="region" aria-label={title} className="min-h-128 gap-3">
       <Label text={title} />
       <div className="flex flex-col">
-        {entries.slice(0, 10).map((entry) => (
-          <Linked key={entry.user_id ?? entry.rank} href={entry.is_me ? null : profileHref?.(entry)} className="hover:bg-card">
+        {entries.slice(0, 10).map((entry, i) => (
+          <Linked key={entry.user_id ?? `${entry.rank}-${i}`} href={entry.is_me ? null : profileHref?.(entry)} className="hover:bg-card">
             <RankRow
               rank={rankText(entry.rank)}
               user={entry.is_me ? you(handle) : displayName(entry)}

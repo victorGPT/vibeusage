@@ -225,6 +225,8 @@ describe("tied ranks", () => {
     { rank: 1, user_id: "a", display_name: "a", total_tokens: 9 },
     { rank: 1, user_id: "b", display_name: "b", total_tokens: 9 },
     { rank: 2, user_id: "c", display_name: "c", total_tokens: 5 },
+    { rank: 3, user_id: null, display_name: "Anonymous", total_tokens: 2 },
+    { rank: 3, user_id: null, display_name: "Anonymous", total_tokens: 2 },
   ];
 
   it("keeps every tied row in RankList and RankTable", () => {
@@ -232,11 +234,12 @@ describe("tied ranks", () => {
     render(
       <>
         <RankList entries={tied} period="week" handle="h" />
-        <RankTable entries={tied} me={null} handle="h" page={1} totalPages={1} totalEntries={3} period="week" onPageChange={() => {}} />
+        <RankTable entries={tied} me={null} handle="h" page={1} totalPages={1} totalEntries={5} period="week" onPageChange={() => {}} />
       </>,
     );
     expect(screen.getAllByText("a")).toHaveLength(2);
     expect(screen.getAllByText("b")).toHaveLength(2);
+    expect(screen.getAllByText("Anonymous")).toHaveLength(4);
     expect(error.mock.calls.some(([msg]) => String(msg).includes("same key"))).toBe(false);
     error.mockRestore();
   });

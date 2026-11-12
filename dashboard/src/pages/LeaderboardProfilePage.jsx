@@ -101,9 +101,12 @@ export function LeaderboardProfilePage({
       ]
     : [];
 
+  const signIn = () => window.location.assign(signInUrl);
   let body = null;
   if (notFound) {
     body = <StateScreen variant="invalid" />;
+  } else if (!mockEnabled && !authTokenAllowed) {
+    body = <StateScreen variant="expired" onSignIn={signIn} />;
   } else if (profileState.error) {
     body = <StateScreen variant="error" onRetry={() => setReloadToken((v) => v + 1)} />;
   } else if (!entry) {
@@ -133,7 +136,7 @@ export function LeaderboardProfilePage({
           dashboardHref="/"
           leaderboardHref={`/leaderboard${periodSearch}`}
           githubHref={GITHUB_URL}
-          onSignIn={() => window.location.assign(signInUrl)}
+          onSignIn={signIn}
           onSignOut={signOut}
         />
         <PageHeader

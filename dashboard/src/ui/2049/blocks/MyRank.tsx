@@ -65,14 +65,14 @@ export function MyRank({ me, entries, totalEntries, period, metric = "all", from
             </div>
           </div>
           <div className="flex flex-col border-t border-border">
-            {above.map((entry) => (
-              <Neighbour key={entry.user_id ?? entry.rank} entry={entry} metric={metric} />
+            {above.map((entry, i) => (
+              <Neighbour key={entry.user_id ?? `${entry.rank}-${i}`} entry={entry} metric={metric} />
             ))}
             {me?.rank == null ? null : (
               <RankRow rank={rankText(me.rank)} user={you(handle)} value={abbr(counted(me, metric))} me />
             )}
-            {below.map((entry) => (
-              <Neighbour key={entry.user_id ?? entry.rank} entry={entry} metric={metric} />
+            {below.map((entry, i) => (
+              <Neighbour key={entry.user_id ?? `${entry.rank}-${i}`} entry={entry} metric={metric} />
             ))}
           </div>
           <Stamp handle={handle} range={`${label} · ${range(from, to)}`} />
