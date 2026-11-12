@@ -5,11 +5,13 @@ import { Button } from "#src/ui/shadcn/button.tsx";
 
 // SSOT: design/2049/source/CommandBox.dc.html.
 export function CommandBox({ command, prefix = "$" }: { command: string; prefix?: string }) {
-  const [copied, setCopied] = useState(false);
+  // Remember which command was copied, so a new command shows Copy again.
+  const [copiedCommand, setCopiedCommand] = useState<string | null>(null);
+  const copied = copiedCommand === command;
   const onCopy = () => {
     // A blocked clipboard keeps the Copy label, so the user can still select the text.
     navigator.clipboard?.writeText(command).then(
-      () => setCopied(true),
+      () => setCopiedCommand(command),
       () => {},
     );
   };

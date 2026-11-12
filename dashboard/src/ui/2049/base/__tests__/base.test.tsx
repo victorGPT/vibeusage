@@ -45,6 +45,15 @@ describe("CommandBox", () => {
     expect(await navigator.clipboard.readText()).toBe("npx --yes vibeusage init");
     expect(await screen.findByRole("button", { name: "Copied" })).toBeTruthy();
   });
+
+  it("goes back to Copy when the command changes", async () => {
+    const user = userEvent.setup();
+    const { rerender } = render(<CommandBox command="npx --yes vibeusage init" />);
+    await user.click(screen.getByRole("button", { name: "Copy" }));
+    await screen.findByRole("button", { name: "Copied" });
+    rerender(<CommandBox command="npx --yes vibeusage sync" />);
+    expect(screen.getByRole("button", { name: "Copy" })).toBeTruthy();
+  });
 });
 
 describe("RankRow", () => {
