@@ -49,9 +49,10 @@ describe("LeaderboardProfilePage", () => {
   });
 
   it("shows the broken link screen when the profile has no entry", async () => {
-    api.getLeaderboardProfile.mockResolvedValue({ period: "week", entry: null });
+    api.getLeaderboardProfile.mockResolvedValue({ period: "week", from: "2026-11-06", to: "2026-11-12", entry: null });
     renderPage("nope");
     expect(await screen.findByText("This profile is private or the link is wrong.")).toBeTruthy();
+    expect(screen.queryByText(/2026-11-06/)).toBeNull();
   });
 
   it("offers a retry when the service fails", async () => {

@@ -138,7 +138,7 @@ export function LeaderboardProfilePage({
         />
         <PageHeader
           title={name ?? copy("leaderboard.title")}
-          meta={data?.from && data?.to ? range(data.from, data.to) : undefined}
+          meta={entry && data.from && data.to ? range(data.from, data.to) : undefined}
         />
         {body}
       </div>

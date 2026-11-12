@@ -21,7 +21,7 @@ export function Pager({ summary, page, pageCount, onPageChange }: PagerProps) {
         <Pagination aria-label={summary}>
           <PaginationContent className="w-auto flex-wrap justify-end">
             <PaginationItem>
-              <PaginationLink disabled={page <= 1} onClick={() => onPageChange(page - 1)}>
+              <PaginationLink disabled={page <= 1} focusableWhenDisabled onClick={() => onPageChange(page - 1)}>
                 {copy("details.pagination.prev")}
               </PaginationLink>
             </PaginationItem>
@@ -37,7 +37,7 @@ export function Pager({ summary, page, pageCount, onPageChange }: PagerProps) {
               </PaginationItem>
             ))}
             <PaginationItem>
-              <PaginationLink disabled={page >= pageCount} onClick={() => onPageChange(page + 1)}>
+              <PaginationLink disabled={page >= pageCount} focusableWhenDisabled onClick={() => onPageChange(page + 1)}>
                 {copy("details.pagination.next")}
               </PaginationLink>
             </PaginationItem>

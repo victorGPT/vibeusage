@@ -250,3 +250,13 @@ describe("RankList under a channel metric", () => {
     expect(screen.queryByText("5K")).toBeNull();
   });
 });
+
+describe("Pager at the last page", () => {
+  it("keeps a disabled Next focusable so keyboard focus stays on it", () => {
+    render(<RankTable entries={[]} me={null} handle="h" page={3} totalPages={3} totalEntries={0} period="week" onPageChange={() => {}} />);
+    const next = screen.getByRole("button", { name: "Next" });
+    next.focus();
+    expect(document.activeElement).toBe(next);
+    expect(next.getAttribute("aria-disabled")).toBe("true");
+  });
+});

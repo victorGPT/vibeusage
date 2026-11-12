@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
@@ -82,7 +82,10 @@ describe("DailyTable", () => {
     await user.click(screen.getByRole("button", { name: "Next" }));
     expect(screen.getByText("Days 21–25 of 25")).toBeTruthy();
     expect(screen.getAllByRole("row")).toHaveLength(1 + 5);
-    expect(screen.getByRole("button", { name: "Next" }).hasAttribute("disabled")).toBe(true);
+    const next = screen.getByRole("button", { name: "Next" });
+    expect(next.getAttribute("aria-disabled")).toBe("true");
+    fireEvent.click(next);
+    expect(screen.getByText("Days 21–25 of 25")).toBeTruthy();
   });
 
   it("sorts by tokens from the first page", async () => {
