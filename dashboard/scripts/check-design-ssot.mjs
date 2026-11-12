@@ -95,6 +95,11 @@ const CHECKS_2049 = [
     // ponytail: shadcn/ predates the 2049 size tokens and sits outside P4's files; migrate it, then drop this.
     skip: "src/ui/shadcn/",
   },
+  {
+    // cn() drops a leading-* that comes before a registered size token, so the line height is lost.
+    label: "2049: leading-* utility (put the line height on the size: text-label/none)",
+    pattern: /(?<![\w-])leading-/,
+  },
 ];
 
 function checksFor(file) {

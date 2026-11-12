@@ -1,11 +1,11 @@
 import { cn } from "#src/lib/utils.ts";
 
 const SIZE = {
-  88: "text-screen-xl",
-  76: "text-screen-l",
-  72: "text-screen-m",
-  64: "text-screen-s",
-  28: "text-value-l",
+  88: "text-screen-xl/none",
+  76: "text-screen-l/none",
+  72: "text-screen-m/none",
+  64: "text-screen-s/none",
+  28: "text-value-l/none",
 } as const;
 
 const WEIGHT = { 200: "font-extralight", 300: "font-light", 400: "font-normal" } as const;
@@ -30,7 +30,7 @@ export function Display({ text, size = 76, weight = 200, tone = "light", glow = 
   return (
     <div
       className={cn(
-        "font-display leading-none tracking-[0.01em] tabular-nums wrap-anywhere",
+        "font-display tracking-[0.01em] tabular-nums wrap-anywhere",
         SIZE[size],
         WEIGHT[weight],
         color,
