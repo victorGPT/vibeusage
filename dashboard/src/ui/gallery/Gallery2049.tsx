@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { copy } from "../../lib/copy";
+import { Actions } from "./Actions2049";
 
 // Dev-only token gallery mounted at /__2049 (see main.jsx). Every label is a token name or a
 // value read back from the rendered element, so this page shows what the CSS actually does.
@@ -9,6 +10,7 @@ import { copy } from "../../lib/copy";
 const COLORS = [
   ["background", "bg-background"],
   ["card", "bg-card"],
+  ["accent", "bg-accent"],
   ["border", "bg-border"],
   ["input", "bg-input"],
   ["muted-foreground", "bg-muted-foreground"],
@@ -171,6 +173,8 @@ export function Gallery2049() {
             ))}
           </div>
         </Section>
+
+        <Actions />
       </div>
     </main>
   );

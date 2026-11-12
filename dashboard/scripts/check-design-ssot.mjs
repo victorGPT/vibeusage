@@ -66,8 +66,8 @@ const CHECKS = [
   },
 ];
 
-// The 2049 UI replaces the v1 rules with its own. The two shadcn wrappers listed in
-// LEGACY_V1 predate 2049 and still serve v1 pages, so they keep the v1 rules.
+// The 2049 UI replaces the v1 rules with its own. dialog and tooltip predate 2049 and still
+// style v1 pages with v1 tokens, so they keep the v1 rules until a later PR restyles them.
 const SCOPE_2049 = ["src/ui/2049/", "src/ui/shadcn/", "src/ui/gallery/"];
 const LEGACY_V1 = new Set(["src/ui/shadcn/dialog.tsx", "src/ui/shadcn/tooltip.tsx"]);
 
@@ -80,13 +80,13 @@ const CHECKS_2049 = [
   {
     label: "2049: literal color (use a token from src/styles/2049.css)",
     pattern: new RegExp(
-      `#[0-9a-fA-F]{3,8}\\b|(?:rgba?|hsla?|oklch|oklab)\\(|\\b(?:bg|text|border|ring|fill|stroke|from|via|to|outline|decoration|shadow|accent|caret|divide|placeholder)-(?:white|black|(?:${PALETTE})-\\d{2,3})\\b`,
+      `#[0-9a-fA-F]{3,8}\\b|(?:rgba?|hsla?|oklch|oklab)\\(|\\b(?:bg|text|border|ring|fill|stroke|from|via|to|outline|decoration|shadow|accent|caret|divide|placeholder)-(?:(?:white|black|(?:${PALETTE})-\\d{2,3})\\b|\\[(?!(?:transparent|currentcolor|inherit)\\])[a-zA-Z]+\\])`,
     ),
   },
   {
     label: "2049: spacing off the 4 8 12 16 24 32 48 64 scale",
     pattern: new RegExp(
-      `(?<![\\w-])-?(?:p|px|py|pt|pr|pb|pl|ps|pe|m|mx|my|mt|mr|mb|ml|ms|me|gap|gap-x|gap-y|space-x|space-y)-(?!(?:${SPACING_STEPS})(?![\\w.]))[\\d[]`,
+      `(?<![\\w-])-?(?:p|px|py|pt|pr|pb|pl|ps|pe|m|mx|my|mt|mr|mb|ml|ms|me|gap|gap-x|gap-y|space-x|space-y)-(?!(?:${SPACING_STEPS})(?![\\w.]))(?:[\\d[]|px(?![\\w-]))`,
     ),
   },
 ];
