@@ -85,11 +85,11 @@ export function RankTable(props: RankTableProps) {
       <Table className="min-w-170">
         <TableHeader>
           <TableRow>
-            <TableHead className="w-22">{copy("ui2049.rank_table.rank")}</TableHead>
-            <TableHead>{copy("ui2049.rank_table.user")}</TableHead>
+            <TableHead className="w-22">{copy("leaderboard.column.rank")}</TableHead>
+            <TableHead>{copy("leaderboard.column.user")}</TableHead>
             <TableHead className="text-right text-primary">{copy("daily.sort.total.label")}</TableHead>
             <TableHead className="text-right">{copy("leaderboard.metric.gpt")}</TableHead>
-            <TableHead className="text-right">{copy("ui2049.leaderboard_filters.claude")}</TableHead>
+            <TableHead className="text-right">{copy("leaderboard.metric.claude")}</TableHead>
             <TableHead className="text-right">{copy("ui2049.rank_table.other")}</TableHead>
           </TableRow>
         </TableHeader>

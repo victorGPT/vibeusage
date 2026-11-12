@@ -33,7 +33,7 @@ export function RankRail({ me, entries, totalEntries, from, to, handle, leaderbo
         <Label text={title} />
         <div className="ml-auto">
           <Button variant="outline" nativeButton={false} render={<a href={leaderboardHref} />}>
-            {copy("ui2049.top_nav.leaderboard")}
+            {copy("leaderboard.title")}
           </Button>
         </div>
       </div>

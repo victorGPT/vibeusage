@@ -26,9 +26,9 @@ export function LeaderboardFilters({ period, onPeriodChange, metric, onMetricCha
           label={copy("ui2049.leaderboard_filters.metric_aria")}
           value={metric}
           items={[
-            { value: "all", label: copy("ui2049.leaderboard_filters.all") },
+            { value: "all", label: copy("leaderboard.metric.all") },
             { value: "gpt", label: copy("leaderboard.metric.gpt") },
-            { value: "claude", label: copy("ui2049.leaderboard_filters.claude") },
+            { value: "claude", label: copy("leaderboard.metric.claude") },
           ]}
           onChange={onMetricChange}
         />

@@ -7,7 +7,7 @@ import { Card } from "#src/ui/shadcn/card.tsx";
 // SSOT: design/2049/source/Features.dc.html.
 export function Features() {
   const items = [
-    [copy("ui2049.features.install_kicker"), copy("ui2049.features.install_title"), copy("ui2049.features.install_body")],
+    [copy("dashboard.install.title"), copy("ui2049.features.install_title"), copy("ui2049.features.install_body")],
     [copy("ui2049.features.privacy_kicker"), copy("ui2049.features.privacy_title"), copy("ui2049.features.privacy_body")],
     [copy("ui2049.features.compete_kicker"), copy("ui2049.features.compete_title"), copy("ui2049.features.compete_body")],
   ];

@@ -37,6 +37,6 @@ export function daysBetween(from: string, to: string): number {
 
 // The leaderboard's Total window starts at the epoch; a date there means "no start".
 export function range(from: string, to: string): string {
-  if (from <= "1970-01-01") return copy("ui2049.range.all_time");
+  if (from <= "1970-01-01") return copy("leaderboard.range.total");
   return `${from} → ${to}`;
 }

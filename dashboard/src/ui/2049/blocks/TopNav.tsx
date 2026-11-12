@@ -22,7 +22,7 @@ export function TopNav(props: TopNavProps) {
   const { active, signedIn, stars, dashboardHref, leaderboardHref, githubHref, onSignIn, onSignOut } = props;
   const links = [
     { key: "dashboard", href: dashboardHref, label: copy("ui2049.top_nav.dashboard") },
-    { key: "leaderboard", href: leaderboardHref, label: copy("ui2049.top_nav.leaderboard") },
+    { key: "leaderboard", href: leaderboardHref, label: copy("leaderboard.title") },
   ];
   return (
     <header className="flex min-h-20 w-full flex-wrap items-center gap-x-8 gap-y-3 border-b border-border">

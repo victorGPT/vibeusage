@@ -503,7 +503,6 @@ ui2049.top_nav.brand_vibe,ui,*,TopNav,brand_vibe,"VIBE",,active
 ui2049.top_nav.brand_usage,ui,*,TopNav,brand_usage,"USAGE",,active
 ui2049.top_nav.nav_aria,ui,*,TopNav,nav_aria,"Main",,active
 ui2049.top_nav.dashboard,ui,*,TopNav,dashboard,"Dashboard",,active
-ui2049.top_nav.leaderboard,ui,*,TopNav,leaderboard,"Leaderboard",,active
 ui2049.top_nav.github,ui,*,TopNav,github,"GitHub",,active
 ui2049.top_nav.github_stars,ui,*,TopNav,github_stars,"GitHub ★ {{stars}}",,active
 ui2049.top_nav.sign_in,ui,*,TopNav,sign_in,"Sign in",,active
@@ -554,8 +553,6 @@ ui2049.state_screen.error_title,ui,*,StateScreen,error_title,"Couldn't reach the
 ui2049.state_screen.error_body,ui,*,StateScreen,error_body,"Your local numbers are still counting. Try again in a moment.",,active
 ui2049.state_screen.retry,ui,*,StateScreen,retry,"Retry",,active
 ui2049.leaderboard_filters.metric_aria,ui,*,LeaderboardFilters,metric_aria,"Metric",,active
-ui2049.leaderboard_filters.all,ui,*,LeaderboardFilters,all,"All",,active
-ui2049.leaderboard_filters.claude,ui,*,LeaderboardFilters,claude,"Claude",,active
 ui2049.models.kicker,ui,*,Models,kicker,"Models · {{period}}",,active
 ui2049.models.by_cli,ui,*,Models,by_cli,"By CLI",,active
 ui2049.models.by_model,ui,*,Models,by_model,"By model",,active
@@ -581,8 +578,6 @@ ui2049.daily_table.hours,ui,*,DailyTable,hours,"Hours {{from}}–{{to}} of {{tot
 ui2049.daily_table.months,ui,*,DailyTable,months,"Months {{from}}–{{to}} of {{total}}",,active
 ui2049.rank_table.kicker,ui,*,RankTable,kicker,"All users · {{period}} · {{count}} ranked",,active
 ui2049.rank_table.jump,ui,*,RankTable,jump,"Jump to me · #{{rank}}",,active
-ui2049.rank_table.rank,ui,*,RankTable,rank,"Rank",,active
-ui2049.rank_table.user,ui,*,RankTable,user,"User",,active
 ui2049.rank_table.other,ui,*,RankTable,other,"Other",,active
 ui2049.rank_table.page,ui,*,RankTable,page,"Page {{page}} of {{total}}",,active
 ui2049.landing_hero.clis,ui,*,LandingHero,clis,"Codex,Claude Code,Gemini,OpenCode,Kimi,Hermes,OpenClaw",,active
@@ -592,7 +587,6 @@ ui2049.landing_hero.title_b,ui,*,LandingHero,title_b,"More vibe.",,active
 ui2049.landing_hero.body,ui,*,LandingHero,body,"One readout for every AI coding CLI you run, and a board that shows where you stand. Token counts only. Your prompts and code never leave your machine.",,active
 ui2049.landing_hero.agent,ui,*,LandingHero,agent,"Or hand this guide to your agent",,active
 ui2049.features.aria,ui,*,Features,aria,"How it works",,active
-ui2049.features.install_kicker,ui,*,Features,install_kicker,"Install",,active
 ui2049.features.install_title,ui,*,Features,install_title,"Zero manual steps",,active
 ui2049.features.install_body,ui,*,Features,install_body,"One command hooks into every CLI it finds. Numbers show up within minutes.",,active
 ui2049.features.privacy_kicker,ui,*,Features,privacy_kicker,"Privacy",,active
@@ -601,4 +595,3 @@ ui2049.features.privacy_body,ui,*,Features,privacy_body,"Only token totals in ha
 ui2049.features.compete_kicker,ui,*,Features,compete_kicker,"Compete",,active
 ui2049.features.compete_title,ui,*,Features,compete_title,"One board for every CLI",,active
 ui2049.features.compete_body,ui,*,Features,compete_body,"Weekly, monthly and all-time ranks across Codex, Claude Code, Gemini and the rest.",,active
-ui2049.range.all_time,ui,*,*,all_time,"All time",,active
