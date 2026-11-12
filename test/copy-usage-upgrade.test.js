@@ -5,15 +5,6 @@ const path = require("node:path");
 
 const root = path.resolve(__dirname, "..");
 const copyPath = path.join(root, "dashboard", "src", "content", "copy.csv");
-const fleetPath = path.join(
-  root,
-  "dashboard",
-  "src",
-  "ui",
-  "matrix-a",
-  "components",
-  "NeuralAdaptiveFleet.jsx",
-);
 const upgradePath = path.join(
   root,
   "dashboard",
@@ -52,14 +43,7 @@ test("dashboard copy registry covers fleet usage and upgrade alert text", () => 
   }
 });
 
-test("fleet usage and upgrade alert components use copy keys", () => {
-  const fleetSource = read(fleetPath);
-  assert.ok(
-    fleetSource.includes('copy("dashboard.model_breakdown.usage_label"'),
-    "expected fleet usage label to use copy key",
-  );
-  assert.ok(!fleetSource.includes("Usage:"), "expected hardcoded usage label removed");
-
+test("upgrade alert component uses copy keys", () => {
   const upgradeSource = read(upgradePath);
   const requiredUpgradeKeys = [
     "dashboard.upgrade_alert.title",

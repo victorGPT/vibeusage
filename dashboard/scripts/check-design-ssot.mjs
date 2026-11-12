@@ -14,15 +14,6 @@ const SRC = path.resolve(ROOT, "src");
 
 const EXTS = new Set([".jsx", ".tsx", ".js", ".ts"]);
 
-// Files allowed to contain raw color literals — runtime JS constant SSOT
-// and third-party SVG path data. Nothing else bypasses the guardrail.
-const EXCLUDE = new Set(
-  [
-    "src/ui/matrix-a/components/MatrixConstants.ts",
-    "src/ui/matrix-a/components/ClientLogos.jsx",
-  ].map((p) => path.resolve(ROOT, p)),
-);
-
 const CHECKS = [
   {
     label: "matrix-* legacy token namespace (DESIGN.md §8 deleted)",
@@ -66,10 +57,9 @@ const CHECKS = [
   },
 ];
 
-// The 2049 UI replaces the v1 rules with its own. dialog and tooltip predate 2049 and still
-// style v1 pages with v1 tokens, so they keep the v1 rules until a later PR restyles them.
+// The 2049 UI replaces the v1 rules with its own. Files outside these folders (the pages, and
+// AgentResourcePage's v1 look) still get the v1 rules.
 const SCOPE_2049 = ["src/ui/2049/", "src/ui/shadcn/", "src/ui/gallery/"];
-const LEGACY_V1 = new Set(["src/ui/shadcn/dialog.tsx", "src/ui/shadcn/tooltip.tsx"]);
 
 // Tailwind --spacing is 4px, so these steps are 0 4 8 12 16 24 32 48 64.
 const SPACING_STEPS = "0|1|2|3|4|6|8|12|16";
@@ -104,7 +94,6 @@ const CHECKS_2049 = [
 
 function checksFor(file) {
   const rel = path.relative(ROOT, file).split(path.sep).join("/");
-  if (LEGACY_V1.has(rel)) return CHECKS;
   if (!SCOPE_2049.some((dir) => rel.startsWith(dir))) return CHECKS;
   return CHECKS_2049.filter((check) => !check.skip || !rel.startsWith(check.skip));
 }
@@ -120,7 +109,6 @@ function* walk(dir) {
 
 const violations = [];
 for (const file of walk(SRC)) {
-  if (EXCLUDE.has(file)) continue;
   const checks = checksFor(file);
   const lines = fs.readFileSync(file, "utf8").split("\n");
   lines.forEach((line, i) => {

@@ -1,120 +1,37 @@
-import { forwardRef } from "react";
-import type {
-  ComponentPropsWithoutRef,
-  ElementRef,
-  HTMLAttributes,
-} from "react";
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
+import type { ComponentPropsWithoutRef } from "react";
 
-import { cn } from "../../lib/utils";
+import { cn } from "#src/lib/utils.ts";
 
-// shadcn-style ergonomic wrapper over base-ui Dialog primitives.
-// Source pattern adapted from shadcn/ui base-ui registry. Upstream shadcn
-// classNames are rewritten to v3 SSOT tokens by shadcn-retro-fit.mjs
-// against scripts/shadcn-mapping.json. Do not author tokens here by hand.
-// SSOT: dashboard/DESIGN.md §12.
-
+// The 2049 boards have no dialog; this is a Card-like panel (card ground, border, rounded-md)
+// over a dimmed background. Base UI owns focus trap, Esc, outside click and focus restore.
 const Dialog = DialogPrimitive.Root;
-
-const DialogTrigger = DialogPrimitive.Trigger;
-
-const DialogPortal = DialogPrimitive.Portal;
-
 const DialogClose = DialogPrimitive.Close;
 
-const DialogOverlay = forwardRef<
-  ElementRef<typeof DialogPrimitive.Backdrop>,
-  ComponentPropsWithoutRef<typeof DialogPrimitive.Backdrop>
->(({ className, ...props }, ref) => (
-  <DialogPrimitive.Backdrop
-    ref={ref}
-    className={cn(
-      "fixed inset-0 z-50 bg-surface/80 backdrop-blur-xs",
-      className,
-    )}
-    {...props}
-  />
-));
-DialogOverlay.displayName = "DialogOverlay";
+function DialogContent({ className, children, ...props }: ComponentPropsWithoutRef<typeof DialogPrimitive.Popup>) {
+  return (
+    <DialogPrimitive.Portal>
+      <DialogPrimitive.Backdrop className="fixed inset-0 z-50 bg-background/80 backdrop-blur-xs" />
+      <DialogPrimitive.Popup
+        className={cn(
+          "fixed top-1/2 left-1/2 z-50 flex max-h-[calc(100dvh-32px)] w-[calc(100%-32px)] max-w-lg -translate-1/2 flex-col gap-6 overflow-y-auto rounded-md border border-border bg-card p-6 text-foreground outline-none",
+          className,
+        )}
+        {...props}
+      >
+        {children}
+      </DialogPrimitive.Popup>
+    </DialogPrimitive.Portal>
+  );
+}
 
-const DialogContent = forwardRef<
-  ElementRef<typeof DialogPrimitive.Popup>,
-  ComponentPropsWithoutRef<typeof DialogPrimitive.Popup>
->(({ className, children, ...props }, ref) => (
-  <DialogPortal>
-    <DialogOverlay />
-    <DialogPrimitive.Popup
-      ref={ref}
-      className={cn(
-        "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border border-ink-line bg-surface p-6 shadow-glow duration-200",
-        className,
-      )}
+function DialogTitle({ className, ...props }: ComponentPropsWithoutRef<typeof DialogPrimitive.Title>) {
+  return (
+    <DialogPrimitive.Title
+      className={cn("m-0 font-display text-heading-xs/[1.2] font-light text-hero", className)}
       {...props}
-    >
-      {children}
-    </DialogPrimitive.Popup>
-  </DialogPortal>
-));
-DialogContent.displayName = "DialogContent";
+    />
+  );
+}
 
-const DialogHeader = ({ className, ...props }: HTMLAttributes<HTMLDivElement>) => (
-  <div
-    className={cn(
-      "flex flex-col space-y-1.5 text-center sm:text-left",
-      className,
-    )}
-    {...props}
-  />
-);
-DialogHeader.displayName = "DialogHeader";
-
-const DialogFooter = ({ className, ...props }: HTMLAttributes<HTMLDivElement>) => (
-  <div
-    className={cn(
-      "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2",
-      className,
-    )}
-    {...props}
-  />
-);
-DialogFooter.displayName = "DialogFooter";
-
-const DialogTitle = forwardRef<
-  ElementRef<typeof DialogPrimitive.Title>,
-  ComponentPropsWithoutRef<typeof DialogPrimitive.Title>
->(({ className, ...props }, ref) => (
-  <DialogPrimitive.Title
-    ref={ref}
-    className={cn(
-      "text-heading font-semibold leading-none tracking-tight",
-      className,
-    )}
-    {...props}
-  />
-));
-DialogTitle.displayName = "DialogTitle";
-
-const DialogDescription = forwardRef<
-  ElementRef<typeof DialogPrimitive.Description>,
-  ComponentPropsWithoutRef<typeof DialogPrimitive.Description>
->(({ className, ...props }, ref) => (
-  <DialogPrimitive.Description
-    ref={ref}
-    className={cn("text-caption text-ink-muted", className)}
-    {...props}
-  />
-));
-DialogDescription.displayName = "DialogDescription";
-
-export {
-  Dialog,
-  DialogPortal,
-  DialogOverlay,
-  DialogTrigger,
-  DialogClose,
-  DialogContent,
-  DialogHeader,
-  DialogFooter,
-  DialogTitle,
-  DialogDescription,
-};
+export { Dialog, DialogClose, DialogContent, DialogTitle };

@@ -109,20 +109,6 @@ test("public share header shows login entry", () => {
   assert.match(src, /const handleSignIn = useCallback\(\(\) => window\.location\.assign\(signInUrl\)/);
 });
 
-test("backend status does not expose refresh click", () => {
-  const src = read("dashboard/src/components/BackendStatus.jsx");
-  assert.doesNotMatch(src, /onClick=/);
-  assert.doesNotMatch(src, /backend\.meta\.click_refresh/);
-});
-
-test("connection status renders bracket indicator only", () => {
-  const src = read("dashboard/src/ui/matrix-a/components/ConnectionStatus.jsx");
-  assert.doesNotMatch(src, /onClick/);
-  assert.doesNotMatch(src, /status\.link\./);
-  assert.doesNotMatch(src, /rounded-full/);
-  assert.match(src, /btn-chip--bare/);
-});
-
 test("public view invalid check handles string errors", () => {
   const src = read("dashboard/src/pages/DashboardPage.jsx");
   assert.match(src, /usageError\?\.message\s*\|\|\s*usageError/);
@@ -148,23 +134,12 @@ test("public view fetches profile avatar url", () => {
   assert.match(src, /avatar_url/);
 });
 
-test("public view identity card uses pixel avatar", () => {
-  const src = read("dashboard/src/ui/matrix-a/views/DashboardView.jsx");
-  assert.match(src, /<IdentityCard[\s\S]*avatarUrl=\{null\}/);
-});
-
 test("public view clears profile state before fetching new token", () => {
   const src = read("dashboard/src/pages/DashboardPage.jsx");
   assert.match(
     src,
     /if\s*\(!publicToken\)\s*\{[\s\S]*?\}\s*setPublicProfileName\(null\);\s*setPublicProfileAvatarUrl\(null\);\s*let active = true;\s*const controller = new AbortController\(\);\s*getPublicViewProfile/s,
   );
-});
-
-test("identity card supports avatar fallback", () => {
-  const src = read("dashboard/src/ui/matrix-a/components/IdentityCard.jsx");
-  assert.match(src, /avatarUrl/);
-  assert.match(src, /onError/);
 });
 
 test("public view copy reloads visibility state when token missing", () => {

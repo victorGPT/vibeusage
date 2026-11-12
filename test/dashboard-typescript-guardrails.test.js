@@ -102,13 +102,11 @@ test("eslint uses typescript parser", async () => {
 
 test("hooks and core lib files are migrated to TS", async () => {
   for (const file of [
-    "dashboard/src/hooks/use-backend-status.ts",
     "dashboard/src/hooks/use-activity-heatmap.ts",
     "dashboard/src/hooks/use-usage-data.ts",
     "dashboard/src/hooks/use-trend-data.ts",
     "dashboard/src/hooks/use-usage-model-breakdown.ts",
     "dashboard/src/lib/vibeusage-api.ts",
-    "dashboard/src/ui/matrix-a/components/MatrixConstants.ts",
   ]) {
     await fs.readFile(path.join(repoRoot, file));
   }
@@ -134,7 +132,6 @@ test("lib layer is fully migrated to TS", async () => {
     "safe-browser",
     "format",
     "model-breakdown",
-    "backend-probe-scheduler",
     "detail-sort",
   ];
 
