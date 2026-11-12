@@ -33,3 +33,6 @@ index.scip
 # Local-only canvas focus output
 architecture.focus.canvas
 .worktrees/
+
+# nawaban local issue board
+.nawaban/
