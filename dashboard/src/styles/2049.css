@@ -127,6 +127,8 @@
   --text-screen-l: 76px;
   --text-screen-xl: 88px;
 
+  --tracking-label: 0.12em;
+
   --radius-sm: 3px;
   --radius-md: 8px;
   --radius-lg: 18px;
