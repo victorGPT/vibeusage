@@ -42,7 +42,7 @@ function Row({ entry, me, user, href, pinned = false }: RowProps) {
         {rankText(entry.rank)}
       </TableCell>
       <TableCell className={cn("font-sans font-medium", me ? "text-primary" : "text-hero", cell)}>
-        <span className="inline-flex max-w-80 items-center gap-2 align-middle">
+        <span className="flex max-w-80 items-center gap-2">
           {href ? (
             <a href={href} className="truncate underline-offset-4 hover:underline">
               {user}
