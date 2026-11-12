@@ -42,7 +42,8 @@ export function CostAnalysisModal({
       };
     }),
   }));
-  const total = fleets.reduce((sum, fleet) => sum + fleet.usd, 0);
+  let total = 0;
+  for (const fleet of fleets) total += fleet.usd;
 
   return (
     <Dialog open={!!isOpen} onOpenChange={(next) => !next && onClose?.()}>
@@ -67,9 +68,7 @@ export function CostAnalysisModal({
                     key={model.id || `${model.name}-${modelIndex}`}
                     className="flex justify-between gap-4 font-sans text-copy-s/normal font-medium"
                   >
-                    <span className="text-foreground">
-                      {model.name} ({model.share})
-                    </span>
+                    <span className="text-foreground">{`${model.name} (${model.share})`}</span>
                     <span className="text-muted-foreground">
                       {copy("dashboard.cost_breakdown.calc_prefix")} {model.calc}
                     </span>

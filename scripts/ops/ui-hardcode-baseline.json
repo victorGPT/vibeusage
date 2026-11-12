@@ -1,100 +1,13 @@
 {
-  "generatedAt": "2026-04-26T08:59:35.062Z",
+  "generatedAt": "2026-11-12T23:53:12.318Z",
   "root": "dashboard/src",
   "rules": {
     "colors": "hex/rgb(a) literals",
     "rawText": "JSX text nodes containing letters or digits"
   },
   "totals": {
-    "colors": 25,
-    "rawText": 19
+    "colors": 0,
+    "rawText": 0
   },
-  "files": {
-    "dashboard/src/components/Sparkline.jsx": {
-      "colors": 0,
-      "rawText": 1,
-      "rawTextTokens": [
-        "typeof n === \"number\"); if (values.length"
-      ]
-    },
-    "dashboard/src/pages/DashboardPage.jsx": {
-      "colors": 0,
-      "rawText": 2,
-      "rawTextTokens": [
-        ") ) : signedIn ? (",
-        ") : null; const headerRight = ("
-      ]
-    },
-    "dashboard/src/ui/matrix-a/components/ClientLogos.jsx": {
-      "colors": 16,
-      "rawText": 0,
-      "rawTextTokens": []
-    },
-    "dashboard/src/ui/matrix-a/components/CostAnalysisModal.jsx": {
-      "colors": 0,
-      "rawText": 1,
-      "rawTextTokens": [
-        "acc + fleet.usdValue, 0); const totalUsdLabel = formatUsdValue(totalUsd); return ("
-      ]
-    },
-    "dashboard/src/ui/matrix-a/components/GithubStar.jsx": {
-      "colors": 0,
-      "rawText": 1,
-      "rawTextTokens": [
-        "STAR"
-      ]
-    },
-    "dashboard/src/ui/matrix-a/components/IdentityCard.jsx": {
-      "colors": 0,
-      "rawText": 1,
-      "rawTextTokens": [
-        ") : ( title ); return ("
-      ]
-    },
-    "dashboard/src/ui/matrix-a/components/MatrixConstants.ts": {
-      "colors": 9,
-      "rawText": 0,
-      "rawTextTokens": []
-    },
-    "dashboard/src/ui/matrix-a/components/NeuralDivergenceMap.jsx": {
-      "colors": 0,
-      "rawText": 1,
-      "rawTextTokens": [
-        "1 && count % 2 !== 0 && index === 0; const itemClass = isFirstAndOdd ? \"md:col-span-2\" : \"\"; return ("
-      ]
-    },
-    "dashboard/src/ui/matrix-a/components/TrendMonitor.jsx": {
-      "colors": 0,
-      "rawText": 1,
-      "rawTextTokens": [
-        "0"
-      ]
-    },
-    "dashboard/src/ui/matrix-a/views/DashboardView.jsx": {
-      "colors": 0,
-      "rawText": 3,
-      "rawTextTokens": [
-        ") : linkCodeError ? (",
-        ") : showAuthGate ? (",
-        "1 ? ("
-      ]
-    },
-    "dashboard/src/ui/matrix-a/views/LandingView.jsx": {
-      "colors": 0,
-      "rawText": 1,
-      "rawTextTokens": [
-        "); return ("
-      ]
-    },
-    "dashboard/src/ui/shadcn/dialog.tsx": {
-      "colors": 0,
-      "rawText": 7,
-      "rawTextTokens": [
-        ")); DialogOverlay.displayName = \"DialogOverlay\"; const DialogContent = forwardRef",
-        ")); DialogTitle.displayName = \"DialogTitle\"; const DialogDescription = forwardRef",
-        "); DialogFooter.displayName = \"DialogFooter\"; const DialogTitle = forwardRef",
-        ", ComponentPropsWithoutRef"
-      ]
-    }
-  }
+  "files": {}
 }
