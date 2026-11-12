@@ -9,7 +9,6 @@ import React, {
 } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ErrorBoundary } from "./components/ErrorBoundary.jsx";
-import { getAppVersion } from "./lib/app-version";
 import { getSafeSessionStorage, shouldRedirectFromAuthCallback } from "./lib/auth-callback";
 import { resolveAuthGate } from "./lib/auth-gate";
 import {
@@ -47,7 +46,6 @@ import { resolveAgentResourceRoute } from "./pages/agent-resource-routes.js";
 import { LandingPage } from "./pages/LandingPage.jsx";
 import { StateScreen } from "./ui/2049/blocks/StateScreen";
 import { UpgradeAlertModal } from "./ui/matrix-a/components/UpgradeAlertModal.jsx";
-import { VersionBadge } from "./ui/matrix-a/components/VersionBadge.jsx";
 
 function buildAuthEntryUrl(basePath, nextPath) {
   if (typeof basePath !== "string" || basePath.length === 0) return "/";
@@ -91,7 +89,6 @@ export default function App() {
     if (typeof window === "undefined") return false;
     return isScreenshotModeEnabled(window.location.search);
   }, []);
-  const appVersion = useMemo(() => getAppVersion(import.meta.env), []);
   const [latestVersion, setLatestVersion] = useState(null);
   const [insforgeLoaded, setInsforgeLoaded] = useState(false);
   const insforgeSession = useSyncExternalStore(
@@ -470,7 +467,6 @@ export default function App() {
   return (
     <ErrorBoundary>
       {content}
-      {!screenshotMode ? <VersionBadge version={appVersion} /> : null}
     </ErrorBoundary>
   );
 }

@@ -11,6 +11,7 @@ import {
   resolveAuthAccessToken,
 } from "../lib/auth-token";
 import { copy } from "../lib/copy";
+import { getAppVersion } from "../lib/app-version";
 import { getRangeForPeriod } from "../lib/date-range";
 import { trimLeadingZeroMonths } from "../lib/details";
 import { selectRollingUsageForDisplay } from "../lib/dashboard-period-bindings";
@@ -510,7 +511,6 @@ export function DashboardPage({
 
   const {
     summary,
-    source: usageSource,
     loading: usageLoading,
     error: usageError,
     refresh: refreshUsage,
@@ -660,13 +660,6 @@ export function DashboardPage({
   const rollingUsage = useMemo(
     () => selectRollingUsageForDisplay({ recentRolling }),
     [recentRolling],
-  );
-  const usageSourceLabel = useMemo(
-    () =>
-      copy("shared.data_source", {
-        source: String(usageSource || "edge").toUpperCase(),
-      }),
-    [usageSource],
   );
   const publicViewInvalid = useMemo(() => {
     if (!publicMode || !usageError) return false;
@@ -1083,7 +1076,7 @@ export function DashboardPage({
           )}
         </div>
         <div className="grid items-start gap-4 lg:grid-cols-12">
-          <div className="min-w-0 lg:col-span-6 *:min-h-176">
+          <div className="min-w-0 lg:col-span-6 lg:*:min-h-176">
             <Models
               breakdown={modelBreakdown ?? {}}
               periodLabel={periodLabel(period)}
@@ -1093,13 +1086,13 @@ export function DashboardPage({
             />
           </div>
           <div className="flex min-w-0 flex-col gap-4 lg:col-span-6">
-            <div className="*:min-h-66">
+            <div className="lg:*:min-h-66">
               <DotHeatmap
-                heatmap={heatmap ?? { ...heatmapRange, weeks: [] }}
+                heatmap={{ ...heatmapRange, weeks: [], ...heatmap }}
                 handle={identityDisplayName}
               />
             </div>
-            <div className="*:min-h-106">
+            <div className="lg:*:min-h-106">
               <Trend
                 rows={trendRowsForDisplay}
                 dateKey={detailsDateKey}
@@ -1120,7 +1113,12 @@ export function DashboardPage({
           dateKey={detailsDateKey}
           paged={DETAILS_PAGED_PERIODS.has(period)}
         />
-        {screenshotMode ? null : <PageFooter left={timeZoneRangeLabel} right={usageSourceLabel} />}
+        {screenshotMode ? null : (
+          <PageFooter
+            left={timeZoneRangeLabel}
+            right={copy("ui2049.page_footer.version", { version: getAppVersion(import.meta.env) })}
+          />
+        )}
       </div>
       <CostAnalysisModal isOpen={costModalOpen} onClose={closeCostModal} fleetData={fleetData} />
       <KeyboardCheatsheet open={cheatsheetOpen} onClose={() => setCheatsheetOpen(false)} />
