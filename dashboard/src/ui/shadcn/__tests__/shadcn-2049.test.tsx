@@ -179,6 +179,7 @@ describe("Pagination", () => {
     expect(paginationRange(19, 38)).toEqual([1, "ellipsis", 18, 19, 20, "ellipsis", 38]);
     expect(paginationRange(38, 38)).toEqual([1, "ellipsis", 37, 38]);
     expect(paginationRange(1, 1)).toEqual([1]);
+    expect(paginationRange(1, 0)).toEqual([1]);
   });
 
   it("disables prev on the first page and next on the last", () => {

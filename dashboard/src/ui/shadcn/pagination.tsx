@@ -9,7 +9,9 @@ import { Button } from "#src/ui/shadcn/button.tsx";
 type PageItem = number | "ellipsis";
 
 // First, current ±1 and last, with an ellipsis wherever pages are skipped.
-function paginationRange(page: number, total: number): PageItem[] {
+// An empty result set still has one page, so the bar never shows page 0.
+function paginationRange(page: number, pageCount: number): PageItem[] {
+  const total = Math.max(1, pageCount);
   const pages = [...new Set([1, page - 1, page, page + 1, total])]
     .filter((n) => Math.min(Math.max(n, 1), total) === n)
     .sort((a, b) => a - b);
