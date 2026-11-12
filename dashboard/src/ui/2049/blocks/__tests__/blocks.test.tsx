@@ -136,9 +136,16 @@ describe("RankTable", () => {
     expect(within(rows[1]).getByText("#21")).toBeTruthy();
   });
 
-  it("does not pin on page 1", () => {
+  it("pins my row on page 1 when I am off the page", () => {
     renderRankTable(1, entries(1, 20));
-    expect(screen.queryByText(MY_RANK)).toBeNull();
+    const rows = screen.getAllByRole("row");
+    expect(within(rows[rows.length - 1]).getByText(MY_RANK)).toBeTruthy();
+  });
+
+  it("does not duplicate my row on page 1 when I am on it", () => {
+    const rows = entries(1, 20).map((e) => (e.rank === 7 ? { ...e, is_me: true } : e));
+    renderRankTable(1, rows, { ...ME, rank: 7 });
+    expect(screen.getAllByText("your_handle · you")).toHaveLength(1);
   });
 
   it("does not pin when I am already on the page", () => {
@@ -177,10 +184,15 @@ describe("StateScreen", () => {
     unmount();
   });
 
-  it("shows the install command and link code", () => {
+  it("shows the install command with the link code", () => {
     render(<StateScreen variant="install" linkCode="K7Q-2049" />);
+    expect(screen.getByText("npx --yes vibeusage init --link-code K7Q-2049")).toBeTruthy();
+    expect(screen.queryByText(/when asked/)).toBeNull();
+  });
+
+  it("shows the bare install command without a link code", () => {
+    render(<StateScreen variant="install" />);
     expect(screen.getByText("npx --yes vibeusage init")).toBeTruthy();
-    expect(screen.getByText(/K7Q-2049/)).toBeTruthy();
   });
 
   it("marks loading as busy", () => {
