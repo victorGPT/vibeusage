@@ -155,6 +155,11 @@ describe("IdentityBar", () => {
     const toggle = screen.getByRole("switch");
     expect(toggle.getAttribute("aria-disabled") === "true" || toggle.hasAttribute("data-disabled")).toBe(true);
   });
+
+  it("holds the share link until the public setting is saved", () => {
+    render(<IdentityBar handle="h" owner publicEnabled publicBusy />);
+    expect(screen.getByRole("button", { name: "Copy share link" }).hasAttribute("disabled")).toBe(true);
+  });
 });
 
 describe("DotHeatmap", () => {

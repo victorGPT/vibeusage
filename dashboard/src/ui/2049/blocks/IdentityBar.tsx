@@ -39,7 +39,7 @@ export function IdentityBar(props: IdentityBarProps) {
             <Switch checked={publicEnabled} disabled={publicBusy} onCheckedChange={(v) => onPublicChange?.(v)}>
               {copy("ui2049.identity_bar.public")}
             </Switch>
-            <Button variant="outline" disabled={!publicEnabled} onClick={props.onCopyShareLink}>
+            <Button variant="outline" disabled={!publicEnabled || publicBusy} onClick={props.onCopyShareLink}>
               {props.shareCopied ? copy("ui2049.command_box.copied") : copy("ui2049.identity_bar.copy_link")}
             </Button>
           </>
