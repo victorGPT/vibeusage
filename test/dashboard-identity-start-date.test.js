@@ -49,41 +49,11 @@ test("IdentityCard renders rank value in gold", () => {
   assert.ok(match[1].includes("text-gold"), "expected rank value to use gold color");
 });
 
-test("Dashboard identity wiring includes subscription badges", () => {
-  const pageSrc = readFile(pagePath);
-  assert.ok(pageSrc.includes("identitySubscriptions"), "expected identity subscriptions state");
-
-  const viewPath = path.join(
-    __dirname,
-    "..",
-    "dashboard",
-    "src",
-    "ui",
-    "matrix-a",
-    "views",
-    "DashboardView.jsx",
-  );
-  const viewSrc = readFile(viewPath);
-  assert.ok(
-    viewSrc.includes("subscriptions={identitySubscriptions}"),
-    "expected DashboardView to pass subscriptions into IdentityCard",
-  );
-
-  const componentPath = path.join(
-    __dirname,
-    "..",
-    "dashboard",
-    "src",
-    "ui",
-    "matrix-a",
-    "components",
-    "IdentityCard.jsx",
-  );
-  const componentSrc = readFile(componentPath);
-  assert.ok(
-    componentSrc.includes('identity_card.subscription_item'),
-    'expected IdentityCard subscription badge copy template'
-  );
+test("DashboardPage passes start date and active days to IdentityBar", () => {
+  const src = readFile(pagePath);
+  const bar = src.slice(src.indexOf("<IdentityBar"), src.indexOf("/>", src.indexOf("<IdentityBar")));
+  assert.match(bar, /since=\{identityStartDate\}/);
+  assert.match(bar, /activeDays=\{activeDays\}/);
 });
 
 test("copy registry labels active days and start without underscores", () => {

@@ -5,6 +5,16 @@ const path = require("node:path");
 
 const copyPath = path.join(__dirname, "..", "dashboard", "src", "content", "copy.csv");
 const pagePath = path.join(__dirname, "..", "dashboard", "src", "pages", "DashboardPage.jsx");
+const statePath = path.join(
+  __dirname,
+  "..",
+  "dashboard",
+  "src",
+  "ui",
+  "2049",
+  "blocks",
+  "StateScreen.tsx",
+);
 
 function readFile(filePath) {
   return fs.readFileSync(filePath, "utf8");
@@ -26,16 +36,15 @@ test("copy registry includes link code install keys", () => {
   }
 });
 
-test("DashboardPage wires link code install copy flow", () => {
+test("DashboardPage hands the unexpired link code to the install StateScreen", () => {
   const src = readFile(pagePath);
-  assert.ok(src.includes("dashboard.install.cmd.init"), "expected base install command usage");
+  const screenSrc = readFile(statePath);
+  assert.match(src, /const resolvedLinkCode = !linkCodeExpired \? linkCode : null;/);
+  assert.match(src, /if \(shouldShowInstall\) return "install";/);
+  assert.match(src, /<StateScreen[\s\S]*?linkCode=\{resolvedLinkCode\}/);
   assert.ok(
-    src.includes("dashboard.install.cmd.init_link_code"),
-    "expected link code install command usage for copy",
+    screenSrc.includes("dashboard.install.cmd.init_link_code"),
+    "expected link code install command for the CommandBox",
   );
-  assert.ok(
-    src.includes("const installInitCmdDisplay = installInitCmdBase;"),
-    "expected install display to use base command",
-  );
-  assert.ok(src.includes("safeWriteClipboard"), "expected clipboard helper usage");
+  assert.match(screenSrc, /<CommandBox/);
 });

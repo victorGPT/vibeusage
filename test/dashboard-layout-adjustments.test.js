@@ -128,7 +128,6 @@ test("ProjectUsagePanel constrains identity text width", () => {
 test("DashboardPage wires install panel gating through helper", () => {
   const containerSrc = readFile(containerPath);
   const installStatusSrc = readFile(installStatusPath);
-  const viewSrc = readFile(viewPath);
   assert.ok(containerSrc.includes("shouldShowInstallCard"), "expected install status helper usage");
   assert.ok(
     containerSrc.includes("has_active_device_token"),
@@ -158,8 +157,8 @@ test("DashboardPage wires install panel gating through helper", () => {
     "expected helper to hide card for active device token",
   );
   assert.ok(
-    viewSrc.includes("shouldShowInstall ? ("),
-    "expected install panel to use shouldShowInstall",
+    containerSrc.includes('if (shouldShowInstall) return "install";'),
+    "expected the install screen to use shouldShowInstall",
   );
 });
 
