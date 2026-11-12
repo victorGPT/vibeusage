@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { abbr, cost, daysBetween, full, pct, range } from "../format";
-import { groupByCli, groupByModel } from "../models";
+import { groupByCli, groupByModel } from "../grouping";
 import { neighbours, pinnedMe } from "../rank";
 
 describe("format", () => {

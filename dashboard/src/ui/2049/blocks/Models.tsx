@@ -7,7 +7,7 @@ import { Stamp } from "#src/ui/2049/base/Stamp.tsx";
 import { Card } from "#src/ui/shadcn/card.tsx";
 
 import { abbr, pct, range } from "./format";
-import { groupByCli, groupByModel } from "./models";
+import { groupByCli, groupByModel } from "./grouping";
 import { cliNames } from "./shared";
 import { Tabs } from "./Tabs";
 import type { ModelBreakdown } from "./types";
