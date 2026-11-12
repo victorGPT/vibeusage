@@ -45,6 +45,15 @@ describe("LeaderboardProfilePage", () => {
     expect(screen.queryByText(/\$/)).toBeNull();
   });
 
+  it("shows the app version in the page footer, like the leaderboard", async () => {
+    vi.stubEnv("VITE_APP_VERSION", "0.7.1");
+    api.getLeaderboardProfile.mockRejectedValue(Object.assign(new Error("Not found"), { status: 404 }));
+    renderPage("nope");
+    expect(await screen.findByText("v0.7.1")).toBeTruthy();
+    expect(screen.getByText("Boards in UTC")).toBeTruthy();
+    vi.unstubAllEnvs();
+  });
+
   it("shows the broken link screen for an unknown profile", async () => {
     api.getLeaderboardProfile.mockRejectedValue(Object.assign(new Error("Not found"), { status: 404 }));
     renderPage("nope");
