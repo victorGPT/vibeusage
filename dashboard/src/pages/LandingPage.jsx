@@ -35,18 +35,27 @@ function useGithubStars(enabled) {
 export function LandingPage({ signUpUrl }) {
   const appVersion = useMemo(() => getAppVersion(import.meta.env), []);
   const screenshotMode = useMemo(
-    () => typeof window !== "undefined" && isScreenshotModeEnabled(window.location.search),
+    () =>
+      typeof window !== "undefined" &&
+      isScreenshotModeEnabled(window.location.search),
     [],
   );
   const stars = useGithubStars(!screenshotMode);
   const sampleRange = useMemo(() => {
     const today = Date.now();
-    return { from: formatDateUTC(new Date(today - 6 * 86_400_000)), to: formatDateUTC(new Date(today)) };
+    return {
+      from: formatDateUTC(new Date(today - 6 * 86_400_000)),
+      to: formatDateUTC(new Date(today)),
+    };
   }, []);
 
   const sampleBoard = useMemo(() => {
     const names = String(copy("ui2049.landing.sample_names")).split(",");
-    return SAMPLE_TOKENS.map((total, i) => ({ rank: i + 1, display_name: names[i] ?? null, total_tokens: total }));
+    return SAMPLE_TOKENS.map((total, i) => ({
+      rank: i + 1,
+      display_name: names[i] ?? null,
+      total_tokens: total,
+    }));
   }, []);
 
   useEffect(() => {
