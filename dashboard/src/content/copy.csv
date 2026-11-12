@@ -499,3 +499,106 @@ ui2049.command_box.copy,ui,*,CommandBox,copy,"Copy",,active
 ui2049.command_box.copied,ui,*,CommandBox,copied,"Copied",,active
 ui2049.rank_row.leader,ui,*,RankRow,leader_badge,"Leader",,active
 ui2049.stamp.site,ui,*,Stamp,site,"vibeusage.cc",,active
+ui2049.top_nav.brand_vibe,ui,*,TopNav,brand_vibe,"VIBE",,active
+ui2049.top_nav.brand_usage,ui,*,TopNav,brand_usage,"USAGE",,active
+ui2049.top_nav.nav_aria,ui,*,TopNav,nav_aria,"Main",,active
+ui2049.top_nav.dashboard,ui,*,TopNav,dashboard,"Dashboard",,active
+ui2049.top_nav.leaderboard,ui,*,TopNav,leaderboard,"Leaderboard",,active
+ui2049.top_nav.github,ui,*,TopNav,github,"GitHub",,active
+ui2049.top_nav.github_stars,ui,*,TopNav,github_stars,"GitHub ★ {{stars}}",,active
+ui2049.top_nav.sign_in,ui,*,TopNav,sign_in,"Sign in",,active
+ui2049.identity_bar.since,ui,*,IdentityBar,since,"Since {{since}} · {{days}} active days",,active
+ui2049.identity_bar.public,ui,*,IdentityBar,public,"Public profile",,active
+ui2049.identity_bar.copy_link,ui,*,IdentityBar,copy_link,"Copy share link",,active
+ui2049.identity_bar.read_only,ui,*,IdentityBar,read_only,"Public profile · read only",,active
+ui2049.readout.kicker,ui,*,Readout,kicker,"Core index · {{period}}",,active
+ui2049.readout.day,ui,*,Readout,day,"Day",,active
+ui2049.readout.week,ui,*,Readout,week,"Week",,active
+ui2049.readout.month,ui,*,Readout,month,"Month",,active
+ui2049.readout.period_aria,ui,*,Readout,period_aria,"Period",,active
+ui2049.readout.cost_label,ui,*,Readout,cost_label,"Spent at list price",,active
+ui2049.readout.cost_breakdown,ui,*,Readout,cost_breakdown,"Cost breakdown",,active
+ui2049.readout.per_day,ui,*,Readout,per_day,"{{value}} tokens a day.",,active
+ui2049.readout.cached,ui,*,Readout,cached,"Cached input",,active
+ui2049.readout.sample_kicker,ui,*,Readout,sample_kicker,"Sample account · week",,active
+ui2049.readout.board,ui,*,Readout,board,"This week's board",,active
+ui2049.rank_rail.title,ui,*,RankRail,title,"Week rank",,active
+ui2049.rank_rail.delta_suffix,ui,*,RankRail,delta_suffix,"vs last week",,active
+ui2049.rank_rail.to_pass,ui,*,RankRail,to_pass,"To pass #{{rank}} · {{name}}",,active
+ui2049.rank_rail.this_week,ui,*,RankRail,this_week,"This week",,active
+ui2049.rank_rail.this_week_value,ui,*,RankRail,this_week_value,"{{value}} · {{count}} ranked",,active
+ui2049.my_rank.kicker,ui,*,MyRank,kicker,"My rank · {{period}} · all models",,active
+ui2049.my_rank.of_ranked,ui,*,MyRank,of_ranked,"of {{count}} ranked",,active
+ui2049.my_rank.tokens,ui,*,MyRank,tokens,"Tokens",,active
+ui2049.my_rank.to_pass,ui,*,MyRank,to_pass,"To pass #{{rank}}",,active
+ui2049.state_screen.install_kicker,ui,*,StateScreen,install_kicker,"No data yet",,active
+ui2049.state_screen.install_tag,ui,*,StateScreen,install_tag,"Step 1 of 2",,active
+ui2049.state_screen.install_title,ui,*,StateScreen,install_title,"Install the tracker",,active
+ui2049.state_screen.expired_kicker,ui,*,StateScreen,expired_kicker,"Session",,active
+ui2049.state_screen.expired_tag,ui,*,StateScreen,expired_tag,"Expired",,active
+ui2049.state_screen.expired_title,ui,*,StateScreen,expired_title,"Your session expired.",,active
+ui2049.state_screen.expired_body,ui,*,StateScreen,expired_body,"Your data is safe. Sign in again to keep syncing.",,active
+ui2049.state_screen.sign_in,ui,*,StateScreen,sign_in,"Sign in with GitHub",,active
+ui2049.state_screen.visitor_kicker,ui,*,StateScreen,visitor_kicker,"Public profile · {{name}}",,active
+ui2049.state_screen.visitor_tag,ui,*,StateScreen,visitor_tag,"Read only",,active
+ui2049.state_screen.visitor_meta,ui,*,StateScreen,visitor_meta,"All time · {{name}}",,active
+ui2049.state_screen.invalid_tag,ui,*,StateScreen,invalid_tag,"Not found",,active
+ui2049.state_screen.invalid_title,ui,*,StateScreen,invalid_title,"This profile is private or the link is wrong.",,active
+ui2049.state_screen.invalid_body,ui,*,StateScreen,invalid_body,"Ask the owner for a new share link.",,active
+ui2049.state_screen.empty_tag,ui,*,StateScreen,empty_tag,"Waiting for first sync",,active
+ui2049.state_screen.empty_body,ui,*,StateScreen,empty_body,"Run any AI CLI for a minute, then refresh. Sync runs every 30 minutes.",,active
+ui2049.state_screen.core_kicker,ui,*,StateScreen,core_kicker,"Core index",,active
+ui2049.state_screen.loading_tag,ui,*,StateScreen,loading_tag,"Reading",,active
+ui2049.state_screen.error_tag,ui,*,StateScreen,error_tag,"Error",,active
+ui2049.state_screen.error_title,ui,*,StateScreen,error_title,"Couldn't reach the usage service.",,active
+ui2049.state_screen.error_body,ui,*,StateScreen,error_body,"Your local numbers are still counting. Try again in a moment.",,active
+ui2049.state_screen.retry,ui,*,StateScreen,retry,"Retry",,active
+ui2049.leaderboard_filters.metric_aria,ui,*,LeaderboardFilters,metric_aria,"Metric",,active
+ui2049.leaderboard_filters.all,ui,*,LeaderboardFilters,all,"All",,active
+ui2049.leaderboard_filters.claude,ui,*,LeaderboardFilters,claude,"Claude",,active
+ui2049.models.kicker,ui,*,Models,kicker,"Models · {{period}}",,active
+ui2049.models.by_cli,ui,*,Models,by_cli,"By CLI",,active
+ui2049.models.by_model,ui,*,Models,by_model,"By model",,active
+ui2049.models.group_aria,ui,*,Models,group_aria,"Group by",,active
+ui2049.models.via,ui,*,Models,via,"via {{names}}",,active
+ui2049.dot_heatmap.title,ui,*,DotHeatmap,title,"Activity · 52 weeks",,active
+ui2049.dot_heatmap.legend,ui,*,DotHeatmap,legend,"Dot size = tokens that day",,active
+ui2049.dot_heatmap.hover,ui,*,DotHeatmap,hover,"{{date}} · {{value}} tokens",,active
+ui2049.dot_heatmap.img_aria,ui,*,DotHeatmap,img_aria,"Daily tokens over 52 weeks. Larger dot means more tokens.",,active
+ui2049.trend.kicker,ui,*,Trend,kicker,"Trend · {{period}}",,active
+ui2049.trend.last_7,ui,*,Trend,last_7,"Last 7 days",,active
+ui2049.trend.last_30,ui,*,Trend,last_30,"Last 30 days",,active
+ui2049.trend.avg,ui,*,Trend,avg,"Daily avg",,active
+ui2049.trend.peak,ui,*,Trend,peak,"Peak {{value}} · {{date}}",,active
+ui2049.trend.img_aria,ui,*,Trend,img_aria,"Daily tokens, peak {{value}}",,active
+ui2049.rank_list.title,ui,*,RankList,title,"Top 10 · {{period}}",,active
+ui2049.rank_list.you,ui,*,RankList,you,"{{handle}} · you",,active
+ui2049.projects.title,ui,*,Projects,title,"Projects · all time",,active
+ui2049.daily_table.title,ui,*,DailyTable,title,"Daily details",,active
+ui2049.daily_table.sort_aria,ui,*,DailyTable,sort_aria,"Sort by",,active
+ui2049.daily_table.days,ui,*,DailyTable,days,"Days {{from}}–{{to}} of {{total}}",,active
+ui2049.daily_table.hours,ui,*,DailyTable,hours,"Hours {{from}}–{{to}} of {{total}}",,active
+ui2049.daily_table.months,ui,*,DailyTable,months,"Months {{from}}–{{to}} of {{total}}",,active
+ui2049.rank_table.kicker,ui,*,RankTable,kicker,"All users · {{period}} · {{count}} ranked",,active
+ui2049.rank_table.jump,ui,*,RankTable,jump,"Jump to me · #{{rank}}",,active
+ui2049.rank_table.rank,ui,*,RankTable,rank,"Rank",,active
+ui2049.rank_table.user,ui,*,RankTable,user,"User",,active
+ui2049.rank_table.other,ui,*,RankTable,other,"Other",,active
+ui2049.rank_table.page,ui,*,RankTable,page,"Page {{page}} of {{total}}",,active
+ui2049.landing_hero.clis,ui,*,LandingHero,clis,"Codex,Claude Code,Gemini,OpenCode,Kimi,Hermes,OpenClaw",,active
+ui2049.landing_hero.clis_aria,ui,*,LandingHero,clis_aria,"Supported CLIs",,active
+ui2049.landing_hero.title_a,ui,*,LandingHero,title_a,"More tokens.",,active
+ui2049.landing_hero.title_b,ui,*,LandingHero,title_b,"More vibe.",,active
+ui2049.landing_hero.body,ui,*,LandingHero,body,"One readout for every AI coding CLI you run, and a board that shows where you stand. Token counts only. Your prompts and code never leave your machine.",,active
+ui2049.landing_hero.agent,ui,*,LandingHero,agent,"Or hand this guide to your agent",,active
+ui2049.features.aria,ui,*,Features,aria,"How it works",,active
+ui2049.features.install_kicker,ui,*,Features,install_kicker,"Install",,active
+ui2049.features.install_title,ui,*,Features,install_title,"Zero manual steps",,active
+ui2049.features.install_body,ui,*,Features,install_body,"One command hooks into every CLI it finds. Numbers show up within minutes.",,active
+ui2049.features.privacy_kicker,ui,*,Features,privacy_kicker,"Privacy",,active
+ui2049.features.privacy_title,ui,*,Features,privacy_title,"Counts, not content",,active
+ui2049.features.privacy_body,ui,*,Features,privacy_body,"Only token totals in half-hour buckets are uploaded. Prompts and code stay local.",,active
+ui2049.features.compete_kicker,ui,*,Features,compete_kicker,"Compete",,active
+ui2049.features.compete_title,ui,*,Features,compete_title,"One board for every CLI",,active
+ui2049.features.compete_body,ui,*,Features,compete_body,"Weekly, monthly and all-time ranks across Codex, Claude Code, Gemini and the rest.",,active
+ui2049.range.all_time,ui,*,*,all_time,"All time",,active
