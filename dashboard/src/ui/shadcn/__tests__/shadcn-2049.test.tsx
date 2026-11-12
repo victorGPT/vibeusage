@@ -264,7 +264,7 @@ describe("Table", () => {
       <Table>
         <TableBody>
           <TableRow>
-            <TableCell>1</TableCell>
+            <TableCell>{1}</TableCell>
           </TableRow>
         </TableBody>
       </Table>,
