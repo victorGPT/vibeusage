@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { abbr, cost, daysBetween, full, pct, range } from "../format";
+import { abbr, cost, daysBetween, full, pct, range, updated } from "../format";
 import { groupByCli, groupByModel } from "../grouping";
 import { neighbours, pinnedMe } from "../rank";
 import { cliNames } from "../shared";
@@ -31,6 +31,17 @@ describe("format", () => {
     expect(cost(undefined)).toBe("$0.00");
     expect(pct(22.0004)).toBe("22.0%");
     expect(pct(68.56)).toBe("68.6%");
+  });
+
+  it("says how long ago the board was refreshed", () => {
+    const now = Date.parse("2026-11-13T12:00:00Z");
+    expect(updated("2026-11-13T11:59:40Z", now)).toBe("updated just now");
+    expect(updated("2026-11-13T12:00:05Z", now)).toBe("updated just now");
+    expect(updated("2026-11-13T11:56:00Z", now)).toBe("updated 4 min ago");
+    expect(updated("2026-11-13T09:00:00Z", now)).toBe("updated 3 h ago");
+    expect(updated("2026-11-11T11:00:00Z", now)).toBe("updated 2 d ago");
+    expect(updated("not a date", now)).toBeNull();
+    expect(updated(null, now)).toBeNull();
   });
 
   it("counts inclusive days and joins a range", () => {

@@ -42,3 +42,19 @@ export function range(from: string, to: string, form: "full" | "short" = "full")
   if (form === "short") return `${from.slice(5)} → ${to.slice(5)}`;
   return `${from} → ${from.slice(0, 4) === to.slice(0, 4) ? to.slice(5) : to}`;
 }
+
+// How long ago a snapshot was taken, for the page meta. A little clock skew still reads "just now".
+export function updated(iso: unknown, now: number): string | null {
+  const at = typeof iso === "string" ? Date.parse(iso) : NaN;
+  if (!Number.isFinite(at)) return null;
+  const min = Math.floor((now - at) / 60_000);
+  if (min < 1) return copy("ui2049.page_header.updated_now");
+  if (min < 60) return copy("ui2049.page_header.updated_min", { n: min });
+  if (min < 48 * 60) return copy("ui2049.page_header.updated_h", { n: Math.floor(min / 60) });
+  return copy("ui2049.page_header.updated_d", { n: Math.floor(min / 1440) });
+}
+
+// PageHeader meta for a board snapshot: its date range, then how fresh it is.
+export function boardMeta(from: string, to: string, generatedAt: unknown, now = Date.now()): string {
+  return [range(from, to), updated(generatedAt, now)].filter(Boolean).join(" · ");
+}

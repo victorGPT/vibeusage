@@ -30,10 +30,12 @@ describe("LeaderboardProfilePage", () => {
       period: "week",
       from: "2026-11-06",
       to: "2026-11-12",
+      generated_at: new Date(Date.now() - 4 * 60_000).toISOString(),
       entry: { rank: 7, display_name: "nullbyte", total_tokens: "195900000", gpt_tokens: "117500000", claude_tokens: "58800000", other_tokens: "19600000" },
     });
     renderPage();
     expect(await screen.findByRole("heading", { level: 1, name: "nullbyte" })).toBeTruthy();
+    expect(screen.getByText("2026-11-06 → 11-12 · updated 4 min ago")).toBeTruthy();
     expect(screen.getByText("Public profile · read only")).toBeTruthy();
     expect(screen.getByText("#7")).toBeTruthy();
     expect(screen.getByText("195.9M")).toBeTruthy();

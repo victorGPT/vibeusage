@@ -7,7 +7,7 @@ import { getLeaderboardProfile } from "../lib/vibeusage-api";
 import { Label } from "../ui/2049/base/Label.tsx";
 import { PageHeader } from "../ui/2049/base/PageHeader.tsx";
 import { Stat } from "../ui/2049/base/Stat.tsx";
-import { abbr, range } from "../ui/2049/blocks/format.ts";
+import { abbr, boardMeta } from "../ui/2049/blocks/format.ts";
 import { IdentityBar } from "../ui/2049/blocks/IdentityBar.tsx";
 import { displayName, periodLabel, rankText } from "../ui/2049/blocks/shared.ts";
 import { StateScreen } from "../ui/2049/blocks/StateScreen.tsx";
@@ -141,7 +141,7 @@ export function LeaderboardProfilePage({
         />
         <PageHeader
           title={name ?? copy("leaderboard.title")}
-          meta={entry && data.from && data.to ? range(data.from, data.to) : undefined}
+          meta={entry && data.from && data.to ? boardMeta(data.from, data.to, data.generated_at) : undefined}
         />
         {body}
       </div>

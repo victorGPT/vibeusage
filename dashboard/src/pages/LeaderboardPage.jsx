@@ -6,7 +6,7 @@ import { clampInt } from "../lib/leaderboard-ui";
 import { isMockEnabled } from "../lib/mock-data";
 import { getLeaderboard } from "../lib/vibeusage-api";
 import { PageHeader } from "../ui/2049/base/PageHeader.tsx";
-import { range } from "../ui/2049/blocks/format.ts";
+import { boardMeta } from "../ui/2049/blocks/format.ts";
 import { periodLabel } from "../ui/2049/blocks/shared.ts";
 import { LeaderboardFilters } from "../ui/2049/blocks/LeaderboardFilters.tsx";
 import { MyRank } from "../ui/2049/blocks/MyRank.tsx";
@@ -312,7 +312,7 @@ export function LeaderboardPage({
         />
         <div className="flex flex-wrap items-end gap-x-8 gap-y-4">
           <div className="min-w-0 flex-auto basis-90">
-            <PageHeader title={copy("leaderboard.title")} meta={from && to ? range(from, to) : undefined} />
+            <PageHeader title={copy("leaderboard.title")} meta={from && to ? boardMeta(from, to, listData?.generated_at) : undefined} />
           </div>
           <LeaderboardFilters
             period={period}

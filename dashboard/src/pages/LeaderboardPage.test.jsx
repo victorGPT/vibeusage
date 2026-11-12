@@ -43,6 +43,17 @@ describe("LeaderboardPage", () => {
     expect(screen.getByRole("heading", { level: 1, name: "LEADERBOARD" })).toBeTruthy();
   });
 
+  it("says when the board was last refreshed", async () => {
+    api.getLeaderboard.mockImplementation(async (args) => ({
+      ...getMockLeaderboard(args),
+      from: "2026-11-06",
+      to: "2026-11-12",
+      generated_at: new Date(Date.now() - 4 * 60_000).toISOString(),
+    }));
+    renderPage();
+    expect(await screen.findByText("2026-11-06 → 11-12 · updated 4 min ago")).toBeTruthy();
+  });
+
   it("shows three neighbours on each side of my rank", async () => {
     renderPage();
     const myRank = await screen.findByRole("region", { name: /^My rank/ });
