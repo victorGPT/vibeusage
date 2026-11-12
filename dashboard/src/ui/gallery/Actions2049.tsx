@@ -148,31 +148,33 @@ function Pager({ initial, total }: { initial: number; total: number }) {
   return (
     <div className="flex flex-wrap items-center gap-2">
       <span className={LABEL}>{summary}</span>
-      <Pagination aria-label={summary} className="ml-auto max-w-full">
-        <PaginationContent>
-          <PaginationItem>
-            <PaginationLink disabled={page === 1} onClick={() => setPage(page - 1)}>
-              {copy("leaderboard.pagination.prev")}
-            </PaginationLink>
-          </PaginationItem>
-          {paginationRange(page, total).map((item, i) => (
-            <PaginationItem key={`${item}-${i}`}>
-              {item === "ellipsis" ? (
-                <PaginationEllipsis />
-              ) : (
-                <PaginationLink isActive={item === page} onClick={() => setPage(item)}>
-                  {item}
-                </PaginationLink>
-              )}
+      <div className="ml-auto max-w-full min-w-0">
+        <Pagination aria-label={summary}>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationLink disabled={page === 1} onClick={() => setPage(page - 1)}>
+                {copy("leaderboard.pagination.prev")}
+              </PaginationLink>
             </PaginationItem>
-          ))}
-          <PaginationItem>
-            <PaginationLink disabled={page === total} onClick={() => setPage(page + 1)}>
-              {copy("leaderboard.pagination.next")}
-            </PaginationLink>
-          </PaginationItem>
-        </PaginationContent>
-      </Pagination>
+            {paginationRange(page, total).map((item, i) => (
+              <PaginationItem key={`${item}-${i}`}>
+                {item === "ellipsis" ? (
+                  <PaginationEllipsis />
+                ) : (
+                  <PaginationLink isActive={item === page} onClick={() => setPage(item)}>
+                    {item}
+                  </PaginationLink>
+                )}
+              </PaginationItem>
+            ))}
+            <PaginationItem>
+              <PaginationLink disabled={page === total} onClick={() => setPage(page + 1)}>
+                {copy("leaderboard.pagination.next")}
+              </PaginationLink>
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      </div>
     </div>
   );
 }

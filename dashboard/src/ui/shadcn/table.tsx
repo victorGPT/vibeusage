@@ -7,7 +7,10 @@ import { cn } from "#src/lib/utils.ts";
 // so a wide table never makes the page scroll.
 function Table({ className, ...props }: ComponentProps<"table">) {
   return (
-    <div data-slot="table-container" className="w-full overflow-x-auto">
+    <div
+      data-slot="table-container"
+      className="w-full overflow-x-auto outline-none focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring"
+    >
       <table
         data-slot="table"
         className={cn(

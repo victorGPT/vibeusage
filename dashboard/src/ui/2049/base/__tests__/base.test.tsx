@@ -46,6 +46,17 @@ describe("CommandBox", () => {
     expect(await screen.findByRole("button", { name: "Copied" })).toBeTruthy();
   });
 
+  it("announces Copied in a polite status region that is always present", async () => {
+    const user = userEvent.setup();
+    render(<CommandBox command="npx --yes vibeusage init" />);
+    const status = screen.getByRole("status");
+    expect(status.getAttribute("aria-live")).toBe("polite");
+    expect(status.textContent).toBe("");
+    await user.click(screen.getByRole("button", { name: "Copy" }));
+    await screen.findByRole("button", { name: "Copied" });
+    expect(screen.getByRole("status").textContent).toBe("Copied");
+  });
+
   it("goes back to Copy when the command changes", async () => {
     const user = userEvent.setup();
     const { rerender } = render(<CommandBox command="npx --yes vibeusage init" />);
