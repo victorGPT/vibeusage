@@ -322,3 +322,14 @@ describe("links", () => {
     expect(link.textContent).not.toContain("new tab");
   });
 });
+
+describe("unsafe links", () => {
+  it.each(["javascript:alert(1)", " JavaScript:alert(1)", "data:text/html,x", "//evil.example/x", "/\\evil.example/x"])(
+    "renders %s as plain text, not a link",
+    (href) => {
+      render(<Projects entries={[{ project_key: "acme/rocket", project_ref: href, total_tokens: 5 }]} limit={3} />);
+      expect(screen.queryByRole("link")).toBeNull();
+      expect(screen.getByText("rocket")).toBeTruthy();
+    },
+  );
+});

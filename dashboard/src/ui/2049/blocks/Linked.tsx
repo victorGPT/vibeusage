@@ -3,12 +3,14 @@ import type { ReactNode } from "react";
 import { copy } from "#src/lib/copy.ts";
 import { cn } from "#src/lib/utils.ts";
 
-// A link when there is somewhere to go, a plain box otherwise. Off-site links open in a new tab.
+// A link when there is somewhere safe to go, a plain box otherwise. Hrefs can come from uploaded
+// data, so only http(s) and same-site paths become links; off-site links open in a new tab.
 export function Linked({ href, className, children }: { href?: string | null; className?: string; children: ReactNode }) {
   const external = /^https?:\/\//i.test(href ?? "");
-  return href ? (
+  const safe = external || /^\/(?![/\\])/.test(href ?? "");
+  return safe ? (
     <a
-      href={href}
+      href={href ?? undefined}
       target={external ? "_blank" : undefined}
       rel={external ? "noopener noreferrer" : undefined}
       className={cn(
