@@ -1,4 +1,4 @@
-import type { LeaderboardEntry, LeaderboardMe } from "./types";
+import type { LeaderboardEntry, LeaderboardMe, LeaderboardMetric } from "./types";
 
 // The rows around mine: up to n ranks above and n below, as far as `entries` reaches.
 export function neighbours(entries: LeaderboardEntry[], meRank: number | null, n: number) {
@@ -19,4 +19,9 @@ export function pinnedMe(entries: LeaderboardEntry[], me: LeaderboardMe | null) 
 export function ahead(entries: LeaderboardEntry[], me: LeaderboardMe | null) {
   if (me?.rank == null) return undefined;
   return entries.find((e) => e.rank === (me.rank as number) - 1);
+}
+
+// Under GPT or Claude the ranks follow that channel, so the counts shown beside them do too.
+export function counted(entry: LeaderboardMe, metric: LeaderboardMetric) {
+  return metric === "all" ? entry.total_tokens : entry[`${metric}_tokens`];
 }

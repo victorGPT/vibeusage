@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { DailyTable } from "../DailyTable";
 import { DotHeatmap } from "../DotHeatmap";
@@ -217,5 +217,36 @@ describe("MyRank under a channel metric", () => {
     expect(within(region).getAllByText("100").length).toBeGreaterThan(0);
     expect(within(region).getByText("50")).toBeTruthy();
     expect(within(region).queryByText("5K")).toBeNull();
+  });
+});
+
+describe("tied ranks", () => {
+  const tied = [
+    { rank: 1, user_id: "a", display_name: "a", total_tokens: 9 },
+    { rank: 1, user_id: "b", display_name: "b", total_tokens: 9 },
+    { rank: 2, user_id: "c", display_name: "c", total_tokens: 5 },
+  ];
+
+  it("keeps every tied row in RankList and RankTable", () => {
+    const error = vi.spyOn(console, "error").mockImplementation(() => {});
+    render(
+      <>
+        <RankList entries={tied} period="week" handle="h" />
+        <RankTable entries={tied} me={null} handle="h" page={1} totalPages={1} totalEntries={3} period="week" onPageChange={() => {}} />
+      </>,
+    );
+    expect(screen.getAllByText("a")).toHaveLength(2);
+    expect(screen.getAllByText("b")).toHaveLength(2);
+    expect(error.mock.calls.some(([msg]) => String(msg).includes("same key"))).toBe(false);
+    error.mockRestore();
+  });
+});
+
+describe("RankList under a channel metric", () => {
+  it("shows the ranked channel's tokens", () => {
+    const entries = [{ rank: 1, display_name: "a", total_tokens: 5000, gpt_tokens: 300 }];
+    render(<RankList entries={entries} period="week" metric="gpt" handle="h" />);
+    expect(screen.getByText("300")).toBeTruthy();
+    expect(screen.queryByText("5K")).toBeNull();
   });
 });

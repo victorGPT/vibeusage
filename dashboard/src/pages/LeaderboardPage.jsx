@@ -262,7 +262,7 @@ export function LeaderboardPage({
             />
           </div>
           <div className="lg:col-span-4">
-            <RankList entries={leaders} period={period} handle={handle} profileHref={profileHref} />
+            <RankList entries={leaders} period={period} metric={metric} handle={handle} profileHref={profileHref} />
           </div>
         </div>
         <RankTable

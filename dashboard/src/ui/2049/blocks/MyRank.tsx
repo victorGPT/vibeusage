@@ -10,7 +10,7 @@ import { Stamp } from "#src/ui/2049/base/Stamp.tsx";
 import { Stat } from "#src/ui/2049/base/Stat.tsx";
 
 import { abbr, num, range } from "./format";
-import { ahead, neighbours } from "./rank";
+import { ahead, counted, neighbours } from "./rank";
 import { displayName, periodLabel, rankText, SCREEN_FILL, you } from "./shared";
 import type { LeaderboardEntry, LeaderboardMe, LeaderboardMetric, LeaderboardPeriod } from "./types";
 
@@ -24,10 +24,6 @@ type MyRankProps = {
   to: string;
   handle: string;
 };
-
-// Under GPT or Claude the ranks follow that channel, so every count on the screen does too.
-const counted = (entry: LeaderboardMe, metric: LeaderboardMetric) =>
-  metric === "all" ? entry.total_tokens : entry[`${metric}_tokens`];
 
 function Neighbour({ entry, metric }: { entry: LeaderboardEntry; metric: LeaderboardMetric }) {
   return <RankRow rank={rankText(entry.rank)} user={displayName(entry)} value={abbr(counted(entry, metric))} />;
