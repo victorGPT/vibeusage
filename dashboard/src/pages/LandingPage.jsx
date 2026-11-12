@@ -44,13 +44,10 @@ export function LandingPage({ signUpUrl }) {
     return { from: formatDateUTC(new Date(today - 6 * 86_400_000)), to: formatDateUTC(new Date(today)) };
   }, []);
 
-  const sampleBoard = useMemo(
-    () =>
-      String(copy("ui2049.landing.sample_names"))
-        .split(",")
-        .map((name, i) => ({ rank: i + 1, display_name: name, total_tokens: SAMPLE_TOKENS[i] })),
-    [],
-  );
+  const sampleBoard = useMemo(() => {
+    const names = String(copy("ui2049.landing.sample_names")).split(",");
+    return SAMPLE_TOKENS.map((total, i) => ({ rank: i + 1, display_name: names[i] ?? null, total_tokens: total }));
+  }, []);
 
   useEffect(() => {
     try {
