@@ -26,7 +26,7 @@ export function LandingExtras({
                 type="text"
                 value={handle}
                 onChange={onHandleChange}
-                className="w-full bg-transparent border-b border-ink-muted text-ink-bright font-black text-display-3 md:text-display-3 p-1 focus:outline-none focus:border-ink transition-colors"
+                className="w-full bg-transparent border-b border-ink-muted text-ink-bright font-black text-display-3 md:text-display-3 p-1 focus:outline-hidden focus:border-ink transition-colors"
                 maxLength={10}
                 placeholder={handlePlaceholder}
               />

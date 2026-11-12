@@ -95,12 +95,12 @@ export function UpgradeAlertModal({ requiredVersion, installCommand, onClose }) 
 
         {/* Middle: Command Area */}
         <div className="flex-1 flex items-center justify-center max-w-xl w-full">
-          <div className="flex items-center w-full bg-surface-raised border border-gold/20 pl-3 rounded-sm group hover:border-gold/40 transition-all overflow-hidden">
+          <div className="flex items-center w-full bg-surface-raised border border-gold/20 pl-3 rounded-xs group hover:border-gold/40 transition-all overflow-hidden">
             <span className="text-caption text-gold/80 shrink-0">{promptLabel}</span>
             <Input
               readOnly
               value={resolvedInstallCommand}
-              className="bg-transparent border-none text-body text-gray-300 w-full px-2 py-1 outline-none pointer-events-none"
+              className="bg-transparent border-none text-body text-gray-300 w-full px-2 py-1 outline-hidden pointer-events-none"
             />
             <Button
               onClick={handleCopy}

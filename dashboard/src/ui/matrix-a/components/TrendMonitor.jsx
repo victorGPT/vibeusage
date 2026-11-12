@@ -399,7 +399,7 @@ export function TrendMonitor({
           }}
         />
 
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-ink-line to-transparent w-[50%] h-full animate-[scan-x_3s_linear_infinite] pointer-events-none mix-blend-screen" />
+        <div className="absolute inset-0 bg-linear-to-r/srgb from-transparent via-ink-line to-transparent w-[50%] h-full animate-[scan-x_3s_linear_infinite] pointer-events-none mix-blend-screen" />
 
         <svg
           viewBox={`0 0 ${width} ${height}`}
@@ -439,7 +439,7 @@ export function TrendMonitor({
         {singlePoints.map((pt) => (
           <div
             key={pt.key}
-            className="absolute z-15 w-2.5 h-2.5 rounded-full"
+            className="absolute w-2.5 h-2.5 rounded-full"
             style={{
               left: `calc(${(pt.x / width) * 100}% - 5px)`,
               top: `calc(${(pt.y / height) * 100}% - 5px)`,
@@ -470,7 +470,7 @@ export function TrendMonitor({
         {hover ? (
           <>
             <div
-              className="absolute inset-y-0 left-0 pointer-events-none z-25"
+              className="absolute inset-y-0 left-0 pointer-events-none"
               style={{ right: hover.axisWidthPx }}
             >
               <div

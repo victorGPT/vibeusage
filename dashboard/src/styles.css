@@ -1,6 +1,95 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss" source(none);
+@source "../index.html";
+@source "./**/*.{js,jsx,ts,tsx}";
+
+/* v4 wraps hover in @media (hover: hover); keep v3 behavior on touch devices. */
+@custom-variant hover (&:hover);
+
+/* SSOT: dashboard/DESIGN.md. Do not add values that are not documented there. */
+@theme {
+  --font-mono:
+    "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+  --font-katakana:
+    "Hiragino Sans", "Yu Gothic", "MS Gothic", "Geist Mono", ui-monospace,
+    SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New",
+    monospace;
+
+  --tracking-tight: -0.02em;
+  --tracking-data: 0;
+  --tracking-label: 0.12em;
+  --tracking-caps: 0.22em;
+
+  --color-ink: #00ff41;
+  --color-ink-bright: #e8ffe9;
+  --color-ink-text: rgba(0, 255, 65, 0.6);
+  --color-ink-muted: rgba(0, 255, 65, 0.35);
+  --color-ink-line: rgba(0, 255, 65, 0.18);
+
+  --color-surface: #050505;
+  --color-surface-raised: rgba(0, 10, 0, 0.7);
+  --color-surface-strong: rgba(0, 10, 0, 0.82);
+
+  --color-gold: #ffd700;
+  /* Status escape hatch — DESIGN.md §2 v3 (kit chat2). Used only for
+   * status indicators where green-on-green can't carry severity. */
+  --color-warn: #ffb300;
+  --color-err: #ff3344;
+
+  /* v3 palette values for the few default colors still in use (v4 ships oklch). */
+  --color-gray-300: #d1d5db;
+  --color-yellow-500: #eab308;
+  --color-yellow-900: #713f12;
+
+  --shadow-panel: 0 0 0 1px rgba(0, 255, 65, 0.08), 0 18px 40px rgba(0, 0, 0, 0.45);
+  --shadow-glow-xs: 0 0 6px rgba(0, 255, 65, 0.35);
+  --shadow-glow-sm: 0 0 10px rgba(0, 255, 65, 0.35);
+  --shadow-glow: 0 0 24px rgba(0, 255, 65, 0.35);
+  --shadow-glow-faint: 0 0 15px rgba(0, 255, 65, 0.1);
+  --shadow-gold: 0 0 18px rgba(255, 215, 0, 0.35);
+  --shadow-gold-sm: 0 0 10px rgba(255, 215, 0, 0.3);
+  --shadow-gold-faint: 0 0 20px rgba(255, 215, 0, 0.1);
+  --shadow-warn-glow: 0 0 10px rgba(255, 179, 0, 0.4);
+  --shadow-err-glow: 0 0 10px rgba(255, 51, 68, 0.45);
+
+  --drop-shadow-glow: 0 0 8px rgba(0, 255, 65, 0.8);
+  --drop-shadow-glow-sm: 0 0 5px rgba(0, 255, 65, 0.6);
+  --drop-shadow-glow-faint: 0 0 10px rgba(0, 255, 65, 0.22);
+  --drop-shadow-gold: 0 0 10px rgba(255, 215, 0, 0.5);
+
+  --blur-panel: 10px;
+}
+
+/* v3 preflight defaults that v4 dropped. */
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: #e5e7eb;
+  }
+
+  input,
+  select,
+  textarea {
+    background-color: revert-layer;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: #9ca3af;
+  }
+
+  button,
+  [role="button"] {
+    cursor: pointer;
+  }
+
+  :disabled {
+    cursor: default;
+  }
+}
 
 /* VibeUsage Design System v1 — Operations Deck
  * SSOT: dashboard/DESIGN.md. CSS variables below mirror Tailwind tokens
@@ -85,7 +174,7 @@ body {
     transition:
       background 200ms ease,
       border-color 200ms ease,
-      transform 120ms ease;
+      scale 120ms ease;
   }
 
   .btn-chip:hover {
@@ -93,8 +182,10 @@ body {
     border-color: var(--ink-muted);
   }
 
+  /* scale, not transform: MatrixButton also carries active:scale-[0.98], and v4
+   * applies that through the scale property, so a transform here would stack. */
   .btn-chip:active {
-    transform: scale(0.98);
+    scale: 0.98;
   }
 
   .btn-chip--primary {
@@ -142,140 +233,213 @@ body {
   }
 }
 
-@layer utilities {
-  /* Hide native scrollbar, keep scroll. */
-  .no-scrollbar::-webkit-scrollbar {
+/* Type scale (DESIGN.md §3). Plain declarations, not @theme --text-* tokens: a v4 font-size
+ * utility yields to leading-*, tracking-* and font-* at any breakpoint, while v3 let a
+ * later breakpoint's size reset them, and the pages rely on that. */
+@utility text-display-0 {
+  font-size: 96px;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  font-weight: 900;
+}
+
+@utility text-display-1 {
+  font-size: 60px;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-weight: 900;
+}
+
+@utility text-display-2 {
+  font-size: 40px;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  font-weight: 900;
+}
+
+@utility text-display-3 {
+  font-size: 28px;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  font-weight: 900;
+}
+
+@utility text-heading {
+  font-size: 14px;
+  line-height: 1.25;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+}
+
+@utility text-body {
+  font-size: 13px;
+  line-height: 1.5;
+  letter-spacing: 0;
+  font-weight: 500;
+}
+
+@utility text-data {
+  font-size: 12px;
+  line-height: 1.4;
+  letter-spacing: 0;
+  font-weight: 500;
+}
+
+@utility text-caption {
+  font-size: 11px;
+  line-height: 1.3;
+  letter-spacing: 0.12em;
+  font-weight: 600;
+}
+
+@utility text-micro {
+  font-size: 10px;
+  line-height: 1.2;
+  letter-spacing: 0.22em;
+  font-weight: 700;
+}
+
+/* v4 builds drop-shadow(var(--drop-shadow-*)), which breaks on a two-layer value. */
+@utility drop-shadow-crown {
+  --tw-drop-shadow: drop-shadow(0 0 8px rgba(255, 215, 0, 0.8))
+    drop-shadow(0 0 15px rgba(255, 255, 255, 0.5));
+  filter: var(--tw-blur,) var(--tw-brightness,) var(--tw-contrast,) var(--tw-grayscale,)
+    var(--tw-hue-rotate,) var(--tw-invert,) var(--tw-saturate,) var(--tw-sepia,)
+    var(--tw-drop-shadow,);
+}
+
+/* Hide native scrollbar, keep scroll. */
+@utility no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
     display: none;
   }
-  .no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
+}
 
-  /* Single glow text utility (DESIGN.md §5). */
-  .glow-text {
-    text-shadow: 0 0 16px var(--ink-glow);
-  }
+/* Single glow text utility (DESIGN.md §5). */
+@utility glow-text {
+  text-shadow: 0 0 16px var(--ink-glow);
+}
 
-  /* Gold text-shadow utility for inline-style parity (gold accent text). */
-  .glow-text-gold {
-    text-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
-  }
+/* Gold text-shadow utility for inline-style parity (gold accent text). */
+@utility glow-text-gold {
+  text-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+}
 
-  /* App shell content wrapper — banner offset var. */
-  .app-shell-content {
-    margin-top: var(--banner-offset, 0px);
-  }
+/* App shell content wrapper — banner offset var. */
+@utility app-shell-content {
+  margin-top: var(--banner-offset, 0px);
+}
 
-  /* fx-scanline — the ONE ambient overlay layer for dashboard/shell.
-   * Applied at app root (DESIGN.md §5 Motion). */
-  .fx-scanline {
-    background-image: linear-gradient(
-      to bottom,
-      rgba(18, 16, 16, 0) 50%,
-      rgba(0, 0, 0, 0.1) 50%
+/* fx-scanline — the ONE ambient overlay layer for dashboard/shell.
+ * Applied at app root (DESIGN.md §5 Motion). */
+@utility fx-scanline {
+  background-image: linear-gradient(
+    to bottom,
+    rgba(18, 16, 16, 0) 50%,
+    rgba(0, 0, 0, 0.1) 50%
+  );
+  background-size: 100% 4px;
+}
+
+/* fx-scanline-gold — gold-tinted variant for gold alert bars only.
+ * Usage: UpgradeAlertModal. Do not proliferate. */
+@utility fx-scanline-gold {
+  background-image: linear-gradient(
+    to bottom,
+    rgba(255, 215, 0, 0) 50%,
+    rgba(255, 215, 0, 0.1) 50%
+  );
+  background-size: 100% 4px;
+}
+
+/* fx-grid — subtle grid background for landing page hero area. */
+@utility fx-grid {
+  background-image:
+    linear-gradient(rgba(0, 255, 65, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 65, 0.03) 1px, transparent 1px);
+  background-size: 50px 50px;
+}
+
+/* fx-crt — DESIGN.md §5 v3. Single fixed full-bleed overlay layer:
+ * radial inner shadow simulating CRT screen-edge curvature + phosphor warmth.
+ * Like fx-scanline, never nested. Pointer-events: none from caller. */
+@utility fx-crt {
+  background:
+    radial-gradient(
+      ellipse at center,
+      transparent 55%,
+      rgba(0, 0, 0, 0.35) 100%
     );
-    background-size: 100% 4px;
-  }
-
-  /* fx-scanline-gold — gold-tinted variant for gold alert bars only.
-   * Usage: UpgradeAlertModal. Do not proliferate. */
-  .fx-scanline-gold {
-    background-image: linear-gradient(
-      to bottom,
-      rgba(255, 215, 0, 0) 50%,
-      rgba(255, 215, 0, 0.1) 50%
-    );
-    background-size: 100% 4px;
-  }
-
-  /* fx-grid — subtle grid background for landing page hero area. */
-  .fx-grid {
-    background-image:
-      linear-gradient(rgba(0, 255, 65, 0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0, 255, 65, 0.03) 1px, transparent 1px);
-    background-size: 50px 50px;
-  }
-
-  /* fx-crt — DESIGN.md §5 v3. Single fixed full-bleed overlay layer:
-   * radial inner shadow simulating CRT screen-edge curvature + phosphor warmth.
-   * Like fx-scanline, never nested. Pointer-events: none from caller. */
-  .fx-crt {
-    background:
-      radial-gradient(
-        ellipse at center,
-        transparent 55%,
-        rgba(0, 0, 0, 0.35) 100%
-      );
-    box-shadow:
-      inset 0 0 80px rgba(0, 255, 65, 0.04),
-      inset 0 0 160px rgba(0, 0, 0, 0.55);
-  }
+  box-shadow:
+    inset 0 0 80px rgba(0, 255, 65, 0.04),
+    inset 0 0 160px rgba(0, 0, 0, 0.55);
 
   @media (max-width: 767px) {
-    .fx-crt {
-      box-shadow:
-        inset 0 0 80px rgba(0, 255, 65, 0.025),
-        inset 0 0 160px rgba(0, 0, 0, 0.55);
-    }
+    box-shadow:
+      inset 0 0 80px rgba(0, 255, 65, 0.025),
+      inset 0 0 160px rgba(0, 0, 0, 0.55);
   }
+}
 
-  /* fx-glitch — DESIGN.md §5 v3. 2-frame RGB-shift jitter on hover.
-   * Apply to display-0 hero numbers + primary CTAs.
-   * Respects prefers-reduced-motion via global rule below. */
-  .fx-glitch {
-    position: relative;
-    transition: text-shadow 160ms ease-out;
-  }
-  .fx-glitch:hover {
+/* fx-glitch — DESIGN.md §5 v3. 2-frame RGB-shift jitter on hover.
+ * Apply to display-0 hero numbers + primary CTAs.
+ * Respects prefers-reduced-motion via global rule below. */
+@utility fx-glitch {
+  position: relative;
+  transition: text-shadow 160ms ease-out;
+
+  &:hover {
     animation: fx-glitch-shift 360ms steps(2, end);
     text-shadow:
       -1px 0 rgba(255, 0, 64, 0.55),
       1px 0 rgba(0, 200, 255, 0.55),
       0 0 16px var(--ink-glow);
   }
+}
 
-  @keyframes fx-glitch-shift {
-    0%, 100% { transform: translate(0, 0); }
-    20% { transform: translate(-1px, 1px); }
-    40% { transform: translate(1px, -1px); }
-    60% { transform: translate(-1px, 0); }
-    80% { transform: translate(1px, 0); }
-  }
+@keyframes fx-glitch-shift {
+  0%, 100% { transform: translate(0, 0); }
+  20% { transform: translate(-1px, 1px); }
+  40% { transform: translate(1px, -1px); }
+  60% { transform: translate(-1px, 0); }
+  80% { transform: translate(1px, 0); }
+}
 
-  /* deco-katakana — DESIGN.md §5 v3. Monospaced katakana decorative band.
-   * Chrome only. Removing it must not lose information.
-   * Wrap content in a span with .deco-katakana; provide actual chars from
-   * copy.csv or hard-coded fallback (latin-only environments still render). */
-  .deco-katakana {
-    font-family: "Hiragino Sans", "Yu Gothic", "MS Gothic", "Geist Mono",
-      ui-monospace, monospace;
-    color: var(--ink-line);
-    letter-spacing: 0.18em;
-    user-select: none;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: clip;
-  }
+/* deco-katakana — DESIGN.md §5 v3. Monospaced katakana decorative band.
+ * Chrome only. Removing it must not lose information.
+ * Wrap content in a span with .deco-katakana; provide actual chars from
+ * copy.csv or hard-coded fallback (latin-only environments still render). */
+@utility deco-katakana {
+  font-family: "Hiragino Sans", "Yu Gothic", "MS Gothic", "Geist Mono",
+    ui-monospace, monospace;
+  color: var(--ink-line);
+  letter-spacing: 0.18em;
+  user-select: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
+}
 
-  /* Heatmap scrubber bar (functional indicator, not atmosphere). */
-  .heatmap-scrollbar-track {
-    height: 6px;
-    border-radius: 999px;
-    background: var(--ink-line);
-    border: 1px solid var(--ink-line);
-    position: relative;
-    overflow: hidden;
-  }
+/* Heatmap scrubber bar (functional indicator, not atmosphere). */
+@utility heatmap-scrollbar-track {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--ink-line);
+  border: 1px solid var(--ink-line);
+  position: relative;
+  overflow: hidden;
+}
 
-  .heatmap-scrollbar-thumb {
-    position: absolute;
-    inset: 0 auto 0 0;
-    border-radius: 999px;
-    background: var(--ink-muted);
-    box-shadow: 0 0 6px var(--ink-glow);
-    transition: transform 120ms ease-out;
-  }
+@utility heatmap-scrollbar-thumb {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 999px;
+  background: var(--ink-muted);
+  box-shadow: 0 0 6px var(--ink-glow);
+  transition: transform 120ms ease-out;
 }
 
 /* Screenshot mode — silence atmospheric layers for deterministic capture. */

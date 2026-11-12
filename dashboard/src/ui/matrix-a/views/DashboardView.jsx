@@ -348,7 +348,7 @@ export function DashboardView(props) {
                       onClick={handleShareToX}
                       aria-label={screenshotTwitterLabel}
                       title={screenshotTwitterLabel}
-                      className="h-12 md:h-14 px-6 text-body tracking-caps"
+                      className="md:h-14 px-6 text-body tracking-caps"
                       primary
                       disabled={isCapturing}
                     >
@@ -439,7 +439,7 @@ export function DashboardView(props) {
                                   type="button"
                                   onClick={() => toggleSort(c.key)}
                                   title={c.title}
-                                  className="w-full px-3 py-2 text-left text-micro uppercase tracking-caps font-black opacity-70 hover:opacity-100 hover:bg-ink-line focus:outline-none focus-visible:ring-2 focus-visible:ring-ink-muted flex items-center justify-start"
+                                  className="w-full px-3 py-2 text-left text-micro uppercase tracking-caps font-black opacity-70 hover:opacity-100 hover:bg-ink-line focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ink-muted flex items-center justify-start"
                                 >
                                   <span className="inline-flex items-center gap-2">
                                     <span>{c.label}</span>

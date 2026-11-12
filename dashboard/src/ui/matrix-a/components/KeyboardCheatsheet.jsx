@@ -36,7 +36,7 @@ export function KeyboardCheatsheet({ open, onClose }) {
         className="max-w-md mx-4 bg-surface-strong border-ink font-mono gap-0 block"
       >
         <div className="flex items-baseline justify-between border-b border-ink-line pb-3 mb-4">
-          <DialogTitle className="text-heading text-ink uppercase tracking-label font-normal">
+          <DialogTitle className="text-body text-ink uppercase leading-none tracking-tight font-normal">
             {copy("keyboard.cheatsheet.title")}
           </DialogTitle>
           <div className="flex items-center gap-3">
@@ -48,7 +48,7 @@ export function KeyboardCheatsheet({ open, onClose }) {
             </span>
             <DialogClose
               aria-label={copy("keyboard.cheatsheet.close_aria")}
-              className="text-caption text-ink uppercase tracking-caps border border-ink-muted bg-surface px-2 py-0.5 hover:bg-ink-line focus:outline-none focus-visible:border-ink"
+              className="text-caption text-ink uppercase tracking-caps border border-ink-muted bg-surface px-2 py-0.5 hover:bg-ink-line focus:outline-hidden focus-visible:border-ink"
             >
               {copy("keyboard.cheatsheet.close_label")}
             </DialogClose>
