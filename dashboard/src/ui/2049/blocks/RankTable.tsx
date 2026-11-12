@@ -35,14 +35,14 @@ type RowProps = {
 
 function Row({ entry, me, user, href, pinned = false }: RowProps) {
   const lead = entry.rank === 1;
-  const cell = cn(me && "text-primary", lead && "border-t-2 border-t-teal", pinned && "border-input");
+  const cell = cn(me && "text-primary", lead && "border-t border-t-teal", pinned && "border-input");
   return (
     <TableRow className={cn(me && "bg-primary/8")}>
       <TableCell className={cn("font-display", me ? "text-primary" : "text-muted-foreground", cell)}>
         {rankText(entry.rank)}
       </TableCell>
       <TableCell className={cn("font-sans font-medium", me ? "text-primary" : "text-hero", cell)}>
-        <span className="flex max-w-80 items-center gap-2">
+        <span className="-my-1 flex max-w-80 items-center gap-2">
           {href ? (
             <a href={href} className="truncate underline-offset-4 hover:underline">
               {user}
