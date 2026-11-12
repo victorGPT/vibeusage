@@ -1028,7 +1028,7 @@ export function DashboardPage({
           handle={identityDisplayName}
           since={identityStartDate}
           activeDays={activeDays}
-          owner={!publicMode && signedIn}
+          owner={!publicMode && signedIn && !sessionSoftExpired}
           publicEnabled={publicViewEnabled}
           publicBusy={publicViewBusy}
           onPublicChange={handleTogglePublicView}
