@@ -495,3 +495,7 @@ keyboard.cheatsheet.row.total,ui,KeyboardCheatsheet,KeyboardCheatsheet,row,"swit
 keyboard.cheatsheet.row.refresh,ui,KeyboardCheatsheet,KeyboardCheatsheet,row,"refresh data",,active
 keyboard.cheatsheet.row.share,ui,KeyboardCheatsheet,KeyboardCheatsheet,row,"share screenshot to X",,active
 keyboard.cheatsheet.row.close,ui,KeyboardCheatsheet,KeyboardCheatsheet,row,"close overlays",,active
+ui2049.command_box.copy,ui,*,CommandBox,copy,"Copy",,active
+ui2049.command_box.copied,ui,*,CommandBox,copied,"Copied",,active
+ui2049.rank_row.leader,ui,*,RankRow,leader_badge,"Leader",,active
+ui2049.stamp.site,ui,*,Stamp,site,"vibeusage.cc",,active

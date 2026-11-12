@@ -106,6 +106,27 @@
   --font-sans: "Barlow", "Noto Sans SC", sans-serif;
   --font-command: "JetBrains Mono", ui-monospace, monospace;
 
+  /* Font sizes only. Line height stays on the class (text-label/none), because one size
+   * carries several line heights across the boards. */
+  --text-badge: 10px;
+  --text-label: 11px;
+  --text-label-lg: 12px;
+  --text-copy-s: 14px;
+  --text-copy-m: 15px;
+  --text-copy-l: 17px;
+  --text-value-s: 18px;
+  --text-heading-xs: 22px;
+  --text-value-l: 28px;
+  --text-heading-s: 36px;
+  --text-heading-m: 40px;
+  --text-title: 44px;
+  --text-heading-l: 52px;
+  --text-screen-s: 64px;
+  --text-screen-m: 72px;
+  --text-heading-xl: 76px;
+  --text-screen-l: 76px;
+  --text-screen-xl: 88px;
+
   --radius-sm: 3px;
   --radius-md: 8px;
   --radius-lg: 18px;
@@ -113,4 +134,26 @@
   --spacing-control: 32px;
   --spacing-control-lg: 48px;
   --spacing-row: 40px;
+
+  --text-shadow-display-glow: 0 0 22px rgb(127 217 203 / 0.3);
+  --text-shadow-display-glow-amber: 0 0 22px rgb(224 176 74 / 0.3);
+  --text-shadow-display-glow-alert: 0 0 22px rgb(229 72 77 / 0.3);
+  --text-shadow-heading-glow: 0 0 26px rgb(127 217 203 / 0.3);
+  --text-shadow-heading-glow-amber: 0 0 26px rgb(224 176 74 / 0.3);
+  --inset-shadow-screen: inset 0 0 40px rgb(127 217 203 / 0.1);
+}
+
+/* Main-screen vignette, copied from the shell in SpecLayout.dc.html. */
+@utility screen-shell {
+  background: radial-gradient(
+    130% 100% at 50% 40%,
+    var(--color-screen-core) 0%,
+    var(--color-card) 65%,
+    var(--color-screen-edge) 100%
+  );
+}
+
+/* Main-screen material from ScreenFx.dc.html: one dark line every 3px, static. */
+@utility screen-scanlines {
+  background: repeating-linear-gradient(0deg, rgb(0 0 0 / 0.22) 0 1px, transparent 1px 3px);
 }
