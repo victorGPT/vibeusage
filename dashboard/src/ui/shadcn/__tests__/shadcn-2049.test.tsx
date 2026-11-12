@@ -257,3 +257,19 @@ describe("Badge, Card, Table", () => {
     expect(screen.getByRole("cell", { name: "2026-11-12" })).toBeInTheDocument();
   });
 });
+
+describe("Table", () => {
+  it("lets keyboard users reach the scroll container to scroll a wide table", async () => {
+    render(
+      <Table>
+        <TableBody>
+          <TableRow>
+            <TableCell>1</TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>,
+    );
+    await userEvent.tab();
+    expect(document.activeElement?.getAttribute("data-slot")).toBe("table-container");
+  });
+});
