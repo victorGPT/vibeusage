@@ -50,7 +50,6 @@ import { periodLabel } from "../ui/2049/blocks/shared";
 import { StateScreen } from "../ui/2049/blocks/StateScreen";
 import { TopNav } from "../ui/2049/blocks/TopNav";
 import { Trend } from "../ui/2049/blocks/Trend";
-import { COLORS } from "../ui/matrix-a/components/MatrixConstants";
 import { CostAnalysisModal } from "../ui/matrix-a/components/CostAnalysisModal.jsx";
 import { KeyboardCheatsheet } from "../ui/matrix-a/components/KeyboardCheatsheet.jsx";
 import { Button } from "../ui/shadcn/button";
@@ -809,6 +808,7 @@ export function DashboardPage({
     const root = document.querySelector("#root") || document.body;
     const docEl = document.documentElement;
     const { scrollWidth, scrollHeight } = document.documentElement;
+    const backgroundColor = getComputedStyle(docEl).getPropertyValue("--color-background").trim();
     docEl?.classList.add("screenshot-capture");
     document.body?.classList.add("screenshot-capture");
     await new Promise((resolve) => requestAnimationFrame(resolve));
@@ -816,7 +816,7 @@ export function DashboardPage({
     try {
       const { toBlob, toPng } = await import("html-to-image");
       const blob = await toBlob(root, {
-        backgroundColor: COLORS.SURFACE,
+        backgroundColor,
         pixelRatio: 2,
         cacheBust: true,
         width: scrollWidth,
@@ -830,7 +830,7 @@ export function DashboardPage({
       });
       if (blob) return blob;
       const dataUrl = await toPng(root, {
-        backgroundColor: COLORS.SURFACE,
+        backgroundColor,
         pixelRatio: 2,
         cacheBust: true,
         width: scrollWidth,
