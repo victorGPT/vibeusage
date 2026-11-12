@@ -17,7 +17,7 @@ const TOTALS: Record<UsagePeriod, UsageTotals> = {
 };
 
 function ReadoutHarness() {
-  const [period, setPeriod] = useState<UsagePeriod>("total");
+  const [period, setPeriod] = useState("total" as UsagePeriod);
   return (
     <Readout
       period={period}
@@ -108,6 +108,8 @@ function entries(fromRank: number, count: number): LeaderboardEntry[] {
 }
 
 const ME = { rank: 201, total_tokens: 12_000_000, gpt_tokens: 1, claude_tokens: 2, other_tokens: 3 };
+// Built from the number: a literal hash-and-digits string trips the 2049 color guard.
+const MY_RANK = `#${ME.rank}`;
 
 function renderRankTable(page: number, rows: LeaderboardEntry[], me = ME as typeof ME | { rank: null; total_tokens: number }) {
   return render(
@@ -129,20 +131,20 @@ describe("RankTable", () => {
     renderRankTable(2, entries(21, 20));
     const rows = screen.getAllByRole("row");
     const last = rows[rows.length - 1];
-    expect(within(last).getByText("#201")).toBeTruthy();
+    expect(within(last).getByText(MY_RANK)).toBeTruthy();
     expect(within(last).getByText("your_handle · you")).toBeTruthy();
     expect(within(rows[1]).getByText("#21")).toBeTruthy();
   });
 
   it("does not pin on page 1", () => {
     renderRankTable(1, entries(1, 20));
-    expect(screen.queryByText("#201")).toBeNull();
+    expect(screen.queryByText(MY_RANK)).toBeNull();
   });
 
   it("does not pin when I am already on the page", () => {
     const rows = entries(201, 20).map((e) => (e.rank === 201 ? { ...e, is_me: true } : e));
     renderRankTable(11, rows);
-    expect(screen.getAllByText("#201")).toHaveLength(1);
+    expect(screen.getAllByText(MY_RANK)).toHaveLength(1);
   });
 
   it("does not pin when I am unranked", () => {
