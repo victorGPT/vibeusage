@@ -16,7 +16,7 @@ import { getRangeForPeriod } from "../lib/date-range";
 import { trimLeadingZeroMonths } from "../lib/details";
 import { selectRollingUsageForDisplay } from "../lib/dashboard-period-bindings";
 import { formatUsdCurrency, toDisplayNumber, toFiniteNumber } from "../lib/format";
-import { shouldShowInstallCard } from "../lib/install-status";
+import { shouldShowEmptyState, shouldShowInstallCard } from "../lib/install-status";
 import { getMockNow, isMockEnabled } from "../lib/mock-data";
 import { buildFleetData, resolveModelDisplayName } from "../lib/model-breakdown";
 import { safeWriteClipboard, safeWriteClipboardImage } from "../lib/safe-browser";
@@ -916,15 +916,14 @@ export function DashboardPage({
     activeDays,
     hasActiveDeviceToken,
   });
-  // The heatmap covers 52 weeks and Total covers 24 months, so a quiet year alone is not "no data".
-  const showEmpty =
-    !publicMode &&
-    accessEnabled &&
-    !heatmapPending &&
-    activeDays === 0 &&
-    hasActiveDeviceToken &&
-    Boolean(summary) &&
-    !hasUsageValue(summaryTotalTokens);
+  const showEmpty = shouldShowEmptyState({
+    publicMode,
+    accessEnabled,
+    heatmapLoading: heatmapPending,
+    activeDays,
+    hasActiveDeviceToken,
+    latestDeviceSeenAt: userStatus?.install?.latest_device_seen_at,
+  });
   const publicViewBusy = publicViewLoading || publicViewActionLoading;
   const publicViewUrl = useMemo(() => {
     if (!publicViewToken || typeof window === "undefined") return "";

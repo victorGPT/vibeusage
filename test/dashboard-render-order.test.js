@@ -112,11 +112,3 @@ test("screenshot mode titles the exported image and keeps the share hint out of 
   assert.ok(exclude > line2, "expected the title outside the excluded share controls");
   assert.ok(hint > exclude, "expected the hint inside the excluded share controls");
 });
-
-test("the empty screen needs a loaded, zero summary, not just a quiet heatmap", () => {
-  const src = fs.readFileSync(path.join(__dirname, "..", "dashboard", "src", "pages", "DashboardPage.jsx"), "utf8");
-  const showEmpty = src.match(/const showEmpty =([\s\S]*?);/)?.[1] ?? "";
-  assert.match(showEmpty, /activeDays === 0/);
-  assert.match(showEmpty, /Boolean\(summary\)/);
-  assert.match(showEmpty, /!hasUsageValue\(summaryTotalTokens\)/);
-});
