@@ -193,6 +193,13 @@ describe("StateScreen", () => {
     expect(screen.queryByText(/when asked/)).toBeNull();
   });
 
+  it("names the Node.js prerequisite above the install command", () => {
+    render(<StateScreen variant="install" />);
+    const prompt = screen.getByText("Install Node.js 18+ then run:");
+    const command = screen.getByText("npx --yes vibeusage init");
+    expect(prompt.compareDocumentPosition(command) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
   it("shows the bare install command without a link code", () => {
     render(<StateScreen variant="install" />);
     expect(screen.getByText("npx --yes vibeusage init")).toBeTruthy();

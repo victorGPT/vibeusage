@@ -53,6 +53,7 @@ export function StateScreen({ variant, compact = false, linkCode, visitor, onSig
           {variant === "install" ? (
             <>
               <Heading text={copy("ui2049.state_screen.install_title")} size="s" />
+              <Text text={copy("dashboard.install.prompt")} />
               <CommandBox
                 command={
                   linkCode
