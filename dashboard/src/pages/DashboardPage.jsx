@@ -580,6 +580,7 @@ export function DashboardPage({
     daily: heatmapDaily,
     heatmap,
     loading: heatmapLoading,
+    error: heatmapError,
     refresh: refreshHeatmap,
   } = useActivityHeatmap({
     baseUrl,
@@ -886,9 +887,6 @@ export function DashboardPage({
       }
     }
   }, [captureScreenshotBlob, isCapturing, screenshotTwitterUrl]);
-  const footerLeftContent = accessEnabled
-    ? copy("dashboard.footer.active", { range: timeZoneRangeLabel })
-    : copy("dashboard.footer.auth");
 
   const summaryCostValue = useMemo(() => {
     const formatted = formatUsdCurrency(summary?.total_cost_usd);
@@ -909,17 +907,19 @@ export function DashboardPage({
   const hasActiveDeviceToken = Boolean(
     userStatus?.install?.has_active_device_token ?? userStatus?.install?.hasActiveDeviceToken,
   );
+  // The heatmap hook starts idle with no data, which reads as zero active days for one frame.
+  const heatmapPending = heatmapLoading || (!heatmap && !heatmapError);
   const shouldShowInstall = shouldShowInstallCard({
     publicMode,
     screenshotMode,
     forceInstall,
     accessEnabled,
-    heatmapLoading,
+    heatmapLoading: heatmapPending,
     activeDays,
     hasActiveDeviceToken,
   });
   const showEmpty =
-    !publicMode && accessEnabled && !heatmapLoading && activeDays === 0 && hasActiveDeviceToken;
+    !publicMode && accessEnabled && !heatmapPending && activeDays === 0 && hasActiveDeviceToken;
   const publicViewBusy = publicViewLoading || publicViewActionLoading;
   const publicViewUrl = useMemo(() => {
     if (!publicViewToken || typeof window === "undefined") return "";
@@ -1120,7 +1120,7 @@ export function DashboardPage({
           dateKey={detailsDateKey}
           paged={DETAILS_PAGED_PERIODS.has(period)}
         />
-        {screenshotMode ? null : <PageFooter left={footerLeftContent} right={usageSourceLabel} />}
+        {screenshotMode ? null : <PageFooter left={timeZoneRangeLabel} right={usageSourceLabel} />}
       </div>
       <CostAnalysisModal isOpen={costModalOpen} onClose={closeCostModal} fleetData={fleetData} />
       <KeyboardCheatsheet open={cheatsheetOpen} onClose={() => setCheatsheetOpen(false)} />
