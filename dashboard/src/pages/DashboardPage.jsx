@@ -106,7 +106,6 @@ function mainScreen({
   usageLoading,
   hasSummary,
   showEmpty,
-  publicMode,
 }) {
   if (publicViewInvalid) return "invalid";
   if (showExpiredGate) return "expired";
@@ -114,7 +113,6 @@ function mainScreen({
   if (shouldShowInstall) return "install";
   if (usageLoading && !hasSummary) return "loading";
   if (showEmpty) return "empty";
-  if (publicMode) return "visitor";
   return "readout";
 }
 
@@ -468,7 +466,7 @@ export function DashboardPage({
     });
   }, []);
   const [cheatsheetOpen, setCheatsheetOpen] = useState(false);
-  const period = screenshotMode || publicMode ? "total" : selectedPeriod;
+  const period = screenshotMode ? "total" : selectedPeriod;
   const range = useMemo(
     () =>
       getRangeForPeriod(period, {
@@ -1004,7 +1002,6 @@ export function DashboardPage({
     usageLoading,
     hasSummary: Boolean(summary),
     showEmpty,
-    publicMode,
   });
 
   return (
@@ -1055,7 +1052,6 @@ export function DashboardPage({
               <StateScreen
                 variant={screen}
                 linkCode={resolvedLinkCode}
-                visitor={{ name: identityDisplayName, totals: summary ?? {} }}
                 onSignIn={handleSignIn}
                 onRetry={refreshAll}
               />

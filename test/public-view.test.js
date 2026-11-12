@@ -28,12 +28,12 @@ test("public mode activates for share routes", () => {
   assert.ok(src.includes('sharePathname.startsWith("/share/")'));
 });
 
-test("DashboardPage shows the visitor screen read-only in public mode", () => {
+test("DashboardPage shows share visitors the Readout with period switching, read-only", () => {
   const src = read("dashboard/src/pages/DashboardPage.jsx");
-  assert.match(src, /if \(publicMode\) return "visitor";/);
+  assert.doesNotMatch(src, /return "visitor";/);
   assert.match(src, /owner=\{!publicMode && signedIn\}/);
   assert.match(src, /publicMode \? null : \(\s*<div[^>]*>\s*<RankRail/);
-  assert.match(src, /const period = screenshotMode \|\| publicMode \? "total" : selectedPeriod;/);
+  assert.match(src, /const period = screenshotMode \? "total" : selectedPeriod;/);
 });
 
 test("copy registry includes public view copy keys", () => {

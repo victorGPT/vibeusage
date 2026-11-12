@@ -79,7 +79,6 @@ test("mainScreen picks the first matching state in priority order", () => {
     usageLoading: false,
     hasSummary: true,
     showEmpty: false,
-    publicMode: false,
   };
   const cases = [
     [{ publicViewInvalid: true, showExpiredGate: true, usageError: "x", publicMode: true }, "invalid"],
@@ -88,8 +87,8 @@ test("mainScreen picks the first matching state in priority order", () => {
     [{ shouldShowInstall: true, usageLoading: true, hasSummary: false }, "install"],
     [{ usageLoading: true, hasSummary: false, showEmpty: true }, "loading"],
     [{ usageLoading: true, hasSummary: true }, "readout"],
-    [{ showEmpty: true, publicMode: true }, "empty"],
-    [{ publicMode: true }, "visitor"],
+    [{ showEmpty: true }, "empty"],
+    [{ publicMode: true }, "readout"],
     [{}, "readout"],
   ];
   for (const [overrides, expected] of cases) {
