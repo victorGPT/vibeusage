@@ -54,5 +54,7 @@ export type LeaderboardEntry = {
   gpt_tokens?: TokenCount;
   claude_tokens?: TokenCount;
   other_tokens?: TokenCount;
+  // Rank change since the last period. The endpoint does not send it yet; pages pass it when they have it.
+  delta?: number;
 };
 export type LeaderboardMe = Omit<LeaderboardEntry, "rank"> & { rank: number | null };

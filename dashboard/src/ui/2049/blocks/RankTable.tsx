@@ -1,5 +1,6 @@
 import { copy } from "#src/lib/copy.ts";
 import { cn } from "#src/lib/utils.ts";
+import { Delta } from "#src/ui/2049/base/Delta.tsx";
 import { Label } from "#src/ui/2049/base/Label.tsx";
 import { Badge } from "#src/ui/shadcn/badge.tsx";
 import { Button } from "#src/ui/shadcn/button.tsx";
@@ -39,7 +40,10 @@ function Row({ entry, me, user, href, pinned = false }: RowProps) {
   return (
     <TableRow className={cn(me && "bg-primary/8")}>
       <TableCell className={cn("font-display", me ? "text-primary" : "text-muted-foreground", cell)}>
-        {rankText(entry.rank)}
+        <span className="inline-flex items-baseline gap-2">
+          {rankText(entry.rank)}
+          {entry.delta === undefined ? null : <Delta value={entry.delta} />}
+        </span>
       </TableCell>
       <TableCell className={cn("font-sans font-medium", me ? "text-primary" : "text-hero", cell)}>
         <span className="-my-1 flex max-w-80 items-center gap-2">

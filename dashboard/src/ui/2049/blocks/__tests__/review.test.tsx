@@ -9,6 +9,7 @@ import { MyRank } from "../MyRank";
 import { RankRail } from "../RankRail";
 import { RankTable } from "../RankTable";
 import { Readout } from "../Readout";
+import { RankList } from "../RankList";
 import { Trend } from "../Trend";
 import type { DailyRow } from "../types";
 
@@ -128,6 +129,23 @@ describe("Trend windows without rolling", () => {
     expect(screen.getByText("7.0M")).toBeTruthy();
     expect(screen.getByText("30.0M")).toBeTruthy();
     expect(screen.getByText("1.0M")).toBeTruthy();
+  });
+});
+
+describe("rank deltas when a page has them", () => {
+  const rows = [
+    { rank: 1, display_name: "nullbyte", total_tokens: 9, delta: 0 },
+    { rank: 2, display_name: "kernel_panic", total_tokens: 8, delta: -2 },
+  ];
+
+  it("shows each row's delta in RankList", () => {
+    render(<RankList entries={rows} period="week" handle="me" />);
+    expect(screen.getByText("▼ 2")).toBeTruthy();
+  });
+
+  it("shows each row's delta next to the rank in RankTable", () => {
+    render(<RankTable entries={rows} me={null} handle="me" page={1} totalPages={1} totalEntries={2} period="week" onPageChange={() => {}} />);
+    expect(screen.getByText("▼ 2")).toBeTruthy();
   });
 });
 

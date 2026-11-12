@@ -29,6 +29,7 @@ export function RankList({ entries, period, handle, profileHref }: RankListProps
               rank={rankText(entry.rank)}
               user={entry.is_me ? you(handle) : displayName(entry)}
               value={abbr(entry.total_tokens)}
+              delta={entry.delta}
               me={entry.is_me}
               lead={entry.rank === 1}
             />

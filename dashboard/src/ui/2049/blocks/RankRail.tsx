@@ -56,7 +56,7 @@ export function RankRail({ me, entries, totalEntries, from, to, handle, leaderbo
           size="S"
         />
       </div>
-      <Stamp handle={handle} range={range(from, to)} />
+      <Stamp handle={handle} range={range(from, to, "short")} />
     </Card>
   );
 }
