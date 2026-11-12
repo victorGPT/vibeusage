@@ -9,7 +9,7 @@ import { Text } from "#src/ui/2049/base/Text.tsx";
 import { Button } from "#src/ui/shadcn/button.tsx";
 
 import { cost, full, tokens } from "./format";
-import { periodLabel, SCREEN_FILL } from "./shared";
+import { periodLabel, SCREEN_FILL, SCREEN_MIN_H } from "./shared";
 import type { UsageTotals } from "./types";
 
 export type StateVariant = "install" | "expired" | "visitor" | "invalid" | "empty" | "loading" | "error";
@@ -44,7 +44,7 @@ export function StateScreen({ variant, compact = false, linkCode, visitor, onSig
   const kicker = ownKicker ?? named.kicker;
   return (
     <section aria-label={kicker} aria-busy={variant === "loading" ? true : undefined}>
-      <ScreenFx className={cn(compact ? "min-h-66" : "min-h-96", SCREEN_FILL)}>
+      <ScreenFx className={cn(compact ? "min-h-66" : SCREEN_MIN_H, SCREEN_FILL)}>
         <div className="flex flex-col gap-4">
           <div className="flex justify-between gap-3">
             <Label text={kicker} />
