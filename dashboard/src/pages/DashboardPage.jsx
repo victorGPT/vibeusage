@@ -1043,7 +1043,7 @@ export function DashboardPage({
             {screen === "readout" ? (
               <Readout
                 period={period}
-                onPeriodChange={transitionSelectedPeriod}
+                onPeriodChange={screenshotMode ? undefined : transitionSelectedPeriod}
                 totals={summary ?? {}}
                 from={from}
                 to={to}

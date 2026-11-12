@@ -54,6 +54,15 @@ describe("Readout", () => {
   });
 });
 
+describe("Readout without a period handler", () => {
+  it("shows no period tabs it could not act on", () => {
+    render(<Readout period="total" totals={TOTALS.total} from="2025-11-13" to="2026-11-12" handle="your_handle" />);
+    expect(screen.getByText("4,733,386,712")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Day" })).toBeNull();
+    expect(screen.queryByRole("group", { name: /period/i })).toBeNull();
+  });
+});
+
 function days(count: number): DailyRow[] {
   return Array.from({ length: count }, (_, i) => ({
     day: `2026-10-${String(i + 1).padStart(2, "0")}`,

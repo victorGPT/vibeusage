@@ -96,3 +96,7 @@ test("mainScreen picks the first matching state in priority order", () => {
     assert.equal(mainScreen({ ...base, ...overrides }), expected, JSON.stringify(overrides));
   }
 });
+
+test("screenshot mode gives the Readout no period handler, so it shows no tabs", () => {
+  assert.match(readPage(), /onPeriodChange=\{screenshotMode \? undefined : transitionSelectedPeriod\}/);
+});

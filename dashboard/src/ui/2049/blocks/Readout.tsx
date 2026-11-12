@@ -48,7 +48,7 @@ export function Readout(props: ReadoutProps) {
         <div className="flex flex-auto flex-col gap-3">
           <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
             <Label text={kicker} />
-            {sample ? null : (
+            {sample || !onPeriodChange ? null : (
               <div className="ml-auto">
                 <Tabs
                   label={copy("ui2049.readout.period_aria")}
