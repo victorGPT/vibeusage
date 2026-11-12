@@ -595,3 +595,7 @@ ui2049.features.privacy_body,ui,*,Features,privacy_body,"Only token totals in ha
 ui2049.features.compete_kicker,ui,*,Features,compete_kicker,"Compete",,active
 ui2049.features.compete_title,ui,*,Features,compete_title,"One board for every CLI",,active
 ui2049.features.compete_body,ui,*,Features,compete_body,"Weekly, monthly and all-time ranks across Codex, Claude Code, Gemini and the rest.",,active
+ui2049.landing.cta_title,ui,LandingPage,CtaBand,cta_title,"See where you rank this week.",,active
+ui2049.landing.cta_meta,ui,LandingPage,CtaBand,cta_meta,"v{{version}} · open source",,active
+ui2049.landing.sample_handle,ui,LandingPage,Readout,sample_handle,"your_handle",,active
+ui2049.top_nav.new_tab,ui,*,TopNav,new_tab,"(opens in a new tab)",,active
