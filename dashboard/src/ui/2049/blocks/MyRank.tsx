@@ -22,7 +22,6 @@ type MyRankProps = {
   from: string;
   to: string;
   handle: string;
-  delta?: number;
 };
 
 function Neighbour({ entry }: { entry: LeaderboardEntry }) {
@@ -31,7 +30,7 @@ function Neighbour({ entry }: { entry: LeaderboardEntry }) {
 
 // SSOT: design/2049/source/MyRank.dc.html. Up to three neighbours on each side fill the screen
 // to the height of the RankList beside it.
-export function MyRank({ me, entries, totalEntries, period, from, to, handle, delta }: MyRankProps) {
+export function MyRank({ me, entries, totalEntries, period, from, to, handle }: MyRankProps) {
   const label = periodLabel(period);
   const kicker = copy("ui2049.my_rank.kicker", { period: label });
   const next = ahead(entries, me);
@@ -44,7 +43,7 @@ export function MyRank({ me, entries, totalEntries, period, from, to, handle, de
           <div className="flex flex-wrap items-end gap-x-8 gap-y-4">
             <div className="flex items-baseline gap-3">
               <Display text={rankText(me?.rank)} size={88} tone="amber" />
-              {delta === undefined ? null : <Delta value={delta} />}
+              {me?.delta === undefined ? null : <Delta value={me.delta} />}
             </div>
             <div className="flex min-w-0 flex-col gap-2 pb-2">
               <Heading text={handle} size="xs" level={2} />

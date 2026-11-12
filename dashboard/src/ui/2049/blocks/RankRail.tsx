@@ -20,11 +20,10 @@ type RankRailProps = {
   to: string;
   handle: string;
   leaderboardHref: string;
-  delta?: number;
 };
 
 // SSOT: design/2049/source/RankRail.dc.html. h-full so it matches the Readout in a stretch row.
-export function RankRail({ me, entries, totalEntries, from, to, handle, leaderboardHref, delta }: RankRailProps) {
+export function RankRail({ me, entries, totalEntries, from, to, handle, leaderboardHref }: RankRailProps) {
   const title = copy("ui2049.rank_rail.title");
   const next = ahead(entries, me);
   return (
@@ -39,7 +38,7 @@ export function RankRail({ me, entries, totalEntries, from, to, handle, leaderbo
       </div>
       <div className="flex items-baseline gap-3">
         <Display text={rankText(me?.rank)} size={72} tone="amber" glow={false} />
-        {delta === undefined ? null : <Delta value={delta} suffix={copy("ui2049.rank_rail.delta_suffix")} />}
+        {me?.delta === undefined ? null : <Delta value={me.delta} suffix={copy("ui2049.rank_rail.delta_suffix")} />}
       </div>
       {next && me ? (
         <div className="border-t border-border pt-4">

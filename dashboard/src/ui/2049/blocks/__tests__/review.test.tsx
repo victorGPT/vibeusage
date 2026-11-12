@@ -143,6 +143,16 @@ describe("rank deltas when a page has them", () => {
     expect(screen.getByText("▼ 2")).toBeTruthy();
   });
 
+  it("reads my delta from me in MyRank and RankRail", () => {
+    const me = { rank: 2, total_tokens: 8, delta: -2 };
+    const myRank = <MyRank me={me} entries={rows} totalEntries={2} period="week" from="2026-11-06" to="2026-11-12" handle="me" />;
+    const { unmount } = render(myRank);
+    expect(screen.getAllByText("▼ 2").length).toBeGreaterThan(0);
+    unmount();
+    render(<RankRail me={me} entries={rows} totalEntries={2} from="2026-11-06" to="2026-11-12" handle="me" leaderboardHref="/leaderboard" />);
+    expect(screen.getAllByText("▼ 2").length).toBeGreaterThan(0);
+  });
+
   it("shows each row's delta next to the rank in RankTable", () => {
     render(<RankTable entries={rows} me={null} handle="me" page={1} totalPages={1} totalEntries={2} period="week" onPageChange={() => {}} />);
     expect(screen.getByText("▼ 2")).toBeTruthy();

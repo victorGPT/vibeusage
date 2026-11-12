@@ -54,6 +54,7 @@ const BREAKDOWN = getMockUsageModelBreakdown({ from: FROM.total, to: TO });
 const PROJECTS = getMockProjectUsageSummary({ limit: 10 }).entries;
 const PROJECTS_TOTAL = PROJECTS.reduce((sum: number, e: { billable_total_tokens: string }) => sum + Number(e.billable_total_tokens), 0);
 const BOARD = getMockLeaderboard({ period: "week" });
+const ME = { ...BOARD.me, delta: -2 };
 const HANDLE = "your_handle";
 const HREF = "#__2049";
 const PROFILE = (e: LeaderboardEntry) => (e.user_id ? HREF : null);
@@ -170,14 +171,13 @@ export function Blocks() {
           </Block>
           <Block name="RankRail" className={COL_4}>
             <RankRail
-              me={BOARD.me}
+              me={ME}
               entries={BOARD.entries}
               totalEntries={BOARD.total_entries}
               from={FROM.week}
               to={TO}
               handle={HANDLE}
               leaderboardHref={HREF}
-              delta={-2}
             />
           </Block>
         </div>
@@ -215,14 +215,13 @@ export function Blocks() {
         <div className="flex flex-wrap items-start gap-4">
           <Block name="MyRank" className={COL_8}>
             <MyRank
-              me={BOARD.me}
+              me={ME}
               entries={BOARD.entries}
               totalEntries={BOARD.total_entries}
               period="week"
               from={FROM.week}
               to={TO}
               handle={HANDLE}
-              delta={-2}
             />
           </Block>
           <Block name="RankList" className={COL_4}>
