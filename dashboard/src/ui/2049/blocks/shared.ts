@@ -11,7 +11,7 @@ export function periodLabel(period: UsagePeriod): string {
   }[period];
 }
 
-export function periodItems(periods: UsagePeriod[]) {
+export function periodItems<T extends UsagePeriod>(periods: T[]) {
   return periods.map((value) => ({ value, label: periodLabel(value) }));
 }
 
