@@ -173,6 +173,23 @@ describe("IdentityBar", () => {
     expect(toggle.getAttribute("aria-disabled") === "true" || toggle.hasAttribute("data-disabled")).toBe(true);
   });
 
+  it("shows each subscription after the since label", () => {
+    render(<IdentityBar handle="h" since="2025-11-16" activeDays={3} owner subscriptions={["Codex Pro", "Claude Code Max 20x"]} />);
+    const since = screen.getByText("Since 2025-11-16 · 3 active days");
+    const heading = screen.getByText("SUBSCRIPTIONS");
+    const codex = screen.getByText("Codex Pro");
+    expect(since.compareDocumentPosition(heading) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(heading.compareDocumentPosition(codex) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(screen.getByText("Claude Code Max 20x")).toBeTruthy();
+  });
+
+  it("shows no subscription label when there is none", () => {
+    const bare = render(<IdentityBar handle="h" since="2025-11-16" activeDays={3} owner />);
+    const { container } = render(<IdentityBar handle="h" since="2025-11-16" activeDays={3} owner subscriptions={[]} />);
+    expect(container.textContent).toBe(bare.container.textContent);
+    expect(container.textContent).not.toContain("SUBSCRIPTIONS");
+  });
+
   it("holds the share link until the public setting is saved", () => {
     render(<IdentityBar handle="h" owner publicEnabled publicBusy />);
     expect(screen.getByRole("button", { name: "Copy share link" }).hasAttribute("disabled")).toBe(true);

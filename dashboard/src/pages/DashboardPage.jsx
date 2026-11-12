@@ -39,6 +39,7 @@ import { Heading } from "../ui/2049/base/Heading";
 import { Label } from "../ui/2049/base/Label";
 import { PageFooter } from "../ui/2049/base/PageFooter";
 import { DailyTable } from "../ui/2049/blocks/DailyTable";
+import { subscriptionLabels } from "../ui/2049/blocks/derive";
 import { DotHeatmap } from "../ui/2049/blocks/DotHeatmap";
 import { IdentityBar } from "../ui/2049/blocks/IdentityBar";
 import { Models } from "../ui/2049/blocks/Models";
@@ -731,6 +732,10 @@ export function DashboardPage({
 
     return earliest;
   }, [heatmap?.weeks, heatmapDaily]);
+  const identitySubscriptions = useMemo(
+    () => (publicMode ? [] : subscriptionLabels(userStatus?.subscriptions?.items)),
+    [publicMode, userStatus],
+  );
 
   const summaryTotalTokens = getBillableTotal(summary);
   const placeholderShort = copy("shared.placeholder.short");
@@ -1037,6 +1042,7 @@ export function DashboardPage({
           handle={identityDisplayName}
           since={identityStartDate}
           activeDays={activeDays}
+          subscriptions={identitySubscriptions}
           owner={!publicMode && signedIn && !sessionSoftExpired}
           publicEnabled={publicViewEnabled}
           publicBusy={publicViewBusy}

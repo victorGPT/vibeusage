@@ -11,6 +11,7 @@ type IdentityBarProps = {
   handle: string;
   since?: string;
   activeDays?: number;
+  subscriptions?: string[];
   owner: boolean;
   publicEnabled?: boolean;
   publicBusy?: boolean;
@@ -33,6 +34,10 @@ export function IdentityBar(props: IdentityBarProps) {
       {since && activeDays != null ? (
         <Label text={copy("ui2049.identity_bar.since", { since, days: activeDays })} />
       ) : null}
+      {props.subscriptions?.length ? <Label text={copy("identity_card.subscriptions_label")} /> : null}
+      {props.subscriptions?.map((label) => (
+        <Label key={label} text={label} tone="accent" />
+      ))}
       <div className="ml-auto flex flex-wrap items-center gap-4">
         {owner ? (
           <>

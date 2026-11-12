@@ -32,6 +32,7 @@ test("DashboardPage shows share visitors the Readout with period switching, read
   const src = read("dashboard/src/pages/DashboardPage.jsx");
   assert.doesNotMatch(src, /return "visitor";/);
   assert.match(src, /owner=\{!publicMode && signedIn && !sessionSoftExpired\}/);
+  assert.match(src, /publicMode \? \[\] : subscriptionLabels\(/);
   assert.match(src, /publicMode \? null : \(\s*<div[^>]*>\s*<RankRail/);
   assert.match(src, /const period = screenshotMode \? "total" : selectedPeriod;/);
 });
