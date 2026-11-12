@@ -187,7 +187,7 @@ export const UsagePanel = React.memo(function UsagePanel({
         <div className="flex-1 flex flex-col items-center justify-center space-y-6 opacity-90 py-4">
           <div className="text-center relative">
             <div className="text-heading text-ink-text mb-2">{summaryLabel}</div>
-            <div className="fx-glitch text-display-1 md:text-display-0 font-black text-ink-bright tracking-tight tabular-nums leading-none glow-text select-none -translate-y-[5px]">
+            <div className="fx-glitch text-display-1 md:text-display-0 font-black text-ink-bright tracking-tight tabular-nums leading-none glow-text select-none [transform:translateY(-5px)]">
               {summaryDisplay}
             </div>
             {summaryCostValue ? (
@@ -202,7 +202,7 @@ export const UsagePanel = React.memo(function UsagePanel({
                     onClick={onCostInfo}
                     title={costInfoLabel}
                     aria-label={costInfoLabel}
-                    className="group inline-flex items-center gap-1 text-micro uppercase font-black text-gold tracking-caps transition-all hover:text-gold/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60"
+                    className="group inline-flex items-center gap-1 text-micro uppercase font-black text-gold tracking-caps transition-all hover:text-gold/90 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-gold/60"
                   >
                     {costLabelCore ? (
                       <>

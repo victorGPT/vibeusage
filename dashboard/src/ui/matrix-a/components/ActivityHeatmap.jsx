@@ -401,14 +401,14 @@ export function ActivityHeatmap({
         <div
           ref={scrollRef}
           data-heatmap-scroll="true"
-          className="w-full max-w-full overflow-x-scroll no-scrollbar select-none pb-2 outline-none"
+          className="w-full max-w-full overflow-x-scroll no-scrollbar select-none pb-2 outline-hidden"
           tabIndex={0}
           aria-label={copy("heatmap.aria_label")}
           onWheel={handleWheel}
           style={{ scrollbarWidth: "none" }} // Firefox
         >
           <div
-            className={`inline-flex flex-col min-w-max outline-none ${
+            className={`inline-flex flex-col min-w-max outline-hidden ${
               isDraggingContent ? "cursor-grabbing" : "cursor-grab"
             }`}
             style={{ touchAction: "none", minWidth: contentWidth }}
@@ -493,7 +493,7 @@ export function ActivityHeatmap({
       {/* Custom Scrollbar Track */}
       <div
         ref={trackRef}
-        className="heatmap-scrollbar-track relative h-[6px] rounded-full bg-surface-strong border border-ink-line overflow-visible mt-1 transition-opacity duration-150"
+        className="heatmap-scrollbar-track relative h-[6px] rounded-full border border-ink-line mt-1 transition-opacity duration-150"
         style={{
           opacity: showScrollbar ? 1 : 0,
           pointerEvents: showScrollbar ? "auto" : "none",
