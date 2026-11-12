@@ -75,7 +75,8 @@ This document is the single source of truth for repository navigation. Use it to
   - `dashboard/src/App.jsx`
   - `dashboard/src/pages/`
   - `dashboard/src/hooks/`
-  - `dashboard/src/ui/matrix-a/components/`
+  - `dashboard/src/ui/2049/blocks/` for the page blocks (Dashboard, Leaderboard, Landing, state screens, upgrade banner), built on `dashboard/src/ui/2049/base/` and `dashboard/src/ui/shadcn/`
+  - `dashboard/src/ui/matrix-a/components/` only for the parts not yet moved to 2049 (`CostAnalysisModal`, `KeyboardCheatsheet`)
 - Auth/session integration first-read path:
   - `dashboard/src/main.jsx`
   - `dashboard/src/App.jsx`
@@ -100,7 +101,7 @@ This document is the single source of truth for repository navigation. Use it to
   - Start at `dashboard/src/hooks/use-usage-model-breakdown.ts` for live fetch, cache fallback, and live snapshot reuse.
   - Then read `dashboard/src/lib/model-breakdown.ts` for final fleet/top-model label derivation.
   - Then read `dashboard/src/pages/DashboardPage.jsx` for summary-level fallback selection.
-  - Then read `dashboard/src/ui/matrix-a/components/TopModelsPanel.jsx`, `NeuralAdaptiveFleet.jsx`, and `CostAnalysisModal.jsx` for final rendered text.
+  - Then read `dashboard/src/ui/2049/blocks/Models.tsx` and `grouping.ts` for the rendered model labels, and `dashboard/src/ui/matrix-a/components/CostAnalysisModal.jsx` for the cost breakdown.
   - Browser-local cache helpers live in `dashboard/src/lib/dashboard-cache.ts` and `dashboard/src/lib/dashboard-live-snapshot.ts`.
 - Dashboard provenance contract:
   - `edge` means successful backend truth, including immediate reuse of the last successful live snapshot while a refresh is in flight.
