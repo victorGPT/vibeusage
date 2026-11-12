@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
+import { copy } from "../../lib/copy";
 
 // Dev-only token gallery mounted at /__2049 (see main.jsx). Every label is a token name or a
 // value read back from the rendered element, so this page shows what the CSS actually does.
@@ -22,13 +23,30 @@ const COLORS = [
   ["screen-edge", "bg-screen-edge"],
 ] as const;
 
+// Specimen text is a formatted number or an existing copy key, never page copy of its own.
 const TYPE = [
-  ["font-display 200", "font-display font-extralight text-[64px]/none text-hero", "4,733"],
-  ["font-display 300", "font-display font-light text-[28px]/none text-hero", "$1,456.46"],
-  ["font-display 400", "font-display font-normal text-[18px]/none text-hero", "195.9M"],
-  ["font-sans 500", "font-sans font-medium text-[15px]/[1.4]", "Codex · Claude Code"],
-  ["font-sans 600 label", "font-sans font-semibold text-[11px]/none tracking-label uppercase text-muted-foreground", "Week rank"],
-  ["font-command 500", "font-command font-medium text-[14px]/none text-hero", "npx --yes vibeusage init"],
+  [
+    "font-display 200",
+    "font-display font-extralight text-[64px]/none text-hero",
+    new Intl.NumberFormat("en-US").format(4733),
+  ],
+  [
+    "font-display 300",
+    "font-display font-light text-[28px]/none text-hero",
+    new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(1456.46),
+  ],
+  [
+    "font-display 400",
+    "font-display font-normal text-[18px]/none text-hero",
+    new Intl.NumberFormat("en-US", { notation: "compact", maximumFractionDigits: 1 }).format(195_900_000),
+  ],
+  ["font-sans 500", "font-sans font-medium text-[15px]/[1.4]", copy("landing.hero.subtagline")],
+  [
+    "font-sans 600 label",
+    "font-sans font-semibold text-[11px]/none tracking-label uppercase text-muted-foreground",
+    copy("leaderboard.column.rank"),
+  ],
+  ["font-command 500", "font-command font-medium text-[14px]/none text-hero", copy("landing.install.command")],
 ] as const;
 
 const FONT_FACES = [
