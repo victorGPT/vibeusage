@@ -26,6 +26,10 @@ export function CommandBox({ command, prefix = "$" }: { command: string; prefix?
           {copied ? copy("ui2049.command_box.copied") : copy("ui2049.command_box.copy")}
         </Button>
       </div>
+      {/* Stays mounted so screen readers hear the change, not a new region. */}
+      <span role="status" aria-live="polite" className="sr-only">
+        {copied ? copy("ui2049.command_box.copied") : ""}
+      </span>
     </div>
   );
 }
