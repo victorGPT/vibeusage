@@ -35,6 +35,7 @@ describe("LeaderboardProfilePage", () => {
     });
     renderPage();
     expect(await screen.findByRole("heading", { level: 1, name: "nullbyte" })).toBeTruthy();
+    expect(screen.getAllByRole("heading", { name: "nullbyte" })).toHaveLength(1);
     expect(screen.getByText("2026-11-06 → 11-12 · updated 4 min ago")).toBeTruthy();
     expect(screen.getByText("Public profile · read only")).toBeTruthy();
     expect(screen.getByText("#7")).toBeTruthy();

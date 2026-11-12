@@ -8,7 +8,6 @@ import { Label } from "../ui/2049/base/Label.tsx";
 import { PageHeader } from "../ui/2049/base/PageHeader.tsx";
 import { Stat } from "../ui/2049/base/Stat.tsx";
 import { abbr, boardMeta } from "../ui/2049/blocks/format.ts";
-import { IdentityBar } from "../ui/2049/blocks/IdentityBar.tsx";
 import { displayName, periodLabel, rankText } from "../ui/2049/blocks/shared.ts";
 import { StateScreen } from "../ui/2049/blocks/StateScreen.tsx";
 import { TopNav } from "../ui/2049/blocks/TopNav.tsx";
@@ -113,17 +112,17 @@ export function LeaderboardProfilePage({
     body = <StateScreen variant="loading" />;
   } else {
     body = (
-      <>
-        <IdentityBar handle={name} owner={false} />
-        <Card role="region" aria-label={kicker} className="gap-6">
+      <Card role="region" aria-label={kicker} className="gap-6">
+        <div className="flex flex-wrap justify-between gap-3">
           <Label text={kicker} />
-          <div className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-5">
-            {stats.map(([label, value]) => (
-              <Stat key={label} label={label} value={value} />
-            ))}
-          </div>
-        </Card>
-      </>
+          <Label text={copy("ui2049.identity_bar.read_only")} tone="muted" />
+        </div>
+        <div className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-5">
+          {stats.map(([label, value]) => (
+            <Stat key={label} label={label} value={value} />
+          ))}
+        </div>
+      </Card>
     );
   }
 
