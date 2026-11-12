@@ -123,6 +123,25 @@ describe("LeaderboardPage", () => {
     await waitFor(() => expect(table().querySelector("tbody").textContent).toContain("victor · you"));
   });
 
+  it("shows the empty screen, not an empty table or made-up ranks, when nobody is ranked", async () => {
+    api.getLeaderboard.mockResolvedValue({
+      period: "week",
+      from: "2026-11-08",
+      to: "2026-11-14",
+      page: 1,
+      total_pages: 0,
+      total_entries: 0,
+      entries: [],
+      me: { rank: null, total_tokens: "0" },
+    });
+    renderPage();
+    const empty = await screen.findByRole("region", { name: "All users · Week · 0 ranked" });
+    expect(within(empty).getByText(/Run any AI CLI/)).toBeTruthy();
+    expect(regionNames()).toEqual(["All users · Week · 0 ranked"]);
+    expect(screen.queryByText(/Page 1 of 0/)).toBeNull();
+    expect(screen.queryByRole("table")).toBeNull();
+  });
+
   it("offers a retry when the board fails to load", async () => {
     api.getLeaderboard.mockRejectedValue(new Error("boom"));
     renderPage();

@@ -7,6 +7,7 @@ import { isMockEnabled } from "../lib/mock-data";
 import { getLeaderboard } from "../lib/vibeusage-api";
 import { PageHeader } from "../ui/2049/base/PageHeader.tsx";
 import { range } from "../ui/2049/blocks/format.ts";
+import { periodLabel } from "../ui/2049/blocks/shared.ts";
 import { LeaderboardFilters } from "../ui/2049/blocks/LeaderboardFilters.tsx";
 import { MyRank } from "../ui/2049/blocks/MyRank.tsx";
 import { RankList } from "../ui/2049/blocks/RankList.tsx";
@@ -245,6 +246,13 @@ export function LeaderboardPage({
     board = <StateScreen variant="error" onRetry={() => setListReloadToken((v) => v + 1)} />;
   } else if (!listData) {
     board = <StateScreen variant="loading" />;
+  } else if (totalEntries === 0) {
+    board = (
+      <StateScreen
+        variant="empty"
+        kicker={copy("ui2049.rank_table.kicker", { period: periodLabel(period), count: 0 })}
+      />
+    );
   } else {
     board = (
       <>
