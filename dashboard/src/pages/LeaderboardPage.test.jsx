@@ -7,6 +7,7 @@ import { getMockLeaderboard } from "../lib/mock-data";
 import { LeaderboardPage } from "./LeaderboardPage.jsx";
 
 const api = vi.hoisted(() => ({ getLeaderboard: vi.fn() }));
+vi.mock("../lib/github-repo-meta", () => ({ fetchGithubRepoMeta: async () => ({ stars: 57, avatarUrl: null }) }));
 vi.mock("../lib/vibeusage-api", async (importOriginal) => ({
   ...(await importOriginal()),
   getLeaderboard: api.getLeaderboard,
@@ -41,6 +42,11 @@ describe("LeaderboardPage", () => {
     await screen.findByRole("region", { name: /^All users · Week · 250 ranked$/ });
     expect(regionNames()).toEqual(["My rank · Week · all models", "Top 10 · Week", "All users · Week · 250 ranked"]);
     expect(screen.getByRole("heading", { level: 1, name: "LEADERBOARD" })).toBeTruthy();
+  });
+
+  it("shows the repo's GitHub stars in the top nav", async () => {
+    renderPage();
+    expect(await screen.findByRole("button", { name: /^GitHub ★ 57/ })).toBeTruthy();
   });
 
   it("says when the board was last refreshed", async () => {

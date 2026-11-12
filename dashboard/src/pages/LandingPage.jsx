@@ -1,9 +1,7 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo } from "react";
 import { copy } from "../lib/copy";
 import { getAppVersion } from "../lib/app-version";
 import { formatDateUTC } from "../lib/date-range";
-import { fetchGithubRepoMeta } from "../lib/github-repo-meta";
-import { isScreenshotModeEnabled } from "../lib/screenshot-mode";
 import { CtaBand } from "../ui/2049/base/CtaBand";
 import { Heading } from "../ui/2049/base/Heading";
 import { Label } from "../ui/2049/base/Label";
@@ -20,30 +18,8 @@ const COL_6 = "min-w-[min(100%,420px)] flex-[1_1_calc((100%-176px)*6/12+80px)]";
 const SAMPLE_TOTALS = { total_tokens: 195_893_152, total_cost_usd: "60.28" };
 const SAMPLE_TOKENS = [589_300_000, 489_700_000, 407_500_000];
 
-function useGithubStars(enabled) {
-  const [stars, setStars] = useState(null);
-  useEffect(() => {
-    if (!enabled) return undefined;
-    let active = true;
-    fetchGithubRepoMeta(REPO)
-      .then((meta) => active && setStars(meta?.stars ?? null))
-      .catch(() => {});
-    return () => {
-      active = false;
-    };
-  }, [enabled]);
-  return stars;
-}
-
 export function LandingPage({ signUpUrl }) {
   const appVersion = useMemo(() => getAppVersion(import.meta.env), []);
-  const screenshotMode = useMemo(
-    () =>
-      typeof window !== "undefined" &&
-      isScreenshotModeEnabled(window.location.search),
-    [],
-  );
-  const stars = useGithubStars(!screenshotMode);
   const sampleRange = useMemo(() => {
     const today = Date.now();
     return {
@@ -75,7 +51,6 @@ export function LandingPage({ signUpUrl }) {
         <TopNav
           active={null}
           signedIn={false}
-          stars={stars}
           dashboardHref="/"
           leaderboardHref="/leaderboard"
           githubHref={`https://github.com/${REPO}`}
