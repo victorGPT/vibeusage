@@ -44,7 +44,7 @@ export function Readout(props: ReadoutProps) {
 
   return (
     <section aria-label={kicker}>
-      <ScreenFx className={cn(SCREEN_MIN_H, SCREEN_FILL)}>
+      <ScreenFx className={cn(sample ? "min-h-96" : SCREEN_MIN_H, SCREEN_FILL)}>
         <div className="flex flex-auto flex-col gap-3">
           <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
             <Label text={kicker} />
