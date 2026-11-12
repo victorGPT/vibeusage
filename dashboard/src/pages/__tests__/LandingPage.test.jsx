@@ -36,6 +36,7 @@ describe("LandingPage", () => {
     expect(within(sample).getByText("#1")).toBeTruthy();
     expect(within(sample).getByText("#3")).toBeTruthy();
     expect(within(sample).queryByText("#4")).toBeNull();
+    expect(within(sample).getByText("nullbyte")).toBeTruthy();
     expect(screen.getByText("https://github.com/victorGPT/vibeusage/blob/main/docs/AI_AGENT_INSTALL.md")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Copy link" })).toBeTruthy();
     expect(screen.getByRole("heading", { name: "See where you rank this week." })).toBeTruthy();

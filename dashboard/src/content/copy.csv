@@ -599,3 +599,4 @@ ui2049.landing.cta_title,ui,LandingPage,CtaBand,cta_title,"See where you rank th
 ui2049.landing.cta_meta,ui,LandingPage,CtaBand,cta_meta,"v{{version}} · open source",,active
 ui2049.landing.sample_handle,ui,LandingPage,Readout,sample_handle,"your_handle",,active
 ui2049.top_nav.new_tab,ui,*,TopNav,new_tab,"(opens in a new tab)",,active
+ui2049.landing.sample_names,ui,LandingPage,Readout,sample_names,"nullbyte,kernel_panic,sudo_rm",,active

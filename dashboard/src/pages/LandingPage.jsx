@@ -15,11 +15,7 @@ const COL_6 = "min-w-[min(100%,420px)] flex-[1_1_calc((100%-176px)*6/12+80px)]";
 
 // The landing board's sample account, frozen so the hero never depends on a signed-in fetch.
 const SAMPLE_TOTALS = { total_tokens: 195_893_152, total_cost_usd: "60.28" };
-const SAMPLE_BOARD = [
-  { rank: 1, display_name: "nullbyte", total_tokens: 589_300_000 },
-  { rank: 2, display_name: "kernel_panic", total_tokens: 489_700_000 },
-  { rank: 3, display_name: "sudo_rm", total_tokens: 407_500_000 },
-];
+const SAMPLE_TOKENS = [589_300_000, 489_700_000, 407_500_000];
 
 function useGithubStars(enabled) {
   const [stars, setStars] = useState(null);
@@ -47,6 +43,14 @@ export function LandingPage({ signUpUrl }) {
     const today = Date.now();
     return { from: formatDateUTC(new Date(today - 6 * 86_400_000)), to: formatDateUTC(new Date(today)) };
   }, []);
+
+  const sampleBoard = useMemo(
+    () =>
+      String(copy("ui2049.landing.sample_names"))
+        .split(",")
+        .map((name, i) => ({ rank: i + 1, display_name: name, total_tokens: SAMPLE_TOKENS[i] })),
+    [],
+  );
 
   useEffect(() => {
     try {
@@ -80,7 +84,7 @@ export function LandingPage({ signUpUrl }) {
               from={sampleRange.from}
               to={sampleRange.to}
               handle={copy("ui2049.landing.sample_handle")}
-              board={SAMPLE_BOARD}
+              board={sampleBoard}
             />
           </div>
         </div>
