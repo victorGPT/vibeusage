@@ -56,9 +56,39 @@
     format("woff2");
 }
 
+/* State variants. Each matches the real pseudo-class and a data-force attribute, so the
+ * /__2049 gallery can pin a hover, active or focus cell with the same classes the user sees. */
+@custom-variant is-hover {
+  &:hover:not(:disabled, [data-disabled]) {
+    @slot;
+  }
+  &[data-force="hover"] {
+    @slot;
+  }
+}
+
+@custom-variant is-active {
+  &:active:not(:disabled, [data-disabled]) {
+    @slot;
+  }
+  &[data-force="active"] {
+    @slot;
+  }
+}
+
+@custom-variant is-focus {
+  &:focus-visible {
+    @slot;
+  }
+  &[data-force="focus"] {
+    @slot;
+  }
+}
+
 @theme {
   --color-background: #03100f;
   --color-card: #061716;
+  --color-accent: #0a2321;
   --color-border: #1f4e48;
   --color-input: #2c6b63;
   --color-foreground: #bfe9e1;
