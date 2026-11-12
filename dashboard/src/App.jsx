@@ -45,6 +45,7 @@ import { isScreenshotModeEnabled } from "./lib/screenshot-mode";
 import { probeBackend } from "./lib/vibeusage-api";
 import { resolveAgentResourceRoute } from "./pages/agent-resource-routes.js";
 import { LandingPage } from "./pages/LandingPage.jsx";
+import { StateScreen } from "./ui/2049/blocks/StateScreen";
 import { UpgradeAlertModal } from "./ui/matrix-a/components/UpgradeAlertModal.jsx";
 import { VersionBadge } from "./ui/matrix-a/components/VersionBadge.jsx";
 
@@ -396,7 +397,19 @@ export default function App() {
     navigate(signInUrl, { replace: true });
   }, [insforgeLoaded, insforgeSession, navigate, signInUrl]);
 
-  const loadingShell = <div className="min-h-screen bg-surface" />;
+  const loadingShell = (
+    <div className="min-h-screen bg-background px-8 pb-12 font-sans text-foreground">
+      <div className="mx-auto flex max-w-304 flex-col gap-4">
+        <div className="h-20" />
+        <div className="h-18" />
+        <div className="grid gap-4 lg:grid-cols-12">
+          <div className={publicMode ? "min-w-0 lg:col-span-12" : "min-w-0 lg:col-span-8"}>
+            <StateScreen variant="loading" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
   const normalizedPath = pathname.replace(/\/+$/, "") || "/";
   const agentResourceRoute = resolveAgentResourceRoute(normalizedPath);
   const agentResourceMode = Boolean(agentResourceRoute);

@@ -605,3 +605,4 @@ ui2049.page_header.updated_now,ui,*,PageHeader,updated_now,"updated just now",,a
 ui2049.page_header.updated_min,ui,*,PageHeader,updated_min,"updated {{n}} min ago",,active
 ui2049.page_header.updated_h,ui,*,PageHeader,updated_h,"updated {{n}} h ago",,active
 ui2049.page_header.updated_d,ui,*,PageHeader,updated_d,"updated {{n}} d ago",,active
+ui2049.top_nav.github_href,ui,*,TopNav,github_href,"https://github.com/victorGPT/vibeusage",,active
