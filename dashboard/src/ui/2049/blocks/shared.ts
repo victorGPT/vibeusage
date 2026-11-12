@@ -31,3 +31,7 @@ export const rankText = (rank: number | null | undefined) =>
 
 // ScreenFx's inner wrapper is its last child; stretching it lets the Stamp sit at the bottom.
 export const SCREEN_FILL = "flex flex-col *:last:flex *:last:flex-auto *:last:flex-col";
+
+// Readout and the full-size StateScreen share one height so the page doesn't jump when data lands.
+// Below sm the Readout's big number sets its height (up to 493px at 390 wide), so the floor rises.
+export const SCREEN_MIN_H = "min-h-124 sm:min-h-96";

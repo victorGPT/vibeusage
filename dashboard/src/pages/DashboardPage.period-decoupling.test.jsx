@@ -5,10 +5,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { render } from "../test/test-utils.tsx";
 import { DashboardPage } from "./DashboardPage.jsx";
 
-const SKIP_BOOT_LABEL = "Skip boot";
-const SWITCH_TOTAL_LABEL = "Switch total";
-const SHARE_TO_X_LABEL = "Share to X";
-const dashboardViewProps = vi.hoisted(() => ({ current: null }));
+const TOTAL_TAB_LABEL = "Total";
+const SHARE_TO_X_LABEL = "Share on X";
 
 const usageDataHook = vi.hoisted(() => ({
   useUsageData: vi.fn(() => ({
@@ -49,7 +47,7 @@ const heatmapHook = vi.hoisted(() => ({
   useActivityHeatmap: vi.fn(() => ({
     range: { from: "2026-01-01", to: "2026-03-07" },
     daily: [],
-    heatmap: { weeks: [] },
+    heatmap: { weeks: [], active_days: 1 },
     loading: false,
     source: "edge",
     error: null,
@@ -102,6 +100,7 @@ const vibeusageApi = vi.hoisted(() => ({
   getUserStatus: vi.fn(async () => ({ subscriptions: { items: [] }, install: null })),
   getPublicViewProfile: vi.fn(async () => ({ profile: null })),
   requestInstallLinkCode: vi.fn(async () => ({ code: null, expires_at: null })),
+  getLeaderboard: vi.fn(async () => ({ me: null, entries: [], total_entries: 0 })),
 }));
 
 const htmlToImage = vi.hoisted(() => ({
@@ -120,49 +119,6 @@ vi.mock("../lib/mock-data", () => mockData);
 vi.mock("../lib/timezone", () => timezone);
 vi.mock("../lib/vibeusage-api", () => vibeusageApi);
 vi.mock("html-to-image", () => htmlToImage);
-vi.mock("../components/BackendStatus.jsx", () => ({ BackendStatus: () => null }));
-vi.mock("../ui/matrix-a/components/BootScreen.jsx", () => ({
-  BootScreen: ({ onSkip }) => (
-    <button type="button" onClick={onSkip}>
-      {SKIP_BOOT_LABEL}
-    </button>
-  ),
-}));
-vi.mock("../ui/matrix-a/components/GithubStar.jsx", () => ({ GithubStar: () => null }));
-vi.mock("../ui/matrix-a/components/ActivityHeatmap.jsx", () => ({ ActivityHeatmap: () => null }));
-vi.mock("../ui/matrix-a/components/ProjectUsagePanel.jsx", () => ({ ProjectUsagePanel: () => null }));
-vi.mock("../ui/foundation/AsciiBox.jsx", () => ({ AsciiBox: ({ children }) => <div>{children}</div> }));
-vi.mock("../ui/foundation/MatrixButton.jsx", () => ({
-  MatrixButton: ({ children, onClick, href }) => {
-    if (href) {
-      return <a href={href}>{children}</a>;
-    }
-
-    return (
-      <button type="button" onClick={onClick}>
-        {children}
-      </button>
-    );
-  },
-}));
-vi.mock("../ui/matrix-a/views/DashboardView.jsx", () => ({
-  DashboardView: (props) => {
-    dashboardViewProps.current = props;
-    return (
-      <>
-        <button type="button" onClick={() => props.setSelectedPeriod("total")}>
-          {SWITCH_TOTAL_LABEL}
-        </button>
-        {props.screenshotMode ? (
-          <button type="button" onClick={props.handleShareToX}>
-            {SHARE_TO_X_LABEL}
-          </button>
-        ) : null}
-      </>
-    );
-  },
-}));
-
 describe("DashboardPage period decoupling", () => {
   const originalLocation = window.location;
 
@@ -180,7 +136,6 @@ describe("DashboardPage period decoupling", () => {
 
   afterEach(() => {
     vi.clearAllMocks();
-    dashboardViewProps.current = null;
     window.history.replaceState({}, "", "/");
     window.location = originalLocation;
   });
@@ -197,8 +152,9 @@ describe("DashboardPage period decoupling", () => {
       />,
     );
 
-    fireEvent.click(screen.getByText(SKIP_BOOT_LABEL));
-    await waitFor(() => expect(screen.getByText(SWITCH_TOTAL_LABEL)).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: TOTAL_TAB_LABEL })).toBeInTheDocument(),
+    );
 
     expect(recentUsageHook.useRecentUsageData).toHaveBeenCalled();
     const firstCall = recentUsageHook.useRecentUsageData.mock.calls.at(-1)?.[0];
@@ -206,7 +162,7 @@ describe("DashboardPage period decoupling", () => {
     expect(firstCall).not.toHaveProperty("to");
     expect(firstCall).not.toHaveProperty("period");
 
-    fireEvent.click(screen.getByText(SWITCH_TOTAL_LABEL));
+    fireEvent.click(screen.getByRole("button", { name: TOTAL_TAB_LABEL }));
 
     await waitFor(() => {
       const latestCall = recentUsageHook.useRecentUsageData.mock.calls.at(-1)?.[0];
@@ -214,35 +170,6 @@ describe("DashboardPage period decoupling", () => {
       expect(latestCall).not.toHaveProperty("to");
       expect(latestCall).not.toHaveProperty("period");
     });
-  });
-
-  it("forwards usage refreshing state to the dashboard view", async () => {
-    usageDataHook.useUsageData.mockReturnValue({
-      daily: [],
-      summary: { total_tokens: "42", billable_total_tokens: "42" },
-      rolling: null,
-      source: "edge",
-      loading: false,
-      refreshing: true,
-      error: null,
-      refresh: vi.fn(),
-    });
-
-    render(
-      <DashboardPage
-        baseUrl="https://example.com"
-        auth={{ userId: "user-1" }}
-        currentIdentity={{ displayName: "Victor" }}
-        signedIn
-        sessionSoftExpired={false}
-        signOut={vi.fn()}
-      />,
-    );
-
-    fireEvent.click(screen.getByText(SKIP_BOOT_LABEL));
-    await waitFor(() => expect(screen.getByText(SWITCH_TOTAL_LABEL)).toBeInTheDocument());
-
-    expect(dashboardViewProps.current?.usagePanelRefreshing).toBe(true);
   });
 
   it("uses the shared display helper for screenshot share text when display_model is missing", async () => {
@@ -282,7 +209,6 @@ describe("DashboardPage period decoupling", () => {
       />,
     );
 
-    fireEvent.click(screen.getByText(SKIP_BOOT_LABEL));
     await waitFor(() => expect(screen.getByText(SHARE_TO_X_LABEL)).toBeInTheDocument());
 
     fireEvent.click(screen.getByText(SHARE_TO_X_LABEL));
@@ -291,5 +217,119 @@ describe("DashboardPage period decoupling", () => {
       expect(String(window.location.href)).toContain("claude-opus-4.6");
       expect(String(window.location.href)).not.toContain("anthropic%2Fclaude-opus-4.6");
     });
+  });
+});
+
+describe("DashboardPage owner states", () => {
+  function renderOwner() {
+    return render(
+      <DashboardPage
+        baseUrl="https://example.com"
+        auth="token"
+        currentIdentity={{ displayName: "Victor" }}
+        signedIn
+        sessionSoftExpired={false}
+        signOut={vi.fn()}
+      />,
+    );
+  }
+
+  beforeEach(() => {
+    window.matchMedia = vi.fn().mockReturnValue({
+      matches: false,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+    });
+  });
+
+  afterEach(() => {
+    vi.clearAllMocks();
+    usageDataHook.useUsageData.mockReset();
+    heatmapHook.useActivityHeatmap.mockReset();
+    vibeusageApi.getUserStatus.mockReset();
+    vibeusageApi.getPublicVisibility.mockReset();
+    vibeusageApi.setPublicVisibility.mockReset();
+  });
+
+  function quietYear({ latestDeviceSeenAt }) {
+    usageDataHook.useUsageData.mockReturnValue({
+      daily: [],
+      summary: { total_tokens: "0", billable_total_tokens: "0" },
+      rolling: null,
+      source: "edge",
+      loading: false,
+      refreshing: false,
+      error: null,
+      refresh: vi.fn(),
+    });
+    heatmapHook.useActivityHeatmap.mockReturnValue({
+      range: { from: "2025-03-08", to: "2026-03-07" },
+      daily: [],
+      heatmap: { weeks: [], active_days: 0 },
+      loading: false,
+      source: "edge",
+      error: null,
+      refresh: vi.fn(),
+    });
+    vibeusageApi.getUserStatus.mockResolvedValue({
+      subscriptions: { items: [] },
+      install: { has_active_device_token: true, latest_device_seen_at: latestDeviceSeenAt },
+    });
+    vibeusageApi.getPublicVisibility.mockResolvedValue({ enabled: false, share_token: null, updated_at: null });
+  }
+
+  it("keeps the readout and its period tabs for a user who synced before but not this year", async () => {
+    quietYear({ latestDeviceSeenAt: "2025-01-02T03:04:05Z" });
+    renderOwner();
+    await waitFor(() => expect(vibeusageApi.getUserStatus).toHaveBeenCalled());
+    expect(await screen.findByRole("button", { name: TOTAL_TAB_LABEL })).toBeInTheDocument();
+    expect(screen.queryByText("Waiting for first sync")).toBeNull();
+  });
+
+  it("shows the waiting screen while the installed device has never synced", async () => {
+    quietYear({ latestDeviceSeenAt: null });
+    renderOwner();
+    expect(await screen.findByText("Waiting for first sync")).toBeInTheDocument();
+  });
+
+  it("disables Copy share link once the public profile is turned off", async () => {
+    usageDataHook.useUsageData.mockReturnValue({
+      daily: [],
+      summary: { total_tokens: "42", billable_total_tokens: "42" },
+      rolling: null,
+      source: "edge",
+      loading: false,
+      refreshing: false,
+      error: null,
+      refresh: vi.fn(),
+    });
+    heatmapHook.useActivityHeatmap.mockReturnValue({
+      range: { from: "2026-01-01", to: "2026-03-07" },
+      daily: [],
+      heatmap: { weeks: [], active_days: 1 },
+      loading: false,
+      source: "edge",
+      error: null,
+      refresh: vi.fn(),
+    });
+    vibeusageApi.getUserStatus.mockResolvedValue({ subscriptions: { items: [] }, install: null });
+    vibeusageApi.getPublicVisibility.mockResolvedValue({
+      enabled: true,
+      updated_at: "2026-03-01T00:00:00Z",
+      share_token: "pv1-abc",
+    });
+    vibeusageApi.setPublicVisibility.mockResolvedValue({
+      enabled: false,
+      updated_at: "2026-03-07T00:00:00Z",
+      share_token: null,
+    });
+    renderOwner();
+    const copyLink = screen.getByRole("button", { name: "Copy share link" });
+    await waitFor(() => expect(copyLink).toBeEnabled());
+    fireEvent.click(screen.getByRole("switch", { name: "Public profile" }));
+    await waitFor(() => expect(vibeusageApi.setPublicVisibility).toHaveBeenCalled());
+    await waitFor(() => expect(screen.getByRole("button", { name: "Copy share link" })).toBeDisabled());
   });
 });

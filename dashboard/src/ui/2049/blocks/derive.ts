@@ -1,3 +1,5 @@
+import { copy } from "#src/lib/copy.ts";
+
 import type { DateKey, HeatmapCell } from "./types";
 
 // Five by five cells from a hash of the handle; columns 3 and 4 mirror 1 and 0.
@@ -54,4 +56,25 @@ export function stepDay(cells: (HeatmapCell | null)[], index: number, key: strin
 
 export function dateCell(value: string, dateKey: DateKey): string {
   return dateKey === "hour" ? value.replace("T", " ").slice(0, 16) : value;
+}
+
+function titleWords(value: unknown): string {
+  if (typeof value !== "string") return "";
+  return value
+    .split(/[_\-\s]+/)
+    .filter(Boolean)
+    .map((word) => word[0].toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+}
+
+// user-status subscriptions.items, rows like { tool: "claude_code", plan_type: "max_20x" }, as
+// "Claude Code Max 20x". Rows without a tool or plan are dropped, repeats merged, six at most.
+export function subscriptionLabels(items: unknown): string[] {
+  const rows = (Array.isArray(items) ? items : []) as ({ tool?: unknown; plan_type?: unknown; planType?: unknown } | null)[];
+  const labels = rows.map((row) => {
+    const tool = titleWords(row?.tool);
+    const plan = titleWords(row?.plan_type ?? row?.planType);
+    return tool && plan ? copy("identity_card.subscription_item", { tool, plan }) : "";
+  });
+  return [...new Set(labels.filter(Boolean))].slice(0, 6);
 }

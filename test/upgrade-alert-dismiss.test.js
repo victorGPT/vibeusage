@@ -9,9 +9,9 @@ const upgradePath = path.join(
   "dashboard",
   "src",
   "ui",
-  "matrix-a",
-  "components",
-  "UpgradeAlertModal.jsx",
+  "2049",
+  "blocks",
+  "UpgradeBanner.tsx",
 );
 
 function read(filePath) {

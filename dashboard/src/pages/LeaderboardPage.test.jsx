@@ -40,8 +40,15 @@ describe("LeaderboardPage", () => {
   it("shows MyRank and Top 10 side by side, then the full table", async () => {
     renderPage();
     await screen.findByRole("region", { name: /^All users · Week · 250 ranked$/ });
-    expect(regionNames()).toEqual(["My rank · Week · all models", "Top 10 · Week", "All users · Week · 250 ranked"]);
+    expect(regionNames()).toEqual(["My rank · Week · all models", "Top 10 · Week", "All users · Week · 250 ranked", "Ranking rows"]);
     expect(screen.getByRole("heading", { level: 1, name: "LEADERBOARD" })).toBeTruthy();
+  });
+
+  it("shows the app version in the page footer", async () => {
+    vi.stubEnv("VITE_APP_VERSION", "0.7.1");
+    renderPage();
+    expect(await screen.findByText("v0.7.1")).toBeTruthy();
+    vi.unstubAllEnvs();
   });
 
   it("shows the repo's GitHub stars in the top nav", async () => {

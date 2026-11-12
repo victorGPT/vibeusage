@@ -6,6 +6,7 @@ import { DailyTable } from "../DailyTable";
 import { DotHeatmap } from "../DotHeatmap";
 import { IdentityBar } from "../IdentityBar";
 import { MyRank } from "../MyRank";
+import { Projects } from "../Projects";
 import { RankRail } from "../RankRail";
 import { RankTable } from "../RankTable";
 import { Readout } from "../Readout";
@@ -120,6 +121,12 @@ describe("Trend windows without rolling", () => {
     expect(screen.getAllByText("--")).toHaveLength(3);
   });
 
+  it("shows the placeholder, not zero, when there are no rows and no rolling windows", () => {
+    render(<Trend rows={[]} period="week" />);
+    expect(screen.queryByText("0")).toBeNull();
+    expect(screen.getAllByText("--")).toHaveLength(3);
+  });
+
   it("sums only the last 30 daily rows", () => {
     const rows = Array.from({ length: 40 }, (_, i) => ({
       day: `2026-10-${String(i + 1).padStart(2, "0")}`,
@@ -164,6 +171,23 @@ describe("IdentityBar", () => {
     render(<IdentityBar handle="h" owner publicEnabled publicBusy />);
     const toggle = screen.getByRole("switch");
     expect(toggle.getAttribute("aria-disabled") === "true" || toggle.hasAttribute("data-disabled")).toBe(true);
+  });
+
+  it("shows each subscription after the since label", () => {
+    render(<IdentityBar handle="h" since="2025-11-16" activeDays={3} owner subscriptions={["Codex Pro", "Claude Code Max 20x"]} />);
+    const since = screen.getByText("Since 2025-11-16 · 3 active days");
+    const heading = screen.getByText("SUBSCRIPTIONS");
+    const codex = screen.getByText("Codex Pro");
+    expect(since.compareDocumentPosition(heading) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(heading.compareDocumentPosition(codex) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(screen.getByText("Claude Code Max 20x")).toBeTruthy();
+  });
+
+  it("shows no subscription label when there is none", () => {
+    const bare = render(<IdentityBar handle="h" since="2025-11-16" activeDays={3} owner />);
+    const { container } = render(<IdentityBar handle="h" since="2025-11-16" activeDays={3} owner subscriptions={[]} />);
+    expect(container.textContent).toBe(bare.container.textContent);
+    expect(container.textContent).not.toContain("SUBSCRIPTIONS");
   });
 
   it("holds the share link until the public setting is saved", () => {
@@ -262,4 +286,50 @@ describe("Pager at the last page", () => {
     expect(document.activeElement).toBe(next);
     expect(next.getAttribute("aria-disabled")).toBe("true");
   });
+});
+
+describe("Trend export", () => {
+  it("colors the chart with SVG attributes, which the Share on X image export keeps", () => {
+    const rows = [{ day: "2026-11-01", total_tokens: 10 }, { day: "2026-11-02", total_tokens: 30 }];
+    const { container } = render(<Trend rows={rows} period="week" />);
+    const svg = container.querySelector("svg[role=img]")!;
+    const painted = [...svg.querySelectorAll("line, path")].map((el) => [el.getAttribute("stroke"), el.getAttribute("fill")]);
+    expect(painted).toEqual([
+      ["var(--color-border)", null],
+      ["var(--color-border)", null],
+      ["var(--color-input)", null],
+      [null, "var(--color-primary)"],
+      ["var(--color-primary)", "none"],
+    ]);
+  });
+});
+
+describe("links", () => {
+  it("opens a project's repo in a new tab and says so", () => {
+    render(<Projects entries={[{ project_key: "acme/rocket", project_ref: "https://github.com/acme/rocket", total_tokens: 5 }]} limit={3} />);
+    const link = screen.getByRole("link", { name: "rocket (opens in a new tab)" });
+    expect(link.getAttribute("href")).toBe("https://github.com/acme/rocket");
+    expect(link.getAttribute("target")).toBe("_blank");
+    expect(link.getAttribute("rel")).toBe("noopener noreferrer");
+  });
+
+  it("keeps an internal profile link in the same tab", () => {
+    const rows = [{ rank: 1, display_name: "nullbyte", total_tokens: 9 }];
+    render(<RankList entries={rows} period="week" handle="me" profileHref={() => "/u/nullbyte"} />);
+    const link = screen.getByRole("link");
+    expect(link.getAttribute("href")).toBe("/u/nullbyte");
+    expect(link.hasAttribute("target")).toBe(false);
+    expect(link.textContent).not.toContain("new tab");
+  });
+});
+
+describe("unsafe links", () => {
+  it.each(["javascript:alert(1)", " JavaScript:alert(1)", "data:text/html,x", "//evil.example/x", "/\\evil.example/x"])(
+    "renders %s as plain text, not a link",
+    (href) => {
+      render(<Projects entries={[{ project_key: "acme/rocket", project_ref: href, total_tokens: 5 }]} limit={3} />);
+      expect(screen.queryByRole("link")).toBeNull();
+      expect(screen.getByText("rocket")).toBeTruthy();
+    },
+  );
 });

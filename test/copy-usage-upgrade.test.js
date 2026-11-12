@@ -19,9 +19,9 @@ const upgradePath = path.join(
   "dashboard",
   "src",
   "ui",
-  "matrix-a",
-  "components",
-  "UpgradeAlertModal.jsx",
+  "2049",
+  "blocks",
+  "UpgradeBanner.tsx",
 );
 
 function read(filePath) {
@@ -65,10 +65,7 @@ test("fleet usage and upgrade alert components use copy keys", () => {
     "dashboard.upgrade_alert.title",
     "dashboard.upgrade_alert.subtitle",
     "dashboard.upgrade_alert.subtitle_generic",
-    "dashboard.upgrade_alert.copy",
-    "dashboard.upgrade_alert.copied",
     "dashboard.upgrade_alert.ignore",
-    "dashboard.upgrade_alert.sparkle",
     "dashboard.upgrade_alert.prompt",
     "dashboard.upgrade_alert.install_command",
   ];

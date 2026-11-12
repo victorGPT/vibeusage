@@ -10,7 +10,7 @@ import { Text } from "#src/ui/2049/base/Text.tsx";
 import { Button } from "#src/ui/shadcn/button.tsx";
 
 import { abbr, cost, daysBetween, full, num, pct, range, tokens } from "./format";
-import { displayName, periodItems, periodLabel, SCREEN_FILL } from "./shared";
+import { displayName, periodItems, periodLabel, SCREEN_FILL, SCREEN_MIN_H } from "./shared";
 import { Tabs } from "./Tabs";
 import type { LeaderboardEntry, UsagePeriod, UsageTotals } from "./types";
 
@@ -44,11 +44,11 @@ export function Readout(props: ReadoutProps) {
 
   return (
     <section aria-label={kicker}>
-      <ScreenFx className={cn("min-h-96", SCREEN_FILL)}>
+      <ScreenFx className={cn(sample ? "min-h-96" : SCREEN_MIN_H, SCREEN_FILL)}>
         <div className="flex flex-auto flex-col gap-3">
           <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
             <Label text={kicker} />
-            {sample ? null : (
+            {sample || !onPeriodChange ? null : (
               <div className="ml-auto">
                 <Tabs
                   label={copy("ui2049.readout.period_aria")}

@@ -164,7 +164,7 @@ function SpecRow({ row, me = false }: { row: Row; me?: boolean }) {
 
 function SpecTable({ rows, pinned, empty }: { rows: Row[]; pinned?: Row; empty?: string }) {
   return (
-    <Table>
+    <Table label={"Rank table"}>
       <TableHeader>
         <TableRow>
           <TableHead>{"Rank"}</TableHead>

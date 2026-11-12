@@ -268,7 +268,7 @@ export function Actions() {
 
       <Block title="Table">
         <Card>
-          <Table className="min-w-160">
+          <Table label={"Table"} className="min-w-160">
             <TableHeader>
               <TableRow>
                 {COLUMNS.map((c, i) => (

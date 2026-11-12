@@ -54,6 +54,15 @@ describe("Readout", () => {
   });
 });
 
+describe("Readout without a period handler", () => {
+  it("shows no period tabs it could not act on", () => {
+    render(<Readout period="total" totals={TOTALS.total} from="2025-11-13" to="2026-11-12" handle="your_handle" />);
+    expect(screen.getByText("4,733,386,712")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Day" })).toBeNull();
+    expect(screen.queryByRole("group", { name: /period/i })).toBeNull();
+  });
+});
+
 function days(count: number): DailyRow[] {
   return Array.from({ length: count }, (_, i) => ({
     day: `2026-10-${String(i + 1).padStart(2, "0")}`,
@@ -191,6 +200,13 @@ describe("StateScreen", () => {
     render(<StateScreen variant="install" linkCode="K7Q-2049" />);
     expect(screen.getByText("npx --yes vibeusage init --link-code K7Q-2049")).toBeTruthy();
     expect(screen.queryByText(/when asked/)).toBeNull();
+  });
+
+  it("names the Node.js prerequisite above the install command", () => {
+    render(<StateScreen variant="install" />);
+    const prompt = screen.getByText("Install Node.js 18+ then run:");
+    const command = screen.getByText("npx --yes vibeusage init");
+    expect(prompt.compareDocumentPosition(command) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
   it("shows the bare install command without a link code", () => {

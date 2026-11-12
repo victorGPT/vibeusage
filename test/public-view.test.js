@@ -28,10 +28,14 @@ test("public mode activates for share routes", () => {
   assert.ok(src.includes('sharePathname.startsWith("/share/")'));
 });
 
-test("DashboardPage disables auth gate in public mode", () => {
+test("DashboardPage shows share visitors the Readout with period switching, read-only", () => {
   const src = read("dashboard/src/pages/DashboardPage.jsx");
-  assert.match(src, /publicMode/);
-  assert.match(src, /requireAuthGate/);
+  assert.doesNotMatch(src, /return "visitor";/);
+  assert.match(src, /owner=\{!publicMode && signedIn\}/);
+  assert.match(src, /publicBusy=\{publicViewBusy \|\| sessionSoftExpired\}/);
+  assert.match(src, /publicMode \? \[\] : subscriptionLabels\(/);
+  assert.match(src, /publicMode \? null : \(\s*<div[^>]*>\s*<RankRail/);
+  assert.match(src, /const period = screenshotMode \? "total" : selectedPeriod;/);
 });
 
 test("copy registry includes public view copy keys", () => {
@@ -101,7 +105,8 @@ test("public view hides upgrade banner", () => {
 
 test("public share header shows login entry", () => {
   const src = read("dashboard/src/pages/DashboardPage.jsx");
-  assert.match(src, /landing\.nav\.login/);
+  assert.match(src, /<TopNav[\s\S]*?onSignIn=\{handleSignIn\}/);
+  assert.match(src, /const handleSignIn = useCallback\(\(\) => window\.location\.assign\(signInUrl\)/);
 });
 
 test("backend status does not expose refresh click", () => {

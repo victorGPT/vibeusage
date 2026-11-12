@@ -1,5 +1,4 @@
 import React, { startTransition, useCallback, useEffect, useMemo, useState } from "react";
-import { BackendStatus } from "../components/BackendStatus.jsx";
 import { useActivityHeatmap } from "../hooks/use-activity-heatmap";
 import { useProjectUsageSummary } from "../hooks/use-project-usage-summary";
 import { useRecentUsageData } from "../hooks/use-recent-usage-data";
@@ -12,55 +11,50 @@ import {
   resolveAuthAccessToken,
 } from "../lib/auth-token";
 import { copy } from "../lib/copy";
-import { getDetailsSortColumns, sortDailyRows } from "../lib/daily";
+import { getAppVersion } from "../lib/app-version";
 import { getRangeForPeriod } from "../lib/date-range";
-import { DETAILS_PAGE_SIZE, paginateRows, trimLeadingZeroMonths } from "../lib/details";
-import {
-  getUsagePanelLoading,
-  selectRollingUsageForDisplay,
-} from "../lib/dashboard-period-bindings";
-import {
-  formatCompactNumber,
-  formatUsdCurrency,
-  toDisplayNumber,
-  toFiniteNumber,
-} from "../lib/format";
-import { shouldShowInstallCard } from "../lib/install-status";
+import { trimLeadingZeroMonths } from "../lib/details";
+import { selectRollingUsageForDisplay } from "../lib/dashboard-period-bindings";
+import { formatUsdCurrency, toDisplayNumber, toFiniteNumber } from "../lib/format";
+import { shouldShowEmptyState, shouldShowInstallCard } from "../lib/install-status";
 import { getMockNow, isMockEnabled } from "../lib/mock-data";
-import {
-  buildFleetData,
-  buildTopModels,
-  resolveModelDisplayName,
-} from "../lib/model-breakdown";
+import { buildFleetData, resolveModelDisplayName } from "../lib/model-breakdown";
 import { safeWriteClipboard, safeWriteClipboardImage } from "../lib/safe-browser";
 import { isScreenshotModeEnabled } from "../lib/screenshot-mode";
 import {
-  formatTimeZoneLabel,
   formatTimeZoneShortLabel,
   getBrowserTimeZone,
   getBrowserTimeZoneOffsetMinutes,
   getLocalDayKey,
 } from "../lib/timezone";
 import {
+  getLeaderboard,
   getPublicVisibility,
   setPublicVisibility,
   getUserStatus,
   getPublicViewProfile,
   requestInstallLinkCode,
 } from "../lib/vibeusage-api";
-import { AsciiBox } from "../ui/foundation/AsciiBox.jsx";
-import { MatrixButton } from "../ui/foundation/MatrixButton.jsx";
-import { COLORS } from "../ui/matrix-a/components/MatrixConstants";
-import { ActivityHeatmap } from "../ui/matrix-a/components/ActivityHeatmap.jsx";
-import { BootScreen } from "../ui/matrix-a/components/BootScreen.jsx";
-import { GithubStar } from "../ui/matrix-a/components/GithubStar.jsx";
-import { ProjectUsagePanel } from "../ui/matrix-a/components/ProjectUsagePanel.jsx";
+import { Heading } from "../ui/2049/base/Heading";
+import { Label } from "../ui/2049/base/Label";
+import { PageFooter } from "../ui/2049/base/PageFooter";
+import { DailyTable } from "../ui/2049/blocks/DailyTable";
+import { subscriptionLabels } from "../ui/2049/blocks/derive";
+import { DotHeatmap } from "../ui/2049/blocks/DotHeatmap";
+import { IdentityBar } from "../ui/2049/blocks/IdentityBar";
+import { Models } from "../ui/2049/blocks/Models";
+import { Projects } from "../ui/2049/blocks/Projects";
+import { RankRail } from "../ui/2049/blocks/RankRail";
+import { Readout } from "../ui/2049/blocks/Readout";
+import { periodLabel } from "../ui/2049/blocks/shared";
+import { StateScreen } from "../ui/2049/blocks/StateScreen";
+import { TopNav } from "../ui/2049/blocks/TopNav";
+import { Trend } from "../ui/2049/blocks/Trend";
+import { CostAnalysisModal } from "../ui/matrix-a/components/CostAnalysisModal.jsx";
 import { KeyboardCheatsheet } from "../ui/matrix-a/components/KeyboardCheatsheet.jsx";
-import { DashboardView } from "../ui/matrix-a/views/DashboardView.jsx";
+import { Button } from "../ui/shadcn/button";
 import { useGlobalKeybinds } from "../hooks/use-global-keybinds";
 
-const PERIODS = ["day", "week", "month", "total"];
-const DETAILS_DATE_KEYS = new Set(["day", "hour", "month"]);
 const DETAILS_PAGED_PERIODS = new Set(["day", "total"]);
 
 function hasUsageValue(value, level) {
@@ -106,6 +100,24 @@ function isForceInstallEnabled() {
   return !isProductionHost(window.location.hostname);
 }
 
+function mainScreen({
+  publicViewInvalid,
+  showExpiredGate,
+  usageError,
+  shouldShowInstall,
+  usageLoading,
+  hasSummary,
+  showEmpty,
+}) {
+  if (publicViewInvalid) return "invalid";
+  if (showExpiredGate) return "expired";
+  if (usageError) return "error";
+  if (shouldShowInstall) return "install";
+  if (usageLoading && !hasSummary) return "loading";
+  if (showEmpty) return "empty";
+  return "readout";
+}
+
 export function DashboardPage({
   baseUrl,
   auth,
@@ -116,9 +128,7 @@ export function DashboardPage({
   publicMode = false,
   publicToken = null,
   signInUrl = "/sign-in",
-  signUpUrl = "/sign-up",
 }) {
-  const [booted, setBooted] = useState(false);
   const [costModalOpen, setCostModalOpen] = useState(false);
   const [linkCode, setLinkCode] = useState(null);
   const [linkCodeExpiresAt, setLinkCodeExpiresAt] = useState(null);
@@ -134,20 +144,13 @@ export function DashboardPage({
   const [publicProfileName, setPublicProfileName] = useState(null);
   const [publicProfileAvatarUrl, setPublicProfileAvatarUrl] = useState(null);
   const [userStatus, setUserStatus] = useState(null);
-  const [compactSummary, setCompactSummary] = useState(() => {
-    if (typeof window === "undefined" || !window.matchMedia) return false;
-    return window.matchMedia("(max-width: 640px)").matches;
-  });
+  const [rankBoard, setRankBoard] = useState(null);
   const screenshotMode = useMemo(() => {
     if (typeof window === "undefined") return false;
     return isScreenshotModeEnabled(window.location.search);
   }, []);
   const forceInstall = useMemo(() => isForceInstallEnabled(), []);
   const [isCapturing, setIsCapturing] = useState(false);
-  const identityScrambleDurationMs = 2200;
-  const [coreIndexCollapsed, setCoreIndexCollapsed] = useState(true);
-  const [installCopied, setInstallCopied] = useState(false);
-  const [sessionExpiredCopied, setSessionExpiredCopied] = useState(false);
   const mockEnabled = isMockEnabled();
   const authTokenAllowed = signedIn && !sessionSoftExpired;
   const authAccessToken = useMemo(() => {
@@ -162,11 +165,6 @@ export function DashboardPage({
   const accessEnabled = signedIn || mockEnabled || publicMode;
   const authTokenReady = authTokenAllowed && isAccessTokenReady(effectiveAuthToken);
   const guestAllowed = signedIn && sessionSoftExpired && !publicMode;
-
-  useEffect(() => {
-    const t = window.setTimeout(() => setBooted(true), 900);
-    return () => window.clearTimeout(t);
-  }, []);
 
   useEffect(() => {
     if (!signedIn || mockEnabled) {
@@ -416,18 +414,48 @@ export function DashboardPage({
     };
   }, [linkCodeExpiresAt]);
 
+  // ponytail: one page of 100 ranks. When my rank is past 100 the entry ahead is not in it, so
+  // RankRail hides To-pass; a second request at offset rank-4 would bring it back.
   useEffect(() => {
-    if (typeof window === "undefined" || !window.matchMedia) return;
-    const media = window.matchMedia("(max-width: 640px)");
-    const sync = () => setCompactSummary(media.matches);
-    sync();
-    if (media.addEventListener) {
-      media.addEventListener("change", sync);
-      return () => media.removeEventListener("change", sync);
+    if (publicMode || (!authTokenReady && !mockEnabled)) {
+      setRankBoard(null);
+      return;
     }
-    media.addListener(sync);
-    return () => media.removeListener(sync);
-  }, []);
+    let active = true;
+    const controller = new AbortController();
+    (async () => {
+      let resolvedToken = null;
+      try {
+        resolvedToken = await resolveAuthAccessToken(effectiveAuthToken);
+      } catch (_err) {
+        resolvedToken = null;
+      }
+      if (!active) return;
+      if (!resolvedToken && !mockEnabled) {
+        setRankBoard(null);
+        return;
+      }
+      try {
+        const data = await getLeaderboard({
+          baseUrl,
+          accessToken: resolvedToken,
+          period: "week",
+          limit: 100,
+          offset: 0,
+          signal: controller.signal,
+        });
+        if (!active) return;
+        setRankBoard(data && typeof data === "object" ? data : null);
+      } catch (_err) {
+        if (!active) return;
+        setRankBoard(null);
+      }
+    })();
+    return () => {
+      active = false;
+      controller.abort();
+    };
+  }, [authTokenReady, baseUrl, effectiveAuthToken, mockEnabled, publicMode]);
 
   const timeZone = useMemo(() => getBrowserTimeZone(), []);
   const tzOffsetMinutes = useMemo(() => getBrowserTimeZoneOffsetMinutes(), []);
@@ -452,9 +480,14 @@ export function DashboardPage({
   );
   const from = range.from;
   const to = range.to;
-  const timeZoneLabel = useMemo(
-    () => formatTimeZoneLabel({ timeZone, offsetMinutes: tzOffsetMinutes }),
-    [timeZone, tzOffsetMinutes],
+  const weekRange = useMemo(
+    () =>
+      getRangeForPeriod("week", {
+        timeZone,
+        offsetMinutes: tzOffsetMinutes,
+        now: mockNow,
+      }),
+    [mockNow, timeZone, tzOffsetMinutes],
   );
   const timeZoneShortLabel = useMemo(
     () => formatTimeZoneShortLabel({ timeZone, offsetMinutes: tzOffsetMinutes }),
@@ -466,7 +499,6 @@ export function DashboardPage({
   );
   const trendTimeZone = timeZone;
   const trendTzOffsetMinutes = tzOffsetMinutes;
-  const trendTimeZoneLabel = timeZoneLabel;
   const todayKey = useMemo(
     () =>
       getLocalDayKey({
@@ -478,11 +510,8 @@ export function DashboardPage({
   );
 
   const {
-    daily,
     summary,
-    source: usageSource,
     loading: usageLoading,
-    refreshing: usageRefreshing,
     error: usageError,
     refresh: refreshUsage,
   } = useUsageData({
@@ -508,11 +537,7 @@ export function DashboardPage({
     now: mockNow,
   });
 
-  const {
-    breakdown: modelBreakdown,
-    loading: modelBreakdownLoading,
-    refresh: refreshModelBreakdown,
-  } = useUsageModelBreakdown({
+  const { breakdown: modelBreakdown, refresh: refreshModelBreakdown } = useUsageModelBreakdown({
     baseUrl,
     accessToken,
     guestAllowed,
@@ -524,11 +549,7 @@ export function DashboardPage({
   });
 
   const [projectUsageLimit, setProjectUsageLimit] = useState(3);
-  const {
-    entries: projectUsageEntries,
-    loading: projectUsageLoading,
-    error: projectUsageError,
-  } = useProjectUsageSummary({
+  const { entries: projectUsageEntries } = useProjectUsageSummary({
     baseUrl,
     accessToken,
     guestAllowed,
@@ -540,13 +561,7 @@ export function DashboardPage({
     tzOffsetMinutes,
   });
 
-  const {
-    rows: trendRows,
-    from: trendFrom,
-    to: trendTo,
-    loading: trendLoading,
-    refresh: refreshTrend,
-  } = useTrendData({
+  const { rows: trendRows, refresh: refreshTrend } = useTrendData({
     baseUrl,
     accessToken,
     guestAllowed,
@@ -561,9 +576,11 @@ export function DashboardPage({
   });
 
   const {
+    range: heatmapRange,
     daily: heatmapDaily,
     heatmap,
     loading: heatmapLoading,
+    error: heatmapError,
     refresh: refreshHeatmap,
   } = useActivityHeatmap({
     baseUrl,
@@ -581,21 +598,6 @@ export function DashboardPage({
     if (period === "total") return "month";
     return "day";
   }, [period]);
-  const detailsColumns = useMemo(() => getDetailsSortColumns(detailsDateKey), [detailsDateKey]);
-  const [sort, setSort] = useState(() => ({ key: "day", dir: "desc" }));
-  useEffect(() => {
-    setSort((prev) => {
-      if (!DETAILS_DATE_KEYS.has(prev.key)) return prev;
-      if (prev.key === detailsDateKey) return prev;
-      return { key: detailsDateKey, dir: prev.dir };
-    });
-  }, [detailsDateKey]);
-  const effectiveSort = useMemo(() => {
-    if (DETAILS_DATE_KEYS.has(sort.key) && sort.key !== detailsDateKey) {
-      return { ...sort, key: detailsDateKey };
-    }
-    return sort;
-  }, [detailsDateKey, sort]);
   const detailsRows = useMemo(() => {
     if (period === "day") {
       return Array.isArray(trendRows) ? trendRows.filter((row) => row?.hour && !row?.future) : [];
@@ -608,82 +610,12 @@ export function DashboardPage({
     }
     return Array.isArray(trendRows) ? trendRows.filter((row) => row?.day && !row?.future) : [];
   }, [period, trendRows]);
-  const sortedDetails = useMemo(
-    () => sortDailyRows(detailsRows, effectiveSort),
-    [detailsRows, effectiveSort],
-  );
-  const hasDetailsActual = useMemo(
-    () => detailsRows.some((row) => !row?.missing && !row?.future),
-    [detailsRows],
-  );
-  const detailsPageCount = useMemo(() => {
-    if (!DETAILS_PAGED_PERIODS.has(period)) return 1;
-    const count = Math.ceil(sortedDetails.length / DETAILS_PAGE_SIZE);
-    return count > 0 ? count : 1;
-  }, [period, sortedDetails.length]);
-  const [detailsPage, setDetailsPage] = useState(0);
-  useEffect(() => {
-    if (!DETAILS_PAGED_PERIODS.has(period)) {
-      setDetailsPage(0);
-      return;
-    }
-    setDetailsPage((prev) => Math.min(prev, detailsPageCount - 1));
-  }, [detailsPageCount, period]);
-  useEffect(() => {
-    if (!DETAILS_PAGED_PERIODS.has(period)) return;
-    setDetailsPage(0);
-  }, [period, sort.dir, sort.key]);
-  const pagedDetails = useMemo(() => {
-    if (!DETAILS_PAGED_PERIODS.has(period)) return sortedDetails;
-    return paginateRows(sortedDetails, detailsPage, DETAILS_PAGE_SIZE);
-  }, [detailsPage, period, sortedDetails]);
   const trendRowsForDisplay = useMemo(() => {
     if (period === "day") {
       return Array.isArray(trendRows) ? trendRows.filter((row) => row?.hour) : [];
     }
     return trendRows;
   }, [period, trendRows]);
-  const trendFromForDisplay = trendFrom;
-  const trendToForDisplay = trendTo;
-
-  function renderDetailCell(row, key) {
-    if (row?.future) return "—";
-    if (row?.missing) return copy("shared.status.unsynced");
-    if (key === "total_tokens") {
-      return toDisplayNumber(getBillableTotal(row));
-    }
-    return toDisplayNumber(row?.[key]);
-  }
-
-  function renderDetailDate(row) {
-    const raw = row?.[detailsDateKey];
-    if (raw == null) return "";
-    const value = String(raw);
-    if (detailsDateKey === "hour") {
-      const [datePart, timePart] = value.split("T");
-      if (datePart && timePart) {
-        return `${datePart} ${timePart.slice(0, 5)}`;
-      }
-    }
-    return value;
-  }
-
-  function toggleSort(key) {
-    setSort((prev) => {
-      if (prev.key === key) return { key, dir: prev.dir === "asc" ? "desc" : "asc" };
-      return { key, dir: "desc" };
-    });
-  }
-
-  function ariaSortFor(key) {
-    if (effectiveSort.key !== key) return "none";
-    return effectiveSort.dir === "asc" ? "ascending" : "descending";
-  }
-
-  function sortIconFor(key) {
-    if (effectiveSort.key !== key) return "";
-    return effectiveSort.dir === "asc" ? "▲" : "▼";
-  }
 
   const activeDays = useMemo(() => {
     if (!signedIn && !mockEnabled && !publicMode) return 0;
@@ -725,26 +657,9 @@ export function DashboardPage({
     refreshModelBreakdown();
   }, [refreshHeatmap, refreshModelBreakdown, refreshRecentUsage, refreshTrend, refreshUsage]);
 
-  const usagePanelLoading = useMemo(
-    () =>
-      getUsagePanelLoading({
-        usageLoading,
-        heatmapLoading,
-        trendLoading,
-        modelBreakdownLoading,
-      }),
-    [heatmapLoading, modelBreakdownLoading, trendLoading, usageLoading],
-  );
   const rollingUsage = useMemo(
     () => selectRollingUsageForDisplay({ recentRolling }),
     [recentRolling],
-  );
-  const usageSourceLabel = useMemo(
-    () =>
-      copy("shared.data_source", {
-        source: String(usageSource || "edge").toUpperCase(),
-      }),
-    [usageSource],
   );
   const publicViewInvalid = useMemo(() => {
     if (!publicMode || !usageError) return false;
@@ -816,94 +731,12 @@ export function DashboardPage({
 
     return earliest;
   }, [heatmap?.weeks, heatmapDaily]);
-  const identitySubscriptions = useMemo(() => {
-    if (publicMode) return [];
-    const rows = Array.isArray(userStatus?.subscriptions?.items)
-      ? userStatus.subscriptions.items
-      : [];
-    const normalized = rows
-      .map((row) => {
-        const tool = typeof row?.tool === "string" ? row.tool.trim() : "";
-        const planTypeRaw =
-          typeof row?.plan_type === "string"
-            ? row.plan_type
-            : typeof row?.planType === "string"
-              ? row.planType
-              : "";
-        const planType = planTypeRaw.trim();
-        if (!tool || !planType) return null;
-        return {
-          tool,
-          planType,
-          provider: typeof row?.provider === "string" ? row.provider.trim() : "",
-          product: typeof row?.product === "string" ? row.product.trim() : "",
-          rateLimitTier:
-            typeof row?.rate_limit_tier === "string"
-              ? row.rate_limit_tier.trim()
-              : typeof row?.rateLimitTier === "string"
-                ? row.rateLimitTier.trim()
-                : "",
-        };
-      })
-      .filter(Boolean);
-    return normalized.slice(0, 6);
-  }, [publicMode, userStatus]);
-
-  const activityHeatmapBlock = (
-    <AsciiBox
-      title={copy("dashboard.activity.title")}
-      subtitle={accessEnabled ? copy("dashboard.activity.subtitle") : "—"}
-      className="min-w-0 overflow-hidden"
-    >
-      <ActivityHeatmap
-        heatmap={heatmap}
-        timeZoneLabel={timeZoneLabel}
-        timeZoneShortLabel={timeZoneShortLabel}
-        hideLegend={screenshotMode}
-        defaultToLatestMonth={screenshotMode}
-      />
-    </AsciiBox>
+  const identitySubscriptions = useMemo(
+    () => (publicMode ? [] : subscriptionLabels(userStatus?.subscriptions?.items)),
+    [publicMode, userStatus],
   );
 
-  const rangeLabel = useMemo(() => {
-    return `${from}..${to}`;
-  }, [from, period, to]);
-
-  const summaryLabel = copy("usage.summary.total");
   const summaryTotalTokens = getBillableTotal(summary);
-  const thousandSuffix = copy("shared.unit.thousand_abbrev");
-  const millionSuffix = copy("shared.unit.million_abbrev");
-  const billionSuffix = copy("shared.unit.billion_abbrev");
-  const summaryNumber = toFiniteNumber(summaryTotalTokens);
-  const useCompactSummary =
-    compactSummary && summaryNumber != null && Math.abs(summaryNumber) >= 1000000000;
-  const summaryValue = useMemo(() => {
-    if (!useCompactSummary) return toDisplayNumber(summaryTotalTokens);
-    return formatCompactNumber(summaryNumber, {
-      thousandSuffix,
-      millionSuffix,
-      billionSuffix,
-      decimals: 1,
-    });
-  }, [
-    billionSuffix,
-    millionSuffix,
-    summaryTotalTokens,
-    summaryNumber,
-    thousandSuffix,
-    useCompactSummary,
-  ]);
-
-  const coreIndexCollapseLabel = copy("dashboard.core_index.collapse_label");
-  const coreIndexExpandLabel = copy("dashboard.core_index.expand_label");
-  const coreIndexCollapseAria = copy("dashboard.core_index.collapse_aria");
-  const coreIndexExpandAria = copy("dashboard.core_index.expand_aria");
-  const allowBreakdownToggle = !screenshotMode;
-  const screenshotTitleLine1 = copy("dashboard.screenshot.title_line1");
-  const screenshotTitleLine2 = copy("dashboard.screenshot.title_line2");
-  const screenshotTwitterLabel = copy("dashboard.screenshot.twitter_label");
-  const screenshotTwitterButton = copy("dashboard.screenshot.twitter_button");
-  const screenshotTwitterHint = copy("dashboard.screenshot.twitter_hint");
   const placeholderShort = copy("shared.placeholder.short");
   const agentSummary = useMemo(() => {
     const sources = Array.isArray(modelBreakdown?.sources) ? modelBreakdown.sources : [];
@@ -975,6 +808,7 @@ export function DashboardPage({
     const root = document.querySelector("#root") || document.body;
     const docEl = document.documentElement;
     const { scrollWidth, scrollHeight } = document.documentElement;
+    const backgroundColor = getComputedStyle(docEl).getPropertyValue("--color-background").trim();
     docEl?.classList.add("screenshot-capture");
     document.body?.classList.add("screenshot-capture");
     await new Promise((resolve) => requestAnimationFrame(resolve));
@@ -982,7 +816,7 @@ export function DashboardPage({
     try {
       const { toBlob, toPng } = await import("html-to-image");
       const blob = await toBlob(root, {
-        backgroundColor: COLORS.SURFACE,
+        backgroundColor,
         pixelRatio: 2,
         cacheBust: true,
         width: scrollWidth,
@@ -996,7 +830,7 @@ export function DashboardPage({
       });
       if (blob) return blob;
       const dataUrl = await toPng(root, {
-        backgroundColor: COLORS.SURFACE,
+        backgroundColor,
         pixelRatio: 2,
         cacheBust: true,
         width: scrollWidth,
@@ -1051,45 +885,6 @@ export function DashboardPage({
       }
     }
   }, [captureScreenshotBlob, isCapturing, screenshotTwitterUrl]);
-  const footerLeftContent = screenshotMode
-    ? null
-    : accessEnabled
-      ? copy("dashboard.footer.active", { range: timeZoneRangeLabel })
-      : copy("dashboard.footer.auth");
-  const periodsForDisplay = useMemo(() => (screenshotMode ? [] : PERIODS), [screenshotMode]);
-
-  const metricsRows = useMemo(
-    () => [
-      {
-        label: copy("usage.metric.total"),
-        value: toDisplayNumber(summaryTotalTokens),
-        valueClassName: "text-ink-bright",
-      },
-      {
-        label: copy("usage.metric.input"),
-        value: toDisplayNumber(summary?.input_tokens),
-      },
-      {
-        label: copy("usage.metric.output"),
-        value: toDisplayNumber(summary?.output_tokens),
-      },
-      {
-        label: copy("usage.metric.cached_input"),
-        value: toDisplayNumber(summary?.cached_input_tokens),
-      },
-      {
-        label: copy("usage.metric.reasoning_output"),
-        value: toDisplayNumber(summary?.reasoning_output_tokens),
-      },
-    ],
-    [
-      summary?.cached_input_tokens,
-      summary?.input_tokens,
-      summary?.output_tokens,
-      summary?.reasoning_output_tokens,
-      summaryTotalTokens,
-    ],
-  );
 
   const summaryCostValue = useMemo(() => {
     const formatted = formatUsdCurrency(summary?.total_cost_usd);
@@ -1101,91 +896,41 @@ export function DashboardPage({
     () => buildFleetData(modelBreakdown, { copyFn: copy }),
     [modelBreakdown],
   );
-  const topModels = useMemo(
-    () => buildTopModels(modelBreakdown, { limit: 3, copyFn: copy }),
-    [modelBreakdown],
-  );
-  const projectUsageBlock = useMemo(
-    () => (
-      <ProjectUsagePanel
-        entries={projectUsageEntries}
-        limit={projectUsageLimit}
-        onLimitChange={setProjectUsageLimit}
-        loading={projectUsageLoading}
-        error={projectUsageError}
-      />
-    ),
-    [projectUsageEntries, projectUsageLimit, projectUsageLoading, projectUsageError],
-  );
 
   const openCostModal = useCallback(() => setCostModalOpen(true), []);
   const closeCostModal = useCallback(() => setCostModalOpen(false), []);
   const costInfoEnabled = summaryCostValue && summaryCostValue !== "-" && fleetData.length > 0;
 
-  const installInitCmdBase = copy("dashboard.install.cmd.init");
   const resolvedLinkCode = !linkCodeExpired ? linkCode : null;
-  const installInitCmdCopy = resolvedLinkCode
-    ? copy("dashboard.install.cmd.init_link_code", {
-        link_code: resolvedLinkCode,
-      })
-    : installInitCmdBase;
-  const installInitCmdDisplay = installInitCmdBase;
-  const installSyncCmd = copy("dashboard.install.cmd.sync");
-  const installCopyLabel = resolvedLinkCode
-    ? copy("dashboard.install.copy")
-    : copy("dashboard.install.copy_base");
-  const installCopiedLabel = copy("dashboard.install.copied");
-  const sessionExpiredCopyLabel = copy("dashboard.session_expired.copy_label");
-  const sessionExpiredCopiedLabel = copy("dashboard.session_expired.copied");
   const hasActiveDeviceToken = Boolean(
     userStatus?.install?.has_active_device_token ?? userStatus?.install?.hasActiveDeviceToken,
   );
+  // The heatmap hook starts idle with no data, which reads as zero active days for one frame.
+  const heatmapPending = heatmapLoading || (!heatmap && !heatmapError);
   const shouldShowInstall = shouldShowInstallCard({
     publicMode,
     screenshotMode,
     forceInstall,
     accessEnabled,
-    heatmapLoading,
+    heatmapLoading: heatmapPending,
     activeDays,
     hasActiveDeviceToken,
   });
-  const installPrompt = copy("dashboard.install.prompt");
-  const publicViewTitle = copy("dashboard.public_view.title");
-  const publicViewStatusEnabledLabel = copy("dashboard.public_view.status.enabled");
-  const publicViewStatusDisabledLabel = copy("dashboard.public_view.status.disabled");
-  const publicViewCopyLabel = copy("dashboard.public_view.action.copy");
-  const publicViewCopiedLabel = copy("dashboard.public_view.action.copied");
-  const publicViewEnableLabel = copy("dashboard.public_view.action.enable");
-  const publicViewDisableLabel = copy("dashboard.public_view.action.disable");
-  const publicViewInvalidTitle = copy("dashboard.public_view.invalid.title");
-  const publicViewInvalidBody = copy("dashboard.public_view.invalid.body");
+  const showEmpty = shouldShowEmptyState({
+    publicMode,
+    accessEnabled,
+    heatmapLoading: heatmapPending,
+    activeDays,
+    hasActiveDeviceToken,
+    latestDeviceSeenAt: userStatus?.install?.latest_device_seen_at,
+    latestTokenActivityAt: userStatus?.install?.latest_token_activity_at,
+  });
   const publicViewBusy = publicViewLoading || publicViewActionLoading;
-  const publicViewStatusLabel = publicViewEnabled
-    ? publicViewStatusEnabledLabel
-    : publicViewStatusDisabledLabel;
   const publicViewUrl = useMemo(() => {
     if (!publicViewToken || typeof window === "undefined") return "";
     const url = new URL(`/share/${publicViewToken}`, window.location.origin);
     return url.toString();
   }, [publicViewToken]);
-  const publicViewCopyButtonLabel = publicViewCopied ? publicViewCopiedLabel : publicViewCopyLabel;
-  const publicViewToggleLabel = publicViewEnabled ? publicViewDisableLabel : publicViewEnableLabel;
-
-  const handleCopyInstall = useCallback(async () => {
-    if (!installInitCmdCopy) return;
-    const didCopy = await safeWriteClipboard(installInitCmdCopy);
-    if (!didCopy) return;
-    setInstallCopied(true);
-    window.setTimeout(() => setInstallCopied(false), 2000);
-  }, [installInitCmdCopy]);
-
-  const handleCopySessionExpired = useCallback(async () => {
-    if (!installInitCmdBase) return;
-    const didCopy = await safeWriteClipboard(installInitCmdBase);
-    if (!didCopy) return;
-    setSessionExpiredCopied(true);
-    window.setTimeout(() => setSessionExpiredCopied(false), 2000);
-  }, [installInitCmdBase]);
 
   const handleCopyPublicView = useCallback(async () => {
     if (publicViewActionLoading || !publicViewEnabled) return;
@@ -1201,7 +946,6 @@ export function DashboardPage({
         const data = await getPublicVisibility({
           baseUrl,
           accessToken: resolvedToken,
-          signal: controller.signal,
         });
         const token = typeof data?.share_token === "string" ? data.share_token : null;
         setPublicViewToken(token);
@@ -1248,49 +992,9 @@ export function DashboardPage({
     }
   }, [effectiveAuthToken, baseUrl, publicViewActionLoading, publicViewEnabled]);
 
-  const dailyEmptyTemplate = useMemo(() => copy("dashboard.daily.empty", { cmd: "{{cmd}}" }), []);
-  const [dailyEmptyPrefix, dailyEmptySuffix] = useMemo(() => {
-    const parts = dailyEmptyTemplate.split("{{cmd}}");
-    if (parts.length === 1) return [dailyEmptyTemplate, ""];
-    return [parts[0], parts.slice(1).join("{{cmd}}")];
-  }, [dailyEmptyTemplate]);
+  const handleSignIn = useCallback(() => window.location.assign(signInUrl), [signInUrl]);
 
-  const headerStatus =
-    authTokenAllowed && authTokenReady ? (
-      <BackendStatus baseUrl={baseUrl} accessToken={effectiveAuthToken} />
-    ) : null;
-
-  const headerRight = (
-    <div className="ml-auto flex w-max min-w-max items-center gap-2 sm:gap-3 md:gap-4">
-      <GithubStar isFixed={false} size="header" className="hidden sm:inline-flex" />
-      {!publicMode && signedIn ? (
-        <MatrixButton as="a" size="header" href="/leaderboard">
-          {copy("leaderboard.nav.open")}
-        </MatrixButton>
-      ) : null}
-
-      {publicMode ? (
-        signedIn ? (
-          <MatrixButton onClick={signOut} size="header">
-            {copy("dashboard.sign_out")}
-          </MatrixButton>
-        ) : (
-          <MatrixButton as="a" size="header" href={signInUrl}>
-            {copy("landing.nav.login")}
-          </MatrixButton>
-        )
-      ) : signedIn ? (
-        <MatrixButton onClick={signOut} size="header">
-          {copy("dashboard.sign_out")}
-        </MatrixButton>
-      ) : (
-        <span className="text-micro opacity-60">{copy("dashboard.not_signed_in")}</span>
-      )}
-    </div>
-  );
-
-  // Global keybind layer — DESIGN.md §11. Disabled in screenshot mode and
-  // before the boot screen finishes (handlers may not be ready).
+  // Global keybind layer — DESIGN.md §11. Disabled in screenshot mode.
   // While the cheatsheet is open the modal owns the keyboard: only ? and esc
   // route through (toggle / close); period / refresh / share are silenced so
   // they don't bleed past the overlay.
@@ -1300,122 +1004,142 @@ export function DashboardPage({
     onShare: cheatsheetOpen ? undefined : handleShareToX,
     onToggleCheatsheet: () => setCheatsheetOpen((o) => !o),
     onCloseCheatsheet: () => setCheatsheetOpen(false),
-    enabled: booted && !screenshotMode,
+    enabled: !screenshotMode,
   });
 
-  if (!booted) {
-    return <BootScreen onSkip={() => setBooted(true)} />;
-  }
-
   const showExpiredGate = sessionSoftExpired && !publicMode;
-  const requireAuthGate = !signedIn && !mockEnabled && !sessionSoftExpired;
-  const showAuthGate = requireAuthGate && !publicMode;
+  const screen = mainScreen({
+    publicViewInvalid,
+    showExpiredGate,
+    usageError,
+    shouldShowInstall,
+    usageLoading,
+    hasSummary: Boolean(summary),
+    showEmpty,
+  });
 
   return (
-    <>
-    <DashboardView
-      copy={copy}
-      headerStatus={headerStatus}
-      headerRight={headerRight}
-      footerLeftContent={footerLeftContent}
-      screenshotMode={screenshotMode}
-      publicViewInvalid={publicViewInvalid}
-      publicViewInvalidTitle={publicViewInvalidTitle}
-      publicViewInvalidBody={publicViewInvalidBody}
-      showExpiredGate={showExpiredGate}
-      showAuthGate={showAuthGate}
-      sessionExpiredCopied={sessionExpiredCopied}
-      sessionExpiredCopiedLabel={sessionExpiredCopiedLabel}
-      sessionExpiredCopyLabel={sessionExpiredCopyLabel}
-      handleCopySessionExpired={handleCopySessionExpired}
-      signInUrl={signInUrl}
-      signUpUrl={signUpUrl}
-      screenshotTitleLine1={screenshotTitleLine1}
-      screenshotTitleLine2={screenshotTitleLine2}
-      identityDisplayName={identityDisplayName}
-      identityStartDate={identityStartDate}
-      activeDays={activeDays}
-      identitySubscriptions={identitySubscriptions}
-      identityScrambleDurationMs={identityScrambleDurationMs}
-      projectUsageBlock={projectUsageBlock}
-      topModels={topModels}
-      signedIn={signedIn}
-      publicMode={publicMode}
-      shouldShowInstall={shouldShowInstall}
-      installPrompt={installPrompt}
-      handleCopyInstall={handleCopyInstall}
-      installCopied={installCopied}
-      installCopiedLabel={installCopiedLabel}
-      installCopyLabel={installCopyLabel}
-      installInitCmdDisplay={installInitCmdDisplay}
-      linkCodeLoading={linkCodeLoading}
-      linkCodeError={linkCodeError}
-      publicViewTitle={publicViewTitle}
-      handleTogglePublicView={handleTogglePublicView}
-      publicViewBusy={publicViewBusy}
-      publicViewEnabled={publicViewEnabled}
-      publicViewToggleLabel={publicViewToggleLabel}
-      publicViewStatusLabel={publicViewStatusLabel}
-      publicViewCopyButtonLabel={publicViewCopyButtonLabel}
-      handleCopyPublicView={handleCopyPublicView}
-      trendRowsForDisplay={trendRowsForDisplay}
-      trendFromForDisplay={trendFromForDisplay}
-      trendToForDisplay={trendToForDisplay}
-      period={period}
-      trendTimeZoneLabel={trendTimeZoneLabel}
-      activityHeatmapBlock={activityHeatmapBlock}
-      isCapturing={isCapturing}
-      handleShareToX={handleShareToX}
-      screenshotTwitterLabel={screenshotTwitterLabel}
-      screenshotTwitterButton={screenshotTwitterButton}
-      screenshotTwitterHint={screenshotTwitterHint}
-      periodsForDisplay={periodsForDisplay}
-      setSelectedPeriod={transitionSelectedPeriod}
-      metricsRows={metricsRows}
-      summaryLabel={summaryLabel}
-      summaryValue={summaryValue}
-      summaryCostValue={summaryCostValue}
-      rollingUsage={rollingUsage}
-      costInfoEnabled={costInfoEnabled}
-      openCostModal={openCostModal}
-      allowBreakdownToggle={allowBreakdownToggle}
-      coreIndexCollapsed={coreIndexCollapsed}
-      setCoreIndexCollapsed={setCoreIndexCollapsed}
-      coreIndexCollapseLabel={coreIndexCollapseLabel}
-      coreIndexExpandLabel={coreIndexExpandLabel}
-      coreIndexCollapseAria={coreIndexCollapseAria}
-      coreIndexExpandAria={coreIndexExpandAria}
-      refreshAll={refreshAll}
-      usagePanelLoading={usagePanelLoading}
-      usagePanelRefreshing={usageRefreshing}
-      usageError={usageError}
-      rangeLabel={rangeLabel}
-      timeZoneRangeLabel={timeZoneRangeLabel}
-      usageSourceLabel={usageSourceLabel}
-      fleetData={fleetData}
-      hasDetailsActual={hasDetailsActual}
-      dailyEmptyPrefix={dailyEmptyPrefix}
-      installSyncCmd={installSyncCmd}
-      dailyEmptySuffix={dailyEmptySuffix}
-      detailsColumns={detailsColumns}
-      ariaSortFor={ariaSortFor}
-      toggleSort={toggleSort}
-      sortIconFor={sortIconFor}
-      pagedDetails={pagedDetails}
-      detailsDateKey={detailsDateKey}
-      renderDetailDate={renderDetailDate}
-      renderDetailCell={renderDetailCell}
-      DETAILS_PAGED_PERIODS={DETAILS_PAGED_PERIODS}
-      detailsPageCount={detailsPageCount}
-      detailsPage={detailsPage}
-      setDetailsPage={setDetailsPage}
-      costModalOpen={costModalOpen}
-      closeCostModal={closeCostModal}
-    />
-    <KeyboardCheatsheet
-      open={cheatsheetOpen}
-      onClose={() => setCheatsheetOpen(false)}
-    />
-    </>
+    <div className="min-h-screen bg-background px-8 pb-12 font-sans text-foreground">
+      <div className="mx-auto flex max-w-304 flex-col gap-4">
+        {screenshotMode ? (
+          <div className="flex min-h-20 flex-wrap items-center justify-between gap-4 pt-8">
+            <div>
+              <Heading text={copy("dashboard.screenshot.title_line1")} size="m" level={1} />
+              <Heading text={copy("dashboard.screenshot.title_line2")} size="xl" level={1} />
+            </div>
+            <div data-screenshot-exclude="true" className="flex flex-wrap items-center gap-3">
+              <Label text={copy("dashboard.screenshot.twitter_hint")} />
+              <Button onClick={handleShareToX} disabled={isCapturing}>
+                {copy("dashboard.screenshot.twitter_button")}
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <TopNav
+            active="dashboard"
+            signedIn={signedIn}
+            dashboardHref="/"
+            leaderboardHref="/leaderboard"
+            githubHref={copy("ui2049.top_nav.github_href")}
+            onSignIn={handleSignIn}
+            onSignOut={signOut}
+          />
+        )}
+        <IdentityBar
+          handle={identityDisplayName}
+          since={identityStartDate}
+          activeDays={activeDays}
+          subscriptions={identitySubscriptions}
+          owner={!publicMode && signedIn}
+          publicEnabled={publicViewEnabled}
+          publicBusy={publicViewBusy || sessionSoftExpired}
+          onPublicChange={handleTogglePublicView}
+          onCopyShareLink={handleCopyPublicView}
+          shareCopied={publicViewCopied}
+        />
+        <div className="grid gap-4 lg:grid-cols-12">
+          <div className={publicMode ? "min-w-0 lg:col-span-12" : "min-w-0 lg:col-span-8"}>
+            {screen === "readout" ? (
+              <Readout
+                period={period}
+                onPeriodChange={screenshotMode ? undefined : transitionSelectedPeriod}
+                totals={summary ?? {}}
+                from={from}
+                to={to}
+                asOf={todayKey}
+                handle={identityDisplayName}
+                onCostBreakdown={costInfoEnabled ? openCostModal : undefined}
+              />
+            ) : (
+              <StateScreen
+                variant={screen}
+                linkCode={resolvedLinkCode}
+                onSignIn={handleSignIn}
+                onRetry={refreshAll}
+              />
+            )}
+          </div>
+          {publicMode ? null : (
+            <div className="min-w-0 lg:col-span-4 *:min-h-96">
+              <RankRail
+                me={rankBoard?.me ?? null}
+                entries={Array.isArray(rankBoard?.entries) ? rankBoard.entries : []}
+                totalEntries={rankBoard?.total_entries ?? 0}
+                from={rankBoard?.from || weekRange.from}
+                to={rankBoard?.to || weekRange.to}
+                handle={identityDisplayName}
+                leaderboardHref="/leaderboard"
+              />
+            </div>
+          )}
+        </div>
+        <div className="grid items-start gap-4 lg:grid-cols-12">
+          <div className="min-w-0 lg:col-span-6 lg:*:min-h-176">
+            <Models
+              breakdown={modelBreakdown ?? {}}
+              periodLabel={periodLabel(period)}
+              from={from}
+              to={to}
+              handle={identityDisplayName}
+            />
+          </div>
+          <div className="flex min-w-0 flex-col gap-4 lg:col-span-6">
+            <div className="lg:*:min-h-66">
+              <DotHeatmap
+                heatmap={{ ...heatmapRange, weeks: [], ...heatmap }}
+                handle={identityDisplayName}
+              />
+            </div>
+            <div className="lg:*:min-h-106">
+              <Trend
+                rows={trendRowsForDisplay}
+                dateKey={detailsDateKey}
+                period={period}
+                rolling={rollingUsage}
+              />
+            </div>
+          </div>
+        </div>
+        <Projects
+          entries={projectUsageEntries}
+          limit={projectUsageLimit}
+          onLimitChange={setProjectUsageLimit}
+          totalTokens={period === "total" ? summaryTotalTokens : undefined}
+        />
+        <DailyTable
+          rows={detailsRows}
+          dateKey={detailsDateKey}
+          paged={DETAILS_PAGED_PERIODS.has(period)}
+        />
+        {screenshotMode ? null : (
+          <PageFooter
+            left={timeZoneRangeLabel}
+            right={copy("ui2049.page_footer.version", { version: getAppVersion(import.meta.env) })}
+          />
+        )}
+      </div>
+      <CostAnalysisModal isOpen={costModalOpen} onClose={closeCostModal} fleetData={fleetData} />
+      <KeyboardCheatsheet open={cheatsheetOpen} onClose={() => setCheatsheetOpen(false)} />
+    </div>
   );
 }

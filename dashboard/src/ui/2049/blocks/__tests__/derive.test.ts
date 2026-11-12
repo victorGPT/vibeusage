@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { axisLabel, dateCell, identicon, monthLabels, stepDay, trendPath } from "../derive";
+import { axisLabel, dateCell, identicon, monthLabels, stepDay, subscriptionLabels, trendPath } from "../derive";
 import { ahead } from "../rank";
 
 describe("identicon", () => {
@@ -76,5 +76,23 @@ describe("dateCell", () => {
   it("shows an hour key as date and minutes", () => {
     expect(dateCell("2026-11-12T13:30:00", "hour")).toBe("2026-11-12 13:30");
     expect(dateCell("2026-11-12", "day")).toBe("2026-11-12");
+  });
+});
+
+describe("subscriptionLabels", () => {
+  it("titles, dedupes and caps the user-status subscriptions", () => {
+    const items = [
+      { tool: "claude_code", plan_type: "max_20x" },
+      { tool: "codex", planType: "pro" },
+      { tool: "Codex", plan_type: "PRO" },
+      { tool: "opencode", plan_type: " " },
+      null,
+      ...Array.from({ length: 8 }, (_, i) => ({ tool: `tool${i}`, plan_type: "plus" })),
+    ];
+    expect(subscriptionLabels(items)).toEqual(["Claude Code Max 20x", "Codex Pro", "Tool0 Plus", "Tool1 Plus", "Tool2 Plus", "Tool3 Plus"]);
+  });
+
+  it("returns nothing for a missing list", () => {
+    expect(subscriptionLabels(undefined)).toEqual([]);
   });
 });

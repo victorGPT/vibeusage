@@ -345,17 +345,6 @@ body {
   background-size: 100% 4px;
 }
 
-/* fx-scanline-gold — gold-tinted variant for gold alert bars only.
- * Usage: UpgradeAlertModal. Do not proliferate. */
-@utility fx-scanline-gold {
-  background-image: linear-gradient(
-    to bottom,
-    rgba(255, 215, 0, 0) 50%,
-    rgba(255, 215, 0, 0.1) 50%
-  );
-  background-size: 100% 4px;
-}
-
 /* fx-grid — subtle grid background for landing page hero area. */
 @utility fx-grid {
   background-image:
