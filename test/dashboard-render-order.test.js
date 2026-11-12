@@ -30,3 +30,69 @@ test("DashboardPage declares mockEnabled before link code effect uses it", () =>
     "mockEnabled should be declared before useEffect references it",
   );
 });
+
+function readPage() {
+  return fs.readFileSync(
+    path.join(__dirname, "..", "dashboard", "src", "pages", "DashboardPage.jsx"),
+    "utf8",
+  );
+}
+
+function loadMainScreen(src) {
+  const start = src.indexOf("function mainScreen(");
+  assert.ok(start !== -1, "mainScreen not found");
+  const end = src.indexOf("\n}\n", start);
+  return new Function(`${src.slice(start, end + 2)}; return mainScreen;`)();
+}
+
+test("DashboardPage renders the 2049 blocks in board order", () => {
+  const src = readPage();
+  const order = [
+    "TopNav",
+    "IdentityBar",
+    "Readout",
+    "RankRail",
+    "Models",
+    "DotHeatmap",
+    "Trend",
+    "Projects",
+    "DailyTable",
+    "PageFooter",
+  ];
+  let last = -1;
+  for (const name of order) {
+    const index = src.slice(last + 1).search(new RegExp(`<${name}\\b`));
+    assert.ok(index !== -1, `expected <${name} after the previous block`);
+    last += 1 + index;
+  }
+  assert.match(src, /<StateScreen\b/, "expected StateScreen in the main slot");
+  assert.doesNotMatch(src, /<DashboardView\b/, "expected the matrix-a view to be gone");
+});
+
+test("mainScreen picks the first matching state in priority order", () => {
+  const mainScreen = loadMainScreen(readPage());
+  const base = {
+    publicViewInvalid: false,
+    showExpiredGate: false,
+    usageError: null,
+    shouldShowInstall: false,
+    usageLoading: false,
+    hasSummary: true,
+    showEmpty: false,
+    publicMode: false,
+  };
+  const cases = [
+    [{ publicViewInvalid: true, showExpiredGate: true, usageError: "x", publicMode: true }, "invalid"],
+    [{ showExpiredGate: true, usageError: "x", shouldShowInstall: true }, "expired"],
+    [{ usageError: "boom", shouldShowInstall: true, usageLoading: true }, "error"],
+    [{ shouldShowInstall: true, usageLoading: true, hasSummary: false }, "install"],
+    [{ usageLoading: true, hasSummary: false, showEmpty: true }, "loading"],
+    [{ usageLoading: true, hasSummary: true }, "readout"],
+    [{ showEmpty: true, publicMode: true }, "empty"],
+    [{ publicMode: true }, "visitor"],
+    [{}, "readout"],
+  ];
+  for (const [overrides, expected] of cases) {
+    assert.equal(mainScreen({ ...base, ...overrides }), expected, JSON.stringify(overrides));
+  }
+});
