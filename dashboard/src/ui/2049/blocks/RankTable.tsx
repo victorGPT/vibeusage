@@ -35,7 +35,7 @@ type RowProps = {
 
 function Row({ entry, me, user, href, pinned = false }: RowProps) {
   const lead = entry.rank === 1;
-  const cell = cn(me && "text-primary", lead && "border-t border-t-teal", pinned && "border-input");
+  const cell = cn(me && "text-primary", lead && "inset-shadow-[0_2px_0_var(--color-teal)]", pinned && "border-input");
   return (
     <TableRow className={cn(me && "bg-primary/8")}>
       <TableCell className={cn("font-display", me ? "text-primary" : "text-muted-foreground", cell)}>

@@ -17,7 +17,7 @@ type GroupBy = "cli" | "model";
 type ModelsProps = { breakdown: ModelBreakdown; periodLabel: string; from: string; to: string; handle: string };
 
 // SSOT: design/2049/source/Models.dc.html. The page sets the min height; rows sit flush because
-// ShareRow's own padding and top rule already space the groups 24 apart.
+// ShareRow's own 12px padding either side of its 1px top rule spaces the groups, as on the board.
 export function Models({ breakdown, periodLabel, from, to, handle }: ModelsProps) {
   const [by, setBy] = useState("cli" as GroupBy);
   const kicker = copy("ui2049.models.kicker", { period: periodLabel });

@@ -19,7 +19,7 @@ export function Pager({ summary, page, pageCount, onPageChange }: PagerProps) {
       <Label text={summary} />
       <div className="ml-auto max-w-full min-w-0">
         <Pagination aria-label={summary}>
-          <PaginationContent>
+          <PaginationContent className="w-auto flex-wrap justify-end">
             <PaginationItem>
               <PaginationLink disabled={page <= 1} onClick={() => onPageChange(page - 1)}>
                 {copy("details.pagination.prev")}
