@@ -58,7 +58,7 @@ function SelectItem({ className, ...props }: SelectPrimitive.Item.Props) {
       data-slot="select-item"
       className={cn(
         CONTROL_TEXT,
-        "flex h-control cursor-pointer items-center px-3 text-foreground outline-none select-none data-disabled:cursor-default data-disabled:opacity-45 data-highlighted:bg-card data-highlighted:text-hero data-selected:text-primary",
+        "flex h-control cursor-pointer items-center px-3 text-foreground outline-none select-none data-disabled:cursor-default data-disabled:opacity-45 data-highlighted:bg-card data-highlighted:text-hero data-[selected]:text-primary",
         className,
       )}
       {...props}

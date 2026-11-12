@@ -18,9 +18,11 @@ function paginationRange(page: number, pageCount: number): PageItem[] {
   return pages.flatMap((n, i): PageItem[] => (i > 0 && n - pages[i - 1] > 1 ? ["ellipsis", n] : [n]));
 }
 
+// The scroll container clips overflow on both axes, so it pads by the focus ring's reach
+// (2px outline + 2px offset) and cancels that with a negative margin to keep its layout box.
 function Pagination({ className, ...props }: ComponentProps<"nav">) {
   return (
-    <nav data-slot="pagination" className={cn("w-full overflow-x-auto", className)} {...props} />
+    <nav data-slot="pagination" className={cn("-m-1 overflow-x-auto p-1", className)} {...props} />
   );
 }
 

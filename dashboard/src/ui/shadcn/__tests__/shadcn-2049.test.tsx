@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
@@ -139,6 +139,32 @@ describe("Select", () => {
     await userEvent.click(await screen.findByRole("option", { name: "top 10" }));
     expect(onValueChange).toHaveBeenLastCalledWith("10", expect.anything());
     expect(trigger).toHaveTextContent("top 10");
+  });
+
+  // Base UI marks the selected option with an empty data-selected attribute, and shadcn's
+  // data-selected: variant only matches data-selected="true", so the amber must key on presence.
+  it("keeps the selected option amber after the highlight moves away", async () => {
+    render(
+      <Select items={items} defaultValue="10">
+        <SelectTrigger aria-label="show">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {items.map((item) => (
+            <SelectItem key={item.value} value={item.value}>
+              {item.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>,
+    );
+    screen.getByRole("combobox", { name: "show" }).focus();
+    await userEvent.keyboard("{ArrowDown}");
+    const selected = await screen.findByRole("option", { name: "top 10" });
+    await userEvent.hover(screen.getByRole("option", { name: "top 3" }));
+    await waitFor(() => expect(selected).not.toHaveAttribute("data-highlighted"));
+    expect(selected).toHaveAttribute("data-selected", "");
+    expect(selected.className.split(" ")).toContain("data-[selected]:text-primary");
   });
 });
 
