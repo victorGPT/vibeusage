@@ -120,6 +120,12 @@ describe("Trend windows without rolling", () => {
     expect(screen.getAllByText("--")).toHaveLength(3);
   });
 
+  it("shows the placeholder, not zero, when there are no rows and no rolling windows", () => {
+    render(<Trend rows={[]} period="week" />);
+    expect(screen.queryByText("0")).toBeNull();
+    expect(screen.getAllByText("--")).toHaveLength(3);
+  });
+
   it("sums only the last 30 daily rows", () => {
     const rows = Array.from({ length: 40 }, (_, i) => ({
       day: `2026-10-${String(i + 1).padStart(2, "0")}`,

@@ -16,8 +16,8 @@ export function Trend({ rows, dateKey = "day", period, rolling }: TrendProps) {
   const shown = rows.filter((r) => !r.future);
   const values = shown.map(tokens);
   const sum = (list: number[]) => list.reduce((total, v) => total + v, 0);
-  // Without rolling windows only daily rows can stand in for them; hours and months cannot.
-  const days = dateKey === "day" ? values.slice(-30) : null;
+  // Without rolling windows only daily rows can stand in for them; hours, months and no rows cannot.
+  const days = dateKey === "day" && values.length ? values.slice(-30) : null;
   const last7 = rolling?.last_7d?.totals?.billable_total_tokens ?? (days && sum(days.slice(-7)));
   const last30 = rolling?.last_30d?.totals?.billable_total_tokens ?? (days && sum(days));
   const avg =
