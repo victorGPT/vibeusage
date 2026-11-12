@@ -10,10 +10,10 @@ const byTokens = (a: { tokens: number }, b: { tokens: number }) => b.tokens - a.
 function sources(breakdown: ModelBreakdown, names: Record<string, string>) {
   return (breakdown.sources ?? []).map((s) => {
     const key = s.source ?? "";
-    const models = (s.models ?? []).map((m) => ({
-      name: String(resolveModelDisplayName(m, "")),
-      tokens: tokens(m.totals),
-    }));
+    const models = (s.models ?? []).map((m) => {
+      const name = String(resolveModelDisplayName(m, ""));
+      return { id: String(m.model_id ?? m.model ?? name), name, tokens: tokens(m.totals) };
+    });
     return { key, label: names[key] ?? key, tokens: tokens(s.totals), models };
   });
 }
@@ -32,15 +32,16 @@ export function groupByCli(breakdown: ModelBreakdown, names: Record<string, stri
     .sort(byTokens);
 }
 
-// One row per model summed across CLIs; detail names the CLIs it came through.
+// One row per model id summed across CLIs, so sources that name it differently still merge;
+// detail names the CLIs it came through.
 export function groupByModel(breakdown: ModelBreakdown, names: Record<string, string>): ShareGroup[] {
   const groups = new Map<string, ShareGroup>();
   for (const s of sources(breakdown, names)) {
     for (const m of s.models) {
-      const g = groups.get(m.name) ?? { key: m.name, label: m.name, tokens: 0, detail: [] };
+      const g = groups.get(m.id) ?? { key: m.id, label: m.name, tokens: 0, detail: [] };
       g.tokens += m.tokens;
       if (!g.detail.includes(s.label)) g.detail.push(s.label);
-      groups.set(m.name, g);
+      groups.set(m.id, g);
     }
   }
   return [...groups.values()].sort(byTokens);

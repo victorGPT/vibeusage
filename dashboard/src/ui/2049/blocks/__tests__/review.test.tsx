@@ -108,6 +108,29 @@ describe("Trend keys", () => {
   });
 });
 
+describe("Trend windows without rolling", () => {
+  it("does not pass months off as the last 7 or 30 days", () => {
+    const rows = [
+      { month: "2026-09", total_tokens: 5_000_000 },
+      { month: "2026-10", total_tokens: 9_000_000 },
+    ];
+    render(<Trend rows={rows} dateKey="month" period="total" />);
+    expect(screen.queryByText("14.0M")).toBeNull();
+    expect(screen.getAllByText("--")).toHaveLength(3);
+  });
+
+  it("sums only the last 30 daily rows", () => {
+    const rows = Array.from({ length: 40 }, (_, i) => ({
+      day: `2026-10-${String(i + 1).padStart(2, "0")}`,
+      total_tokens: 1_000_000,
+    }));
+    render(<Trend rows={rows} period="month" />);
+    expect(screen.getByText("7.0M")).toBeTruthy();
+    expect(screen.getByText("30.0M")).toBeTruthy();
+    expect(screen.getByText("1.0M")).toBeTruthy();
+  });
+});
+
 describe("IdentityBar", () => {
   it("disables the public switch while saving", () => {
     render(<IdentityBar handle="h" owner publicEnabled publicBusy />);

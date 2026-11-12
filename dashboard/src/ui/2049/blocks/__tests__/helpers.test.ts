@@ -110,9 +110,23 @@ describe("groupByCli", () => {
 describe("groupByModel", () => {
   it("sums each model across sources and names the CLIs it came through", () => {
     expect(groupByModel(BREAKDOWN, NAMES)).toEqual([
-      { key: "gpt-5.2-codex", label: "gpt-5.2-codex", tokens: 480, detail: ["Codex"] },
+      { key: "openai/gpt-5.2-codex", label: "gpt-5.2-codex", tokens: 480, detail: ["Codex"] },
       { key: "gpt-5.2", label: "gpt-5.2", tokens: 170, detail: ["Claude Code", "Codex"] },
       { key: "claude-opus-4.5", label: "claude-opus-4.5", tokens: 150, detail: ["Claude Code"] },
+    ]);
+  });
+});
+
+describe("groupByModel identity", () => {
+  it("merges one model_id that sources name differently", () => {
+    const breakdown = {
+      sources: [
+        { source: "codex", totals: { total_tokens: 70 }, models: [{ model_id: "gpt-4o", display_model: "GPT-4o", totals: { total_tokens: 70 } }] },
+        { source: "claude", totals: { total_tokens: 50 }, models: [{ model_id: "gpt-4o", display_model: "GPT-4o Omni", totals: { total_tokens: 50 } }] },
+      ],
+    };
+    expect(groupByModel(breakdown, NAMES)).toEqual([
+      { key: "gpt-4o", label: "GPT-4o", tokens: 120, detail: ["Codex", "Claude Code"] },
     ]);
   });
 });
