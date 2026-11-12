@@ -50,8 +50,8 @@ function Cell({ label, children }: { label: string; children: ReactNode }) {
 
 function Block({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <section className="flex flex-col gap-4 border-t border-border pt-6" data-block={title}>
-      <h2 className="font-display text-[28px]/none font-light text-hero">{title}</h2>
+    <section className="flex flex-col gap-4" data-block={title}>
+      <h2 className="font-display text-[36px]/[1.1] font-light text-hero">{title}</h2>
       {children}
     </section>
   );
@@ -79,7 +79,7 @@ function Toggles({ items, initial, force }: { items: readonly string[]; initial:
         ))}
       </ToggleGroup>
       <output className="text-[12px] text-muted-foreground" data-readout="toggle">
-        {value.join(",")}
+        {value.map((key) => copy(key)).join(",")}
       </output>
     </div>
   );
@@ -148,7 +148,7 @@ function Pager({ initial, total }: { initial: number; total: number }) {
   return (
     <div className="flex flex-wrap items-center gap-2">
       <span className={LABEL}>{summary}</span>
-      <Pagination aria-label={summary} className="ml-auto w-auto max-w-full">
+      <Pagination aria-label={summary} className="ml-auto max-w-full">
         <PaginationContent>
           <PaginationItem>
             <PaginationLink disabled={page === 1} onClick={() => setPage(page - 1)}>
@@ -188,7 +188,7 @@ const METERS = [58, 23.4, 100];
 
 export function Actions() {
   return (
-    <>
+    <div className="flex flex-col gap-12">
       <Block title="Button">
         <div className={GRID}>
           {VARIANTS.flatMap((variant) =>
@@ -299,6 +299,6 @@ export function Actions() {
           ))}
         </div>
       </Block>
-    </>
+    </div>
   );
 }
