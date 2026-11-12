@@ -30,7 +30,7 @@ const VARIANTS = ["default", "outline", "ghost"] as const;
 const SIZES = ["default", "lg"] as const;
 const STATES: State[] = ["normal", "hover", "focus", "active", "disabled"];
 
-const LABEL = "font-sans text-[11px]/none font-semibold uppercase tracking-label text-muted-foreground";
+const LABEL = "font-sans text-label/none font-semibold uppercase tracking-label text-muted-foreground";
 const GRID = "grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-x-4 gap-y-6";
 const WIDE_GRID = "grid grid-cols-[repeat(auto-fill,minmax(min(100%,480px),1fr))] gap-x-4 gap-y-6";
 
@@ -51,7 +51,7 @@ function Cell({ label, children }: { label: string; children: ReactNode }) {
 function Block({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="flex flex-col gap-4" data-block={title}>
-      <h2 className="font-display text-[36px]/[1.1] font-light text-hero">{title}</h2>
+      <h2 className="font-display text-heading-s/[1.1] font-light text-hero">{title}</h2>
       {children}
     </section>
   );
@@ -78,7 +78,7 @@ function Toggles({ items, initial, force }: { items: readonly string[]; initial:
           </ToggleGroupItem>
         ))}
       </ToggleGroup>
-      <output className="text-[12px] text-muted-foreground" data-readout="toggle">
+      <output className="text-label-lg text-muted-foreground" data-readout="toggle">
         {value.map((key) => copy(key)).join(",")}
       </output>
     </div>
@@ -100,7 +100,7 @@ function LiveSwitch({ checked, disabled, force }: { checked: boolean; disabled?:
       <Switch checked={on} onCheckedChange={setOn} disabled={disabled} {...(force ? { "data-force": force } : {})}>
         {copy("leaderboard.public_profile.label")}
       </Switch>
-      <output className="text-[12px] text-muted-foreground" data-readout="switch">
+      <output className="text-label-lg text-muted-foreground" data-readout="switch">
         {String(on)}
       </output>
     </div>

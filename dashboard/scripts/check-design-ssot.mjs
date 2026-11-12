@@ -89,12 +89,24 @@ const CHECKS_2049 = [
       `(?<![\\w-])-?(?:p|px|py|pt|pr|pb|pl|ps|pe|m|mx|my|mt|mr|mb|ml|ms|me|gap|gap-x|gap-y|space-x|space-y)-(?!(?:${SPACING_STEPS})(?![\\w.]))(?:[\\d[]|px(?![\\w-]))`,
     ),
   },
+  {
+    label: "2049: text-[Npx] font size (use a --text-* token from src/styles/2049.css)",
+    pattern: /text-\[[0-9.]+px\]/,
+    // ponytail: shadcn/ predates the 2049 size tokens and sits outside P4's files; migrate it, then drop this.
+    skip: "src/ui/shadcn/",
+  },
+  {
+    // cn() drops a leading-* that comes before a registered size token, so the line height is lost.
+    label: "2049: leading-* utility (put the line height on the size: text-label/none)",
+    pattern: /(?<![\w-])leading-/,
+  },
 ];
 
 function checksFor(file) {
   const rel = path.relative(ROOT, file).split(path.sep).join("/");
   if (LEGACY_V1.has(rel)) return CHECKS;
-  return SCOPE_2049.some((dir) => rel.startsWith(dir)) ? CHECKS_2049 : CHECKS;
+  if (!SCOPE_2049.some((dir) => rel.startsWith(dir))) return CHECKS;
+  return CHECKS_2049.filter((check) => !check.skip || !rel.startsWith(check.skip));
 }
 
 function* walk(dir) {

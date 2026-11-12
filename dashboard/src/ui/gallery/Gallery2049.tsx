@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { copy } from "../../lib/copy";
 import { Actions } from "./Actions2049";
+import { Spec } from "./Spec2049";
 
 // Dev-only token gallery mounted at /__2049 (see main.jsx). Every label is a token name or a
 // value read back from the rendered element, so this page shows what the CSS actually does.
@@ -29,26 +30,26 @@ const COLORS = [
 const TYPE = [
   [
     "font-display 200",
-    "font-display font-extralight text-[64px]/none text-hero",
+    "font-display font-extralight text-screen-s/none text-hero",
     new Intl.NumberFormat("en-US").format(4733),
   ],
   [
     "font-display 300",
-    "font-display font-light text-[28px]/none text-hero",
+    "font-display font-light text-value-l/none text-hero",
     new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(1456.46),
   ],
   [
     "font-display 400",
-    "font-display font-normal text-[18px]/none text-hero",
+    "font-display font-normal text-value-s/none text-hero",
     new Intl.NumberFormat("en-US", { notation: "compact", maximumFractionDigits: 1 }).format(195_900_000),
   ],
-  ["font-sans 500", "font-sans font-medium text-[15px]/[1.4]", copy("landing.hero.subtagline")],
+  ["font-sans 500", "font-sans font-medium text-copy-m/[1.4]", copy("landing.hero.subtagline")],
   [
     "font-sans 600 label",
-    "font-sans font-semibold text-[11px]/none tracking-label uppercase text-muted-foreground",
+    "font-sans font-semibold text-label/none tracking-label uppercase text-muted-foreground",
     copy("leaderboard.column.rank"),
   ],
-  ["font-command 500", "font-command font-medium text-[14px]/none text-hero", copy("landing.install.command")],
+  ["font-command 500", "font-command font-medium text-copy-s/none text-hero", copy("landing.install.command")],
 ] as const;
 
 const FONT_FACES = [
@@ -88,7 +89,7 @@ function Sample({ className, prop }: { className: string; prop: string }) {
   return (
     <>
       <div ref={ref} className={className} />
-      <span className="text-[12px] text-muted-foreground" data-readout={prop}>
+      <span className="text-label-lg text-muted-foreground" data-readout={prop}>
         {value}
       </span>
     </>
@@ -98,7 +99,7 @@ function Sample({ className, prop }: { className: string; prop: string }) {
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="flex flex-col gap-3 border-t border-border pt-6">
-      <h2 className="font-sans text-[11px]/none font-semibold uppercase tracking-label text-muted-foreground">
+      <h2 className="font-sans text-label/none font-semibold uppercase tracking-label text-muted-foreground">
         {title}
       </h2>
       {children}
@@ -113,30 +114,30 @@ export function Gallery2049() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-background px-4 py-8 font-sans text-[15px] font-medium text-foreground md:px-8">
+    <main className="min-h-screen bg-background px-4 py-8 font-sans text-copy-m font-medium text-foreground md:px-8">
       <div className="mx-auto flex max-w-[1216px] flex-col gap-8">
-        <h1 className="font-display text-[44px]/none font-extralight text-hero">{"/__2049"}</h1>
+        <h1 className="font-display text-title/none font-extralight text-hero">{"/__2049"}</h1>
 
         <Section title="color">
           <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-4">
             {COLORS.map(([name, className]) => (
               <div key={name} className="flex flex-col gap-2" data-token={`--color-${name}`}>
                 <Sample prop="background-color" className={`h-12 rounded-sm border border-border ${className}`} />
-                <span className="text-[12px]">{name}</span>
+                <span className="text-label-lg">{name}</span>
               </div>
             ))}
           </div>
         </Section>
 
         <Section title="type">
-          <span className="text-[12px] text-muted-foreground" data-fonts>
+          <span className="text-label-lg text-muted-foreground" data-fonts>
             {fonts}
           </span>
           <div className="flex flex-col gap-4">
             {TYPE.map(([name, className, sample]) => (
               <div key={name} className="flex flex-col gap-2">
                 <div className={`wrap-anywhere ${className}`}>{sample}</div>
-                <span className="text-[12px] text-muted-foreground">{name}</span>
+                <span className="text-label-lg text-muted-foreground">{name}</span>
               </div>
             ))}
           </div>
@@ -147,7 +148,7 @@ export function Gallery2049() {
             {RADII.map(([name, className]) => (
               <div key={name} className="flex flex-col items-center gap-2" data-token={name}>
                 <Sample prop="border-radius" className={`border border-input ${className}`} />
-                <span className="text-[12px]">{name}</span>
+                <span className="text-label-lg">{name}</span>
               </div>
             ))}
           </div>
@@ -168,13 +169,15 @@ export function Gallery2049() {
             {SIZES.map((name) => (
               <div key={name} className="flex flex-col gap-2" data-token={name}>
                 <Sample prop="height" className={`w-24 rounded-sm border border-input ${name}`} />
-                <span className="text-[12px]">{name}</span>
+                <span className="text-label-lg">{name}</span>
               </div>
             ))}
           </div>
         </Section>
 
         <Actions />
+
+        <Spec />
       </div>
     </main>
   );
