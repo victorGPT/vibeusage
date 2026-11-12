@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { abbr, cost, daysBetween, full, pct, range } from "../format";
 import { groupByCli, groupByModel } from "../grouping";
 import { neighbours, pinnedMe } from "../rank";
+import { cliNames } from "../shared";
 
 describe("format", () => {
   it("abbreviates by magnitude", () => {
@@ -113,5 +114,11 @@ describe("groupByModel", () => {
       { key: "gpt-5.2", label: "gpt-5.2", tokens: 170, detail: ["Claude Code", "Codex"] },
       { key: "claude-opus-4.5", label: "claude-opus-4.5", tokens: 150, detail: ["Claude Code"] },
     ]);
+  });
+});
+
+describe("cliNames", () => {
+  it("maps each source id to its name in the landing badge list", () => {
+    expect(cliNames()).toMatchObject({ codex: "Codex", claude: "Claude Code", openclaw: "OpenClaw" });
   });
 });

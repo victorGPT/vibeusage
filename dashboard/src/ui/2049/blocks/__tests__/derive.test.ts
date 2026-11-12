@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { axisLabel, identicon, monthLabels, trendPath } from "../derive";
+import { axisLabel, dateCell, identicon, monthLabels, stepDay, trendPath } from "../derive";
 import { ahead } from "../rank";
 
 describe("identicon", () => {
@@ -48,5 +48,33 @@ describe("ahead", () => {
     expect(ahead(list, { rank: 7, total_tokens: 1 })).toEqual({ rank: 6, total_tokens: 94 });
     expect(ahead(list, { rank: 1, total_tokens: 1 })).toBeUndefined();
     expect(ahead(list, null)).toBeUndefined();
+  });
+});
+
+describe("stepDay", () => {
+  const cell = (day: string) => ({ day, value: 1, level: 1 });
+  // Two week columns of 7: index = week * 7 + weekday.
+  const cells = [null, cell("a"), cell("b"), cell("c"), cell("d"), cell("e"), cell("f"), cell("g"), cell("h"), null, null, null, null, null];
+
+  it("moves a day with up and down and a week with left and right, skipping empty slots", () => {
+    expect(stepDay(cells, 2, "ArrowUp")).toBe(1);
+    expect(stepDay(cells, 1, "ArrowUp")).toBe(1);
+    expect(stepDay(cells, 6, "ArrowDown")).toBe(7);
+    expect(stepDay(cells, 1, "ArrowRight")).toBe(8);
+    expect(stepDay(cells, 8, "ArrowRight")).toBe(8);
+    expect(stepDay(cells, 8, "ArrowLeft")).toBe(1);
+  });
+
+  it("jumps to the first and last day, and ignores other keys", () => {
+    expect(stepDay(cells, 4, "Home")).toBe(1);
+    expect(stepDay(cells, 4, "End")).toBe(8);
+    expect(stepDay(cells, 4, "Enter")).toBeNull();
+  });
+});
+
+describe("dateCell", () => {
+  it("shows an hour key as date and minutes", () => {
+    expect(dateCell("2026-11-12T13:30:00", "hour")).toBe("2026-11-12 13:30");
+    expect(dateCell("2026-11-12", "day")).toBe("2026-11-12");
   });
 });

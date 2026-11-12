@@ -37,3 +37,21 @@ export function axisLabel(value: string, dateKey: DateKey): string {
   if (dateKey === "hour") return value.slice(11, 16);
   return value;
 }
+
+const STEP: Record<string, number> = { ArrowUp: -1, ArrowDown: 1, ArrowLeft: -7, ArrowRight: 7 };
+
+// Keyboard walk over the week-major dot grid: a day up or down, a week left or right, past empty
+// slots. Returns null for keys it does not handle, and stays put at the edges.
+export function stepDay(cells: (HeatmapCell | null)[], index: number, key: string): number | null {
+  const filled = cells.flatMap((cell, i) => (cell ? [i] : []));
+  if (key === "Home") return filled[0] ?? index;
+  if (key === "End") return filled[filled.length - 1] ?? index;
+  const step = STEP[key];
+  if (!step) return null;
+  for (let i = index + step; i >= 0 && i < cells.length; i += step) if (cells[i]) return i;
+  return index;
+}
+
+export function dateCell(value: string, dateKey: DateKey): string {
+  return dateKey === "hour" ? value.replace("T", " ").slice(0, 16) : value;
+}

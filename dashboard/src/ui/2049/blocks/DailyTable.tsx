@@ -6,6 +6,7 @@ import { Label } from "#src/ui/2049/base/Label.tsx";
 import { Card } from "#src/ui/shadcn/card.tsx";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "#src/ui/shadcn/table.tsx";
 
+import { dateCell } from "./derive";
 import { full, tokens } from "./format";
 import { Pager } from "./Pager";
 import { Tabs } from "./Tabs";
@@ -84,7 +85,7 @@ export function DailyTable({ rows, pageSize = 10, dateKey = "day", paged = true 
             };
             return (
               <TableRow key={String(row[dateKey])}>
-                <TableCell>{row[dateKey]}</TableCell>
+                <TableCell>{dateCell(String(row[dateKey] ?? ""), dateKey)}</TableCell>
                 <TableCell className="text-right text-hero">{cell(tokens(row))}</TableCell>
                 <TableCell className="text-right">{cell(row.input_tokens)}</TableCell>
                 <TableCell className="text-right">{cell(row.output_tokens)}</TableCell>
