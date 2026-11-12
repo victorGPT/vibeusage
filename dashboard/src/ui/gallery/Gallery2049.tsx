@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { copy } from "../../lib/copy";
 import { Actions } from "./Actions2049";
+import { Blocks } from "./Blocks2049";
 import { Spec } from "./Spec2049";
 
 // Dev-only token gallery mounted at /__2049 (see main.jsx). Every label is a token name or a
@@ -178,6 +179,8 @@ export function Gallery2049() {
         <Actions />
 
         <Spec />
+
+        <Blocks />
       </div>
     </main>
   );
