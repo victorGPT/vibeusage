@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Projects</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&amp;family=Saira:wght@200;300;400&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<section aria-label="Projects" style="box-sizing: border-box; width: 100%; display: flex; flex-direction: column; gap: 16px; background: #061716; border: 1px solid #1f4e48; border-radius: 8px; padding: 24px; color: #bfe9e1; font-family: Barlow, sans-serif">
+  <div style="display: flex; align-items: center; gap: 12px">
+    <dc-import name="Label" text="Projects · all time" hint-size="140px,11px"></dc-import>
+    <div style="margin-left: auto">
+      <dc-import name="Select" label="Show" value="{{top}}" options="{{tops}}" on-value-change="{{setTop}}" hint-size="140px,32px"></dc-import>
+    </div>
+  </div>
+  <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: 16px; border-top: 1px solid #1f4e48; padding-top: 16px">
+    <sc-for list="{{items}}" as="p" hint-placeholder-count="3">
+      <div style="{{p.wrap}}">
+        <dc-import name="Label" text="{{p.org}}" hint-size="60px,11px"></dc-import>
+        <dc-import name="Text" text="{{p.repo}}" tone="light" weight="600" hint-size="100%,22px"></dc-import>
+        <dc-import name="Stat" value="{{p.v}}" sub="{{p.p}}" pct="{{p.bar}}" hint-size="100%,47px"></dc-import>
+      </div>
+    </sc-for>
+  </div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":240}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const data = [['acme', 'vibeusage', '804.7M', 17.0], ['acme', 'agent-kit', '568.0M', 12.0], ['lumen', 'core', '520.7M', 11.0]];
+    const items = data.map(([org, repo, v, p], i) => ({
+      org, repo, v, p: p.toFixed(1) + '%', bar: p / 17 * 100,
+      wrap: 'display: flex; flex-direction: column; gap: 8px; min-width: 0' + (i ? '; border-left: 1px solid #1f4e48; padding-left: 16px' : '')
+    }));
+    return {
+      items, top: this.state?.top ?? '3', setTop: (v) => this.setState({ top: v }),
+      tops: [{ value: '3', label: 'Top 3' }, { value: '6', label: 'Top 6' }, { value: '10', label: 'Top 10' }]
+    };
+  }
+}
+</script>
+</body>
+</html>

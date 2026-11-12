@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Share row</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&amp;family=Saira:wght@200;300;400&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div style="box-sizing: border-box; display: flex; flex-direction: column; gap: 8px; padding: {{pad}}; border-top: 1px solid #1f4e48; background: {{bg}}; font-family: Barlow, sans-serif; color: #bfe9e1">
+  <div style="display: flex; align-items: baseline; gap: 12px">
+    <span style="flex: 1 1 auto; min-width: 0; font: 600 15px/1.2 Barlow, sans-serif; color: #e2f8f3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{label}}</span>
+    <span style="font: 400 15px/1 Saira, sans-serif; font-variant-numeric: tabular-nums; color: #6fa79e">{{value}}</span>
+    <span style="width: 64px; text-align: right; font: 400 18px/1 Saira, sans-serif; font-variant-numeric: tabular-nums; color: #e2f8f3">{{pctText}}</span>
+  </div>
+  <dc-import name="Meter" pct="{{bar}}" hint-size="100%,3px"></dc-import>
+  <sc-if value="{{hasSub}}" hint-placeholder-val="{{true}}"><dc-import name="Text" text="{{sub}}" size="s" tone="muted" hint-size="100%,21px"></dc-import></sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"label":{"editor":"text","default":"Codex"},"value":{"editor":"text","default":"2.75B"},"pctText":{"editor":"text","default":"58.0%"},"bar":{"editor":"range","min":0,"max":100,"step":0.1,"default":100},"sub":{"editor":"text","default":"gpt-5.2-codex 64%   gpt-5.2 18%"},"$preview":{"width":600,"height":96}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const solo = Object.keys(this.props).filter((k) => k[0] !== '$' && k !== 'children').length === 0;
+    const sub = this.props.sub ?? (solo ? 'gpt-5.2-codex 64%   gpt-5.2 18%' : '');
+    return {
+      label: this.props.label ?? 'Codex', value: this.props.value ?? '2.75B', pctText: this.props.pctText ?? '58.0%',
+      bar: this.props.bar ?? 100, sub, hasSub: !!sub,
+      pad: solo ? '12px 16px' : '12px 0', bg: solo ? '#061716' : 'transparent'
+    };
+  }
+}
+</script>
+</body>
+</html>

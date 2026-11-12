@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Button</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<span style="display: inline-flex; background: {{bg}}; padding: {{pad}}; font-family: Barlow, sans-serif; color: #bfe9e1">
+  <sc-if value="{{isLink}}" hint-placeholder-val="{{false}}">
+    <a href="{{href}}" onMouseEnter="{{enter}}" onMouseLeave="{{leave}}" onMouseDown="{{down}}" onMouseUp="{{up}}" onFocus="{{focus}}" onBlur="{{blur}}" style="{{style}}">{{label}}</a>
+  </sc-if>
+  <sc-if value="{{isButton}}" hint-placeholder-val="{{true}}">
+    <button type="button" disabled="{{disabled}}" onClick="{{click}}" onMouseEnter="{{enter}}" onMouseLeave="{{leave}}" onMouseDown="{{down}}" onMouseUp="{{up}}" onFocus="{{focus}}" onBlur="{{blur}}" style="{{style}}">{{label}}</button>
+  </sc-if>
+</span>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"label":{"editor":"text","default":"Copy link"},"variant":{"editor":"enum","options":["default","outline","ghost"],"default":"outline"},"size":{"editor":"enum","options":["default","lg"],"default":"default"},"disabled":{"editor":"boolean","default":false},"href":{"editor":"text","default":""},"forceState":{"editor":"enum","options":["","hover","focus","active"],"default":""},"onClick":{"editor":null},"$preview":{"width":200,"height":56}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const solo = Object.keys(this.props).filter((k) => k[0] !== '$' && k !== 'children').length === 0;
+    const variant = this.props.variant ?? 'outline';
+    const lg = (this.props.size ?? 'default') === 'lg';
+    const disabled = !!this.props.disabled;
+    const href = this.props.href || '';
+    // state: forceState wins (spec boards), else real pointer/focus state
+    const fs = this.props.forceState || '';
+    const s = this.state || {};
+    const hov = !disabled && (fs === 'hover' || (!fs && s.hov));
+    const act = !disabled && (fs === 'active' || (!fs && s.act));
+    const foc = !disabled && (fs === 'focus' || (!fs && s.foc));
+    const V = {
+      default: 'background: #e0b04a; border: 1px solid #e0b04a; color: #03100f',
+      outline: 'background: transparent; border: 1px solid #2c6b63; color: #bfe9e1',
+      ghost: 'background: transparent; border: 1px solid transparent; color: #bfe9e1'
+    };
+    const H = {
+      default: 'background: #e0b04a; border: 1px solid #e0b04a; color: #03100f; filter: brightness(1.12)',
+      outline: 'background: #061716; border: 1px solid #7fd9cb; color: #e2f8f3',
+      ghost: 'background: #061716; border: 1px solid transparent; color: #e2f8f3'
+    };
+    const A = {
+      default: 'background: #e0b04a; border: 1px solid #e0b04a; color: #03100f; filter: brightness(0.9)',
+      outline: 'background: #0a2321; border: 1px solid #7fd9cb; color: #e2f8f3',
+      ghost: 'background: #0a2321; border: 1px solid transparent; color: #e2f8f3'
+    };
+    // shadcn 约定：disabled 保留变体外观，只降不透明度
+    const look = disabled ? (V[variant] || V.outline) + '; opacity: 0.45'
+      : ((act ? A : hov ? H : V)[variant] || V.outline);
+    const style = 'display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; height: ' + (lg ? '48px; padding: 0 24px; font: 600 12px/1 Barlow, sans-serif' : '32px; padding: 0 16px; font: 600 11px/1 Barlow, sans-serif') +
+      '; letter-spacing: 0.12em; text-transform: uppercase; white-space: nowrap; text-decoration: none; border-radius: 3px; transition: background 120ms, border-color 120ms; cursor: ' + (disabled ? 'default' : 'pointer') + '; ' +
+      look + '; outline: ' + (foc ? '2px solid #e0b04a; outline-offset: 2px' : 'none');
+    const set = (k, v) => () => { if (!fs) this.setState({ [k]: v }); };
+    return {
+      enter: set('hov', true), leave: () => { if (!fs) this.setState({ hov: false, act: false }); },
+      down: set('act', true), up: set('act', false),
+      focus: (e) => { if (!fs && e && e.target && e.target.matches && e.target.matches(':focus-visible')) this.setState({ foc: true }); },
+      blur: set('foc', false),
+      label: this.props.label ?? 'Copy link', style, disabled, href,
+      isLink: !!href && !disabled, isButton: !href || disabled,
+      click: this.props.onClick ?? (() => {}),
+      bg: solo ? '#03100f' : 'transparent', pad: solo ? '12px' : '0'
+    };
+  }
+}
+</script>
+</body>
+</html>

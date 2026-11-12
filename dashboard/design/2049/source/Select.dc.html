@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Select</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<label style="display: inline-flex; align-items: center; gap: 8px; background: {{bg}}; padding: {{pad}}; font: 600 11px/1 Barlow, sans-serif; letter-spacing: 0.12em; text-transform: uppercase; color: #6fa79e">
+  {{label}}
+  <select onChange="{{change}}" style="height: 32px; padding: 0 12px; background: #03100f; border: 1px solid #2c6b63; border-radius: 3px; color: #bfe9e1; font: 600 11px/1 Barlow, sans-serif; letter-spacing: 0.12em; text-transform: uppercase">
+    <sc-for list="{{options}}" as="o" hint-placeholder-count="3">
+      <option value="{{o.value}}" selected="{{o.on}}">{{o.label}}</option>
+    </sc-for>
+  </select>
+</label>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"label":{"editor":"text","default":"Show"},"value":{"editor":"text","default":"3"},"options":{"editor":null},"onValueChange":{"editor":null},"$preview":{"width":200,"height":56}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const solo = Object.keys(this.props).filter((k) => k[0] !== '$' && k !== 'children').length === 0;
+    const options = this.props.options ?? [{ value: '3', label: 'Top 3' }, { value: '6', label: 'Top 6' }, { value: '10', label: 'Top 10' }];
+    const cur = this.props.value ?? this.state?.v ?? options[0].value;
+    return {
+      label: this.props.label ?? 'Show',
+      options: options.map((o) => ({ ...o, on: o.value === cur })),
+      change: (e) => {
+        const v = e.target.value;
+        if (this.props.value === undefined) this.setState({ v });
+        if (this.props.onValueChange) this.props.onValueChange(v);
+      },
+      bg: solo ? '#03100f' : 'transparent', pad: solo ? '12px' : '0'
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -11,6 +11,15 @@ import "@fontsource/geist-mono/900.css";
 import "./styles.css";
 
 const router = createBrowserRouter([
+  ...(import.meta.env.DEV
+    ? [
+        {
+          path: "/__2049",
+          lazy: () =>
+            import("./ui/gallery/Gallery2049.tsx").then((m) => ({ Component: m.Gallery2049 })),
+        },
+      ]
+    : []),
   { path: "/sign-in", element: <SignInRedirect /> },
   { path: "/sign-up", element: <SignUpRedirect /> },
   { path: "*", element: <App /> },

@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>State screen</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&amp;family=Saira:wght@200;300;400&amp;family=JetBrains+Mono:wght@500&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<section aria-label="{{kicker}}" style="position: relative; box-sizing: border-box; width: 100%; min-height: 264px; overflow: hidden; border-radius: 18px; border: 1px solid #2c6b63; background: radial-gradient(130% 100% at 50% 40%, #0c2c29 0%, #061716 65%, #020807 100%); box-shadow: inset 0 0 40px rgba(127, 217, 203, 0.1); padding: 24px; color: #bfe9e1; font-family: Barlow, sans-serif">
+  <dc-import name="ScreenFx" embedded="{{yes}}" hint-size="0px,0px"></dc-import>
+  <div style="position: relative; display: flex; flex-direction: column; gap: 16px">
+    <div style="display: flex; justify-content: space-between; gap: 12px">
+      <dc-import name="Label" text="{{kicker}}" hint-size="160px,11px"></dc-import>
+      <dc-import name="Label" text="{{tag}}" tone="{{tagTone}}" hint-size="100px,11px"></dc-import>
+    </div>
+
+    <sc-if value="{{isInstall}}" hint-placeholder-val="{{true}}">
+      <dc-import name="Heading" text="Install the tracker" size="s" hint-size="100%,40px"></dc-import>
+      <dc-import name="CommandBox" cmd="npx --yes vibeusage init" hint-size="100%,46px"></dc-import>
+      <dc-import name="Text" text="Then paste link code K7Q-2049 when asked." hint-size="100%,22px"></dc-import>
+    </sc-if>
+
+    <sc-if value="{{isExpired}}" hint-placeholder-val="{{false}}">
+      <dc-import name="Heading" text="Your session expired." size="s" hint-size="100%,40px"></dc-import>
+      <dc-import name="Text" text="Your data is safe. Sign in again to keep syncing." hint-size="100%,22px"></dc-import>
+      <div><dc-import name="Button" label="Sign in with GitHub" variant="default" hint-size="170px,32px"></dc-import></div>
+    </sc-if>
+
+    <sc-if value="{{isVisitor}}" hint-placeholder-val="{{false}}">
+      <dc-import name="Display" text="21,410,592,118" size="64" hint-size="100%,64px"></dc-import>
+      <div style="display: flex; align-items: baseline; gap: 12px">
+        <dc-import name="Display" text="$6,588.04" size="28" weight="300" tone="amber" glow="{{no}}" hint-size="120px,28px"></dc-import>
+        <dc-import name="Label" text="All time · nullbyte" hint-size="140px,11px"></dc-import>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{isInvalid}}" hint-placeholder-val="{{false}}">
+      <dc-import name="Heading" text="This profile is private or the link is wrong." size="s" hint-size="100%,80px"></dc-import>
+      <dc-import name="Text" text="Ask the owner for a new share link." hint-size="100%,22px"></dc-import>
+    </sc-if>
+
+    <sc-if value="{{isEmpty}}" hint-placeholder-val="{{false}}">
+      <dc-import name="Display" text="0" size="64" hint-size="60px,64px"></dc-import>
+      <dc-import name="Text" text="Run any AI CLI for a minute, then refresh. Sync runs every 30 minutes." hint-size="100%,22px"></dc-import>
+    </sc-if>
+
+    <sc-if value="{{isLoading}}" hint-placeholder-val="{{false}}">
+      <div aria-hidden="true" style="height: 64px; width: 70%; background: rgba(127, 217, 203, 0.12); border-radius: 3px"></div>
+      <div aria-hidden="true" style="height: 12px; width: 40%; background: rgba(127, 217, 203, 0.12); border-radius: 3px"></div>
+      <div aria-hidden="true" style="height: 12px; width: 55%; background: rgba(127, 217, 203, 0.12); border-radius: 3px"></div>
+    </sc-if>
+
+    <sc-if value="{{isError}}" hint-placeholder-val="{{false}}">
+      <dc-import name="Heading" text="Couldn't reach the usage service." size="s" tone="alert" hint-size="100%,40px"></dc-import>
+      <dc-import name="Text" text="Your local numbers are still counting. Try again in a moment." hint-size="100%,22px"></dc-import>
+      <div><dc-import name="Button" label="Retry" variant="outline" hint-size="72px,32px"></dc-import></div>
+    </sc-if>
+  </div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"variant":{"editor":"enum","options":["install","expired","visitor","invalid","empty","loading","error"],"default":"install"},"$preview":{"width":620,"height":300}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const v = this.props.variant ?? 'install';
+    const M = {
+      install: ['No data yet', 'Step 1 of 2'], expired: ['Session', 'Expired'], visitor: ['Public profile · nullbyte', 'Read only'],
+      invalid: ['Public profile', 'Not found'], empty: ['Core index · total', 'Waiting for first sync'], loading: ['Core index', 'Reading'], error: ['Core index', 'Error 503']
+    };
+    const [kicker, tag] = M[v] || M.install;
+    return {
+      yes: true, no: false, kicker, tag,
+      tagTone: v === 'error' || v === 'expired' ? 'alert' : 'muted',
+      isInstall: v === 'install', isExpired: v === 'expired', isVisitor: v === 'visitor', isInvalid: v === 'invalid',
+      isEmpty: v === 'empty', isLoading: v === 'loading', isError: v === 'error'
+    };
+  }
+}
+</script>
+</body>
+</html>

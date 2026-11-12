@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Switch</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<span style="display: inline-flex; background: {{bg}}; padding: {{pad}}; font-family: Barlow, sans-serif; color: #6fa79e">
+  <button type="button" role="switch" aria-checked="{{checked}}" disabled="{{disabled}}" onClick="{{toggle}}" onMouseEnter="{{enter}}" onMouseLeave="{{leave}}" onFocus="{{focus}}" onBlur="{{blur}}" style="{{btn}}">
+    <span style="{{track}}"><span style="{{thumb}}"></span></span>
+    {{label}}
+  </button>
+</span>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"label":{"editor":"text","default":"Public profile"},"checked":{"editor":"boolean","default":true},"disabled":{"editor":"boolean","default":false},"forceState":{"editor":"enum","options":["","focus"],"default":""},"onCheckedChange":{"editor":null},"$preview":{"width":240,"height":48}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const solo = Object.keys(this.props).filter((k) => k[0] !== '$' && k !== 'children').length === 0;
+    const on = this.state?.on ?? this.props.checked ?? true;
+    const disabled = !!this.props.disabled;
+    const fs = this.props.forceState || '';
+    const s = this.state || {};
+    const hov = !disabled && !fs && s.hov;
+    const foc = !disabled && (fs === 'focus' || (!fs && s.foc));
+    const trackOn = disabled ? '#2c6b63; background: #2c6b63' : '#e0b04a; background: #e0b04a';
+    const trackOff = disabled ? '#1f4e48; background: transparent' : (hov ? '#7fd9cb; background: #061716' : '#2c6b63; background: #03100f');
+    return {
+      label: this.props.label ?? 'Public profile', checked: on, disabled,
+      toggle: () => {
+        if (disabled) return;
+        this.setState({ on: !on });
+        if (this.props.onCheckedChange) this.props.onCheckedChange(!on);
+      },
+      enter: () => { if (!fs) this.setState({ hov: true }); },
+      leave: () => { if (!fs) this.setState({ hov: false }); },
+      focus: (e) => { if (!fs && e && e.target && e.target.matches && e.target.matches(':focus-visible')) this.setState({ foc: true }); },
+      blur: () => { if (!fs) this.setState({ foc: false }); },
+      btn: 'display: inline-flex; align-items: center; gap: 8px; background: none; border: 0; padding: 0; border-radius: 3px; cursor: ' + (disabled ? 'default' : 'pointer') +
+        '; font: 600 11px/1 Barlow, sans-serif; letter-spacing: 0.12em; text-transform: uppercase; color: ' + (disabled ? '#6fa79e; opacity: 0.6' : '#6fa79e') +
+        '; outline: ' + (foc ? '2px solid #e0b04a; outline-offset: 2px' : 'none'),
+      track: 'position: relative; display: inline-block; flex: none; box-sizing: border-box; width: 40px; height: 20px; border-radius: 3px; transition: background 120ms, border-color 120ms; border: 1px solid ' + (on ? trackOn : trackOff),
+      thumb: 'position: absolute; top: 2px; left: ' + (on ? '22px' : '2px') + '; width: 14px; height: 14px; border-radius: 2px; transition: left 120ms; background: ' + (on ? '#03100f' : '#6fa79e'),
+      bg: solo ? '#03100f' : 'transparent', pad: solo ? '16px' : '0'
+    };
+  }
+}
+</script>
+</body>
+</html>

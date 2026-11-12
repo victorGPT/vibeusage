@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Trend</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&amp;family=Saira:wght@200;300;400&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<section aria-label="Trend, 30 days" style="box-sizing: border-box; width: 100%; min-height: {{minH}}; display: flex; flex-direction: column; gap: 16px; background: #061716; border: 1px solid #1f4e48; border-radius: 8px; padding: 24px; color: #bfe9e1; font-family: Barlow, sans-serif">
+  <dc-import name="Label" text="Trend · 30 days" hint-size="120px,11px"></dc-import>
+  <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: 16px">
+    <dc-import name="Stat" label="Last 7 days" value="195.9M" hint-size="100%,47px"></dc-import>
+    <dc-import name="Stat" label="Last 30 days" value="753.1M" divider="{{yes}}" hint-size="100%,47px"></dc-import>
+    <dc-import name="Stat" label="Daily avg" value="25.1M" divider="{{yes}}" hint-size="100%,47px"></dc-import>
+  </div>
+  <svg viewBox="0 0 560 120" preserveAspectRatio="none" role="img" aria-label="Daily tokens over the last 30 days, peak 43.9 million" style="width: 100%; flex: 1 1 176px; min-height: 176px; display: block">
+    <line x1="0" y1="40" x2="560" y2="40" stroke="#1f4e48" stroke-width="1" vector-effect="non-scaling-stroke"></line>
+    <line x1="0" y1="80" x2="560" y2="80" stroke="#1f4e48" stroke-width="1" vector-effect="non-scaling-stroke"></line>
+    <line x1="0" y1="119" x2="560" y2="119" stroke="#2c6b63" stroke-width="1" vector-effect="non-scaling-stroke"></line>
+    <path d="{{area}}" fill="rgba(224, 176, 74, 0.1)"></path>
+    <path d="{{line}}" fill="none" stroke="#e0b04a" stroke-width="1.5" vector-effect="non-scaling-stroke"></path>
+  </svg>
+  <div style="display: flex; justify-content: space-between; gap: 8px">
+    <dc-import name="Label" text="10-14" hint-size="40px,11px"></dc-import>
+    <dc-import name="Label" text="Peak 43.9M · 10-29" hint-size="130px,11px"></dc-import>
+    <dc-import name="Label" text="11-12" hint-size="40px,11px"></dc-import>
+  </div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"minH":{"editor":"text","default":"auto"},"$preview":{"width":600,"height":392}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const v = [18, 22, 9, 6, 24, 27, 31, 28, 12, 8, 26, 30, 34, 29, 11, 7, 33, 36, 43.9, 31, 14, 10, 29, 32, 35, 30, 13, 9, 27, 26.1];
+    const max = 46, n = v.length;
+    const pts = v.map((x, i) => (i * 560 / (n - 1)).toFixed(1) + ' ' + (118 - x / max * 110).toFixed(1));
+    const line = 'M' + pts.join(' L');
+    return { yes: true, minH: this.props.minH ?? 'auto', line, area: line + ' L560 120 L0 120 Z' };
+  }
+}
+</script>
+</body>
+</html>

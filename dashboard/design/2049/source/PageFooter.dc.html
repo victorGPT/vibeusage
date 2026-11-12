@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Page footer</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<footer style="box-sizing: border-box; width: 100%; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; padding: {{pad}}; border-top: 1px solid #1f4e48; background: {{bg}}; font-family: Barlow, sans-serif; color: #6fa79e">
+  <dc-import name="Label" text="{{left}}" hint-size="180px,11px"></dc-import>
+  <dc-import name="Label" text="{{right}}" hint-size="60px,11px"></dc-import>
+</footer>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"left":{"editor":"text","default":"Synced 4 min ago · UTC"},"right":{"editor":"text","default":"v0.7.1"},"$preview":{"width":1216,"height":48}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const solo = Object.keys(this.props).filter((k) => k[0] !== '$' && k !== 'children').length === 0;
+    return {
+      left: this.props.left ?? 'Synced 4 min ago · UTC', right: this.props.right ?? 'v0.7.1',
+      pad: solo ? '16px 32px' : '16px 0 0', bg: solo ? '#03100f' : 'transparent'
+    };
+  }
+}
+</script>
+</body>
+</html>

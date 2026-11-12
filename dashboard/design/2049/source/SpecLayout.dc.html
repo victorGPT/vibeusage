@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Spec · Layout</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&amp;family=Saira:wght@200;300;400&amp;display=swap">
+<style>body{margin:0;background:#03100f}</style>
+</helmet>
+<div style="box-sizing: border-box; width: 100%; min-height: 100vh; background: #03100f; padding: 32px; font-family: Barlow, sans-serif; color: #bfe9e1">
+  <div style="max-width: 1216px; margin: 0 auto; display: flex; flex-direction: column; gap: 48px">
+    <dc-import name="PageHeader" title="Spec · Layout" meta="Stamp, PageHeader, PageFooter, CtaBand, Table, ScreenFx" hint-size="100%,96px"></dc-import>
+
+    <section style="display: flex; flex-direction: column; gap: 16px">
+      <dc-import name="Heading" text="Stamp" size="s" hint-size="100%,28px"></dc-import>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 16px">
+        <sc-for list="{{stamps}}" as="c" hint-placeholder-count="2">
+          <div style="display: flex; flex-direction: column; gap: 8px; min-width: 0">
+            <dc-import name="Label" text="{{c.cap}}" hint-size="100%,11px"></dc-import>
+            <dc-import name="Stamp" handle="{{c.handle}}" range="{{c.range}}" hint-size="100%,32px"></dc-import>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 16px">
+      <dc-import name="Heading" text="PageHeader · PageFooter · CtaBand" size="s" hint-size="100%,28px"></dc-import>
+      <dc-import name="Label" text="PageHeader" hint-size="100%,11px"></dc-import>
+      <dc-import name="PageHeader" title="Leaderboard" meta="2026-11-06 → 11-12 · updated 4 min ago" hint-size="100%,96px"></dc-import>
+      <dc-import name="Label" text="PageFooter" hint-size="100%,11px"></dc-import>
+      <dc-import name="PageFooter" left="Synced 4 min ago · UTC" right="v0.7.1" hint-size="100%,48px"></dc-import>
+      <dc-import name="Label" text="CtaBand" hint-size="100%,11px"></dc-import>
+      <dc-import name="CtaBand" title="See where you rank this week." button-label="Sign in with GitHub" href="#" meta="v0.7.1 · open source" hint-size="100%,200px"></dc-import>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 16px">
+      <dc-import name="Heading" text="Table" size="s" hint-size="100%,28px"></dc-import>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px 16px">
+        <div style="display: flex; flex-direction: column; gap: 8px; min-width: 0">
+          <dc-import name="Label" text="normal" hint-size="100%,11px"></dc-import>
+          <dc-import name="Table" columns="{{cols}}" rows="{{rows}}" min-width="0" hint-size="100%,160px"></dc-import>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px; min-width: 0">
+          <dc-import name="Label" text="pinned · me" hint-size="100%,11px"></dc-import>
+          <dc-import name="Table" columns="{{cols}}" rows="{{rows}}" pinned="{{pinned}}" min-width="0" hint-size="100%,200px"></dc-import>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px; min-width: 0">
+          <dc-import name="Label" text="empty" hint-size="100%,11px"></dc-import>
+          <dc-import name="Table" columns="{{cols}}" rows="{{none}}" empty-text="No one has synced this week yet." min-width="0" hint-size="100%,120px"></dc-import>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px; min-width: 0">
+          <dc-import name="Label" text="long name · truncates" hint-size="100%,11px"></dc-import>
+          <dc-import name="Table" columns="{{cols}}" rows="{{longRows}}" min-width="0" hint-size="100%,120px"></dc-import>
+        </div>
+      </div>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 16px">
+      <dc-import name="Heading" text="ScreenFx" size="s" hint-size="100%,28px"></dc-import>
+      <dc-import name="Label" text="embedded in a main-screen shell" hint-size="100%,11px"></dc-import>
+      <div style="position: relative; box-sizing: border-box; overflow: hidden; border-radius: 18px; border: 1px solid #2c6b63; background: radial-gradient(130% 100% at 50% 40%, #0c2c29 0%, #061716 65%, #020807 100%); box-shadow: inset 0 0 40px rgba(127, 217, 203, 0.1); padding: 24px">
+        <dc-import name="ScreenFx" embedded="{{yes}}" hint-size="0px,0px"></dc-import>
+        <div style="position: relative; display: flex; flex-direction: column; gap: 12px">
+          <dc-import name="Label" text="Total tokens · all time" hint-size="160px,11px"></dc-import>
+          <dc-import name="Display" text="4,733,386,712" size="76" hint-size="100%,76px"></dc-import>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1800}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const row = (rank, name, total, delta, o) => Object.assign({ cells: [{ text: rank, dim: true }, { text: name, name: true, delta }, { text: total, strong: true }] }, o);
+    return {
+      yes: true,
+      stamps: [
+        { cap: 'normal', handle: 'your_handle', range: '2026-11-06 → 11-12' },
+        { cap: 'long range · wraps', handle: 'an_unreasonably_long_handle', range: '2025-11-13 → 2026-11-12 · all time since first sync' }
+      ],
+      cols: [{ label: 'Rank', width: '64px' }, { label: 'User' }, { label: 'Tokens', align: 'right', active: true }],
+      rows: [row('#1', 'tokenfurnace', '4.73B', 0, { lead: true }), row('#2', 'night_shift_dev', '3.12B', 3), row('#3', 'ralph_loop', '2.80B', -2)],
+      pinned: row('#7', 'your_handle · you', '195.9M', -2, { me: true }),
+      none: [],
+      longRows: [row('#4', 'an_unreasonably_long_handle_that_keeps_going_forever_and_ever', '1.04B', 1), row('#5', 'short', '980.2M', 0)]
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Delta</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<span style="display: inline-flex; align-items: baseline; gap: 8px; background: {{bg}}; padding: {{pad}}; font: 600 11px/1 Barlow, sans-serif; letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap; color: #6fa79e">
+  <span style="color: {{color}}">{{text}}</span>
+  <sc-if value="{{hasSuffix}}" hint-placeholder-val="{{false}}"><span>{{suffix}}</span></sc-if>
+</span>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"value":{"editor":"int","default":-2},"suffix":{"editor":"text","default":"vs last week"},"$preview":{"width":200,"height":32}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const solo = Object.keys(this.props).filter((k) => k[0] !== '$' && k !== 'children').length === 0;
+    const v = Number(this.props.value ?? -2);
+    const suffix = solo ? 'vs last week' : (this.props.suffix ?? '');
+    return {
+      text: v > 0 ? '▲ ' + v : v < 0 ? '▼ ' + (-v) : '—',
+      color: v < 0 ? '#e5484d' : '#6fa79e',
+      suffix, hasSuffix: !!suffix,
+      bg: solo ? '#03100f' : 'transparent', pad: solo ? '12px' : '0'
+    };
+  }
+}
+</script>
+</body>
+</html>

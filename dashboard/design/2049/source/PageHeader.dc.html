@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Page header</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&amp;family=Saira:wght@200;300;400&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<header style="box-sizing: border-box; width: 100%; display: flex; flex-direction: column; gap: 8px; padding: {{pad}}; background: {{bg}}; font-family: Barlow, sans-serif; color: #e2f8f3">
+  <dc-import name="Heading" text="{{title}}" size="l" upper="{{yes}}" level="1" hint-size="100%,52px"></dc-import>
+  <sc-if value="{{hasMeta}}" hint-placeholder-val="{{true}}"><dc-import name="Label" text="{{meta}}" hint-size="240px,11px"></dc-import></sc-if>
+</header>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"title":{"editor":"text","default":"Leaderboard"},"meta":{"editor":"text","default":"2026-11-06 → 11-12 · updated 4 min ago"},"$preview":{"width":1216,"height":120}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const solo = Object.keys(this.props).filter((k) => k[0] !== '$' && k !== 'children').length === 0;
+    const meta = this.props.meta ?? (solo ? '2026-11-06 → 11-12 · updated 4 min ago' : '');
+    return {
+      title: this.props.title ?? 'Leaderboard', meta, hasMeta: !!meta, yes: true,
+      pad: solo ? '24px 32px' : '16px 0 8px', bg: solo ? '#03100f' : 'transparent'
+    };
+  }
+}
+</script>
+</body>
+</html>

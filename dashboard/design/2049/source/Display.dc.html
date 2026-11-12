@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Display number</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira:wght@200;300;400&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div style="box-sizing: border-box; background: {{bg}}; padding: {{pad}}; font: {{weight}} {{size}}px/1 Saira, sans-serif; letter-spacing: 0.01em; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; text-shadow: {{glow}}; color: {{color}}">{{text}}</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"text":{"editor":"text","default":"4,733,386,712"},"size":{"editor":"int","min":18,"max":120,"default":76},"weight":{"editor":"enum","options":["200","300","400"],"default":"200"},"tone":{"editor":"enum","options":["light","amber","alert"],"default":"light"},"glow":{"editor":"boolean","default":true},"$preview":{"width":600,"height":120}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const solo = Object.keys(this.props).filter((k) => k[0] !== '$' && k !== 'children').length === 0;
+    const tone = this.props.tone ?? 'light';
+    const C = { light: ['#e2f8f3', 'rgba(127, 217, 203, 0.3)'], amber: ['#e0b04a', 'rgba(224, 176, 74, 0.3)'], alert: ['#e5484d', 'rgba(229, 72, 77, 0.3)'] };
+    const [color, g] = C[tone] || C.light;
+    const glow = this.props.glow ?? true;
+    return {
+      text: this.props.text ?? '4,733,386,712', size: this.props.size ?? 76, weight: this.props.weight ?? '200',
+      color, glow: glow ? '0 0 22px ' + g : 'none',
+      bg: solo ? '#03100f' : 'transparent', pad: solo ? '20px' : '0'
+    };
+  }
+}
+</script>
+</body>
+</html>

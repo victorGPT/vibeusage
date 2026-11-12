@@ -1,6 +1,7 @@
 #!/usr/bin/env node
-// VibeUsage design system v1 — SSOT guardrail.
-// Enforces DESIGN.md §7 (forbidden) and §8 (migration map).
+// VibeUsage design SSOT guardrail.
+// v1 files: DESIGN.md §7 (forbidden) and §8 (migration map).
+// 2049 files: no literal colors, spacing only on the scale in design/2049/source/Main.dc.html.
 // Exits 1 on any violation under dashboard/src.
 
 import fs from "node:fs";
@@ -65,6 +66,37 @@ const CHECKS = [
   },
 ];
 
+// The 2049 UI replaces the v1 rules with its own. The two shadcn wrappers listed in
+// LEGACY_V1 predate 2049 and still serve v1 pages, so they keep the v1 rules.
+const SCOPE_2049 = ["src/ui/2049/", "src/ui/shadcn/", "src/ui/gallery/"];
+const LEGACY_V1 = new Set(["src/ui/shadcn/dialog.tsx", "src/ui/shadcn/tooltip.tsx"]);
+
+// Tailwind --spacing is 4px, so these steps are 0 4 8 12 16 24 32 48 64.
+const SPACING_STEPS = "0|1|2|3|4|6|8|12|16";
+const PALETTE =
+  "slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose";
+
+const CHECKS_2049 = [
+  {
+    label: "2049: literal color (use a token from src/styles/2049.css)",
+    pattern: new RegExp(
+      `#[0-9a-fA-F]{3,8}\\b|(?:rgba?|hsla?|oklch|oklab)\\(|\\b(?:bg|text|border|ring|fill|stroke|from|via|to|outline|decoration|shadow|accent|caret|divide|placeholder)-(?:white|black|(?:${PALETTE})-\\d{2,3})\\b`,
+    ),
+  },
+  {
+    label: "2049: spacing off the 4 8 12 16 24 32 48 64 scale",
+    pattern: new RegExp(
+      `(?<![\\w-])-?(?:p|px|py|pt|pr|pb|pl|ps|pe|m|mx|my|mt|mr|mb|ml|ms|me|gap|gap-x|gap-y|space-x|space-y)-(?!(?:${SPACING_STEPS})(?![\\w.]))[\\d[]`,
+    ),
+  },
+];
+
+function checksFor(file) {
+  const rel = path.relative(ROOT, file).split(path.sep).join("/");
+  if (LEGACY_V1.has(rel)) return CHECKS;
+  return SCOPE_2049.some((dir) => rel.startsWith(dir)) ? CHECKS_2049 : CHECKS;
+}
+
 function* walk(dir) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     if (entry.name === "node_modules" || entry.name.startsWith(".")) continue;
@@ -77,9 +109,10 @@ function* walk(dir) {
 const violations = [];
 for (const file of walk(SRC)) {
   if (EXCLUDE.has(file)) continue;
+  const checks = checksFor(file);
   const lines = fs.readFileSync(file, "utf8").split("\n");
   lines.forEach((line, i) => {
-    for (const check of CHECKS) {
+    for (const check of checks) {
       if (check.pattern.test(line)) {
         violations.push({
           check: check.label,
@@ -117,6 +150,6 @@ console.error(
   `\n${violations.length} SSOT violation(s) across ${byCheck.size} check(s).`,
 );
 console.error(
-  "Reference: dashboard/DESIGN.md §7 (forbidden) / §8 (migration map).",
+  "Reference: dashboard/DESIGN.md §7 (forbidden) / §8 (migration map); 2049: dashboard/src/styles/2049.css.",
 );
 process.exit(1);

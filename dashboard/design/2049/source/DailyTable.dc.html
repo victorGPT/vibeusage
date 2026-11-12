@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Daily details</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&amp;family=Saira:wght@200;300;400&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<section aria-label="Daily details" style="box-sizing: border-box; width: 100%; display: flex; flex-direction: column; gap: 12px; background: #061716; border: 1px solid #1f4e48; border-radius: 8px; padding: 24px; color: #bfe9e1; font-family: Barlow, sans-serif">
+  <div style="display: flex; align-items: center; gap: 12px">
+    <dc-import name="Label" text="Daily details" hint-size="100px,11px"></dc-import>
+    <div style="margin-left: auto">
+      <dc-import name="ToggleGroup" items="{{sorts}}" value="{{sort}}" on-value-change="{{setSort}}" aria-label="Sort by" hint-size="120px,17px"></dc-import>
+    </div>
+  </div>
+  <dc-import name="Table" columns="{{columns}}" rows="{{rows}}" min-width="{{640}}" hint-size="100%,420px"></dc-import>
+  <dc-import name="Pagination" page="{{page}}" total="{{37}}" summary="{{summary}}" on-page-change="{{setPage}}" hint-size="100%,32px"></dc-import>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":540}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const tot = [26.1, 27.0, 29.0, 9.0, 13.0, 30.0, 35.0, 32.0, 29.0, 24.0];
+    const f = (n) => Math.round(n).toLocaleString('en-US');
+    const sort = this.state?.sort ?? 'date';
+    const page = this.state?.page ?? 1;
+    let days = tot.map((m, k) => ({ date: '2026-11-' + String(12 - k).padStart(2, '0'), t: m * 1e6 + 100392 * (k + 1) }));
+    if (sort === 'tokens') days = [...days].sort((a, b) => b.t - a.t);
+    // ponytail: sample holds one page of days; Pagination is wired but every page shows the same 10 rows
+    const rows = days.map((d) => ({ cells: [{ text: d.date }, { text: f(d.t), strong: true }, { text: f(d.t * 0.22) }, { text: f(d.t * 0.07) }, { text: f(d.t * 0.685) }, { text: f(d.t * 0.025) }] }));
+    return {
+      sort, setSort: (k) => this.setState({ sort: k }),
+      sorts: [{ key: 'date', label: 'Date' }, { key: 'tokens', label: 'Tokens' }],
+      columns: [{ label: 'Date' }, { label: 'Total', align: 'right', active: sort === 'tokens' }, { label: 'Input', align: 'right' }, { label: 'Output', align: 'right' }, { label: 'Cached input', align: 'right' }, { label: 'Reasoning', align: 'right' }],
+      rows, page, setPage: (n) => this.setState({ page: n }),
+      summary: 'Days ' + ((page - 1) * 10 + 1) + '–' + Math.min(365, page * 10) + ' of 365'
+    };
+  }
+}
+</script>
+</body>
+</html>

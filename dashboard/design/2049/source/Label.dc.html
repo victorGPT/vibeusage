@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Label</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<span style="display: inline-block; background: {{bg}}; padding: {{pad}}; font: 600 11px/1 Barlow, sans-serif; letter-spacing: 0.12em; text-transform: uppercase; white-space: nowrap; color: {{color}}">{{text}}</span>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"text":{"editor":"text","default":"Week rank"},"tone":{"editor":"enum","options":["muted","accent","alert","teal"],"default":"muted"},"$preview":{"width":240,"height":40}}'>
+class Component extends DCLogic {
+  renderVals() {
+    // ponytail: no props at all = standalone artboard preview, so paint the page ground; importers always pass text
+    const solo = Object.keys(this.props).filter((k) => k[0] !== '$' && k !== 'children').length === 0;
+    const C = { muted: '#6fa79e', accent: '#e0b04a', alert: '#e5484d', teal: '#7fd9cb' };
+    return { text: this.props.text ?? 'Week rank', color: C[this.props.tone] || C.muted, bg: solo ? '#03100f' : 'transparent', pad: solo ? '16px' : '0' };
+  }
+}
+</script>
+</body>
+</html>

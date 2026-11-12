@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Leaderboard</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&amp;family=Saira:wght@200;300;400&amp;display=swap">
+<style>body{margin:0;background:#03100f}</style>
+</helmet>
+<div style="box-sizing: border-box; width: 100%; min-height: 100vh; background: #03100f; padding: 0 32px 48px; font-family: Barlow, sans-serif; color: #bfe9e1">
+  <div style="max-width: 1216px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px">
+    <dc-import name="TopNav" active="leaderboard" signed-in="{{yes}}" hint-size="100%,80px"></dc-import>
+    <div style="display: flex; flex-wrap: wrap; align-items: flex-end; gap: 16px 32px">
+      <div style="flex: 1 1 360px; min-width: 0"><dc-import name="PageHeader" title="Leaderboard" meta="2026-11-06 → 11-12 · updated 4 min ago" hint-size="100%,96px"></dc-import></div>
+      <dc-import name="LeaderboardFilters" hint-size="420px,49px"></dc-import>
+    </div>
+    <div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start">
+      <div style="flex: 1 1 calc((100% - 176px) * 8 / 12 + 112px); min-width: min(100%, 480px)"><dc-import name="MyRank" min-h="512px" hint-size="100%,512px"></dc-import></div>
+      <div style="flex: 1 1 calc((100% - 176px) * 4 / 12 + 48px); min-width: min(100%, 300px)"><dc-import name="RankList" min-h="512px" hint-size="100%,512px"></dc-import></div>
+    </div>
+    <dc-import name="RankTable" hint-size="100%,660px"></dc-import>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1700}}'>
+class Component extends DCLogic {
+  renderVals() { return { yes: true }; }
+}
+</script>
+</body>
+</html>

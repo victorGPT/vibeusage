@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Command box</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&amp;family=JetBrains+Mono:wght@500&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div style="box-sizing: border-box; width: 100%; display: flex; align-items: stretch; border: 1px solid #2c6b63; border-radius: 3px; background: {{bg}}; font-family: Barlow, sans-serif; color: #e2f8f3">
+  <code style="flex: 1 1 auto; min-width: 0; padding: 12px 16px; font: 500 15px/24px 'JetBrains Mono', monospace; color: #e2f8f3; overflow-wrap: anywhere"><span style="color: #6fa79e">{{prefix}} </span>{{cmd}}</code>
+  <div style="display: flex; align-items: center; padding: 0 4px; border-left: 1px solid #2c6b63">
+    <dc-import name="Button" label="{{copyText}}" variant="ghost" on-click="{{copy}}" hint-size="72px,32px"></dc-import>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"cmd":{"editor":"text","default":"npx --yes vibeusage init"},"prefix":{"editor":"text","default":"$"},"copyLabel":{"editor":"text","default":"Copy"},"forceState":{"editor":"enum","options":["","copied"],"default":""},"$preview":{"width":520,"height":64}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const solo = Object.keys(this.props).filter((k) => k[0] !== '$' && k !== 'children').length === 0;
+    const cmd = this.props.cmd ?? 'npx --yes vibeusage init';
+    const label = this.props.copyLabel ?? 'Copy';
+    return {
+      cmd, prefix: this.props.prefix ?? '$',
+      copyText: (this.props.forceState === 'copied' || this.state?.copied) ? 'Copied' : label,
+      copy: () => {
+        try { navigator.clipboard.writeText(cmd).then(() => this.setState({ copied: true }), () => {}); } catch (e) { /* clipboard blocked: leave label */ }
+      },
+      bg: solo ? '#03100f' : 'transparent'
+    };
+  }
+}
+</script>
+</body>
+</html>

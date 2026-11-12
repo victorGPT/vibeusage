@@ -1,0 +1,86 @@
+/* VibeUsage 2049 tokens. SSOT: dashboard/design/2049/source/Main.dc.html.
+ * They live beside the v1 tokens in styles.css until the old UI is deleted, so a name
+ * here must not change an existing utility. That is why Geist Mono keeps --font-mono and
+ * the command font is --font-command. Spacing uses Tailwind's 4px --spacing; the allowed
+ * steps (4 8 12 16 24 32 48 64) are enforced by scripts/check-design-ssot.mjs. */
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+/* woff2 only, latin only: the font budget is 120 KB and fontsource's own CSS also emits woff. */
+@font-face {
+  font-family: "Saira";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 200;
+  src: url("@fontsource/saira/files/saira-latin-200-normal.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Saira";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300;
+  src: url("@fontsource/saira/files/saira-latin-300-normal.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Saira";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url("@fontsource/saira/files/saira-latin-400-normal.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Barlow";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url("@fontsource/barlow/files/barlow-latin-500-normal.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Barlow";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url("@fontsource/barlow/files/barlow-latin-600-normal.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url("@fontsource/jetbrains-mono/files/jetbrains-mono-latin-500-normal.woff2")
+    format("woff2");
+}
+
+@theme {
+  --color-background: #03100f;
+  --color-card: #061716;
+  --color-border: #1f4e48;
+  --color-input: #2c6b63;
+  --color-foreground: #bfe9e1;
+  --color-muted-foreground: #6fa79e;
+  --color-hero: #e2f8f3;
+  --color-primary: #e0b04a;
+  --color-primary-foreground: #03100f;
+  --color-destructive: #e5484d;
+  --color-ring: #e0b04a;
+  --color-teal: #7fd9cb;
+  --color-screen-core: #0c2c29;
+  --color-screen-edge: #020807;
+
+  --font-display: "Saira", "Noto Sans SC", sans-serif;
+  --font-sans: "Barlow", "Noto Sans SC", sans-serif;
+  --font-command: "JetBrains Mono", ui-monospace, monospace;
+
+  --radius-sm: 3px;
+  --radius-md: 8px;
+  --radius-lg: 18px;
+
+  --spacing-control: 32px;
+  --spacing-control-lg: 48px;
+  --spacing-row: 40px;
+}

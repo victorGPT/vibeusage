@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Top nav</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&amp;family=Saira:wght@200;300;400&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<header style="box-sizing: border-box; width: 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 32px; min-height: 80px; padding: 0; border-bottom: 1px solid #1f4e48; background: #03100f; color: #bfe9e1; font-family: Barlow, sans-serif">
+  <span style="font: 300 22px/1 Saira, sans-serif; letter-spacing: 0.12em; color: #e2f8f3">VIBE<span style="color: #6fa79e">USAGE</span></span>
+  <nav aria-label="Main">
+    <dc-import name="ToggleGroup" items="{{links}}" value="{{active}}" aria-label="Main" hint-size="220px,17px"></dc-import>
+  </nav>
+  <div style="margin-left: auto; display: flex; gap: 8px">
+    <dc-import name="Button" label="GitHub ★ 57" variant="outline" href="#" hint-size="120px,32px"></dc-import>
+    <sc-if value="{{signedIn}}" hint-placeholder-val="{{true}}">
+      <dc-import name="Button" label="Sign out" variant="outline" hint-size="96px,32px"></dc-import>
+    </sc-if>
+    <sc-if value="{{signedOut}}" hint-placeholder-val="{{false}}">
+      <dc-import name="Button" label="Sign in" variant="default" hint-size="88px,32px"></dc-import>
+    </sc-if>
+  </div>
+</header>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"active":{"editor":"enum","options":["dashboard","leaderboard","none"],"default":"dashboard"},"signedIn":{"editor":"boolean","default":true},"$preview":{"width":1280,"height":80}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const signedIn = this.props.signedIn ?? true;
+    return {
+      active: this.props.active ?? 'dashboard',
+      links: [{ key: 'dashboard', label: 'Dashboard', href: 'Dashboard.dc.html' }, { key: 'leaderboard', label: 'Leaderboard', href: 'Leaderboard.dc.html' }],
+      signedIn, signedOut: !signedIn
+    };
+  }
+}
+</script>
+</body>
+</html>

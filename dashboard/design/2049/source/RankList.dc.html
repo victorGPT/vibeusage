@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Top 10</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&amp;family=Saira:wght@200;300;400&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<section aria-label="Top 10" style="box-sizing: border-box; width: 100%; min-height: {{minH}}; display: flex; flex-direction: column; gap: 12px; background: #061716; border: 1px solid #1f4e48; border-radius: 8px; padding: 24px; color: #bfe9e1; font-family: Barlow, sans-serif">
+  <dc-import name="Label" text="Top 10 · week" hint-size="100px,11px"></dc-import>
+  <div style="display: flex; flex-direction: column">
+    <sc-for list="{{rows}}" as="r" hint-placeholder-count="10">
+      <dc-import name="RankRow" rank="{{r.rank}}" user="{{r.user}}" value="{{r.v}}" delta="{{r.d}}" me="{{r.me}}" lead="{{r.lead}}" hint-size="100%,40px"></dc-import>
+    </sc-for>
+  </div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"minH":{"editor":"text","default":"auto"},"$preview":{"width":560,"height":544}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const data = [
+      ['nullbyte', '589.3M', 0], ['kernel_panic', '489.7M', 1], ['sudo_rm', '407.5M', -1], ['tabs_not_spaces', '318.2M', 2],
+      ['segfault_sam', '276.4M', 0], ['heap_of_trouble', '234.6M', 3], ['your_handle', '195.9M', -2], ['dev_null_dan', '188.0M', 1],
+      ['0xdeadbeef', '171.3M', -1], ['rubber_duck', '150.8M', 4]
+    ];
+    const rows = data.map(([u, v, d], i) => {
+      const me = u === 'your_handle';
+      return { rank: '#' + (i + 1), user: me ? u + ' · you' : u, v, d, me, lead: i === 0 };
+    });
+    return { rows, minH: this.props.minH ?? 'auto' };
+  }
+}
+</script>
+</body>
+</html>

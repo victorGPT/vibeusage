@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Heading</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira:wght@200;300;400&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div role="heading" aria-level="{{level}}" style="box-sizing: border-box; margin: 0; background: {{bg}}; padding: {{pad}}; font: {{font}}; letter-spacing: {{ls}}; text-transform: {{tt}}; text-wrap: balance; text-shadow: {{glow}}; color: {{color}}">{{text}}</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"text":{"editor":"text","default":"Install the tracker"},"size":{"editor":"enum","options":["xl","l","m","s","xs"],"default":"s"},"tone":{"editor":"enum","options":["light","amber","alert"],"default":"light"},"upper":{"editor":"boolean","default":false},"level":{"editor":"enum","options":["1","2","3"],"default":"2"},"$preview":{"width":600,"height":96}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const solo = Object.keys(this.props).filter((k) => k[0] !== '$' && k !== 'children').length === 0;
+    const S = {
+      xl: ['200 76px/0.95 Saira, sans-serif', '0.01em'], l: ['200 52px/1 Saira, sans-serif', '0.02em'], m: ['200 40px/1.1 Saira, sans-serif', '0'],
+      s: ['300 36px/1.1 Saira, sans-serif', '0'], xs: ['300 22px/1.2 Saira, sans-serif', '0']
+    };
+    const size = this.props.size ?? 's';
+    const [font, ls] = S[size] || S.s;
+    const C = { light: '#e2f8f3', amber: '#e0b04a', alert: '#e5484d' };
+    const tone = this.props.tone ?? 'light';
+    return {
+      text: this.props.text ?? 'Install the tracker', font, ls, level: this.props.level ?? '2',
+      tt: this.props.upper ? 'uppercase' : 'none', color: C[tone] || C.light,
+      glow: size === 'xl' ? (tone === 'amber' ? '0 0 26px rgba(224, 176, 74, 0.3)' : '0 0 26px rgba(127, 217, 203, 0.3)') : 'none',
+      bg: solo ? '#03100f' : 'transparent', pad: solo ? '20px' : '0'
+    };
+  }
+}
+</script>
+</body>
+</html>
