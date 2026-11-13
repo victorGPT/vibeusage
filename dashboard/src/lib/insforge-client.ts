@@ -332,7 +332,9 @@ export function createInsforgeClient({
 }
 
 export function createInsforgeAuthClient() {
-  const baseUrl = getInsforgeBaseUrl();
+  // The SDK refreshes via an httpOnly cookie. Served from our own origin (vercel.json /
+  // vite proxy forward /api/auth/*), that cookie is first-party and survives 3P-cookie blocking.
+  const baseUrl = typeof window !== "undefined" ? window.location.origin : getInsforgeBaseUrl();
   if (!baseUrl) throw new Error("Missing baseUrl");
   const anonKey = getInsforgeAnonKey();
   const timeoutFetch = createTimeoutFetch(globalThis.fetch) as unknown as typeof fetch;
