@@ -1,529 +1,200 @@
-# VibeUsage Design System v3 — Retro-Cyberpunk Operations Deck
+# VibeUsage Design System: 2049
+
+This file describes the 2049 UI. Every page uses it except the few listed in section 10. The tokens live in `src/styles/2049.css`. The boards in `design/2049/` are the visual reference, and `design/2049/source/Main.dc.html` is the spec board the tokens follow. When this file and the CSS disagree, the CSS wins. Fix this file.
+
+## 1. Sources
+
+- `src/styles/2049.css` holds the tokens (`@theme`), the fonts, the state variants and the two screen utilities.
+- `design/2049/README.md` explains the boards. `design/2049/source/*.dc.html` holds one board per component with exact inline values. The `page-*.png` and `spec-*.png` files are renders of the boards.
+- `src/ui/2049/base/`, `src/ui/2049/blocks/` and `src/ui/shadcn/` hold the components. Most name their board in a `// SSOT:` comment. The dialogs, `Linked` and `UpgradeBanner` have no board.
+- `src/ui/gallery/` is the dev-only gallery at `/__2049` (registered in `src/main.jsx` when `import.meta.env.DEV`). It renders the tokens, the controls and most blocks, with forced hover, active and focus cells.
 
-**Status**: v3 · hard cut · **no backward compat**
-**Last updated**: 2026-04-25
-**Heritage**: extends v1 Operations Deck (token SSOT, CI guardrail) with retro + cyberpunk material — see PRODUCT.md three-word brand: `hacker · 复古 · cyberpunk`.
+## 2. Color
 
----
+Dark only. Use the utility the token generates (`bg-card`, `text-hero`, `border-border`, `outline-ring`). Never write a literal color in a 2049 file.
 
-## 0. SSOT (Single Source of Truth)
-
-This document is the **only** authoritative reference for visual tokens and
-component contracts. Everything else (tailwind config, css variables,
-component implementations) **derives from it**.
-
-- **All** color / font-size / letter-spacing / spacing / shadow values MUST
-  resolve to a token defined below — via `tailwind.config.cjs` or a CSS
-  variable in `src/styles.css`.
-- **Forbidden** inline patterns (hard fail in review):
-  - `[#hex]` / `[#00FF41]/N` / `rgba(...)` in className
-  - `text-[Npx]` / `text-[NNN]`
-  - `tracking-[Xem]` outside the 4 canonical values
-  - `p-[Npx]` / `gap-[Npx]` / `mt-[Nrem]`
-  - `shadow-[...]` / `drop-shadow-[...]`
-  - `opacity-30|40|50|60|70|80|90` (use ink-\* alpha tokens)
-  - Any class beginning with `matrix-` (legacy namespace, deleted)
-- **Adding a token** requires editing this file + `tailwind.config.cjs`.
-  Never hard-code a new value inside a component.
-
----
-
-## 1. Visual Thesis
-
-**Direction**: Operations Deck — Bloomberg terminal × The Matrix.
-**Material**: zero radius (except `dot`), thin lines, low-noise surfaces,
-numbers as the hero.
-**Energy**: restrained neon green + density + a single scanline layer.
-
-**Signature**: ASCII-frame panel + corner-cross marks (`<Panel variant="ascii">`).
-**Pocket color**: Matrix Green `#00FF41` — appears only on data, active
-state, hover-lines, and single-glow text. Never as a filled surface larger
-than a button.
-
-**Signature micro-interaction**: `decoding-reveal` — scramble characters
-converging to final string. Reserved for: first-paint hero title, display-2
-primary number, identity handle. **Not** for label / button / caption.
-
----
-
-## 2. Color Tokens
-
-Two tracks for prose / surfaces / accents: green ink (data) and neutral
-surface (ground), with one `gold` accent. A narrow status escape hatch
-(`warn` / `err`) extends the palette **only** for status indicators —
-never for prose, accents, or surfaces (see §2.4).
-
-### 2.1 `ink.*` — green data ink
-
-| Token        | Tailwind                              | Value                        | Usage                                     |
-| ------------ | ------------------------------------- | ---------------------------- | ----------------------------------------- |
-| `ink`        | `text-ink` `border-ink` `bg-ink`      | `#00FF41`                    | primary data, active state, primary btn   |
-| `ink-bright` | `text-ink-bright`                     | `#E8FFE9`                    | display emphasis, selection foreground    |
-| `ink-text`   | `text-ink-text`                       | `rgba(0, 255, 65, 0.60)`     | body text, value label                    |
-| `ink-muted`  | `text-ink-muted` `border-ink-muted`   | `rgba(0, 255, 65, 0.35)`     | secondary text, hover line                |
-| `ink-line`   | `border-ink-line` `bg-ink-line`       | `rgba(0, 255, 65, 0.18)`     | default separator, panel border, weak rule |
-
-**5 alpha stops. That's it.** No `/5`, `/8`, `/12`, `/25`, `/45`. Pick one.
-
-### 2.2 `surface.*` — background ground
-
-| Token             | Value                 | Usage                                 |
-| ----------------- | --------------------- | ------------------------------------- |
-| `surface`         | `#050505`             | page background                       |
-| `surface-raised`  | `rgba(0, 10, 0, 0.70)` | panel background (+ backdrop-blur-panel) |
-| `surface-strong`  | `rgba(0, 10, 0, 0.82)` | chip, sticky header, modal            |
-
-### 2.3 Accent
-
-| Token  | Value       | Usage                                |
-| ------ | ----------- | ------------------------------------ |
-| `gold` | `#FFD700`   | leaderboard #1 only                  |
-
-### 2.4 Status escape hatch
-
-The green-on-green ladder can't carry severity for status indicators —
-verified in kit chat2 user feedback. Two tokens fill that gap, and only
-that gap.
-
-| Token  | Tailwind                            | Value       | Usage                                |
-| ------ | ----------------------------------- | ----------- | ------------------------------------ |
-| `warn` | `text-warn` `border-warn` `bg-warn` | `#FFB300`   | degraded / rate-limited status indicator |
-| `err`  | `text-err` `border-err` `bg-err`    | `#FF3344`   | failure / error status indicator     |
-
-Matching `box-shadow` glows: `shadow-warn-glow` / `shadow-err-glow`.
-CSS-var mirrors: `--warn` / `--warn-glow` / `--err` / `--err-glow`.
-
-**Hard rule.** `warn` / `err` are reserved for connection state,
-banners reporting an error, and similar status surfaces. They are
-**never** valid for prose copy, accent text, surface backgrounds,
-iconography, or hover / focus rings. If a non-status component needs
-to communicate severity, redesign the layout — don't reach for these.
-
----
-
-## 3. Typography Tokens
-
-`Geist Mono` is the only font-family. No `text-[Npx]`.
-
-### 3.1 Canonical text scale (use these by default)
-
-Per kit chat2 ("Type / Text + data scale: 会不会太多样式了"), there are
-exactly **3** canonical non-display text styles. Reach for one of these
-first; only fall back to the auxiliary stops in §3.2 when a layout truly
-needs a finer granularity.
-
-| Token     | Size / LineHt / Tracking / Weight / Case | Usage                       |
-| --------- | ---------------------------------------- | --------------------------- |
-| `heading` | 14 / 1.25 / 0.12em / 700 / UPPERCASE     | label, panel title, nav     |
-| `body`    | 13 / 1.50 / 0     / 500 / none           | prose                       |
-| `data`    | 12 / 1.40 / 0     / 500 tabular-nums     | numbers, table cells        |
-
-### 3.2 Display + auxiliary stops
-
-Display tokens are unchanged. `caption` / `micro` are kept as tactical
-aliases (existing call sites and dense status pills); avoid them in new
-code unless `heading` / `data` genuinely won't fit.
-
-| Token       | Size / LineHt / Tracking / Weight / Case    | Usage                                       |
-| ----------- | ------------------------------------------- | ------------------------------------------- |
-| `display-0` | 96 / 0.95 / -0.03em / 900 / none            | **outsized hero** (dashboard total, CORE_INDEX, X-screenshot moment) |
-| `display-1` | 60 / 1.00 / -0.02em / 900 / none            | landing hero title                          |
-| `display-2` | 40 / 1.05 / -0.02em / 900 / none            | big number, screenshot title                |
-| `display-3` | 28 / 1.10 / -0.02em / 900 / none            | mid-size hero (leaderboard title, identity) |
-| `caption`   | 11 / 1.30 /  0.12em / 600 / UPPERCASE       | _legacy_ — prefer `heading`                 |
-| `micro`     | 10 / 1.20 /  0.22em / 700 / UPPERCASE       | _legacy_ — prefer `heading` (or `data`)     |
-
-### Letter-spacing (4 canonical values only)
-
-| Token      | Value     | Usage                   |
-| ---------- | --------- | ----------------------- |
-| `tight`    | `-0.02em` | display-1, display-2    |
-| `data`     | `0`       | body, data              |
-| `label`    | `0.12em`  | heading, caption        |
-| `caps`     | `0.22em`  | micro, section divider  |
-
-**Nothing in between.** If you want `0.16em`, you want `0.12em` or `0.22em`.
-
----
-
-## 4. Spacing Tokens
-
-Tailwind default 4px grid, restricted to the following stops:
-
-`0 · 1 (4) · 2 (8) · 3 (12) · 4 (16) · 6 (24) · 8 (32) · 12 (48) · 16 (64)`
-
-Forbidden: `p-5`, `p-7`, `gap-5`, `mt-7`, `[Npx]` bracket values.
-
-If you need a mid-point between two stops, you probably want to change
-the surrounding layout instead.
-
----
-
-## 5. Borders, Shadows, Motion
-
-### Border
-
-| Usage              | Class                    |
-| ------------------ | ------------------------ |
-| panel, table, weak rule | `border border-ink-line` |
-| hover              | `border-ink-muted`       |
-| active, selected   | `border-ink`             |
-
-All borders are **1px solid**. No dashed / dotted. No `border-[Npx]`.
-
-### Shadow (box-shadow)
-
-| Token                 | Definition                                                                   | Usage                                 |
-| --------------------- | ---------------------------------------------------------------------------- | ------------------------------------- |
-| `shadow-panel`        | `0 0 0 1px rgba(0,255,65,0.08), 0 18px 40px rgba(0,0,0,0.45)`               | every Panel variant                   |
-| `shadow-glow-xs`      | `0 0 6px rgba(0,255,65,0.35)`                                               | data points, scrubber thumb           |
-| `shadow-glow-sm`      | `0 0 10px rgba(0,255,65,0.35)`                                              | panel accents, bar highlights         |
-| `shadow-glow`         | `0 0 24px rgba(0,255,65,0.35)`                                              | primary button, header logo           |
-| `shadow-glow-faint`   | `0 0 15px rgba(0,255,65,0.1)`                                               | subtle ambient badge                  |
-| `shadow-gold`         | `0 0 18px rgba(255,215,0,0.35)`                                             | gold default                          |
-| `shadow-gold-sm`      | `0 0 10px rgba(255,215,0,0.3)`                                              | gold small badge                      |
-| `shadow-gold-faint`   | `0 0 20px rgba(255,215,0,0.1)`                                              | gold alert bar                        |
-
-### Shadow (drop-shadow, for SVG / filter)
-
-| Token                     | Definition                                              | Usage                        |
-| ------------------------- | ------------------------------------------------------- | ---------------------------- |
-| `drop-shadow-glow`        | `0 0 8px rgba(0,255,65,0.8)`                            | hover icon, svg star         |
-| `drop-shadow-glow-sm`     | `0 0 5px rgba(0,255,65,0.6)`                            | small SVG glow               |
-| `drop-shadow-glow-faint`  | `0 0 10px rgba(0,255,65,0.22)`                          | sparkline                    |
-| `drop-shadow-gold`        | `0 0 10px rgba(255,215,0,0.5)`                          | gold small text              |
-| `drop-shadow-crown`       | two-layer gold + white                                  | leaderboard #1 avatar        |
-
-### Glow text
-
-Two utilities only:
-- `glow-text` — `text-shadow: 0 0 16px var(--ink-glow)`
-- `glow-text-gold` — `text-shadow: 0 0 20px rgba(255,215,0,0.4)`
-
-No `glow-text-strong`. No ad-hoc `drop-shadow-[...]` / `shadow-[...]` in className.
-
-### Motion
-
-| Layer             | Rule                                                                 |
-| ----------------- | -------------------------------------------------------------------- |
-| default transition | `transition duration-200 ease`                                      |
-| button press      | `active:scale-[0.98]` (only allowed bracket value; semantic)         |
-| signature reveal  | `decoding-reveal` (Scramble) — hero title, display-2, identity handle |
-| ambient overlay   | `.fx-scanline` — **single** fixed 4px scan overlay, app root only     |
-| pointer on link   | inherit from `<a>`, no custom hover underline                         |
-
-**Deleted** (were duplicates / noise):
-- `.matrix-scanlines` `.matrix-scan-sweep` `.matrix-scanline-overlay` — replaced by `.fx-scanline`
-- `.matrix-header-action::after` sweep
-- `.glow-text-strong` `.shadow-glow` (css class variant)
-- `.matrix-header-chip` corner-cross — absorbed into `<Panel>` / chip button
-
-### Matrix Rain
-
-Reserved for **landing page only**. Removed from dashboard routes. Always
-hidden in `screenshot-capture` mode.
-
-### v3 retro-cyberpunk fx layers
-
-Three new ambient layers, each load-bearing (carry signal, not decoration).
-All respect `prefers-reduced-motion: reduce` and `screenshot-capture` mode.
-
-| Class            | Effect                                                                | Where used                                       |
-| ---------------- | --------------------------------------------------------------------- | ------------------------------------------------ |
-| `fx-crt`         | Subtle screen-edge curvature (radial inner shadow) + phosphor warmth  | `<MatrixShell>` root, fixed full-bleed overlay   |
-| `fx-glitch`      | 2-frame RGB-shift jitter on hover or 7s-interval tick                 | `display-0` hero number, primary CTA on hover    |
-| `deco-katakana`  | Monospaced katakana band (`カタカナ ベンチマーク ...`), 1-line, low alpha | header right margin, section divider, panel chrome |
-
-`fx-crt` is **a single fixed overlay**, like `fx-scanline`. Never nested.
-
-`fx-glitch` triggers on:
-- `:hover` of an element it's attached to (manual user)
-- a 7-second `data-glitch-tick` event (rare ambient signal — only on `display-0`)
-
-`deco-katakana` uses font family `font-katakana` (defined below), is `text-ink-line`, and never carries semantic meaning. If removed, no information is lost — purely chrome.
-
-### Font families
-
-| Family          | Stack                                                                             | Usage                                          |
-| --------------- | --------------------------------------------------------------------------------- | ---------------------------------------------- |
-| `font-mono`     | `Geist Mono` → ui-monospace fallbacks                                             | default for everything                         |
-| `font-katakana` | `Hiragino Sans` → `Yu Gothic` → `MS Gothic` → `Geist Mono` (latin glyphs fallback) | `deco-katakana` ONLY — never body / data / label |
-
----
-
-## 6. Component Contracts
-
-### `<Panel>`
-
-```jsx
-<Panel
-  variant="ascii"
-  weight="primary"
-  tone="default"
-  stamped
-  stampHandle="vibeuser"
-  stampPeriod="WEEK · 2025-W52"
-  title="..."
-  subtitle="..."
->
-  {children}
-</Panel>
-```
-
-| Prop          | Values                                       | Default      |
-| ------------- | -------------------------------------------- | ------------ |
-| `variant`     | `ascii` \| `plain` \| `bare`                 | `plain`      |
-| `weight`      | `primary` \| `secondary` \| `tertiary`       | `secondary`  |
-| `tone`        | `default` \| `strong`                        | `default`    |
-| `stamped`     | `boolean` — show corner stamps               | `false`      |
-| `stampHandle` | string — `@HANDLE` upper-left corner stamp   | —            |
-| `stampPeriod` | string — period label upper-right stamp      | —            |
-| `stampLogo`   | string — lower-right brand stamp             | `vibeusage.cc` |
-| `title`       | string \| ReactNode                          | —            |
-| `subtitle`    | string \| ReactNode                          | —            |
-
-**Weight ladder** (DESIGN.md §6 v3):
-- `primary` — double-line ASCII (`╔ ╗ ╚ ╝ ═ ║`), frame `text-ink`, `shadow-glow-sm`. Reserved for **the** hero panel of any view (one per route).
-- `secondary` — default single-line (`┌ ┐ └ ┘ ─ │`), `text-ink-muted`. The everyday panel.
-- `tertiary` — dotted (`·`), `text-ink-line`. Stacked / supporting / footer panels.
-
-Use **at most one** `primary` per visible viewport. Two primaries cancel each other out.
-
-**Stamping** is screenshot armor. When `stamped` is on, the panel renders three corner labels so a single-panel crop is self-explanatory:
-- upper-left: `@{handle}` — owner identity
-- upper-right: `{period}` — time scope (e.g. `WEEK · 2025-W52`)
-- lower-right: `{logo}` — origin watermark, defaults to `vibeusage.cc`
-
-Stamps use `text-micro` `tracking-caps` `text-ink-muted` / `text-ink-line` so they read as instrumentation, not as decoration.
-
-- `ascii`: ASCII box drawing + corner-cross (signature).
-- `plain`: 1px ink-line border + surface-raised bg + backdrop blur.
-- `bare`: surface-raised bg only, no border (for stacked sections).
-- `tone="strong"`: surface-strong bg + border-ink-muted (chip, modal).
-
-### `<Text>`
-
-```jsx
-<Text size="heading" as="h2" tone="ink-text">Label</Text>
-```
-
-| Prop    | Values                                                                 | Default |
-| ------- | ---------------------------------------------------------------------- | ------- |
-| `size`  | `display-1` \| `display-2` \| `heading` \| `body` \| `data` \| `caption` \| `micro` | required |
-| `as`    | any HTML tag                                                           | `span`  |
-| `tone`  | `ink` \| `ink-bright` \| `ink-text` \| `ink-muted` \| `ink-line` | `ink-text` |
-| `glow`  | `boolean`                                                              | `false` |
-
-Enforces typography + color tokens at the component boundary.
-
-### `<MatrixButton>`
-
-```jsx
-<MatrixButton size="md" variant="primary">Sync</MatrixButton>
-```
-
-| Prop      | Values                              | Default    |
-| --------- | ----------------------------------- | ---------- |
-| `size`    | `sm` \| `md` \| `lg` \| `header`    | `md`       |
-| `variant` | `primary` \| `default` \| `ghost`   | `default`  |
-
-Size maps to: `sm = h-7 px-3 text-micro`, `md = h-9 px-4 text-caption`,
-`lg = h-11 px-6 text-body`, `header = header-chip (h-10, corner-cross)`.
-
-All buttons get `active:scale-[0.98]` and the 200ms color transition.
-
----
-
-## 7. Forbidden / Blacklist
-
-Anything below fails review:
-
-```
-text-[9px]  text-[10px]  text-[11px]  text-[12px]  text-[Npx]
-[#00FF41]/5  /10  /20  /30  /40  /60  /80  /90
-bg-[#00FF41] border-[#00FF41] text-[#00FF41]
-tracking-[Xem] (outside tight/data/label/caps)
-p-[Npx] gap-[Npx] mt-[Nrem] m-[Npx] h-[Npx] w-[Npx]
-shadow-[...] drop-shadow-[...]
-opacity-30  opacity-40  opacity-50  opacity-60  opacity-70  opacity-80  opacity-90
-matrix-*  (entire namespace)
-font-extralight (use weight via text-* token)
-```
-
-The only permitted bracket value in the entire codebase is
-`active:scale-[0.98]` — because it is semantic, not magic.
-
----
-
-## 8. Migration Map (legacy → SSOT)
-
-All legacy references were migrated in one cut. Kept here as a
-historical reviewer guide — do not author legacy names into new code.
-
-### Tailwind color classes
-
-| Deleted                         | Replacement                          |
-| ------------------------------- | ------------------------------------ |
-| `text-matrix-primary`           | `text-ink`                           |
-| `text-matrix-bright`            | `text-ink-bright`                    |
-| `text-matrix-muted`             | `text-ink-text`                      |
-| `text-matrix-dim`               | `text-ink-muted`                     |
-| `text-matrix-primary/80`        | `text-ink-text`                      |
-| `text-matrix-primary/60`        | `text-ink-text`                      |
-| `text-matrix-primary/40`        | `text-ink-muted`                     |
-| `text-matrix-primary/30`        | `text-ink-muted`                     |
-| `text-matrix-primary/20`        | `text-ink-line`                      |
-| `border-matrix-primary`         | `border-ink`                         |
-| `border-matrix-primary/30`      | `border-ink-muted`                   |
-| `border-matrix-primary/20`      | `border-ink-line`                    |
-| `border-matrix-primary/10`      | `border-ink-line`                    |
-| `border-matrix-ghost`           | `border-ink-line`                    |
-| `border-matrix-dim`             | `border-ink-muted`                   |
-| `border-matrix-muted`           | `border-ink-muted`                   |
-| `bg-matrix-dark`                | `bg-surface`                         |
-| `bg-matrix-panel`               | `bg-surface-raised`                  |
-| `bg-matrix-panelStrong`         | `bg-surface-strong`                  |
-| `bg-matrix-primary`             | `bg-ink`                             |
-| `bg-matrix-primary/10`          | `bg-ink-line`                        |
-| `bg-matrix-primary/5`           | `bg-ink-line`                        |
-| `font-matrix`                   | `font-mono` (Geist Mono is default)  |
-| `shadow-matrix-glow`            | `shadow-glow`                        |
-| `shadow-matrix-gold`            | `shadow-gold`                        |
-
-### Raw hex (`[#00FF41]/N`)
-
-| Deleted alpha                   | Replacement                          |
-| ------------------------------- | ------------------------------------ |
-| `/5`, `/8`, `/10`, `/12`, `/18`, `/20`, `/25` | `bg-ink-line` / `border-ink-line`    |
-| `/30`, `/32`, `/40`             | `border-ink-muted`                   |
-| `/60`, `/70`, `/80`, `/90`      | `text-ink-text` or `text-ink`        |
-
-### CSS classes
-
-| Deleted                         | Replacement                                            |
-| ------------------------------- | ------------------------------------------------------ |
-| `.matrix-panel`                 | `<Panel variant="plain">`                              |
-| `.matrix-panel-strong`          | `<Panel variant="plain" tone="strong">`                |
-| `.matrix-header-chip`           | `<Panel variant="ascii">` or `<MatrixButton size="header">` |
-| `.matrix-header-action`         | inline `active:scale-[0.98]` + color transition         |
-| `.matrix-scanline-overlay`      | `.fx-scanline` (single global overlay)                 |
-| `.matrix-scanlines`             | `.fx-scanline`                                         |
-| `.matrix-scan-sweep`            | deleted (was duplicate atmosphere)                     |
-| `.glow-text-strong`             | `glow-text` (only one level)                           |
-
-### Typography pixel hacks
-
-| Deleted           | Replacement   |
-| ----------------- | ------------- |
-| `text-[9px]`      | `text-micro`  |
-| `text-[10px]`     | `text-micro`  |
-| `text-[11px]`     | `text-caption`|
-| `text-[12px]`     | `text-data`   |
-| `text-[13px]`     | `text-body`   |
-| `text-xs`         | `text-caption`|
-| `text-sm`         | `text-body`   |
-| `text-base`       | `text-body`   |
-| `text-lg`         | `text-heading`|
-| `text-xl`               | `text-heading`                                 |
-| `text-2xl`              | `text-display-3`                               |
-| `text-3xl`              | `text-display-3`                               |
-| `text-4xl`              | `text-display-2`                               |
-| `text-5xl`              | `text-display-2`                               |
-| `text-6xl` … `text-8xl` | `text-display-1`                               |
-| `text-white`            | `text-ink-bright`                              |
-| `text-black`            | `text-surface`                                 |
-| `bg-white`              | `bg-ink-bright`                                |
-| `bg-black` / `bg-black/N` | `bg-surface` / `bg-surface/N`                |
-
----
-
-## 9. CI Guardrails (implemented)
-
-`dashboard/scripts/check-design-ssot.mjs` enforces §7 at build-time.
-
-- **Run manually**: `npm run guardrail:design`
-- **Auto-triggered**: runs before `npm test` via `pretest` hook
-- **On violation**: exits 1, lists offending `file:line` + check label, references DESIGN.md
-- **Allowed bypasses** (JS-side runtime color SSOT):
-  - `src/ui/matrix-a/components/MatrixConstants.ts` (hex constants module)
-  - `src/ui/matrix-a/components/ClientLogos.jsx` (third-party SVG path `fill="#hex"`)
-
-What it checks:
-- `matrix-*` legacy token namespace
-- `[#hex]` raw hex in className
-- `text-[Npx]` / `tracking-[Xem]` brackets
-- `shadow-[…]` / `drop-shadow-[…]` inline
-- `text-xs` … `text-9xl` tailwind defaults
-- `text-white` / `bg-black` family
-- redundant `/N` alpha on rgba-backed `ink-*` tokens
-
-Planned extensions (not in v1):
-- ESLint plugin for IDE-level inline feedback (current guardrail is CLI-only).
-- Husky `pre-commit` hook wiring (opt-in; project does not ship husky yet).
-
----
-
-## 10. Adding a new value
-
-1. Edit this file — add a row to the appropriate token table with a
-   reason for the addition.
-2. Edit `tailwind.config.cjs` to expose the token.
-3. If CSS-variable backed, edit `src/styles.css`.
-4. Use it.
-5. Never hard-code a new value in a component, not even once.
-
----
-
-## 12. shadcn integration policy (v3)
-
-We are not running `npx shadcn init`. The init flow rewrites `tailwind.config`
-and `globals.css` with hsl colour variables, default radii, and SaaS-flavoured
-typography that all collide head-on with §1–§7 of this file. Keep init out.
-
-Our integration is mechanical and one-way:
-
-1. Hand-write or copy a shadcn-style component file into `dashboard/src/ui/shadcn/<name>.tsx` using the **upstream classNames as-authored** (`bg-primary`, `text-sm`, `rounded-md`, `shadow-md`, …). The retro-fitter owns translation, not the author.
-2. Run `node dashboard/scripts/shadcn-retro-fit.mjs dashboard/src/ui/shadcn/<name>.tsx`. The script remaps every Tailwind token to its SSOT equivalent via `dashboard/scripts/shadcn-mapping.json` (~50 entries: bg / text / border / shadow / typography / shape, plus `opacity-30..90` strip and `dark:` prefix strip).
-3. Run `npm run guardrail:design` and `npm run validate:ui-hardcode` to confirm the rewritten file is SSOT-clean.
-4. Use the component from anywhere in `dashboard/src/`. Re-importing a fresh upstream version requires re-running step 2; never edit the rewritten classes by hand.
-
-Rules:
-
-- **No new mapping rule lives in a component file.** If a shadcn class has no SSOT equivalent, add a row to `shadcn-mapping.json` (or a new SSOT token here in §2/§3 first), then re-run the retro-fitter.
-- **No `dark:` prefixes survive.** vibeusage is dark-only by register; the mapping strips them.
-- **No `rounded-*` survives.** `§1` mandates zero radius (the `dot` exception lives in CSS, not Tailwind).
-- **No `opacity-30..90` survives.** Use `ink-*` alpha tokens.
-- **Imports stay named.** vibeusage `tsconfig.json` does not enable `esModuleInterop`; `import * as React from "react"` fails. Use `import { forwardRef, type ComponentPropsWithoutRef, type ElementRef } from "react"`.
-- **Primitives layer is `@base-ui/react`.** Already in `dashboard/package.json`. Do not add `@radix-ui/*` — same primitives, parallel namespace, dead weight.
-
-Runtime deps owned by this policy: `class-variance-authority`, `clsx`, `tailwind-merge`. The composer lives at `dashboard/src/lib/utils.ts` (`cn(...inputs)`).
-
-Components landed under this policy: `tooltip.tsx` (initial verifier).
-
----
-
-## 11. Keyboard Layer (v3)
-
-Hacker / cyberpunk register expects power-user keyboard control. The
-dashboard ships single-key bindings via `useGlobalKeybinds` (see
-`dashboard/src/hooks/use-global-keybinds.ts`).
-
-| Key   | Action                                              |
-| ----- | --------------------------------------------------- |
-| `?`   | Toggle keyboard cheatsheet overlay (`<KeyboardCheatsheet>`) |
-| `d`   | Switch period to DAY                                |
-| `w`   | Switch period to WEEK                               |
-| `m`   | Switch period to MONTH                              |
-| `t`   | Switch period to TOTAL                              |
-| `r`   | Refresh dashboard data                              |
-| `s`   | Trigger share-to-X screenshot flow                  |
-| `esc` | Close any open overlay                              |
-
-**Rules**:
-
-- All bindings are **single-key, no modifier**. Modified keys (`Cmd/Ctrl/Alt + X`) belong to the OS and the browser.
-- Bindings are **suppressed while a text input is focused** (input / textarea / select / contentEditable). Typing in the search bar does not trigger period switching.
-- The cheatsheet is the **only** in-app surface that documents these keys. There is no settings page for re-binding (this is a feature, not a missing piece — opinionated minimalism is part of the brand).
-- New bindings require a row in this table **and** a row in `KeyboardCheatsheet`'s `KEY_ROWS`. CI does not enforce parity yet — keep them in sync by hand.
-- `screenshot-capture` mode disables the layer (`enabled: !screenshotMode`).
-
+| Token | Value | Use |
+| --- | --- | --- |
+| `--color-background` | `#03100f` | Page ground. |
+| `--color-card` | `#061716` | Panel ground (`Card`, dialog). |
+| `--color-accent` | `#0a2321` | Pressed fill (`is-active:bg-accent`). Hover uses `bg-card`. |
+| `--color-border` | `#1f4e48` | Default 1px line and body table rules. |
+| `--color-input` | `#2c6b63` | Control borders and the table header rule. |
+| `--color-foreground` | `#bfe9e1` | Body text. |
+| `--color-muted-foreground` | `#6fa79e` | Labels and secondary text. |
+| `--color-hero` | `#e2f8f3` | Display numbers and headings. |
+| `--color-primary` | `#e0b04a` | Amber. Primary action, current item, "me" row, meter fill. |
+| `--color-primary-foreground` | `#03100f` | Text on amber. |
+| `--color-destructive` | `#e5484d` | Errors and a falling delta. |
+| `--color-ring` | `#e0b04a` | Focus ring. |
+| `--color-teal` | `#7fd9cb` | Leader mark and teal glow. |
+| `--color-screen-core` | `#0c2c29` | Center of the main-screen vignette. |
+| `--color-screen-edge` | `#020807` | Edge of the main-screen vignette. |
+
+Glow tokens are text shadows, not colors: `--text-shadow-display-glow` (teal), `-amber` and `-alert` for the `Display` number, and `--text-shadow-heading-glow` (teal) and `-amber` for the largest `Heading`. `--inset-shadow-screen` is the inner glow of the main screen.
+
+## 3. Type
+
+Three families, all self-hosted as latin woff2:
+
+| Token | Family | Weights | Use |
+| --- | --- | --- | --- |
+| `--font-display` | Saira | 200, 300, 400 | Numbers, headings, table cells. |
+| `--font-sans` | Barlow | 500, 600 | Body text and labels. |
+| `--font-command` | JetBrains Mono | 500 | Shell commands (`CommandBox`). |
+
+The spec board calls the mono family `--font-mono`. In code it is `--font-command`, because the leftover v1 pages still use `--font-mono` for Geist Mono (see section 10). Rename it when those pages move to 2049.
+
+Size tokens set the font size only. Put the line height on the class, as in `text-label/none`, because one size carries several line heights across the boards. Do not use a separate `leading-*` utility. `cn()` drops it when it comes before a size token.
+
+| Token | Size |
+| --- | --- |
+| `--text-badge` | 10px |
+| `--text-label` | 11px |
+| `--text-label-lg` | 12px |
+| `--text-copy-s` | 14px |
+| `--text-copy-m` | 15px |
+| `--text-copy-l` | 17px |
+| `--text-value-s` | 18px |
+| `--text-heading-xs` | 22px |
+| `--text-value-l` | 28px |
+| `--text-heading-s` | 36px |
+| `--text-heading-m` | 40px |
+| `--text-title` | 44px |
+| `--text-heading-l` | 52px |
+| `--text-screen-s` | 64px |
+| `--text-screen-m` | 72px |
+| `--text-heading-xl` | 76px |
+| `--text-screen-l` | 76px |
+| `--text-screen-xl` | 88px |
+
+`--tracking-label` (0.12em) is the letter spacing for upper-case labels.
+
+## 4. Shape and space
+
+Radius has three steps:
+
+| Token | Value | Use |
+| --- | --- | --- |
+| `--radius-sm` (`rounded-sm`) | 3px | Controls, badges, small marks. |
+| `--radius-md` (`rounded-md`) | 8px | Panels (`Card`, dialog). |
+| `--radius-lg` (`rounded-lg`) | 18px | The main screen (`ScreenFx`). |
+
+Spacing uses Tailwind's 4px `--spacing`. Padding, margin, gap and space utilities may only use the steps 4, 8, 12, 16, 24, 32, 48 and 64 px (`-1 -2 -3 -4 -6 -8 -12 -16`). `scripts/check-design-ssot.mjs` fails on any other step in a 2049 file.
+
+Fixed heights:
+
+| Token | Utility | Value | Use |
+| --- | --- | --- | --- |
+| `--spacing-control` | `h-control` | 32px | Buttons, selects, toggles. |
+| `--spacing-control-lg` | `h-control-lg` | 48px | The large button (`size="lg"`) in `LandingHero` and `CtaBand`. |
+| `--spacing-row` | `h-row`, `min-h-row` | 40px | Table and list rows. |
+
+## 5. Material
+
+- `screen-shell` paints the main-screen vignette from `--color-screen-core` through `--color-card` to `--color-screen-edge`.
+- `screen-scanlines` draws one dark line every 3px. It is static.
+- `ScreenFx` combines both with the 18px radius, the border and `--inset-shadow-screen`. Use one per page, around its most important number.
+
+## 6. States
+
+`2049.css` defines three custom variants. Controls use them instead of `hover:`, `active:` and `focus-visible:`.
+
+- `is-hover:` matches `:hover` on an enabled element.
+- `is-active:` matches `:active` on an enabled element.
+- `is-focus:` matches `:focus-visible`.
+
+Each one also matches `data-force="hover"`, `"active"` or `"focus"`. The `/__2049` gallery sets that attribute to pin a state with the same classes the user sees. A disabled control keeps its variant look at reduced opacity. Some blocks still put plain `hover:` or `focus-visible:` on links and scroll areas. The gallery cannot pin those states.
+
+## 7. Components
+
+Pages hold only layout containers and component references. A page arranges blocks in a grid or stack and passes data. It does not style text, draw borders or pick colors. If a page needs a new look, add or change a component.
+
+### Base (`src/ui/2049/base/`)
+
+- `CommandBox` shows a shell command in JetBrains Mono with a copy button.
+- `CtaBand` is the call-to-action band with a title, a button and a meta line.
+- `Delta` shows a signed change. Only a fall is red.
+- `Display` is the one big number on a main screen, with optional glow.
+- `Heading` is a section or page heading in five sizes. Only the largest glows.
+- `Label` is a one-line upper-case label that ends in an ellipsis.
+- `PageFooter` is the page's bottom line, such as the version footer.
+- `PageHeader` is a page title with an optional meta line.
+- `RankRow` is one leaderboard row. "Me" turns it amber and the leader gets a teal rule and a badge.
+- `ScreenFx` is the main-screen shell (vignette, scanlines, border, 18px radius).
+- `ShareRow` is one line of a share-of-total list with a bar.
+- `Stamp` is the handle and range footer of a block meant to be screenshotted.
+- `Stat` is a labeled value with an optional sub line, divider and percent.
+- `Text` is body copy in three sizes with an optional measure.
+
+### Blocks (`src/ui/2049/blocks/`)
+
+- `CostAnalysisModal` is the cost breakdown dialog per CLI and model.
+- `DailyTable` is the paged per-day usage table.
+- `DotHeatmap` is the activity heatmap drawn as dots, keyboard walkable.
+- `Features` is the landing feature list.
+- `IdentityBar` shows the handle, identicon, activity summary and subscriptions, with the owner's share controls.
+- `KeyboardCheatsheet` is the dialog that lists the keyboard shortcuts.
+- `LandingHero` is the landing hero with the install command and sign-in.
+- `LeaderboardFilters` holds the leaderboard period and metric controls.
+- `Linked` renders a safe link when there is a valid href, a plain box otherwise.
+- `Models` is the per-CLI or per-model share list.
+- `MyRank` shows the user's rank with up to three neighbors on each side.
+- `Pager` wraps `Pagination` with a summary line.
+- `Projects` is the per-repository usage list.
+- `RankList` is the compact leaderboard list.
+- `RankRail` is the dashboard's rank panel beside the `Readout`.
+- `RankTable` is the full leaderboard table, with the user's row pinned below when it is off the page.
+- `Readout` is the dashboard's main screen with the period total.
+- `StateScreen` stands in for the main screen in the install, expired, invalid, empty, loading and error states.
+- `Tabs` is the single-select strip every block header uses.
+- `TopNav` is the top navigation with the page links and the GitHub link.
+- `Trend` is the usage trend line with rolling windows.
+- `UpgradeBanner` asks the user to upgrade the CLI. It sits in the page flow above `TopNav`.
+
+The `.ts` files beside the blocks (`derive`, `format`, `grouping`, `rank`, `shared`, `types`) hold the data shaping. Blocks format and derive. They never fetch.
+
+### shadcn (`src/ui/shadcn/`)
+
+These follow the shadcn file layout, are built on `@base-ui/react` primitives, and use the 2049 tokens directly. Do not add `@radix-ui/*`.
+
+- `badge.tsx` is a small status tag in two color variants of one size.
+- `button.tsx` is the button in `default` (amber), `outline` and `ghost`, at `h-control` or `h-control-lg`. Disabled keeps the variant look at 45% opacity.
+- `card.tsx` is the flat panel: card ground, one 1px border, 8px radius, 24px padding.
+- `dialog.tsx` is the modal panel (see below).
+- `pagination.tsx` is page buttons with Prev and Next, skipping pages with an ellipsis.
+- `progress.tsx` is the flat 3px amber meter.
+- `select.tsx` is the select control and its open panel.
+- `switch.tsx` is the on and off switch with its label inside the focus ring.
+- `table.tsx` is the 40px-row table that scrolls sideways inside its wrapper.
+- `toggle-group.tsx` is the toggle group. Without `multiple` it acts as a tab strip.
+
+### Dialog
+
+The boards have no dialog. `dialog.tsx` is a card-like panel (card ground, border, `rounded-md`) over a dimmed background. Base UI owns the focus trap, Esc, outside click and focus restore. `CostAnalysisModal` and `KeyboardCheatsheet` are its two users. A new modal should reuse it.
+
+## 8. Guardrails
+
+- `scripts/check-design-ssot.mjs` runs as `npm run guardrail:design` and before `npm test` in `dashboard/`. In `src/ui/2049/`, `src/ui/shadcn/` and `src/ui/gallery/` it fails on a literal color, a spacing step off the scale, a `text-[Npx]` size (`src/ui/shadcn/` is exempt from this one for now) and any `leading-*` utility. Files outside those folders, `src/pages/` included, get the v1 checks instead (section 10). The spacing scale is not checked there.
+- `scripts/ops/validate-ui-hardcode.cjs` runs as `npm run validate:ui-hardcode` from the repo root. It counts hex and rgb literals and raw JSX text per file under `dashboard/src` and fails when a file not in `scripts/ops/ui-hardcode-baseline.json` has any, when a count rises, or when a new raw text string appears.
+- All user-facing text comes from `src/content/copy.csv` through `copy()`. Run `npm run validate:copy` after changing it. See `docs/copy-registry.md`.
+
+## 9. Adding a token
+
+Add it to `src/styles/2049.css` and to this file, then use the utility it generates. Do not hard-code a new value in a component.
+
+## 10. Leftover v1
+
+`src/styles.css` keeps a small v1 theme for the pages that 2049 has not replaced: `AgentResourcePage` (`/developers` and the docs routes), `ErrorBoundary`, and `SignInRedirect` and `SignUpRedirect`. It holds:
+
+- Colors `--color-ink`, `--color-ink-bright`, `--color-ink-text`, `--color-ink-muted`, `--color-ink-line` and `--color-surface`.
+- `--font-mono` (Geist Mono), which is also the body font.
+- `--tracking-caps`.
+- Type utilities `text-display-2`, `text-display-3`, `text-heading`, `text-body`, `text-caption` and `text-micro`.
+- Backdrop utilities `fx-grid` and `fx-scanline`.
+
+Do not use these in new work. `check-design-ssot.mjs` applies its v1 checks to every file outside `src/ui/2049/`, `src/ui/shadcn/` and `src/ui/gallery/`. They reject `matrix-*` classes, `[#hex]` colors, `text-[Npx]` and `tracking-[Xem]` brackets, `shadow-[...]` brackets, Tailwind's default `text-xs` to `text-9xl`, `text-white` and its kin, and a `/N` alpha on the rgba `ink-*` colors. When the last of these pages moves to 2049, delete the v1 theme and rename `--font-command` to `--font-mono`.
+
+## 11. Keyboard
+
+`src/hooks/use-global-keybinds.ts` binds single keys on the dashboard. `?` toggles the cheatsheet. `d`, `w`, `m` and `t` switch the period. `r` refreshes, `s` starts the share screenshot, and `esc` closes an overlay. Bindings use no modifier keys and are suppressed while a text field has focus. A new binding needs a row in `KEY_ROWS` in `KeyboardCheatsheet.tsx` too. Nothing checks that the two match.

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // VibeUsage design SSOT guardrail.
-// v1 files: DESIGN.md §7 (forbidden) and §8 (migration map).
+// v1 files (the leftover v1 pages): DESIGN.md §10.
 // 2049 files: no literal colors, spacing only on the scale in design/2049/source/Main.dc.html.
 // Exits 1 on any violation under dashboard/src.
 
@@ -16,7 +16,7 @@ const EXTS = new Set([".jsx", ".tsx", ".js", ".ts"]);
 
 const CHECKS = [
   {
-    label: "matrix-* legacy token namespace (DESIGN.md §8 deleted)",
+    label: "matrix-* legacy token namespace (deleted)",
     pattern: /\b(?:text|bg|border|font|shadow|fill|stroke|ring|from|via|to)-matrix-/,
   },
   {
@@ -37,7 +37,7 @@ const CHECKS = [
     pattern: /(?:shadow-\[|drop-shadow-\[)/,
   },
   {
-    label: "tailwind default text-Nxl (use DESIGN.md §3 typography token)",
+    label: "tailwind default text-Nxl (use a v1 type utility: text-micro|caption|body|heading|display-*)",
     pattern:
       /\b(?:text-xs|text-sm|text-base|text-lg|text-xl|text-2xl|text-3xl|text-4xl|text-5xl|text-6xl|text-7xl|text-8xl|text-9xl)\b/,
   },
@@ -150,6 +150,6 @@ console.error(
   `\n${violations.length} SSOT violation(s) across ${byCheck.size} check(s).`,
 );
 console.error(
-  "Reference: dashboard/DESIGN.md §7 (forbidden) / §8 (migration map); 2049: dashboard/src/styles/2049.css.",
+  "Reference: dashboard/DESIGN.md §8 (guardrails) / §10 (leftover v1); 2049 tokens: dashboard/src/styles/2049.css.",
 );
 process.exit(1);

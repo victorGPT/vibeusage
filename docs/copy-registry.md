@@ -16,7 +16,7 @@
 - `key`：稳定的引用 key（例如 `dashboard.footer.right`）
 - `module`：模块（例如 `landing` / `dashboard` / `connect` / `ui`）
 - `page`：页面或范围（例如 `LandingPage` / `DashboardPage` / `*`）
-- `component`：组件名（例如 `MatrixShell` / `ActivityHeatmap`）
+- `component`：组件名（例如 `Readout` / `StateScreen`）
 - `slot`：用途/位置（例如 `title` / `subtitle` / `label`）
 - `text`：实际展示文案
 

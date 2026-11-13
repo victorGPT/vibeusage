@@ -1,8 +1,8 @@
 /* VibeUsage 2049 tokens. SSOT: dashboard/design/2049/source/Main.dc.html.
- * They live beside the v1 tokens in styles.css until the old UI is deleted, so a name
- * here must not change an existing utility. That is why Geist Mono keeps --font-mono and
- * the command font is --font-command. Spacing uses Tailwind's 4px --spacing; the allowed
- * steps (4 8 12 16 24 32 48 64) are enforced by scripts/check-design-ssot.mjs. */
+ * styles.css still keeps a small v1 theme for AgentResourcePage, ErrorBoundary and the sign-in
+ * redirects, and it owns --font-mono (Geist Mono), so the command font is --font-command.
+ * Spacing uses Tailwind's 4px --spacing; the allowed steps (4 8 12 16 24 32 48 64) are
+ * enforced by scripts/check-design-ssot.mjs. */
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 

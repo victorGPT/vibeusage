@@ -75,8 +75,14 @@ This document is the single source of truth for repository navigation. Use it to
   - `dashboard/src/App.jsx`
   - `dashboard/src/pages/`
   - `dashboard/src/hooks/`
-  - `dashboard/src/ui/2049/blocks/` for the page blocks (Dashboard, Leaderboard, Landing, state screens, upgrade banner), built on `dashboard/src/ui/2049/base/` and `dashboard/src/ui/shadcn/`
-  - `dashboard/src/ui/matrix-a/components/` only for the parts not yet moved to 2049 (`CostAnalysisModal`, `KeyboardCheatsheet`)
+- UI layers (design rules in `dashboard/DESIGN.md`):
+  - `dashboard/src/pages/` holds the routed pages. A page arranges blocks and passes data.
+  - `dashboard/src/ui/2049/blocks/` holds the page blocks (readout, rank, models, tables, landing hero, state screens, dialogs, upgrade banner).
+  - `dashboard/src/ui/2049/base/` holds the small 2049 parts the blocks are built from.
+  - `dashboard/src/ui/shadcn/` holds the shadcn-layout controls on `@base-ui/react` (button, select, table, dialog, and more).
+  - `dashboard/src/ui/gallery/` is the dev-only token and component gallery at `/__2049`, registered in `dashboard/src/main.jsx`.
+  - `dashboard/src/styles/2049.css` holds the 2049 tokens. `dashboard/src/styles.css` imports it and keeps a small v1 theme for `AgentResourcePage`, `dashboard/src/components/ErrorBoundary.jsx` and the sign-in redirects.
+  - `dashboard/design/2049/` holds the design boards (`source/*.dc.html`, with `Main.dc.html` as the spec board) and their PNG renders.
 - Auth/session integration first-read path:
   - `dashboard/src/main.jsx`
   - `dashboard/src/App.jsx`
@@ -101,7 +107,7 @@ This document is the single source of truth for repository navigation. Use it to
   - Start at `dashboard/src/hooks/use-usage-model-breakdown.ts` for live fetch, cache fallback, and live snapshot reuse.
   - Then read `dashboard/src/lib/model-breakdown.ts` for final fleet/top-model label derivation.
   - Then read `dashboard/src/pages/DashboardPage.jsx` for summary-level fallback selection.
-  - Then read `dashboard/src/ui/2049/blocks/Models.tsx` and `grouping.ts` for the rendered model labels, and `dashboard/src/ui/matrix-a/components/CostAnalysisModal.jsx` for the cost breakdown.
+  - Then read `dashboard/src/ui/2049/blocks/Models.tsx` and `grouping.ts` for the rendered model labels, and `dashboard/src/ui/2049/blocks/CostAnalysisModal.tsx` for the cost breakdown.
   - Browser-local cache helpers live in `dashboard/src/lib/dashboard-cache.ts` and `dashboard/src/lib/dashboard-live-snapshot.ts`.
 - Dashboard provenance contract:
   - `edge` means successful backend truth, including immediate reuse of the last successful live snapshot while a refresh is in flight.
