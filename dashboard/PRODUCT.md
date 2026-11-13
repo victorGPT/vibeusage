@@ -73,7 +73,7 @@ What this should explicitly **not** look like:
 - The 2049 screen material is static. The scanlines do not move or flash.
 - `screenshot-capture` mode (already implemented) disables all motion and freezes layout. The share flow uses it.
 - Information layering does not depend on color discrimination. The amber "me" row and the teal leader mark each come with a structural mark (position number, badge, top rule).
-- Every interactive 2049 control renders a 2px amber outline on `:focus-visible`. No focus rings hidden by overflow.
+- The shadcn controls (button, select, switch, toggle group, table) and the TopNav, RankTable, DotHeatmap and Linked links render a 2px amber outline (`outline-ring`) on `:focus-visible`.
 - Labels start at 11px and badges at 10px. Smaller sizes are not in the token system (DESIGN.md section 3).
 - All UI text routes through `dashboard/src/content/copy.csv`. No string is hard-coded in components.
 
