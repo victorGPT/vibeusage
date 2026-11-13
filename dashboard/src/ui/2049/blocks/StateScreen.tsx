@@ -8,28 +8,25 @@ import { ScreenFx } from "#src/ui/2049/base/ScreenFx.tsx";
 import { Text } from "#src/ui/2049/base/Text.tsx";
 import { Button } from "#src/ui/shadcn/button.tsx";
 
-import { cost, full, tokens } from "./format";
+import { full } from "./format";
 import { periodLabel, SCREEN_FILL, SCREEN_MIN_H } from "./shared";
-import type { UsageTotals } from "./types";
 
-export type StateVariant = "install" | "expired" | "visitor" | "invalid" | "empty" | "loading" | "error";
+export type StateVariant = "install" | "expired" | "invalid" | "empty" | "loading" | "error";
 
 type StateScreenProps = {
   variant: StateVariant;
   compact?: boolean;
   linkCode?: string;
-  visitor?: { name: string; totals: UsageTotals };
   kicker?: string;
   onSignIn?: () => void;
   onRetry?: () => void;
 };
 
-function header(variant: StateVariant, name: string): { kicker: string; tag: string; tone: LabelTone } {
+function header(variant: StateVariant): { kicker: string; tag: string; tone: LabelTone } {
   const core = copy("ui2049.state_screen.core_kicker");
   return {
     install: { kicker: copy("ui2049.state_screen.install_kicker"), tag: copy("ui2049.state_screen.install_tag"), tone: "muted" },
     expired: { kicker: copy("ui2049.state_screen.expired_kicker"), tag: copy("ui2049.state_screen.expired_tag"), tone: "alert" },
-    visitor: { kicker: copy("ui2049.state_screen.visitor_kicker", { name }), tag: copy("ui2049.state_screen.visitor_tag"), tone: "muted" },
     invalid: { kicker: copy("ui2049.identity_bar.public"), tag: copy("ui2049.state_screen.invalid_tag"), tone: "muted" },
     empty: { kicker: copy("ui2049.readout.kicker", { period: periodLabel("total") }), tag: copy("ui2049.state_screen.empty_tag"), tone: "muted" },
     loading: { kicker: core, tag: copy("ui2049.state_screen.loading_tag"), tone: "muted" },
@@ -39,8 +36,8 @@ function header(variant: StateVariant, name: string): { kicker: string; tag: str
 
 // SSOT: design/2049/source/StateScreen.dc.html. Stands in for the main screen, so it keeps the
 // Readout's height unless `compact`.
-export function StateScreen({ variant, compact = false, linkCode, visitor, onSignIn, onRetry, kicker: ownKicker }: StateScreenProps) {
-  const { tag, tone, ...named } = header(variant, visitor?.name ?? "");
+export function StateScreen({ variant, compact = false, linkCode, onSignIn, onRetry, kicker: ownKicker }: StateScreenProps) {
+  const { tag, tone, ...named } = header(variant);
   const kicker = ownKicker ?? named.kicker;
   return (
     <section aria-label={kicker} aria-busy={variant === "loading" ? true : undefined}>
@@ -69,15 +66,6 @@ export function StateScreen({ variant, compact = false, linkCode, visitor, onSig
               <Text text={copy("ui2049.state_screen.expired_body")} />
               <div>
                 <Button onClick={onSignIn}>{copy("ui2049.state_screen.sign_in")}</Button>
-              </div>
-            </>
-          ) : null}
-          {variant === "visitor" ? (
-            <>
-              <Display text={full(tokens(visitor?.totals))} size={64} />
-              <div className="flex flex-wrap items-baseline gap-3">
-                <Display text={cost(visitor?.totals.total_cost_usd)} size={28} weight={300} tone="amber" glow={false} />
-                <Label text={copy("ui2049.state_screen.visitor_meta", { name: visitor?.name ?? "" })} />
               </div>
             </>
           ) : null}

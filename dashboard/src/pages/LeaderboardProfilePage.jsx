@@ -1,10 +1,12 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { isAccessTokenReady, resolveAuthAccessToken } from "../lib/auth-token";
+import { getAppVersion } from "../lib/app-version";
 import { copy } from "../lib/copy";
 import { isMockEnabled } from "../lib/mock-data";
 import { getLeaderboardProfile } from "../lib/vibeusage-api";
 import { Label } from "../ui/2049/base/Label.tsx";
+import { PageFooter } from "../ui/2049/base/PageFooter.tsx";
 import { PageHeader } from "../ui/2049/base/PageHeader.tsx";
 import { Stat } from "../ui/2049/base/Stat.tsx";
 import { abbr, boardMeta } from "../ui/2049/blocks/format.ts";
@@ -143,6 +145,10 @@ export function LeaderboardProfilePage({
           meta={entry && data.from && data.to ? boardMeta(data.from, data.to, data.generated_at) : undefined}
         />
         {body}
+        <PageFooter
+          left={copy("ui2049.page_footer.leaderboard_time")}
+          right={copy("ui2049.page_footer.version", { version: getAppVersion(import.meta.env) })}
+        />
       </div>
     </main>
   );

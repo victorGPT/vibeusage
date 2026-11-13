@@ -50,8 +50,8 @@ import { periodLabel } from "../ui/2049/blocks/shared";
 import { StateScreen } from "../ui/2049/blocks/StateScreen";
 import { TopNav } from "../ui/2049/blocks/TopNav";
 import { Trend } from "../ui/2049/blocks/Trend";
-import { CostAnalysisModal } from "../ui/matrix-a/components/CostAnalysisModal.jsx";
-import { KeyboardCheatsheet } from "../ui/matrix-a/components/KeyboardCheatsheet.jsx";
+import { CostAnalysisModal } from "../ui/2049/blocks/CostAnalysisModal.tsx";
+import { KeyboardCheatsheet } from "../ui/2049/blocks/KeyboardCheatsheet.tsx";
 import { Button } from "../ui/shadcn/button";
 import { useGlobalKeybinds } from "../hooks/use-global-keybinds";
 

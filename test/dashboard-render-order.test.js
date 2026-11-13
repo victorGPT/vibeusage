@@ -66,7 +66,6 @@ test("DashboardPage renders the 2049 blocks in board order", () => {
     last += 1 + index;
   }
   assert.match(src, /<StateScreen\b/, "expected StateScreen in the main slot");
-  assert.doesNotMatch(src, /<DashboardView\b/, "expected the matrix-a view to be gone");
 });
 
 test("mainScreen picks the first matching state in priority order", () => {

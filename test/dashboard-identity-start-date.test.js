@@ -30,25 +30,6 @@ test("DashboardPage uses active days for identity stats", () => {
   assert.ok(src.includes("active_days"), "expected active days usage");
 });
 
-test("IdentityCard renders rank value in gold", () => {
-  const componentPath = path.join(
-    __dirname,
-    "..",
-    "dashboard",
-    "src",
-    "ui",
-    "matrix-a",
-    "components",
-    "IdentityCard.jsx",
-  );
-  const src = readFile(componentPath);
-  const match = src.match(
-    /identity_card\.rank_label[\s\S]*?<div className="([^"]*)">\s*\{rankValue\}/,
-  );
-  assert.ok(match, "expected rank value class");
-  assert.ok(match[1].includes("text-gold"), "expected rank value to use gold color");
-});
-
 test("DashboardPage passes start date and active days to IdentityBar", () => {
   const src = readFile(pagePath);
   const bar = src.slice(src.indexOf("<IdentityBar"), src.indexOf("/>", src.indexOf("<IdentityBar")));

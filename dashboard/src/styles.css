@@ -6,19 +6,12 @@
 /* v4 wraps hover in @media (hover: hover); keep v3 behavior on touch devices. */
 @custom-variant hover (&:hover);
 
-/* SSOT: dashboard/DESIGN.md. Do not add values that are not documented there. */
+/* v1 theme, kept only for the pages listed below :root. 2049 tokens live in styles/2049.css. */
 @theme {
   --font-mono:
     "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
     "Liberation Mono", "Courier New", monospace;
-  --font-katakana:
-    "Hiragino Sans", "Yu Gothic", "MS Gothic", "Geist Mono", ui-monospace,
-    SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New",
-    monospace;
 
-  --tracking-tight: -0.02em;
-  --tracking-data: 0;
-  --tracking-label: 0.12em;
   --tracking-caps: 0.22em;
 
   --color-ink: #00ff41;
@@ -28,37 +21,6 @@
   --color-ink-line: rgba(0, 255, 65, 0.18);
 
   --color-surface: #050505;
-  --color-surface-raised: rgba(0, 10, 0, 0.7);
-  --color-surface-strong: rgba(0, 10, 0, 0.82);
-
-  --color-gold: #ffd700;
-  /* Status escape hatch — DESIGN.md §2 v3 (kit chat2). Used only for
-   * status indicators where green-on-green can't carry severity. */
-  --color-warn: #ffb300;
-  --color-err: #ff3344;
-
-  /* v3 palette values for the few default colors still in use (v4 ships oklch). */
-  --color-gray-300: #d1d5db;
-  --color-yellow-500: #eab308;
-  --color-yellow-900: #713f12;
-
-  --shadow-panel: 0 0 0 1px rgba(0, 255, 65, 0.08), 0 18px 40px rgba(0, 0, 0, 0.45);
-  --shadow-glow-xs: 0 0 6px rgba(0, 255, 65, 0.35);
-  --shadow-glow-sm: 0 0 10px rgba(0, 255, 65, 0.35);
-  --shadow-glow: 0 0 24px rgba(0, 255, 65, 0.35);
-  --shadow-glow-faint: 0 0 15px rgba(0, 255, 65, 0.1);
-  --shadow-gold: 0 0 18px rgba(255, 215, 0, 0.35);
-  --shadow-gold-sm: 0 0 10px rgba(255, 215, 0, 0.3);
-  --shadow-gold-faint: 0 0 20px rgba(255, 215, 0, 0.1);
-  --shadow-warn-glow: 0 0 10px rgba(255, 179, 0, 0.4);
-  --shadow-err-glow: 0 0 10px rgba(255, 51, 68, 0.45);
-
-  --drop-shadow-glow: 0 0 8px rgba(0, 255, 65, 0.8);
-  --drop-shadow-glow-sm: 0 0 5px rgba(0, 255, 65, 0.6);
-  --drop-shadow-glow-faint: 0 0 10px rgba(0, 255, 65, 0.22);
-  --drop-shadow-gold: 0 0 10px rgba(255, 215, 0, 0.5);
-
-  --blur-panel: 10px;
 }
 
 /* v3 preflight defaults that v4 dropped. */
@@ -92,33 +54,10 @@
   }
 }
 
-/* VibeUsage Design System v1 — Operations Deck
- * SSOT: dashboard/DESIGN.md. CSS variables below mirror Tailwind tokens
- * for runtime (JS-reachable) and non-utility CSS usage. */
-
+/* v1 tokens. What is left styles the pages 2049 has not replaced: AgentResourcePage
+ * (/developers and the docs routes), ErrorBoundary and the sign-in redirects. */
 :root {
   color-scheme: dark;
-
-  /* Ink — green data palette (5 stops, DESIGN.md §2.1) */
-  --ink: #00ff41;
-  --ink-bright: #e8ffe9;
-  --ink-text: rgba(0, 255, 65, 0.6);
-  --ink-muted: rgba(0, 255, 65, 0.35);
-  --ink-line: rgba(0, 255, 65, 0.18);
-  --ink-glow: rgba(0, 255, 65, 0.45);
-
-  /* Surface — neutral ground (DESIGN.md §2.2) */
-  --surface: #050505;
-  --surface-raised: rgba(0, 10, 0, 0.7);
-  --surface-strong: rgba(0, 10, 0, 0.82);
-
-  /* Status escape hatch (DESIGN.md §2 v3). Reserved for status indicators
-   * where the green-on-green ladder can't carry severity. Do not use as
-   * accent for prose, surfaces, or icons. */
-  --warn: #ffb300;
-  --warn-glow: rgba(255, 179, 0, 0.4);
-  --err: #ff3344;
-  --err-glow: rgba(255, 51, 68, 0.45);
 }
 
 html,
@@ -127,10 +66,9 @@ body {
 }
 
 body {
-  /* Corresponds to text-body (DESIGN.md §3). */
   margin: 0;
-  background: var(--surface);
-  color: var(--ink);
+  background: var(--color-surface);
+  color: var(--color-ink);
   font-family:
     "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
     "Liberation Mono", "Courier New", monospace;
@@ -138,119 +76,9 @@ body {
   line-height: 1.5;
 }
 
-@layer components {
-  /* Chip button — corner-cross signature for <MatrixButton size="header">.
-   * SSOT: DESIGN.md §6 MatrixButton. */
-  .btn-chip {
-    --corner: var(--ink);
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    height: 40px;
-    min-width: 160px;
-    padding: 0 16px;
-    background: var(--surface-raised);
-    color: var(--ink);
-    border: 1px solid var(--ink-line);
-    text-transform: uppercase;
-    overflow: hidden;
-    background-image:
-      linear-gradient(var(--corner) 0 0),
-      linear-gradient(var(--corner) 0 0),
-      linear-gradient(var(--corner) 0 0),
-      linear-gradient(var(--corner) 0 0);
-    background-repeat: no-repeat;
-    background-size:
-      10px 1px,
-      1px 10px,
-      10px 1px,
-      1px 10px;
-    background-position:
-      top 6px left 6px,
-      top 6px left 6px,
-      bottom 6px right 6px,
-      bottom 6px right 6px;
-    transition:
-      background 200ms ease,
-      border-color 200ms ease,
-      scale 120ms ease;
-  }
-
-  .btn-chip:hover {
-    background-color: var(--surface-strong);
-    border-color: var(--ink-muted);
-  }
-
-  /* scale, not transform: MatrixButton also carries active:scale-[0.98], and v4
-   * applies that through the scale property, so a transform here would stack. */
-  .btn-chip:active {
-    scale: 0.98;
-  }
-
-  .btn-chip--primary {
-    --corner: var(--surface);
-    background-color: var(--ink);
-    border-color: var(--ink);
-    color: var(--surface);
-    box-shadow: 0 0 24px rgba(0, 255, 65, 0.35);
-  }
-
-  .btn-chip--primary:hover {
-    background-color: var(--ink-bright);
-    border-color: var(--ink-bright);
-  }
-
-  .btn-chip--bare {
-    background: transparent;
-    background-image: none;
-    border-color: transparent;
-    box-shadow: none;
-  }
-
-  .btn-chip--bare:hover {
-    background: transparent;
-    border-color: transparent;
-  }
-
-  @media (max-width: 767px) {
-    .btn-chip {
-      min-width: auto;
-      height: 36px;
-      padding: 0 10px;
-      gap: 8px;
-      background-size:
-        8px 1px,
-        1px 8px,
-        8px 1px,
-        1px 8px;
-      background-position:
-        top 5px left 5px,
-        top 5px left 5px,
-        bottom 5px right 5px,
-        bottom 5px right 5px;
-    }
-  }
-}
-
-/* Type scale (DESIGN.md §3). Plain declarations, not @theme --text-* tokens: a v4 font-size
+/* v1 type scale. Plain declarations, not @theme --text-* tokens: a v4 font-size
  * utility yields to leading-*, tracking-* and font-* at any breakpoint, while v3 let a
  * later breakpoint's size reset them, and the pages rely on that. */
-@utility text-display-0 {
-  font-size: 96px;
-  line-height: 0.95;
-  letter-spacing: -0.03em;
-  font-weight: 900;
-}
-
-@utility text-display-1 {
-  font-size: 60px;
-  line-height: 1;
-  letter-spacing: -0.02em;
-  font-weight: 900;
-}
-
 @utility text-display-2 {
   font-size: 40px;
   line-height: 1.05;
@@ -279,13 +107,6 @@ body {
   font-weight: 500;
 }
 
-@utility text-data {
-  font-size: 12px;
-  line-height: 1.4;
-  letter-spacing: 0;
-  font-weight: 500;
-}
-
 @utility text-caption {
   font-size: 11px;
   line-height: 1.3;
@@ -300,42 +121,7 @@ body {
   font-weight: 700;
 }
 
-/* v4 builds drop-shadow(var(--drop-shadow-*)), which breaks on a two-layer value. */
-@utility drop-shadow-crown {
-  --tw-drop-shadow: drop-shadow(0 0 8px rgba(255, 215, 0, 0.8))
-    drop-shadow(0 0 15px rgba(255, 255, 255, 0.5));
-  filter: var(--tw-blur,) var(--tw-brightness,) var(--tw-contrast,) var(--tw-grayscale,)
-    var(--tw-hue-rotate,) var(--tw-invert,) var(--tw-saturate,) var(--tw-sepia,)
-    var(--tw-drop-shadow,);
-}
-
-/* Hide native scrollbar, keep scroll. */
-@utility no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-
-  &::-webkit-scrollbar {
-    display: none;
-  }
-}
-
-/* Single glow text utility (DESIGN.md §5). */
-@utility glow-text {
-  text-shadow: 0 0 16px var(--ink-glow);
-}
-
-/* Gold text-shadow utility for inline-style parity (gold accent text). */
-@utility glow-text-gold {
-  text-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
-}
-
-/* App shell content wrapper — banner offset var. */
-@utility app-shell-content {
-  margin-top: var(--banner-offset, 0px);
-}
-
-/* fx-scanline — the ONE ambient overlay layer for dashboard/shell.
- * Applied at app root (DESIGN.md §5 Motion). */
+/* AgentResourcePage backdrop: scanlines over a faint grid. */
 @utility fx-scanline {
   background-image: linear-gradient(
     to bottom,
@@ -345,7 +131,6 @@ body {
   background-size: 100% 4px;
 }
 
-/* fx-grid — subtle grid background for landing page hero area. */
 @utility fx-grid {
   background-image:
     linear-gradient(rgba(0, 255, 65, 0.03) 1px, transparent 1px),
@@ -353,89 +138,8 @@ body {
   background-size: 50px 50px;
 }
 
-/* fx-crt — DESIGN.md §5 v3. Single fixed full-bleed overlay layer:
- * radial inner shadow simulating CRT screen-edge curvature + phosphor warmth.
- * Like fx-scanline, never nested. Pointer-events: none from caller. */
-@utility fx-crt {
-  background:
-    radial-gradient(
-      ellipse at center,
-      transparent 55%,
-      rgba(0, 0, 0, 0.35) 100%
-    );
-  box-shadow:
-    inset 0 0 80px rgba(0, 255, 65, 0.04),
-    inset 0 0 160px rgba(0, 0, 0, 0.55);
-
-  @media (max-width: 767px) {
-    box-shadow:
-      inset 0 0 80px rgba(0, 255, 65, 0.025),
-      inset 0 0 160px rgba(0, 0, 0, 0.55);
-  }
-}
-
-/* fx-glitch — DESIGN.md §5 v3. 2-frame RGB-shift jitter on hover.
- * Apply to display-0 hero numbers + primary CTAs.
- * Respects prefers-reduced-motion via global rule below. */
-@utility fx-glitch {
-  position: relative;
-  transition: text-shadow 160ms ease-out;
-
-  &:hover {
-    animation: fx-glitch-shift 360ms steps(2, end);
-    text-shadow:
-      -1px 0 rgba(255, 0, 64, 0.55),
-      1px 0 rgba(0, 200, 255, 0.55),
-      0 0 16px var(--ink-glow);
-  }
-}
-
-@keyframes fx-glitch-shift {
-  0%, 100% { transform: translate(0, 0); }
-  20% { transform: translate(-1px, 1px); }
-  40% { transform: translate(1px, -1px); }
-  60% { transform: translate(-1px, 0); }
-  80% { transform: translate(1px, 0); }
-}
-
-/* deco-katakana — DESIGN.md §5 v3. Monospaced katakana decorative band.
- * Chrome only. Removing it must not lose information.
- * Wrap content in a span with .deco-katakana; provide actual chars from
- * copy.csv or hard-coded fallback (latin-only environments still render). */
-@utility deco-katakana {
-  font-family: "Hiragino Sans", "Yu Gothic", "MS Gothic", "Geist Mono",
-    ui-monospace, monospace;
-  color: var(--ink-line);
-  letter-spacing: 0.18em;
-  user-select: none;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: clip;
-}
-
-/* Heatmap scrubber bar (functional indicator, not atmosphere). */
-@utility heatmap-scrollbar-track {
-  height: 6px;
-  border-radius: 999px;
-  background: var(--ink-line);
-  border: 1px solid var(--ink-line);
-  position: relative;
-  overflow: hidden;
-}
-
-@utility heatmap-scrollbar-thumb {
-  position: absolute;
-  inset: 0 auto 0 0;
-  border-radius: 999px;
-  background: var(--ink-muted);
-  box-shadow: 0 0 6px var(--ink-glow);
-  transition: transform 120ms ease-out;
-}
-
 /* Screenshot mode — silence atmospheric layers for deterministic capture. */
-.screenshot-mode .fx-rain,
-.screenshot-mode .fx-scanline,
-.screenshot-mode .fx-crt {
+.screenshot-mode .fx-scanline {
   display: none !important;
 }
 
@@ -450,20 +154,7 @@ html.screenshot-capture * {
   transition: none !important;
 }
 
-body.screenshot-capture .fx-scanline,
-body.screenshot-capture .fx-rain,
-body.screenshot-capture .fx-crt {
+body.screenshot-capture .fx-scanline {
   opacity: 0 !important;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .animate-pulse,
-  .animate-spin,
-  .animate-bounce {
-    animation: none !important;
-  }
-  .fx-glitch:hover {
-    animation: none !important;
-    text-shadow: 0 0 16px var(--ink-glow) !important;
-  }
-}

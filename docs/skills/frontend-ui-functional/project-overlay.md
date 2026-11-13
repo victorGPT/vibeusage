@@ -9,13 +9,13 @@ This overlay applies when using the `frontend-ui-functional` skill in this repos
 - **Project rules first:** Read `CLAUDE.md` before starting. Project-level rules override the base skill.
 - **Copy registry:** All user-facing text must come from `dashboard/src/content/copy.csv`. Update the registry and run `npm run validate:copy` after changes.
 - **UI hardcode guardrails:** Run `npm run validate:ui-hardcode` before shipping UI changes.
-- **Reuse UI primitives:** Prefer existing components in `dashboard/src/ui` and `dashboard/src/components` before creating new ones.
-- **Pages and layouts:** Follow patterns in `dashboard/src/pages` and the current layouts used there.
-- **Tokens and styles:** Use the Tailwind tokens from `dashboard/tailwind.config.cjs` and shared styles in `dashboard/src/styles.css`.
+- **Reuse UI primitives:** Prefer existing components in `dashboard/src/ui/2049/base`, `dashboard/src/ui/2049/blocks` and `dashboard/src/ui/shadcn` before creating new ones. `dashboard/DESIGN.md` lists them.
+- **Pages and layouts:** Pages in `dashboard/src/pages` hold only layout containers and component references. Styling belongs in components.
+- **Tokens and styles:** Tailwind v4 has no config file. Tokens live in CSS `@theme` blocks. Use the 2049 tokens in `dashboard/src/styles/2049.css`. The v1 theme in `dashboard/src/styles.css` is only for the leftover v1 pages.
 
 ## Mandatory Checks (Before PR)
 
-- **Hardcoded color audit:** run `rg -n "#[0-9a-fA-F]{3,6}|rgba?\\(" dashboard/src` and replace matches with Tailwind tokens or CSS variables. If an exception is required, add a short comment explaining why.
+- **Design guardrail:** run `npm --prefix dashboard run guardrail:design` (`dashboard/scripts/check-design-ssot.mjs`). It fails on literal colors and off-scale spacing in 2049 files.
 - **Copy registry validation:** run `npm run validate:copy`.
 
 ## Notes

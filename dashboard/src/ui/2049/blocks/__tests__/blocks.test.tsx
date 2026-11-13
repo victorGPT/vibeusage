@@ -176,7 +176,6 @@ describe("StateScreen", () => {
   const CASES: [StateVariant, string, string][] = [
     ["install", "Step 1 of 2", "Install the tracker"],
     ["expired", "Expired", "Your session expired."],
-    ["visitor", "Read only", "21,410,592,118"],
     ["invalid", "Not found", "This profile is private or the link is wrong."],
     ["empty", "Waiting for first sync", "Run any AI CLI for a minute, then refresh. Sync runs every 30 minutes."],
     ["loading", "Reading", ""],
@@ -188,7 +187,6 @@ describe("StateScreen", () => {
       <StateScreen
         variant={variant}
         linkCode="K7Q-2049"
-        visitor={{ name: "nullbyte", totals: { total_tokens: 21_410_592_118, total_cost_usd: "6588.04" } }}
       />,
     );
     expect(screen.getByText(tag)).toBeTruthy();

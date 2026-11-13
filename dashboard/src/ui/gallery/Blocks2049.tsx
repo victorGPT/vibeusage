@@ -68,7 +68,6 @@ const COL_4 = "min-w-[min(100%,300px)] flex-[1_1_calc((100%-176px)*4/12+48px)]";
 const STATES: [StateVariant, string][] = [
   ["install", "Not signed in or not installed"],
   ["expired", "Session expired"],
-  ["visitor", "Viewing someone else"],
   ["invalid", "Share link broken"],
   ["empty", "Installed, no data yet"],
   ["loading", "Loading"],
@@ -265,7 +264,6 @@ export function Blocks() {
                 variant={variant}
                 compact
                 linkCode="K7Q-2049"
-                visitor={{ name: "nullbyte", totals: TOTALS.total }}
               />
             </div>
           ))}

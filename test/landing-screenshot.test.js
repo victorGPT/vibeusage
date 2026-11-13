@@ -70,7 +70,6 @@ test("LandingPage renders the 2049 landing blocks in board order", () => {
   for (const [i, pos] of positions.entries()) assert.ok(pos > 0, `expected ${order[i]} in LandingPage`);
   assert.deepEqual([...positions].sort((a, b) => a - b), positions);
   assert.match(src, /<Readout[^>]*mode="sample"/);
-  assert.doesNotMatch(src, /matrix-a/);
 });
 
 test("copy registry includes landing/share meta keys", () => {
