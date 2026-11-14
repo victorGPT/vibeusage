@@ -177,6 +177,15 @@ export default defineConfig(({ mode }) => {
       port: 5173,
       // Prefer 5173 for local CLI integration, but don't fail if already in use.
       strictPort: false,
+      proxy: {
+        "/api/auth": {
+          target:
+            env.VITE_VIBEUSAGE_INSFORGE_BASE_URL ||
+            env.VITE_INSFORGE_BASE_URL ||
+            "https://5tmappuk.us-east.insforge.app",
+          changeOrigin: true,
+        },
+      },
     },
   };
 });

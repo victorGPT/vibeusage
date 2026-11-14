@@ -1,5 +1,9 @@
 {
   "rewrites": [
+    {
+      "source": "/api/auth/:path*",
+      "destination": "https://5tmappuk.us-east.insforge.app/api/auth/:path*"
+    },
     { "source": "/share/(.*)", "destination": "/share.html" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]

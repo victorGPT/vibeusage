@@ -93,6 +93,7 @@ This document is the single source of truth for repository navigation. Use it to
   - Hosted-auth restore is repository-owned and runs directly on `@insforge/sdk`; the dashboard does not use `@insforge/react` / `@insforge/react-router` as a runtime restore layer.
   - SDK session persistence and runtime session store are repository-owned and wrap the SDK token manager; `App.jsx` subscribes to that store instead of caching its own session truth.
   - Official refresh/state primitives currently used by local code are `auth.refreshSession()`, `auth.getCurrentUser()`, and `auth.signOut()`.
+  - The auth client's base URL is the page origin. `dashboard/vercel.json` (prod) and the Vite dev proxy forward `/api/auth/*` to InsForge, so the httpOnly `insforge_refresh_token` cookie is first-party. Data calls (`createInsforgeClient`) still go straight to InsForge.
   - OAuth redirect entrypoints stay repository-owned, while PKCE callback exchange continues to run inside the SDK client.
 - Copy and content source of truth:
   - `dashboard/src/content/copy.csv`
