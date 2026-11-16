@@ -18,6 +18,12 @@ const router = createBrowserRouter([
           lazy: () =>
             import("./ui/gallery/Gallery2049.tsx").then((m) => ({ Component: m.Gallery2049 })),
         },
+        {
+          path: "/__vu1",
+          HydrateFallback: () => null,
+          lazy: () =>
+            import("./ui/gallery/GalleryVu1.tsx").then((m) => ({ Component: m.GalleryVu1 })),
+        },
       ]
     : []),
   { path: "/sign-in", element: <SignInRedirect /> },

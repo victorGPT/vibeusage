@@ -1,0 +1,441 @@
+/* Navbar: a floating plate of frosted acrylic. What's behind it blurs and
+   brightens through; its polished top edge catches the light, a fine inner
+   rim shows the sheet's thickness, a faint sheen crosses it, and it casts a
+   soft shadow on the page. */
+[data-skin="hardware"] [data-kit="navbar"] {
+  position: relative;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  height: 52px;
+  padding: 0 22px;
+  border-radius: calc(16px * var(--corner-scale));
+  background: linear-gradient(180deg, rgb(248 248 246 / 0.84), rgb(242 242 240 / 0.74));
+  -webkit-backdrop-filter: blur(40px) saturate(1.6) brightness(1.1);
+  backdrop-filter: blur(40px) saturate(1.6) brightness(1.1);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.95),
+    inset 0 -1px 0 rgb(255 255 255 / 0.35),
+    inset 0 0 0 1px rgb(255 255 255 / 0.4),
+    0 0 0 1px rgb(0 0 0 / 0.07),
+    0 1px 2px hsl(var(--shadow-color) / calc(0.12 * var(--shadow-k))),
+    0 12px 28px -12px hsl(var(--shadow-color) / calc(0.3 * var(--shadow-k)));
+  user-select: none;
+  isolation: isolate;
+
+  /* The sheet's edge: brighter where it faces the light. */
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(160deg, rgb(255 255 255 / 0.95), rgb(255 255 255 / 0.15) 40%, rgb(255 255 255 / 0.05) 70%, rgb(255 255 255 / 0.5));
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  /* A faint sheen across the top half. */
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 1px 1px 50%;
+    z-index: -1;
+    border-radius: inherit;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    background: linear-gradient(180deg, rgb(255 255 255 / 0.35), rgb(255 255 255 / 0));
+    pointer-events: none;
+  }
+}
+
+/* On the site it floats over the top of the page and stays there. */
+/* The bar is fixed, 12px under the safe area, and the site pads its top by
+   that much plus the bar's height (--nav-h, measured by Site), so the page
+   starts under it.
+
+   Fixed, not sticky: on an iPhone, Safari repositions a sticky element late
+   while its toolbar collapses during a scroll, so the bar would ride up for
+   a moment and slip under the status bar; a fixed one stays pinned. The
+   safe area keeps it clear of the status bar the page slides under. (It's
+   0 on desktop.) */
+[data-skin="hardware"][data-site] {
+  padding-top: calc(12px + env(safe-area-inset-top, 0px) + var(--nav-h, 52px));
+}
+
+[data-skin="hardware"][data-site] > [data-kit="navbar"] {
+  position: fixed;
+  z-index: 60;
+  top: calc(12px + env(safe-area-inset-top, 0px));
+  right: 0;
+  left: 0;
+  width: min(1200px, calc(100% - var(--site-edge, 16px) * 2));
+  margin: 0 auto;
+}
+
+[data-skin="hardware"] [data-kit="navbar-brand"] {
+  flex-shrink: 0;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  color: var(--ink);
+  text-decoration: none;
+
+  /* The model and the name are one title, the same size; the model is set
+     a shade lighter. */
+  & :is(span, strong) {
+    font: 200 20px var(--mono, "Spec Mono", monospace);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  & span {
+    color: #7a7974;
+  }
+}
+
+[data-skin="hardware"] [data-kit="navbar-links"] {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  gap: 22px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+[data-skin="hardware"] [data-kit="navbar-link"] {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font: var(--label);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: #5f5e5a;
+  text-decoration: none;
+  text-shadow: none;
+
+  &::before {
+    content: "";
+    width: var(--led-size);
+    height: var(--led-size);
+    border-radius: 50%;
+    corner-shape: round;
+    background: var(--led-off);
+  }
+
+  &:hover {
+    color: var(--ink);
+  }
+
+  &[aria-current] {
+    color: var(--ink);
+
+    &::before {
+      background: var(--led-color);
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--key-color);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+}
+
+/* The catalog's example floats over a photo, so the acrylic shows. The
+   photo comes first and the bar, positioned, paints over it. Nothing clips
+   or isolates the card: in WebKit a backdrop filter inside a rounded parent
+   that clips, or over a layer pushed behind with a negative z-index, stops
+   sampling and the bar shows the photo sharp. The photo rounds its own
+   corners instead. */
+[data-skin="hardware"] [data-navbar-demo] {
+  position: relative;
+  width: 100%;
+  height: 220px;
+  padding: 16px;
+  border-radius: calc(12px * var(--corner-scale));
+
+  & > img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: inherit;
+  }
+
+  & > [data-kit="navbar"] {
+    gap: 18px;
+  }
+}
+
+/* Links that switch in place are buttons; they print like the links. */
+[data-skin="hardware"] button[data-kit="navbar-link"] {
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+/* The key color picker at the bar's right end: a row of small round keys
+   whose caps are the key colors; the chosen one is pressed and ringed. */
+[data-skin="hardware"] [data-kit="key-picker"] {
+  display: flex;
+  gap: 9px;
+  margin-inline-start: auto;
+  padding-inline-start: 18px;
+  border-left: 1px solid rgb(0 0 0 / 0.08);
+  box-shadow: -1px 0 0 rgb(255 255 255 / 0.6);
+}
+
+/* Leading the bar instead, the picker's divider is on its right, and the
+   links go to the bar's right end. */
+[data-skin="hardware"] [data-kit="navbar"] > [data-kit="key-picker"]:first-child:not(#_) {
+  margin-inline-start: 0;
+  padding-inline: 0 18px;
+  border-left: 0;
+  border-right: 1px solid rgb(0 0 0 / 0.08);
+  box-shadow: 1px 0 0 rgb(255 255 255 / 0.6);
+
+  /* An auto margin on the first link, not on the row: the row fills the
+     bar, and when it scrolls on a narrow screen the margin collapses to
+     nothing, so the first links stay reachable. */
+  & ~ [data-kit="navbar-links"] > :first-of-type {
+    margin-inline-start: auto;
+  }
+}
+
+[data-skin="hardware"] [data-kit="key-swatch"]:not(#_):not(#_) {
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  corner-shape: round;
+  background:
+    linear-gradient(0deg, rgb(255 255 255 / 0.25), rgb(255 255 255 / 0) 60%),
+    var(--swatch);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.3),
+    0 0 0 0.5px rgb(0 0 0 / 0.25),
+    0 2px 0 color-mix(in oklab, var(--swatch), #000 35%),
+    0 3px 3px rgb(0 0 0 / 0.18);
+  translate: 0 -1px;
+  cursor: pointer;
+  transition:
+    translate 80ms,
+    box-shadow 80ms;
+
+  &::before {
+    content: none;
+  }
+
+  &:is([data-checked], [aria-checked="true"]) {
+    translate: 0 1px;
+    box-shadow:
+      inset 0 1px 2px rgb(0 0 0 / 0.25),
+      0 0 0 0.5px rgb(0 0 0 / 0.25),
+      0 0 0 2.5px rgb(255 255 255 / 0.9),
+      0 0 0 3.5px var(--ink);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--key-color);
+    outline-offset: 5px;
+  }
+}
+
+/* The links row scrolls on narrow screens, which clips what's drawn outside
+   it; padding gives the lit LED's glow room, and the margin keeps the row
+   where it was. */
+[data-skin="hardware"] [data-kit="navbar-links"]:not(#_) {
+  padding: 10px;
+  margin: -10px;
+}
+
+/* The links as an amplifier's input selector: printed names, each with an
+   LED beside it. */
+[data-skin="hardware"] [data-kit="navbar-links"]:not(#_):not(#_) {
+  position: relative;
+  align-self: stretch;
+  align-items: center;
+  gap: 26px;
+  padding: 0 10px;
+  margin: 0;
+}
+
+/* The brand and links are pressed, never dragged off as links or images. */
+[data-skin="hardware"] :is([data-kit="navbar-link"], [data-kit="navbar-brand"]) {
+  -webkit-user-drag: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* The names sit centered in the bar, each after its LED: unlit, a dot of
+   gray recessed in the plate; lit, the key color with a soft glow, on the
+   current page only. Nothing moves; the light changes. */
+[data-skin="hardware"] [data-kit="navbar-link"]:not(#_):not(#_) {
+  position: relative;
+  z-index: 1;
+  padding-bottom: 0;
+  font-size: 8.5px;
+  color: #6f6e69;
+
+  &::before {
+    flex-shrink: 0;
+    width: 5px;
+    height: 5px;
+    background: var(--led-off);
+    box-shadow: inset 0 0.5px 1px rgb(0 0 0 / 0.25), 0 0.5px 0 rgb(255 255 255 / 0.9);
+    transition: background 120ms, box-shadow 120ms;
+  }
+
+  &[aria-current] {
+    color: var(--ink);
+
+    &::before {
+      background: var(--led-color);
+      box-shadow:
+        inset 0 0.5px 0.5px rgb(255 255 255 / 0.5),
+        0 0 4px 1px color-mix(in oklab, var(--led-color) 55%, transparent);
+    }
+  }
+
+  &:hover {
+    color: var(--ink);
+  }
+}
+
+/* Black lamps are solid black with no glow (a black light can't glow on
+   white), so the current page's LED is lit without one. */
+[data-skin="hardware"][data-key="black"] [data-kit="navbar-link"][aria-current]:not(#_):not(#_)::before {
+  box-shadow: inset 0 0.5px 0.5px rgb(255 255 255 / 0.3);
+}
+
+/* The key color picker: flat color dots, the chosen one ringed. */
+[data-skin="hardware"] [data-kit="key-swatch"]:not(#_):not(#_):not(#_) {
+  background: var(--swatch);
+  box-shadow: inset 0 0 0 0.5px rgb(0 0 0 / 0.2);
+  translate: none;
+
+  &:is([data-checked], [aria-checked="true"]) {
+    translate: none;
+    box-shadow:
+      inset 0 0 0 0.5px rgb(0 0 0 / 0.2),
+      0 0 0 2.5px #f6f6f4,
+      0 0 0 3.5px var(--ink);
+  }
+}
+
+/* Narrow screens: the bar takes two rows when something leads it (the
+   site's key colors, or a brand). The brand or the key colors take the top
+   one; a bar of links alone stays one row;
+   the links run along the bottom one, scrolling sideways, with the current
+   page kept in view. */
+@media (max-width: 760px) {
+  [data-skin="hardware"] :is([data-site] > [data-kit="navbar"], [data-navbar-demo] > [data-kit="navbar"]:has(> [data-kit="navbar-brand"])):not(#_) {
+    flex-wrap: wrap;
+    height: auto;
+    gap: 0 12px;
+    /* 16px over the colors matches the space under the links' row and
+       between the two rows. */
+    padding: 16px 14px 0;
+  }
+
+  [data-skin="hardware"] :is([data-site] > [data-kit="navbar"], [data-navbar-demo] > [data-kit="navbar"]:has(> [data-kit="navbar-brand"])) [data-kit="navbar-brand"] :is(span, strong) {
+    font-size: 16px;
+  }
+
+  [data-skin="hardware"] :is([data-site] > [data-kit="navbar"], [data-navbar-demo] > [data-kit="navbar"]:has(> [data-kit="navbar-brand"])) [data-kit="key-picker"]:not(#_):not(#_) {
+    gap: 7px;
+    padding-inline: 0;
+    border-inline: 0;
+    box-shadow: none;
+  }
+
+  [data-skin="hardware"] :is([data-site] > [data-kit="navbar"], [data-navbar-demo] > [data-kit="navbar"]:has(> [data-kit="navbar-brand"])) [data-kit="key-swatch"]:not(#_):not(#_):not(#_):not(#_) {
+    width: 16px;
+    height: 16px;
+  }
+
+  [data-skin="hardware"] :is([data-site] > [data-kit="navbar"], [data-navbar-demo] > [data-kit="navbar"]:has(> [data-kit="navbar-brand"])) [data-kit="navbar-links"]:not(#_):not(#_):not(#_) {
+    order: 3;
+    flex: 1 0 100%;
+    height: 42px;
+    margin-inline: -14px;
+    padding-inline: 14px;
+    overflow-x: auto;
+  }
+}
+
+/* The mute key, just past the picker's divider: a small white round key
+   like the swatches, printed with a speaker, crossed out when muted. */
+[data-skin="hardware"] [data-kit="sound-toggle"] {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 22px;
+  height: 22px;
+  /* 18px past the divider, as the swatches sit 18px before it; the bar's
+     own 28px gap between items is taken back. */
+  margin-inline-start: -10px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  corner-shape: round;
+  color: var(--ink);
+  background: linear-gradient(0deg, #f1f1ee, #fff);
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 0 0 0.5px rgb(0 0 0 / 0.22),
+    0 2px 0 #d2d2ce,
+    0 3px 3px rgb(0 0 0 / 0.14);
+  translate: 0 -1px;
+  cursor: pointer;
+  transition:
+    translate 80ms,
+    box-shadow 80ms,
+    color 120ms;
+
+  & [data-icon] {
+    width: 13px;
+    height: 13px;
+  }
+
+  & svg {
+    width: 13px;
+    height: 13px;
+  }
+
+  &[aria-pressed="false"] {
+    color: #8a8984;
+  }
+
+  &:active {
+    translate: 0 1px;
+    box-shadow:
+      inset 0 1px 0 #fff,
+      0 0 0 0.5px rgb(0 0 0 / 0.22),
+      0 0 0 #d2d2ce,
+      0 1px 1px rgb(0 0 0 / 0.12);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--key-color);
+    outline-offset: 2px;
+  }
+}
+
+/* On phones the bar's gap is smaller and the picker has no divider. */
+@media (max-width: 760px) {
+  [data-skin="hardware"] [data-kit="sound-toggle"] {
+    margin-inline-start: 14px;
+  }
+}

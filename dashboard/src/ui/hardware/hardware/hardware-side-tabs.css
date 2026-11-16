@@ -1,0 +1,298 @@
+/* Side tabs: a multi-position slide switch along the edge, like a radio's
+   band selector. A narrow slot is cut into the panel with a detent tick at
+   each position and its label printed beside it; a ribbed lever rides in
+   the slot and snaps to the chosen position. ui-sdk places the lever on
+   the chosen tab through its indicator. The body is a recessed panel whose
+   content shifts in from the lever's side. */
+[data-skin="hardware"] [data-kit="side-tabs"] {
+  --row: 38px;
+  --slot-x: 14px;
+  display: grid;
+  gap: 18px;
+  width: 100%;
+
+  &[data-side="right"] {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  &[data-side="left"] {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  &[data-side="top"] {
+    grid-template-rows: auto minmax(0, 1fr);
+    --col: 96px;
+    --slot-y: 12px;
+  }
+}
+
+[data-skin="hardware"] [data-kit="side-tabs-body"]:not(#_):not(#_):not(#_) {
+  min-height: 168px;
+  padding: 18px 20px;
+  border-radius: calc(12px * var(--corner-scale));
+  background: #f4f4f2;
+  box-shadow:
+    inset 0 1px 3px rgb(0 0 0 / calc(0.08 * var(--shadow-k))),
+    inset 0 0 0 1px rgb(0 0 0 / calc(0.035 * var(--shadow-k))),
+    0 1px 0 #fff;
+  overflow: hidden;
+
+  [data-side="left"] > & {
+    grid-column: 2;
+    grid-row: 1;
+  }
+}
+
+[data-skin="hardware"] [data-kit="side-tabs-panel"] {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--dim);
+  outline: none;
+  animation: side-panel-in 240ms cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  & h3 {
+    margin: 0 0 6px;
+    font: var(--label);
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+
+  & p {
+    margin: 0;
+  }
+
+  [data-side="right"] & {
+    --from: 10px 0;
+  }
+
+  [data-side="left"] & {
+    --from: -10px 0;
+  }
+
+  [data-side="top"] & {
+    --from: 0 -8px;
+  }
+}
+
+@keyframes side-panel-in {
+  from {
+    opacity: 0;
+    translate: var(--from, 0 6px);
+  }
+}
+
+/* The selector: rows of labels beside the slot. */
+[data-skin="hardware"] [data-kit="side-tabs-list"] {
+  position: relative;
+  display: grid;
+  align-content: start;
+  align-self: start;
+  gap: 0;
+  padding: 0;
+
+  /* The slot. */
+  &::before {
+    content: "";
+    position: absolute;
+    border-radius: 3px;
+    corner-shape: round;
+    background: linear-gradient(90deg, #1b1b1a, #2c2c2a);
+    box-shadow:
+      inset 0 1px 2px rgb(0 0 0 / 0.5),
+      0 0 0 1px rgb(0 0 0 / 0.06),
+      0 1px 0 1px rgb(255 255 255 / 0.8);
+  }
+
+  [data-side="right"] > &::before,
+  [data-side="left"] > &::before {
+    top: calc(var(--row) / 2 - 6px);
+    bottom: calc(var(--row) / 2 - 6px);
+    width: 6px;
+  }
+
+  [data-side="right"] > &::before {
+    left: calc(var(--slot-x) - 3px);
+  }
+
+  [data-side="left"] > & {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  [data-side="left"] > &::before {
+    right: calc(var(--slot-x) - 3px);
+  }
+
+  [data-side="top"] > & {
+    grid-auto-flow: column;
+    justify-content: start;
+    justify-self: start;
+  }
+
+  [data-side="top"] > &::before {
+    top: calc(var(--slot-y) - 3px);
+    left: calc(var(--col) / 2 - 6px);
+    right: calc(var(--col) / 2 - 6px);
+    height: 6px;
+  }
+}
+
+/* A position: its detent tick by the slot, and its label. */
+[data-skin="hardware"] [data-kit="side-tab"]:not(#_):not(#_) {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: auto;
+  height: var(--row);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  font: var(--label);
+  font-size: 8.5px;
+  line-height: 1;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  writing-mode: horizontal-tb;
+  color: #8a8984;
+  background: none;
+  box-shadow: none;
+  translate: none;
+  cursor: pointer;
+  user-select: none;
+  transition: color 160ms;
+
+  [data-side="right"] & {
+    padding-inline-start: calc(var(--slot-x) + 22px);
+  }
+
+  [data-side="left"] & {
+    justify-content: flex-end;
+    padding-inline-end: calc(var(--slot-x) + 22px);
+  }
+
+  [data-side="top"] & {
+    justify-content: center;
+    align-items: flex-end;
+    width: var(--col);
+    height: calc(var(--slot-y) + 34px);
+    padding-bottom: 4px;
+  }
+
+  /* The detent tick, printed beside the slot. */
+  &::before {
+    content: "";
+    position: absolute;
+    background: #b5b4af;
+  }
+
+  [data-side="right"] &::before {
+    left: calc(var(--slot-x) + 8px);
+    top: calc(50% - 0.5px);
+    width: 7px;
+    height: 1px;
+  }
+
+  [data-side="left"] &::before {
+    right: calc(var(--slot-x) + 8px);
+    top: calc(50% - 0.5px);
+    width: 7px;
+    height: 1px;
+  }
+
+  [data-side="top"] &::before {
+    left: calc(50% - 0.5px);
+    top: calc(var(--slot-y) + 8px);
+    width: 1px;
+    height: 6px;
+  }
+
+  &::after {
+    content: none;
+  }
+
+  &:hover {
+    color: var(--ink);
+  }
+
+  &:is([aria-selected="true"], [data-selected]) {
+    color: var(--ink);
+
+    &::before {
+      background: var(--key-color);
+    }
+  }
+
+  &:focus-visible {
+    outline: none;
+    color: var(--ink);
+    text-decoration: underline;
+    text-decoration-color: var(--key-ink);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 4px;
+  }
+}
+
+/* The lever: a ribbed cap across the slot, snapping between detents. */
+[data-skin="hardware"] [data-kit="side-lever"]:not(#_):not(#_) {
+  position: absolute;
+  z-index: 1;
+  display: block;
+  border-radius: calc(4px * var(--corner-scale));
+  background:
+    repeating-linear-gradient(var(--rib-dir, 180deg), rgb(0 0 0 / 0.12) 0 1px, transparent 1px 3px) center / 60% 50% no-repeat,
+    linear-gradient(0deg, #ffffff, #efefec 70%, #e9e9e6);
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 0 0 0.5px rgb(0 0 0 / 0.18),
+    0 2px 0 #d2d2ce,
+    0 2.5px 1px rgb(0 0 0 / calc(0.14 * var(--shadow-k))),
+    0 4px 8px -3px rgb(0 0 0 / calc(0.18 * var(--shadow-k)));
+  pointer-events: none;
+  transition:
+    top 300ms var(--ease-detent),
+    left 300ms var(--ease-detent);
+
+  [data-side="right"] &,
+  [data-side="left"] & {
+    width: 26px;
+    height: 16px;
+    top: calc(var(--active-tab-top) + var(--row) / 2 - 9px);
+  }
+
+  [data-side="right"] & {
+    left: calc(var(--slot-x) - 13px);
+  }
+
+  [data-side="left"] & {
+    left: auto;
+    right: calc(var(--slot-x) - 13px);
+  }
+
+  [data-side="top"] & {
+    --rib-dir: 90deg;
+    width: 16px;
+    height: 26px;
+    top: calc(var(--slot-y) - 14px);
+    left: calc(var(--active-tab-left) + var(--col) / 2 - 8px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-skin="hardware"] [data-kit="side-lever"] {
+    transition: none;
+  }
+
+  [data-skin="hardware"] [data-kit="side-tabs-panel"] {
+    animation: none;
+  }
+}
+
+/* LEDs stay circular under the skin's squircle corners. */
+[data-skin="hardware"] [data-kit="navbar-link"]::before,
+[data-skin="hardware"] [data-list] button::before,
+[data-skin="hardware"] [data-device-power] {
+  corner-shape: round;
+}

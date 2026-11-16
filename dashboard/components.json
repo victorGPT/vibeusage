@@ -15,8 +15,8 @@
   "aliases": {
     "components": "#src/ui",
     "utils": "#src/lib/utils",
-    "ui": "#src/ui/shadcn",
-    "lib": "#src/lib",
+    "ui": "#src/ui/hardware",
+    "lib": "#src/ui/hardware/lib",
     "hooks": "#src/hooks"
   },
   "menuColor": "default",

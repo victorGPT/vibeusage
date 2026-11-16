@@ -1,0 +1,71 @@
+/* Fixes for Safari and touch screens, kept together and loaded last. */
+
+/* Menus and lists open as top-layer popovers, and the browser's popover
+   defaults include inset: 0. ui-sdk places a popup with top and left only,
+   so where a browser doesn't also hold the popup to its content's height,
+   as Safari didn't, the default bottom: 0 stretched it to the foot of the
+   screen and its rows spread out down its height. The popup is held to its
+   content, its rows to the top, and it scrolls past the room it has. */
+[data-skin="hardware"] [data-kit="popup"]:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) {
+  right: auto;
+  bottom: auto;
+  height: fit-content;
+  max-height: var(--available-height, none);
+  align-content: start;
+  overflow-y: auto;
+}
+
+/* On touch screens, dialogs and their backdrop fade and scale in without
+   growing a blur: animating a blur re-renders the layer at every step, and
+   it held dialogs back for seconds. The backdrop keeps its blur, at full
+   strength throughout, and fades with its tint; a blur that holds still is
+   affordable, like the navbar's frosted glass. */
+@media (pointer: coarse) {
+  [data-skin="hardware"] [data-kit="backdrop"]:not(#_):not(#_):not(#_) {
+    -webkit-backdrop-filter: blur(4px) !important;
+    backdrop-filter: blur(4px) !important;
+    transition: opacity 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  [data-skin="hardware"] [data-kit="dialog-surface"]:not(#_):not(#_):not(#_):not(#_):not(#_) {
+    filter: none !important;
+    transition:
+      opacity 200ms cubic-bezier(0.2, 0.8, 0.2, 1),
+      scale 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+}
+
+/* The context area opens its menu on a long press on touch screens. Held
+   on its text, iOS would start selecting it and show its callout instead,
+   which cancels the press, so neither happens here. */
+[data-skin="hardware"] [data-kit="context-area"] {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Panel titles are h2s, so the catalog's headings run in order (h1, h2,
+   then the accordion's h3s). This only clears the browser's heading look
+   (size, weight, margins); at zero specificity it beats those defaults but
+   leaves the caption's own type rules in charge. */
+:where([data-skin="hardware"] h2[data-kit="caption"]) {
+  margin: 0;
+  font: inherit;
+}
+
+/* Body text in the accordion and the resizable panes was the dim print
+   color, 2.8:1 on their panels. This darker gray clears 4.5:1 and keeps
+   the printed look. */
+[data-skin="hardware"] :is([data-kit="accordion-panel"] p, [data-kit="resizable-panel"]):not(#_):not(#_):not(#_):not(#_):not(#_) {
+  color: #5f5e59;
+}
+
+/* No native control styling. The kit draws every key and field itself, but
+   a <button> left at appearance: auto keeps some of Safari's own button
+   look on iOS (its rounding, insets and padding), which threw off the
+   Timer's round chime latch. Range inputs keep theirs: the sliders rely on
+   them being native. */
+[data-skin="hardware"] :is(button, input:not([type="range"]), select, textarea) {
+  -webkit-appearance: none;
+  appearance: none;
+}

@@ -1,0 +1,126 @@
+/* The page wheel: a drum lying on its side in a slot. Cog teeth along its
+   top and bottom edges roll with it, it shades toward both ends as it curves
+   away, and two index marks hold the current page between them. */
+[data-skin="hardware"] [data-kit="page-wheel-row"] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  width: 100%;
+
+  & > [data-kit="button"] {
+    flex-shrink: 0;
+  }
+}
+
+[data-skin="hardware"] [data-kit="page-wheel"] {
+  position: relative;
+  flex: 1;
+  max-width: 320px;
+  height: 52px;
+  border-radius: calc(10px * var(--corner-scale));
+  background: #efefed;
+  box-shadow:
+    inset 0 1px 2px rgb(0 0 0 / 0.08),
+    inset 0 0 0 1px rgb(0 0 0 / 0.04),
+    0 1px 0 #fff;
+  overflow: hidden;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  outline: none;
+
+  &[data-dragging] {
+    cursor: grabbing;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--key-color);
+    outline-offset: 3px;
+  }
+
+  /* The drum's body: lit across its crown, falling into shade at its ends,
+     with cog teeth top and bottom that turn with it. */
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 5px 4px;
+    border-radius: calc(6px * var(--corner-scale));
+    background: linear-gradient(90deg, #dddcd8, #f4f4f2 24%, #fdfdfc 50%, #f4f4f2 76%, #dddcd8);
+    box-shadow:
+      0 0 0 0.5px rgb(0 0 0 / 0.06),
+      0 1px 1.5px rgb(0 0 0 / 0.08);
+  }
+
+  /* The index marks above and below the current page. */
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(var(--key-color), var(--key-color)) 50% 0 / 1.5px 7px no-repeat,
+      linear-gradient(var(--key-color), var(--key-color)) 50% 100% / 1.5px 7px no-repeat;
+    pointer-events: none;
+  }
+}
+
+[data-skin="hardware"] [data-kit="page-wheel-drum"] {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+
+[data-skin="hardware"] [data-kit="page-wheel-number"] {
+  grid-area: 1 / 1;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  font: 400 16px/1 var(--mono, monospace);
+  font-variant-numeric: tabular-nums;
+  color: #8f8e89;
+  backface-visibility: hidden;
+  transition: color 90ms;
+  will-change: transform;
+
+  &[data-current] {
+    color: var(--ink);
+    font-weight: 600;
+  }
+}
+
+/* The cog teeth along the drum's top and bottom edges. Each is placed and
+   narrowed by script to follow the drum's curve. */
+[data-skin="hardware"] [data-kit="page-wheel-teeth"] {
+  position: absolute;
+  inset-inline: 11px;
+  height: 4px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  pointer-events: none;
+
+  &[data-edge="top"] {
+    top: 5px;
+  }
+
+  &[data-edge="bottom"] {
+    bottom: 5px;
+  }
+
+  & i {
+    grid-area: 1 / 1;
+    width: 1.5px;
+    height: 4px;
+    background: #cfcec9;
+    will-change: transform;
+  }
+}
+
+
+/* The keys repeat while held, so a long press on them stays a press. */
+[data-skin="hardware"] [data-kit="page-wheel-row"] {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}

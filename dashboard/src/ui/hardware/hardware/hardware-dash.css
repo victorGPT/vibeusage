@@ -1,0 +1,68 @@
+[data-skin="hardware"] {
+  & [data-kit="stat"] {
+    width: 100%;
+    justify-items: start;
+  }
+
+  & [data-kit="stat-value"] {
+    font-family: "Helvetica Neue", "Inter", sans-serif;
+    font-size: 40px;
+    font-weight: 500;
+    letter-spacing: -0.04em;
+    line-height: 1.1;
+    text-transform: none;
+  }
+
+  & [data-kit="stat-delta"] {
+    color: var(--dim);
+
+    &::before {
+      content: "▲ ";
+      color: var(--key-ink);
+    }
+
+    &[data-trend="down"]::before {
+      content: "▼ ";
+      color: var(--green);
+    }
+  }
+
+  /* Bars: LED columns on the OLED, lit from the bottom. */
+  & [data-kit="bars"] {
+    width: 100%;
+  }
+
+  & [data-kit="bars-plot"] {
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    height: 110px;
+    padding: 8px;
+    border-radius: calc(4px * var(--corner-scale));
+    background: #0d0d0c;
+  }
+
+  & [data-kit="bar"] {
+    flex: 1;
+    height: calc(var(--value) * 100%);
+    background: linear-gradient(0deg, var(--key-color) 0 70%, color-mix(in oklab, var(--key-color), #fff 50%));
+    mask: repeating-linear-gradient(0deg, #000 0 4px, transparent 4px 6px);
+    transition: height 300ms var(--ease-settle);
+  }
+
+  & [data-kit="bars-axis"] {
+    display: flex;
+    justify-content: space-between;
+    padding-inline: 8px;
+    color: var(--dim);
+  }
+
+  & [data-layout="dashboard"] [data-kit="surface"] {
+    align-content: center;
+  }
+
+  & [data-layout="dashboard"] [data-kit="surface"]:has([data-kit="meter"]) {
+    display: grid;
+    gap: 16px;
+  }
+}

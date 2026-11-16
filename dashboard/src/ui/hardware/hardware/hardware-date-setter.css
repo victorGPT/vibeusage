@@ -1,0 +1,220 @@
+/* The date setter: an LCD with the date's fields, the one being set
+   inverted and blinking, beside a knurled jog wheel with a SET key at its
+   center. */
+[data-skin="hardware"] [data-kit="date-setter"] {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 18px;
+  width: 100%;
+  user-select: none;
+}
+
+[data-skin="hardware"] [data-kit="date-lcd"] {
+  /* The date fits whatever width the screen gets beside the jog. */
+  container-type: inline-size;
+  display: grid;
+  gap: 8px;
+  padding: 12px 14px;
+  border: 2px solid #1a1918;
+  border-radius: calc(10px * var(--corner-scale));
+  color: #f2f2ee;
+  font-family: var(--mono, "Spec Mono", monospace);
+  text-shadow: 0 0 6px rgb(255 255 255 / 0.3);
+  background:
+    var(--tex-matte),
+    radial-gradient(130% 160% at 50% 0%, #121211 50%, #1c1c1b 80%, #262624 100%);
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.04),
+    inset 0 0 12px 2px rgb(255 255 255 / 0.05),
+    inset 0 -1px 0 rgb(0 0 0 / calc(0.6 * var(--shadow-k))),
+    0 1px 0 #fff,
+    0 2px 6px -2px rgb(0 0 0 / calc(0.25 * var(--shadow-k)));
+}
+
+[data-skin="hardware"] [data-kit="date-lcd-row"] {
+  display: flex;
+  justify-content: space-between;
+}
+
+[data-skin="hardware"] [data-kit="date-lcd-tag"] {
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgb(242 242 238 / 0.55);
+  text-shadow: none;
+}
+
+[data-skin="hardware"] [data-kit="date-lcd-fields"] {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  /* 26px, or smaller when the screen is narrow: the date runs about 7.8
+     times its size wide, plus fixed gaps, so this leaves some room. */
+  font-size: min(26px, 100cqi / 8.3);
+  font-weight: 300;
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+
+[data-skin="hardware"] [data-kit="date-lcd-sep"] {
+  color: rgb(242 242 238 / 0.4);
+}
+
+[data-skin="hardware"] [data-kit="date-lcd-field"] {
+  padding: 2px 3px;
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+
+  /* The field being set is inverted, and blinks while it waits. */
+  &[data-active] {
+    color: #111;
+    text-shadow: none;
+    background: #f2f2ee;
+    box-shadow: 0 0 8px rgb(255 255 255 / 0.35);
+    animation: setting 1.1s steps(1) infinite;
+  }
+
+  &[data-active]:focus-visible {
+    box-shadow:
+      0 0 0 2px #111,
+      0 0 0 3px #f2f2ee;
+  }
+}
+
+@keyframes setting {
+  70% {
+    color: #f2f2ee;
+    background: transparent;
+    box-shadow: none;
+  }
+}
+
+/* The month as dots on the LCD: today's day lit, the rest dim. */
+[data-skin="hardware"] [data-kit="date-lcd-month"] {
+  display: grid;
+  grid-template-columns: repeat(7, 6px);
+  gap: 3px;
+
+  & i {
+    width: 6px;
+    height: 6px;
+    border-radius: 1px;
+    corner-shape: round;
+    background: rgb(242 242 238 / 0.18);
+
+    &[data-blank] {
+      background: none;
+    }
+
+    &[data-on] {
+      background: #f2f2ee;
+      box-shadow: 0 0 6px rgb(255 255 255 / 0.6);
+    }
+  }
+}
+
+[data-skin="hardware"] [data-kit="jog"] {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 112px;
+  height: 112px;
+  border-radius: 50%;
+  corner-shape: round;
+  touch-action: none;
+  cursor: grab;
+  background: radial-gradient(circle at 50% 30%, #ffffff, #efefec 65%, #e2e2de);
+  box-shadow:
+    inset 0 1px 0 #fff,
+    inset 0 -2px 4px rgb(0 0 0 / calc(0.08 * var(--shadow-k))),
+    0 0 0 1px rgb(0 0 0 / calc(0.06 * var(--shadow-k))),
+    0 3px 0 var(--key-edge),
+    0 4px 2px rgb(0 0 0 / calc(0.08 * var(--shadow-k))),
+    0 16px 22px -8px rgb(0 0 0 / calc(0.3 * var(--shadow-k)));
+
+  &:active {
+    cursor: grabbing;
+  }
+}
+
+/* The knurled ring: fine grooves that turn with the wheel. */
+[data-skin="hardware"] [data-kit="jog-ring"] {
+  position: absolute;
+  inset: 6px;
+  border-radius: 50%;
+  corner-shape: round;
+  background: repeating-conic-gradient(from 0deg, rgb(0 0 0 / 0.1) 0 1.2deg, transparent 0 6deg);
+  mask: radial-gradient(circle closest-side, transparent 72%, #000 74% 98%, transparent 100%);
+  rotate: var(--turn);
+  transition: rotate 120ms var(--ease-detent);
+}
+
+[data-skin="hardware"] [data-kit="jog-center"] {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  corner-shape: round;
+  font: var(--label);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #f1f1ee;
+  background: var(--tex-matte), radial-gradient(circle at 50% 30%, #4a4a45, #2a2a28 70%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.2),
+    inset 0 -2px 3px rgb(0 0 0 / calc(0.4 * var(--shadow-k))),
+    0 2px 0 #121211,
+    0 4px 6px rgb(0 0 0 / calc(0.35 * var(--shadow-k)));
+  cursor: pointer;
+  transition:
+    translate 100ms,
+    box-shadow 100ms;
+
+  &:active {
+    translate: 0 2px;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.12),
+      0 0 0 #121211,
+      0 1px 2px rgb(0 0 0 / calc(0.35 * var(--shadow-k)));
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--key-color);
+    outline-offset: 3px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-skin="hardware"] [data-kit="date-lcd-field"][data-active] {
+    animation: none;
+  }
+}
+
+/* The field being set and today's dot light in the key color, as it glows
+   on a dark screen: black lights near-white there. Text on that light turns
+   white or ink by its own lightness, as --on-accent does for the key. */
+[data-skin="hardware"] {
+  --lcd-key: var(--key-glow);
+  --on-lcd-key: oklch(from var(--key-glow) clamp(0.18, (0.8 - l) * 1000, 1) 0 0);
+}
+
+[data-skin="hardware"] [data-kit="date-lcd-field"][data-active] {
+  color: var(--on-lcd-key);
+  background: var(--lcd-key);
+  box-shadow: 0 0 8px color-mix(in oklab, var(--lcd-key) 45%, transparent);
+
+  &:focus-visible {
+    box-shadow:
+      0 0 0 2px #111,
+      0 0 0 3px var(--lcd-key);
+  }
+}
+
+[data-skin="hardware"] [data-kit="date-lcd-month"] i[data-on] {
+  background: var(--lcd-key);
+  box-shadow: 0 0 6px color-mix(in oklab, var(--lcd-key) 70%, transparent);
+}

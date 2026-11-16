@@ -1,5 +1,6 @@
 @import "tailwindcss" source(none);
 @import "./styles/2049.css";
+@import "./styles/vu1.css";
 @source "../index.html";
 @source "./**/*.{js,jsx,ts,tsx}";
 

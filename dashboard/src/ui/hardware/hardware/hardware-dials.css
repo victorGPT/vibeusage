@@ -1,0 +1,215 @@
+/* Mode dial: stops on a printed arc around a small knurled knob. */
+[data-skin="hardware"] [data-kit="mode-dial"] {
+  --size: 214px;
+  --r: 74px;
+  --scale-gap: 32px;
+  position: relative;
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: none;
+  cursor: grab;
+  width: var(--size);
+  height: calc(var(--size) * 0.86);
+  margin-inline: auto;
+}
+
+/* The scale: fine ticks on an arc that covers the stops' sweep. Each tick
+   is 0.3deg solid with 0.25deg soft edges, about 1px at this radius, and is
+   centered on its angle. */
+[data-skin="hardware"] [data-kit="mode-dial-scale"] {
+  corner-shape: round;
+  position: absolute;
+  inset: calc(var(--size) / 2 - var(--r) - var(--scale-gap)) auto auto 50%;
+  width: calc((var(--r) + var(--scale-gap)) * 2);
+  aspect-ratio: 1;
+  translate: -50% 0;
+  border-radius: 50%;
+  background: repeating-conic-gradient(
+    from calc(var(--sweep) / -2 - 0.15deg),
+    #6a6964 0deg 0.3deg,
+    transparent 0.55deg 5.75deg,
+    #6a6964 6deg
+  );
+  mask:
+    radial-gradient(closest-side, transparent calc(100% - 7px), #000 calc(100% - 7px) calc(100% - 1px), transparent 100%),
+    conic-gradient(from calc(var(--sweep) / -2 - 3deg), #000 calc(var(--sweep) + 6deg), transparent 0);
+  mask-composite: intersect;
+  pointer-events: none;
+}
+
+/* The knob: a small knurled crown seen from above, its pointer turned to the
+   chosen stop. */
+[data-skin="hardware"] [data-kit="mode-dial-knob"] {
+  position: absolute;
+  top: calc(var(--size) / 2);
+  left: 50%;
+  width: 72px;
+  height: 72px;
+  translate: -50% -50%;
+  border-radius: 50%;
+  corner-shape: round;
+  background:
+    radial-gradient(circle, transparent 60%, rgb(0 0 0 / 0.06) 61%, transparent 64%),
+    radial-gradient(120% 120% at 35% 25%, #ffffff, #e9e8e4 60%, #dcdbd6);
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 0 0 4px #d9d8d3,
+    0 0 0 4.5px rgb(0 0 0 / 0.08),
+    0 0 0 8px transparent,
+    0 0 0 4px #d9d8d3,
+    0 2px 2px 4px hsl(var(--shadow-color) / calc(0.18 * var(--shadow-k))),
+    1px 6px 12px 2px hsl(var(--shadow-color) / calc(0.16 * var(--shadow-k)));
+  cursor: grab;
+  touch-action: none;
+
+  /* The knurled rim: fine radial ribs around the edge. */
+  &::before {
+    content: "";
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    corner-shape: round;
+    background: repeating-conic-gradient(from var(--at), #efeeea 0deg 1.4deg, #c8c7c2 2deg 3.4deg, #efeeea 4deg);
+    mask: radial-gradient(closest-side, transparent calc(100% - 4px), #000 calc(100% - 4px));
+    transition: background 0ms;
+  }
+
+  &:active {
+    cursor: grabbing;
+  }
+}
+
+[data-skin="hardware"] [data-kit="mode-dial-pointer"] {
+  position: absolute;
+  inset: 0;
+  rotate: var(--at);
+  transition: rotate 240ms var(--ease-detent);
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 7px;
+    left: 50%;
+    width: 3px;
+    height: 16px;
+    margin-left: -1.5px;
+    border-radius: 2px;
+    background: var(--key-color);
+  }
+}
+
+[data-skin="hardware"] [data-kit="mode-dial"] [data-kit="mode-dial-knob"]::before {
+  rotate: var(--at);
+  transition: rotate 240ms var(--ease-detent);
+}
+
+/* A stop: placed round the arc, kept upright, with a long tick behind it. The
+   chosen one sits in a filled circle. */
+[data-skin="hardware"] [data-kit="mode-stop"]:not(#_):not(#_) {
+  position: absolute;
+  top: calc(var(--size) / 2);
+  left: 50%;
+  display: grid;
+  place-items: center;
+  width: auto;
+  height: auto;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  translate: none;
+  transform: translate(-50%, -50%) rotate(var(--a)) translateY(calc(var(--r) * -1)) rotate(calc(var(--a) * -1));
+  cursor: pointer;
+
+  &::before {
+    content: none;
+  }
+
+  &:focus-visible {
+    outline: none;
+
+    & [data-kit="mode-stop-label"] {
+      outline: 2px solid var(--key-color);
+      outline-offset: 2px;
+    }
+  }
+}
+
+[data-skin="hardware"] [data-kit="mode-stop-label"] {
+  display: grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: 10px;
+  corner-shape: round;
+  font: 500 8px/1 var(--mono, monospace);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: #6a6964;
+  transition:
+    background 160ms,
+    color 160ms;
+
+  [data-kit="mode-stop"]:hover & {
+    color: var(--ink);
+  }
+
+  [data-kit="mode-stop"]:is([data-checked], [aria-checked="true"]) & {
+    color: var(--on-accent);
+    background: var(--key-cap);
+    box-shadow: 0 1px 0 rgb(255 255 255 / 0.6);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-skin="hardware"] [data-kit="mode-dial-pointer"],
+  [data-skin="hardware"] [data-kit="mode-dial"] [data-kit="mode-dial-knob"]::before {
+    transition: none;
+  }
+}
+
+/* The mode dial's knob stands off the panel like the date setter's jog
+   wheel, on a side wall with a contact shadow. */
+[data-skin="hardware"] [data-kit="mode-dial-knob"]:not(#_):not(#_) {
+  translate: -50% calc(-50% - 3px);
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 0 0 4px #d9d8d3,
+    0 0 0 4.5px rgb(0 0 0 / 0.08),
+    0 3px 0 4px #c4c3be,
+    0 3px 0 4.5px rgb(0 0 0 / 0.1),
+    0.5px 4px 2px 4px hsl(var(--shadow-color) / calc(0.2 * var(--shadow-k))),
+    1px 8px 14px 1px hsl(var(--shadow-color) / calc(0.18 * var(--shadow-k)));
+}
+
+/* The mode dial panel's two dials share one row at any width. Where two
+   full-size dials won't fit (a phone), each is scaled down whole, so its
+   stops stay where they belong around it. */
+[data-mode-dial-row] {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: space-around;
+  align-items: flex-start;
+  width: 100%;
+  gap: 12px;
+
+  & > * {
+    flex: 0 0 auto;
+    min-width: 0;
+  }
+}
+
+/* Scaled with a transform rather than zoom: iPhone Safari loses the dial's
+   touch-action under zoom, so a drag scrolled the page instead of turning
+   it. A dial is 214 x 202 px; at 0.72 from its top center it draws at about
+   154 x 145, and negative margins give back the rest of its box. */
+@media (max-width: 520px) {
+  [data-mode-dial-row] > * {
+    scale: 0.72;
+    transform-origin: 50% 0;
+    margin: 0 -30px -56.6px;
+  }
+}

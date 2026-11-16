@@ -442,3 +442,5 @@ ui2049.page_footer.version,ui,*,PageFooter,version,"v{{version}}",,active
 ui2049.daily_table.scroll_aria,ui,*,DailyTable,scroll_aria,"Daily usage rows",,active
 ui2049.rank_table.scroll_aria,ui,*,RankTable,scroll_aria,"Ranking rows",,active
 ui2049.page_footer.leaderboard_time,ui,*,PageFooter,leaderboard_time,"Boards in UTC",,active
+vu1.device.model,vu1,Gallery,Device,model,"VU-1",,active
+vu1.device.name,vu1,Gallery,Device,name,"VIBEUSAGE",,active

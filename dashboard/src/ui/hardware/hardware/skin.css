@@ -1,0 +1,31 @@
+/* The hardware skin. Everything is scoped to [data-skin="hardware"], so it
+   styles only what's inside the <Hardware> root. The order matters: later
+   files refine earlier ones. */
+@import "./tokens.css";
+@import "./layout.css";
+@import "./hardware-textures.css";
+@import "./hardware.css";
+@import "./hardware-more.css";
+@import "./hardware-dash.css";
+@import "./hardware-extra.css";
+@import "./hardware-field.css";
+@import "./hardware-display.css";
+@import "./hardware-side-tabs.css";
+@import "./hardware-date-setter.css";
+@import "./hardware-wheel.css";
+@import "./hardware-screens.css";
+@import "./hardware-tabs.css";
+@import "./hardware-accordion.css";
+@import "./hardware-dials.css";
+@import "./hardware-dpad.css";
+@import "./hardware-rocker.css";
+@import "./hardware-objects.css";
+@import "./hardware-navbar.css";
+@import "./hardware-lcd.css";
+@import "./hardware-slide-switch.css";
+@import "./hardware-page-wheel.css";
+@import "./hardware-menu.css";
+@import "./hardware-item-list.css";
+@import "./hardware-bar-graph.css";
+@import "./hardware-roles.css";
+@import "./hardware-touch.css";

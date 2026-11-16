@@ -1,0 +1,243 @@
+/* Item list: a table in a recessed tray. A dim header names the columns;
+   rows sit on engraved rules, their columns on one grid. The chosen row is
+   printed in ink with a key-color tick in its gutter; a row with progress
+   fills from its left in a pale wash of the key color, with a playhead
+   hairline at the front. */
+[data-skin="hardware"] [data-kit="item-list"] {
+  display: grid;
+  padding: 4px 6px 6px;
+  border-radius: calc(10px * var(--corner-scale));
+  background: #efefed;
+  box-shadow:
+    inset 0 1px 3px rgb(0 0 0 / calc(0.08 * var(--shadow-k))),
+    inset 0 0 0 1px rgb(0 0 0 / 0.035),
+    0 1px 0 #fff;
+}
+
+[data-skin="hardware"] :is([data-kit="item-list-head"], [data-kit="item-list-row"]) {
+  display: grid;
+  grid-template-columns: var(--columns);
+  align-items: center;
+  column-gap: 12px;
+  padding: 0 10px 0 16px;
+
+  & [data-align="end"] {
+    justify-self: end;
+    text-align: end;
+  }
+
+  & > span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+[data-skin="hardware"] [data-kit="item-list-head"] {
+  height: 24px;
+  font: var(--label);
+  font-size: 7.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #a3a29d;
+}
+
+[data-skin="hardware"] [data-kit="item-list-body"]:not(#_):not(#_) {
+  display: grid;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  outline: none;
+}
+
+[data-skin="hardware"] [data-kit="item-list-row"]:not(#_):not(#_) {
+  --progress: 0;
+  position: relative;
+  height: 32px;
+  border: 0;
+  border-top: 1px solid rgb(0 0 0 / 0.07);
+  border-radius: 0;
+  font: 400 11.5px/1 var(--mono, monospace);
+  color: #77766f;
+  background: none;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.7);
+  cursor: pointer;
+  isolation: isolate;
+  transition: color 120ms;
+
+  &:hover {
+    color: var(--ink);
+  }
+
+  /* The gutter tick. */
+  &::before {
+    content: "";
+    position: absolute;
+    left: 5px;
+    top: calc(50% - 4px);
+    width: 3px;
+    height: 8px;
+    border-radius: 1px;
+    background: transparent;
+    transition: background 120ms;
+  }
+
+  &[data-selected] {
+    color: var(--ink);
+
+    &::before {
+      background: var(--key-color);
+    }
+  }
+
+  &[data-highlighted] {
+    background: rgb(0 0 0 / 0.025);
+  }
+
+  /* Progress: the row fills behind its text, with a playhead at the front. */
+  &[data-progress]::after {
+    content: "";
+    position: absolute;
+    inset: 3px auto 3px 12px;
+    z-index: -1;
+    width: calc((100% - 12px) * var(--progress));
+    border-radius: 3px;
+    background:
+      linear-gradient(var(--key-color), var(--key-color)) right / 1.5px 100% no-repeat,
+      color-mix(in oklab, var(--key-color) 9%, transparent);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--key-color);
+    outline-offset: -2px;
+  }
+}
+
+[data-skin="hardware"] [data-kit="item-list-row"]:first-child:not(#_):not(#_) {
+  border-top-color: transparent;
+}
+
+/* The item list is a gray LCD: rows printed on the glass, in the light rim
+   of the other LCDs. The chosen row is marked like the select wheel's: two
+   thin key-color lines point in at it from either side. */
+[data-skin="hardware"] [data-kit="item-list"]:not(#_):not(#_) {
+  padding: 6px 10px 8px;
+  border-radius: calc(10px * var(--corner-scale));
+  color: var(--gray-ink);
+  background: var(--gray-glass);
+  box-shadow:
+    inset 0 1px 3px rgb(0 0 0 / 0.22),
+    inset 0 0 0 0.5px rgb(0 0 0 / 0.15),
+    0 0 0 4px #f2f2f0,
+    0 0 0 4.5px rgb(0 0 0 / calc(0.06 * var(--shadow-k)));
+  font-family: var(--mono, monospace);
+}
+
+[data-skin="hardware"] [data-kit="item-list-head"]:not(#_):not(#_) {
+  padding: 0 24px;
+  color: var(--gray-dim);
+  border-bottom: 1px dashed rgb(20 20 19 / 0.22);
+}
+
+[data-skin="hardware"] [data-kit="item-list-row"]:not(#_):not(#_):not(#_) {
+  padding: 0 24px;
+  border-top: 0;
+  color: rgb(20 20 19 / 0.55);
+  box-shadow: none;
+  text-shadow: var(--lcd-print);
+
+  &:hover {
+    color: var(--gray-ink);
+  }
+
+  &[data-highlighted] {
+    background: rgb(20 20 19 / 0.04);
+  }
+
+  /* The indicator: a thin line at each end of the chosen row. */
+  &::before {
+    left: 4px;
+    top: calc(50% - 0.75px);
+    width: 12px;
+    height: 1.5px;
+    border-radius: 0;
+    background: transparent;
+  }
+
+  &[data-selected] {
+    color: var(--key-ink);
+    /* On a very light key, a strip of the key color behind black text. */
+    background: var(--key-highlight);
+    font-weight: 600;
+    text-shadow: var(--lcd-print-key);
+
+    &::before {
+      background: var(--key-color);
+      box-shadow: calc(100cqw - 20px) 0 0 var(--key-color);
+    }
+  }
+
+  /* Progress fills in the glass's own dark, faintly. */
+  &[data-progress]::after {
+    inset: 3px 20px 3px 20px;
+    width: calc((100% - 40px) * var(--progress));
+    background: rgb(20 20 19 / 0.07);
+  }
+}
+
+[data-skin="hardware"] [data-kit="item-list-body"]:not(#_):not(#_) {
+  container-type: inline-size;
+}
+
+/* The date device sizes its own popover. */
+[data-skin="hardware"] [data-kit="popover"]:has(> [data-size="date-device"]):not(#_):not(#_) {
+  width: auto;
+}
+
+/* Trigger keys with an icon: icon then label. The command trigger is wider,
+   with its shortcut at the far end. */
+[data-skin="hardware"] [data-kit="button"]:has(> [data-icon]):not([data-shape]):not(#_):not(#_) {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  & > [data-icon] svg {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+[data-skin="hardware"] [data-kit="button"]:has(> [data-kit="kbd"]):not(#_):not(#_) {
+  min-width: 220px;
+  justify-content: flex-start;
+
+  & > [data-kit="kbd"] {
+    margin-inline-start: auto;
+  }
+}
+
+[data-skin="hardware"] [data-kit="item-list"]:not(#_):not(#_):not(#_) {
+  width: 100%;
+}
+
+/* Room for descenders: the cells clip their overflow, so their line box is
+   taller than the text. The header prints flat, with no emboss. */
+[data-skin="hardware"] :is([data-kit="item-list-head"], [data-kit="item-list-row"]) > span {
+  line-height: 1.5;
+}
+
+[data-skin="hardware"] [data-kit="item-list-head"]:not(#_):not(#_):not(#_) {
+  text-shadow: none;
+}
+
+/* The command trigger is wide, but never wider than its panel. */
+[data-skin="hardware"] [data-kit="button"]:has(> [data-kit="kbd"]):not(#_):not(#_):not(#_) {
+  min-width: 0;
+  width: min(100%, 220px);
+}
+
+[data-skin="hardware"] [data-kit="item-list-row"]:not(#_):not(#_):not(#_):not(#_) {
+  border-radius: 3px;
+}

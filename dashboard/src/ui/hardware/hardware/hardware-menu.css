@@ -1,0 +1,216 @@
+/* Menus are gray LCD lists, framed like the toast: rows
+   printed on the glass, the highlighted one inverted like a cursor bar, and
+   checks printed as filled or empty squares. */
+[data-skin="hardware"] [data-kit="popup"]:not([data-screen]):not(#_):not(#_):not(#_) {
+  display: grid;
+  gap: 1px;
+  min-width: 190px;
+  padding: 8px;
+  border: 0;
+  border-radius: calc(10px * var(--corner-scale));
+  background: var(--gray-glass);
+  box-shadow:
+    inset 0 1px 3px rgb(0 0 0 / 0.22),
+    inset 0 0 0 0.5px rgb(0 0 0 / 0.15),
+    0 0 0 5px #f2f2f0,
+    0 0 0 6px rgb(0 0 0 / calc(0.06 * var(--shadow-k))),
+    var(--float);
+  font-family: var(--mono, monospace);
+}
+
+[data-skin="hardware"] [data-kit="popup"]:not([data-screen]) [data-kit="option"]:not(#_):not(#_):not(#_) {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 30px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 3px;
+  font: 500 11px/1 var(--mono, monospace);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gray-ink);
+  background: none;
+  box-shadow: none;
+  translate: none;
+  text-shadow: none;
+  cursor: pointer;
+  animation: lcd-print 200ms steps(12, end) both;
+
+  &::before,
+  &::after {
+    content: none;
+  }
+
+  &[data-highlighted] {
+    color: #c6c7c1;
+    background: var(--gray-ink);
+  }
+}
+
+[data-skin="hardware"] [data-kit="popup"]:not([data-screen]) [data-kit="option-index"]:not(#_):not(#_) {
+  color: var(--gray-dim);
+
+  [data-highlighted] > & {
+    color: rgb(198 199 193 / 0.6);
+  }
+}
+
+/* Checks: a printed square, filled when checked. */
+[data-skin="hardware"] [data-kit="popup"]:not([data-screen]) [data-kit="option-check"]:not(#_):not(#_) {
+  flex-shrink: 0;
+  width: 9px;
+  height: 9px;
+  border-radius: 1px;
+  font-size: 0;
+  color: transparent;
+  background: none;
+  box-shadow: inset 0 0 0 1.5px currentColor;
+  opacity: 1;
+  visibility: visible;
+
+  [data-kit="option"] > & {
+    color: var(--gray-ink);
+  }
+
+  [data-highlighted] > & {
+    color: #c6c7c1;
+  }
+
+  &[data-checked] {
+    background: currentColor;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-skin="hardware"] [data-kit="popup"] [data-kit="option"] {
+    animation: none;
+  }
+}
+
+/* Closing after a choice, the chosen row blinks a few times, then the glass
+   fades. ui-sdk waits for these animations before it removes the menu.
+   Closed any other way, the menu just fades. */
+[data-skin="hardware"] [data-kit="popup"]:not([data-screen]):not(#_):not(#_):not(#_) {
+  transition: opacity 120ms;
+
+  &:is([data-ending-style], [data-closed]) {
+    opacity: 0;
+  }
+
+  &:is([data-ending-style], [data-closed]):has([data-chosen]) {
+    transition-delay: 300ms;
+  }
+}
+
+[data-skin="hardware"] [data-kit="popup"]:not([data-screen]):is([data-ending-style], [data-closed]) [data-kit="option"][data-chosen]:not(#_):not(#_):not(#_) {
+  animation: menu-chosen 300ms steps(1) both;
+}
+
+@keyframes menu-chosen {
+  0%,
+  50% {
+    color: #c6c7c1;
+    background: var(--gray-ink);
+  }
+
+  25%,
+  75% {
+    color: var(--gray-ink);
+    background: transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-skin="hardware"] [data-kit="popup"]:not([data-screen]):is([data-ending-style], [data-closed]) [data-kit="option"][data-chosen] {
+    animation: none;
+  }
+}
+
+/* A menu's key stays down until its menu has finished closing: the popup
+   follows the trigger and stays in the page through its blink and fade. */
+[data-skin="hardware"] [data-kit="button"]:not([data-tone="primary"]):has(~ [data-kit="popup"]:not([data-screen])):not(#_):not(#_) {
+  translate: 0 2px;
+  box-shadow: var(--key-down);
+}
+
+/* The menubar: its menus are keys standing in a gray well, dished like the
+   other keys. The open one is pressed down into the well while its menu is
+   open; hovering another while one is open moves the press to it. */
+[data-skin="hardware"] [data-kit="menubar"]:not(#_):not(#_):not(#_) {
+  display: inline-flex;
+  gap: 5px;
+  padding: 5px 5px 8px;
+  border-radius: calc(13px * var(--corner-scale));
+  background: #e9e9e6;
+  box-shadow:
+    inset 0 1px 3px rgb(0 0 0 / calc(0.1 * var(--shadow-k))),
+    inset 0 0 0 1px rgb(0 0 0 / 0.04),
+    0 1px 0 #fff;
+}
+
+[data-skin="hardware"] [data-kit="menubar-trigger"]:not(#_):not(#_):not(#_):not(#_) {
+  --lift: 3px;
+  height: 34px;
+  min-width: 64px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: calc(8px * var(--corner-scale));
+  font: var(--label);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: linear-gradient(0deg, #ffffff, #f2f2f0 70%, #eeeeec);
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 0 0 0.5px rgb(0 0 0 / 0.1),
+    0 var(--lift) 0 #d6d6d2,
+    0 calc(var(--lift) + 0.5px) 1.5px rgb(0 0 0 / calc(0.14 * var(--shadow-k)));
+  translate: 0 calc(var(--lift) * -1 + 3px);
+  text-shadow: none;
+  cursor: pointer;
+  transition:
+    --lift 90ms cubic-bezier(0.3, 0, 0.6, 1),
+    background 90ms;
+
+  &::before,
+  &::after {
+    content: none;
+  }
+
+  &:is([data-open], [aria-expanded="true"], :active) {
+    --lift: 0.5px;
+    background: linear-gradient(0deg, #f1f1ef, #e6e6e3 70%, #e2e2df);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--key-color);
+    outline-offset: 2px;
+  }
+}
+
+/* The menubar without a well: its keys stand straight on the panel, grouped
+   by an engraved hairline around them. */
+[data-skin="hardware"] [data-kit="menubar"]:not(#_):not(#_):not(#_):not(#_) {
+  padding: 6px 6px 9px;
+  background: none;
+  box-shadow:
+    inset 0 0 0 1px rgb(0 0 0 / 0.12),
+    inset 0 1px 0 1px rgb(255 255 255 / 0.85);
+}
+
+/* A key's base is centered in the menubar's frame. Standing, the face rises
+   by its wall height with the wall showing below; pressed all the way, the
+   face sits on its base, with equal space above and below. */
+[data-skin="hardware"] [data-kit="menubar"]:not(#_):not(#_):not(#_):not(#_):not(#_) {
+  padding: 7px;
+}
+
+[data-skin="hardware"] [data-kit="menubar-trigger"]:not(#_):not(#_):not(#_):not(#_):not(#_) {
+  translate: 0 calc(var(--lift) * -1);
+
+  &:is([data-open], [aria-expanded="true"], :active) {
+    --lift: 0px;
+  }
+}
