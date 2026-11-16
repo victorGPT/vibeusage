@@ -1,0 +1,302 @@
+/* Slide switch: the same parts as the side tabs' selector. A narrow slot
+   with a printed detent tick at each position and its label beside it, and
+   a ribbed lever that snaps to the chosen position. Horizontal: the slot
+   runs across with labels below. Vertical: down the side, labels beside. */
+[data-skin="hardware"] [data-kit="slide-switch"] {
+  --col: 64px;
+  --row: 34px;
+  --slot-y: 12px;
+  --slot-x: 14px;
+  position: relative;
+  display: grid;
+  justify-self: center;
+  user-select: none;
+
+  /* Positions share the width, up to their natural size, so a switch fits
+     wherever it's put; the slot and lever are placed in shares too. */
+  &[data-orientation="horizontal"] {
+    grid-template-columns: repeat(var(--n), minmax(0, 1fr));
+    width: min(100%, calc(var(--n) * var(--col)));
+  }
+
+  touch-action: none;
+  cursor: grab;
+
+  &[data-dragging] {
+    cursor: grabbing;
+  }
+
+  &[data-orientation="vertical"] {
+    grid-auto-rows: var(--row);
+    justify-self: start;
+  }
+
+  /* The slot. */
+  &::before {
+    content: "";
+    position: absolute;
+    border-radius: 3px;
+    corner-shape: round;
+    background: linear-gradient(90deg, #1b1b1a, #2c2c2a);
+    box-shadow:
+      inset 0 1px 2px rgb(0 0 0 / 0.5),
+      0 0 0 1px rgb(0 0 0 / 0.06),
+      0 1px 0 1px rgb(255 255 255 / 0.8);
+  }
+
+  &[data-orientation="horizontal"]::before {
+    top: calc(var(--slot-y) - 3px);
+    left: calc(50% / var(--n) - 6px);
+    right: calc(50% / var(--n) - 6px);
+    height: 6px;
+  }
+
+  &[data-orientation="vertical"]::before {
+    top: calc(var(--row) / 2 - 6px);
+    bottom: calc(var(--row) / 2 - 6px);
+    left: calc(var(--slot-x) - 3px);
+    width: 6px;
+  }
+}
+
+[data-skin="hardware"] [data-kit="slide-switch-stop"]:not(#_):not(#_) {
+  position: relative;
+  display: flex;
+  width: auto;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  font: var(--label);
+  font-size: 8.5px;
+  line-height: 1;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: #8a8984;
+  background: none;
+  box-shadow: none;
+  translate: none;
+  cursor: pointer;
+  transition: color 160ms;
+
+  [data-orientation="horizontal"] > & {
+    justify-content: center;
+    align-items: flex-end;
+    height: calc(var(--slot-y) + 34px);
+    padding-bottom: 4px;
+  }
+
+  [data-orientation="vertical"] > & {
+    align-items: center;
+    padding-inline-start: calc(var(--slot-x) + 22px);
+  }
+
+  /* The detent tick. */
+  &::before {
+    content: "";
+    position: absolute;
+    width: auto;
+    height: auto;
+    border-radius: 0;
+    background: #b5b4af;
+    box-shadow: none;
+  }
+
+  [data-orientation="horizontal"] > &::before {
+    left: calc(50% - 0.5px);
+    top: calc(var(--slot-y) + 8px);
+    width: 1px;
+    height: 6px;
+  }
+
+  [data-orientation="vertical"] > &::before {
+    left: calc(var(--slot-x) + 8px);
+    top: calc(50% - 0.5px);
+    width: 7px;
+    height: 1px;
+  }
+
+  &::after {
+    content: none;
+  }
+
+  &:hover {
+    color: var(--ink);
+  }
+
+  &:is([data-checked], [aria-checked="true"]) {
+    color: var(--ink);
+
+    &::before {
+      background: var(--key-color);
+    }
+  }
+
+  &:focus-visible {
+    outline: none;
+    color: var(--ink);
+    text-decoration: underline;
+    text-decoration-color: var(--key-ink);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 4px;
+  }
+}
+
+[data-skin="hardware"] [data-kit="slide-switch-lever"] {
+  position: absolute;
+  z-index: 1;
+  border-radius: calc(4px * var(--corner-scale));
+  background:
+    repeating-linear-gradient(var(--rib-dir, 90deg), rgb(0 0 0 / 0.12) 0 1px, transparent 1px 3px) center / 50% 60% no-repeat,
+    linear-gradient(0deg, #ffffff, #efefec 70%, #e9e9e6);
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 0 0 0.5px rgb(0 0 0 / 0.18),
+    0 2px 0 #d2d2ce,
+    0 2.5px 1px rgb(0 0 0 / calc(0.14 * var(--shadow-k))),
+    0 4px 8px -3px rgb(0 0 0 / calc(0.18 * var(--shadow-k)));
+  pointer-events: none;
+  transition:
+    left 300ms var(--ease-detent),
+    top 300ms var(--ease-detent);
+
+  /* Dragged, it follows the pointer exactly. */
+  [data-dragging] > & {
+    transition: none;
+  }
+
+  [data-orientation="horizontal"] > & {
+    width: 16px;
+    height: 26px;
+    top: calc(var(--slot-y) - 14px);
+    left: calc((var(--i) + 0.5) * 100% / var(--n) - 8px);
+  }
+
+  [data-orientation="vertical"] > & {
+    --rib-dir: 180deg;
+    width: 26px;
+    height: 16px;
+    left: calc(var(--slot-x) - 13px);
+    top: calc(var(--i) * var(--row) + var(--row) / 2 - 9px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-skin="hardware"] [data-kit="slide-switch-lever"] {
+    transition: none;
+  }
+}
+
+/* Upright with its labels on the start side: the slot moves to the end and
+   the labels right-align against it. */
+[data-skin="hardware"] [data-kit="slide-switch"][data-orientation="vertical"][data-side="start"] {
+  justify-self: end;
+
+  &::before {
+    left: auto;
+    right: calc(var(--slot-x) - 3px);
+  }
+
+  & > [data-kit="slide-switch-stop"]:not(#_):not(#_) {
+    justify-content: flex-end;
+    padding-inline: 0 calc(var(--slot-x) + 22px);
+
+    &::before {
+      left: auto;
+      right: calc(var(--slot-x) + 8px);
+    }
+  }
+
+  & > [data-kit="slide-switch-lever"] {
+    left: auto;
+    right: calc(var(--slot-x) - 13px);
+  }
+}
+
+/* The catalog's three directions, side by side. */
+[data-skin="hardware"] [data-switch-demo] {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  align-items: center;
+  gap: 24px;
+  width: 100%;
+
+  & > [data-kit="field"] {
+    flex: 0 1 auto;
+    min-width: 0;
+  }
+
+  & [data-kit="slide-switch"][data-orientation="horizontal"] {
+    width: calc(var(--n) * var(--col));
+  }
+}
+
+/* The ticks sit just clear of the lever, so the chosen one shows too. */
+[data-skin="hardware"] [data-kit="slide-switch"] {
+  & > [data-kit="slide-switch-stop"]:not(#_):not(#_):not(#_) {
+    &::before {
+      transition: background 160ms;
+    }
+  }
+
+  &[data-orientation="horizontal"] > [data-kit="slide-switch-stop"]:not(#_):not(#_):not(#_) {
+    height: calc(var(--slot-y) + 38px);
+
+    &::before {
+      top: calc(var(--slot-y) + 15px);
+    }
+  }
+
+  &[data-orientation="vertical"]:not([data-side="start"]) > [data-kit="slide-switch-stop"]:not(#_):not(#_):not(#_) {
+    padding-inline-start: calc(var(--slot-x) + 30px);
+
+    &::before {
+      left: calc(var(--slot-x) + 16px);
+    }
+  }
+
+  &[data-orientation="vertical"][data-side="start"] > [data-kit="slide-switch-stop"]:not(#_):not(#_):not(#_) {
+    padding-inline: 0 calc(var(--slot-x) + 30px);
+
+    &::before {
+      right: calc(var(--slot-x) + 16px);
+    }
+  }
+}
+
+/* Across with its labels on the start side, above: the same parts mirrored
+   top to bottom, each measured from the bottom edge instead of the top, so
+   a pair of switches can print their labels outward from each other. */
+[data-skin="hardware"] [data-kit="slide-switch"][data-orientation="horizontal"][data-side="start"] {
+  &::before {
+    top: auto;
+    bottom: calc(var(--slot-y) - 3px);
+  }
+
+  & > [data-kit="slide-switch-stop"]:not(#_):not(#_):not(#_) {
+    align-items: flex-start;
+    padding-bottom: 0;
+    padding-top: 4px;
+
+    &::before {
+      top: auto;
+      bottom: calc(var(--slot-y) + 15px);
+    }
+  }
+
+  & > [data-kit="slide-switch-lever"] {
+    top: auto;
+    bottom: calc(var(--slot-y) - 14px);
+  }
+}
+
+/* Keyboard focus rings the lever, the part a hand would move, in the same
+   key-color ring as the knobs and sliders; the focused stop's label keeps
+   its underline. */
+[data-skin="hardware"] [data-kit="slide-switch"]:has([data-kit="slide-switch-stop"]:focus-visible) > [data-kit="slide-switch-lever"] {
+  outline: 2px solid var(--key-color);
+  outline-offset: 2px;
+}

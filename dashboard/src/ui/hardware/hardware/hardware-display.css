@@ -1,0 +1,238 @@
+/* The display: a screen set into the device behind a thick black bezel. The
+   bezel catches a highlight on its top edge and casts a shadow onto the
+   panel; the glass vignettes its edges and carries a faint reflection, and
+   the content behind it stays bright. */
+[data-skin="hardware"] [data-kit="display"] {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+  margin: 0;
+}
+
+[data-skin="hardware"] [data-kit="display-bezel"] {
+  padding: 11px;
+  border-radius: calc(14px * var(--corner-scale));
+  background: var(--tex-matte), linear-gradient(180deg, #1d1d1c, #0d0d0c 40%, #090908);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.12),
+    inset 0 -1px 0 rgb(0 0 0 / calc(0.8 * var(--shadow-k))),
+    0 0 0 1px rgb(0 0 0 / calc(0.55 * var(--shadow-k))),
+    0 1px 0 1px rgb(255 255 255 / 0.9),
+    0 4px 3px rgb(0 0 0 / calc(0.18 * var(--shadow-k))),
+    0 22px 36px -14px rgb(0 0 0 / calc(0.5 * var(--shadow-k)));
+}
+
+[data-skin="hardware"] [data-kit="display-screen"] {
+  position: relative;
+  overflow: hidden;
+  /* Concentric with the bezel: its radius less the bezel's padding, so the
+     black rim is the same width along the sides and round the corners. */
+  border-radius: max(2px, calc(14px * var(--corner-scale) - 11px));
+  background: #000;
+  box-shadow: 0 0 0 1px #000;
+  isolation: isolate;
+  /* The panel's print is debossed with a white edge below it. On a lit
+     screen that edge would show as a second image, so it stops here. */
+  text-shadow: none;
+
+  & > :is(img, video, canvas, svg) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: saturate(1.08) brightness(1.04);
+  }
+
+  /* The glass: edges sink into the bezel, a soft reflection crosses the top. */
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    border-radius: inherit;
+    background: linear-gradient(162deg, rgb(255 255 255 / 0.14), rgb(255 255 255 / 0.03) 32%, transparent 46%);
+    box-shadow:
+      inset 0 0 0 1px rgb(0 0 0 / calc(0.9 * var(--shadow-k))),
+      inset 0 2px 6px rgb(0 0 0 / calc(0.7 * var(--shadow-k))),
+      inset 0 0 22px 4px rgb(0 0 0 / calc(0.45 * var(--shadow-k)));
+  }
+
+  /* A barely-there pixel grid, seen only up close. */
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: repeating-linear-gradient(0deg, rgb(0 0 0 / 0.025) 0 1px, transparent 1px 2px);
+    mix-blend-mode: multiply;
+  }
+}
+
+[data-skin="hardware"] [data-kit="display-label"] {
+  justify-self: center;
+  font: var(--label);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--dim);
+  user-select: none;
+}
+
+/* Code on the display: bright mono type on the dark glass, glowing a little,
+   with dim line numbers and a copy key in the corner. */
+[data-skin="hardware"] [data-kit="code"] {
+  position: relative;
+  padding: 14px 16px 16px;
+  font: 12px/1.65 var(--mono, "Spec Mono", monospace);
+  letter-spacing: 0.04em;
+  color: #f2f2ee;
+  text-shadow: 0 0 6px rgb(255 255 255 / 0.35);
+  background: radial-gradient(130% 150% at 50% 0%, #161615, #050505 70%);
+  overflow-x: auto;
+
+  & ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* Long lines wrap rather than run off a narrow screen. The code is its
+     own column beside the number, so a wrapped line hangs under the code,
+     not under the number; indentation is kept. */
+  & li {
+    display: flex;
+    white-space: pre-wrap;
+  }
+
+  & li[data-error] code {
+    color: #ff6b5e;
+    text-shadow: 0 0 8px rgb(255 80 60 / 0.5);
+  }
+
+  & code {
+    flex: 0 1 auto;
+    min-width: 0;
+    font: inherit;
+    overflow-wrap: anywhere;
+  }
+}
+
+[data-skin="hardware"] [data-kit="code-number"] {
+  flex-shrink: 0;
+  width: 2.6em;
+  color: rgb(242 242 238 / 0.35);
+  text-shadow: none;
+  user-select: none;
+}
+
+[data-skin="hardware"] [data-kit="code"] [data-token="keyword"] {
+  color: #8fd3ff;
+  text-shadow: 0 0 8px rgb(143 211 255 / 0.45);
+}
+
+[data-skin="hardware"] [data-kit="code"] [data-token="string"] {
+  color: #ffb347;
+  text-shadow: 0 0 8px rgb(255 179 71 / 0.45);
+}
+
+[data-skin="hardware"] [data-kit="code"] [data-token="number"] {
+  color: #ffd98a;
+}
+
+[data-skin="hardware"] [data-kit="code"] [data-token="comment"] {
+  color: rgb(242 242 238 / 0.4);
+  text-shadow: none;
+}
+
+/* A block cursor at the end of the line being typed. It holds steady while
+   typing and blinks once the screen is waiting. */
+[data-skin="hardware"] [data-kit="code-cursor"] {
+  display: inline-block;
+  width: 0.6em;
+  height: 1.1em;
+  margin-inline-start: 1px;
+  align-self: center;
+  background: currentColor;
+  box-shadow: 0 0 6px rgb(255 255 255 / 0.4);
+
+  &[data-idle] {
+    animation: code-blink 1s steps(1) infinite;
+  }
+}
+
+@keyframes code-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+[data-skin="hardware"] [data-kit="code"] li[data-pending] {
+  visibility: hidden;
+}
+
+/* The copy key sits on the bezel's right side, like a side button on a
+   device: it stands out from the edge, pushes in when pressed, and stays in
+   for a moment once the code is copied. The language is printed above the
+   screen, at its top left. */
+[data-skin="hardware"] [data-kit="code-block"] {
+  position: relative;
+  display: grid;
+  gap: 8px;
+  padding-inline-end: 8px;
+}
+
+[data-skin="hardware"] [data-kit="code-label"] {
+  font: var(--label);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--dim);
+  user-select: none;
+}
+
+/* The side key is placed against the bezel itself, a little below its top
+   corner, so it lines up whatever sits above the screen. */
+[data-skin="hardware"] [data-kit="code-block"] {
+  width: 100%;
+}
+
+[data-skin="hardware"] [data-kit="code-body"] {
+  position: relative;
+  min-width: 0;
+}
+
+[data-skin="hardware"] [data-kit="code-copy"] {
+  position: absolute;
+  top: 30px;
+  right: -8px;
+  width: 9px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 0 calc(4px * var(--corner-scale)) calc(4px * var(--corner-scale)) 0;
+  background: var(--tex-matte), linear-gradient(90deg, #121211, #3a3a38 55%, #232322);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.12),
+    1px 0 0 #0c0c0b,
+    2px 2px 3px hsl(var(--shadow-color, 45deg 8% 30%) / 0.35);
+  cursor: pointer;
+  transition:
+    translate 90ms,
+    box-shadow 90ms;
+
+  &:active,
+  &[data-copied] {
+    translate: -3px 0;
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.08);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--key-color);
+    outline-offset: 2px;
+  }
+}
+
+/* Code sets solid, with no added tracking. */
+[data-skin="hardware"] [data-kit="code"]:not(#_) :is(code, [data-kit="code-number"]) {
+  letter-spacing: 0;
+}

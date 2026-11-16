@@ -14,6 +14,9 @@ const SRC = path.resolve(ROOT, "src");
 
 const EXTS = new Set([".jsx", ".tsx", ".js", ".ts"]);
 
+// SPEC-01 registry code (MIT), kept as shipped, so its literal colors are allowed.
+const VENDOR = "src/ui/hardware/";
+
 const CHECKS = [
   {
     label: "matrix-* legacy token namespace (deleted)",
@@ -22,6 +25,7 @@ const CHECKS = [
   {
     label: "raw [#hex] color in className (use ink/surface/gold token)",
     pattern: /\[#[0-9a-fA-F]{3,6}\]/,
+    skip: VENDOR,
   },
   {
     label:
@@ -44,6 +48,7 @@ const CHECKS = [
   {
     label: "text-white|text-black|bg-white|bg-black (use ink-bright / surface)",
     pattern: /\b(?:text-white|text-black|bg-white|bg-black)\b/,
+    skip: VENDOR,
   },
   {
     label: "redundant /N on rgba-backed ink token (Tailwind ignores it)",
@@ -94,8 +99,8 @@ const CHECKS_2049 = [
 
 function checksFor(file) {
   const rel = path.relative(ROOT, file).split(path.sep).join("/");
-  if (!SCOPE_2049.some((dir) => rel.startsWith(dir))) return CHECKS;
-  return CHECKS_2049.filter((check) => !check.skip || !rel.startsWith(check.skip));
+  const checks = SCOPE_2049.some((dir) => rel.startsWith(dir)) ? CHECKS_2049 : CHECKS;
+  return checks.filter((check) => !check.skip || !rel.startsWith(check.skip));
 }
 
 function* walk(dir) {

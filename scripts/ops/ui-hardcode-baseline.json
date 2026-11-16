@@ -1,13 +1,49 @@
 {
-  "generatedAt": "2026-11-12T23:53:12.318Z",
+  "generatedAt": "2026-11-16T15:57:48.364Z",
   "root": "dashboard/src",
   "rules": {
     "colors": "hex/rgb(a) literals",
     "rawText": "JSX text nodes containing letters or digits"
   },
   "totals": {
-    "colors": 0,
-    "rawText": 0
+    "colors": 1,
+    "rawText": 6
   },
-  "files": {}
+  "files": {
+    "dashboard/src/ui/hardware/button-group.tsx": {
+      "colors": 0,
+      "rawText": 1,
+      "rawTextTokens": [
+        "part.repeat ? ("
+      ]
+    },
+    "dashboard/src/ui/hardware/code-block.tsx": {
+      "colors": 0,
+      "rawText": 2,
+      "rawTextTokens": [
+        "group !== undefined)] parts.push(",
+        "typed.line const text = current ? line.slice(0, typed.chars) : line return ("
+      ]
+    },
+    "dashboard/src/ui/hardware/item-list.tsx": {
+      "colors": 0,
+      "rawText": 1,
+      "rawTextTokens": [
+        "column.width ?? \"auto\").join(\" \") return ("
+      ]
+    },
+    "dashboard/src/ui/hardware/lib/block-caret.ts": {
+      "colors": 1,
+      "rawText": 0,
+      "rawTextTokens": []
+    },
+    "dashboard/src/ui/hardware/segmented-control.tsx": {
+      "colors": 0,
+      "rawText": 2,
+      "rawTextTokens": [
+        "[...root.querySelectorAll",
+        "x"
+      ]
+    }
+  }
 }

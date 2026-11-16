@@ -1,0 +1,46 @@
+/* Bar graph: segments 2px tall on a 4px pitch, lit in the key color as it
+   glows on a screen. The graph is a whole number of pitches tall and each
+   column's lit part snaps to one, so no segment is cut short at the top. The
+   unlit segments show as a faint ghost, like an LCD's unlit digits, and the
+   lit ones glow in their own color. */
+[data-skin="hardware"] [data-kit="bar-graph"] {
+  --pitch: 4px;
+  --segment: calc(var(--pitch) / 2);
+  --ghost: rgb(242 242 238 / 0.07);
+  display: grid;
+  grid-template-columns: repeat(var(--columns), minmax(0, 1fr));
+  gap: 3px;
+  height: calc(var(--pitch) * var(--segments));
+}
+
+[data-skin="hardware"] [data-kit="bar-graph-bar"] {
+  position: relative;
+  background: repeating-linear-gradient(0deg, var(--ghost) 0 var(--segment), transparent var(--segment) var(--pitch));
+
+  /* The lit part: from the foot up, both stripes counted from the bottom so
+     the lit segments sit exactly on the ghost ones. */
+  &::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 0;
+    height: calc(var(--v) * 100%);
+    height: round(calc(var(--v) * 100%), var(--pitch));
+    background: repeating-linear-gradient(0deg, var(--lcd-key) 0 var(--segment), transparent var(--segment) var(--pitch));
+    /* The glow follows each segment's shape: a tight halo, then a wider
+       bloom that merges the stack into one lit column. */
+    filter:
+      drop-shadow(0 0 1.5px color-mix(in oklab, var(--lcd-key) 80%, transparent))
+      drop-shadow(0 0 5px color-mix(in oklab, var(--lcd-key) 45%, transparent));
+  }
+}
+
+/* The catalog's example: the graph on a small screen, its levels moving. */
+[data-skin="hardware"] [data-bar-graph-demo] {
+  width: 100%;
+  padding: 14px 14px 12px;
+  border-radius: calc(8px * var(--corner-scale));
+  background: var(--screen-glass);
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.04),
+    0 1px 0 #fff;
+}

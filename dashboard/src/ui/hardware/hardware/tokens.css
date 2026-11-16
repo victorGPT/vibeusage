@@ -1,0 +1,79 @@
+/* The theme: a lightness, a chroma and a hue, turned into an OKLCH color,
+   which reaches into P3 on displays that show it. The skin uses it in three
+   roles, each worked out from the one color with relative color syntax:
+
+   - --key-color, the theme itself: key caps, wedges, fills, anything large.
+   - --key-ink: text and thin marks on the light panels. Its lightness is
+     capped at 0.62, so a light key still reads. A light key (above 0.68,
+     like yellow or a bright green) can't be darkened into a readable ink
+     and still look like itself (a yellow turns ochre or olive, a green
+     muddy), so its ink is near-black, and the key color comes back as a
+     marker behind the text.
+   - --key-highlight: that marker. The key color for a light key, and
+     transparent for every other, so rules can lay it behind selected text
+     unconditionally: a highlighter stripe, a label behind a number.
+   - --key-lamp: lit lamps on the panels. The key color, except that a very
+     light key lights at 0.86 so a lit lamp still stands out from an unlit
+     one on white.
+   - --key-cap: a fill carrying a small white legend, never lighter than
+     0.55 so the legend reads (light keys, with black legends, keep their
+     color). Used by the mode dial's chosen chip.
+   - --key-glow: lit things on dark screens. Never darker than 0.72, and a
+     key with no chroma (black) lights near-white instead.
+
+   `clamp(0, (l - 0.68) * 1000, 1)` is a switch: 0 for a key at or below
+   0.68 lightness, 1 above. --key-tone is the same switch on --theme-l, for
+   use outside a color. (Legends on key caps switch at 0.8, below.)
+
+   Text on a key cap (--on-accent) is white below a lightness of 0.8 and ink
+   above, by the same switch. contrast-color() would also do this, but by
+   the WCAG 2 formula, which puts black legends on the orange-red keys. */
+[data-skin] {
+  --theme: oklch(var(--theme-l, 0.24) var(--theme-c, 0) var(--theme-h, 0));
+  --key-tone: clamp(0, (var(--theme-l, 0.24) - 0.68) * 1000, 1);
+  --key-ink: oklch(
+    from var(--theme)
+      calc(min(l, 0.62) * (1 - clamp(0, (l - 0.68) * 1000, 1)) + 0.22 * clamp(0, (l - 0.68) * 1000, 1))
+      calc(c * (1 - clamp(0, (l - 0.68) * 1000, 1)) + 0.01 * clamp(0, (l - 0.68) * 1000, 1))
+      h
+  );
+  --key-highlight: color-mix(in oklab, var(--theme) calc(var(--key-tone) * 100%), transparent);
+  --key-cap: oklch(from var(--theme) calc(l - max(0, l - 0.55) * (1 - clamp(0, (l - 0.8) * 1000, 1))) c h);
+  --key-lamp: oklch(from var(--theme) min(l, 0.86) c h);
+  --key-glow: oklch(from var(--theme) max(l, calc(0.95 - 0.23 * clamp(0, c * 20, 1))) c h);
+  --on-accent: oklch(clamp(0.18, (0.8 - var(--theme-l, 0.24)) * 1000, 1) 0 0);
+
+  /* Motion, as mechanisms move rather than springs. --ease-detent is for
+     anything that snaps to a position, like a lever, a latch, a dial's
+     pointer or an indicator: a moment's resistance, then a quick travel
+     that stops dead at the detent, with no overshoot. --ease-settle is for
+     things that don't click, like screens, meters and pop-ups: a smooth
+     ease-out that comes to rest without a bounce. */
+  --ease-detent: cubic-bezier(0.45, 0, 0.15, 1);
+  --ease-settle: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* Touch screens. WebKit flashes a gray box over anything tapped; the skin
+   draws its own pressed states, so the flash is turned off (the property is
+   inherited, so the root covers everything). */
+[data-skin] {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* iOS zooms into any focused field set smaller than 16px, so on touch
+   screens every field is 16px. It's a platform rule rather than a style,
+   hence !important over the skin's per-part sizes. */
+@media (pointer: coarse) {
+  [data-skin] :is(input:not([type="range"], [type="checkbox"], [type="radio"], [type="hidden"]), textarea, select, [contenteditable]) {
+    font-size: 16px !important;
+  }
+}
+
+/* Images are pictures, not text: a drag across them doesn't select them,
+   and they can't be dragged out. Each <img> also sets draggable={false};
+   this covers any image added outside React. */
+[data-skin] img {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}

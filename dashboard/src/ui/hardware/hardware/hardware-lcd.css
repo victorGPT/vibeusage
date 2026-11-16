@@ -1,0 +1,479 @@
+/* The gray LCD: a recessed window of gray reflective glass with dark print,
+   lit by the room rather than from behind. Shared by the LCD component, the
+   tooltip, the hover card, the toast and the timer. */
+[data-skin="hardware"] {
+  --gray-glass:
+    var(--tex-matte),
+    linear-gradient(180deg, #b6b7b1, #c8c9c3 35%, #c2c3bd);
+  --gray-ink: #141413;
+  --gray-dim: rgb(20 20 19 / 0.6);
+  --gray-ghost: rgb(20 20 19 / 0.07);
+  /* Dark print on gray glass sits a hair above it, with a faint shadow. */
+  /* The print floats above the reflective backing and casts a sharp shadow
+     down and to the right, as on a real segment display. */
+  --lcd-print: 0.25px 1px 0 rgb(20 20 19 / 14%);
+  /* Key-colored print casts the same gray, a little lighter: under opaque
+     key color the regular 14% reads darker than it does under the gray
+     print, which is translucent. */
+  --lcd-print-key: 0.25px 1px 0 rgb(20 20 19 / 9%);
+  --gray-well:
+    inset 0 1px 3px rgb(0 0 0 / 0.25),
+    inset 0 0 0 0.5px rgb(0 0 0 / 0.15),
+    0 1px 0 #fff;
+}
+
+[data-skin="hardware"] [data-kit="lcd"] {
+  display: inline-grid;
+  gap: 6px;
+  min-width: 0;
+  padding: 10px 14px 9px;
+  border-radius: calc(7px * var(--corner-scale));
+  color: var(--gray-ink);
+  background: var(--gray-glass);
+  box-shadow: var(--gray-well);
+  font-family: var(--mono, monospace);
+  text-shadow: none;
+
+  &[data-size="sm"] {
+    gap: 3px;
+    padding: 5px 8px 4px;
+    border-radius: calc(4px * var(--corner-scale));
+  }
+
+  &[data-size="lg"] {
+    gap: 8px;
+    padding: 14px 20px 12px;
+    border-radius: calc(10px * var(--corner-scale));
+  }
+}
+
+[data-skin="hardware"] [data-kit="lcd-tag"] {
+  font-size: 8px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gray-dim);
+}
+
+[data-skin="hardware"] [data-kit="lcd-body"] {
+  font-size: 12px;
+  line-height: 1.4;
+  letter-spacing: 0.04em;
+}
+
+[data-skin="hardware"] [data-kit="lcd-digits"] {
+  position: relative;
+  display: inline-grid;
+  font: 400 26px/1 var(--mono, monospace);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+
+  [data-size="sm"] & {
+    font-size: 14px;
+  }
+
+  [data-size="lg"] & {
+    font-size: 48px;
+    font-weight: 300;
+  }
+
+  & > span {
+    grid-area: 1 / 1;
+  }
+}
+
+[data-skin="hardware"] [data-kit="lcd-ghost"]:not(#_):not(#_):not(#_):not(#_):not(#_) {
+  color: var(--gray-ghost);
+  text-shadow: none;
+}
+
+/* Toast: a gray LCD strip that prints its lines in, one after the other. */
+[data-skin="hardware"] [data-kit="toast"]:not(#_):not(#_):not(#_) {
+  color: var(--gray-ink);
+  background: var(--gray-glass);
+  box-shadow:
+    inset 0 1px 3px rgb(0 0 0 / 0.22),
+    inset 0 0 0 0.5px rgb(0 0 0 / 0.15),
+    0 0 0 5px #f2f2f0,
+    0 0 0 6px rgb(0 0 0 / calc(0.06 * var(--shadow-k))),
+    0 10px 24px -8px rgb(0 0 0 / calc(0.3 * var(--shadow-k)));
+  text-shadow: none;
+}
+
+[data-skin="hardware"] [data-kit="toast-text"] > * {
+  animation: lcd-print 280ms steps(16, end) both;
+  animation-delay: 120ms;
+
+  & + * {
+    animation-delay: 260ms;
+  }
+}
+
+[data-skin="hardware"] [data-kit="toast-title"]:not(#_):not(#_) {
+  font: 600 11px/1.3 var(--mono, monospace);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--gray-ink);
+}
+
+[data-skin="hardware"] [data-kit="toast-description"]:not(#_):not(#_) {
+  font: 400 11px/1.4 var(--mono, monospace);
+  color: var(--gray-dim);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-skin="hardware"] [data-kit="toast-text"] > * {
+    animation: none;
+  }
+}
+
+/* The catalog's examples, side by side. */
+[data-skin="hardware"] [data-lcd-demo] {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  align-items: center;
+  gap: 18px;
+  width: 100%;
+}
+
+/* Popover: a small pager. A gray LCD in a light bezel, its lines printing
+   in, its keys on the bezel below, and a short bridge joining it to the
+   key that opened it. It pops out of the trigger rather than turning. */
+[data-skin="hardware"] [data-kit="popover"] [data-kit="popover-surface"]:not([data-size]):not(#_):not(#_):not(#_):not(#_) {
+  transform-origin: 50% calc(100% + 18px);
+  transform: none;
+  scale: 1;
+  opacity: 1;
+  transition:
+    scale 260ms var(--ease-settle),
+    opacity 140ms;
+
+  @starting-style {
+    transform: none;
+    scale: 0.6;
+    opacity: 0;
+  }
+
+  /* The glass is gray. */
+  &::before {
+    border: 0;
+    background: var(--gray-glass);
+    box-shadow: var(--gray-well);
+  }
+
+  /* The bridge to the trigger, in place of the hinge. */
+  &::after {
+    inset: -9px auto auto 22px;
+    width: 18px;
+    height: 10px;
+    border-radius: 3px 3px 0 0;
+    background: linear-gradient(180deg, #f6f6f4, #f1f0ed);
+    box-shadow:
+      inset 0 1px 0 #fff,
+      0 0 0 1px hsl(var(--shadow-color) / 0.1);
+    clip-path: inset(-2px -2px 1px -2px);
+  }
+
+  & [data-kit="dialog-title"] {
+    color: var(--gray-ink);
+    text-shadow: none;
+    animation: lcd-print 260ms steps(16, end) both 120ms;
+
+    &::after {
+      content: none;
+    }
+  }
+
+  & [data-kit="dialog-description"] {
+    color: var(--gray-dim);
+    text-shadow: none;
+    animation: lcd-print 320ms steps(20, end) both 260ms;
+
+    &::after {
+      background: var(--gray-ink);
+    }
+  }
+}
+
+[data-skin="hardware"] [data-kit="popover"]:is([data-ending-style], [data-closed]) [data-kit="popover-surface"]:not([data-size]):not(#_):not(#_):not(#_):not(#_) {
+  transform: none;
+  scale: 0.85;
+  opacity: 0;
+  transition-duration: 150ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 1, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-skin="hardware"] [data-kit="popover"] [data-kit="popover-surface"] :is([data-kit="dialog-title"], [data-kit="dialog-description"]) {
+    animation: none;
+  }
+}
+
+/* The whole popover is the LCD, framed like the toast: gray glass in a
+   light plastic rim, the title and message on it, and its actions as real
+   keys sitting on the glass. */
+[data-skin="hardware"] [data-kit="popover"] [data-kit="popover-surface"]:not([data-size]):not(#_):not(#_):not(#_):not(#_):not(#_) {
+  padding: 16px 16px 14px 18px;
+  border-radius: calc(10px * var(--corner-scale));
+  background: var(--gray-glass);
+  box-shadow:
+    inset 0 1px 3px rgb(0 0 0 / 0.22),
+    inset 0 0 0 0.5px rgb(0 0 0 / 0.15),
+    0 0 0 5px #f2f2f0,
+    0 0 0 6px rgb(0 0 0 / calc(0.06 * var(--shadow-k))),
+    0 10px 24px -8px rgb(0 0 0 / calc(0.3 * var(--shadow-k)));
+
+  &::before {
+    content: none;
+  }
+
+  /* No anchor: it sits just below its trigger and pops out of it. */
+  &::after {
+    content: none;
+  }
+
+  & [data-kit="dialog-title"] {
+    grid-row: auto;
+    padding: 0;
+    font-size: 13px;
+  }
+
+  & [data-kit="dialog-description"] {
+    grid-row: auto;
+    padding: 6px 0 0;
+  }
+
+  & [data-kit="actions"] {
+    grid-row: auto;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 14px;
+  }
+
+  & [data-kit="actions"] > [data-kit="button"] {
+    height: 34px;
+    min-width: 0;
+    padding: 0 14px;
+  }
+}
+
+/* The floating screens (tooltip, popover, toast) stand well off the panel:
+   a tight contact shadow and soft layers that spread wider as they fall,
+   tinted with the panel's warm hue. */
+[data-skin="hardware"] {
+  --float:
+    0 1px 1px hsl(var(--shadow-color) / calc(0.1 * var(--shadow-k))),
+    0 2px 2px hsl(var(--shadow-color) / calc(0.08 * var(--shadow-k))),
+    0 4px 4px hsl(var(--shadow-color) / calc(0.08 * var(--shadow-k))),
+    0 8px 8px hsl(var(--shadow-color) / calc(0.08 * var(--shadow-k))),
+    0 16px 16px hsl(var(--shadow-color) / calc(0.08 * var(--shadow-k))),
+    0 28px 32px -4px hsl(var(--shadow-color) / calc(0.1 * var(--shadow-k)));
+  --float-sm:
+    0 1px 1px hsl(var(--shadow-color) / calc(0.12 * var(--shadow-k))),
+    0 2px 3px hsl(var(--shadow-color) / calc(0.1 * var(--shadow-k))),
+    0 5px 8px hsl(var(--shadow-color) / calc(0.1 * var(--shadow-k))),
+    0 10px 18px -2px hsl(var(--shadow-color) / calc(0.12 * var(--shadow-k)));
+}
+
+[data-skin="hardware"] [data-kit="toast"]:not(#_):not(#_):not(#_):not(#_) {
+  box-shadow:
+    inset 0 1px 3px rgb(0 0 0 / 0.22),
+    inset 0 0 0 0.5px rgb(0 0 0 / 0.15),
+    0 0 0 5px #f2f2f0,
+    0 0 0 6px rgb(0 0 0 / calc(0.06 * var(--shadow-k))),
+    var(--float);
+}
+
+[data-skin="hardware"] [data-kit="popover"] [data-kit="popover-surface"]:not([data-size]):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) {
+  box-shadow:
+    inset 0 1px 3px rgb(0 0 0 / 0.22),
+    inset 0 0 0 0.5px rgb(0 0 0 / 0.15),
+    0 0 0 5px #f2f2f0,
+    0 0 0 6px rgb(0 0 0 / calc(0.06 * var(--shadow-k))),
+    var(--float);
+}
+
+/* The tooltip floats a little higher above its control too. */
+[data-skin="hardware"] [data-kit="tooltip-legend"]:not(#_):not(#_) {
+  bottom: calc(100% + 12px);
+  box-shadow:
+    inset 0 1px 2px rgb(0 0 0 / 0.22),
+    inset 0 0 0 0.5px rgb(0 0 0 / 0.12),
+    0 0 0 3px #f2f2f0,
+    0 0 0 3.5px rgb(0 0 0 / calc(0.06 * var(--shadow-k))),
+    var(--float-sm);
+}
+
+[data-skin="hardware"] [data-kit="topbar-actions"] [data-kit="tooltip-legend"]:not(#_):not(#_) {
+  top: calc(100% + 12px);
+  bottom: auto;
+}
+
+/* Opened below instead, when there's no room above, it pops down from the
+   trigger. */
+[data-skin="hardware"] [data-kit="popover"][data-side="bottom"] [data-kit="popover-surface"]:not([data-size]):not(#_):not(#_):not(#_):not(#_):not(#_) {
+  transform-origin: 50% -18px;
+}
+
+/* Every gray LCD's dark print carries the same faint shadow as the
+   tooltip's lit characters. Inverted rows (light print on a dark bar) don't. */
+[data-skin="hardware"] :is(
+    [data-kit="lcd"],
+    [data-kit="toast"],
+    [data-kit="hover-lcd"],
+    [data-kit="popover"] [data-kit="popover-surface"]:not([data-size]),
+    [data-kit="popup"]:not([data-screen])
+  ):not(#_):not(#_)
+  :is(
+    [data-kit="lcd-body"],
+    [data-kit="lcd-lit"],
+    [data-kit="lcd-tag"],
+    [data-kit="toast-title"],
+    [data-kit="toast-description"],
+    [data-kit="dialog-title"],
+    [data-kit="dialog-description"],
+    strong,
+    p,
+    [data-kit="hover-lcd-initials"],
+    [data-kit="hover-lcd-status"],
+    [data-kit="option"]:not([data-highlighted])
+  ):not(#_):not(#_):not(#_):not(#_) {
+  text-shadow: var(--lcd-print);
+}
+
+/* The floating LCD boards stand on a thin edge of their own: a light band
+   just past the rim, a half pixel lower, so the board reads as a slab. */
+[data-skin="hardware"] {
+  --board-edge: 0 0.5px 0 6px #dddddd;
+}
+
+[data-skin="hardware"] [data-kit="toast"]:not(#_):not(#_):not(#_):not(#_):not(#_) {
+  box-shadow:
+    inset 0 1px 3px rgb(0 0 0 / 0.22),
+    inset 0 0 0 0.5px rgb(0 0 0 / 0.15),
+    0 0 0 5px #f2f2f0,
+    var(--board-edge),
+    0 0 0 6.5px rgb(0 0 0 / calc(0.06 * var(--shadow-k))),
+    var(--float);
+}
+
+[data-skin="hardware"] [data-kit="popover"] [data-kit="popover-surface"]:not([data-size]):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) {
+  box-shadow:
+    inset 0 1px 3px rgb(0 0 0 / 0.22),
+    inset 0 0 0 0.5px rgb(0 0 0 / 0.15),
+    0 0 0 5px #f2f2f0,
+    var(--board-edge),
+    0 0 0 6.5px rgb(0 0 0 / calc(0.06 * var(--shadow-k))),
+    var(--float);
+}
+
+[data-skin="hardware"] [data-kit="popup"]:not([data-screen]):not(#_):not(#_):not(#_):not(#_) {
+  box-shadow:
+    inset 0 1px 3px rgb(0 0 0 / 0.22),
+    inset 0 0 0 0.5px rgb(0 0 0 / 0.15),
+    0 0 0 5px #f2f2f0,
+    var(--board-edge),
+    0 0 0 6.5px rgb(0 0 0 / calc(0.06 * var(--shadow-k))),
+    var(--float);
+}
+
+[data-skin="hardware"] [data-kit="hover-lcd"]:not(#_):not(#_) {
+  box-shadow:
+    inset 0 1px 3px rgb(0 0 0 / 0.25),
+    inset 0 0 0 0.5px rgb(0 0 0 / 0.15),
+    0 0 0 5px #f2f2f0,
+    var(--board-edge),
+    0 0 0 6.5px rgb(0 0 0 / calc(0.06 * var(--shadow-k))),
+    var(--float);
+}
+
+[data-skin="hardware"] [data-kit="tooltip-legend"]:not(#_):not(#_):not(#_) {
+  box-shadow:
+    inset 0 1px 2px rgb(0 0 0 / 0.22),
+    inset 0 0 0 0.5px rgb(0 0 0 / 0.12),
+    0 0 0 3px #f2f2f0,
+    0 0.5px 0 4px #dddddd,
+    0 0 0 4.5px rgb(0 0 0 / calc(0.06 * var(--shadow-k))),
+    var(--float-sm);
+}
+
+/* The hover card hinges on the edge nearest its trigger: from its foot when
+   it opens above, from its head when it opens below. */
+[data-skin="hardware"] [data-kit="popover"][data-side="top"] [data-kit="hover-lcd"]:not(#_) {
+  transform-origin: 50% 100%;
+
+  @starting-style {
+    transform: perspective(800px) rotateX(-90deg);
+  }
+}
+
+[data-skin="hardware"] [data-kit="popover"][data-side="top"]:is([data-ending-style], [data-closed]) [data-kit="hover-lcd"]:not(#_) {
+  transform: perspective(800px) rotateX(-90deg);
+}
+
+/* The hover card tips up into place from the edge nearest its trigger, a
+   short way, and tips back the same way when it goes. */
+[data-skin="hardware"] [data-kit="popover"] [data-kit="hover-lcd"]:not(#_):not(#_):not(#_) {
+  --tilt: 32deg;
+  transform-origin: 50% 0;
+  transform: perspective(700px) rotateX(0deg);
+  opacity: 1;
+  transition:
+    transform 300ms var(--ease-settle),
+    opacity 160ms;
+
+  @starting-style {
+    transform: perspective(700px) rotateX(var(--tilt));
+    opacity: 0;
+  }
+}
+
+[data-skin="hardware"] [data-kit="popover"][data-side="top"] [data-kit="hover-lcd"]:not(#_):not(#_):not(#_) {
+  --tilt: -32deg;
+  transform-origin: 50% 100%;
+}
+
+[data-skin="hardware"] [data-kit="popover"]:is([data-ending-style], [data-closed]) [data-kit="hover-lcd"]:not(#_):not(#_):not(#_) {
+  transform: perspective(700px) rotateX(var(--tilt));
+  opacity: 0;
+  transition:
+    transform 180ms cubic-bezier(0.5, 0, 0.75, 0),
+    opacity 180ms;
+}
+
+/* The popover's rim is part of its own shape, so it follows the squircle
+   corner: the board is the light rim, and the gray glass sits inside it as
+   a layer with the same corner shape. */
+[data-skin="hardware"] [data-kit="popover"] [data-kit="popover-surface"]:not([data-size]):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) {
+  --rim: 5px;
+  --glass-r: calc(10px * var(--corner-scale));
+  padding: calc(16px + var(--rim)) calc(16px + var(--rim)) calc(14px + var(--rim)) calc(18px + var(--rim));
+  border-radius: calc(var(--glass-r) + var(--rim));
+  background: #f2f2f0;
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 0 0 0.5px rgb(0 0 0 / calc(0.08 * var(--shadow-k))),
+    0 0.5px 0 1px #dddddd,
+    var(--float);
+
+  &::before {
+    content: "";
+    position: absolute;
+    grid-area: auto;
+    inset: var(--rim);
+    z-index: 0;
+    border: 0;
+    border-radius: var(--glass-r);
+    background: var(--gray-glass);
+    box-shadow:
+      inset 0 1px 3px rgb(0 0 0 / 0.22),
+      inset 0 0 0 0.5px rgb(0 0 0 / 0.15);
+    pointer-events: none;
+  }
+
+  & > * {
+    position: relative;
+    z-index: 1;
+  }
+}

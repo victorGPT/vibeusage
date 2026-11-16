@@ -1,0 +1,3964 @@
+/* One light gray panel with printed hairlines, chunky
+   square keys in light gray, charcoal and the key color, tiny uppercase labels, LED
+   dots, and black glass kept for the one display. */
+[data-skin="hardware"] {
+  --paper: #f3f3f1;
+  --panel: #d9d9d6;
+  --panel-hi: #e3e3e0;
+  --line: #b4b4b0;
+  --ink: #1d1d1c;
+  --dim: #77777372;
+  --dim: #7a7a76;
+  --light-key: #ececea;
+  --light-edge: #b3b3af;
+  --charcoal: #2a2a29;
+  --charcoal-edge: #0f0f0f;
+  --key-color: var(--theme, #1c1c1c);
+  --key-color-edge: color-mix(in oklab, var(--key-color) 70%, #000);
+  --gray-key: #8a8a87;
+  --blue: #4aa3ff;
+  --green: #2f9e5f;
+  --red: #ff3b30;
+  --sans: "Spec Mono", "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  --mono: var(--sans);
+  --label: 500 10px/1.2 var(--sans);
+  --dim: #7a7a76;
+  --dot-color: transparent;
+  color: var(--ink);
+  background: var(--paper);
+  font-family: var(--sans);
+  font-size: 12px;
+  text-transform: none;
+  letter-spacing: 0;
+
+  & [data-kit="masthead"] h1,
+  & [data-kit="page-header"] h1 {
+    font-weight: 200;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+  }
+
+  & [data-kit="masthead"] p,
+  & [data-kit="page-header"] p {
+    color: var(--dim);
+  }
+
+  /* Labels are printed: tiny, uppercase, spaced. */
+  & :is(
+      [data-kit="label"],
+      [data-kit="caption"],
+      [data-kit="nav-heading"],
+      [data-kit="card-title"],
+      [data-kit="value"],
+      [data-kit="calendar-weekday"],
+      [data-kit="table"] th,
+      [data-kit="breadcrumb"],
+      [data-kit="bars-axis"],
+      [data-kit="stat-delta"]
+    ) {
+    font: var(--label);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  & :is([data-kit="value"], [data-kit="caption"], [data-kit="nav-heading"], [data-kit="calendar-weekday"], [data-kit="table"] th, [data-kit="bars-axis"]) {
+    color: var(--dim);
+  }
+
+  /* The catalog is one panel; modules are sections divided by printed lines. */
+  & [data-kit="grid"] {
+    gap: 0;
+    padding: 0;
+    overflow: hidden;
+    border-radius: calc(6px * var(--corner-scale));
+    background: var(--panel);
+    box-shadow:
+      inset 0 0 0 1px #c9c9c5,
+      0 1px 0 #fff inset,
+      0 40px 70px -40px rgb(0 0 0 / calc(0.35 * var(--shadow-k)));
+  }
+
+  & [data-kit="module"] {
+    border-radius: 0;
+    background: none;
+    box-shadow:
+      inset -1px 0 0 var(--line),
+      inset 0 -1px 0 var(--line);
+
+    &::after {
+      display: none;
+    }
+  }
+
+  & [data-kit="caption"] {
+    align-items: center;
+    padding-inline-start: 0;
+    padding-block-end: 10px;
+
+    & span {
+      color: var(--key-ink);
+      /* On a very light key the text prints black on a label of the key color. */
+      background: var(--key-highlight);
+      box-shadow: 0 0 0 2px var(--key-highlight);
+      border-radius: 1px;
+    }
+
+    &::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: var(--line);
+    }
+  }
+
+  /* Keys: chunky, square, with their height showing underneath. */
+  & :is(
+      [data-kit="button"],
+      [data-kit="checkbox"],
+      [data-kit="segment"],
+      [data-kit="toggle"],
+      [data-kit="page"],
+      [data-kit="calendar-nav"],
+      [data-kit="tab"],
+      [data-kit="menubar-trigger"],
+      [data-kit="radio"]
+    ) {
+    font: var(--label);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink);
+    border-radius: calc(5px * var(--corner-scale));
+    background: linear-gradient(180deg, #f6f6f4, var(--light-key));
+    box-shadow:
+      inset 0 1px 0 #fff,
+      0 3px 0 var(--light-edge),
+      0 5px 7px -3px rgb(0 0 0 / calc(0.3 * var(--shadow-k)));
+    transition:
+      translate 60ms,
+      box-shadow 60ms;
+
+    &:active {
+      translate: 0 2px;
+      box-shadow:
+        inset 0 1px 0 #fff,
+        0 1px 0 var(--light-edge),
+        0 2px 3px -1px rgb(0 0 0 / calc(0.25 * var(--shadow-k)));
+    }
+  }
+
+  /* Charcoal keys, like the number pads. */
+  & :is([data-kit="segment"], [data-kit="toggle"], [data-kit="page"], [data-kit="button"][data-shape="round"]) {
+    color: #f2f2f0;
+    background: linear-gradient(180deg, #3b3b3a, var(--charcoal));
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.12),
+      0 3px 0 var(--charcoal-edge),
+      0 5px 7px -3px rgb(0 0 0 / calc(0.4 * var(--shadow-k)));
+
+    &:active {
+      box-shadow:
+        inset 0 1px 0 rgb(255 255 255 / 0.12),
+        0 1px 0 var(--charcoal-edge);
+    }
+  }
+
+  /* The key color: the one key that acts, and whatever is chosen. */
+  & :is(
+      [data-kit="button"][data-tone="primary"],
+      [data-kit="segment"][data-selected],
+      [data-kit="page"][aria-current="page"],
+      [data-kit="tab"][data-selected],
+      [data-kit="menubar-trigger"][data-open]
+    ) {
+    color: #fff;
+    background: linear-gradient(180deg, color-mix(in oklab, var(--key-color), #fff 18%), var(--key-color));
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.3),
+      0 3px 0 var(--key-color-edge),
+      0 5px 7px -3px color-mix(in oklab, var(--key-color-edge) 50%, transparent);
+  }
+
+  & [data-kit="button"][data-tone="danger"] {
+    color: #fff;
+    background: linear-gradient(180deg, #ff5b50, var(--red));
+    box-shadow: 0 3px 0 #b8251c;
+  }
+
+  & [data-kit="button"]:not([data-shape]) {
+    min-width: 72px;
+  }
+
+  & [data-kit="button"][data-shape="round"] {
+    border-radius: 50%;
+
+    & [data-icon="more"] {
+      background: radial-gradient(circle, #fff 1.4px, transparent 1.8px) 0 0 / 6px 4px;
+    }
+  }
+
+  & [data-icon="record"] {
+    width: 12px;
+    height: 12px;
+    background: var(--key-color);
+  }
+
+  & :is([data-kit="segmented"], [data-kit="tabs-list"], [data-kit="menubar"]) {
+    gap: 8px;
+    padding: 0 0 4px;
+    border-radius: 0;
+    background: none;
+  }
+
+  & :is([data-kit="segmented-indicator"], [data-kit="tabs-indicator"]) {
+    display: none;
+  }
+
+  & [data-kit="segment"],
+  & [data-kit="tab"] {
+    border-radius: calc(5px * var(--corner-scale)) !important;
+  }
+
+  /* LEDs sit in the key's corner and light in the key color. */
+  & :is([data-kit="checkbox-indicator"], [data-kit="radio-indicator"]) {
+    background: #b9b9b5;
+    box-shadow: inset 0 1px 1px rgb(0 0 0 / calc(0.25 * var(--shadow-k)));
+
+    &[data-checked] {
+      background: var(--key-color);
+      box-shadow: 0 0 6px color-mix(in oklab, var(--key-color) 70%, transparent);
+    }
+  }
+
+  & [data-kit="toggle"]::after {
+    background: #5a5a58;
+  }
+
+  & [data-kit="toggle"][data-pressed]::after {
+    background: var(--key-color);
+    box-shadow: 0 0 6px color-mix(in oklab, var(--key-color) 80%, transparent);
+  }
+
+  & [data-kit="switch"] {
+    background: #bcbcb8;
+    box-shadow: inset 0 1px 2px rgb(0 0 0 / calc(0.3 * var(--shadow-k)));
+  }
+
+  & [data-kit="switch-thumb"] {
+    background: var(--key-color);
+    box-shadow: 0 1px 2px rgb(0 0 0 / calc(0.3 * var(--shadow-k)));
+  }
+
+  & [data-kit="switch"]::before,
+  & [data-kit="switch"]::after {
+    font: var(--label);
+    text-transform: uppercase;
+  }
+
+  /* Knobs: matte cylinders, one color each. */
+  & [data-kit="knob-dial"] {
+    width: 72px;
+    height: 72px;
+    background: none;
+
+    &::before {
+      opacity: 0.35;
+    }
+  }
+
+  & [data-kit="knob-cap"] {
+    inset: 13px;
+    background: radial-gradient(circle at 50% 35%, color-mix(in oklab, var(--cap) 80%, #fff), var(--cap) 60%);
+    box-shadow:
+      0 3px 0 color-mix(in oklab, var(--cap) 65%, #000),
+      0 8px 12px -4px rgb(0 0 0 / calc(0.35 * var(--shadow-k)));
+
+    &::after {
+      top: 4px;
+      width: 2px;
+      height: 8px;
+      background: rgb(255 255 255 / 0.8);
+    }
+  }
+
+  & [data-color="blue"] {
+    --cap: var(--charcoal);
+  }
+
+  & [data-color="orange"] {
+    --cap: var(--key-color);
+  }
+
+  & [data-color="white"] {
+    --cap: #f1f1ef;
+
+    & [data-kit="knob-cap"]::after {
+      background: var(--ink);
+    }
+  }
+
+  & [data-color="green"] {
+    --cap: var(--gray-key);
+  }
+
+  & [data-kit="knob-readout"] {
+    font: 300 15px var(--sans);
+  }
+
+  /* Fields are recessed into the panel; only the display is black glass. */
+  & :is([data-kit="input"], [data-kit="select-trigger"], [data-kit="otp-slot"]) {
+    font: 400 14px var(--sans);
+    text-transform: none;
+    color: var(--ink);
+    background: var(--light-key);
+    box-shadow:
+      inset 0 1px 3px rgb(0 0 0 / calc(0.22 * var(--shadow-k))),
+      0 1px 0 #fff;
+    caret-color: var(--key-color);
+  }
+
+  & [data-kit="input-addon"] {
+    color: var(--ink);
+  }
+
+  & [data-kit="otp-slot"][data-active] {
+    box-shadow:
+      inset 0 0 0 2px var(--key-color),
+      inset 0 1px 3px rgb(0 0 0 / calc(0.2 * var(--shadow-k)));
+  }
+
+  & :is([data-kit="bars-plot"], [data-kit="stepper-input"]) {
+    background: #0c0c0c;
+    box-shadow: inset 0 0 0 1px #000;
+  }
+
+  & [data-kit="stepper-input"] {
+    font: 300 26px var(--sans);
+    color: var(--blue);
+    letter-spacing: 0.04em;
+  }
+
+  & [data-kit="tab-panel"] {
+    color: var(--ink);
+    background: var(--panel-hi);
+    box-shadow: inset 0 0 0 1px var(--line);
+    font-size: 13px;
+  }
+
+  & [data-kit="bar"] {
+    background: linear-gradient(0deg, var(--key-color) 0 75%, color-mix(in oklab, var(--key-color), #fff 50%));
+  }
+
+  & [data-kit="meter-track"] {
+    background: #0c0c0c;
+  }
+
+  & :is([data-kit="popup"], [data-kit="popup"][data-slot="select-content"], [data-kit="popup"][data-slot="menu-content"]) {
+    color: var(--ink);
+    background: var(--panel-hi);
+    box-shadow:
+      inset 0 0 0 1px #c9c9c5,
+      0 16px 30px -12px rgb(0 0 0 / calc(0.3 * var(--shadow-k)));
+    text-transform: none;
+
+    & [data-highlighted] {
+      color: #fff;
+      background: var(--key-color);
+    }
+
+    & [data-selected]::after {
+      color: inherit;
+    }
+  }
+
+  & [data-kit="option"] {
+    font: 400 13px var(--sans);
+  }
+
+  & :is([data-kit="dialog-surface"], [data-kit="popover-surface"]) {
+    background: var(--panel);
+    box-shadow:
+      inset 0 0 0 1px #c9c9c5,
+      0 30px 60px -20px rgb(0 0 0 / calc(0.35 * var(--shadow-k)));
+    text-transform: none;
+  }
+
+  & [data-kit="dialog-title"] {
+    font-weight: 300;
+    text-transform: uppercase;
+  }
+
+  & [data-kit="stat-value"] {
+    font-weight: 200;
+    letter-spacing: -0.02em;
+  }
+
+  & [data-kit="stat-delta"]::before {
+    color: var(--key-ink);
+  }
+
+  /* Badges are label blocks, like the panel's port labels. */
+  & [data-kit="badge"] {
+    padding: 3px 6px;
+    border-radius: calc(2px * var(--corner-scale));
+    font: var(--label);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink);
+    background: var(--light-key);
+    box-shadow: none;
+
+    &::before {
+      display: none;
+    }
+
+    &[data-tone="success"] {
+      color: #fff;
+      background: var(--charcoal);
+    }
+
+    &[data-tone="info"] {
+      color: #fff;
+      background: var(--gray-key);
+    }
+
+    &[data-tone="danger"],
+    &[data-tone="warning"] {
+      color: #fff;
+      background: var(--key-color);
+    }
+  }
+
+  & [data-kit="alert"] {
+    color: var(--ink);
+    background: var(--panel-hi);
+    box-shadow:
+      inset 0 0 0 1px #c9c9c5,
+      inset 6px 0 0 var(--key-color);
+  }
+
+  & [data-kit="alert-title"] {
+    font: var(--label);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--key-ink);
+  }
+
+  & [data-kit="alert-description"] {
+    color: var(--ink);
+  }
+
+  & [data-kit="avatar"] {
+    color: #fff;
+    background: var(--charcoal);
+  }
+
+  /* The app: panels on paper, the sidebar one long panel. */
+  & [data-kit="sidebar"] {
+    background: var(--panel);
+    box-shadow: inset -1px 0 0 #c9c9c5;
+  }
+
+  & [data-kit="nav-item"] {
+    font-size: 13px;
+
+    &[aria-current="page"] {
+      background: linear-gradient(180deg, #f6f6f4, var(--light-key));
+      box-shadow:
+        inset 0 1px 0 #fff,
+        0 2px 0 var(--light-edge);
+
+      & [data-kit="nav-glyph"] {
+        color: var(--key-ink);
+      }
+    }
+  }
+
+  & [data-kit="nav-count"] {
+    color: #fff;
+    background: var(--charcoal);
+  }
+
+  & [data-kit="topbar"] {
+    background: rgb(243 243 241 / 0.9);
+    box-shadow: inset 0 -1px 0 #dcdcd8;
+  }
+
+  & [data-kit="card"] {
+    border-radius: calc(6px * var(--corner-scale));
+    background: var(--panel);
+    box-shadow:
+      inset 0 0 0 1px #c9c9c5,
+      inset 0 1px 0 #ececea;
+
+    &::after {
+      display: none;
+    }
+  }
+
+  & [data-kit="card-header"] {
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  & [data-kit="card-title"]::before {
+    content: none;
+  }
+
+  & [data-kit="card-footer"] {
+    border-top-color: var(--line);
+  }
+
+  & [data-kit="table"] {
+    & td {
+      border-bottom-color: #c6c6c2;
+    }
+
+    & tr[data-selected] td {
+      background: color-mix(in oklab, var(--key-color) 8%, transparent);
+    }
+  }
+
+  & [data-kit="icon-button"] [data-icon="more"] {
+    background: radial-gradient(circle, var(--ink) 1.4px, transparent 1.8px) 0 0 / 6px 4px;
+  }
+
+  & [data-kit="calendar-day"] {
+    font: 400 12px var(--sans);
+
+    &[data-selected] {
+      background: linear-gradient(180deg, color-mix(in oklab, var(--key-color), #fff 18%), var(--key-color));
+      box-shadow: 0 2px 0 var(--key-color-edge);
+    }
+  }
+
+  & :is([data-kit="tile"], [data-kit="scroll-area"]) {
+    color: var(--ink);
+    background: var(--panel-hi);
+    box-shadow: inset 0 0 0 1px #c9c9c5;
+  }
+
+  & [data-kit="scroll-area-row"] {
+    border-bottom-color: #cfcfcb;
+  }
+
+  & [data-kit="kbd"] {
+    font: var(--label);
+  }
+}
+
+[data-skin="hardware"] {
+  & :is([data-kit="masthead"] h1, [data-kit="page-header"] h1, [data-kit="stat-value"], [data-kit="dialog-title"]) {
+    font-family: var(--sans);
+  }
+
+  & [data-kit="masthead"] h1,
+  & [data-kit="page-header"] h1 {
+    font-weight: 200;
+    letter-spacing: -0.04em;
+  }
+
+  /* Outside the catalog's shared panel, a module is a panel of its own. */
+  & :not([data-kit="grid"]) > [data-kit="module"] {
+    border-radius: calc(6px * var(--corner-scale));
+    background: var(--panel);
+    box-shadow:
+      inset 0 0 0 1px #c9c9c5,
+      inset 0 1px 0 #ececea;
+  }
+}
+
+/* Lighter: an off-white face, light keys
+   throughout, and displays recessed into the panel instead of black glass. */
+[data-skin="hardware"] {
+  --paper: #fbfbf9;
+  --panel: #f0efeb;
+  --panel-hi: #f7f6f3;
+  --line: #dad8d2;
+  --dim: #8f8d87;
+  --light-key: #fcfcfa;
+  --light-edge: #d3d1cb;
+  --recess: #e9e8e3;
+
+  & [data-kit="grid"] {
+    box-shadow:
+      inset 0 0 0 1px #e2e0da,
+      0 30px 60px -36px rgb(60 50 40 / calc(0.22 * var(--shadow-k)));
+  }
+
+  & :is([data-kit="sidebar"], [data-kit="card"], :not([data-kit="grid"]) > [data-kit="module"]) {
+    background: var(--panel);
+    box-shadow: inset 0 0 0 1px #e2e0da;
+  }
+
+  & [data-kit="sidebar"] {
+    box-shadow: inset -1px 0 0 #e2e0da;
+  }
+
+  /* Every key is light; the chosen one turns the key color. */
+  & :is([data-kit="segment"], [data-kit="toggle"], [data-kit="page"], [data-kit="button"][data-shape="round"]):not(
+      [data-selected],
+      [data-checked],
+      [aria-current="page"]
+    ) {
+    color: var(--ink);
+    background: linear-gradient(180deg, #ffffff, var(--light-key));
+    box-shadow:
+      inset 0 1px 0 #fff,
+      0 3px 0 var(--light-edge),
+      0 5px 8px -4px rgb(60 50 40 / calc(0.25 * var(--shadow-k)));
+
+    &:active {
+      box-shadow:
+        inset 0 1px 0 #fff,
+        0 1px 0 var(--light-edge);
+    }
+  }
+
+  & :is([data-kit="button"], [data-kit="checkbox"], [data-kit="tab"], [data-kit="calendar-nav"], [data-kit="menubar-trigger"], [data-kit="radio"]):not(
+      [data-tone="primary"],
+      [data-tone="danger"],
+      [data-selected],
+      [data-open]
+    ) {
+    background: linear-gradient(180deg, #ffffff, var(--light-key));
+    box-shadow:
+      inset 0 1px 0 #fff,
+      0 3px 0 var(--light-edge),
+      0 5px 8px -4px rgb(60 50 40 / calc(0.25 * var(--shadow-k)));
+  }
+
+  & [data-kit="button"][data-shape="round"] [data-icon="more"] {
+    background: radial-gradient(circle, var(--ink) 1.4px, transparent 1.8px) 0 0 / 6px 4px;
+  }
+
+  & [data-kit="button"][data-shape="round"] :is([data-icon="info"], [data-icon="bell"])::before {
+    color: var(--ink);
+  }
+
+  & [data-kit="toggle"]::after {
+    background: #c9c7c1;
+  }
+
+  & :is([data-kit="checkbox-indicator"], [data-kit="radio-indicator"]):not([data-checked]) {
+    background: #d4d2cc;
+    box-shadow: inset 0 1px 1px rgb(0 0 0 / calc(0.15 * var(--shadow-k)));
+  }
+
+  & [data-kit="switch"] {
+    background: var(--recess);
+    box-shadow: inset 0 1px 2px rgb(0 0 0 / calc(0.18 * var(--shadow-k)));
+  }
+
+  /* Displays are recessed into the face, lit in the key color. */
+  & :is([data-kit="bars-plot"], [data-kit="stepper-input"], [data-kit="meter-track"]) {
+    background: var(--recess);
+    box-shadow:
+      inset 0 1px 3px rgb(0 0 0 / calc(0.14 * var(--shadow-k))),
+      0 1px 0 #fff;
+  }
+
+  /* The digits print in a slightly deeper ink than the key color's own
+     (never lighter than 0.54), so they keep their contrast on the gray glass. */
+  & [data-kit="stepper-input"] {
+    color: oklch(from var(--key-ink) min(l, 0.54) c h);
+  }
+
+  & [data-kit="meter-track"]::before {
+    background: #d7d5cf;
+  }
+
+  & [data-kit="meter-indicator"] {
+    background: linear-gradient(90deg, color-mix(in oklab, var(--key-color), #fff 50%) 0 55%, var(--key-color) 55%);
+  }
+
+  & [data-kit="bar"] {
+    background: linear-gradient(0deg, var(--key-color) 0 78%, color-mix(in oklab, var(--key-color), #fff 50%));
+  }
+
+  & :is([data-kit="input"], [data-kit="select-trigger"], [data-kit="otp-slot"]) {
+    background: var(--recess);
+    box-shadow:
+      inset 0 1px 3px rgb(0 0 0 / calc(0.14 * var(--shadow-k))),
+      0 1px 0 #fff;
+  }
+
+  & [data-kit="tab-panel"] {
+    background: var(--panel-hi);
+    box-shadow: inset 0 0 0 1px var(--line);
+  }
+
+  /* Small things lighten: avatars, counts and badges are printed, not inked. */
+  & [data-kit="avatar"] {
+    color: var(--ink);
+    background: #e6e5e0;
+    box-shadow: inset 0 0 0 1px #d6d4ce;
+  }
+
+  & [data-kit="nav-count"] {
+    color: var(--dim);
+    background: none;
+    box-shadow: inset 0 0 0 1px var(--line);
+  }
+
+  & [data-kit="badge"] {
+    color: var(--ink);
+    background: #e6e5e0;
+
+    &[data-tone="success"] {
+      color: var(--ink);
+      background: #e6e5e0;
+      box-shadow: inset 3px 0 0 var(--green);
+    }
+
+    &[data-tone="info"] {
+      color: var(--ink);
+      background: #e6e5e0;
+      box-shadow: inset 3px 0 0 var(--blue);
+    }
+  }
+
+  & [data-kit="knob-dial"]::before {
+    opacity: 0.25;
+  }
+
+  & [data-color="green"] {
+    --cap: #c9c7c1;
+  }
+
+  & :is([data-kit="dialog-surface"], [data-kit="popover-surface"], [data-kit="popup"]) {
+    background: var(--panel-hi);
+    box-shadow:
+      inset 0 0 0 1px #e2e0da,
+      0 24px 50px -20px rgb(60 50 40 / calc(0.3 * var(--shadow-k)));
+  }
+
+  & [data-kit="table"] td {
+    border-bottom-color: #e2e0da;
+  }
+
+  & [data-kit="card-header"] {
+    border-bottom-color: var(--line);
+  }
+
+  & [data-kit="topbar"] {
+    background: rgb(251 251 249 / 0.9);
+    box-shadow: inset 0 -1px 0 #eceae5;
+  }
+
+  & [data-kit="alert"] {
+    background: color-mix(in oklab, var(--key-color), #fff 93%);
+    box-shadow:
+      inset 0 0 0 1px color-mix(in oklab, var(--key-color), #fff 75%),
+      inset 4px 0 0 var(--key-color);
+  }
+}
+
+/* A segment is a radio: it marks its choice with data-checked. */
+[data-skin="hardware"] [data-kit="segment"][data-checked] {
+  color: #fff;
+  background: linear-gradient(180deg, color-mix(in oklab, var(--key-color), #fff 18%), var(--key-color));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.3),
+    0 3px 0 var(--key-color-edge),
+    0 5px 8px -4px color-mix(in oklab, var(--key-color-edge) 50%, transparent);
+}
+
+[data-skin="hardware"] {
+  /* The stepper's keys keep to their columns, whatever a button's minimum. */
+  & [data-kit="stepper"] [data-kit="button"] {
+    min-width: 0;
+    width: 100%;
+  }
+
+  /* Scrollbars are a thin printed rail with a key-colored thumb. */
+  &,
+  & * {
+    scrollbar-width: thin;
+    scrollbar-color: #cbc9c3 transparent;
+  }
+
+  & ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  & ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  & ::-webkit-scrollbar-thumb {
+    border: 2px solid transparent;
+    border-radius: calc(8px * var(--corner-scale));
+    background: #cbc9c3 padding-box;
+
+    &:hover {
+      background-color: var(--key-color);
+    }
+  }
+}
+
+[data-skin="hardware"] [data-kit="scroll-area-scrollbar"] {
+  width: 10px;
+  padding: 4px 3px;
+}
+
+[data-skin="hardware"] [data-kit="scroll-area-thumb"] {
+  width: 4px;
+  border-radius: calc(4px * var(--corner-scale));
+  background: #cbc9c3;
+}
+
+[data-skin="hardware"] [data-kit="scroll-area-thumb"]:is([data-dragging], :hover) {
+  background: var(--key-color);
+}
+
+/* The cap stays still, so its light and shadow stay put; only the indicator
+   line turns, on an overlay rotating around the cap's center. */
+[data-skin="hardware"] [data-kit="knob-cap"] {
+  --notch: rgb(255 255 255 / 0.85);
+  rotate: none;
+
+  &::after {
+    inset: 0;
+    top: 0;
+    left: 0;
+    width: auto;
+    height: auto;
+    border-radius: 50%;
+    background: linear-gradient(var(--notch), var(--notch)) 50% 4px / 2px 9px no-repeat;
+    translate: none;
+    rotate: var(--turn);
+  }
+}
+
+[data-skin="hardware"] [data-color="white"] [data-kit="knob-cap"] {
+  --notch: var(--ink);
+
+  &::after {
+    background: linear-gradient(var(--notch), var(--notch)) 50% 4px / 2px 9px no-repeat;
+  }
+}
+
+/* Pressing sinks the cap into a base that stays put: the key moves down 2px
+   while its edge shrinks by 2px, so the bottom and its shadow don't move. */
+[data-skin="hardware"]
+  :is(
+    [data-kit="button"],
+    [data-kit="checkbox"],
+    [data-kit="segment"],
+    [data-kit="toggle"],
+    [data-kit="page"],
+    [data-kit="calendar-nav"],
+    [data-kit="tab"],
+    [data-kit="menubar-trigger"],
+    [data-kit="radio"]
+  ):active:not([data-disabled], :disabled) {
+  translate: 0 2px;
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 1px 0 var(--light-edge),
+    0 3px 8px -4px rgb(60 50 40 / calc(0.25 * var(--shadow-k)));
+}
+
+[data-skin="hardware"]
+  :is(
+    [data-kit="button"][data-tone="primary"],
+    [data-kit="segment"][data-checked],
+    [data-kit="tab"][data-selected],
+    [data-kit="page"][aria-current="page"]
+  ):active {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.3),
+    0 1px 0 var(--key-color-edge),
+    0 3px 8px -4px color-mix(in oklab, var(--key-color-edge) 50%, transparent);
+}
+
+/* Soft light, after the reference: no hard edges. Every raised thing has a
+   tight contact shadow, a wide faint blur, and a bright top highlight; panels
+   float on the page the same way. `:not(#_)` lifts these over the layered
+   rules above without !important; folding the skin into one file removes it. */
+[data-skin="hardware"] {
+  --paper: #eeeeec;
+  --panel: #fbfbfa;
+  --soft-rest:
+    inset 0 1px 0 #fff, inset 0 -1px 1px rgb(0 0 0 / calc(0.04 * var(--shadow-k))), 0 1px 1px rgb(0 0 0 / calc(0.08 * var(--shadow-k))), 0 2px 4px rgb(0 0 0 / calc(0.06 * var(--shadow-k))),
+    0 10px 18px -6px rgb(0 0 0 / calc(0.16 * var(--shadow-k)));
+  --soft-press: inset 0 1px 2px rgb(0 0 0 / calc(0.08 * var(--shadow-k))), 0 0 0 1px rgb(0 0 0 / calc(0.04 * var(--shadow-k))), 0 1px 2px rgb(0 0 0 / calc(0.08 * var(--shadow-k)));
+  --soft-panel: 0 0 0 1px rgb(0 0 0 / 0.025), 0 2px 6px rgb(0 0 0 / 0.04), 0 24px 48px -20px rgb(0 0 0 / 0.16);
+  --soft-well: inset 0 1px 3px rgb(0 0 0 / 0.1), inset 0 0 0 1px rgb(0 0 0 / 0.03);
+}
+
+/* Panels float, separate, rounded. */
+[data-skin="hardware"] [data-kit="grid"]:not(#_) {
+  gap: 16px;
+  overflow: visible;
+  background: none;
+  box-shadow: none;
+}
+
+[data-skin="hardware"] :is([data-kit="module"], [data-kit="card"]):not(#_) {
+  border-radius: calc(18px * var(--corner-scale));
+  background: var(--panel);
+  box-shadow: var(--soft-panel);
+}
+
+[data-skin="hardware"] :is([data-kit="sidebar"]):not(#_) {
+  background: var(--panel);
+  box-shadow: 0 0 0 1px rgb(0 0 0 / calc(0.03 * var(--shadow-k))), 8px 0 30px -18px rgb(0 0 0 / calc(0.18 * var(--shadow-k)));
+}
+
+[data-skin="hardware"] [data-kit="caption"]::after {
+  background: rgb(0 0 0 / 0.07);
+}
+
+/* Keys: white, softly raised; pressing tightens the shadow. */
+[data-skin="hardware"]
+  :is(
+    [data-kit="button"],
+    [data-kit="checkbox"],
+    [data-kit="segment"],
+    [data-kit="toggle"],
+    [data-kit="page"],
+    [data-kit="calendar-nav"],
+    [data-kit="tab"],
+    [data-kit="menubar-trigger"],
+    [data-kit="radio"]
+  ):not(#_) {
+  color: var(--ink);
+  background: linear-gradient(180deg, #ffffff, #f6f6f5);
+  box-shadow: var(--soft-rest);
+  translate: none;
+
+  &:active {
+    translate: none;
+    scale: 0.98;
+    background: linear-gradient(180deg, #f7f7f6, #f1f1f0);
+    box-shadow: var(--soft-press);
+  }
+}
+
+[data-skin="hardware"] [data-kit="button"]:not([data-shape]):not(#_) {
+  border-radius: calc(12px * var(--corner-scale));
+}
+
+[data-skin="hardware"] [data-kit="button"][data-tone="primary"]:not(#_) {
+  color: #fff;
+  background: linear-gradient(180deg, color-mix(in oklab, var(--key-color), #fff 18%), var(--key-color));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.3),
+    0 1px 1px color-mix(in oklab, var(--key-color-edge) 20%, transparent),
+    0 10px 18px -6px color-mix(in oklab, var(--key-color) 45%, transparent);
+}
+
+[data-skin="hardware"] [data-kit="button"][data-tone="danger"]:not(#_) {
+  color: #fff;
+  background: linear-gradient(180deg, #ff6b62, var(--red));
+  box-shadow:
+    0 1px 1px rgb(150 20 10 / 0.2),
+    0 10px 18px -6px rgb(255 59 48 / 0.4);
+}
+
+/* Segmented, tabs and the menubar: a pale inset pill, the chosen one a raised white pill. */
+[data-skin="hardware"] :is([data-kit="segmented"], [data-kit="tabs-list"], [data-kit="menubar"]):not(#_) {
+  gap: 2px;
+  padding: 3px;
+  border-radius: calc(12px * var(--corner-scale));
+  background: #ececea;
+  box-shadow: var(--soft-well);
+}
+
+[data-skin="hardware"] :is([data-kit="segment"], [data-kit="tab"], [data-kit="menubar-trigger"]):not(#_) {
+  border-radius: calc(9px * var(--corner-scale)) !important;
+  color: var(--dim);
+  background: transparent;
+  box-shadow: none;
+
+  &:is([data-checked], [data-selected], [data-open]) {
+    color: var(--ink);
+    background: linear-gradient(180deg, #ffffff, #f8f8f7);
+    box-shadow: 0 1px 1px rgb(0 0 0 / calc(0.08 * var(--shadow-k))), 0 3px 8px -2px rgb(0 0 0 / calc(0.14 * var(--shadow-k)));
+  }
+}
+
+[data-skin="hardware"] [data-kit="page"][aria-current="page"]:not(#_) {
+  color: #fff;
+  background: linear-gradient(180deg, #3a3a39, #232322);
+  box-shadow: 0 1px 1px rgb(0 0 0 / calc(0.2 * var(--shadow-k))), 0 8px 14px -6px rgb(0 0 0 / calc(0.4 * var(--shadow-k)));
+}
+
+/* The switch: a pill that darkens when on, with a soft white thumb. */
+[data-skin="hardware"] [data-kit="switch"]:not(#_) {
+  width: 52px;
+  height: 28px;
+  padding: 3px;
+  border-radius: calc(14px * var(--corner-scale));
+  background: #e2e2e0;
+  box-shadow: var(--soft-well);
+
+  &[data-checked] {
+    background: #2a2a29;
+  }
+}
+
+[data-skin="hardware"] [data-kit="switch-thumb"]:not(#_) {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #ffffff, #f2f2f1);
+  box-shadow: 0 1px 1px rgb(0 0 0 / calc(0.15 * var(--shadow-k))), 0 4px 8px -2px rgb(0 0 0 / calc(0.3 * var(--shadow-k)));
+
+  [data-checked] > & {
+    translate: 24px 0;
+  }
+}
+
+/* Knobs: a white cap with a thin dark rim and a soft shadow, a dot for the
+   value, and a fine tick ring. */
+[data-skin="hardware"] [data-kit="knob-dial"]:not(#_) {
+  --tick-color: #9a9a96;
+  --lit-color: #2a2a29;
+
+  &::before {
+    opacity: 1;
+  }
+}
+
+[data-skin="hardware"] [data-kit="knob-cap"]:not(#_) {
+  inset: 12px;
+  background: radial-gradient(circle at 50% 30%, #ffffff, #f3f3f2 70%);
+  box-shadow:
+    0 0 0 2px #2c2c2b,
+    0 2px 2px rgb(0 0 0 / calc(0.18 * var(--shadow-k))),
+    0 10px 16px -4px rgb(0 0 0 / calc(0.3 * var(--shadow-k)));
+
+  &::after {
+    background: radial-gradient(circle, #2c2c2b 2.6px, transparent 3px) 50% 7px / 8px 8px no-repeat;
+  }
+}
+
+[data-skin="hardware"] [data-color="orange"] [data-kit="knob-cap"]:not(#_)::after {
+  background: radial-gradient(circle, var(--key-color) 2.6px, transparent 3px) 50% 7px / 8px 8px no-repeat;
+}
+
+/* Faders: a thin dark track with a small white pill cap. */
+[data-skin="hardware"] [data-kit="slider-track"]:not(#_) {
+  height: 3px;
+  border-radius: calc(2px * var(--corner-scale));
+  background: #3a3a39;
+}
+
+[data-skin="hardware"] [data-kit="slider-thumb"]:not(#_) {
+  width: 34px;
+  height: 16px;
+  border-radius: calc(8px * var(--corner-scale));
+  background: linear-gradient(180deg, #ffffff, #f2f2f1);
+  box-shadow:
+    0 0 0 1px rgb(0 0 0 / calc(0.06 * var(--shadow-k))),
+    0 1px 1px rgb(0 0 0 / calc(0.15 * var(--shadow-k))),
+    0 6px 10px -3px rgb(0 0 0 / calc(0.3 * var(--shadow-k)));
+
+  &::after {
+    top: 6px;
+    width: 14px;
+    height: 3px;
+    border-radius: calc(2px * var(--corner-scale));
+    background: #2c2c2b;
+  }
+}
+
+/* Wells: fields and displays sit softly into the panel. */
+[data-skin="hardware"]
+  :is(
+    [data-kit="input"],
+    [data-kit="select-trigger"],
+    [data-kit="otp-slot"],
+    [data-kit="stepper-input"],
+    [data-kit="bars-plot"],
+    [data-kit="meter-track"],
+    [data-kit="tab-panel"]
+  ):not(#_) {
+  border-radius: calc(10px * var(--corner-scale));
+  background: #ececea;
+  box-shadow: var(--soft-well);
+}
+
+[data-skin="hardware"] :is([data-kit="popup"], [data-kit="dialog-surface"], [data-kit="popover-surface"]):not(#_) {
+  border-radius: calc(14px * var(--corner-scale));
+  background: var(--panel);
+  box-shadow: 0 0 0 1px rgb(0 0 0 / calc(0.04 * var(--shadow-k))), 0 4px 10px rgb(0 0 0 / calc(0.06 * var(--shadow-k))), 0 30px 60px -20px rgb(0 0 0 / calc(0.25 * var(--shadow-k)));
+}
+
+[data-skin="hardware"] [data-kit="checkbox"]:not(#_) {
+  border-radius: calc(12px * var(--corner-scale));
+}
+
+[data-skin="hardware"] [data-kit="topbar"]:not(#_) {
+  background: rgb(238 238 236 / 0.85);
+  box-shadow: none;
+}
+
+[data-skin="hardware"] [data-kit="nav-item"][aria-current="page"]:not(#_) {
+  background: linear-gradient(180deg, #ffffff, #f6f6f5);
+  box-shadow: var(--soft-rest);
+}
+
+[data-skin="hardware"] [data-kit="table"] [data-kit="checkbox"]:not(#_) {
+  border-radius: calc(6px * var(--corner-scale));
+}
+
+/* Depth back under the soft light: each key has its side face, and the soft
+   shadows fall below it. Pressing sinks the cap into the edge, so the bottom
+   and its shadow stay put. */
+[data-skin="hardware"] {
+  --key-edge: #dcdcd8;
+  --soft-rest:
+    inset 0 1px 0 #fff, 0 3px 0 var(--key-edge), 0 4px 1px rgb(0 0 0 / calc(0.06 * var(--shadow-k))), 0 5px 4px rgb(0 0 0 / calc(0.05 * var(--shadow-k))),
+    0 14px 20px -8px rgb(0 0 0 / calc(0.18 * var(--shadow-k)));
+  --soft-press:
+    inset 0 1px 0 #fff, 0 1px 0 var(--key-edge), 0 2px 1px rgb(0 0 0 / calc(0.07 * var(--shadow-k))), 0 5px 4px rgb(0 0 0 / calc(0.04 * var(--shadow-k))),
+    0 12px 18px -8px rgb(0 0 0 / calc(0.14 * var(--shadow-k)));
+}
+
+[data-skin="hardware"]
+  :is(
+    [data-kit="button"],
+    [data-kit="checkbox"],
+    [data-kit="toggle"],
+    [data-kit="page"],
+    [data-kit="calendar-nav"],
+    [data-kit="radio"]
+  ):not(#_) {
+  &:active {
+    scale: none;
+    translate: 0 2px;
+    box-shadow: var(--soft-press);
+  }
+}
+
+[data-skin="hardware"] [data-kit="button"][data-tone="primary"]:not(#_) {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.3),
+    0 3px 0 var(--key-color-edge),
+    0 5px 4px color-mix(in oklab, var(--key-color-edge) 12%, transparent),
+    0 14px 20px -8px color-mix(in oklab, var(--key-color) 45%, transparent);
+
+  &:active {
+    translate: 0 2px;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.3),
+      0 1px 0 var(--key-color-edge),
+      0 3px 3px color-mix(in oklab, var(--key-color-edge) 12%, transparent),
+      0 12px 18px -8px color-mix(in oklab, var(--key-color) 40%, transparent);
+  }
+}
+
+[data-skin="hardware"] [data-kit="page"][aria-current="page"]:not(#_) {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.12),
+    0 3px 0 #0f0f0f,
+    0 14px 20px -8px rgb(0 0 0 / calc(0.4 * var(--shadow-k)));
+}
+
+/* The chosen segment or tab stands up out of its track. */
+[data-skin="hardware"] :is([data-kit="segment"], [data-kit="tab"], [data-kit="menubar-trigger"]):not(#_) {
+  &:is([data-checked], [data-selected], [data-open]) {
+    translate: 0 -1px;
+    box-shadow:
+      inset 0 1px 0 #fff,
+      0 2px 0 var(--key-edge),
+      0 3px 2px rgb(0 0 0 / calc(0.07 * var(--shadow-k))),
+      0 8px 12px -4px rgb(0 0 0 / calc(0.16 * var(--shadow-k)));
+  }
+
+  &:active {
+    translate: 0 1px;
+  }
+}
+
+[data-skin="hardware"] :is([data-kit="segmented"], [data-kit="tabs-list"], [data-kit="menubar"]):not(#_) {
+  padding: 3px 3px 5px;
+}
+
+/* Text with depth: print on the light material is pressed in (a highlight
+   below, a faint shade above), print on colored keys stands out (a shade
+   below), and lit digits glow. */
+[data-skin="hardware"] {
+  --engraved: 0 1px 0 rgb(255 255 255 / 0.95), 0 -1px 0 rgb(0 0 0 / 0.07);
+  --embossed: 0 1px 1px rgb(0 0 0 / 0.25), 0 -1px 0 rgb(255 255 255 / 0.12);
+  --letterpress: 0 1px 0 #fff, 0 2px 4px rgb(0 0 0 / 0.08);
+
+  text-shadow: var(--engraved);
+}
+
+[data-skin="hardware"] :is([data-kit="masthead"] h1, [data-kit="page-header"] h1, [data-kit="stat-value"], [data-kit="knob-readout"]) {
+  text-shadow: var(--letterpress);
+}
+
+[data-skin="hardware"]
+  :is(
+    [data-kit="button"][data-tone="primary"],
+    [data-kit="button"][data-tone="danger"],
+    [data-kit="page"][aria-current="page"],
+    [data-kit="badge"][data-tone="danger"],
+    [data-kit="badge"][data-tone="warning"],
+    [data-kit="nav-count"]
+  ):not(#_) {
+  text-shadow: var(--embossed);
+}
+
+[data-skin="hardware"] [data-kit="stepper-input"]:not(#_) {
+  text-shadow:
+    0 0 8px color-mix(in oklab, var(--key-color) 35%, transparent),
+    0 1px 0 rgb(255 255 255 / 0.6);
+}
+
+[data-skin="hardware"] :is([data-kit="input"], [data-kit="select-trigger"], [data-kit="otp-slot"], [data-kit="tab-panel"]) {
+  text-shadow: 0 1px 0 rgb(255 255 255 / 0.8);
+}
+
+[data-skin="hardware"] :is([data-kit="caption"] span, [data-kit="alert-title"]) {
+  text-shadow: 0 1px 0 rgb(255 255 255 / 0.9), 0 0 6px color-mix(in oklab, var(--key-color) 18%, transparent);
+}
+
+/* Toasts float like the panels: light, soft, with depth. */
+[data-skin="hardware"] [data-kit="toast"]:not(#_) {
+  padding: 14px 14px 14px 18px;
+  border-radius: calc(14px * var(--corner-scale));
+  color: var(--ink);
+  background: var(--panel);
+  box-shadow:
+    0 0 0 1px rgb(0 0 0 / calc(0.04 * var(--shadow-k))),
+    0 4px 10px rgb(0 0 0 / calc(0.06 * var(--shadow-k))),
+    0 24px 48px -16px rgb(0 0 0 / calc(0.28 * var(--shadow-k)));
+  font: 400 12px var(--sans);
+  text-transform: none;
+  text-shadow: var(--engraved);
+}
+
+[data-skin="hardware"] [data-kit="toast-title"] {
+  font: var(--label);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+[data-skin="hardware"] [data-kit="toast-description"]:not(#_) {
+  color: var(--dim);
+}
+
+/* Print on a dark surface gets no highlight, which would smear. */
+[data-skin="hardware"] [data-kit="tooltip"]:not(#_) {
+  padding: 6px 10px;
+  border-radius: calc(8px * var(--corner-scale));
+  color: #f4f4f2;
+  background: #2a2a29;
+  box-shadow: 0 8px 18px -8px rgb(0 0 0 / calc(0.5 * var(--shadow-k)));
+  font: var(--label);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  text-shadow: none;
+}
+
+[data-skin="hardware"] [data-kit="switch"][data-checked] {
+  text-shadow: none;
+}
+
+[data-skin="hardware"] [data-icon] {
+  text-transform: none;
+}
+
+/* Tabs as a row of blank keys, each with its label printed on the panel
+   above it in dotted print. The chosen key stays pressed down. */
+[data-skin="hardware"] [data-kit="tabs-list"]:not(#_) {
+  gap: 6px;
+  padding: 0 0 4px;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+[data-skin="hardware"] [data-kit="tab"]:not(#_) {
+  display: grid;
+  gap: 10px;
+  height: auto;
+  padding: 0;
+  border-radius: 0 !important;
+  background: none;
+  box-shadow: none;
+  translate: none;
+  font: 400 15px var(--sans);
+  letter-spacing: 0.04em;
+  text-transform: none;
+  text-shadow: none;
+  color: transparent;
+  /* The dots are the print: the label's glyphs are filled with a dot grid. */
+  background-image: radial-gradient(circle, #a3a19b 0.75px, transparent 1px);
+  background-size: 2.2px 2.2px;
+  -webkit-background-clip: text;
+  background-clip: text;
+
+  &::after {
+    content: "";
+    height: 22px;
+    border-radius: calc(8px * var(--corner-scale));
+    background: linear-gradient(180deg, #ffffff, #f4f4f2);
+    box-shadow: var(--soft-rest);
+    transition:
+      translate 60ms,
+      box-shadow 60ms,
+      background 60ms;
+  }
+
+  &:active::after {
+    translate: 0 2px;
+    box-shadow: var(--soft-press);
+  }
+
+  &[data-selected] {
+    background-image: radial-gradient(circle, #5f5d58 0.8px, transparent 1.05px);
+    translate: none;
+    box-shadow: none;
+
+    &::after {
+      translate: 0 3px;
+      background: linear-gradient(180deg, #e3e3e0, #ebebe8);
+      box-shadow:
+        inset 0 1px 3px rgb(0 0 0 / calc(0.16 * var(--shadow-k))),
+        0 1px 0 #fff;
+    }
+  }
+
+  &:focus-visible {
+    outline: none;
+
+    &::after {
+      outline: 2px solid var(--key-color);
+      outline-offset: 3px;
+    }
+  }
+}
+
+/* The selected tab keeps the dotted print, darker; earlier selected-state
+   rules reset the background, so the clip is restated here. */
+[data-skin="hardware"] [data-kit="tabs-list"] [data-kit="tab"][data-selected]:not(#_) {
+  color: transparent;
+  background: radial-gradient(circle, #4f4d48 0.8px, transparent 1.05px) 0 0 / 2.2px 2.2px;
+  -webkit-background-clip: text;
+  background-clip: text;
+  box-shadow: none;
+  translate: none;
+  text-shadow: none;
+}
+
+/* Tab labels: small printed caps above the key, no dots. */
+[data-skin="hardware"] [data-kit="tabs-list"] [data-kit="tab"]:not(#_) {
+  gap: 8px;
+  font: var(--label);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--dim);
+  background: none;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+  text-shadow: var(--engraved);
+
+  &[data-selected] {
+    color: var(--ink);
+    background: none;
+    -webkit-background-clip: border-box;
+    background-clip: border-box;
+    text-shadow: var(--engraved);
+  }
+}
+
+[data-skin="hardware"]
+  :is(
+    [data-kit="button"][data-tone="primary"],
+    [data-kit="badge"][data-tone="danger"],
+    [data-kit="badge"][data-tone="warning"],
+    [data-kit="calendar-day"][data-selected]
+  ):not(#_) {
+  color: var(--on-accent);
+}
+
+/* Engraved print keeps only its highlight; a shade above ghosts up close. */
+[data-skin="hardware"] {
+  --engraved: 0 1px 0 rgb(255 255 255 / 0.85);
+}
+
+/* The meter: one overlay of gaps across the whole track, so lit and unlit
+   segments share a pitch, and the lit bar snaps to whole segments. ui-sdk
+   writes the bar's width inline, so only !important can round it. */
+[data-skin="hardware"] [data-kit="meter-track"]:not(#_) {
+  position: relative;
+
+  &::before {
+    background: #d9d8d3;
+    mask: none;
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 3px;
+    background: repeating-linear-gradient(90deg, transparent 0 calc(5% - 2px), #ececea calc(5% - 2px) 5%);
+    pointer-events: none;
+  }
+}
+
+[data-skin="hardware"] [data-kit="meter-indicator"]:not(#_) {
+  width: round(down, var(--meter-value, var(--progress-value, 0%)), 5%) !important;
+  background: var(--key-color);
+  mask: none;
+}
+
+[data-skin="hardware"] [data-kit="meter-indicator"]:not(#_) {
+  text-shadow: none;
+}
+
+/* Text fields are LCD screens: black glass set into the panel, light text,
+   and the theme color for the caret and selection. */
+[data-skin="hardware"] [data-kit="input"]:not(#_) {
+  color: #f1f1ed;
+  background: linear-gradient(180deg, #1b1b1a, #111110);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.06),
+    inset 0 2px 6px rgb(0 0 0 / calc(0.6 * var(--shadow-k))),
+    0 1px 0 #fff,
+    0 0 0 1px rgb(0 0 0 / calc(0.08 * var(--shadow-k)));
+  text-shadow: none;
+  caret-color: var(--key-color);
+
+  &::placeholder {
+    color: #6d6d68;
+  }
+
+  &::selection {
+    color: var(--on-accent);
+    background: var(--key-color);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--key-color);
+    outline-offset: 2px;
+  }
+}
+
+[data-skin="hardware"] [data-kit="input-group"] [data-kit="input-addon"]:not(#_) {
+  color: #b9b9b4;
+  text-shadow: none;
+}
+
+/* The LCD in detail: a thin dark bezel, black glass that brightens toward
+   its rim where the backlight leaks in, faintly glowing print, a block
+   caret, and a thick ring set off the bezel on focus. */
+[data-skin="hardware"] [data-kit="input"]:not(#_) {
+  border: 2px solid #1a1918;
+  border-radius: calc(12px * var(--corner-scale));
+  color: #f4f4f0;
+  background:
+    radial-gradient(130% 160% at 50% 50%, #090908 52%, #141413 78%, #22211f 100%),
+    #0b0b0a;
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.05),
+    inset 0 0 10px 2px rgb(255 255 255 / 0.07),
+    inset 0 1px 0 rgb(255 255 255 / 0.08),
+    inset 0 -1px 0 rgb(0 0 0 / calc(0.6 * var(--shadow-k))),
+    0 1px 0 #fff,
+    0 2px 6px -2px rgb(0 0 0 / calc(0.25 * var(--shadow-k)));
+  text-shadow: 0 0 6px rgb(255 255 255 / 0.18);
+  caret-color: var(--key-color);
+  caret-shape: block;
+
+  &:focus-visible {
+    outline: 3px solid var(--key-color);
+    outline-offset: 4px;
+  }
+}
+
+/* The chosen segment presses into its edge too: it moves down by the edge's
+   height while the edge shrinks to nothing, so its bottom stays put. */
+[data-skin="hardware"]
+  :is([data-kit="segment"], [data-kit="menubar-trigger"]):is([data-checked], [data-selected], [data-open]):active:not(#_) {
+  translate: 0 1px;
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 0 0 var(--key-edge),
+    0 1px 1px rgb(0 0 0 / calc(0.07 * var(--shadow-k))),
+    0 6px 10px -4px rgb(0 0 0 / calc(0.14 * var(--shadow-k)));
+}
+
+/* An unchosen segment has no edge, so pressing it only darkens. */
+[data-skin="hardware"] :is([data-kit="segment"], [data-kit="menubar-trigger"]):not([data-checked], [data-selected], [data-open]):active:not(#_) {
+  translate: none;
+  background: rgb(0 0 0 / 0.04);
+}
+
+/* Keys sit in holes in the panel: a dark slot around each
+   key, a lip at the key's bottom inside it. Pressing sinks the key within its
+   hole, so the slot never moves. */
+[data-skin="hardware"] {
+  --slot: #262624;
+  --key-rest:
+    inset 0 1px 0 rgb(255 255 255 / 0.95), inset 0 -3px 0 var(--key-edge), inset 0 -4px 3px rgb(0 0 0 / calc(0.04 * var(--shadow-k))),
+    0 0 0 2px var(--slot), 0 1px 0 2px rgb(255 255 255 / 0.7);
+  --key-down:
+    inset 0 2px 3px rgb(0 0 0 / calc(0.14 * var(--shadow-k))), inset 0 -1px 0 var(--key-edge), 0 0 0 2px var(--slot),
+    0 1px 0 2px rgb(255 255 255 / 0.7);
+}
+
+[data-skin="hardware"]
+  :is(
+    [data-kit="button"],
+    [data-kit="checkbox"],
+    [data-kit="toggle"],
+    [data-kit="page"],
+    [data-kit="calendar-nav"],
+    [data-kit="radio"]
+  ):not(#_) {
+  border-radius: calc(6px * var(--corner-scale));
+  background: linear-gradient(180deg, #fdfdfc, #efefec);
+  box-shadow: var(--key-rest);
+  translate: none;
+
+  &:active {
+    translate: none;
+    scale: none;
+    background: linear-gradient(180deg, #f1f1ee, #e9e9e6);
+    box-shadow: var(--key-down);
+  }
+}
+
+[data-skin="hardware"] [data-kit="button"][data-shape="round"]:not(#_) {
+  border-radius: 50%;
+}
+
+[data-skin="hardware"] [data-kit="button"][data-tone="primary"]:not(#_) {
+  --key-edge: color-mix(in oklab, var(--key-color), #000 28%);
+  color: var(--on-accent);
+  font-weight: 400;
+  background: linear-gradient(180deg, color-mix(in oklab, var(--key-color), #fff 10%), var(--key-color));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.28),
+    inset 0 -3px 0 var(--key-edge),
+    0 0 0 2px var(--slot),
+    0 1px 0 2px rgb(255 255 255 / 0.7);
+
+  &:active {
+    background: linear-gradient(180deg, var(--key-color), color-mix(in oklab, var(--key-color), #000 6%));
+    box-shadow:
+      inset 0 2px 3px rgb(0 0 0 / calc(0.2 * var(--shadow-k))),
+      inset 0 -1px 0 var(--key-edge),
+      0 0 0 2px var(--slot),
+      0 1px 0 2px rgb(255 255 255 / 0.7);
+  }
+}
+
+[data-skin="hardware"] [data-kit="page"][aria-current="page"]:not(#_) {
+  --key-edge: #0c0c0c;
+  color: #d9d9d5;
+  background: linear-gradient(180deg, #353534, #242423);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.1),
+    inset 0 -3px 0 var(--key-edge),
+    0 0 0 2px var(--slot),
+    0 1px 0 2px rgb(255 255 255 / 0.7);
+}
+
+/* The switch lights up in the theme color when on. */
+[data-skin="hardware"] [data-kit="switch"][data-checked]:not(#_) {
+  background: var(--key-color);
+  box-shadow:
+    inset 0 1px 3px color-mix(in oklab, var(--key-color), #000 40%),
+    0 0 10px -2px color-mix(in oklab, var(--key-color) 50%, transparent);
+}
+
+/* The fader: a dark rounded groove, lit in the theme color up to the cap,
+   and a gray round cap with a thin printed line through it. */
+[data-skin="hardware"] [data-kit="slider-track"]:not(#_) {
+  height: 8px;
+  border-radius: calc(4px * var(--corner-scale));
+  background: #1c1c1b;
+  box-shadow:
+    inset 0 1px 2px rgb(0 0 0 / calc(0.6 * var(--shadow-k))),
+    0 1px 0 #fff;
+}
+
+[data-skin="hardware"] [data-kit="slider-indicator"]:not(#_) {
+  border-radius: calc(4px * var(--corner-scale));
+  background: linear-gradient(180deg, color-mix(in oklab, var(--key-color), #000 15%), var(--key-color));
+  box-shadow: 0 0 8px -1px color-mix(in oklab, var(--key-color) 55%, transparent);
+}
+
+[data-skin="hardware"] [data-kit="slider-thumb"]:not(#_) {
+  width: 30px;
+  height: 46px;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset-block: 0;
+    left: 50%;
+    width: 1px;
+    background: #8d8c88;
+    translate: -50% 0;
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 8px 0;
+    width: auto;
+    height: auto;
+    border-radius: 50%;
+    background: radial-gradient(circle at 50% 30%, #c4c3bf, #9c9b97 70%, #8b8a86);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.35),
+      0 2px 2px rgb(0 0 0 / calc(0.25 * var(--shadow-k))),
+      0 8px 12px -4px rgb(0 0 0 / calc(0.4 * var(--shadow-k)));
+    translate: none;
+  }
+
+  &:focus-visible {
+    outline: none;
+
+    &::after {
+      outline: 2px solid var(--key-color);
+      outline-offset: 3px;
+    }
+  }
+}
+
+/* The meter: small round dots on one grid; lit dots in the theme color, and
+   the lit run snapped to whole dots. */
+[data-skin="hardware"] [data-kit="meter-track"]:not(#_) {
+  height: 16px;
+  padding: 3px 4px;
+
+  &::before {
+    inset: 3px 4px;
+    background: radial-gradient(circle at 4px 50%, #cfcdc7 2.4px, transparent 2.9px) 0 0 / 10px 100%;
+  }
+
+  &::after {
+    display: none;
+  }
+}
+
+[data-skin="hardware"] [data-kit="meter-indicator"]:not(#_) {
+  width: round(down, var(--meter-value, var(--progress-value, 0%)), 10px) !important;
+  background: radial-gradient(circle at 4px 50%, var(--key-color) 2.4px, transparent 2.9px) 0 0 / 10px 100%;
+  filter: drop-shadow(0 0 2px color-mix(in oklab, var(--key-color) 60%, transparent));
+}
+
+/* Slots read as a shadowed gap, not a drawn ring. */
+[data-skin="hardware"] {
+  --slot: #34332f;
+}
+
+/* The switch sits in a slot. On, the track and the thumb are both the theme
+   color, the thumb shaded like a dome; off, both are gray. */
+[data-skin="hardware"] [data-kit="switch"]:not(#_) {
+  width: 54px;
+  height: 28px;
+  padding: 3px;
+  border-radius: calc(14px * var(--corner-scale));
+  background: #d6d5d0;
+  box-shadow:
+    inset 0 2px 3px rgb(0 0 0 / calc(0.25 * var(--shadow-k))),
+    0 0 0 2px var(--slot),
+    0 1px 0 2px rgb(255 255 255 / 0.7);
+
+  &[data-checked] {
+    background: color-mix(in oklab, var(--key-color), #000 12%);
+    box-shadow:
+      inset 0 2px 4px color-mix(in oklab, var(--key-color), #000 45%),
+      0 0 0 2px var(--slot),
+      0 1px 0 2px rgb(255 255 255 / 0.7);
+  }
+}
+
+[data-skin="hardware"] [data-kit="switch-thumb"]:not(#_) {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 30%, #fafaf8, #dcdbd6 75%);
+  box-shadow:
+    inset 0 -1px 1px rgb(0 0 0 / calc(0.12 * var(--shadow-k))),
+    0 1px 2px rgb(0 0 0 / calc(0.3 * var(--shadow-k)));
+
+  [data-checked] > & {
+    translate: 26px 0;
+    background: radial-gradient(
+      circle at 50% 30%,
+      color-mix(in oklab, var(--key-color), #fff 22%),
+      var(--key-color) 70%,
+      color-mix(in oklab, var(--key-color), #000 10%)
+    );
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.25),
+      inset 0 -1px 1px rgb(0 0 0 / calc(0.18 * var(--shadow-k))),
+      -2px 1px 3px rgb(0 0 0 / calc(0.3 * var(--shadow-k)));
+  }
+}
+
+/* Unlit dots span only whole dots, so the last one isn't cut. */
+[data-skin="hardware"] [data-kit="meter-track"]:not(#_)::before {
+  right: auto;
+  width: round(down, calc(100% - 8px), 10px);
+}
+
+/* Keys without the dark ring: the lip inside, a soft shadow outside, and
+   smaller corners. */
+[data-skin="hardware"] {
+  --key-rest:
+    inset 0 1px 0 rgb(255 255 255 / 0.95), inset 0 -3px 0 var(--key-edge), 0 0 0 1px rgb(0 0 0 / calc(0.06 * var(--shadow-k))),
+    0 1px 2px rgb(0 0 0 / calc(0.1 * var(--shadow-k))), 0 8px 14px -6px rgb(0 0 0 / calc(0.22 * var(--shadow-k)));
+  --key-down:
+    inset 0 2px 3px rgb(0 0 0 / calc(0.12 * var(--shadow-k))), inset 0 -1px 0 var(--key-edge), 0 0 0 1px rgb(0 0 0 / calc(0.06 * var(--shadow-k))),
+    0 1px 1px rgb(0 0 0 / calc(0.08 * var(--shadow-k)));
+}
+
+[data-skin="hardware"]
+  :is(
+    [data-kit="button"]:not([data-shape="round"]),
+    [data-kit="checkbox"],
+    [data-kit="toggle"],
+    [data-kit="page"],
+    [data-kit="calendar-nav"]
+  ):not(#_) {
+  border-radius: calc(4px * var(--corner-scale));
+}
+
+[data-skin="hardware"] [data-kit="button"][data-tone="primary"]:not(#_) {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.28),
+    inset 0 -3px 0 var(--key-edge),
+    0 1px 2px rgb(0 0 0 / calc(0.14 * var(--shadow-k))),
+    0 8px 14px -6px color-mix(in oklab, var(--key-color) 55%, transparent);
+
+  &:active {
+    box-shadow:
+      inset 0 2px 3px rgb(0 0 0 / calc(0.2 * var(--shadow-k))),
+      inset 0 -1px 0 var(--key-edge),
+      0 1px 1px rgb(0 0 0 / calc(0.1 * var(--shadow-k)));
+  }
+}
+
+[data-skin="hardware"] [data-kit="page"][aria-current="page"]:not(#_) {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.1),
+    inset 0 -3px 0 var(--key-edge),
+    0 1px 2px rgb(0 0 0 / calc(0.2 * var(--shadow-k))),
+    0 8px 14px -6px rgb(0 0 0 / calc(0.35 * var(--shadow-k)));
+}
+
+/* Popups match the keys' smaller corners. Print on a theme-colored fill uses
+   the computed text color and no engraving, which smears on color. */
+[data-skin="hardware"] :is([data-kit="popup"], [data-kit="popover-surface"], [data-kit="dialog-surface"]):not(#_) {
+  border-radius: calc(8px * var(--corner-scale));
+  padding: 4px;
+}
+
+[data-skin="hardware"] [data-kit="option"]:not(#_) {
+  gap: 8px;
+  border-radius: calc(4px * var(--corner-scale));
+
+  &[data-highlighted] {
+    color: var(--on-accent);
+    background: var(--key-color);
+    text-shadow: none;
+  }
+}
+
+[data-skin="hardware"] [data-kit="option-check"]:not(#_) {
+  width: 12px;
+  color: inherit;
+
+  &:not([data-checked]) {
+    visibility: hidden;
+  }
+}
+
+[data-skin="hardware"] :is([data-highlighted], [data-checked][data-kit="segment"]) [data-kit="option-check"],
+[data-skin="hardware"] [data-highlighted] [data-kit="option-index"] {
+  color: inherit;
+  text-shadow: none;
+}
+
+/* The switch: a faint edge instead of a dark ring. */
+[data-skin="hardware"] [data-kit="switch"]:not(#_) {
+  box-shadow:
+    inset 0 2px 3px rgb(0 0 0 / calc(0.22 * var(--shadow-k))),
+    0 0 0 1px rgb(0 0 0 / calc(0.08 * var(--shadow-k))),
+    0 1px 0 1px rgb(255 255 255 / 0.7);
+
+  &[data-checked] {
+    box-shadow:
+      inset 0 2px 4px color-mix(in oklab, var(--key-color), #000 45%),
+      0 0 0 1px rgb(0 0 0 / calc(0.08 * var(--shadow-k))),
+      0 1px 0 1px rgb(255 255 255 / 0.7);
+  }
+}
+
+/* The fader cap: clean white, clearly lifted off the groove. */
+[data-skin="hardware"] [data-kit="slider-thumb"]:not(#_)::after {
+  background: radial-gradient(circle at 50% 28%, #ffffff, #f5f5f3 60%, #e7e7e4);
+  box-shadow:
+    inset 0 1px 0 #fff,
+    inset 0 -2px 3px rgb(0 0 0 / calc(0.08 * var(--shadow-k))),
+    0 0 0 1px rgb(0 0 0 / calc(0.06 * var(--shadow-k))),
+    0 2px 3px rgb(0 0 0 / calc(0.22 * var(--shadow-k))),
+    0 10px 18px -4px rgb(0 0 0 / calc(0.38 * var(--shadow-k)));
+}
+
+/* The switch, back to the soft pill: a pale inset track that takes the theme
+   color when on, and a soft white thumb in both states. */
+[data-skin="hardware"] [data-kit="switch"]:not(#_) {
+  width: 52px;
+  height: 28px;
+  padding: 3px;
+  border-radius: calc(14px * var(--corner-scale));
+  background: #e2e2e0;
+  box-shadow: var(--soft-well);
+
+  &[data-checked] {
+    background: var(--key-color);
+    box-shadow:
+      inset 0 1px 3px color-mix(in oklab, var(--key-color), #000 35%),
+      inset 0 0 0 1px rgb(0 0 0 / calc(0.04 * var(--shadow-k)));
+  }
+}
+
+[data-skin="hardware"] [data-kit="switch-thumb"]:not(#_) {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #ffffff, #f2f2f1);
+  box-shadow:
+    0 1px 1px rgb(0 0 0 / calc(0.15 * var(--shadow-k))),
+    0 4px 8px -2px rgb(0 0 0 / calc(0.3 * var(--shadow-k)));
+
+  [data-checked] > & {
+    translate: 24px 0;
+    background: linear-gradient(180deg, #ffffff, #f2f2f1);
+    box-shadow:
+      0 1px 1px rgb(0 0 0 / calc(0.15 * var(--shadow-k))),
+      0 4px 8px -2px rgb(0 0 0 / calc(0.3 * var(--shadow-k)));
+  }
+}
+
+/* Focus lands on the range input inside the thumb, so the ring follows it,
+   for keyboard focus only: Chromium counts a clicked range input as
+   :focus-visible, so the page's input modality (data-modality, lib/input-modality.ts) gates it. */
+:root[data-modality="keyboard"] [data-skin="hardware"] [data-kit="slider-thumb"]:has(:focus-visible):not(#_)::after {
+  outline: 2px solid var(--key-color);
+  outline-offset: 3px;
+}
+
+/* The switch thumb sits clearly above its track. */
+[data-skin="hardware"] [data-kit="switch-thumb"]:not(#_),
+[data-skin="hardware"] [data-checked] > [data-kit="switch-thumb"]:not(#_) {
+  box-shadow:
+    0 0 0 0.5px rgb(0 0 0 / calc(0.08 * var(--shadow-k))),
+    0 1px 2px rgb(0 0 0 / calc(0.25 * var(--shadow-k))),
+    0 3px 6px -1px rgb(0 0 0 / calc(0.25 * var(--shadow-k))),
+    0 8px 14px -4px rgb(0 0 0 / calc(0.35 * var(--shadow-k)));
+}
+
+[data-skin="hardware"] [data-kit="switch"]:has(:focus-visible):not(#_),
+[data-skin="hardware"] [data-kit="switch"]:focus-visible:not(#_) {
+  outline: 2px solid var(--key-color);
+  outline-offset: 3px;
+}
+
+/* The segmented control slides: the raised pill is the control's indicator,
+   placed by ui-sdk and moved on a transition; the segments stay flat. */
+[data-skin="hardware"] [data-kit="segmented"]:not(#_) {
+  position: relative;
+}
+
+[data-skin="hardware"] [data-kit="segmented-indicator"]:not(#_) {
+  display: block;
+  position: absolute;
+  z-index: 0;
+  top: var(--segmented-control-indicator-top);
+  left: var(--segmented-control-indicator-left);
+  width: var(--segmented-control-indicator-width);
+  height: var(--segmented-control-indicator-height);
+  bottom: auto;
+  border-radius: calc(9px * var(--corner-scale));
+  background: linear-gradient(180deg, #ffffff, #f8f8f7);
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 2px 0 var(--key-edge),
+    0 3px 2px rgb(0 0 0 / calc(0.07 * var(--shadow-k))),
+    0 8px 12px -4px rgb(0 0 0 / calc(0.16 * var(--shadow-k)));
+  translate: 0 -1px;
+  transition:
+    left 260ms var(--ease-detent),
+    width 260ms var(--ease-detent);
+}
+
+[data-skin="hardware"] [data-kit="segment"]:not(#_),
+[data-skin="hardware"] [data-kit="segment"][data-checked]:not(#_),
+[data-skin="hardware"] [data-kit="segment"][data-checked]:active:not(#_) {
+  position: relative;
+  z-index: 1;
+  background: transparent;
+  box-shadow: none;
+  translate: none;
+}
+
+[data-skin="hardware"] [data-kit="segment"][data-checked]:not(#_) {
+  color: var(--ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-skin="hardware"] [data-kit="segmented-indicator"]:not(#_) {
+    transition: none;
+  }
+}
+
+/* Labels beneath: the well and the sliding pill fill the top slot area, and
+   each option's label is printed on the panel under its slot. */
+[data-skin="hardware"] {
+  --slot-height: 40px;
+}
+
+[data-skin="hardware"] [data-kit="segmented"]:not(#_) {
+  gap: 4px;
+  padding: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    height: calc(var(--slot-height) + 8px);
+    border-radius: calc(12px * var(--corner-scale));
+    background: #ececea;
+    box-shadow: var(--soft-well);
+  }
+}
+
+[data-skin="hardware"] [data-kit="segmented-indicator"]:not(#_) {
+  z-index: 1;
+  top: calc(var(--segmented-control-indicator-top) + 4px);
+  left: calc(var(--segmented-control-indicator-left) + 4px);
+  width: calc(var(--segmented-control-indicator-width) - 8px);
+  height: var(--slot-height);
+}
+
+[data-skin="hardware"] [data-kit="segment"]:not(#_),
+[data-skin="hardware"] [data-kit="segment"][data-checked]:not(#_) {
+  z-index: 2;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  height: auto;
+  min-width: 52px;
+  padding: calc(var(--slot-height) + 16px) 0 0;
+  border-radius: 0 !important;
+  font: var(--label);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+[data-skin="hardware"] [data-kit="segment"][data-checked]:not(#_) {
+  color: var(--ink);
+}
+
+[data-skin="hardware"] [data-kit="segment"]:focus-visible:not(#_) {
+  outline: none;
+}
+
+[data-skin="hardware"] [data-kit="segmented"]:has([data-kit="segment"]:focus-visible) [data-kit="segmented-indicator"] {
+  outline: 2px solid var(--key-color);
+  outline-offset: 2px;
+}
+
+/* In the page header, the field label and Deploy line up with the slot,
+   not with the labels printed beneath it. */
+[data-skin="hardware"] [data-kit="page-actions"]:not(#_) {
+  align-items: flex-start;
+}
+
+[data-skin="hardware"] [data-kit="page-header"] [data-kit="field"]:not(#_) {
+  align-items: flex-start;
+
+  & > [data-kit="label"] {
+    padding-top: calc((var(--slot-height) + 8px) / 2 - 6px);
+  }
+}
+
+[data-skin="hardware"] [data-kit="page-actions"] > [data-kit="button"]:not(#_) {
+  height: calc(var(--slot-height) + 8px);
+}
+
+/* Pressing an option sinks only its slot, never the label area. */
+[data-skin="hardware"] [data-kit="segment"]:not(#_),
+[data-skin="hardware"] [data-kit="segment"]:active:not(#_),
+[data-skin="hardware"] [data-kit="segment"][data-checked]:active:not(#_) {
+  background: transparent;
+  box-shadow: none;
+  translate: none;
+  scale: none;
+}
+
+[data-skin="hardware"] [data-kit="segment"]:not(#_)::before {
+  content: "";
+  position: absolute;
+  inset: 4px 2px auto;
+  height: var(--slot-height);
+  border-radius: calc(9px * var(--corner-scale));
+  transition: background 80ms;
+}
+
+[data-skin="hardware"] [data-kit="segment"]:not([data-checked]):active:not(#_)::before {
+  background: rgb(0 0 0 / 0.05);
+  box-shadow: inset 0 1px 2px rgb(0 0 0 / calc(0.08 * var(--shadow-k)));
+}
+
+/* Separators between slots, fading out beside the pill. */
+[data-skin="hardware"] [data-kit="segment"] + [data-kit="segment"]:not(#_)::after {
+  content: "";
+  position: absolute;
+  top: calc(4px + var(--slot-height) * 0.25);
+  left: -2.5px;
+  width: 1px;
+  height: calc(var(--slot-height) * 0.5);
+  background: rgb(0 0 0 / 0.1);
+  box-shadow: 1px 0 0 rgb(255 255 255 / 0.8);
+  transition: opacity 200ms;
+}
+
+[data-skin="hardware"] :is([data-kit="segment"][data-checked], [data-kit="segment"][data-checked] + [data-kit="segment"]):not(#_)::after {
+  opacity: 0;
+}
+
+/* Tabs press only their key, not the whole tab. */
+[data-skin="hardware"] [data-kit="tabs-list"] [data-kit="tab"]:active:not(#_) {
+  background: none;
+  box-shadow: none;
+  translate: none;
+  scale: none;
+}
+
+/* A button whose menu is open stays pressed down. */
+[data-skin="hardware"] [data-kit="button"][data-open]:not([data-tone="primary"]):not(#_) {
+  background: linear-gradient(180deg, #f1f1ee, #e9e9e6);
+  box-shadow: var(--key-down);
+}
+
+/* The meter's track is a whole number of dots long, each dot centered in
+   its cell, so both ends have the same margin. */
+[data-skin="hardware"] [data-kit="meter-track"]:not(#_) {
+  width: calc(round(down, 100% - 10px, 10px) + 10px);
+  padding: 3px 5px;
+
+  &::before {
+    inset: 3px 5px;
+    width: auto;
+    right: 5px;
+    background: radial-gradient(circle at 5px 50%, #cfcdc7 2.4px, transparent 2.9px) 0 0 / 10px 100%;
+  }
+}
+
+[data-skin="hardware"] [data-kit="meter-indicator"]:not(#_) {
+  background: radial-gradient(circle at 5px 50%, var(--key-color) 2.4px, transparent 2.9px) 0 0 / 10px 100%;
+}
+
+/* Clears an older press tint across the whole option; only the slot sinks. */
+[data-skin="hardware"] :is([data-kit="segment"]):not([data-checked], [data-selected], [data-open]):active:not(#_) {
+  background: transparent;
+}
+
+/* Dialogs and popovers keep room inside; only menus are tight. */
+[data-skin="hardware"] :is([data-kit="dialog-surface"], [data-kit="popover-surface"]):not(#_) {
+  display: grid;
+  gap: 10px;
+  padding: 24px;
+  border-radius: calc(10px * var(--corner-scale));
+}
+
+[data-skin="hardware"] [data-kit="dialog-title"]:not(#_) {
+  margin: 0;
+  font: 400 15px/1.3 var(--sans);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+[data-skin="hardware"] [data-kit="dialog-description"]:not(#_) {
+  margin: 0 0 14px;
+  font: 400 13px/1.6 var(--sans);
+  color: var(--dim);
+}
+
+[data-skin="hardware"] [data-kit="actions"]:not(#_) {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* The key is its cap, and the cap is the element: its outline is the face, so
+   a round key is a true circle with its content centered on it. The side is
+   below the cap, outside it, and the soft shadows fall below the side.
+   Pressing moves the cap down 2px while the side and the shadows shorten by
+   2px, so the base and its shadow stay put. */
+[data-skin="hardware"] {
+  --key-rest:
+    inset 0 1px 0 rgb(255 255 255 / 0.95), inset 0 -1px 1px rgb(0 0 0 / calc(0.04 * var(--shadow-k))), 0 0 0 1px rgb(0 0 0 / calc(0.05 * var(--shadow-k))),
+    0 3px 0 var(--key-edge), 0 4px 2px rgb(0 0 0 / calc(0.08 * var(--shadow-k))), 0 12px 16px -6px rgb(0 0 0 / calc(0.2 * var(--shadow-k)));
+  --key-down:
+    inset 0 1px 0 rgb(255 255 255 / 0.9), inset 0 1px 3px rgb(0 0 0 / calc(0.06 * var(--shadow-k))), 0 0 0 1px rgb(0 0 0 / calc(0.05 * var(--shadow-k))),
+    0 1px 0 var(--key-edge), 0 2px 2px rgb(0 0 0 / calc(0.08 * var(--shadow-k))), 0 10px 16px -6px rgb(0 0 0 / calc(0.18 * var(--shadow-k)));
+}
+
+[data-skin="hardware"]
+  :is(
+    [data-kit="button"],
+    [data-kit="checkbox"],
+    [data-kit="toggle"],
+    [data-kit="page"],
+    [data-kit="calendar-nav"],
+    [data-kit="radio"]
+  ):not(#_) {
+  box-shadow: var(--key-rest);
+
+  &:active {
+    translate: 0 2px;
+    box-shadow: var(--key-down);
+  }
+}
+
+[data-skin="hardware"] [data-kit="button"][data-open]:not([data-tone="primary"]):not(#_) {
+  translate: 0 2px;
+  box-shadow: var(--key-down);
+}
+
+[data-skin="hardware"] [data-kit="button"][data-tone="primary"]:not(#_) {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.28),
+    0 3px 0 var(--key-edge),
+    0 4px 2px rgb(0 0 0 / calc(0.1 * var(--shadow-k))),
+    0 12px 16px -6px color-mix(in oklab, var(--key-color) 55%, transparent);
+
+  &:active {
+    translate: 0 2px;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.2),
+      inset 0 1px 3px rgb(0 0 0 / calc(0.12 * var(--shadow-k))),
+      0 1px 0 var(--key-edge),
+      0 2px 2px rgb(0 0 0 / calc(0.1 * var(--shadow-k))),
+      0 10px 16px -6px color-mix(in oklab, var(--key-color) 50%, transparent);
+  }
+}
+
+[data-skin="hardware"] [data-kit="page"][aria-current="page"]:not(#_) {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.1),
+    0 3px 0 var(--key-edge),
+    0 4px 2px rgb(0 0 0 / calc(0.15 * var(--shadow-k))),
+    0 12px 16px -6px rgb(0 0 0 / calc(0.35 * var(--shadow-k)));
+}
+
+/* Separators: every option but the first draws one on its leading edge. */
+[data-skin="hardware"] [data-kit="segment"]:not(:first-of-type):not(#_)::after {
+  content: "";
+  position: absolute;
+  top: calc(4px + var(--slot-height) * 0.28);
+  left: -2.5px;
+  width: 1px;
+  height: calc(var(--slot-height) * 0.44);
+  background: rgb(0 0 0 / 0.12);
+  box-shadow: 1px 0 0 rgb(255 255 255 / 0.85);
+  transition: opacity 200ms;
+}
+
+/* Hidden beside the pill: on the chosen option, and on the option after it. */
+[data-skin="hardware"] [data-kit="segment"][data-checked]:not(#_)::after {
+  opacity: 0;
+}
+
+/* The pressed slot sits inside its option like the pill: 4px all round. */
+[data-skin="hardware"] [data-kit="segment"]:not(#_)::before {
+  inset: 4px 4px auto;
+}
+
+/* Each option is followed by ui-sdk's hidden input, so the option after the
+   chosen one is two siblings on. */
+[data-skin="hardware"] :is([data-kit="segment"][data-checked], [data-kit="segment"][data-checked] + input + [data-kit="segment"]):not(#_)::after {
+  opacity: 0;
+}
+
+/* Keys with labels beneath sit in equal columns, so their spacing doesn't
+   follow the labels' lengths. */
+[data-skin="hardware"] [data-kit="radio-group"]:not(#_),
+[data-skin="hardware"] [data-kit="surface"]:has(> [data-kit="check"]):not(#_) {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(72px, 1fr);
+  justify-items: center;
+  gap: 8px;
+}
+
+[data-skin="hardware"] [data-kit="surface"]:has(> [data-kit="check"]):not(#_) {
+  width: auto;
+}
+
+[data-skin="hardware"] [data-kit="radio-group"]:not(#_),
+[data-skin="hardware"] [data-kit="surface"]:has(> [data-kit="check"]):not(#_) {
+  grid-auto-columns: minmax(0, 1fr);
+  width: 100%;
+}
+
+/* Icons are Carbon glyphs; the drawn shapes before them are reset. */
+[data-skin="hardware"] [data-kit="icon"][data-icon]:not(#_) {
+  width: auto;
+  height: auto;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  rotate: none;
+  translate: none;
+  box-shadow: none;
+  text-shadow: none;
+
+  &::before {
+    content: none;
+  }
+}
+
+[data-skin="hardware"] [data-icon="record"]:not(#_) {
+  color: var(--key-ink);
+  filter: drop-shadow(0 0 3px color-mix(in oklab, var(--key-color) 50%, transparent));
+}
+
+/* The current page is lit in the theme color. */
+[data-skin="hardware"] [data-kit="page"][aria-current="page"]:not(#_) {
+  --key-edge: color-mix(in oklab, var(--key-color), #000 28%);
+  color: var(--on-accent);
+  background: linear-gradient(180deg, color-mix(in oklab, var(--key-color), #fff 10%), var(--key-color));
+  text-shadow: var(--embossed);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.28),
+    0 3px 0 var(--key-edge),
+    0 4px 2px rgb(0 0 0 / calc(0.1 * var(--shadow-k))),
+    0 12px 16px -6px color-mix(in oklab, var(--key-color) 50%, transparent);
+}
+
+/* Segmented: equal columns that fit the panel, and separators that always
+   show; the pill slides over them, since options don't stack above it. */
+[data-skin="hardware"] [data-kit="segmented"]:not(#_) {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  width: 100%;
+}
+
+[data-skin="hardware"] [data-kit="segment"]:not(#_),
+[data-skin="hardware"] [data-kit="segment"][data-checked]:not(#_) {
+  z-index: auto;
+  min-width: 0;
+}
+
+[data-skin="hardware"] :is([data-kit="segment"], [data-kit="segment"][data-checked], [data-kit="segment"][data-checked] + input + [data-kit="segment"]):not(:first-of-type):not(#_)::after {
+  opacity: 1;
+  transition: none;
+}
+
+[data-skin="hardware"] [data-kit="segment"]:first-of-type:not(#_)::after {
+  content: none;
+}
+
+/* Badges are printed status tags: a small block of caps with a lit LED. */
+[data-skin="hardware"] [data-kit="badge"]:not(#_) {
+  --led: #b9b8b2;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 7px 3px 6px;
+  border-radius: calc(2px * var(--corner-scale));
+  font: var(--label);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: #e9e8e4;
+  box-shadow:
+    inset 0 0 0 1px rgb(0 0 0 / calc(0.06 * var(--shadow-k))),
+    0 1px 0 #fff;
+  text-shadow: var(--engraved);
+
+  &::before {
+    content: "";
+    display: block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--led);
+    box-shadow: 0 0 5px color-mix(in oklab, var(--led) 70%, transparent);
+  }
+
+  &[data-tone="success"] {
+    --led: #2fbf6a;
+  }
+
+  &[data-tone="info"] {
+    --led: #4a8cff;
+  }
+
+  &[data-tone="warning"],
+  &[data-tone="danger"] {
+    --led: var(--key-color);
+    color: var(--ink);
+    background: #e9e8e4;
+    text-shadow: var(--engraved);
+  }
+}
+
+/* The alert is a message on an LCD strip, with a lit LED. */
+[data-skin="hardware"] [data-kit="alert"]:not(#_) {
+  position: relative;
+  padding: 14px 18px 14px 40px;
+  border: 2px solid #1a1918;
+  border-radius: calc(10px * var(--corner-scale));
+  background:
+    radial-gradient(130% 220% at 50% 50%, #090908 55%, #151514 80%, #22211f 100%),
+    #0b0b0a;
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.05),
+    inset 0 0 10px 2px rgb(255 255 255 / 0.06),
+    0 1px 0 #fff;
+  text-shadow: none;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 18px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--key-color);
+    box-shadow: 0 0 8px 1px color-mix(in oklab, var(--key-color) 70%, transparent);
+    translate: 0 -50%;
+  }
+}
+
+[data-skin="hardware"] [data-kit="alert-title"]:not(#_) {
+  color: color-mix(in oklab, var(--key-color), #fff 30%);
+  text-shadow: 0 0 6px color-mix(in oklab, var(--key-color) 40%, transparent);
+}
+
+[data-skin="hardware"] [data-kit="alert-description"]:not(#_) {
+  color: #b8b8b3;
+  text-shadow: 0 0 5px rgb(255 255 255 / 0.12);
+}
+
+/* The breadcrumb is a printed signal path: small caps joined by engraved
+   slashes, the current stop marked with an LED. */
+[data-skin="hardware"] [data-kit="breadcrumb"]:not(#_) {
+  gap: 10px;
+  font: var(--label);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+
+  /* A slash engraved into the panel: a dark hairline with a lit edge beside it. */
+  & li + li::before {
+    content: "";
+    display: inline-block;
+    width: 1px;
+    height: 11px;
+    margin-inline: 1px 10px;
+    vertical-align: -1px;
+    background: #b4b3ad;
+    box-shadow: 1px 0 0 rgb(255 255 255 / 0.9);
+    rotate: 20deg;
+    opacity: 1;
+  }
+}
+
+[data-skin="hardware"] [data-kit="breadcrumb-link"]:not(#_) {
+  color: var(--dim);
+}
+
+[data-skin="hardware"] [data-kit="breadcrumb-current"]:not(#_) {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink);
+
+  &::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--key-color);
+    box-shadow: 0 0 5px color-mix(in oklab, var(--key-color) 70%, transparent);
+  }
+}
+
+/* The accordion: printed rows on hairlines, each with an LED that lights
+   when its section is open, and the open section recessed into the panel. */
+[data-skin="hardware"] [data-kit="accordion"]:not(#_) {
+  border-block-start: 1px solid var(--line);
+}
+
+[data-skin="hardware"] [data-kit="accordion-trigger"]:not(#_) {
+  padding: 14px 4px;
+  font: var(--label);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink);
+
+  & [data-kit="chevron"] {
+    display: none;
+  }
+
+  &::after {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #cfcdc7;
+    box-shadow: inset 0 1px 1px rgb(0 0 0 / calc(0.2 * var(--shadow-k)));
+  }
+
+  &[data-open]::after {
+    background: var(--key-color);
+    box-shadow: 0 0 6px 1px color-mix(in oklab, var(--key-color) 60%, transparent);
+  }
+}
+
+[data-skin="hardware"] [data-kit="accordion-panel"]:not(#_) p {
+  margin: 0 0 14px;
+  padding: 12px 14px;
+  border-radius: calc(8px * var(--corner-scale));
+  color: var(--ink);
+  background: #ececea;
+  box-shadow: var(--soft-well);
+  font: 400 12px/1.6 var(--sans);
+}
+
+/* The accordion shows its LED, not a chevron. */
+[data-skin="hardware"] [data-kit="accordion-trigger"] [data-icon="chevron-down"]:not(#_) {
+  display: none;
+}
+
+/* Status LEDs keep fixed meanings, whatever the theme: green ready, amber
+   warning, red error, blue in progress. */
+[data-skin="hardware"] [data-kit="badge"]:not(#_) {
+  &[data-tone="warning"] {
+    --led: #f2a900;
+  }
+
+  &[data-tone="danger"] {
+    --led: #ff3b30;
+  }
+}
+
+/* The path stays on one line. Each stop is a row centered on one line: the
+   slash, the link or the LED and name. Centered rather than set on their
+   own baselines, a link and the current stop's flex row sit level. */
+[data-skin="hardware"] [data-kit="breadcrumb"]:not(#_) {
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+  letter-spacing: 0.06em;
+
+  & li {
+    display: inline-flex;
+    align-items: center;
+    line-height: 1;
+  }
+
+  & li + li::before {
+    margin-inline: 1px 8px;
+    vertical-align: 0;
+  }
+
+  & :is([data-kit="breadcrumb-link"], [data-kit="breadcrumb-current"]) {
+    display: inline-flex;
+    align-items: center;
+    line-height: 1;
+  }
+}
+
+/* Carousel: a preset browser on an LCD. Each slide is a preset shown in the
+   screen, its slot number printed in the theme color; LEDs below mark the
+   slots, the current one lit. */
+[data-skin="hardware"] [data-kit="carousel"]:not(#_) {
+  gap: 12px 14px;
+}
+
+[data-skin="hardware"] [data-kit="carousel-viewport"]:not(#_) {
+  border: 2px solid #1a1918;
+  border-radius: calc(12px * var(--corner-scale));
+  background:
+    radial-gradient(130% 170% at 50% 50%, #090908 52%, #141413 78%, #22211f 100%),
+    #0b0b0a;
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.05),
+    inset 0 0 12px 2px rgb(255 255 255 / 0.06),
+    0 1px 0 #fff,
+    0 2px 6px -2px rgb(0 0 0 / calc(0.25 * var(--shadow-k)));
+}
+
+[data-skin="hardware"] [data-kit="carousel-content"]:not(#_) {
+  gap: 0;
+  counter-reset: preset;
+}
+
+[data-skin="hardware"] [data-kit="carousel-item"]:not(#_) {
+  flex-basis: 100%;
+  counter-increment: preset;
+}
+
+[data-skin="hardware"] [data-kit="tile"]:not(#_) {
+  position: relative;
+  aspect-ratio: 2.6 / 1;
+  border-radius: 0;
+  color: #f4f4f0;
+  background: none;
+  box-shadow: none;
+  font: 200 26px var(--sans);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-shadow: 0 0 8px rgb(255 255 255 / 0.25);
+
+  &::before {
+    content: "P" counter(preset, decimal-leading-zero);
+    position: absolute;
+    top: 10px;
+    left: 14px;
+    font: var(--label);
+    letter-spacing: 0.1em;
+    color: color-mix(in oklab, var(--key-color), #fff 25%);
+    text-shadow: 0 0 6px color-mix(in oklab, var(--key-color) 50%, transparent);
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: auto 14px 12px;
+    height: 2px;
+    background: repeating-linear-gradient(90deg, rgb(255 255 255 / 0.22) 0 2px, transparent 2px 6px);
+  }
+}
+
+[data-skin="hardware"] [data-kit="carousel-indicators"]:not(#_) {
+  gap: 10px;
+}
+
+[data-skin="hardware"] [data-kit="carousel-indicator"]:not(#_) {
+  width: 7px;
+  height: 7px;
+  background: #cfcdc7;
+  box-shadow: inset 0 1px 1px rgb(0 0 0 / calc(0.2 * var(--shadow-k)));
+  opacity: 1;
+
+  &[data-selected] {
+    background: var(--key-color);
+    box-shadow: 0 0 6px 1px color-mix(in oklab, var(--key-color) 60%, transparent);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--key-color);
+    outline-offset: 3px;
+  }
+}
+
+/* Resizable: a crossfader. Two recessed wells with printed labels under a
+   printed scale, and a white fader cap with grip grooves riding a dark slot. */
+[data-skin="hardware"] [data-kit="resizable"]:not(#_) {
+  position: relative;
+  height: 150px;
+  padding-top: 18px;
+  overflow: visible;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    height: 8px;
+    background:
+      linear-gradient(90deg, var(--ink) 1px, transparent 1px) 0 0 / 25% 8px repeat-x,
+      linear-gradient(90deg, #a9a7a1 1px, transparent 1px) 0 4px / 5% 4px repeat-x;
+  }
+}
+
+[data-skin="hardware"] [data-kit="resizable-panel"]:not(#_) {
+  border-radius: calc(10px * var(--corner-scale));
+  font: var(--label);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--dim);
+  background: #ececea;
+  box-shadow: var(--soft-well);
+}
+
+[data-skin="hardware"] [data-kit="resizable-handle"]:not(#_) {
+  width: 22px;
+  margin-inline: 2px;
+  background: none;
+  cursor: ew-resize;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 6px 50%;
+    width: 4px;
+    border-radius: calc(2px * var(--corner-scale));
+    background: #1c1c1b;
+    box-shadow: inset 0 1px 2px rgb(0 0 0 / calc(0.6 * var(--shadow-k)));
+    translate: -50% 0;
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 50% 0 auto;
+    height: 46px;
+    border-radius: calc(6px * var(--corner-scale));
+    background:
+      repeating-linear-gradient(180deg, transparent 0 5px, rgb(0 0 0 / 0.12) 5px 6px, rgb(255 255 255 / 0.9) 6px 7px) 50% 50% / 60% 22px
+        no-repeat,
+      linear-gradient(180deg, #ffffff, #f2f2f0);
+    box-shadow:
+      0 0 0 1px rgb(0 0 0 / calc(0.06 * var(--shadow-k))),
+      0 2px 3px rgb(0 0 0 / calc(0.2 * var(--shadow-k))),
+      0 10px 16px -4px rgb(0 0 0 / calc(0.35 * var(--shadow-k)));
+    translate: 0 -50%;
+  }
+
+  &:is(:hover, [data-dragging])::after {
+    box-shadow:
+      0 0 0 1px rgb(0 0 0 / calc(0.06 * var(--shadow-k))),
+      0 0 0 3px color-mix(in oklab, var(--key-color) 35%, transparent),
+      0 10px 16px -4px rgb(0 0 0 / calc(0.35 * var(--shadow-k)));
+  }
+
+  &:focus-visible {
+    outline: none;
+
+    &::after {
+      outline: 2px solid var(--key-color);
+      outline-offset: 3px;
+    }
+  }
+}
+
+/* Hover card: an operator label. The trigger is printed with a dotted
+   underline in the theme color; the card has a printed header and an LED. */
+[data-skin="hardware"] [data-kit="link"]:not(#_) {
+  font: var(--label);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink);
+  text-decoration: underline dotted color-mix(in oklab, var(--key-color), transparent 20%);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 5px;
+}
+
+[data-skin="hardware"] [data-kit="popover-surface"][data-size="sm"]:not(#_) {
+  position: relative;
+  width: 280px;
+  gap: 12px;
+  padding-top: 40px;
+
+  &::before {
+    content: "Operator";
+    position: absolute;
+    top: 16px;
+    left: 24px;
+    right: 24px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font: var(--label);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--dim);
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 8px;
+  }
+
+  & [data-kit="avatar"] {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    font: 300 14px var(--sans);
+
+    &::after {
+      content: "";
+      position: absolute;
+      right: -1px;
+      bottom: -1px;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #2fbf6a;
+      box-shadow:
+        0 0 0 2px var(--panel),
+        0 0 6px #2fbf6a;
+    }
+  }
+
+  & strong {
+    font: 400 14px var(--sans);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+
+  & [data-kit="muted"] {
+    font: 400 12px/1.5 var(--sans);
+  }
+}
+
+/* Checkboxes are latching keys: a dark key with its legend on top, standing
+   in an opening in the panel. Checked, it latches down inside the opening;
+   pressed again, it pops back up.
+
+   One number drives it: --lift, how far the cap stands above the opening
+   (--travel raised, 0 latched, -1px held down). The cap's position, every
+   layer of its side wall and the shadow it casts are worked out from it,
+   and only it animates, so the wall always reaches exactly down to the
+   opening, never below it, and the shadow list never changes length. (An
+   animated list of shadows that changes length flickers in Safari.) The
+   legend rides on the same number. */
+@property --lift {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 0px;
+}
+
+[data-skin="hardware"] [data-kit="check"]:has(> [data-kit="checkbox"]):not(#_) {
+  --travel: 11px;
+  --lift: var(--travel);
+  display: grid;
+  width: 100%;
+  padding: 6px;
+  overflow: visible;
+  border-radius: calc(10px * var(--corner-scale));
+  background: linear-gradient(180deg, #0b0b0a, #1a1a19);
+  box-shadow:
+    inset 0 3px 6px rgb(0 0 0 / calc(0.85 * var(--shadow-k))),
+    inset 0 -1px 0 rgb(255 255 255 / 0.06),
+    0 1px 0 #fff,
+    0 -1px 0 rgb(0 0 0 / calc(0.08 * var(--shadow-k)));
+  gap: 0;
+  transition: --lift 140ms var(--ease-detent);
+
+  & > * {
+    grid-area: 1 / 1;
+  }
+
+  & > [data-kit="label"] {
+    z-index: 1;
+    place-self: center;
+    color: #f1f1ee;
+    letter-spacing: 0.1em;
+    text-shadow: 0 1px 1px rgb(0 0 0 / 0.6);
+    pointer-events: none;
+    translate: 0 calc(var(--lift) * -1);
+    transition: opacity 140ms;
+  }
+
+  &:has([data-checked]) {
+    --lift: 0px;
+
+    & > [data-kit="label"] {
+      opacity: 0.75;
+    }
+  }
+
+  &:has(> [data-kit="checkbox"]:active) {
+    --lift: -1px;
+  }
+}
+
+[data-skin="hardware"] [data-kit="check"] > [data-kit="checkbox"]:not(#_) {
+  /* The cap's own shading: a lit top edge and a shade, which change with
+     its state; the wall below is all --lift. */
+  --cap-lit: 0.18;
+  --cap-shade: inset 0 -2px 2px rgb(0 0 0 / calc(0.45 * var(--shadow-k)));
+  width: 100%;
+  height: 40px;
+  padding: 0;
+  border-radius: calc(20px * var(--corner-scale));
+  background: var(--tex-matte), linear-gradient(180deg, #44443f, #2a2a28 55%, #21211f);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / var(--cap-lit)),
+    var(--cap-shade),
+    0 calc(max(0px, var(--lift)) * 0.0909) 0 #1b1b1a,
+    0 calc(max(0px, var(--lift)) * 0.1818) 0 #191918,
+    0 calc(max(0px, var(--lift)) * 0.2727) 0 #171716,
+    0 calc(max(0px, var(--lift)) * 0.3636) 0 #151514,
+    0 calc(max(0px, var(--lift)) * 0.4545) 0 #131312,
+    0 calc(max(0px, var(--lift)) * 0.5455) 0 #111110,
+    0 calc(max(0px, var(--lift)) * 0.6364) 0 #0f0f0e,
+    0 calc(max(0px, var(--lift)) * 0.7273) 0 #0d0d0c,
+    0 calc(max(0px, var(--lift)) * 0.8182) 0 #0b0b0a,
+    0 calc(max(0px, var(--lift)) * 0.9091) 0 #0a0a09,
+    0 calc(max(0px, var(--lift)) * 1.0000) 0 #090908,
+    0 calc(max(0px, var(--lift)) + 2px) calc(max(0px, var(--lift)) * 0.9 + 1px) rgb(0 0 0 / calc(0.7 * var(--shadow-k)));
+  translate: 0 calc(var(--lift) * -1);
+  transition: background 140ms;
+
+  /* Latched: down in the opening, its top in shade. */
+  &[data-checked] {
+    --cap-lit: 0.07;
+    --cap-shade: inset 0 2px 6px rgb(0 0 0 / calc(0.5 * var(--shadow-k)));
+    background: linear-gradient(180deg, #2c2c2a, #1c1c1b);
+  }
+
+  &:active {
+    --cap-lit: 0.05;
+    --cap-shade: inset 0 2px 6px rgb(0 0 0 / calc(0.55 * var(--shadow-k)));
+    background: linear-gradient(180deg, #2a2a28, #1b1b1a);
+  }
+
+  & > [data-kit="checkbox-indicator"] {
+    display: none;
+  }
+}
+
+/* Radios are light keys with their LED in the corner and their legend inside. */
+[data-skin="hardware"] [data-kit="radio-group"] > [data-kit="check"]:not(#_) {
+  display: grid;
+  width: 100%;
+  gap: 0;
+
+  & > * {
+    grid-area: 1 / 1;
+  }
+
+  & > [data-kit="label"] {
+    z-index: 1;
+    place-self: center;
+    padding-top: 10px;
+    font-size: 8.5px;
+    letter-spacing: 0.08em;
+    pointer-events: none;
+    transition: translate 120ms var(--ease-detent);
+  }
+
+  /* The legend is printed on the key, so it sinks with it. */
+  &:has(> [data-kit="radio"]:active) > [data-kit="label"] {
+    translate: 0 var(--radio-press, 2px);
+  }
+}
+
+[data-skin="hardware"] [data-kit="radio-group"] [data-kit="radio"]:not(#_) {
+  position: relative;
+  width: 100%;
+  height: 48px;
+  padding: 0;
+  border-radius: calc(12px * var(--corner-scale));
+
+  & > [data-kit="radio-indicator"] {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    width: 6px;
+    height: 6px;
+  }
+}
+
+/* Dragging the segmented control's pill: it follows the pointer, then snaps. */
+[data-skin="hardware"] [data-kit="segmented"]:not(#_) {
+  touch-action: pan-y;
+  user-select: none;
+  cursor: grab;
+
+  &[data-dragging] {
+    cursor: grabbing;
+
+    & [data-kit="segmented-indicator"] {
+      left: calc(var(--drag-left) + 4px);
+      transition: none;
+    }
+  }
+}
+
+[data-skin="hardware"] [data-kit="segmented"][data-dragging] [data-kit="segment"]:is(*, :active):not(#_)::before {
+  background: transparent;
+  box-shadow: none;
+}
+
+/* Tabs are a strip of keys joined edge to edge, each with its legend on it.
+   The chosen key latches down level with the others' edges. */
+[data-skin="hardware"] [data-kit="tabs-list"]:not(#_) {
+  gap: 0;
+  padding: 0 0 3px;
+  border-radius: calc(8px * var(--corner-scale));
+  filter: drop-shadow(0 4px 1px rgb(0 0 0 / calc(0.05 * var(--shadow-k)))) drop-shadow(0 10px 10px rgb(0 0 0 / calc(0.1 * var(--shadow-k))));
+}
+
+[data-skin="hardware"] [data-kit="tabs-list"] [data-kit="tab"]:not(#_),
+[data-skin="hardware"] [data-kit="tabs-list"] [data-kit="tab"][data-selected]:not(#_),
+[data-skin="hardware"] [data-kit="tabs-list"] [data-kit="tab"]:active:not(#_) {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: 34px;
+  border-radius: 0 !important;
+  background: linear-gradient(180deg, #ffffff, #f2f2f0);
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 3px 0 var(--key-edge);
+  color: var(--dim);
+  translate: none;
+  transition:
+    translate 80ms,
+    box-shadow 80ms,
+    background 80ms;
+
+  &::after {
+    content: none;
+  }
+
+  &:first-of-type {
+    border-radius: calc(8px * var(--corner-scale)) 0 0 calc(8px * var(--corner-scale)) !important;
+  }
+
+  &:last-of-type {
+    border-radius: 0 calc(8px * var(--corner-scale)) calc(8px * var(--corner-scale)) 0 !important;
+  }
+
+  & + [data-kit="tab"]::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 1px;
+    background: rgb(0 0 0 / 0.09);
+  }
+}
+
+[data-skin="hardware"] [data-kit="tabs-list"] [data-kit="tab"]:active:not(#_) {
+  translate: 0 2px;
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 1px 0 var(--key-edge);
+}
+
+[data-skin="hardware"] [data-kit="tabs-list"] [data-kit="tab"][data-selected]:not(#_) {
+  translate: 0 3px;
+  color: var(--ink);
+  background: linear-gradient(180deg, #e2e2df, #ebebe8);
+  box-shadow:
+    inset 0 2px 4px rgb(0 0 0 / calc(0.14 * var(--shadow-k))),
+    inset 0 0 0 1px rgb(0 0 0 / calc(0.04 * var(--shadow-k)));
+}
+
+[data-skin="hardware"] [data-kit="tabs-list"] [data-kit="tab"]:focus-visible:not(#_) {
+  outline: 2px solid var(--key-color);
+  outline-offset: 2px;
+  z-index: 1;
+}
+
+/* Every LED on the panel is drawn like a dot in the meter: a flat, crisp dot,
+   warm gray when off and solid color when on. Each LED only sets
+   --led-color: the theme by default, a status color on badges and alerts. */
+[data-skin="hardware"] {
+  --led-size: 5px;
+  --led-color: var(--theme, #1c1c1c);
+  --led-off: #cfcdc7;
+}
+
+[data-skin="hardware"] [data-kit="badge"][data-tone="success"] {
+  --led-color: #2fbf6a;
+}
+
+[data-skin="hardware"] :is([data-kit="badge"], [data-kit="alert"])[data-tone="info"] {
+  --led-color: #4a8cff;
+}
+
+[data-skin="hardware"] :is([data-kit="badge"], [data-kit="alert"])[data-tone="danger"] {
+  --led-color: #ff3b30;
+}
+
+[data-skin="hardware"] :is([data-kit="badge"], [data-kit="alert"])[data-tone="warning"] {
+  --led-color: #ffa800;
+}
+
+[data-skin="hardware"] :is([data-kit="radio-indicator"], [data-kit="checkbox-indicator"], [data-kit="carousel-indicator"], [data-kit="led"]):not(#_),
+[data-skin="hardware"] :is([data-kit="toggle"], [data-kit="accordion-trigger"]):not(#_)::after,
+[data-skin="hardware"] :is([data-kit="alert"], [data-kit="badge"], [data-kit="breadcrumb-current"]):not(#_)::before {
+  width: var(--led-size);
+  height: var(--led-size);
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  opacity: 1;
+  background: var(--led-off);
+  box-shadow: none;
+  filter: none;
+  transition: background 120ms;
+}
+
+/* Lit. */
+[data-skin="hardware"] :is([data-kit="radio-indicator"], [data-kit="checkbox-indicator"])[data-checked]:not(#_),
+[data-skin="hardware"] [data-kit="carousel-indicator"]:is([aria-selected="true"], [data-selected]):not(#_),
+[data-skin="hardware"] [data-kit="segment"][data-checked] > [data-kit="led"]:not(#_),
+[data-skin="hardware"] [data-kit="toggle"]:is([data-pressed], [aria-pressed="true"]):not(#_)::after,
+[data-skin="hardware"] [data-kit="accordion-trigger"]:is([aria-expanded="true"], [data-panel-open], [data-open]):not(#_)::after,
+[data-skin="hardware"] :is([data-kit="alert"], [data-kit="badge"], [data-kit="breadcrumb-current"]):not(#_)::before {
+  background: var(--led-color);
+}
+
+/* The segment's LED sits between its slot and its printed legend. */
+[data-skin="hardware"] [data-kit="segmented"] [data-kit="segment"]:is(*, [data-checked], :active):not(#_) {
+  padding-top: calc(var(--slot-height) + 26px);
+  background: none;
+}
+
+[data-skin="hardware"] [data-kit="segment"] > [data-kit="led"]:not(#_) {
+  position: absolute;
+  top: calc(var(--slot-height) + 15px);
+  left: 50%;
+  translate: -50% 0;
+}
+
+/* The knob's pointer is a lit LED on its cap. The cap stays still so its
+   lighting doesn't spin; this layer covers it and turns around its center. */
+[data-skin="hardware"] [data-kit="knob-cap"]:not(#_)::after,
+[data-skin="hardware"] [data-color] [data-kit="knob-cap"]:not(#_)::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: auto;
+  height: auto;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--led-color) calc(var(--led-size) / 2 - 0.4px), transparent calc(var(--led-size) / 2))
+    50% 6px / var(--led-size) var(--led-size) no-repeat;
+  box-shadow: none;
+  translate: none;
+  rotate: var(--turn);
+}
+
+/* Controls and printed legends don't select: pressing a key or dragging a
+   pill shouldn't highlight its label. Text you read or type still selects. */
+[data-skin="hardware"]
+  :is(
+    [data-kit="button"],
+    [data-kit="icon-button"],
+    [data-kit="toggle"],
+    [data-kit="segment"],
+    [data-kit="tab"],
+    [data-kit="check"],
+    [data-kit="switch-row"],
+    [data-kit="page"],
+    [data-kit="page-gap"],
+    [data-kit="menubar-trigger"],
+    [data-kit="calendar-nav"],
+    [data-kit="calendar-heading"],
+    [data-kit="calendar-weekday"],
+    [data-kit="calendar-day"],
+    [data-kit="accordion-trigger"],
+    [data-kit="select-trigger"],
+    [data-kit="option"],
+    [data-kit="knob"],
+    [data-kit="label"],
+    [data-kit="caption"],
+    [data-kit="value"],
+    [data-kit="badge"],
+    [data-kit="kbd"],
+    [data-kit="nav-item"],
+    [data-kit="nav-heading"],
+    [data-kit="carousel-indicators"],
+    [data-kit="tile"],
+    [data-kit="bars-axis"],
+    [data-kit="resizable-panel"],
+    [data-kit="stat-delta"]
+  ) {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Letter-spacing adds space after the last character, which pulls a centered
+   legend left of the LED above it; an equal indent on the other side evens it. */
+[data-skin="hardware"] [data-kit="segmented"] [data-kit="segment"]:is(*, [data-checked], :active):not(#_) {
+  padding-inline-start: 0.08em;
+}
+
+/* Smooth corners: a squircle, where the curve eases into the straight edge,
+   instead of a circular arc. Browsers without corner-shape keep round ones.
+   Round parts stay circular, since a squircle would square them off. */
+:where([data-skin="hardware"], [data-skin="hardware"] *),
+:where([data-skin="hardware"] *)::before,
+:where([data-skin="hardware"] *)::after {
+  corner-shape: squircle;
+}
+
+[data-skin="hardware"]
+  :is(
+    [data-kit="button"][data-shape="round"],
+    [data-kit="switch"],
+    [data-kit="switch-thumb"],
+    [data-kit="knob-dial"],
+    [data-kit="knob-cap"],
+    [data-kit="avatar"],
+    [data-kit="led"],
+    [data-kit="radio-indicator"],
+    [data-kit="checkbox-indicator"],
+    [data-kit="carousel-indicator"],
+    [data-kit="scroll-area-thumb"],
+    [data-kit="slider-thumb"],
+    [data-kit="skeleton-block"][data-shape="circle"]
+  ),
+[data-skin="hardware"]
+  :is(
+    [data-kit="knob-dial"],
+    [data-kit="knob-cap"],
+    [data-kit="slider-thumb"],
+    [data-kit="switch"],
+    [data-kit="toggle"],
+    [data-kit="accordion-trigger"],
+    [data-kit="button"][data-shape="round"]
+  )::after,
+[data-skin="hardware"]
+  :is([data-kit="knob-dial"], [data-kit="slider-thumb"], [data-kit="switch"], [data-kit="alert"], [data-kit="badge"], [data-kit="breadcrumb-current"])::before {
+  corner-shape: round;
+}
+
+/* A squircle's curve is shorter than a circle's at the same radius, so where
+   corners are squircles every radius grows to keep corners their visual size. */
+[data-skin="hardware"] {
+  --corner-scale: 1;
+}
+
+@supports (corner-shape: squircle) {
+  [data-skin="hardware"] {
+    --corner-scale: 2;
+  }
+}
+
+/* The segmented control's thumb keeps circular corners: on a pill this narrow
+   a squircle never finishes its curve. It leaves the same 4px of well on
+   every side; top is 5px because the thumb is lifted 1px by its translate. */
+[data-skin="hardware"] [data-kit="segmented-indicator"]:not(#_) {
+  corner-shape: round;
+  top: 5px;
+  height: var(--slot-height);
+  border-radius: 10px;
+}
+
+/* A pressed primary key keeps its gradient's shape, only darker, as the light
+   keys do. Losing the lit top band made its face look like it jumped further
+   than it travels. */
+[data-skin="hardware"] [data-kit="button"][data-tone="primary"]:active:not(#_) {
+  background: linear-gradient(180deg, color-mix(in oklab, var(--key-color), #fff 6%), color-mix(in oklab, var(--key-color), #000 5%));
+}
+
+/* A switch's legend is printed above it, small, centered over the switch;
+   OFF and ON stay on either side. */
+[data-skin="hardware"] [data-kit="switch-row"]:not(#_) {
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+
+  & > [data-kit="label"] {
+    font-size: 8.5px;
+    letter-spacing: 0.1em;
+  }
+}
+
+[data-skin="hardware"] [data-kit="switch"]:not(#_)::before,
+[data-skin="hardware"] [data-kit="switch"]:not(#_)::after {
+  font-size: 8.5px;
+  letter-spacing: 0.1em;
+}
+
+/* Every key shares one radius. Change it here. Round keys stay round; the
+   tab strip rounds only its outer corners. */
+[data-skin="hardware"] {
+  --key-radius: calc(10px * var(--corner-scale));
+}
+
+[data-skin="hardware"]
+  :is(
+    [data-kit="button"]:not([data-shape="round"]),
+    [data-kit="toggle"],
+    [data-kit="page"],
+    [data-kit="calendar-nav"],
+    [data-kit="menubar-trigger"],
+    [data-kit="icon-button"],
+    [data-kit="radio"],
+    [data-kit="checkbox"]
+  ):not(#_):not(#_) {
+  border-radius: var(--key-radius);
+}
+
+[data-skin="hardware"] [data-kit="tabs-list"] [data-kit="tab"]:first-of-type:not(#_):not(#_) {
+  border-radius: var(--key-radius) 0 0 var(--key-radius) !important;
+}
+
+[data-skin="hardware"] [data-kit="tabs-list"] [data-kit="tab"]:last-of-type:not(#_):not(#_) {
+  border-radius: 0 var(--key-radius) var(--key-radius) 0 !important;
+}
+
+[data-skin="hardware"] [data-kit="menubar-trigger"]:not(#_):not(#_) {
+  border-radius: var(--key-radius) !important;
+}
+
+[data-skin="hardware"] [data-kit="menubar"]:not(#_):not(#_) {
+  border-radius: calc(var(--key-radius) + 4px);
+}
+
+/* The knob's tick ring is SVG drawn by the knob itself, under the cap, so
+   it draws the same in every browser without the CSS Paint API. Safari has
+   no Paint API, and the polyfill it needed re-scanned the page on every
+   style change, which made Safari drop frames whenever anything moved. */
+[data-skin="hardware"] [data-kit="knob-ticks"] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+
+  & line {
+    stroke: var(--tick-color, #1a1a1a);
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+  }
+
+  & line[data-major] {
+    stroke-width: 2;
+  }
+
+  & line[data-lit] {
+    stroke: var(--lit-color, #ff5a1f);
+  }
+}
+
+[data-skin="hardware"] [data-kit="knob-dial"]:not(#_):not(#_)::before {
+  content: none;
+}
+
+[data-skin="hardware"] [data-kit="slider-control"]:not(#_):not(#_) {
+  position: relative;
+  background: none;
+}
+
+/* The slider's printed scale: straight ticks need no worklet, so gradients
+   draw it the same in every browser. Twenty short ticks, and a tall one
+   every quarter. */
+[data-skin="hardware"] [data-kit="slider-scale"]:not(#_):not(#_) {
+  --tick: #1b1b19;
+  position: absolute;
+  inset: auto 0 0;
+  height: 8px;
+  pointer-events: none;
+  /* Each tick placed at an exact percentage: a 1px image at x% sits x% of
+     the way along, ending flush at 100%, with no tile rounding to drift. */
+  background:
+    linear-gradient(var(--tick), var(--tick)) 0% 100% / 1px 100% no-repeat,
+    linear-gradient(var(--tick), var(--tick)) 25% 100% / 1px 100% no-repeat,
+    linear-gradient(var(--tick), var(--tick)) 50% 100% / 1px 100% no-repeat,
+    linear-gradient(var(--tick), var(--tick)) 75% 100% / 1px 100% no-repeat,
+    linear-gradient(var(--tick), var(--tick)) 100% 100% / 1px 100% no-repeat,
+    linear-gradient(var(--tick), var(--tick)) 5% 100% / 1px 45% no-repeat,
+    linear-gradient(var(--tick), var(--tick)) 10% 100% / 1px 45% no-repeat,
+    linear-gradient(var(--tick), var(--tick)) 15% 100% / 1px 45% no-repeat,
+    linear-gradient(var(--tick), var(--tick)) 20% 100% / 1px 45% no-repeat,
+    linear-gradient(var(--tick), var(--tick)) 30% 100% / 1px 45% no-repeat,
+    linear-gradient(var(--tick), var(--tick)) 35% 100% / 1px 45% no-repeat,
+    linear-gradient(var(--tick), var(--tick)) 40% 100% / 1px 45% no-repeat,
+    linear-gradient(var(--tick), var(--tick)) 45% 100% / 1px 45% no-repeat,
+    linear-gradient(var(--tick), var(--tick)) 55% 100% / 1px 45% no-repeat,
+    linear-gradient(var(--tick), var(--tick)) 60% 100% / 1px 45% no-repeat,
+    linear-gradient(var(--tick), var(--tick)) 65% 100% / 1px 45% no-repeat,
+    linear-gradient(var(--tick), var(--tick)) 70% 100% / 1px 45% no-repeat,
+    linear-gradient(var(--tick), var(--tick)) 80% 100% / 1px 45% no-repeat,
+    linear-gradient(var(--tick), var(--tick)) 85% 100% / 1px 45% no-repeat,
+    linear-gradient(var(--tick), var(--tick)) 90% 100% / 1px 45% no-repeat,
+    linear-gradient(var(--tick), var(--tick)) 95% 100% / 1px 45% no-repeat;
+}
+
+/* Tracks and fills are always fully rounded, never squircles. */
+[data-skin="hardware"]
+  :is(
+    [data-kit="slider-track"],
+    [data-kit="slider-indicator"],
+    [data-kit="meter-track"],
+    [data-kit="meter-indicator"],
+    [data-kit="scroll-area-scrollbar"],
+    [data-kit="scroll-area-thumb"]
+  ):not(#_):not(#_),
+[data-skin="hardware"] :is([data-kit="meter-track"], [data-kit="slider-track"]):not(#_):not(#_)::before,
+[data-skin="hardware"] :is([data-kit="meter-track"], [data-kit="slider-track"]):not(#_):not(#_)::after {
+  corner-shape: round;
+}
+
+/* Lit LEDs glow in their own color. */
+[data-skin="hardware"] {
+  --led-glow: 0 0 4px 1px color-mix(in oklab, var(--led-color) 50%, transparent);
+}
+
+[data-skin="hardware"] :is([data-kit="radio-indicator"], [data-kit="checkbox-indicator"])[data-checked]:not(#_):not(#_),
+[data-skin="hardware"] [data-kit="carousel-indicator"]:is([aria-selected="true"], [data-selected]):not(#_):not(#_),
+[data-skin="hardware"] [data-kit="segment"][data-checked] > [data-kit="led"]:not(#_):not(#_),
+[data-skin="hardware"] [data-kit="toggle"]:is([data-pressed], [aria-pressed="true"]):not(#_):not(#_)::after,
+[data-skin="hardware"] [data-kit="accordion-trigger"]:is([aria-expanded="true"], [data-panel-open], [data-open]):not(#_):not(#_)::after,
+[data-skin="hardware"] :is([data-kit="alert"], [data-kit="badge"], [data-kit="breadcrumb-current"]):not(#_):not(#_)::before,
+[data-skin="hardware"] [data-kit="side-tab"]:is([aria-selected="true"], [data-selected]):not(#_):not(#_)::before,
+[data-skin="hardware"] [data-kit="navbar-link"][aria-current]::before,
+[data-skin="hardware"] [data-list] button[aria-current="true"]::before,
+[data-skin="hardware"] [data-device-power][data-on] {
+  box-shadow: var(--led-glow);
+}
+
+/* Dots drawn as backgrounds glow through a drop shadow instead. */
+[data-skin="hardware"] [data-kit="knob-cap"]:not(#_):not(#_)::after,
+[data-skin="hardware"] [data-kit="meter-indicator"]:not(#_):not(#_) {
+  filter: drop-shadow(0 0 2px color-mix(in oklab, var(--led-color) 55%, transparent));
+}
+
+/* Shadows, after Josh Comeau's "Designing Beautiful Shadows":
+   - One light, above and to the left, so every soft shadow falls right and
+     down at 1:2.
+   - Elevation moves offset, blur and opacity together.
+   - Shadows are layered, each doubling the last, so they fall off softly.
+   - They're tinted with the panel's own warm hue, not black, so they don't
+     turn the surface grey.
+   A key's hard side wall is its physical thickness and stays straight down;
+   only the soft shadow it casts follows the light. */
+[data-skin="hardware"] {
+  --shadow-color: 45deg 8% 30%;
+  --elev-mid:
+    0.5px 1px 1px hsl(var(--shadow-color) / calc(0.08 * var(--shadow-k))), 1px 2px 2px hsl(var(--shadow-color) / calc(0.08 * var(--shadow-k))),
+    2px 4px 4px hsl(var(--shadow-color) / calc(0.08 * var(--shadow-k))), 4px 8px 8px hsl(var(--shadow-color) / calc(0.08 * var(--shadow-k))),
+    8px 16px 16px hsl(var(--shadow-color) / calc(0.07 * var(--shadow-k)));
+  --elev-high:
+    0.5px 1px 1px hsl(var(--shadow-color) / calc(0.1 * var(--shadow-k))), 1px 2px 2px hsl(var(--shadow-color) / calc(0.1 * var(--shadow-k))),
+    2px 4px 4px hsl(var(--shadow-color) / calc(0.1 * var(--shadow-k))), 4px 8px 8px hsl(var(--shadow-color) / calc(0.1 * var(--shadow-k))),
+    8px 16px 16px hsl(var(--shadow-color) / calc(0.1 * var(--shadow-k))), 16px 32px 32px hsl(var(--shadow-color) / calc(0.1 * var(--shadow-k)));
+  /* A key's shadow starts at its base, 3px down, and spreads from there. */
+  --key-cast:
+    0.25px 3.5px 1px hsl(var(--shadow-color) / calc(0.16 * var(--shadow-k))), 1px 5px 3px hsl(var(--shadow-color) / calc(0.12 * var(--shadow-k))),
+    2px 7px 6px -1px hsl(var(--shadow-color) / calc(0.12 * var(--shadow-k))), 4px 11px 12px -3px hsl(var(--shadow-color) / calc(0.14 * var(--shadow-k)));
+  /* Pressed, the key is 2px lower, so the same shadow sits 2px higher on it. */
+  --key-cast-down:
+    0.25px 1.5px 1px hsl(var(--shadow-color) / calc(0.16 * var(--shadow-k))), 1px 3px 3px hsl(var(--shadow-color) / calc(0.12 * var(--shadow-k))),
+    2px 5px 6px -1px hsl(var(--shadow-color) / calc(0.12 * var(--shadow-k))), 4px 9px 12px -3px hsl(var(--shadow-color) / calc(0.14 * var(--shadow-k)));
+  --key-rest:
+    inset 0 1px 0 rgb(255 255 255 / 0.95), inset 0 -1px 1px rgb(0 0 0 / calc(0.04 * var(--shadow-k))), 0 0 0 1px hsl(var(--shadow-color) / calc(0.08 * var(--shadow-k))),
+    0 3px 0 var(--key-edge), var(--key-cast);
+  --key-down:
+    inset 0 1px 0 rgb(255 255 255 / 0.9), inset 0 1px 3px rgb(0 0 0 / calc(0.06 * var(--shadow-k))), 0 0 0 1px hsl(var(--shadow-color) / calc(0.08 * var(--shadow-k))),
+    0 1px 0 var(--key-edge), var(--key-cast-down);
+  --soft-rest: inset 0 1px 0 #fff, 0 3px 0 var(--key-edge), var(--key-cast);
+  --soft-press: inset 0 1px 0 #fff, 0 1px 0 var(--key-edge), var(--key-cast-down);
+}
+
+[data-skin="hardware"] :is([data-kit="module"], [data-kit="card"]):not(#_):not(#_),
+[data-skin="hardware"] [data-device] {
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 0 0 1px hsl(var(--shadow-color) / calc(0.06 * var(--shadow-k))),
+    var(--elev-mid);
+}
+
+[data-skin="hardware"] [data-kit="side-tabs-body"]:not(#_):not(#_) {
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 0 0 1px hsl(var(--shadow-color) / calc(0.07 * var(--shadow-k))),
+    0 2px 0 var(--key-edge),
+    var(--elev-mid);
+}
+
+[data-skin="hardware"]
+  :is([data-kit="popup"], [data-kit="dialog-surface"], [data-kit="popover-surface"], [data-kit="toast"], [data-kit="tooltip"]):not(#_):not(#_) {
+  box-shadow:
+    0 0 0 1px hsl(var(--shadow-color) / calc(0.1 * var(--shadow-k))),
+    var(--elev-high);
+}
+
+[data-skin="hardware"] [data-kit="knob-cap"]:not(#_):not(#_) {
+  box-shadow:
+    0 0 0 2px #2c2c2b,
+    1px 2px 2px hsl(var(--shadow-color) / calc(0.25 * var(--shadow-k))),
+    2px 5px 6px hsl(var(--shadow-color) / calc(0.18 * var(--shadow-k))),
+    5px 10px 14px -3px hsl(var(--shadow-color) / calc(0.22 * var(--shadow-k)));
+}
+
+[data-skin="hardware"] [data-kit="display-bezel"] {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.12),
+    inset 0 -1px 0 rgb(0 0 0 / calc(0.8 * var(--shadow-k))),
+    0 0 0 1px rgb(0 0 0 / calc(0.55 * var(--shadow-k))),
+    0 1px 0 1px rgb(255 255 255 / 0.9),
+    1px 2px 3px hsl(var(--shadow-color) / calc(0.3 * var(--shadow-k))),
+    3px 6px 10px hsl(var(--shadow-color) / calc(0.2 * var(--shadow-k))),
+    8px 16px 26px -4px hsl(var(--shadow-color) / calc(0.25 * var(--shadow-k)));
+}
+
+/* Black: lit LEDs are solid black, the key color, with no glow; a white
+   light can't show against a white key. */
+[data-skin="hardware"][data-key="black"] {
+  --led-off: #dbdbd7;
+  --led-color: #1c1c1b;
+  --led-glow: none;
+}
+
+[data-skin="hardware"][data-key="black"] [data-kit="knob-cap"]:not(#_):not(#_)::after,
+[data-skin="hardware"][data-key="black"] [data-kit="meter-indicator"]:not(#_):not(#_) {
+  filter: none;
+}
+
+/* The meter's dots are LEDs: off and lit like every other one. */
+[data-skin="hardware"] [data-kit="meter-track"]:not(#_):not(#_)::before {
+  background: radial-gradient(circle at 5px 50%, var(--led-off) 2.4px, transparent 2.9px) 0 0 / 10px 100%;
+}
+
+[data-skin="hardware"] [data-kit="meter-indicator"]:not(#_):not(#_) {
+  background: radial-gradient(circle at 5px 50%, var(--led-color) 2.4px, transparent 2.9px) 0 0 / 10px 100%;
+}
+
+/* Dragging the switch: the thumb follows the pointer with no easing, then
+   eases to its side when let go. */
+[data-skin="hardware"] [data-kit="switch"][data-dragging]:not(#_):not(#_) {
+  cursor: grabbing;
+
+  & [data-kit="switch-thumb"] {
+    translate: var(--switch-drag-x) 0;
+    transition: none;
+  }
+}
+
+/* ui-sdk rounds the indicator's left offset to a whole pixel but keeps the
+   fraction in its width, so on half-pixel columns the last thumb overhangs
+   by 0.5px. Rounding the width down keeps the outer gaps at 4px. */
+[data-skin="hardware"] [data-kit="segmented-indicator"]:not(#_):not(#_) {
+  width: calc(round(down, var(--segmented-control-indicator-width), 1px) - 8px);
+}
+
+/* Black's slider: a gray track filled in black. */
+[data-skin="hardware"][data-key="black"] [data-kit="slider-track"]:not(#_):not(#_):not(#_) {
+  background: #dbdbd7;
+  box-shadow:
+    inset 0 1px 2px rgb(0 0 0 / calc(0.12 * var(--shadow-k))),
+    0 1px 0 #fff;
+}
+
+[data-skin="hardware"][data-key="black"] [data-kit="slider-indicator"]:not(#_):not(#_):not(#_) {
+  background: #1c1c1b;
+  box-shadow: none;
+}
+
+/* Black's key would vanish as a caret on the black LCD, so it blinks white. */
+[data-skin="hardware"][data-key="black"] [data-kit="input"]:not(#_):not(#_) {
+  caret-color: #ffffff;
+}
+
+/* Control legends are small print, like the switch's: checkbox, segmented
+   control, slider and knob labels. */
+[data-skin="hardware"] [data-kit="check"] > [data-kit="label"]:not(#_):not(#_),
+[data-skin="hardware"] [data-kit="field"]:has(> [data-kit="segmented"]) > [data-kit="label"]:not(#_):not(#_),
+[data-skin="hardware"] [data-kit="slider"] [data-kit="label"]:not(#_):not(#_),
+[data-skin="hardware"] [data-kit="knob"] > [data-kit="label"]:not(#_):not(#_),
+[data-skin="hardware"] [data-kit="switch-row"] > [data-kit="label"]:not(#_):not(#_) {
+  font-size: 8px;
+  letter-spacing: 0.1em;
+}
+
+/* A clicked text field or wheel shows no focus ring; one reached by keyboard
+   does. The page sets data-modality from the last press or navigation key. */
+[data-modality="pointer"] [data-skin="hardware"] [data-kit="input"]:focus-visible:not(#_):not(#_):not(#_),
+[data-modality="pointer"] [data-skin="hardware"] [data-kit="wheel-frame"]:has(:focus-visible):not(#_):not(#_):not(#_) {
+  outline: none;
+}
+
+/* Badges are small light plates with a light pipe: a pale, flat plate with
+   a crisp hairline edge and a hint of thickness, its legend printed small,
+   and a slim bar of light at its left edge in the status color. Building
+   pulses; queued sits unlit. */
+[data-skin="hardware"] [data-kit="badge"]:not(#_):not(#_) {
+  --status: #c9c8c3;
+  --glow: transparent;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 22px;
+  padding: 0 10px 0 7px;
+  border-radius: calc(4px * var(--corner-scale));
+  font: 600 8px/1 var(--mono, monospace);
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: #3a3a37;
+  background: linear-gradient(180deg, #fcfcfb, #f2f2f0);
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 0 0 0.5px rgb(0 0 0 / 0.14),
+    0 1px 0 #e1e1dd,
+    0 1.5px 2px rgb(0 0 0 / calc(0.08 * var(--shadow-k)));
+  text-shadow: none;
+  translate: none;
+  clip-path: none;
+
+  &[data-tone="success"] {
+    --status: oklch(0.72 0.19 150);
+    --glow: oklch(0.72 0.19 150 / 0.55);
+  }
+
+  &[data-tone="info"] {
+    --status: oklch(0.64 0.2 258);
+    --glow: oklch(0.64 0.2 258 / 0.55);
+  }
+
+  &[data-tone="warning"] {
+    --status: oklch(0.82 0.16 80);
+    --glow: oklch(0.82 0.16 80 / 0.6);
+  }
+
+  &[data-tone="danger"] {
+    --status: oklch(0.65 0.23 28);
+    --glow: oklch(0.65 0.23 28 / 0.55);
+  }
+
+  /* The light pipe: a slim lit bar, brighter at its core. */
+  &::before {
+    content: "";
+    flex-shrink: 0;
+    width: 3px;
+    height: 11px;
+    border-radius: 2px;
+    corner-shape: round;
+    background: linear-gradient(90deg, var(--status), color-mix(in oklch, var(--status), #fff 45%) 50%, var(--status));
+    box-shadow:
+      0 0 0 1px rgb(255 255 255 / 0.5),
+      0 0 6px 1px var(--glow);
+    animation: none;
+  }
+
+  &[data-tone="info"]::before {
+    animation: badge-breathe 1.6s ease-in-out infinite;
+  }
+
+  &::after {
+    content: none;
+  }
+}
+
+@keyframes badge-breathe {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-skin="hardware"] [data-kit="badge"]::before {
+    animation: none;
+  }
+}
+
+/* One strength for every shadow on the panel: each dark shadow color's
+   alpha is multiplied by it. Highlights and hard key edges don't change. */
+[data-skin="hardware"] {
+  --shadow-k: 0.9;
+}
+
+/* A little more metal: the panels and the page get a faint brushed grain,
+   streaks running across like machined aluminum, and the panels a soft sheen
+   that brightens toward the top. */
+[data-skin="hardware"] :is([data-kit="module"], [data-kit="card"]):not(#_):not(#_) {
+  background:
+    var(--tex-brushed) 0 0 / 256px 70px,
+    linear-gradient(180deg, rgb(255 255 255 / 0.55), rgb(255 255 255 / 0) 45%, rgb(0 0 0 / 0.012)),
+    var(--panel);
+}
+
+[data-skin="hardware"][data-site] {
+  background:
+    var(--tex-brushed) 0 0 / 256px 70px,
+    var(--tex-grain),
+    #eeeeec;
+}
+
+/* The OTP input draws its own caret in the slot being typed into, a block in
+   the key color that blinks like the text fields' caret. */
+[data-skin="hardware"] [data-kit="otp-slot"]:not(#_) {
+  position: relative;
+}
+
+[data-skin="hardware"] [data-kit="otp-slot"][data-fake-caret]:not(#_)::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0.6em;
+  height: 1.15em;
+  translate: -50% -50%;
+  background: var(--key-color);
+  animation: otp-caret 1.1s steps(1) infinite;
+}
+
+@keyframes otp-caret {
+  50% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-skin="hardware"] [data-kit="otp-slot"][data-fake-caret]::after {
+    animation: none;
+  }
+}
+
+/* The drawn block caret for browsers without caret-shape (see
+   lib/block-caret.ts), blinking like the native one. */
+[data-block-caret] {
+  animation: block-caret 1.06s steps(1) infinite;
+}
+
+@keyframes block-caret {
+  50% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-block-caret] {
+    animation: none;
+  }
+}
+
+/* Keys sit on the panel rather than hover over it: each casts a firm contact
+   shadow right at its base and only a short, soft ambient one beyond. */
+[data-skin="hardware"] {
+  --key-cast:
+    0 3.5px 1px hsl(var(--shadow-color) / calc(0.13 * var(--shadow-k))),
+    0 4.5px 3px hsl(var(--shadow-color) / calc(0.07 * var(--shadow-k))),
+    0.5px 6px 9px -3px hsl(var(--shadow-color) / calc(0.09 * var(--shadow-k)));
+  --key-cast-down:
+    0 1.5px 1px hsl(var(--shadow-color) / calc(0.13 * var(--shadow-k))),
+    0 2.5px 3px hsl(var(--shadow-color) / calc(0.07 * var(--shadow-k))),
+    0.5px 4px 8px -3px hsl(var(--shadow-color) / calc(0.09 * var(--shadow-k)));
+}
+
+/* A colored key throws its color onto the panel below it: clearly while it
+   stands, and hardly at all once it's pressed down onto the panel. */
+[data-skin="hardware"] [data-kit="button"][data-tone="primary"]:not(:active):not(#_):not(#_):not(#_) {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.28),
+    0 3px 0 color-mix(in oklab, var(--key-color), #000 30%),
+    0 3.5px 1px rgb(0 0 0 / calc(0.12 * var(--shadow-k))),
+    0 6px 10px -3px color-mix(in oklab, var(--key-color) calc(52% * var(--shadow-k)), transparent),
+    0 11px 20px -8px color-mix(in oklab, var(--key-color) calc(38% * var(--shadow-k)), transparent);
+}
+
+[data-skin="hardware"] [data-kit="button"][data-tone="primary"]:active:not(#_):not(#_):not(#_) {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.2),
+    inset 0 1px 3px rgb(0 0 0 / calc(0.12 * var(--shadow-k))),
+    0 1px 0 color-mix(in oklab, var(--key-color), #000 30%),
+    0 1.5px 1px rgb(0 0 0 / calc(0.1 * var(--shadow-k))),
+    0 2px 5px -1px color-mix(in oklab, var(--key-color) calc(28% * var(--shadow-k)), transparent);
+}
+
+[data-skin="hardware"] [data-kit="segmented-indicator"]:not(#_):not(#_):not(#_) {
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 2px 0 var(--key-edge),
+    0 2.5px 1px rgb(0 0 0 / calc(0.07 * var(--shadow-k))),
+    0 4px 7px -3px rgb(0 0 0 / calc(0.1 * var(--shadow-k)));
+}
+
+[data-skin="hardware"] [data-kit="tabs-indicator"]:not(#_):not(#_):not(#_) {
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 2px 0 var(--key-edge),
+    0 2.5px 1px rgb(0 0 0 / calc(0.07 * var(--shadow-k))),
+    0 4px 7px -3px rgb(0 0 0 / calc(0.1 * var(--shadow-k)));
+}
+
+[data-skin="hardware"] [data-kit="knob-cap"]:not(#_):not(#_):not(#_) {
+  box-shadow:
+    0 0 0 2px #2c2c2b,
+    0.5px 1.5px 1.5px hsl(var(--shadow-color) / calc(0.2 * var(--shadow-k))),
+    1px 3px 5px hsl(var(--shadow-color) / calc(0.12 * var(--shadow-k))),
+    2px 5px 9px -3px hsl(var(--shadow-color) / calc(0.12 * var(--shadow-k)));
+}
+
+[data-skin="hardware"] [data-kit="switch-thumb"]:not(#_):not(#_):not(#_),
+[data-skin="hardware"] [data-checked] > [data-kit="switch-thumb"]:not(#_):not(#_):not(#_) {
+  box-shadow:
+    0 0 0 0.5px rgb(0 0 0 / calc(0.08 * var(--shadow-k))),
+    0 1px 1.5px rgb(0 0 0 / calc(0.18 * var(--shadow-k))),
+    0 2px 4px -1px rgb(0 0 0 / calc(0.12 * var(--shadow-k))),
+    0 4px 8px -4px rgb(0 0 0 / calc(0.14 * var(--shadow-k)));
+}
+
+/* The fader cap is a solid little cylinder: a wall 3px tall below its face,
+   and a face dished slightly, lit from above, with a bright rim on its top
+   edge. It sits on the groove with a firm contact shadow. */
+[data-skin="hardware"] [data-kit="slider-thumb"]:not(#_):not(#_):not(#_)::after {
+  background:
+    radial-gradient(circle at 50% 62%, #ecece9 0, #f6f6f4 46%, #ffffff 72%, #f1f1ee 100%);
+  box-shadow:
+    inset 0 1px 0 #fff,
+    inset 0 -1px 1px rgb(0 0 0 / 0.06),
+    0 0 0 0.5px rgb(0 0 0 / calc(0.16 * var(--shadow-k))),
+    0 3px 0 #d2d2ce,
+    0 3px 0 0.5px rgb(0 0 0 / calc(0.1 * var(--shadow-k))),
+    0 4px 2px rgb(0 0 0 / calc(0.16 * var(--shadow-k))),
+    0 6px 10px -3px rgb(0 0 0 / calc(0.16 * var(--shadow-k)));
+  translate: 0 -1.5px;
+}
+
+/* Keys are dished: under light from above, the rim shades the top of the
+   face and the far slope catches the light, so the face brightens toward
+   the bottom while the top rim stays bright. Pressed, the key keeps the
+   same dish, only darker. Round, domed things (knobs, thumbs) keep their
+   top light. */
+[data-skin="hardware"] {
+  --dish: linear-gradient(0deg, rgb(255 255 255 / 0.85), rgb(255 255 255 / 0) 55%, rgb(0 0 0 / 0.025));
+}
+
+[data-skin="hardware"] :is([data-kit="button"]:not([data-tone="primary"]), [data-kit="radio"], [data-kit="toggle"], [data-kit="page"]):not(#_):not(#_):not(#_) {
+  background: linear-gradient(0deg, #fdfdfc, #efefec 70%, #ececE9);
+
+  /* Only a key travelling down while held darkens; a toggle that's on stays
+     at its height, so its face stays the same and its LED shows the state. */
+  &:active:not([data-kit="toggle"]) {
+    background: linear-gradient(0deg, #f1f1ef, #e4e4e1 70%, #e0e0dd);
+  }
+}
+
+[data-skin="hardware"] [data-kit="button"][data-tone="primary"]:not(#_):not(#_):not(#_) {
+  background: linear-gradient(0deg, oklch(from var(--key-color) calc(l + 0.06) c h), var(--key-color) 70%, oklch(from var(--key-color) calc(l - 0.03) c h));
+
+  &:active {
+    background: linear-gradient(0deg, oklch(from var(--key-color) calc(l + 0.01) c h), oklch(from var(--key-color) calc(l - 0.04) c h) 70%, oklch(from var(--key-color) calc(l - 0.07) c h));
+  }
+}
+
+[data-skin="hardware"] [data-kit="segmented-indicator"]:not(#_):not(#_):not(#_) {
+  background: linear-gradient(0deg, #ffffff, #f3f3f1 70%, #efefed);
+}
+
+/* The carousel's screen sits in a heavier black bezel. */
+[data-skin="hardware"] [data-kit="carousel-viewport"]:not(#_):not(#_) {
+  border: 6px solid #121211;
+  border-radius: calc(14px * var(--corner-scale));
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.05),
+    0 0 0 1px rgb(0 0 0 / 0.35),
+    0 1px 0 1px #fff,
+    0 2px 6px -2px rgb(0 0 0 / calc(0.25 * var(--shadow-k)));
+}
+
+/* The current page is a key in the key color, dished like the others. */
+[data-skin="hardware"] [data-kit="page"][aria-current="page"]:not(#_):not(#_):not(#_) {
+  color: var(--on-accent);
+  background: linear-gradient(0deg, oklch(from var(--key-color) calc(l + 0.06) c h), var(--key-color) 70%, oklch(from var(--key-color) calc(l - 0.03) c h));
+  text-shadow: none;
+}
+
+/* The resizable example is compact: a short pair of panes. */
+[data-skin="hardware"] [data-kit="resizable"]:not(#_):not(#_) {
+  height: 96px;
+  padding-top: 14px;
+}
+
+[data-skin="hardware"] [data-kit="resizable-panel"]:not(#_):not(#_) {
+  font-size: 8.5px;
+}
+
+[data-skin="hardware"] [data-kit="resizable-handle"]:not(#_):not(#_) {
+  width: 16px;
+  margin-inline: 1px;
+}
+
+/* A slimmer grip on the resizable handle: a narrow cap on a hairline rail. */
+[data-skin="hardware"] [data-kit="resizable-handle"]:not(#_):not(#_) {
+  width: 12px;
+
+  &::before {
+    width: 2px;
+  }
+
+  &::after {
+    inset: 50% 3px auto;
+    height: 34px;
+    border-radius: 3px;
+    background:
+      repeating-linear-gradient(180deg, transparent 0 3px, rgb(0 0 0 / 0.14) 3px 4px, rgb(255 255 255 / 0.9) 4px 5px) 50% 50% / 50% 15px no-repeat,
+      linear-gradient(0deg, #ffffff, #f0f0ee);
+    box-shadow:
+      0 0 0 0.5px rgb(0 0 0 / 0.16),
+      0 1px 1.5px rgb(0 0 0 / calc(0.16 * var(--shadow-k))),
+      0 3px 6px -2px rgb(0 0 0 / calc(0.18 * var(--shadow-k)));
+  }
+
+  &:is(:hover, [data-dragging])::after {
+    box-shadow:
+      0 0 0 0.5px rgb(0 0 0 / 0.16),
+      0 0 0 2.5px color-mix(in oklab, var(--key-color) 35%, transparent),
+      0 3px 6px -2px rgb(0 0 0 / calc(0.18 * var(--shadow-k)));
+  }
+}
+
+/* The scroll area's thumb is in the key color. */
+[data-skin="hardware"] [data-kit="scroll-area-thumb"]:not(#_):not(#_):not(#_) {
+  background: var(--key-color);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.25);
+
+  &:is([data-dragging], :hover) {
+    background: oklch(from var(--key-color) calc(l + 0.06) c h);
+  }
+}
+
+/* A latching key with an icon shows the icon on its cap, moving with it. */
+[data-skin="hardware"] [data-kit="check"][data-icon]:not(#_):not(#_) {
+  position: relative;
+}
+
+[data-skin="hardware"] [data-kit="check"][data-icon] [data-kit="check-icon"] {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  color: #f2f2ee;
+  pointer-events: none;
+  transition: translate 120ms var(--ease-detent);
+
+  & svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+/* Toolbar toggles center their icon on the key's face. */
+[data-skin="hardware"] [data-kit="toolbar"] [data-kit="toggle"]:not(#_):not(#_):not(#_) {
+  display: grid;
+  place-items: center;
+  padding: 0;
+}
+
+/* Every field's label is the same small print as the switch's and the
+   segmented control's. */
+[data-skin="hardware"] [data-kit="field"] > [data-kit="label"]:not(#_):not(#_) {
+  font-size: 8px;
+  letter-spacing: 0.1em;
+}
+
+/* While dragged, the slider's cap is pressed down into the groove: it sinks,
+   its wall shortens and its shadow pulls in. */
+[data-skin="hardware"] [data-kit="slider-thumb"]:is([data-dragging], :active):not(#_):not(#_):not(#_)::after {
+  translate: 0 0;
+  background: radial-gradient(circle at 50% 62%, #e4e4e1 0, #eeeeec 46%, #f7f7f5 72%, #e9e9e6 100%);
+  box-shadow:
+    inset 0 1px 0 #fff,
+    inset 0 -1px 1px rgb(0 0 0 / 0.08),
+    0 0 0 0.5px rgb(0 0 0 / calc(0.18 * var(--shadow-k))),
+    0 1px 0 #d2d2ce,
+    0 1px 0 0.5px rgb(0 0 0 / calc(0.1 * var(--shadow-k))),
+    0 1.5px 1.5px rgb(0 0 0 / calc(0.14 * var(--shadow-k)));
+}
+
+/* The badge's light pipe: one flat lit color with a soft glow. */
+[data-skin="hardware"] [data-kit="badge"]:not(#_):not(#_):not(#_)::before {
+  background: var(--status);
+}
+
+/* The context area's dashed edge is engraved: a light catch just below it. */
+[data-skin="hardware"] [data-kit="context-area"]:not(#_):not(#_) {
+  box-shadow: 0 1px 0 rgb(255 255 255 / 0.9), inset 0 1px 0 rgb(0 0 0 / 0.03);
+  filter: drop-shadow(0 1px 0 rgb(255 255 255 / 0.9));
+}
+
+/* A slider being dragged shows the press, not a focus ring. */
+[data-skin="hardware"] [data-kit="slider-thumb"][data-dragging]:not(#_):not(#_):not(#_)::after {
+  outline: none;
+}
+
+/* Stepper keys center their icon. */
+[data-skin="hardware"] [data-kit="stepper"] > [data-kit="button"]:not(#_):not(#_):not(#_) {
+  justify-content: center;
+  align-items: center;
+}
+
+/* The stacked resizable: panes one above the other, the handle across them.
+   Its ruler runs down the left side. */
+[data-skin="hardware"] [data-kit="resizable"][data-orientation="vertical"]:not(#_):not(#_):not(#_) {
+  height: 180px;
+  padding: 0 0 0 14px;
+
+  &::before {
+    inset: 0 auto 0 0;
+    width: 8px;
+    height: auto;
+    background:
+      linear-gradient(180deg, var(--ink) 1px, transparent 1px) 0 0 / 8px 25% repeat-y,
+      linear-gradient(180deg, #a9a7a1 1px, transparent 1px) 4px 0 / 4px 5% repeat-y;
+  }
+
+  & [data-kit="resizable-handle"] {
+    width: auto;
+    height: 12px;
+    margin: 1px 0;
+    cursor: ns-resize;
+
+    &::before {
+      inset: 50% 6px;
+      width: auto;
+      height: 2px;
+      translate: 0 -50%;
+    }
+
+    &::after {
+      inset: 3px auto 3px 50%;
+      width: 34px;
+      height: auto;
+      translate: -50% 0;
+      background:
+        repeating-linear-gradient(90deg, transparent 0 3px, rgb(0 0 0 / 0.14) 3px 4px, rgb(255 255 255 / 0.9) 4px 5px) 50% 50% / 15px 50% no-repeat,
+        linear-gradient(0deg, #ffffff, #f0f0ee);
+    }
+  }
+}
+
+/* Focus on a flat knob lands on its readout, the number under the dial; the
+   ring goes round the dial's cap instead, where the hand will reach, in
+   the same key-color ring as the skin's other controls. */
+/* Keyboard only, like the slider's: a clicked text field is :focus-visible too. */
+:root[data-modality="keyboard"] [data-skin="hardware"] [data-kit="knob"]:has([data-kit="knob-readout"]:focus-visible) [data-kit="knob-cap"]:not(#_) {
+  outline: 2px solid var(--key-color);
+  /* Snug to the cap's rim, clear of the tick marks round it. */
+  outline-offset: 1px;
+}
+
+[data-skin="hardware"] [data-kit="knob-readout"]:focus-visible:not(#_) {
+  outline: none;
+}
+
+/* The resizable card shows both directions side by side, at one height
+   (after the vertical resizable's own height, which it overrides). */
+[data-skin="hardware"] [data-resizable-demo] {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+}
+
+[data-skin="hardware"] [data-resizable-demo] [data-kit="resizable"]:not(#_):not(#_):not(#_) {
+  height: 150px;
+}

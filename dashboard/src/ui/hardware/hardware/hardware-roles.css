@@ -1,0 +1,30 @@
+/* The key color's roles on the light panels (base.css works them out).
+   Thin marks, such as knob pointers, index lines, ticks and thumbs, print in
+   --key-ink rather than the key color, so a light key like yellow still
+   shows on white (near-black, for a key that light). Lamps light in
+   --key-lamp. Caps, fills and the dark screens keep the key color itself.
+
+   Each mark re-points --key-color for itself and what's inside it, so every
+   rule that draws it follows, whichever of them wins the cascade. For keys
+   at or below 0.62 lightness --key-ink is the key color, so nothing changes. */
+[data-skin="hardware"] {
+  --led-color: var(--key-lamp);
+}
+
+[data-skin="hardware"]
+  :is(
+    [data-kit="knob-cap"],
+    [data-kit="mode-dial-pointer"],
+    [data-kit="wheel-frame"],
+    [data-kit="page-wheel"],
+    [data-kit="item-list"],
+    [data-kit="tab"],
+    [data-kit="meter"],
+    [data-kit="slide-switch"],
+    [data-kit="link"],
+    [data-kit="scroll-area-thumb"],
+    [data-kit="resizable-handle"],
+    [data-icon="record"]
+  ) {
+  --key-color: var(--key-ink);
+}

@@ -1,0 +1,919 @@
+/* Screens. Dialogs and popovers are display modules: an LCD set in a light
+   bezel, with their actions as keys on the bezel below it. A dialog flips up
+   on a hinge along its bottom edge, like a lid opening; a popover swings down
+   from its trigger. The glass lights only once it stands upright. The command
+   palette is one whole screen, a terminal with a prompt. */
+
+[data-skin="hardware"] {
+  --screen-glass:
+    var(--tex-matte),
+    radial-gradient(130% 160% at 50% 0%, #121211 50%, #1c1c1b 80%, #262624 100%);
+  --screen-ink: #f2f2ee;
+  --screen-dim: rgb(242 242 238 / 0.58);
+  --screen-flip: 420ms var(--ease-settle);
+}
+
+/* The module: a bezel in panel plastic with the glass as a grid item behind
+   the title and description, so no extra markup is needed. */
+[data-skin="hardware"]
+  :is([data-kit="dialog"], [data-kit="popover"]):not([data-kit="drawer"] *)
+  :is([data-kit="dialog-surface"], [data-kit="popover-surface"]):not([data-size]):not(#_):not(#_):not(#_) {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  padding: 12px 12px 14px;
+  border-radius: calc(16px * var(--corner-scale));
+  background:
+    var(--tex-matte),
+    linear-gradient(180deg, #f1f0ed, #e4e3df);
+  box-shadow:
+    inset 0 1px 0 #fff,
+    inset 0 -2px 0 rgb(0 0 0 / calc(0.06 * var(--shadow-k))),
+    0 0 0 1px hsl(var(--shadow-color) / calc(0.12 * var(--shadow-k))),
+    var(--elev-high);
+  transform-origin: 50% 100%;
+  transform: perspective(1000px) rotateX(0deg);
+  transition:
+    transform var(--screen-flip),
+    box-shadow var(--screen-flip);
+
+  @starting-style {
+    transform: perspective(1000px) rotateX(-90deg);
+  }
+
+  &::before {
+    content: "";
+    grid-row: 1 / 3;
+    grid-column: 1;
+    border: 2px solid #1a1918;
+    border-radius: calc(9px * var(--corner-scale));
+    background: var(--screen-glass);
+    box-shadow:
+      inset 0 0 0 1px rgb(255 255 255 / 0.04),
+      inset 0 0 14px 2px rgb(255 255 255 / 0.05),
+      inset 0 -1px 0 rgb(0 0 0 / calc(0.6 * var(--shadow-k))),
+      0 1px 0 #fff;
+  }
+
+  /* The hinge: a metal pin in knuckles along the edge it turns on. */
+  &::after {
+    content: "";
+    position: absolute;
+    inset-inline: 22%;
+    bottom: -5px;
+    height: 7px;
+    border-radius: 4px;
+    background:
+      repeating-linear-gradient(90deg, transparent 0 22%, rgb(0 0 0 / 0.28) 22% calc(22% + 1px), transparent calc(22% + 1px) 33.33%),
+      linear-gradient(180deg, #fbfbf9, #c9c8c3 55%, #9f9e99);
+    box-shadow: 0 1px 2px rgb(0 0 0 / calc(0.25 * var(--shadow-k)));
+  }
+
+  & [data-kit="dialog-title"] {
+    grid-row: 1;
+    grid-column: 1;
+    z-index: 1;
+    margin: 0;
+    padding: 18px 20px 0;
+    color: var(--screen-ink);
+    font: 400 15px/1.3 var(--mono, monospace);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-shadow: 0 0 8px rgb(255 255 255 / 0.3);
+    transition: opacity 160ms 260ms;
+
+    @starting-style {
+      opacity: 0;
+    }
+
+    /* A status LED in the screen's corner, lit in the key color. */
+    &::after {
+      content: "";
+      float: right;
+      width: 6px;
+      height: 6px;
+      margin-top: 5px;
+      border-radius: 50%;
+      background: var(--lcd-key);
+      box-shadow: 0 0 6px color-mix(in oklab, var(--lcd-key) 70%, transparent);
+    }
+  }
+
+  & [data-kit="dialog-description"] {
+    grid-row: 2;
+    grid-column: 1;
+    z-index: 1;
+    margin: 0;
+    padding: 10px 20px 20px;
+    color: var(--screen-dim);
+    font: 400 12px/1.6 var(--mono, monospace);
+    text-shadow: 0 0 6px rgb(255 255 255 / 0.15);
+    transition: opacity 160ms 300ms;
+
+    @starting-style {
+      opacity: 0;
+    }
+
+    /* A block cursor waits at the end of the message. */
+    &::after {
+      content: "";
+      display: inline-block;
+      width: 0.6em;
+      height: 1.1em;
+      margin-inline-start: 4px;
+      vertical-align: -0.2em;
+      background: var(--screen-ink);
+      animation: screen-cursor 1.1s steps(1) infinite;
+    }
+  }
+
+  & [data-kit="actions"] {
+    grid-row: 3;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    gap: 10px;
+    margin-top: 14px;
+  }
+}
+
+@keyframes screen-cursor {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* A popover hangs from its trigger, so it swings down on a hinge at its top. */
+[data-skin="hardware"] [data-kit="popover"] [data-kit="popover-surface"]:not([data-size]):not(#_):not(#_):not(#_) {
+  transform-origin: 50% 0%;
+
+  @starting-style {
+    transform: perspective(1000px) rotateX(90deg);
+  }
+
+  &::after {
+    top: -5px;
+    bottom: auto;
+  }
+}
+
+/* Folded flat: edge-on to the eye, with the glass dark. */
+[data-skin="hardware"] :is([data-kit="dialog"], [data-kit="popover"]):is([data-starting-style], [data-ending-style])
+  :is([data-kit="dialog-surface"], [data-kit="popover-surface"]):not([data-size]):not(#_):not(#_):not(#_) {
+  transform: perspective(1000px) rotateX(-90deg);
+  box-shadow: 0 0 0 1px hsl(var(--shadow-color) / calc(0.12 * var(--shadow-k)));
+
+  & :is([data-kit="dialog-title"], [data-kit="dialog-description"]) {
+    opacity: 0;
+    transition-delay: 0ms;
+  }
+}
+
+[data-skin="hardware"] [data-kit="popover"]:is([data-starting-style], [data-ending-style]) [data-kit="popover-surface"]:not([data-size]):not(#_):not(#_):not(#_) {
+  transform: perspective(1000px) rotateX(90deg);
+}
+
+/* Closing folds it back quickly. */
+[data-skin="hardware"] :is([data-kit="dialog"], [data-kit="popover"])[data-ending-style]
+  :is([data-kit="dialog-surface"], [data-kit="popover-surface"]):not([data-size]):not(#_):not(#_):not(#_) {
+  transition:
+    transform 200ms cubic-bezier(0.5, 0, 0.75, 0),
+    box-shadow 200ms;
+}
+
+/* The command palette: the whole module is a terminal. The search line is a
+   prompt, results are glowing rows, and the highlighted one is inverted in
+   the key color, like the field being set on the calendar. */
+[data-skin="hardware"] [data-kit="dialog-surface"][data-size="command"]:not(#_):not(#_):not(#_) {
+  position: relative;
+  padding: 12px 12px 14px;
+  border-radius: calc(16px * var(--corner-scale));
+  background:
+    var(--tex-matte),
+    linear-gradient(180deg, #f1f0ed, #e4e3df);
+  box-shadow:
+    inset 0 1px 0 #fff,
+    inset 0 -2px 0 rgb(0 0 0 / calc(0.06 * var(--shadow-k))),
+    0 0 0 1px hsl(var(--shadow-color) / calc(0.12 * var(--shadow-k))),
+    var(--elev-high);
+  transform-origin: 50% 100%;
+  transform: perspective(1000px) rotateX(0deg);
+  transition: transform var(--screen-flip);
+
+  @starting-style {
+    transform: perspective(1000px) rotateX(-90deg);
+  }
+
+  & [data-kit="command"] {
+    display: grid;
+    gap: 6px;
+    min-height: 260px;
+    padding: 10px;
+    border: 2px solid #1a1918;
+    border-radius: calc(9px * var(--corner-scale));
+    color: var(--screen-ink);
+    background: var(--screen-glass);
+    box-shadow:
+      inset 0 0 0 1px rgb(255 255 255 / 0.04),
+      inset 0 0 14px 2px rgb(255 255 255 / 0.05),
+      0 1px 0 #fff;
+    font: 400 13px/1.3 var(--mono, monospace);
+    align-content: start;
+  }
+
+  & [data-kit="input"] {
+    height: 40px;
+    padding-inline: 30px 10px;
+    border: 0;
+    border-bottom: 1px dashed rgb(242 242 238 / 0.2);
+    border-radius: 0;
+    background:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M2 1L7 5L2 9' fill='none' stroke='%23f2f2ee' stroke-width='1.6'/%3E%3C/svg%3E") 10px center / 10px 10px no-repeat;
+    box-shadow: none;
+    outline: none;
+    text-shadow: 0 0 6px rgb(255 255 255 / 0.25);
+    caret-color: var(--lcd-key);
+
+    &::placeholder {
+      color: rgb(242 242 238 / 0.35);
+    }
+  }
+
+  & [data-kit="command-list"] {
+    display: grid;
+    gap: 2px;
+    margin: 0;
+    padding: 0;
+  }
+
+  & [data-kit="option"] {
+    padding: 8px 10px;
+    border-radius: 3px;
+    color: var(--screen-dim);
+    background: transparent;
+    box-shadow: none;
+    text-shadow: 0 0 6px rgb(255 255 255 / 0.15);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 12px;
+
+    &[data-highlighted] {
+      color: var(--on-lcd-key);
+      background: var(--lcd-key);
+      text-shadow: none;
+      box-shadow: 0 0 10px color-mix(in oklab, var(--lcd-key) 40%, transparent);
+    }
+  }
+
+  & [data-kit="empty"] {
+    padding: 8px 10px;
+    color: var(--screen-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 12px;
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset-inline: 22%;
+    bottom: -5px;
+    height: 7px;
+    border-radius: 4px;
+    background:
+      repeating-linear-gradient(90deg, transparent 0 22%, rgb(0 0 0 / 0.28) 22% calc(22% + 1px), transparent calc(22% + 1px) 33.33%),
+      linear-gradient(180deg, #fbfbf9, #c9c8c3 55%, #9f9e99);
+    box-shadow: 0 1px 2px rgb(0 0 0 / calc(0.25 * var(--shadow-k)));
+  }
+}
+
+[data-skin="hardware"] [data-kit="dialog"]:is([data-starting-style], [data-ending-style]) [data-kit="dialog-surface"][data-size="command"]:not(#_):not(#_):not(#_) {
+  transform: perspective(1000px) rotateX(-90deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-skin="hardware"] :is([data-kit="dialog-surface"], [data-kit="popover-surface"]):not(#_):not(#_):not(#_) {
+    transition-duration: 0s;
+  }
+
+  [data-skin="hardware"] [data-kit="dialog-description"]::after {
+    animation: none;
+  }
+}
+
+[data-skin="hardware"] [data-kit="dialog"]:has(> [data-size="command"]):not(#_):not(#_) {
+  width: min(520px, calc(100% - 32px));
+}
+
+/* Tooltips are small gray LCDs above their control, always there. Their
+   characters sit as faint ghosts until the control is hovered or focused,
+   then darken one after another. They sit out of flow, so they never move
+   the layout. */
+[data-skin="hardware"] [data-kit="tooltip-wrap"] {
+  position: relative;
+  display: inline-grid;
+  justify-items: center;
+}
+
+[data-skin="hardware"] [data-kit="tooltip-legend"] {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  translate: -50% 0;
+  padding: 5px 8px 4px;
+  border-radius: calc(5px * var(--corner-scale));
+  background:
+    var(--tex-matte),
+    linear-gradient(180deg, #b9bab4, #c9cac4 40%, #c4c5bf);
+  box-shadow:
+    inset 0 1px 2px rgb(0 0 0 / calc(0.22 * var(--shadow-k))),
+    inset 0 0 0 0.5px rgb(0 0 0 / calc(0.12 * var(--shadow-k))),
+    0 1px 0 #fff,
+    0 2px 4px -1px rgb(0 0 0 / calc(0.2 * var(--shadow-k)));
+  font: 600 9px/1 var(--mono, monospace);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: pre;
+  color: rgb(17 17 17 / 0.1);
+  text-shadow: none;
+  pointer-events: none;
+  user-select: none;
+
+  & > span {
+    transition:
+      color 60ms,
+      text-shadow 60ms;
+  }
+
+  &[data-open] > span {
+    color: #111;
+    text-shadow: var(--lcd-print);
+    transition-delay: calc(var(--i) * 28ms);
+  }
+}
+
+/* Along the top bar there's no room above, so the screen hangs below. */
+[data-skin="hardware"] [data-kit="topbar-actions"] [data-kit="tooltip-legend"] {
+  top: calc(100% + 8px);
+  bottom: auto;
+  z-index: 5;
+}
+
+/* The trigger is just the icon, printed on the panel: no key around it. */
+[data-skin="hardware"] [data-kit="tooltip-trigger"] {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  corner-shape: round;
+  color: #8f8e89;
+  background: none;
+  cursor: help;
+  transition: color 120ms;
+
+  & svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  &:hover {
+    color: var(--ink);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--key-color);
+    outline-offset: 2px;
+  }
+}
+
+/* The record key's mark: one solid dot in the key color. */
+[data-skin="hardware"] [data-kit="record-dot"] {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  corner-shape: round;
+  background: radial-gradient(circle at 40% 35%, color-mix(in oklab, var(--key-color), #fff 18%), var(--key-color) 70%);
+  box-shadow: inset 0 -1px 1px rgb(0 0 0 / 0.18);
+}
+
+/* Fieldset: a group under a printed bracket. The legend is set into a thin
+   rule that turns down into a short tick at each end, as on instrument
+   panels; the group's controls sit below it. */
+[data-skin="hardware"] :is([data-kit="fieldset"], [data-kit="alert"]):not(#_):not(#_):not(#_) {
+  /* The space between each rule and the contents. The top rule runs through
+     the middle of the legend, so the gap below the legend is that space less
+     half the legend's height, and the two sides come out equal. */
+  --rule: rgb(0 0 0 / 0.28);
+  --space: 16px;
+  --legend-half: 4px;
+  position: relative;
+  display: grid;
+  gap: calc(var(--space) - var(--legend-half));
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 0 0 var(--space);
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+
+  &::before {
+    content: none;
+  }
+
+  /* The same bracket closes the group below, its ticks turned up. */
+  &::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 0;
+    height: 5px;
+    border: 1px solid var(--rule);
+    border-top: 0;
+    pointer-events: none;
+  }
+}
+
+[data-skin="hardware"] :is([data-kit="fieldset"], [data-kit="alert"]) > [data-kit="legend"]:not(#_):not(#_) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  font: var(--label);
+  font-size: 8px;
+  line-height: 1;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #6a6964;
+
+  &::before,
+  &::after {
+    content: "";
+    flex: 1;
+    align-self: flex-start;
+    height: 5px;
+    margin-top: calc(0.5em - 0.5px);
+    border-top: 1px solid var(--rule);
+  }
+
+  &::before {
+    border-left: 1px solid var(--rule);
+  }
+
+  &::after {
+    border-right: 1px solid var(--rule);
+  }
+}
+
+/* A real legend sits outside the fieldset's grid, so the gap doesn't reach
+   it; the contents keep the same distance from the rule themselves. */
+[data-skin="hardware"] [data-kit="fieldset-body"] {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  gap: 18px;
+  margin-top: calc(var(--space) - var(--legend-half));
+  padding: 0 6px;
+}
+
+/* Alert: the same bracket, its rule in the status color, with the status
+   inlay and the title set into it and the message printed below. */
+[data-skin="hardware"] [data-kit="alert"]:not(#_):not(#_):not(#_) {
+  --status: oklch(0.62 0.01 90);
+  color: var(--ink);
+  text-shadow: none;
+
+  &[data-tone="success"] {
+    --status: oklch(0.7 0.19 150);
+  }
+
+  &[data-tone="info"] {
+    --status: oklch(0.6 0.21 258);
+  }
+
+  &[data-tone="warning"] {
+    --status: oklch(0.78 0.17 75);
+  }
+
+  &[data-tone="danger"] {
+    --status: oklch(0.62 0.24 28);
+  }
+}
+
+[data-skin="hardware"] [data-kit="alert-led"] {
+  flex-shrink: 0;
+  width: var(--led-size);
+  height: var(--led-size);
+  border-radius: 50%;
+  corner-shape: round;
+  background: var(--status);
+  box-shadow: 0 0 5px 1px color-mix(in oklch, var(--status) 55%, transparent);
+}
+
+[data-skin="hardware"] [data-kit="alert-title"]:not(#_):not(#_) {
+  font: var(--label);
+  font-size: 8px;
+  line-height: 1;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink);
+  text-shadow: 0 1px 0 rgb(255 255 255 / 0.85);
+}
+
+[data-skin="hardware"] [data-kit="alert-description"]:not(#_):not(#_) {
+  margin: 0;
+  padding: 0 6px;
+  font: 400 12px/1.5 var(--mono, monospace);
+  text-align: center;
+  color: #6a6964;
+  text-shadow: 0 1px 0 rgb(255 255 255 / 0.85);
+}
+
+/* Hover card: a gray LCD, like the tooltip, that swings down from the link
+   and prints its lines one after another. */
+[data-skin="hardware"] [data-kit="hover-lcd"] {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: auto auto auto;
+  column-gap: 14px;
+  row-gap: 4px;
+  width: 268px;
+  padding: 14px 16px;
+  border-radius: calc(10px * var(--corner-scale));
+  color: #141413;
+  background:
+    var(--tex-matte),
+    linear-gradient(180deg, #b6b7b1, #c8c9c3 35%, #c2c3bd);
+  box-shadow:
+    inset 0 1px 3px rgb(0 0 0 / 0.25),
+    inset 0 0 0 0.5px rgb(0 0 0 / 0.15),
+    0 0 0 5px #f2f2f0,
+    0 0 0 6px rgb(0 0 0 / calc(0.06 * var(--shadow-k))),
+    0 8px 18px -6px rgb(0 0 0 / calc(0.25 * var(--shadow-k)));
+  font-family: var(--mono, monospace);
+  text-shadow: none;
+  transform-origin: 50% 0;
+  transform: perspective(800px) rotateX(0deg);
+  transition: transform 320ms var(--ease-settle);
+
+  @starting-style {
+    transform: perspective(800px) rotateX(90deg);
+  }
+
+  & > * {
+    margin: 0;
+    animation: lcd-print 260ms steps(14, end) both;
+    animation-delay: calc(140ms + var(--i) * 110ms);
+  }
+
+  & strong {
+    grid-column: 2;
+    align-self: end;
+    font: 600 11px/1.2 var(--mono, monospace);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  & p {
+    grid-column: 2;
+    font-size: 11px;
+    line-height: 1.45;
+    color: rgb(20 20 19 / 0.72);
+  }
+}
+
+[data-skin="hardware"] [data-kit="popover"]:has(> [data-kit="hover-lcd"])[data-ending-style] [data-kit="hover-lcd"] {
+  transform: perspective(800px) rotateX(90deg);
+  transition-duration: 180ms;
+  transition-timing-function: cubic-bezier(0.5, 0, 0.75, 0);
+}
+
+[data-skin="hardware"] [data-kit="hover-lcd-initials"] {
+  grid-row: 1 / 3;
+  align-self: center;
+  font: 300 30px/1 var(--mono, monospace);
+  letter-spacing: -0.02em;
+}
+
+[data-skin="hardware"] [data-kit="hover-lcd-status"] {
+  grid-column: 1 / -1;
+  margin-top: 8px !important;
+  padding-top: 8px;
+  border-top: 1px dashed rgb(20 20 19 / 0.25);
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgb(20 20 19 / 0.65);
+}
+
+@keyframes lcd-print {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+[data-skin="hardware"] [data-kit="popover"]:has(> [data-kit="hover-lcd"]):not(#_):not(#_) {
+  width: auto;
+  background: none;
+  box-shadow: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-skin="hardware"] [data-kit="hover-lcd"],
+  [data-skin="hardware"] [data-kit="hover-lcd"] > * {
+    transition: none;
+    animation: none;
+  }
+}
+
+/* The bracket's rules are engraved: a soft shadow on the groove's upper
+   edge, where its near wall shades it, and a light catch on its lower edge,
+   where the far wall meets the light. */
+[data-skin="hardware"] :is([data-kit="fieldset"], [data-kit="alert"]):not(#_):not(#_):not(#_)::after,
+[data-skin="hardware"] :is([data-kit="fieldset"], [data-kit="alert"]) > [data-kit="legend"]:not(#_):not(#_)::before,
+[data-skin="hardware"] :is([data-kit="fieldset"], [data-kit="alert"]) > [data-kit="legend"]:not(#_):not(#_)::after {
+  filter:
+    drop-shadow(0 -0.5px 0.6px rgb(0 0 0 / 0.22))
+    drop-shadow(0.5px 1px 0 rgb(255 255 255 / 1));
+}
+
+/* Dialogs and the command palette open in the middle of the screen. They
+   come into focus out of a blur and go back into one; nothing turns. */
+[data-skin="hardware"] [data-kit="dialog"]:not([data-kit="drawer"] *) [data-kit="dialog-surface"]:is(:not([data-size]), [data-size="command"]):not(#_):not(#_):not(#_):not(#_) {
+  transform: none;
+  filter: blur(0);
+  opacity: 1;
+  scale: 1;
+  transition:
+    filter 220ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 220ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    scale 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  @starting-style {
+    transform: none;
+    filter: blur(12px);
+    opacity: 0;
+    scale: 1.03;
+  }
+
+  &::after {
+    content: none;
+  }
+
+  & :is([data-kit="dialog-title"], [data-kit="dialog-description"]) {
+    opacity: 1;
+    transition: none;
+
+    @starting-style {
+      opacity: 1;
+    }
+  }
+}
+
+[data-skin="hardware"] [data-kit="dialog"]:not([data-kit="drawer"] *):is([data-starting-style], [data-ending-style])
+  [data-kit="dialog-surface"]:is(:not([data-size]), [data-size="command"]):not(#_):not(#_):not(#_):not(#_) {
+  transform: none;
+  filter: blur(12px);
+  opacity: 0;
+  scale: 1.03;
+
+  & :is([data-kit="dialog-title"], [data-kit="dialog-description"]) {
+    opacity: 1;
+  }
+}
+
+[data-skin="hardware"] [data-kit="dialog"]:not([data-kit="drawer"] *)[data-ending-style]
+  [data-kit="dialog-surface"]:is(:not([data-size]), [data-size="command"]):not(#_):not(#_):not(#_):not(#_) {
+  transition-duration: 160ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 1, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-skin="hardware"] [data-kit="dialog"] [data-kit="dialog-surface"]:not(#_):not(#_):not(#_):not(#_) {
+    filter: none;
+    scale: 1;
+  }
+}
+
+/* The combobox's list is a screen: black glass, glowing monospace rows, and
+   a block caret in the key color ahead of the highlighted one, like a cursor
+   resting on a line. */
+[data-skin="hardware"] [data-kit="popup"][data-screen]:not(#_):not(#_):not(#_) {
+  padding: 8px;
+  border: 2px solid #121211;
+  border-radius: calc(10px * var(--corner-scale));
+  color: #f2f2ee;
+  background:
+    var(--tex-matte),
+    radial-gradient(130% 160% at 50% 0%, #121211 50%, #1b1b1a 85%);
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.04),
+    inset 0 0 14px 2px rgb(255 255 255 / 0.04),
+    0 0 0 1px rgb(0 0 0 / 0.1),
+    var(--elev-high);
+  font-family: var(--mono, monospace);
+  text-shadow: none;
+
+  & [data-kit="option"] {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 30px;
+    padding: 0 10px;
+    border-radius: 3px;
+    font: 400 12px/1 var(--mono, monospace);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgb(242 242 238 / 0.5);
+    background: none;
+    box-shadow: none;
+
+    &::before {
+      content: "";
+      flex-shrink: 0;
+      width: 0.6em;
+      height: 1.15em;
+      background: transparent;
+    }
+
+    &[data-highlighted] {
+      color: #f2f2ee;
+      text-shadow: 0 0 6px rgb(255 255 255 / 0.3);
+      background: rgb(255 255 255 / 0.04);
+
+      &::before {
+        background: var(--lcd-key);
+        box-shadow: 0 0 8px color-mix(in oklab, var(--lcd-key) 50%, transparent);
+      }
+    }
+
+    &[data-selected]:not([data-highlighted]) {
+      color: rgb(242 242 238 / 0.85);
+    }
+
+    & [data-kit="option-check"],
+    & svg {
+      display: none;
+    }
+  }
+
+  & [data-kit="empty"] {
+    padding: 8px 10px;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgb(242 242 238 / 0.45);
+
+    &:is([hidden], :empty) {
+      display: none;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-skin="hardware"] [data-kit="popup"][data-screen] [data-kit="option"]::before {
+    animation: none;
+  }
+}
+
+/* The OTP field keeps its size and sits in the middle of its card. */
+[data-skin="hardware"] [data-kit="field"]:has(> [data-kit="otp"]):not(#_):not(#_) {
+  width: fit-content;
+  margin-inline: auto;
+}
+
+/* The backdrop eases in and out with the dialog: its tint fades and its blur
+   grows from nothing, and both go back the same way on close. */
+[data-skin="hardware"] [data-kit="backdrop"]:not(#_):not(#_) {
+  opacity: 1;
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  transition:
+    opacity 240ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    backdrop-filter 240ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    -webkit-backdrop-filter 240ms cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  @starting-style {
+    opacity: 0;
+    -webkit-backdrop-filter: blur(0);
+    backdrop-filter: blur(0);
+  }
+
+  &:is([data-starting-style], [data-ending-style]) {
+    opacity: 0;
+    -webkit-backdrop-filter: blur(0);
+    backdrop-filter: blur(0);
+  }
+
+  &[data-ending-style] {
+    transition-duration: 180ms;
+    transition-timing-function: cubic-bezier(0.4, 0, 1, 1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-skin="hardware"] [data-kit="backdrop"]:not(#_):not(#_) {
+    transition: opacity 120ms;
+  }
+}
+
+/* ui-sdk lifts data-ending-style a frame before the element is removed, so
+   the closed look is also held on data-closed, which stays until removal;
+   otherwise the dialog and its backdrop blink back for that last frame. */
+[data-skin="hardware"] [data-kit="dialog"][data-closed]:not([data-kit="drawer"] *)
+  [data-kit="dialog-surface"]:is(:not([data-size]), [data-size="command"]):not(#_):not(#_):not(#_):not(#_) {
+  filter: blur(12px);
+  opacity: 0;
+  scale: 1.03;
+}
+
+[data-skin="hardware"] [data-kit="backdrop"][data-closed]:not(#_):not(#_) {
+  opacity: 0;
+  -webkit-backdrop-filter: blur(0);
+  backdrop-filter: blur(0);
+}
+
+[data-skin="hardware"] [data-kit="popover"][data-closed] [data-kit="popover-surface"]:not([data-size]):not(#_):not(#_):not(#_) {
+  transform: perspective(1000px) rotateX(90deg);
+}
+
+[data-skin="hardware"] [data-kit="popover"][data-closed] [data-kit="hover-lcd"] {
+  transform: perspective(800px) rotateX(90deg);
+}
+
+/* Inside a fieldset the legend names the group, so a lone field's own label
+   is dropped; controls keep their natural size and sit in a row. */
+[data-skin="hardware"] [data-kit="fieldset-body"] > [data-kit="field"]:only-child {
+  flex: 1;
+
+  & > [data-kit="label"] {
+    display: none;
+  }
+}
+
+[data-skin="hardware"] [data-kit="fieldset-body"] > [data-kit="check"]:not(#_):not(#_):not(#_) {
+  flex: 1 1 0;
+  width: auto;
+  max-width: 140px;
+}
+
+/* The tooltip's screen appears only while its control is hovered or
+   focused: it fades and rises into place, then its characters print in. */
+[data-skin="hardware"] [data-kit="tooltip-legend"]:not(#_) {
+  opacity: 0;
+  translate: -50% 4px;
+  visibility: hidden;
+  transition:
+    opacity 140ms,
+    translate 180ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    visibility 0s 180ms;
+
+  &[data-open] {
+    opacity: 1;
+    translate: -50% 0;
+    visibility: visible;
+    transition:
+      opacity 140ms,
+      translate 180ms cubic-bezier(0.2, 0.8, 0.2, 1),
+      visibility 0s;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-skin="hardware"] [data-kit="tooltip-legend"]:not(#_) {
+    translate: -50% 0;
+  }
+}
+
+/* The command palette is wider. */
+[data-skin="hardware"] [data-kit="dialog"]:has(> [data-size="command"]):not(#_):not(#_):not(#_) {
+  width: min(680px, calc(100% - 32px));
+}
+
+[data-skin="hardware"] [data-kit="dialog-surface"][data-size="command"]:not(#_):not(#_):not(#_):not(#_) {
+  width: 100%;
+}
+
+/* Keys with an icon set it a little apart from the label. */
+[data-skin="hardware"] [data-kit="actions"] > [data-kit="button"]:has(> [data-icon]):not(#_):not(#_) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+
+  & [data-icon] svg {
+    width: 14px;
+    height: 14px;
+  }
+}

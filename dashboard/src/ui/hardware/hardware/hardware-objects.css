@@ -1,0 +1,535 @@
+/* Avatar: a small LED matrix behind a round black lens, in a light bezel.
+   Each person's glyph comes from their name; lit dots glow white, the rest
+   sit dark. */
+[data-skin="hardware"] [data-kit="avatar"]:not(#_):not(#_) {
+  --size: 44px;
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: var(--size);
+  height: var(--size);
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  corner-shape: round;
+  background: linear-gradient(180deg, #ffffff, #e6e6e3);
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 0 0 0.5px rgb(0 0 0 / 0.14),
+    0 1px 1.5px hsl(var(--shadow-color) / calc(0.22 * var(--shadow-k))),
+    0 3px 6px -2px hsl(var(--shadow-color) / calc(0.18 * var(--shadow-k)));
+  overflow: visible;
+
+  &[data-size="sm"] {
+    --size: 32px;
+  }
+
+  &[data-size="lg"] {
+    --size: 64px;
+  }
+}
+
+[data-skin="hardware"] [data-kit="avatar-fallback"]:not(#_):not(#_) {
+  display: grid;
+  place-items: center;
+  width: calc(var(--size) - 6px);
+  height: calc(var(--size) - 6px);
+  border-radius: 50%;
+  corner-shape: round;
+  background: radial-gradient(circle at 50% 35%, #1d1d1c, #0a0a0a 75%);
+  box-shadow:
+    inset 0 1px 2px rgb(0 0 0 / 0.6),
+    inset 0 0 0 1px rgb(255 255 255 / 0.04);
+  color: transparent;
+  font-size: 0;
+  overflow: hidden;
+}
+
+[data-skin="hardware"] [data-kit="avatar-matrix"] {
+  /* Whole pixels, so every dot rasterizes the same round shape. */
+  --dot: 3px;
+  --dot-gap: 2px;
+  display: grid;
+  grid-template-columns: repeat(7, var(--dot));
+  grid-auto-rows: var(--dot);
+  gap: var(--dot-gap);
+
+  [data-size="sm"] & {
+    --dot: 2px;
+    --dot-gap: 1px;
+  }
+
+  [data-size="lg"] & {
+    --dot: 4px;
+    --dot-gap: 3px;
+  }
+
+  & i {
+    width: var(--dot);
+    height: var(--dot);
+    border-radius: 50%;
+    corner-shape: round;
+    font-style: normal;
+    background: rgb(255 255 255 / 0.08);
+  }
+
+  & i[data-on] {
+    background: #f4f4f0;
+    box-shadow: 0 0 2px rgb(255 255 255 / 0.4);
+  }
+
+  & i[data-off-lens] {
+    background: none;
+  }
+}
+
+/* Drawer: a sheet of the panel's own plastic that slides up from the bottom
+   and floats there, like the navbar does at the top. A recessed grip to drag
+   it, a printed header, its contents grouped under brackets, and its keys
+   along the foot, divided from the rest by an engraved line. */
+[data-skin="hardware"] [data-kit="drawer"]:not(#_):not(#_) {
+  position: fixed;
+  inset: auto 0 12px;
+  width: min(560px, calc(100% - 24px));
+  margin: 0 auto;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+
+[data-skin="hardware"] [data-kit="drawer-body"] {
+  position: relative;
+  display: grid;
+  gap: 22px;
+  padding: 26px 26px 20px;
+  border-radius: calc(22px * var(--corner-scale));
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.6), rgb(255 255 255 / 0) 30%),
+    #f3f3f1;
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 0 0 1px hsl(var(--shadow-color) / calc(0.1 * var(--shadow-k))),
+    0 2px 4px hsl(var(--shadow-color) / calc(0.08 * var(--shadow-k))),
+    0 18px 40px -12px hsl(var(--shadow-color) / calc(0.3 * var(--shadow-k)));
+}
+
+[data-skin="hardware"] [data-kit="drawer-grip"] {
+  position: absolute;
+  top: 9px;
+  left: 50%;
+  width: 40px;
+  height: 5px;
+  translate: -50% 0;
+  border-radius: 3px;
+  background: #dcdcd8;
+  box-shadow:
+    inset 0 1px 1.5px rgb(0 0 0 / 0.2),
+    0 1px 0 #fff;
+}
+
+[data-skin="hardware"] [data-kit="drawer-head"] {
+  display: grid;
+  gap: 4px;
+
+  & [data-kit="dialog-title"],
+  & [data-kit="dialog-description"] {
+    margin: 0;
+  }
+}
+
+[data-skin="hardware"] [data-kit="drawer-content"] {
+  display: grid;
+  gap: 22px;
+}
+
+[data-skin="hardware"] [data-kit="drawer-body"] > [data-kit="actions"] {
+  justify-content: flex-end;
+  padding-top: 18px;
+  border-top: 1px solid rgb(0 0 0 / 0.08);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.9);
+}
+
+/* Collapsible: one plain ruled row, like an accordion's, with its label and
+   an LED that lights while it's open; the recessed tray slides out below. */
+[data-skin="hardware"] [data-kit="collapsible"]:not(#_):not(#_) {
+  display: grid;
+  width: 100%;
+  border: 0;
+  border-top: 1px solid rgb(0 0 0 / 0.08);
+  border-bottom: 1px solid rgb(0 0 0 / 0.08);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.8);
+}
+
+[data-skin="hardware"] [data-kit="collapsible"] > [data-kit="accordion-trigger"]:not(#_):not(#_):not(#_) {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 46px;
+  margin: 0;
+  padding: 0 4px 0 2px;
+  border: 0;
+  border-radius: 0;
+  font: var(--label);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: none;
+  box-shadow: none;
+  translate: none;
+  cursor: pointer;
+  user-select: none;
+
+  &::before {
+    content: none;
+  }
+
+  &::after {
+    content: "";
+    position: static;
+    flex-shrink: 0;
+    width: var(--led-size);
+    height: var(--led-size);
+    margin-inline-start: auto;
+    border-radius: 50%;
+    corner-shape: round;
+    background: var(--led-off);
+    box-shadow: none;
+    opacity: 1;
+    translate: none;
+    transition:
+      background 160ms,
+      box-shadow 160ms;
+  }
+
+  &:is([data-open], [aria-expanded="true"])::after {
+    background: var(--led-color);
+    box-shadow: var(--led-glow, none);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--key-color);
+    outline-offset: 2px;
+  }
+}
+
+[data-skin="hardware"] [data-kit="collapsible"] [data-kit="accordion-panel"]:not(#_):not(#_) > p:not(#_) {
+  margin: 0 0 14px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-skin="hardware"] [data-kit="collapsible"] > [data-kit="accordion-trigger"] {
+    transition: none;
+  }
+}
+
+/* Date picker: a small date device, like the calendar. A light bezel around
+   an LCD: a tag and the month on top, the days as glowing numerals, the
+   chosen one inverted in the key color and today ringed. Previous and next
+   are keys on the bezel below. */
+[data-skin="hardware"] [data-kit="popover-surface"][data-size="calendar"]:not(#_):not(#_):not(#_) {
+  display: grid;
+  gap: 12px;
+  width: 292px;
+  padding: 12px 12px 14px;
+  border-radius: calc(16px * var(--corner-scale));
+  background:
+    var(--tex-matte),
+    linear-gradient(180deg, #f1f0ed, #e4e3df);
+  box-shadow:
+    inset 0 1px 0 #fff,
+    inset 0 -2px 0 rgb(0 0 0 / 0.06),
+    0 0 0 1px hsl(var(--shadow-color) / 0.12),
+    var(--elev-high);
+  transform-origin: 50% 0;
+  transform: perspective(1000px) rotateX(0deg);
+  transition: transform var(--screen-flip);
+
+  @starting-style {
+    transform: perspective(1000px) rotateX(90deg);
+  }
+}
+
+[data-skin="hardware"] [data-kit="popover"]:is([data-ending-style], [data-closed]) [data-kit="popover-surface"][data-size="calendar"]:not(#_):not(#_):not(#_) {
+  transform: perspective(1000px) rotateX(90deg);
+  transition: transform 180ms cubic-bezier(0.5, 0, 0.75, 0);
+}
+
+[data-skin="hardware"] [data-kit="cal-lcd"] {
+  display: grid;
+  gap: 10px;
+  padding: 12px 12px 10px;
+  border: 2px solid #1a1918;
+  border-radius: calc(9px * var(--corner-scale));
+  color: #f2f2ee;
+  background: var(--screen-glass);
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.04),
+    inset 0 0 14px 2px rgb(255 255 255 / 0.05),
+    0 1px 0 #fff;
+  font-family: var(--mono, monospace);
+  text-shadow: none;
+}
+
+[data-skin="hardware"] [data-kit="cal-lcd-row"] {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+[data-skin="hardware"] [data-kit="cal-lcd-tag"] {
+  font-size: 8px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgb(242 242 238 / 0.45);
+}
+
+[data-skin="hardware"] [data-kit="cal-lcd"] [data-kit="calendar-heading"]:not(#_):not(#_) {
+  margin: 0;
+  font: 300 15px/1 var(--mono, monospace);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #f2f2ee;
+  text-shadow: 0 0 6px rgb(255 255 255 / 0.25);
+}
+
+[data-skin="hardware"] [data-kit="cal-lcd"] [data-kit="calendar-grid"]:not(#_):not(#_) {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 2px;
+}
+
+[data-skin="hardware"] [data-kit="cal-lcd"] [data-kit="calendar-weekday"]:not(#_):not(#_) {
+  padding-bottom: 4px;
+  font: 500 8px/1 var(--mono, monospace);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgb(242 242 238 / 0.4);
+  text-shadow: none;
+}
+
+[data-skin="hardware"] [data-kit="cal-lcd"] [data-kit="calendar-day"]:not(#_):not(#_) {
+  display: table-cell;
+  width: auto;
+  height: 28px;
+  text-align: center;
+  vertical-align: middle;
+  padding: 0;
+  border: 0;
+  border-radius: 3px;
+  font: 400 12px/1 var(--mono, monospace);
+  color: rgb(242 242 238 / 0.82);
+  background: none;
+  box-shadow: none;
+  translate: none;
+  text-shadow: 0 0 6px rgb(255 255 255 / 0.18);
+  cursor: pointer;
+
+  &:hover {
+    background: rgb(255 255 255 / 0.07);
+  }
+
+  &:is([data-outside-month], [data-outside]) {
+    color: rgb(242 242 238 / 0.22);
+    text-shadow: none;
+  }
+
+  &[data-today] {
+    box-shadow: inset 0 0 0 1px rgb(242 242 238 / 0.45);
+  }
+
+  &[data-selected] {
+    color: var(--on-lcd-key);
+    background: var(--lcd-key);
+    text-shadow: none;
+    box-shadow: 0 0 10px color-mix(in oklab, var(--lcd-key) 40%, transparent);
+  }
+
+  &:focus-visible {
+    outline: 1.5px solid var(--lcd-key);
+    outline-offset: 1px;
+  }
+
+  &[data-disabled] {
+    opacity: 0.3;
+    cursor: default;
+  }
+}
+
+[data-skin="hardware"] [data-kit="cal-keys"] {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+
+  & [data-kit="button"] {
+    height: 36px;
+    min-width: 0;
+  }
+}
+
+/* The date picker's device: a light plastic bezel with the month in a
+   counter window between two round keys, and the days as small keys. */
+[data-skin="hardware"] [data-kit="popover"]:has(> [data-size="date-device"]):not(#_):not(#_) {
+  width: auto;
+  overflow: visible;
+}
+
+[data-skin="hardware"] [data-kit="popover-surface"][data-size="date-device"]:not(#_):not(#_):not(#_) {
+  display: grid;
+  gap: 14px;
+  width: 380px;
+  padding: 16px;
+  border-radius: calc(18px * var(--corner-scale));
+  background: linear-gradient(180deg, #f8f8f6, #efefec);
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 0 0 1px hsl(var(--shadow-color) / 0.1),
+    var(--float);
+  transform: none;
+  transform-origin: 30px 0;
+  scale: 1;
+  opacity: 1;
+  transition:
+    scale 260ms var(--ease-settle),
+    opacity 140ms;
+
+  @starting-style {
+    scale: 0.7;
+    opacity: 0;
+  }
+}
+
+[data-skin="hardware"] [data-kit="popover"]:is([data-ending-style], [data-closed]) [data-kit="popover-surface"][data-size="date-device"]:not(#_):not(#_):not(#_) {
+  scale: 0.85;
+  opacity: 0;
+}
+
+[data-skin="hardware"] [data-kit="date-head"] {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+
+  & [data-kit="button"]:not(#_):not(#_) {
+    width: 32px;
+    height: 32px;
+    min-width: 0;
+  }
+}
+
+/* The counter window: white numerals on a dark drum, shaded top and bottom
+   where the drum curves away, behind a recessed frame. */
+[data-skin="hardware"] [data-kit="date-counter"]:not(#_):not(#_) {
+  display: grid;
+  place-items: center;
+  height: 34px;
+  margin: 0;
+  border-radius: 5px;
+  font: 500 13px/1 var(--mono, monospace);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #f2f2ee;
+  background:
+    linear-gradient(180deg, rgb(0 0 0 / 0.55), rgb(0 0 0 / 0) 30%, rgb(0 0 0 / 0) 70%, rgb(0 0 0 / 0.55)),
+    linear-gradient(180deg, #2f2f2d, #3c3c39 50%, #2f2f2d);
+  box-shadow:
+    inset 0 0 0 1px rgb(0 0 0 / 0.6),
+    inset 0 1px 0 1px rgb(0 0 0 / 0.25),
+    0 1px 0 #fff;
+  text-shadow: none;
+}
+
+/* The day keys. */
+[data-skin="hardware"] [data-kit="date-keys"]:not(#_):not(#_) {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 4px 6px;
+  margin: -6px -4px;
+  width: calc(100% + 8px);
+
+  & [data-kit="calendar-weekday"]:not(#_):not(#_) {
+    padding: 0 0 2px;
+    font: var(--label);
+    font-size: 7.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #9a9994;
+    text-shadow: none;
+  }
+}
+
+[data-skin="hardware"] [data-kit="date-key"]:not(#_):not(#_) {
+  --lift: 2.5px;
+  position: relative;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: calc(6px * var(--corner-scale));
+  font: 500 10px/1 var(--mono, monospace);
+  text-align: center;
+  vertical-align: middle;
+  color: var(--ink);
+  background: linear-gradient(0deg, #ffffff, #f2f2f0 70%, #eeeeec);
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 0 0 0.5px rgb(0 0 0 / 0.1),
+    0 var(--lift) 0 #d6d6d2,
+    0 calc(var(--lift) + 0.5px) 1.5px rgb(0 0 0 / calc(0.13 * var(--shadow-k)));
+  translate: 0 calc(var(--lift) * -1);
+  text-shadow: none;
+  cursor: pointer;
+  transition: --lift 80ms cubic-bezier(0.3, 0, 0.6, 1);
+
+  &:active {
+    --lift: 0.5px;
+  }
+
+  /* Days of the neighbouring months: an empty slot, not a key. */
+  &[data-outside] {
+    color: transparent;
+    background: none;
+    box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.06);
+    translate: none;
+    pointer-events: none;
+  }
+
+  /* Today: a printed dot under the number. */
+  &[data-today]::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 4px;
+    width: 3px;
+    height: 3px;
+    margin-left: -1.5px;
+    border-radius: 50%;
+    background: #9a9994;
+  }
+
+  /* Chosen: latched down, with a key-color dash. */
+  &[data-selected] {
+    --lift: 0px;
+    background: linear-gradient(0deg, #f1f1ef, #e6e6e3 70%, #e2e2df);
+
+    &::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      bottom: 5px;
+      width: 10px;
+      height: 1.5px;
+      margin-left: -5px;
+      background: var(--key-color);
+    }
+
+    &::before {
+      content: none;
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--key-color);
+    outline-offset: 1px;
+  }
+}
