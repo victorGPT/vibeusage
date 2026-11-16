@@ -419,7 +419,7 @@ export default function App() {
   const PageComponent = normalizedPath === "/leaderboard" ? LeaderboardPage : DashboardPage;
   let content = null;
   if (removedProfile) {
-    content = <Navigate to="/leaderboard" replace />;
+    content = <Navigate to={{ pathname: "/leaderboard", search: location.search }} replace />;
   } else if (agentResourceMode) {
     content = (
       <Suspense fallback={loadingShell}>

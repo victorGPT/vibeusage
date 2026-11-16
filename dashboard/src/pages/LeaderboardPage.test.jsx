@@ -96,6 +96,19 @@ describe("LeaderboardPage", () => {
     expect(screen.getByRole("radio", { name: "Month" })).toHaveAttribute("aria-checked", "true");
   });
 
+  it("starts a board on page 1 again after visiting another board", async () => {
+    renderPage();
+    await rankings();
+    fireEvent.click(screen.getByRole("button", { name: "3" }));
+    await waitFor(() => expect(api.getLeaderboard).toHaveBeenCalledWith(expect.objectContaining({ period: "week", offset: 20 })));
+    fireEvent.click(screen.getByRole("radio", { name: "Month" }));
+    await waitFor(() => expect(api.getLeaderboard).toHaveBeenCalledWith(expect.objectContaining({ period: "month", offset: 0 })));
+    api.getLeaderboard.mockClear();
+    fireEvent.click(screen.getByRole("radio", { name: "Week" }));
+    await waitFor(() => expect(api.getLeaderboard).toHaveBeenCalledWith(expect.objectContaining({ period: "week", offset: 0, limit: 10 })));
+    expect(api.getLeaderboard).not.toHaveBeenCalledWith(expect.objectContaining({ offset: 20 }));
+  });
+
   it("reads the board from ?period= and ranks every row on all models", async () => {
     renderPage("/leaderboard?period=total");
     await rankings();

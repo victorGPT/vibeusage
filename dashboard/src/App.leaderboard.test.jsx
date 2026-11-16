@@ -12,7 +12,7 @@ vi.mock("./pages/LeaderboardPage.jsx", () => ({
 
 function Where() {
   const location = useLocation();
-  return <output aria-label="path">{location.pathname}</output>;
+  return <output aria-label="path">{location.pathname + location.search}</output>;
 }
 
 function renderAt(path) {
@@ -31,8 +31,8 @@ describe("App", () => {
   it.each(["/leaderboard/u/abc", "/leaderboard/u/00000000-0000-0000-0000-000000000001/"])(
     "sends the removed public profile %s to /leaderboard",
     async (path) => {
-      renderAt(`${path}?mock=1`);
-      await waitFor(() => expect(screen.getByRole("status", { name: "path" })).toHaveTextContent(/^\/leaderboard$/));
+      renderAt(`${path}?period=month`);
+      await waitFor(() => expect(screen.getByRole("status", { name: "path" })).toHaveTextContent(/^\/leaderboard\?period=month$/));
     },
   );
 

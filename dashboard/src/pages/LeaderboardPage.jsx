@@ -100,6 +100,7 @@ export function LeaderboardPage({
   const period = useMemo(() => normalizePeriod(new URLSearchParams(location?.search || "").get("period")), [location?.search]);
   // The page belongs to the board it was picked on, so a new period starts at page 1 without a stale fetch.
   const [paged, setPaged] = useState({ period, page: 1 });
+  if (paged.period !== period) setPaged({ period, page: 1 });
   const page = paged.period === period ? paged.page : 1;
   const setPage = (next) => setPaged({ period, page: next });
   const [reloadToken, setReloadToken] = useState(0);
