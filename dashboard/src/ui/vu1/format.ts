@@ -1,5 +1,3 @@
-import { copy } from "#src/lib/copy.ts";
-
 import type { UsageTotals } from "./types";
 
 // Token counts arrive as numbers or digit strings; anything unparseable counts as zero.
@@ -27,34 +25,3 @@ const USD = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" 
 
 export const full = (value: unknown) => FULL.format(num(value));
 export const cost = (value: unknown) => USD.format(num(value));
-export const pct = (value: number) => `${value.toFixed(1)}%`;
-
-const DAY_MS = 86_400_000;
-
-export function daysBetween(from: string, to: string): number {
-  return Math.round((Date.parse(to) - Date.parse(from)) / DAY_MS) + 1;
-}
-
-// The leaderboard's Total window starts at the epoch; a date there means "no start".
-// The full form drops the end's year when both ends share it, as the boards draw it.
-export function range(from: string, to: string, form: "full" | "short" = "full"): string {
-  if (from <= "1970-01-01") return copy("leaderboard.range.total");
-  if (form === "short") return `${from.slice(5)} → ${to.slice(5)}`;
-  return `${from} → ${from.slice(0, 4) === to.slice(0, 4) ? to.slice(5) : to}`;
-}
-
-// How long ago a snapshot was taken, for the page meta. A little clock skew still reads "just now".
-export function updated(iso: unknown, now: number): string | null {
-  const at = typeof iso === "string" ? Date.parse(iso) : NaN;
-  if (!Number.isFinite(at)) return null;
-  const min = Math.floor((now - at) / 60_000);
-  if (min < 1) return copy("ui2049.page_header.updated_now");
-  if (min < 60) return copy("ui2049.page_header.updated_min", { n: min });
-  if (min < 48 * 60) return copy("ui2049.page_header.updated_h", { n: Math.floor(min / 60) });
-  return copy("ui2049.page_header.updated_d", { n: Math.floor(min / 1440) });
-}
-
-// PageHeader meta for a board snapshot: its date range, then how fresh it is.
-export function boardMeta(from: string, to: string, generatedAt: unknown, now = Date.now()): string {
-  return [range(from, to), updated(generatedAt, now)].filter(Boolean).join(" · ");
-}

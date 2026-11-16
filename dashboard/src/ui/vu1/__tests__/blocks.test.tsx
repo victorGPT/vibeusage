@@ -295,6 +295,15 @@ describe("UpgradeToast", () => {
     render(<UpgradeToast requiredVersion="0.9.2" />);
     expect(screen.queryByRole("status")).toBeNull();
   });
+
+  it("still names a new version after the versionless note was dismissed", async () => {
+    const user = userEvent.setup();
+    const { unmount } = render(<UpgradeToast requiredVersion={null} />);
+    await user.click(screen.getByRole("button", { name: "Update" }));
+    unmount();
+    render(<UpgradeToast requiredVersion="0.9.3" />);
+    expect(screen.getByRole("status")).toHaveTextContent("CLI 0.9.3 available");
+  });
 });
 
 describe("StateScreen", () => {

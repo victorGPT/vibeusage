@@ -1,6 +1,6 @@
 /* VU1 business blocks. Surfaces (screens, LCDs, minis, toast) follow the VU1 mock
  * (.nawaban/vu1-mock.html); controls keep the SPEC-01 kit look from src/ui/hardware.
- * Spacing uses only --spacing-s1..s8. Scoped to the skin so nothing reaches 2049 pages. */
+ * Spacing uses only --spacing-s1..s8. Scoped to the skin. */
 
 [data-skin="hardware"] {
   --vu1-red: #ff2a12;

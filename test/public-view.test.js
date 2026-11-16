@@ -100,8 +100,6 @@ test("public view panel does not render share link text", () => {
 });
 
 test("public view hides upgrade banner", () => {
-  const src = read("dashboard/src/App.jsx");
-  assert.match(src, /\{!publicMode\s*&&\s*!screenshotMode\s*(?:&&[^?]*)?\?\s*\(/);
   const page = read("dashboard/src/pages/DashboardPage.jsx");
   assert.match(page, /\{publicMode \|\| screenshotMode \? null : \(\s*<UpgradeToast/);
 });

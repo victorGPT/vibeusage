@@ -5,7 +5,7 @@ import { safeGetItem, safeSetItem } from "#src/lib/safe-browser.ts";
 import { Button } from "#src/ui/hardware/button.tsx";
 import "./blocks.css";
 
-// The 2049 banner's dismiss keys, so a version dismissed there stays dismissed here.
+// The keys the old upgrade banner wrote, so a version dismissed there stays dismissed here.
 function dismissKey(version: string) {
   return version ? `vibeusage_upgrade_dismissed_${version}` : "vibeusage_upgrade_dismissed_unknown";
 }

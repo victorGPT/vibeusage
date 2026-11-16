@@ -87,6 +87,6 @@ describe("LandingPage", () => {
 
   it("never renders a raw copy key", () => {
     const { container } = render(<LandingPage signInUrl="/sign-in" signUpUrl={SIGN_UP} />);
-    expect(container.textContent).not.toMatch(/\b(vu1|ui2049|landing|dashboard|leaderboard)\.[a-z_]+/);
+    expect(container.textContent).not.toMatch(/\b(vu1|landing|dashboard|leaderboard)\.[a-z_]+/);
   });
 });

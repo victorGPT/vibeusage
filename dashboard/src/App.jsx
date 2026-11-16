@@ -40,12 +40,10 @@ import {
 import { clearInsforgePersistentStorage } from "./lib/insforge-client";
 import { isMockEnabled } from "./lib/mock-data";
 import { fetchLatestTrackerVersion } from "./lib/npm-version";
-import { isScreenshotModeEnabled } from "./lib/screenshot-mode";
 import { probeBackend } from "./lib/vibeusage-api";
 import { resolveAgentResourceRoute } from "./pages/agent-resource-routes.js";
 import { LandingPage } from "./pages/LandingPage.jsx";
 import { StateScreen } from "./ui/vu1/StateScreen";
-import { UpgradeBanner } from "./ui/2049/blocks/UpgradeBanner";
 
 function buildAuthEntryUrl(basePath, nextPath) {
   if (typeof basePath !== "string" || basePath.length === 0) return "/";
@@ -79,10 +77,6 @@ export default function App() {
   const navigate = useNavigate();
   const baseUrl = useMemo(() => getInsforgeBaseUrl(), []);
   const mockEnabled = isMockEnabled();
-  const screenshotMode = useMemo(() => {
-    if (typeof window === "undefined") return false;
-    return isScreenshotModeEnabled(window.location.search);
-  }, []);
   const [latestVersion, setLatestVersion] = useState(null);
   const [insforgeLoaded, setInsforgeLoaded] = useState(false);
   const insforgeSession = useSyncExternalStore(
@@ -432,9 +426,6 @@ export default function App() {
   } else {
     content = (
       <Suspense fallback={loadingShell}>
-        {!publicMode && !screenshotMode && PageComponent !== DashboardPage && PageComponent !== LeaderboardPage ? (
-          <UpgradeBanner requiredVersion={latestVersion} />
-        ) : null}
         <PageComponent
           baseUrl={baseUrl}
           auth={auth}

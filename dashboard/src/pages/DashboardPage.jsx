@@ -950,7 +950,7 @@ export function DashboardPage({
             signedIn={signedIn}
             account={!(publicMode && signedIn)}
             hrefs={HREFS}
-            githubHref={copy("ui2049.top_nav.github_href")}
+            githubHref={copy("vu1.top.github_href")}
             stars={stars}
             onSignIn={handleSignIn}
             onSignOut={signOut}

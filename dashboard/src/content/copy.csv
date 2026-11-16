@@ -1,46 +1,14 @@
 key,module,page,component,slot,text,notes,status
 shared.placeholder.short,shared,*,*,placeholder_short,"--",,active
 shared.placeholder.anon_mark,shared,*,*,placeholder_anon_mark,"?",,active
-shared.unit.percent,shared,*,*,unit_percent,"%",,active
-shared.unit.thousand_abbrev,shared,*,*,unit_thousand_abbrev,"K",,active
-shared.unit.million_abbrev,shared,*,*,unit_million_abbrev,"M",,active
-shared.unit.billion_abbrev,shared,*,*,unit_billion_abbrev,"B",,active
-shared.range.simple,shared,*,*,label,"Range: {{range}}",,active
-shared.data_source,shared,*,*,label,"DATA_SOURCE: {{source}}",,active
 shared.error.prefix,shared,*,*,label,"Error: {{error}}",,active
-shared.status.unsynced,shared,*,*,status,"WAIT_AUTO_SYNC",,active
-error.boundary.title,shared,*,ErrorBoundary,title,"SYSTEM_FAULT",,active
-error.boundary.subtitle,shared,*,ErrorBoundary,subtitle,"RENDER_FAILURE",,active
-error.boundary.hint,shared,*,ErrorBoundary,hint,"OPEN_CONSOLE // THEN RELOAD",,active
-error.boundary.no_details,shared,*,ErrorBoundary,details,"NO_ERROR_DETAILS",,active
-error.boundary.action.reload,shared,*,ErrorBoundary,action_reload,"RELOAD",,active
 
-landing.handle.default,landing,LandingPage,LandingPage,handle_default,"VIBE_USER",,active
-landing.handle.special,landing,LandingPage,LandingPage,handle_special,"VOLT",,active
-landing.hero.title_primary,landing,LandingPage,LandingPage,hero_title_primary,"MORE_TOKENS.",,active
-landing.hero.title_secondary,landing,LandingPage,LandingPage,hero_title_secondary,"MORE_VIBE.",,active
-landing.hero.tagline,landing,LandingPage,LandingPage,hero_tagline,"AI AGENT TOKEN TRACKER",,active
-landing.hero.subtagline,landing,LandingPage,LandingPage,hero_subtagline,"Track Codex, Claude Code, OpenCode, Gemini, Kimi, Hermes, and OpenClaw with minimal data collection and auditable metrics.",,active
-landing.screenshot.alt,landing,LandingPage,LandingPage,screenshot_alt,"VibeUsage dashboard screenshot",,active
-landing.screenshot.title,landing,LandingPage,LandingPage,screenshot_title,"DASHBOARD PREVIEW",,active
-landing.nav.login,landing,LandingPage,LandingPage,nav_login,"LOGIN",,active
-landing.nav.signup,landing,LandingPage,LandingPage,nav_signup,"SIGN UP",,active
-landing.nav.login_signup,landing,LandingPage,LandingPage,nav_login_signup,"SIGN IN / SIGN UP",,active
 landing.seo.title,landing,LandingPage,LandingPage,seo_title,"Secure Token Usage Tracking for AI Agent Clients",,active
 landing.features.title,landing,LandingPage,LandingPage,features_title,"FEATURE BRIEF",,active
 landing.seo.summary,landing,LandingPage,LandingPage,seo_summary,"VibeUsage tracks token usage across AI agent clients (Codex, Claude Code, OpenCode, Gemini, Kimi, Hermes, OpenClaw) with minimal data collection and auditable metrics.",,active
-landing.install.title,landing,LandingPage,LandingPage,install_title,"INSTALL IN ONE COMMAND",,active
-landing.install.prompt,landing,LandingPage,LandingPage,install_prompt,"Run this in your terminal:",,active
 landing.install.command,landing,LandingPage,LandingPage,install_command,"npx --yes vibeusage init",,active
-landing.install.helper,landing,LandingPage,LandingPage,install_helper,"Then connect your account and start syncing usage.",,active
 landing.install.action.copy,landing,LandingPage,LandingPage,install_copy,"COPY COMMAND",,active
 landing.install.action.copied,landing,LandingPage,LandingPage,install_copied,"COPIED",,active
-landing.ai_agent.title,landing,LandingPage,LandingPage,ai_agent_title,"LET AI INSTALL FOR YOU",,active
-landing.ai_agent.description,landing,LandingPage,LandingPage,ai_agent_description,"Copy this guide and paste to ChatGPT, Claude, or any AI assistant. It will install VibeUsage automatically.",,active
-landing.ai_agent.command,landing,LandingPage,LandingPage,ai_agent_command,"https://github.com/victorGPT/vibeusage/blob/main/docs/AI_AGENT_INSTALL.md",,active
-landing.ai_agent.copy_label,landing,LandingPage,LandingPage,ai_agent_copy_label,"Copy link",,active
-landing.ai_agent.helper,landing,LandingPage,LandingPage,ai_agent_helper,"Or click to open the guide and copy manually.",,active
-landing.ai_agent.guide_url,landing,LandingPage,LandingPage,ai_agent_guide_url,"https://github.com/victorGPT/vibeusage/blob/main/docs/AI_AGENT_INSTALL.md",,active
 landing.meta.title,landing,LandingPage,Meta,title,"VibeUsage — Token Usage Tracker for AI Agent CLIs",,active
 landing.meta.description,landing,LandingPage,Meta,description,"Track token usage across AI agent clients: Codex, Claude Code, OpenCode, Gemini, and OpenClaw.",,active
 landing.meta.og_site_name,landing,LandingPage,Meta,og_site_name,"VibeUsage",,active
@@ -59,20 +27,6 @@ landing.seo.point1,landing,LandingPage,LandingPage,seo_point_1,"Auto-track AI CL
 landing.seo.point2,landing,LandingPage,LandingPage,seo_point_2,"Matrix-style interface that highlights the signals you care about.",,active
 landing.seo.point3,landing,LandingPage,LandingPage,seo_point_3,"Universal AI CLI leaderboard to compare usage and rank.",,active
 landing.seo.roadmap,landing,LandingPage,LandingPage,seo_roadmap,"Native support for Codex, Claude Code, Gemini, Kimi, and Hermes CLI.",,active
-landing.handle.label,landing,LandingPage,LandingPage,handle_label,"Set_Handle",,active
-landing.handle.placeholder,landing,LandingPage,LandingPage,handle_placeholder,"TRY '{{handle}}'",,active
-landing.rank.expectation,landing,LandingPage,LandingPage,rank_expectation,"RANK_EXPECTATION: {{rank}}",,active
-landing.rank.singularity,landing,LandingPage,LandingPage,rank_singularity,"APEX",,active
-landing.rank.unranked,landing,LandingPage,LandingPage,rank_unranked,"UNRANKED",,active
-landing.cta.initialize,landing,LandingPage,LandingPage,cta_primary,">> INITIALIZE_LINK <<",,active
-landing.cta.subtext,landing,LandingPage,LandingPage,cta_subtext,"Connect with GitHub // Enter the System",,active
-landing.cta.primary,landing,LandingPage,LandingPage,cta_primary,">> INITIALIZE_LINK <<",,active
-landing.cta.secondary,landing,LandingPage,LandingPage,cta_secondary,"Connect with GitHub // Enter the System",,active
-landing.cta.login_signup,landing,LandingPage,LandingPage,cta_login_signup,">> ENTER SYSTEM <<",,active
-landing.footer.link.manifesto,landing,LandingPage,LandingPage,footer_link_manifesto,"Manifesto",,active
-landing.footer.link.docs,landing,LandingPage,LandingPage,footer_link_docs,"Docs",,active
-landing.footer.link.security,landing,LandingPage,LandingPage,footer_link_security,"Security",,active
-landing.footer.system_ready,landing,LandingPage,LandingPage,footer_system_ready,"System_Ready // 2024 VibeUsage OS",,active
 agent.nav.home,agent,AgentResourcePage,AgentResourcePage,nav_home,"VibeUsage Home",,active
 agent.item.prefix,agent,AgentResourcePage,AgentResourcePage,item_prefix,"Signal {{index}}",,active
 agent.related.title,agent,AgentResourcePage,AgentResourcePage,related_title,"Related Resources",,active
@@ -170,7 +124,6 @@ boot.ascii_art,ui,BootScreen,BootScreen,ascii,"██╗   ██╗██╗█
 identity_card.rank_label,ui,IdentityCard,IdentityCard,rank_label,"START",,active
 identity_card.streak_label,ui,IdentityCard,IdentityCard,streak_label,"ACTIVE",,active
 identity_card.streak_value,ui,IdentityCard,IdentityCard,streak_value,"{{days}} DAY",,active
-identity_card.subscriptions_label,ui,IdentityCard,IdentityCard,subscriptions_label,"SUBSCRIPTIONS",,active
 identity_card.subscription_item,ui,IdentityCard,IdentityCard,subscription_item,"{{tool}} {{plan}}",,active
 
 identity_panel.rank_label,ui,IdentityPanel,IdentityPanel,rank_label,"START",,active
@@ -179,44 +132,14 @@ identity_panel.streak_value,ui,IdentityPanel,IdentityPanel,streak_value,"{{days}
 
 
 
-dashboard.model_breakdown.usage_label,ui,NeuralAdaptiveFleet,NeuralAdaptiveFleet,usage_label,"USAGE: {{value}}",,active
 dashboard.top_models.title,ui,TopModelsPanel,TopModelsPanel,title,"Top Models",,active
-dashboard.projects.title,ui,ProjectUsagePanel,ProjectUsagePanel,title,"Project Usage",,active
-dashboard.projects.subtitle,ui,ProjectUsagePanel,ProjectUsagePanel,subtitle,"Repositories",,active
-dashboard.projects.tokens_label,ui,ProjectUsagePanel,ProjectUsagePanel,tokens_label,"TOKENS",,active
-dashboard.projects.stars_label,ui,ProjectUsagePanel,ProjectUsagePanel,stars_label,"STAR",,active
-dashboard.projects.limit_label,ui,ProjectUsagePanel,ProjectUsagePanel,limit_label,"SHOW",,active
-dashboard.projects.limit_aria,ui,ProjectUsagePanel,ProjectUsagePanel,limit_aria,"Select repository limit",,active
-dashboard.projects.limit_top_3,ui,ProjectUsagePanel,ProjectUsagePanel,limit_top_3,"TOP 3",,active
-dashboard.projects.limit_top_6,ui,ProjectUsagePanel,ProjectUsagePanel,limit_top_6,"TOP 6",,active
-dashboard.projects.limit_top_10,ui,ProjectUsagePanel,ProjectUsagePanel,limit_top_10,"TOP 10",,active
-dashboard.projects.empty,ui,ProjectUsagePanel,ProjectUsagePanel,empty,"NO_PUBLIC_REPOS",,active
-dashboard.upgrade_alert.title,ui,UpgradeAlertModal,UpgradeAlertModal,title,"Update available",,active
-dashboard.upgrade_alert.subtitle,ui,UpgradeAlertModal,UpgradeAlertModal,subtitle,"VibeUsage Tracker v{{required}} is now available.",,active
-dashboard.upgrade_alert.subtitle_generic,ui,UpgradeAlertModal,UpgradeAlertModal,subtitle_generic,"A new version of VibeUsage Tracker is available.",,active
-dashboard.upgrade_alert.prompt,ui,UpgradeAlertModal,UpgradeAlertModal,prompt,"$",,active
-dashboard.upgrade_alert.sparkle,ui,UpgradeAlertModal,UpgradeAlertModal,sparkle,"✨",,active
 dashboard.upgrade_alert.install_command,ui,UpgradeAlertModal,UpgradeAlertModal,install_command,"npx --yes vibeusage init",,active
-dashboard.upgrade_alert.copy,ui,UpgradeAlertModal,UpgradeAlertModal,copy,"[ COPY ]",,active
-dashboard.upgrade_alert.copied,ui,UpgradeAlertModal,UpgradeAlertModal,copied,"[ COPIED ]",,active
-dashboard.upgrade_alert.ignore,ui,UpgradeAlertModal,UpgradeAlertModal,ignore,"Dismiss",,active
-dashboard.cost_breakdown.title,ui,CostAnalysisModal,CostAnalysisModal,title,"Cost Breakdown",,active
-dashboard.cost_breakdown.total_label,ui,CostAnalysisModal,CostAnalysisModal,total_label,"Estimated Total Cost",,active
-dashboard.cost_breakdown.calc_prefix,ui,CostAnalysisModal,CostAnalysisModal,calc_prefix,"CALC:",,active
-dashboard.cost_breakdown.calc_dynamic,ui,CostAnalysisModal,CostAnalysisModal,calc_dynamic,"DYNAMIC",,active
-dashboard.cost_breakdown.close,ui,CostAnalysisModal,CostAnalysisModal,close_label,"[ ESC ] CLOSE",,active
-dashboard.cost_breakdown.footer,ui,CostAnalysisModal,CostAnalysisModal,footer,"Algorithm Build: v9.4.2",,active
-
-
-trend.monitor.month.jan,ui,TrendMonitor,TrendMonitor,month_label,"JAN",,active
-trend.monitor.month.feb,ui,TrendMonitor,TrendMonitor,month_label,"FEB",,active
-trend.monitor.month.mar,ui,TrendMonitor,TrendMonitor,month_label,"MAR",,active
-trend.monitor.month.apr,ui,TrendMonitor,TrendMonitor,month_label,"APR",,active
 
 
 
 
-daily.table.aria_label,dashboard,DashboardPage,DashboardPage,aria_label,"Daily totals table",,active
+
+
 
 daily.sort.date.label,dashboard,DashboardPage,DailyTable,sort_label,"Date",,active
 daily.sort.date.title,dashboard,DashboardPage,DailyTable,sort_title,"Sort by Date",,active
@@ -230,47 +153,23 @@ daily.sort.cached.label,dashboard,DashboardPage,DailyTable,sort_label,"Cached",,
 daily.sort.cached.title,dashboard,DashboardPage,DailyTable,sort_title,"Sort by Cached input",,active
 daily.sort.reasoning.label,dashboard,DashboardPage,DailyTable,sort_label,"Reasoning",,active
 daily.sort.reasoning.title,dashboard,DashboardPage,DailyTable,sort_title,"Sort by Reasoning output",,active
-details.pagination.prev,dashboard,DashboardPage,DailyTable,pagination_prev,"Prev",,active
-details.pagination.next,dashboard,DashboardPage,DailyTable,pagination_next,"Next",,active
-details.pagination.page,dashboard,DashboardPage,DailyTable,pagination_label,"Page {{page}}/{{total}}",,active
 
 
 
-leaderboard.title,dashboard,LeaderboardPage,LeaderboardPage,title,"LEADERBOARD",,active
-leaderboard.range,dashboard,LeaderboardPage,LeaderboardPage,range,"UTC_{{period}}: {{from}}..{{to}}",,active
-leaderboard.range_loading,dashboard,LeaderboardPage,LeaderboardPage,range_loading,"UTC_{{period}}: ...",,active
-leaderboard.range.total,dashboard,LeaderboardPage,LeaderboardPage,range_total,"ALL TIME",,active
-leaderboard.generated_at,dashboard,LeaderboardPage,LeaderboardPage,generated_at,"UPDATED_AT: {{ts}}",,active
 leaderboard.period.week,dashboard,LeaderboardPage,LeaderboardPage,period_week,"WEEK",,active
 leaderboard.period.month,dashboard,LeaderboardPage,LeaderboardPage,period_month,"MONTH",,active
 leaderboard.period.total,dashboard,LeaderboardPage,LeaderboardPage,period_total,"ALL",,active
-leaderboard.metric.all,dashboard,LeaderboardPage,LeaderboardPage,metric_all,"ALL",,active
-leaderboard.metric.gpt,dashboard,LeaderboardPage,LeaderboardPage,metric_gpt,"GPT",,active
-leaderboard.metric.claude,dashboard,LeaderboardPage,LeaderboardPage,metric_claude,"CLAUDE",,active
-
-leaderboard.me_label,dashboard,LeaderboardPage,LeaderboardPage,me_label,"YOU",,active
-leaderboard.anon_label,dashboard,LeaderboardPage,LeaderboardPage,anon_label,"Anonymous",,active
-leaderboard.public_profile.label,dashboard,LeaderboardPage,LeaderboardPage,public_profile_label,"PUBLIC PROFILE",,active
-leaderboard.public_profile.status.enabled,dashboard,LeaderboardPage,LeaderboardPage,public_profile_status,"PUBLIC_ON",,active
-leaderboard.public_profile.status.disabled,dashboard,LeaderboardPage,LeaderboardPage,public_profile_status,"PUBLIC_OFF",,active
-leaderboard.error.unknown,dashboard,LeaderboardPage,LeaderboardPage,error_unknown,"UNKNOWN_ERROR",,active
 
 
 
-leaderboard.loading,dashboard,LeaderboardPage,LeaderboardPage,state_loading,"LOADING...",,active
-leaderboard.empty,dashboard,LeaderboardPage,LeaderboardPage,state_empty,"NO_DATA",,active
+
 
 leaderboard.column.rank,dashboard,LeaderboardPage,LeaderboardPage,column_rank,"RANK",,active
 leaderboard.column.user,dashboard,LeaderboardPage,LeaderboardPage,column_user,"USER",,active
 leaderboard.column.total,dashboard,LeaderboardPage,LeaderboardPage,column_total,"TOTAL",,active
-leaderboard.column.gpt,dashboard,LeaderboardPage,LeaderboardPage,column_gpt,"GPT_MODEL",,active
-leaderboard.column.claude,dashboard,LeaderboardPage,LeaderboardPage,column_claude,"CLAUDE_MODEL",,active
-leaderboard.column.other,dashboard,LeaderboardPage,LeaderboardPage,column_other,"OTHER_MODELS",,active
 
 leaderboard.pagination.prev,dashboard,LeaderboardPage,LeaderboardPage,pagination_prev,"PREV",,active
 leaderboard.pagination.next,dashboard,LeaderboardPage,LeaderboardPage,pagination_next,"NEXT",,active
-leaderboard.pagination.ellipsis,dashboard,LeaderboardPage,LeaderboardPage,pagination_ellipsis,"...",,active
-leaderboard.pagination.page_unknown,dashboard,LeaderboardPage,LeaderboardPage,pagination_unknown,"PAGE {{page}}",,active
 
 dashboard.sign_out,dashboard,DashboardPage,Header,sign_out,"Sign out",,active
 
@@ -308,139 +207,9 @@ dashboard.public_view.invalid.body,dashboard,DashboardPage,AsciiBox,body,"This p
 dashboard.identity.fallback,dashboard,DashboardPage,IdentityCard,handle_fallback,"ANONYMOUS",,active
 
 
-dashboard.screenshot.title_line1,dashboard,DashboardPage,ScreenshotTitle,title_line,"Coding Agent",,active
-dashboard.screenshot.title_line2,dashboard,DashboardPage,ScreenshotTitle,title_line,"2025 Wrapped",,active
-dashboard.screenshot.twitter_button,dashboard,DashboardPage,ScreenshotShare,button_label,"Share on X",,active
-dashboard.screenshot.twitter_hint,dashboard,DashboardPage,ScreenshotShare,helper_text,"Auto-copies image to clipboard",,active
 dashboard.screenshot.twitter_text,dashboard,DashboardPage,ScreenshotShare,share_text,"This year\nI handed {{total_tokens}} tokens to Coding Agent\n\nThe one that stayed with me until the end\nwas {{agent_name}}\n\n{{model_name}} usage: {{model_percent}}%\n\nData: VibeUsage @victor_wu_eth\n\nRun in your terminal:\nnpx --yes vibeusage init\n(Paste Image Stats with CMD / CTRL + V)",,active
 
 
-keyboard.cheatsheet.title,ui,KeyboardCheatsheet,KeyboardCheatsheet,title,"keymap.help",,active
-keyboard.cheatsheet.dismiss_hint,ui,KeyboardCheatsheet,KeyboardCheatsheet,hint,"esc · close",,active
-keyboard.cheatsheet.aria_label,ui,KeyboardCheatsheet,KeyboardCheatsheet,aria_label,"Keyboard shortcuts",,active
-keyboard.cheatsheet.close_label,ui,KeyboardCheatsheet,KeyboardCheatsheet,close_button,"[ × ]",,active
-keyboard.cheatsheet.close_aria,ui,KeyboardCheatsheet,KeyboardCheatsheet,close_aria,"Close shortcuts",,active
-keyboard.cheatsheet.footer_note,ui,KeyboardCheatsheet,KeyboardCheatsheet,note,"// single-key bindings · ignored while typing in inputs",,active
-keyboard.cheatsheet.row.toggle,ui,KeyboardCheatsheet,KeyboardCheatsheet,row,"toggle this cheatsheet",,active
-keyboard.cheatsheet.row.day,ui,KeyboardCheatsheet,KeyboardCheatsheet,row,"switch to DAY",,active
-keyboard.cheatsheet.row.week,ui,KeyboardCheatsheet,KeyboardCheatsheet,row,"switch to WEEK",,active
-keyboard.cheatsheet.row.month,ui,KeyboardCheatsheet,KeyboardCheatsheet,row,"switch to MONTH",,active
-keyboard.cheatsheet.row.total,ui,KeyboardCheatsheet,KeyboardCheatsheet,row,"switch to TOTAL",,active
-keyboard.cheatsheet.row.refresh,ui,KeyboardCheatsheet,KeyboardCheatsheet,row,"refresh data",,active
-keyboard.cheatsheet.row.share,ui,KeyboardCheatsheet,KeyboardCheatsheet,row,"share screenshot to X",,active
-keyboard.cheatsheet.row.close,ui,KeyboardCheatsheet,KeyboardCheatsheet,row,"close overlays",,active
-ui2049.command_box.copy,ui,*,CommandBox,copy,"Copy",,active
-ui2049.command_box.copied,ui,*,CommandBox,copied,"Copied",,active
-ui2049.rank_row.leader,ui,*,RankRow,leader_badge,"Leader",,active
-ui2049.stamp.site,ui,*,Stamp,site,"vibeusage.cc",,active
-ui2049.top_nav.brand_vibe,ui,*,TopNav,brand_vibe,"VIBE",,active
-ui2049.top_nav.brand_usage,ui,*,TopNav,brand_usage,"USAGE",,active
-ui2049.top_nav.nav_aria,ui,*,TopNav,nav_aria,"Main",,active
-ui2049.top_nav.dashboard,ui,*,TopNav,dashboard,"Dashboard",,active
-ui2049.top_nav.github,ui,*,TopNav,github,"GitHub",,active
-ui2049.top_nav.github_stars,ui,*,TopNav,github_stars,"GitHub ★ {{stars}}",,active
-ui2049.top_nav.sign_in,ui,*,TopNav,sign_in,"Sign in",,active
-ui2049.identity_bar.since,ui,*,IdentityBar,since,"Since {{since}} · {{days}} active days",,active
-ui2049.identity_bar.public,ui,*,IdentityBar,public,"Public profile",,active
-ui2049.identity_bar.copy_link,ui,*,IdentityBar,copy_link,"Copy share link",,active
-ui2049.identity_bar.read_only,ui,*,IdentityBar,read_only,"Public profile · read only",,active
-ui2049.readout.kicker,ui,*,Readout,kicker,"Core index · {{period}}",,active
-ui2049.readout.day,ui,*,Readout,day,"Day",,active
-ui2049.readout.week,ui,*,Readout,week,"Week",,active
-ui2049.readout.month,ui,*,Readout,month,"Month",,active
-ui2049.readout.period_aria,ui,*,Readout,period_aria,"Period",,active
-ui2049.readout.cost_label,ui,*,Readout,cost_label,"Spent at list price",,active
-ui2049.readout.cost_breakdown,ui,*,Readout,cost_breakdown,"Cost breakdown",,active
-ui2049.readout.per_day,ui,*,Readout,per_day,"{{value}} tokens a day.",,active
-ui2049.readout.cached,ui,*,Readout,cached,"Cached input",,active
-ui2049.readout.sample_kicker,ui,*,Readout,sample_kicker,"Sample account · week",,active
-ui2049.readout.board,ui,*,Readout,board,"This week's board",,active
-ui2049.rank_rail.title,ui,*,RankRail,title,"Week rank",,active
-ui2049.rank_rail.delta_suffix,ui,*,RankRail,delta_suffix,"vs last week",,active
-ui2049.rank_rail.to_pass,ui,*,RankRail,to_pass,"To pass #{{rank}} · {{name}}",,active
-ui2049.rank_rail.this_week,ui,*,RankRail,this_week,"This week",,active
-ui2049.rank_rail.this_week_value,ui,*,RankRail,this_week_value,"{{value}} · {{count}} ranked",,active
-ui2049.my_rank.kicker,ui,*,MyRank,kicker,"My rank · {{period}} · all models",,active
-ui2049.my_rank.of_ranked,ui,*,MyRank,of_ranked,"of {{count}} ranked",,active
-ui2049.my_rank.tokens,ui,*,MyRank,tokens,"Tokens",,active
-ui2049.my_rank.to_pass,ui,*,MyRank,to_pass,"To pass #{{rank}}",,active
-ui2049.state_screen.install_kicker,ui,*,StateScreen,install_kicker,"No data yet",,active
-ui2049.state_screen.install_tag,ui,*,StateScreen,install_tag,"Step 1 of 2",,active
-ui2049.state_screen.install_title,ui,*,StateScreen,install_title,"Install the tracker",,active
-ui2049.state_screen.expired_kicker,ui,*,StateScreen,expired_kicker,"Session",,active
-ui2049.state_screen.expired_tag,ui,*,StateScreen,expired_tag,"Expired",,active
-ui2049.state_screen.expired_title,ui,*,StateScreen,expired_title,"Your session expired.",,active
-ui2049.state_screen.expired_body,ui,*,StateScreen,expired_body,"Your data is safe. Sign in again to keep syncing.",,active
-ui2049.state_screen.sign_in,ui,*,StateScreen,sign_in,"Sign in with GitHub",,active
-ui2049.state_screen.invalid_tag,ui,*,StateScreen,invalid_tag,"Not found",,active
-ui2049.state_screen.invalid_title,ui,*,StateScreen,invalid_title,"This profile is private or the link is wrong.",,active
-ui2049.state_screen.invalid_body,ui,*,StateScreen,invalid_body,"Ask the owner for a new share link.",,active
-ui2049.state_screen.empty_tag,ui,*,StateScreen,empty_tag,"Waiting for first sync",,active
-ui2049.state_screen.empty_body,ui,*,StateScreen,empty_body,"Run any AI CLI for a minute, then refresh. Sync runs every 30 minutes.",,active
-ui2049.state_screen.core_kicker,ui,*,StateScreen,core_kicker,"Core index",,active
-ui2049.state_screen.loading_tag,ui,*,StateScreen,loading_tag,"Reading",,active
-ui2049.state_screen.error_tag,ui,*,StateScreen,error_tag,"Error",,active
-ui2049.state_screen.error_title,ui,*,StateScreen,error_title,"Couldn't reach the usage service.",,active
-ui2049.state_screen.error_body,ui,*,StateScreen,error_body,"Your local numbers are still counting. Try again in a moment.",,active
-ui2049.state_screen.retry,ui,*,StateScreen,retry,"Retry",,active
-ui2049.leaderboard_filters.metric_aria,ui,*,LeaderboardFilters,metric_aria,"Metric",,active
-ui2049.models.kicker,ui,*,Models,kicker,"Models · {{period}}",,active
-ui2049.models.by_cli,ui,*,Models,by_cli,"By CLI",,active
-ui2049.models.by_model,ui,*,Models,by_model,"By model",,active
-ui2049.models.group_aria,ui,*,Models,group_aria,"Group by",,active
-ui2049.models.via,ui,*,Models,via,"via {{names}}",,active
-ui2049.dot_heatmap.title,ui,*,DotHeatmap,title,"Activity · 52 weeks",,active
-ui2049.dot_heatmap.legend,ui,*,DotHeatmap,legend,"Dot size = tokens that day",,active
-ui2049.dot_heatmap.hover,ui,*,DotHeatmap,hover,"{{date}} · {{value}} tokens",,active
-ui2049.dot_heatmap.img_aria,ui,*,DotHeatmap,img_aria,"Daily tokens over 52 weeks. Larger dot means more tokens.",,active
-ui2049.trend.kicker,ui,*,Trend,kicker,"Trend · {{period}}",,active
-ui2049.trend.last_7,ui,*,Trend,last_7,"Last 7 days",,active
-ui2049.trend.last_30,ui,*,Trend,last_30,"Last 30 days",,active
-ui2049.trend.avg,ui,*,Trend,avg,"Daily avg",,active
-ui2049.trend.peak,ui,*,Trend,peak,"Peak {{value}} · {{date}}",,active
-ui2049.trend.img_aria,ui,*,Trend,img_aria,"Daily tokens, peak {{value}}",,active
-ui2049.rank_list.title,ui,*,RankList,title,"Top 10 · {{period}}",,active
-ui2049.rank_list.you,ui,*,RankList,you,"{{handle}} · you",,active
-ui2049.projects.title,ui,*,Projects,title,"Projects · all time",,active
-ui2049.daily_table.title,ui,*,DailyTable,title,"Daily details",,active
-ui2049.daily_table.sort_aria,ui,*,DailyTable,sort_aria,"Sort by",,active
-ui2049.daily_table.days,ui,*,DailyTable,days,"Days {{from}}–{{to}} of {{total}}",,active
-ui2049.daily_table.hours,ui,*,DailyTable,hours,"Hours {{from}}–{{to}} of {{total}}",,active
-ui2049.daily_table.months,ui,*,DailyTable,months,"Months {{from}}–{{to}} of {{total}}",,active
-ui2049.rank_table.kicker,ui,*,RankTable,kicker,"All users · {{period}} · {{count}} ranked",,active
-ui2049.rank_table.jump,ui,*,RankTable,jump,"Jump to me · #{{rank}}",,active
-ui2049.rank_table.other,ui,*,RankTable,other,"Other",,active
-ui2049.rank_table.page,ui,*,RankTable,page,"Page {{page}} of {{total}}",,active
-ui2049.landing_hero.clis,ui,*,LandingHero,clis,"Codex,Claude Code,Gemini,OpenCode,Kimi,Hermes,OpenClaw",,active
-ui2049.landing_hero.clis_aria,ui,*,LandingHero,clis_aria,"Supported CLIs",,active
-ui2049.landing_hero.title_a,ui,*,LandingHero,title_a,"More tokens.",,active
-ui2049.landing_hero.title_b,ui,*,LandingHero,title_b,"More vibe.",,active
-ui2049.landing_hero.body,ui,*,LandingHero,body,"One readout for every AI coding CLI you run, and a board that shows where you stand. Token counts only. Your prompts and code never leave your machine.",,active
-ui2049.landing_hero.agent,ui,*,LandingHero,agent,"Or hand this guide to your agent",,active
-ui2049.features.aria,ui,*,Features,aria,"How it works",,active
-ui2049.features.install_title,ui,*,Features,install_title,"Zero manual steps",,active
-ui2049.features.install_body,ui,*,Features,install_body,"One command hooks into every CLI it finds. Numbers show up within minutes.",,active
-ui2049.features.privacy_kicker,ui,*,Features,privacy_kicker,"Privacy",,active
-ui2049.features.privacy_title,ui,*,Features,privacy_title,"Counts, not content",,active
-ui2049.features.privacy_body,ui,*,Features,privacy_body,"Only token totals in half-hour buckets are uploaded. Prompts and code stay local.",,active
-ui2049.features.compete_kicker,ui,*,Features,compete_kicker,"Compete",,active
-ui2049.features.compete_title,ui,*,Features,compete_title,"One board for every CLI",,active
-ui2049.features.compete_body,ui,*,Features,compete_body,"Weekly, monthly and all-time ranks across Codex, Claude Code, Gemini and the rest.",,active
-ui2049.landing.cta_title,ui,LandingPage,CtaBand,cta_title,"See where you rank this week.",,active
-ui2049.landing.cta_meta,ui,LandingPage,CtaBand,cta_meta,"v{{version}} · open source",,active
-ui2049.landing.sample_handle,ui,LandingPage,Readout,sample_handle,"your_handle",,active
-ui2049.top_nav.new_tab,ui,*,TopNav,new_tab,"(opens in a new tab)",,active
-ui2049.landing.sample_names,ui,LandingPage,Readout,sample_names,"nullbyte,kernel_panic,sudo_rm",,active
-ui2049.my_rank.kicker_metric,ui,*,MyRank,kicker_metric,"My rank · {{period}} · {{metric}}",,active
-ui2049.page_header.updated_now,ui,*,PageHeader,updated_now,"updated just now",,active
-ui2049.page_header.updated_min,ui,*,PageHeader,updated_min,"updated {{n}} min ago",,active
-ui2049.page_header.updated_h,ui,*,PageHeader,updated_h,"updated {{n}} h ago",,active
-ui2049.page_header.updated_d,ui,*,PageHeader,updated_d,"updated {{n}} d ago",,active
-ui2049.top_nav.github_href,ui,*,TopNav,github_href,"https://github.com/victorGPT/vibeusage",,active
-ui2049.page_footer.version,ui,*,PageFooter,version,"v{{version}}",,active
-ui2049.daily_table.scroll_aria,ui,*,DailyTable,scroll_aria,"Daily usage rows",,active
-ui2049.rank_table.scroll_aria,ui,*,RankTable,scroll_aria,"Ranking rows",,active
-ui2049.page_footer.leaderboard_time,ui,*,PageFooter,leaderboard_time,"Boards in UTC",,active
 vu1.device.model,vu1,Gallery,Device,model,"VU-1",,active
 vu1.device.name,vu1,Gallery,Device,name,"VIBEUSAGE",,active
 vu1.top.nav_aria,vu1,*,TopBar,nav_aria,"Pages",,active
@@ -526,6 +295,10 @@ vu1.state.empty_body,vu1,*,StateScreen,empty_body,"Run any AI CLI for a minute, 
 vu1.state.error_title,vu1,*,StateScreen,error_title,"Couldn't reach the usage service.",,active
 vu1.state.error_body,vu1,*,StateScreen,error_body,"Your local numbers are still counting. Try again in a moment.",,active
 vu1.state.retry,vu1,*,StateScreen,retry,"Retry",,active
+vu1.state.crash_title,vu1,*,StateScreen,crash_title,"Something on this page broke.",,active
+vu1.state.crash_body,vu1,*,StateScreen,crash_body,"Reload to try again. If it keeps happening, the line below helps a bug report.",,active
+vu1.state.reload,vu1,*,StateScreen,reload,"Reload",,active
+vu1.top.github_href,vu1,*,TopBar,github_href,"https://github.com/victorGPT/vibeusage",,active
 vu1.state.signed_out_title,vu1,*,StateScreen,signed_out_title,"Sign in to read your meter.",,active
 vu1.state.signed_out_body,vu1,*,StateScreen,signed_out_body,"Sign in with GitHub to see your usage and rank.",,active
 vu1.state.sign_in,vu1,*,StateScreen,sign_in,"Sign in with GitHub",,active
