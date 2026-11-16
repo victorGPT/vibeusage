@@ -1,0 +1,440 @@
+/* VU1 business blocks. Surfaces (screens, LCDs, minis, toast) follow the VU1 mock
+ * (.nawaban/vu1-mock.html); controls keep the SPEC-01 kit look from src/ui/hardware.
+ * Spacing uses only --spacing-s1..s8. Scoped to the skin so nothing reaches 2049 pages. */
+
+[data-skin="hardware"] {
+  --vu1-red: #ff2a12;
+  --vu1-red-hi: #ff8f6b;
+  --vu1-ink: #1d1d1c;
+  --vu1-legend: #6f6e69;
+  --vu1-screen-ink: #f2f2ee;
+  --vu1-screen-dim: rgba(242, 242, 238, 0.66);
+  --vu1-lcd-ink: #141413;
+}
+
+[data-skin="hardware"] [data-vu1-cap] {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+[data-skin="hardware"] [data-vu1="led"] {
+  width: 8px;
+  height: 8px;
+  flex: none;
+  border-radius: 50%;
+  background: #c9c8c3;
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.2);
+}
+[data-skin="hardware"] [data-vu1="led"][data-on] {
+  background: var(--vu1-red);
+  box-shadow: 0 0 6px var(--vu1-red), 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
+/* Top bar */
+[data-skin="hardware"] [data-vu1="topbar"] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-s4);
+  padding: var(--spacing-s3) var(--spacing-s5);
+  border-radius: 14px;
+  color: var(--vu1-ink);
+  background: linear-gradient(180deg, #f5f5f2, #ecece8);
+  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(0, 0, 0, 0.04), 0 2px 6px rgba(0, 0, 0, 0.05), 0 18px 40px -24px rgba(0, 0, 0, 0.25);
+}
+[data-skin="hardware"] [data-vu1="brand"] {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-s2);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+[data-skin="hardware"] [data-vu1="dim"] {
+  color: var(--vu1-legend);
+  font-weight: 400;
+}
+[data-skin="hardware"] [data-vu1="nav"] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-s1);
+  margin-left: auto;
+}
+[data-skin="hardware"] [data-vu1="nav"] a {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-s2);
+  padding: var(--spacing-s2) var(--spacing-s3);
+  border-radius: 8px;
+  color: var(--vu1-legend);
+  text-decoration: none;
+}
+[data-skin="hardware"] [data-vu1="nav"] a:is([aria-current="page"], :hover) {
+  color: var(--vu1-ink);
+}
+[data-skin="hardware"] [data-vu1="tools"] {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-s2);
+}
+[data-skin="hardware"] [data-vu1="gh"] {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-s2);
+  text-decoration: none;
+}
+[data-skin="hardware"] [data-vu1="star"] {
+  color: var(--vu1-red);
+}
+@media (max-width: 760px) {
+  [data-skin="hardware"] [data-vu1="topbar"] {
+    padding: var(--spacing-s3) var(--spacing-s4);
+  }
+  [data-skin="hardware"] [data-vu1="nav"] {
+    margin-left: 0;
+    width: 100%;
+  }
+}
+
+/* Dark screen */
+[data-skin="hardware"] [data-vu1="screen"] {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-s4);
+  min-width: 0;
+  padding: var(--spacing-s4);
+  border-radius: 12px;
+  color: var(--vu1-screen-ink);
+  text-shadow: none;
+  background: radial-gradient(130% 160% at 50% 0%, #121211 50%, #1c1c1b 80%, #121211);
+  box-shadow: 0 0 0 6px #1a1a19, 0 0 0 7px #000, inset 0 2px 10px rgba(0, 0, 0, 0.6), 0 10px 18px -6px rgba(0, 0, 0, 0.35);
+}
+[data-skin="hardware"] [data-vu1="screen-head"] {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-s4);
+  padding-bottom: var(--spacing-s2);
+  border-bottom: 1px dashed rgba(242, 242, 238, 0.25);
+}
+[data-skin="hardware"] [data-vu1="screen-tabs"] {
+  display: flex;
+  gap: var(--spacing-s4);
+}
+[data-skin="hardware"] [data-vu1="screen-tabs"] [role="tab"] {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--vu1-screen-dim);
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+}
+[data-skin="hardware"] [data-vu1="screen-tabs"] [role="tab"][aria-selected="true"] {
+  color: var(--vu1-red);
+}
+[data-skin="hardware"] [data-vu1="screen"] :focus-visible {
+  outline: 1px dashed var(--vu1-screen-dim);
+  outline-offset: var(--spacing-s1);
+}
+[data-skin="hardware"] [data-vu1="range"] {
+  margin-left: auto;
+  color: var(--vu1-screen-dim);
+}
+[data-skin="hardware"] [data-vu1="reads"] {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--spacing-s3);
+}
+[data-skin="hardware"] [data-vu1="read"] {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-s1);
+}
+[data-skin="hardware"] [data-vu1="read"] dt {
+  color: var(--vu1-screen-dim);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+}
+[data-skin="hardware"] [data-vu1="read"] dd {
+  margin: 0;
+}
+[data-skin="hardware"] [data-vu1="read-value"] {
+  font-size: clamp(20px, 3.2vw, 32px);
+  font-weight: 300;
+  line-height: 1.1;
+  letter-spacing: 0.02em;
+}
+[data-skin="hardware"] [data-vu1="read-delta"] {
+  min-height: 1.2em;
+  color: var(--vu1-screen-dim);
+}
+[data-skin="hardware"] [data-vu1="read-delta"][data-up] {
+  color: var(--vu1-red);
+}
+[data-skin="hardware"] [data-vu1="chart"] {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-s2);
+}
+[data-skin="hardware"] [data-vu1="chart"] [data-kit="bar-graph"] {
+  height: 120px;
+}
+[data-skin="hardware"] [data-vu1="axis"] {
+  display: flex;
+  justify-content: space-between;
+  color: var(--vu1-screen-dim);
+  font-size: 9px;
+}
+
+/* Activity: 52 weeks of LEDs, one column per week. Cell size is the LED pitch, no gap. */
+[data-skin="hardware"] [data-vu1="heat-scroll"] {
+  overflow-x: auto;
+}
+[data-skin="hardware"] [data-vu1="heat-grid"] {
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(7, 12px);
+  grid-auto-columns: minmax(0, 1fr);
+  width: 100%;
+  min-width: 420px;
+}
+[data-skin="hardware"] [data-vu1="heat"] i,
+[data-skin="hardware"] [data-vu1="heat-legend"] i {
+  display: inline-grid;
+  place-items: center;
+}
+[data-skin="hardware"] [data-vu1="heat-legend"] i {
+  width: 12px;
+  height: 12px;
+}
+[data-skin="hardware"] [data-vu1="heat"] i[data-level]::after {
+  content: "";
+  width: var(--dot);
+  height: var(--dot);
+  border-radius: 50%;
+  background: var(--lit);
+}
+[data-skin="hardware"] [data-vu1="heat"] i[data-level="0"] { --dot: 3px; --lit: rgba(242, 242, 238, 0.14); }
+[data-skin="hardware"] [data-vu1="heat"] i[data-level="1"] { --dot: 4px; --lit: #7a1a0e; }
+[data-skin="hardware"] [data-vu1="heat"] i[data-level="2"] { --dot: 5px; --lit: #b8240f; }
+[data-skin="hardware"] [data-vu1="heat"] i[data-level="3"] { --dot: 7px; --lit: var(--vu1-red); }
+[data-skin="hardware"] [data-vu1="heat"] i[data-level="4"] { --dot: 8px; --lit: var(--vu1-red-hi); }
+[data-skin="hardware"] [data-vu1="heat-grid"] i[data-level="4"]::after {
+  box-shadow: 0 0 4px var(--vu1-red);
+}
+[data-skin="hardware"] [data-vu1="heat-grid"] i[data-cur]::after {
+  outline: 1px solid var(--vu1-screen-ink);
+  outline-offset: 1px;
+}
+[data-skin="hardware"] [data-vu1="heat-read"] {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--spacing-s3);
+  color: var(--vu1-screen-dim);
+  font-size: 9px;
+}
+[data-skin="hardware"] [data-vu1="heat-legend"] {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-s1);
+}
+
+/* Gray LCD: list screens and the mini readouts */
+[data-skin="hardware"] [data-vu1="lcd"] {
+  min-width: 0;
+  overflow-x: auto;
+  padding: var(--spacing-s3) var(--spacing-s4);
+  border-radius: 12px;
+  color: var(--vu1-lcd-ink);
+  background: linear-gradient(180deg, #b6b7b1, #c8c9c3 35%, #c2c3bd);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.25), 0 0 0 6px #e6e6e2, 0 0 0 7px rgba(0, 0, 0, 0.08);
+  text-shadow: 0.25px 1px 0 rgba(20, 20, 19, 0.14);
+}
+[data-skin="hardware"] [data-vu1="list"] {
+  width: 100%;
+  border-collapse: collapse;
+}
+[data-skin="hardware"] [data-vu1="list"] th {
+  padding: var(--spacing-s1) var(--spacing-s3) var(--spacing-s2);
+  border-bottom: 1px dashed rgba(20, 20, 19, 0.35);
+  color: rgba(20, 20, 19, 0.6);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-align: left;
+  white-space: nowrap;
+}
+[data-skin="hardware"] [data-vu1="list"] td {
+  padding: var(--spacing-s2) var(--spacing-s3);
+  white-space: nowrap;
+}
+[data-skin="hardware"] [data-vu1="list"] [data-num] {
+  text-align: right;
+}
+[data-skin="hardware"] [data-vu1="list"] tr[data-me] td {
+  color: var(--vu1-red);
+  font-weight: 600;
+}
+/* The mock's dashes either side of my row; decoration, not copy. */
+[data-skin="hardware"] [data-vu1="list"] tr[data-me] td:first-child {
+  position: relative;
+}
+[data-skin="hardware"] [data-vu1="list"] tr[data-me] td:first-child::before {
+  content: "—";
+  position: absolute;
+  left: calc(-1 * var(--spacing-s2));
+}
+[data-skin="hardware"] [data-vu1="list"] tr[data-me] td:last-child::after {
+  content: " —";
+}
+[data-skin="hardware"] [data-vu1="meter"] {
+  position: relative;
+  display: inline-block;
+  width: 72px;
+  height: 6px;
+  margin-right: var(--spacing-s2);
+  vertical-align: middle;
+  background: repeating-linear-gradient(90deg, rgba(20, 20, 19, 0.18) 0 3px, transparent 3px 5px);
+}
+[data-skin="hardware"] [data-vu1="meter"]::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: calc(var(--share) * 100%);
+  background: repeating-linear-gradient(90deg, var(--vu1-lcd-ink) 0 3px, transparent 3px 5px);
+}
+[data-skin="hardware"] tr[data-me] [data-vu1="meter"]::after {
+  background: repeating-linear-gradient(90deg, var(--vu1-red) 0 3px, transparent 3px 5px);
+}
+[data-skin="hardware"] [data-vu1="mini"] {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-s1);
+  padding: var(--spacing-s2) var(--spacing-s3);
+  border-radius: 8px;
+  color: var(--vu1-lcd-ink);
+  background: linear-gradient(180deg, #b6b7b1, #c8c9c3 35%, #c2c3bd);
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.22);
+}
+[data-skin="hardware"] [data-vu1="mini"] dt {
+  color: rgba(20, 20, 19, 0.6);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+}
+[data-skin="hardware"] [data-vu1="mini"] dd {
+  margin: 0;
+  font-size: 20px;
+  letter-spacing: 0.02em;
+}
+
+/* Small screens: my rank, the install command */
+[data-skin="hardware"] [data-vu1="screen"][data-variant="row"] {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-s4);
+  padding: var(--spacing-s2) var(--spacing-s4);
+}
+[data-skin="hardware"] [data-vu1="screen"] [data-vu1="dim"] {
+  color: var(--vu1-screen-dim);
+}
+[data-skin="hardware"] [data-vu1="red"],
+[data-skin="hardware"] [data-vu1="prompt"] {
+  color: var(--vu1-red);
+}
+[data-skin="hardware"] [data-vu1="screen"][data-variant="cmd"] {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--spacing-s3);
+  padding: var(--spacing-s3) var(--spacing-s4);
+}
+[data-skin="hardware"] [data-vu1="screen"][data-variant="cmd"] code {
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  white-space: nowrap;
+  font: inherit;
+  font-size: 12px;
+  text-transform: none;
+}
+
+/* Lying flat on a phone, the period lever gets wider detents so the four labels clear. */
+[data-skin="hardware"] [data-vu1="period"] [data-kit="slide-switch"][data-orientation="horizontal"] {
+  --col: calc(var(--spacing-s8) + var(--spacing-s3));
+  width: calc(var(--n) * var(--col));
+}
+
+/* Round keys with a printed legend under them */
+[data-skin="hardware"] [data-vu1="keycol"] {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-s2);
+}
+[data-skin="hardware"] [data-vu1="legend"] {
+  color: var(--vu1-legend);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+/* Pager: a centered row of page keys */
+[data-skin="hardware"] [data-vu1="pager"] [data-kit="pagination-list"] {
+  justify-content: center;
+}
+
+/* State screen */
+[data-skin="hardware"] [data-vu1="state-title"] {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 300;
+  letter-spacing: 0.02em;
+}
+[data-skin="hardware"] [data-vu1="state-body"] {
+  margin: 0;
+  max-width: 46ch;
+  color: var(--vu1-screen-dim);
+  line-height: 1.7;
+  text-transform: none;
+}
+[data-skin="hardware"] [data-vu1="skeleton"] {
+  display: block;
+  height: var(--spacing-s3);
+  border-radius: 4px;
+  background: rgba(242, 242, 238, 0.12);
+}
+
+/* Upgrade toast, bottom right */
+[data-skin="hardware"] [data-vu1="toast"] {
+  position: fixed;
+  right: max(var(--spacing-s5), calc(env(safe-area-inset-right, 0px) + var(--spacing-s5)));
+  bottom: calc(var(--spacing-s5) + env(safe-area-inset-bottom, 0px));
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-s3);
+  max-width: calc(100% - var(--spacing-s7));
+  padding: var(--spacing-s3) var(--spacing-s4);
+  border-radius: 12px;
+  color: var(--vu1-screen-ink);
+  background: #1c1c1b;
+  box-shadow: 0 12px 30px -8px rgba(0, 0, 0, 0.45);
+}
+
+@media (max-width: 760px) {
+  [data-skin="hardware"] [data-vu1="screen"] {
+    gap: var(--spacing-s3);
+    padding: var(--spacing-s3);
+  }
+  [data-skin="hardware"] [data-vu1="chart"] [data-kit="bar-graph"] {
+    height: 88px;
+  }
+  [data-skin="hardware"] [data-vu1="read-value"] {
+    font-size: 20px;
+  }
+}

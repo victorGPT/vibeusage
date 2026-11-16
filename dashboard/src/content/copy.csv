@@ -444,3 +444,89 @@ ui2049.rank_table.scroll_aria,ui,*,RankTable,scroll_aria,"Ranking rows",,active
 ui2049.page_footer.leaderboard_time,ui,*,PageFooter,leaderboard_time,"Boards in UTC",,active
 vu1.device.model,vu1,Gallery,Device,model,"VU-1",,active
 vu1.device.name,vu1,Gallery,Device,name,"VIBEUSAGE",,active
+vu1.top.nav_aria,vu1,*,TopBar,nav_aria,"Pages",,active
+vu1.top.home,vu1,*,TopBar,home,"Home",,active
+vu1.top.dashboard,vu1,*,TopBar,dashboard,"Dashboard",,active
+vu1.top.leaderboard,vu1,*,TopBar,leaderboard,"Leaderboard",,active
+vu1.top.github,vu1,*,TopBar,github,"GitHub",,active
+vu1.top.star,vu1,*,TopBar,star,"★",,active
+vu1.top.new_tab,vu1,*,TopBar,new_tab,"(opens in a new tab)",,active
+vu1.top.sign_in,vu1,*,TopBar,sign_in,"Sign in",,active
+vu1.top.sign_out,vu1,*,TopBar,sign_out,"Sign out",,active
+vu1.top.sound,vu1,*,TopBar,sound,"Key sounds",,active
+vu1.period.label,vu1,DashboardPage,PeriodSwitch,label,"Period",,active
+vu1.period.day,vu1,*,PeriodSwitch,day,"Day",,active
+vu1.period.week,vu1,*,PeriodSwitch,week,"Week",,active
+vu1.period.month,vu1,*,PeriodSwitch,month,"Month",,active
+vu1.period.total,vu1,*,PeriodSwitch,total,"Total",,active
+vu1.source.label,vu1,DashboardPage,SourceSegment,label,"Source",,active
+vu1.source.all,vu1,*,SourceSegment,all,"All",,active
+vu1.source.claude,vu1,*,SourceSegment,claude,"Claude",,active
+vu1.source.codex,vu1,*,SourceSegment,codex,"Codex",,active
+vu1.source.gemini,vu1,*,SourceSegment,gemini,"Gemini",,active
+vu1.source.opencode,vu1,*,SourceSegment,opencode,"OpenCode",,active
+vu1.source.kimi,vu1,*,SourceSegment,kimi,"Kimi",,active
+vu1.source.hermes,vu1,*,SourceSegment,hermes,"Hermes",,active
+vu1.source.openclaw,vu1,*,SourceSegment,openclaw,"OpenClaw",,active
+vu1.source.other,vu1,*,SourceSegment,other,"Other",,active
+vu1.usage.tabs_aria,vu1,DashboardPage,UsageScreen,tabs_aria,"Screen",,active
+vu1.usage.tab_usage,vu1,DashboardPage,UsageScreen,tab_usage,"Usage",,active
+vu1.usage.tab_activity,vu1,DashboardPage,UsageScreen,tab_activity,"Activity",,active
+vu1.usage.range_activity,vu1,DashboardPage,UsageScreen,range_activity,"Last 52 weeks",,active
+vu1.usage.tokens,vu1,DashboardPage,UsageScreen,tokens,"Tokens",,active
+vu1.usage.cost,vu1,DashboardPage,UsageScreen,cost,"Cost",,active
+vu1.usage.rank,vu1,DashboardPage,UsageScreen,rank,"Rank",,active
+vu1.usage.delta_vs_prev,vu1,DashboardPage,UsageScreen,delta_vs_prev,"{{value}} vs prev",,active
+vu1.usage.rank_up,vu1,DashboardPage,UsageScreen,rank_up,"▲ {{n}}",,active
+vu1.usage.rank_down,vu1,DashboardPage,UsageScreen,rank_down,"▼ {{n}}",,active
+vu1.usage.bars_aria,vu1,DashboardPage,UsageScreen,bars_aria,"Tokens over the period, peak {{value}}",,active
+vu1.heat.aria,vu1,DashboardPage,UsageScreen,heat_aria,"Daily activity, last 52 weeks. Arrow keys move between days.",,active
+vu1.heat.hint,vu1,DashboardPage,UsageScreen,heat_hint,"Use arrow keys or hover a day",,active
+vu1.heat.day,vu1,DashboardPage,UsageScreen,heat_day,"{{date}} · {{value}} tokens",,active
+vu1.heat.day_none,vu1,DashboardPage,UsageScreen,heat_day_none,"{{date}} · no usage",,active
+vu1.heat.less,vu1,DashboardPage,UsageScreen,heat_less,"Less",,active
+vu1.heat.more,vu1,DashboardPage,UsageScreen,heat_more,"More",,active
+vu1.stats.last_7,vu1,DashboardPage,StatMinis,last_7,"Last 7 days",,active
+vu1.stats.last_30,vu1,DashboardPage,StatMinis,last_30,"Last 30 days",,active
+vu1.stats.avg,vu1,DashboardPage,StatMinis,avg,"Avg / active day",,active
+vu1.stats.peak,vu1,DashboardPage,StatMinis,peak,"Peak · {{date}}",,active
+vu1.models.aria,vu1,DashboardPage,ModelList,aria,"Top models",,active
+vu1.models.model,vu1,DashboardPage,ModelList,model,"Model",,active
+vu1.models.cli,vu1,DashboardPage,ModelList,cli,"CLI",,active
+vu1.models.tokens,vu1,DashboardPage,ModelList,tokens,"Tokens",,active
+vu1.models.cost,vu1,DashboardPage,ModelList,cost,"Cost",,active
+vu1.models.share,vu1,DashboardPage,ModelList,share,"Share",,active
+vu1.rank.aria,vu1,LeaderboardPage,RankScreen,aria,"Rankings",,active
+vu1.rank.rank,vu1,LeaderboardPage,RankScreen,rank,"#",,active
+vu1.rank.handle,vu1,LeaderboardPage,RankScreen,handle,"Handle",,active
+vu1.rank.top_cli,vu1,LeaderboardPage,RankScreen,top_cli,"Top CLI",,active
+vu1.rank.tokens,vu1,LeaderboardPage,RankScreen,tokens,"Tokens",,active
+vu1.rank.load,vu1,LeaderboardPage,RankScreen,load,"Load",,active
+vu1.rank.cli_gpt,vu1,LeaderboardPage,RankScreen,cli_gpt,"GPT",,active
+vu1.rank.cli_claude,vu1,LeaderboardPage,RankScreen,cli_claude,"Claude",,active
+vu1.rank.cli_other,vu1,LeaderboardPage,RankScreen,cli_other,"Other",,active
+vu1.myrank.aria,vu1,LeaderboardPage,MyRankLcd,aria,"My rank",,active
+vu1.myrank.you,vu1,LeaderboardPage,MyRankLcd,you,"You",,active
+vu1.myrank.gap,vu1,LeaderboardPage,MyRankLcd,gap,"Gap to #{{rank}}",,active
+vu1.pager.aria,vu1,LeaderboardPage,Pager,aria,"Pages",,active
+vu1.pager.prev,vu1,LeaderboardPage,Pager,prev,"Previous page",,active
+vu1.pager.next,vu1,LeaderboardPage,Pager,next,"Next page",,active
+vu1.install.prompt,vu1,LandingPage,InstallCommand,prompt,"$",,active
+vu1.install.copy,vu1,LandingPage,InstallCommand,copy,"Copy",,active
+vu1.install.copied,vu1,LandingPage,InstallCommand,copied,"Copied",,active
+vu1.keys.share,vu1,DashboardPage,ShareKey,share,"Share",,active
+vu1.keys.share_aria,vu1,DashboardPage,ShareKey,share_aria,"Share screenshot",,active
+vu1.keys.install,vu1,DashboardPage,InstallKey,install,"Install",,active
+vu1.keys.install_aria,vu1,DashboardPage,InstallKey,install_aria,"Copy install command",,active
+vu1.toast.available,vu1,*,UpgradeToast,available,"CLI {{version}} available",,active
+vu1.toast.available_generic,vu1,*,UpgradeToast,available_generic,"A new CLI version is available",,active
+vu1.toast.update,vu1,*,UpgradeToast,update,"Update",,active
+vu1.state.loading,vu1,*,StateScreen,loading,"Reading",,active
+vu1.state.empty_title,vu1,*,StateScreen,empty_title,"Waiting for first sync",,active
+vu1.state.empty_body,vu1,*,StateScreen,empty_body,"Run any AI CLI for a minute, then refresh. Sync runs every 30 minutes.",,active
+vu1.state.error_title,vu1,*,StateScreen,error_title,"Couldn't reach the usage service.",,active
+vu1.state.error_body,vu1,*,StateScreen,error_body,"Your local numbers are still counting. Try again in a moment.",,active
+vu1.state.retry,vu1,*,StateScreen,retry,"Retry",,active
+vu1.state.signed_out_title,vu1,*,StateScreen,signed_out_title,"Sign in to read your meter.",,active
+vu1.state.signed_out_body,vu1,*,StateScreen,signed_out_body,"Your data is safe. Sign in again to keep syncing.",,active
+vu1.state.sign_in,vu1,*,StateScreen,sign_in,"Sign in with GitHub",,active

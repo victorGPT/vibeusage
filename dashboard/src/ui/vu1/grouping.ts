@@ -1,9 +1,9 @@
 import { resolveModelDisplayName } from "#src/lib/model-breakdown.ts";
 
-import { tokens } from "./format";
+import { num, tokens } from "./format";
 import type { ModelBreakdown } from "./types";
 
-export type ShareGroup = { key: string; label: string; tokens: number; detail: string[] };
+export type ShareGroup = { key: string; label: string; tokens: number; cost: number; detail: string[] };
 
 const byTokens = (a: { tokens: number }, b: { tokens: number }) => b.tokens - a.tokens;
 
@@ -12,9 +12,9 @@ function sources(breakdown: ModelBreakdown, names: Record<string, string>) {
     const key = s.source ?? "";
     const models = (s.models ?? []).map((m) => {
       const name = String(resolveModelDisplayName(m, ""));
-      return { id: String(m.model_id ?? m.model ?? name), name, tokens: tokens(m.totals) };
+      return { id: String(m.model_id ?? m.model ?? name), name, tokens: tokens(m.totals), cost: num(m.totals?.total_cost_usd) };
     });
-    return { key, label: names[key] ?? key, tokens: tokens(s.totals), models };
+    return { key, label: names[key] ?? key, tokens: tokens(s.totals), cost: num(s.totals?.total_cost_usd), models };
   });
 }
 
@@ -25,6 +25,7 @@ export function groupByCli(breakdown: ModelBreakdown, names: Record<string, stri
       key: s.key,
       label: s.label,
       tokens: s.tokens,
+      cost: s.cost,
       detail: [...s.models]
         .sort(byTokens)
         .map((m) => `${m.name} ${s.tokens ? Math.round((m.tokens / s.tokens) * 100) : 0}%`),
@@ -38,8 +39,9 @@ export function groupByModel(breakdown: ModelBreakdown, names: Record<string, st
   const groups = new Map<string, ShareGroup>();
   for (const s of sources(breakdown, names)) {
     for (const m of s.models) {
-      const g = groups.get(m.id) ?? { key: m.id, label: m.name, tokens: 0, detail: [] };
+      const g = groups.get(m.id) ?? { key: m.id, label: m.name, tokens: 0, cost: 0, detail: [] };
       g.tokens += m.tokens;
+      g.cost += m.cost;
       if (!g.detail.includes(s.label)) g.detail.push(s.label);
       groups.set(m.id, g);
     }

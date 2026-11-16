@@ -117,9 +117,9 @@ const NAMES = { codex: "Codex", claude: "Claude Code" };
 describe("groupByCli", () => {
   it("lists one row per source, largest first, with its models by share", () => {
     expect(groupByCli(BREAKDOWN, NAMES)).toEqual([
-      { key: "codex", label: "Codex", tokens: 600, detail: ["gpt-5.2-codex 80%", "gpt-5.2 20%"] },
-      { key: "claude", label: "Claude Code", tokens: 200, detail: ["claude-opus-4.5 75%", "gpt-5.2 25%"] },
-      { key: "every-code", label: "every-code", tokens: 100, detail: [] },
+      { key: "codex", label: "Codex", tokens: 600, cost: 0, detail: ["gpt-5.2-codex 80%", "gpt-5.2 20%"] },
+      { key: "claude", label: "Claude Code", tokens: 200, cost: 0, detail: ["claude-opus-4.5 75%", "gpt-5.2 25%"] },
+      { key: "every-code", label: "every-code", tokens: 100, cost: 0, detail: [] },
     ]);
   });
 });
@@ -127,23 +127,23 @@ describe("groupByCli", () => {
 describe("groupByModel", () => {
   it("sums each model across sources and names the CLIs it came through", () => {
     expect(groupByModel(BREAKDOWN, NAMES)).toEqual([
-      { key: "openai/gpt-5.2-codex", label: "gpt-5.2-codex", tokens: 480, detail: ["Codex"] },
-      { key: "gpt-5.2", label: "gpt-5.2", tokens: 170, detail: ["Claude Code", "Codex"] },
-      { key: "claude-opus-4.5", label: "claude-opus-4.5", tokens: 150, detail: ["Claude Code"] },
+      { key: "openai/gpt-5.2-codex", label: "gpt-5.2-codex", tokens: 480, cost: 0, detail: ["Codex"] },
+      { key: "gpt-5.2", label: "gpt-5.2", tokens: 170, cost: 0, detail: ["Claude Code", "Codex"] },
+      { key: "claude-opus-4.5", label: "claude-opus-4.5", tokens: 150, cost: 0, detail: ["Claude Code"] },
     ]);
   });
 });
 
 describe("groupByModel identity", () => {
-  it("merges one model_id that sources name differently", () => {
+  it("merges one model_id that sources name differently, summing its cost", () => {
     const breakdown = {
       sources: [
-        { source: "codex", totals: { total_tokens: 70 }, models: [{ model_id: "gpt-4o", display_model: "GPT-4o", totals: { total_tokens: 70 } }] },
-        { source: "claude", totals: { total_tokens: 50 }, models: [{ model_id: "gpt-4o", display_model: "GPT-4o Omni", totals: { total_tokens: 50 } }] },
+        { source: "codex", totals: { total_tokens: 70 }, models: [{ model_id: "gpt-4o", display_model: "GPT-4o", totals: { total_tokens: 70, total_cost_usd: "1.25" } }] },
+        { source: "claude", totals: { total_tokens: 50 }, models: [{ model_id: "gpt-4o", display_model: "GPT-4o Omni", totals: { total_tokens: 50, total_cost_usd: 0.5 } }] },
       ],
     };
     expect(groupByModel(breakdown, NAMES)).toEqual([
-      { key: "gpt-4o", label: "GPT-4o", tokens: 120, detail: ["Codex", "Claude Code"] },
+      { key: "gpt-4o", label: "GPT-4o", tokens: 120, cost: 1.75, detail: ["Codex", "Claude Code"] },
     ]);
   });
 });
