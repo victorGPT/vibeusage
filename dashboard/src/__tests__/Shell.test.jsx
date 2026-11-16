@@ -30,7 +30,7 @@ describe("Shell", () => {
   });
 
   it("shows a toast a page raises", async () => {
-    render(<Shell><p>page</p></Shell>);
+    render(<Shell />);
     await act(async () => {
       notify("Copied");
     });
