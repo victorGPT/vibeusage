@@ -7,7 +7,7 @@ import React, {
   useState,
   useSyncExternalStore,
 } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { ErrorBoundary } from "./components/ErrorBoundary.jsx";
 import { getSafeSessionStorage, shouldRedirectFromAuthCallback } from "./lib/auth-callback";
 import { resolveAuthGate } from "./lib/auth-gate";
@@ -66,12 +66,6 @@ const DashboardPage = React.lazy(() =>
 const LeaderboardPage = React.lazy(() =>
   import("./pages/LeaderboardPage.jsx").then((mod) => ({
     default: mod.LeaderboardPage,
-  })),
-);
-
-const LeaderboardProfilePage = React.lazy(() =>
-  import("./pages/LeaderboardProfilePage.jsx").then((mod) => ({
-    default: mod.LeaderboardProfilePage,
   })),
 );
 
@@ -420,15 +414,13 @@ export default function App() {
     signedIn,
     authPending,
   });
-  const leaderboardProfileMatch = normalizedPath.match(/^\/leaderboard\/u\/([^/]+)$/i);
-  const leaderboardProfileUserId = leaderboardProfileMatch ? leaderboardProfileMatch[1] : null;
-  const PageComponent = leaderboardProfileUserId
-    ? LeaderboardProfilePage
-    : normalizedPath === "/leaderboard"
-      ? LeaderboardPage
-      : DashboardPage;
+  // The public profile pages were removed; old links land on the board.
+  const removedProfile = /^\/leaderboard\/u\/[^/]+$/i.test(normalizedPath);
+  const PageComponent = normalizedPath === "/leaderboard" ? LeaderboardPage : DashboardPage;
   let content = null;
-  if (agentResourceMode) {
+  if (removedProfile) {
+    content = <Navigate to={{ pathname: "/leaderboard", search: location.search }} replace />;
+  } else if (agentResourceMode) {
     content = (
       <Suspense fallback={loadingShell}>
         <AgentResourcePage route={agentResourceRoute} />
@@ -441,7 +433,7 @@ export default function App() {
   } else {
     content = (
       <Suspense fallback={loadingShell}>
-        {!publicMode && !screenshotMode && PageComponent !== DashboardPage ? (
+        {!publicMode && !screenshotMode && PageComponent !== DashboardPage && PageComponent !== LeaderboardPage ? (
           <UpgradeBanner requiredVersion={latestVersion} />
         ) : null}
         <PageComponent
@@ -453,7 +445,6 @@ export default function App() {
           signOut={signOut}
           publicMode={publicMode}
           publicToken={publicToken}
-          userId={leaderboardProfileUserId}
           signInUrl={signInUrl}
           signUpUrl={signUpUrl}
           latestVersion={latestVersion}

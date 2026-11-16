@@ -255,7 +255,6 @@ leaderboard.public_profile.status.enabled,dashboard,LeaderboardPage,LeaderboardP
 leaderboard.public_profile.status.disabled,dashboard,LeaderboardPage,LeaderboardPage,public_profile_status,"PUBLIC_OFF",,active
 leaderboard.error.unknown,dashboard,LeaderboardPage,LeaderboardPage,error_unknown,"UNKNOWN_ERROR",,active
 
-leaderboard.profile.card.subtitle,dashboard,LeaderboardProfilePage,AsciiBox,card_subtitle,"{{period}}",,active
 
 
 leaderboard.loading,dashboard,LeaderboardPage,LeaderboardPage,state_loading,"LOADING...",,active
@@ -567,3 +566,5 @@ vu1.landing.spec2_body,vu1,LandingPage,Specs,spec2_body,"Input, cached, output a
 vu1.landing.spec3_title,vu1,LandingPage,Specs,spec3_title,"Ranks you",,active
 vu1.landing.spec3_body,vu1,LandingPage,Specs,spec3_body,"Weekly, monthly and all-time boards. Press share and post the panel as it is.",,active
 vu1.landing.foot,vu1,LandingPage,Footer,foot,"VibeUsage · built on SPEC-01/HARDWARE by @shuding",,active
+vu1.board.label,vu1,LeaderboardPage,Segment,label,"Board",,active
+vu1.board.users,vu1,LeaderboardPage,DevicePlate,users,"{{count}} users",,active
