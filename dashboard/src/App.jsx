@@ -44,7 +44,6 @@ import { isScreenshotModeEnabled } from "./lib/screenshot-mode";
 import { probeBackend } from "./lib/vibeusage-api";
 import { resolveAgentResourceRoute } from "./pages/agent-resource-routes.js";
 import { LandingPage } from "./pages/LandingPage.jsx";
-import { Hardware } from "./ui/hardware/hardware";
 import { StateScreen } from "./ui/vu1/StateScreen";
 import { UpgradeBanner } from "./ui/2049/blocks/UpgradeBanner";
 
@@ -390,13 +389,13 @@ export default function App() {
   }, [insforgeLoaded, insforgeSession, navigate, signInUrl]);
 
   const loadingShell = (
-    <Hardware className="min-h-screen px-s4 pt-s4 pb-s8">
+    <div className="px-s4 pt-s4 pb-s8">
       <main className="grid-page mx-auto max-w-shell">
         <div className="col-span-12 lg:col-start-2 lg:col-end-12">
           <StateScreen variant="loading" />
         </div>
       </main>
-    </Hardware>
+    </div>
   );
   const normalizedPath = pathname.replace(/\/+$/, "") || "/";
   const agentResourceRoute = resolveAgentResourceRoute(normalizedPath);

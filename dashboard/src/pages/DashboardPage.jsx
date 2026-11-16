@@ -34,8 +34,7 @@ import {
   requestInstallLinkCode,
 } from "../lib/vibeusage-api";
 import { Device } from "../ui/hardware/device";
-import { Hardware } from "../ui/hardware/hardware";
-import { Toasts, notify } from "../ui/hardware/toaster";
+import { notify } from "../ui/hardware/toaster";
 import { DASHBOARD_SOURCES, sourceSlice, subscriptionLabels } from "../ui/vu1/derive";
 import { IdentityStrip } from "../ui/vu1/IdentityStrip";
 import { InstallKey, ShareKey } from "../ui/vu1/Keys";
@@ -50,7 +49,6 @@ import { UpgradeToast } from "../ui/vu1/UpgradeToast";
 import { UsageScreen } from "../ui/vu1/UsageScreen";
 
 // SPEC-01's default key color (the orange-red the kit ships with).
-const KEY_COLOR = { l: 0.64, c: 0.31, h: 48 };
 const GITHUB_REPO = "victorGPT/vibeusage";
 const HREFS = { home: "/", dashboard: "/", leaderboard: "/leaderboard" };
 const LEADERBOARD_PERIODS = new Set(["week", "month", "total"]);
@@ -944,7 +942,7 @@ export function DashboardPage({
   }, []);
 
   return (
-    <Hardware keyColor={KEY_COLOR} className="min-h-screen px-s4 pt-s4 pb-s8">
+    <div className="px-s4 pt-s4 pb-s8">
       <main className="grid-page mx-auto max-w-shell gap-y-s6 min-[761px]:gap-y-s8">
         <div className="col-span-12">
           <TopBar
@@ -1018,7 +1016,6 @@ export function DashboardPage({
       {publicMode || screenshotMode ? null : (
         <UpgradeToast requiredVersion={latestVersion} onUpdate={copyUpgradeCommand} />
       )}
-      <Toasts />
-    </Hardware>
+    </div>
   );
 }

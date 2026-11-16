@@ -1,6 +1,8 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+// The hardware skin goes first so the VU-1 blocks' styles refine it.
+import { Shell } from "./Shell.jsx";
 import App from "./App.jsx";
 import { SignInRedirect } from "./pages/SignInRedirect.jsx";
 import { SignUpRedirect } from "./pages/SignUpRedirect.jsx";
@@ -33,6 +35,8 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <Shell>
+      <RouterProvider router={router} />
+    </Shell>
   </React.StrictMode>,
 );
