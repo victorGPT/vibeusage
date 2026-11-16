@@ -80,10 +80,10 @@ The kit is kept as shipped except for these edits, each marked `vibeusage patch`
 
 ## 7. Guardrail
 
-- `scripts/check-design-ssot.mjs` runs as `npm run guardrail:design` and before `npm test` in `dashboard/`. Under `src/`, except the kit in `src/ui/hardware/`, it fails on:
+- `scripts/check-design-ssot.mjs` runs as `npm run guardrail:design` and before `npm test` in `dashboard/`, and from the repo root as `npm run validate:design`, the first step of `npm run ci:local` and of the CI workflow. Under `src/`, except the kit in `src/ui/hardware/`, it fails on:
   - a padding, margin, gap or space utility off the scale (`gap-5`, `p-[13px]`, `space-y-2`),
-  - an inline `style` padding, margin or gap that is not 0 or a scale token,
-  - a CSS padding, margin or gap value that is not 0, `auto` or a scale token (the gutters count, since they alias s5 and s4),
+  - an inline `style` padding, margin or gap that is not 0 or a scale token, read across lines from `style={{` to the first `}}` (a nested `}}` inside the object would end the read early),
+  - a CSS padding, margin or gap value that is not 0, `auto` or a scale token (the gutters count, since they alias s5 and s4; `0.5` is not 0),
   - a literal color or a `text-[Npx]` size in a className.
 - `scripts/ops/validate-ui-hardcode.cjs` runs as `npm run validate:ui-hardcode` from the repo root. It counts hex and rgb literals and raw JSX text per file under `dashboard/src` against `scripts/ops/ui-hardcode-baseline.json`.
 - All user-facing text comes from `src/content/copy.csv` through `copy()`. Run `npm run validate:copy` after changing it.

@@ -41,6 +41,30 @@ test("design guard blocks off-scale spacing in classes, inline styles and CSS", 
   }
 });
 
+test("design guard blocks fractions of zero and multi-line inline styles", () => {
+  const out = runGuard({
+    "src/pages/Frac.jsx": [
+      "export const A = () => <div style={{ gap: 0.5 }} />;",
+      'export const B = () => <div className="p-0.5" />;',
+      "export const C = () => (",
+      "  <div",
+      "    style={{",
+      '      color: "red",',
+      "      marginTop: 6,",
+      "    }}",
+      "  />",
+      ");",
+      "export const D = () => <div style={{ padding: 0 }} />;",
+    ].join("\n"),
+    "src/ui/vu1/frac.css": "[data-vu1] { margin: 0.5px; }\n",
+  });
+  assert.equal(out.status, 1);
+  for (const hit of ["Frac.jsx:1", "Frac.jsx:2", "Frac.jsx:7", "frac.css:1"]) {
+    assert.match(out.stderr, new RegExp(hit.replace(".", "\\.")), `expected ${hit} flagged`);
+  }
+  assert.doesNotMatch(out.stderr, /Frac\.jsx:11/, "padding: 0 is on the scale");
+});
+
 test("design guard leaves the vendored SPEC-01 kit alone", () => {
   const out = runGuard({ "src/ui/hardware/hardware/kit.css": "[data-kit] { padding: 9px 11px; }\n" });
   assert.equal(out.status, 0, out.stdout + out.stderr);
