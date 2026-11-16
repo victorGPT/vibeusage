@@ -30,9 +30,9 @@ test("DashboardPage uses active days for identity stats", () => {
   assert.ok(src.includes("active_days"), "expected active days usage");
 });
 
-test("DashboardPage passes start date and active days to IdentityBar", () => {
+test("DashboardPage passes start date and active days to IdentityStrip", () => {
   const src = readFile(pagePath);
-  const bar = src.slice(src.indexOf("<IdentityBar"), src.indexOf("/>", src.indexOf("<IdentityBar")));
+  const bar = src.slice(src.indexOf("<IdentityStrip"), src.indexOf("/>", src.indexOf("<IdentityStrip")));
   assert.match(bar, /since=\{identityStartDate\}/);
   assert.match(bar, /activeDays=\{activeDays\}/);
 });

@@ -185,7 +185,6 @@ test("DashboardPage enables guest data flow when session soft expired", () => {
   const src = read("dashboard/src/pages/DashboardPage.jsx");
   assert.match(src, /const guestAllowed\s*=\s*signedIn\s*&&\s*sessionSoftExpired/);
   assert.match(src, /useUsageData\([\s\S]*guestAllowed/);
-  assert.match(src, /useProjectUsageSummary\([\s\S]*guestAllowed/);
   assert.match(src, /useUsageModelBreakdown\([\s\S]*guestAllowed/);
   assert.match(src, /useTrendData\([\s\S]*guestAllowed/);
   assert.match(src, /useActivityHeatmap\([\s\S]*guestAllowed/);

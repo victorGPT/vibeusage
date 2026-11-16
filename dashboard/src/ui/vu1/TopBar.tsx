@@ -18,11 +18,13 @@ type TopBarProps = {
   githubHref: string;
   // null until the star count loads, or when it fails: the key then reads plain "GitHub".
   stars: number | null;
+  // false on a page that is not the reader's own, like a share link: no Sign in or Sign out.
+  account?: boolean;
   onSignIn?: () => void;
   onSignOut?: () => void;
 };
 
-export function TopBar({ active, signedIn, hrefs, githubHref, stars, onSignIn, onSignOut }: TopBarProps) {
+export function TopBar({ active, signedIn, hrefs, githubHref, stars, account = true, onSignIn, onSignOut }: TopBarProps) {
   const sound = useSyncExternalStore(onSoundChange, soundEnabled, serverSound);
   const links: [Page, string][] = [
     ["home", copy("vu1.top.home")],
@@ -56,7 +58,7 @@ export function TopBar({ active, signedIn, hrefs, githubHref, stars, onSignIn, o
           )}
           <span className="sr-only">{copy("vu1.top.new_tab")}</span>
         </a>
-        {signedIn ? (
+        {!account ? null : signedIn ? (
           <Button onClick={onSignOut}>{copy("vu1.top.sign_out")}</Button>
         ) : (
           <Button tone="primary" onClick={onSignIn}>

@@ -45,19 +45,19 @@ function loadMainScreen(src) {
   return new Function(`${src.slice(start, end + 2)}; return mainScreen;`)();
 }
 
-test("DashboardPage renders the 2049 blocks in board order", () => {
+test("DashboardPage renders the VU1 device in mock order and drops the cut blocks", () => {
   const src = readPage();
   const order = [
-    "TopNav",
-    "IdentityBar",
-    "Readout",
-    "RankRail",
-    "Models",
-    "DotHeatmap",
-    "Trend",
-    "Projects",
-    "DailyTable",
-    "PageFooter",
+    "TopBar",
+    "Device",
+    "PeriodSwitch",
+    "UsageScreen",
+    "ShareKey",
+    "InstallKey",
+    "SourceSegment",
+    "StatMinis",
+    "ModelList",
+    "IdentityStrip",
   ];
   let last = -1;
   for (const name of order) {
@@ -66,6 +66,9 @@ test("DashboardPage renders the 2049 blocks in board order", () => {
     last += 1 + index;
   }
   assert.match(src, /<StateScreen\b/, "expected StateScreen in the main slot");
+  for (const cut of ["CostAnalysisModal", "Projects", "DailyTable", "KeyboardCheatsheet", "RankRail", "useProjectUsageSummary", "ui/2049"]) {
+    assert.doesNotMatch(src, new RegExp(cut), `expected ${cut} gone from the page`);
+  }
 });
 
 test("mainScreen picks the first matching state in priority order", () => {
@@ -95,19 +98,13 @@ test("mainScreen picks the first matching state in priority order", () => {
   }
 });
 
-test("screenshot mode gives the Readout no period handler, so it shows no tabs", () => {
-  assert.match(readPage(), /onPeriodChange=\{screenshotMode \? undefined : transitionSelectedPeriod\}/);
+test("screenshot mode holds the period switch on Total", () => {
+  assert.match(readPage(), /onChange=\{screenshotMode \? \(\) => \{\} : transitionSelectedPeriod\}/);
 });
 
-test("screenshot mode titles the exported image and keeps the share hint out of it", () => {
+test("the share image is the device, without the owner controls", () => {
   const src = readPage();
-  const start = src.indexOf("{screenshotMode ? (");
-  const block = src.slice(start, src.indexOf("<TopNav", start));
-  const exclude = block.indexOf('data-screenshot-exclude="true"');
-  const line1 = block.search(/<Heading text=\{copy\("dashboard\.screenshot\.title_line1"\)\}/);
-  const line2 = block.search(/<Heading text=\{copy\("dashboard\.screenshot\.title_line2"\)\}/);
-  const hint = block.search(/<Label text=\{copy\("dashboard\.screenshot\.twitter_hint"\)\}/);
-  assert.ok(line1 !== -1 && line2 > line1, "expected the two title lines as Headings");
-  assert.ok(exclude > line2, "expected the title outside the excluded share controls");
-  assert.ok(hint > exclude, "expected the hint inside the excluded share controls");
+  assert.match(src, /const node = deviceRef\.current;/);
+  assert.match(src, /toBlob\(node, options\)/);
+  assert.match(src, /<div data-screenshot-exclude="true"[^>]*>\s*<IdentityStrip/);
 });

@@ -44,7 +44,8 @@ import { isScreenshotModeEnabled } from "./lib/screenshot-mode";
 import { probeBackend } from "./lib/vibeusage-api";
 import { resolveAgentResourceRoute } from "./pages/agent-resource-routes.js";
 import { LandingPage } from "./pages/LandingPage.jsx";
-import { StateScreen } from "./ui/2049/blocks/StateScreen";
+import { Hardware } from "./ui/hardware/hardware";
+import { StateScreen } from "./ui/vu1/StateScreen";
 import { UpgradeBanner } from "./ui/2049/blocks/UpgradeBanner";
 
 function buildAuthEntryUrl(basePath, nextPath) {
@@ -395,17 +396,13 @@ export default function App() {
   }, [insforgeLoaded, insforgeSession, navigate, signInUrl]);
 
   const loadingShell = (
-    <div className="min-h-screen bg-background px-8 pb-12 font-sans text-foreground">
-      <div className="mx-auto flex max-w-304 flex-col gap-4">
-        <div className="h-20" />
-        <div className="h-18" />
-        <div className="grid gap-4 lg:grid-cols-12">
-          <div className={publicMode ? "min-w-0 lg:col-span-12" : "min-w-0 lg:col-span-8"}>
-            <StateScreen variant="loading" />
-          </div>
+    <Hardware className="min-h-screen px-s4 pt-s4 pb-s8">
+      <main className="grid-page mx-auto max-w-shell">
+        <div className="col-span-12 lg:col-start-2 lg:col-end-12">
+          <StateScreen variant="loading" />
         </div>
-      </div>
-    </div>
+      </main>
+    </Hardware>
   );
   const normalizedPath = pathname.replace(/\/+$/, "") || "/";
   const agentResourceRoute = resolveAgentResourceRoute(normalizedPath);
@@ -444,7 +441,7 @@ export default function App() {
   } else {
     content = (
       <Suspense fallback={loadingShell}>
-        {!publicMode && !screenshotMode ? (
+        {!publicMode && !screenshotMode && PageComponent !== DashboardPage ? (
           <UpgradeBanner requiredVersion={latestVersion} />
         ) : null}
         <PageComponent
@@ -459,6 +456,7 @@ export default function App() {
           userId={leaderboardProfileUserId}
           signInUrl={signInUrl}
           signUpUrl={signUpUrl}
+          latestVersion={latestVersion}
         />
       </Suspense>
     );
