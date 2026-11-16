@@ -945,7 +945,7 @@ export function DashboardPage({
 
   return (
     <Hardware keyColor={KEY_COLOR} className="min-h-screen px-s4 pt-s4 pb-s8">
-      <main className="grid-page mx-auto max-w-shell gap-y-s5">
+      <main className="grid-page mx-auto max-w-shell gap-y-s6 min-[761px]:gap-y-s8">
         <div className="col-span-12">
           <TopBar
             active="dashboard"

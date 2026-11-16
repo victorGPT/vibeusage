@@ -48,7 +48,7 @@ export function StateScreen({ variant, linkCode, onRetry, onSignIn }: StateScree
       {variant === "invalid" ? <p data-vu1="state-body">{copy("vu1.state.invalid_body")}</p> : null}
       {variant === "signed-out" || variant === "expired" ? (
         <>
-          <p data-vu1="state-body">{copy(variant === "expired" ? "vu1.state.expired_body" : "vu1.state.signed_out_body")}</p>
+          <p data-vu1="state-body">{variant === "expired" ? copy("vu1.state.expired_body") : copy("vu1.state.signed_out_body")}</p>
           <div>
             <Button tone="primary" onClick={onSignIn}>
               {copy("vu1.state.sign_in")}
