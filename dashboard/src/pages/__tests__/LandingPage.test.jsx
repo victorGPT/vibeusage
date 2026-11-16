@@ -1,11 +1,22 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 
 import { copy } from "../../lib/copy";
 import { LandingPage } from "../LandingPage.jsx";
 
 const SIGN_UP = "/sign-up?next=%2Fleaderboard";
+
+// jsdom has no ResizeObserver or CSS.supports; the kit's Device refits its zoom with the first and
+// <Hardware> probes caret support with the second.
+beforeAll(() => {
+  globalThis.ResizeObserver ??= class {
+    observe() {}
+    disconnect() {}
+  };
+  globalThis.CSS ??= {};
+  CSS.supports ??= () => false;
+});
 
 afterEach(() => vi.restoreAllMocks());
 
@@ -15,32 +26,52 @@ describe("LandingPage", () => {
     vi.spyOn(window, "location", "get").mockReturnValue({ ...window.location, assign });
     render(<LandingPage signInUrl="/sign-in" signUpUrl={SIGN_UP} />);
 
-    const links = screen.getAllByRole("button", { name: "Sign in with GitHub" });
-    expect(links).toHaveLength(2);
-    for (const link of links) expect(link.getAttribute("href")).toBe(SIGN_UP);
+    expect(screen.getByRole("link", { name: copy("vu1.landing.sign_in") }).getAttribute("href")).toBe(SIGN_UP);
 
-    await userEvent.click(screen.getByRole("button", { name: "Sign in" }));
+    await userEvent.click(screen.getByRole("button", { name: copy("vu1.top.sign_in") }));
     expect(assign).toHaveBeenCalledWith(SIGN_UP);
+  });
+
+  it("links the leaderboard from the hero and marks Home as the current page", () => {
+    render(<LandingPage signInUrl="/sign-in" signUpUrl={SIGN_UP} />);
+    expect(screen.getByRole("link", { name: copy("vu1.landing.leaderboard") }).getAttribute("href")).toBe("/leaderboard");
+    const nav = screen.getByRole("navigation", { name: copy("vu1.top.nav_aria") });
+    expect(within(nav).getByRole("link", { name: copy("vu1.top.home") }).getAttribute("aria-current")).toBe("page");
   });
 
   it("opens the GitHub repo in a new tab and says so", () => {
     render(<LandingPage signInUrl="/sign-in" signUpUrl={SIGN_UP} />);
-    const github = screen.getByRole("button", { name: /GitHub.*new tab/i });
+    const github = screen.getByRole("link", { name: /GitHub.*new tab/i });
     expect(github.getAttribute("href")).toBe("https://github.com/victorGPT/vibeusage");
     expect(github.getAttribute("target")).toBe("_blank");
     expect(github.getAttribute("rel")).toBe("noopener noreferrer");
   });
 
-  it("shows the sample account with three ranked rows and the agent guide link", () => {
+  it("shows the install command with a copy key", () => {
     render(<LandingPage signInUrl="/sign-in" signUpUrl={SIGN_UP} />);
-    const sample = screen.getByRole("region", { name: /Sample account/i });
-    expect(within(sample).getByText("#1")).toBeTruthy();
-    expect(within(sample).getByText("#3")).toBeTruthy();
-    expect(within(sample).queryByText("#4")).toBeNull();
-    expect(within(sample).getByText("nullbyte")).toBeTruthy();
-    expect(screen.getByText("https://github.com/victorGPT/vibeusage/blob/main/docs/AI_AGENT_INSTALL.md")).toBeTruthy();
-    expect(screen.getByRole("button", { name: "Copy link" })).toBeTruthy();
-    expect(screen.getByRole("heading", { name: "See where you rank this week." })).toBeTruthy();
+    expect(screen.getByText(copy("landing.install.command"))).toBeTruthy();
+    expect(screen.getByRole("button", { name: copy("vu1.install.copy") })).toBeTruthy();
+  });
+
+  it("labels the global meter as example figures", () => {
+    render(<LandingPage signInUrl="/sign-in" signUpUrl={SIGN_UP} />);
+    const device = screen.getByRole("region", { name: copy("vu1.landing.meter_name") });
+    expect(within(device).getByRole("region", { name: copy("vu1.landing.meter_aria") })).toBeTruthy();
+    expect(within(device).getByText(copy("vu1.landing.meter_note"))).toBeTruthy();
+  });
+
+  it("states the three specs as headings with their bodies", () => {
+    render(<LandingPage signInUrl="/sign-in" signUpUrl={SIGN_UP} />);
+    for (const n of [1, 2, 3]) {
+      expect(screen.getByRole("heading", { level: 3, name: copy(`vu1.landing.spec${n}_title`) })).toBeTruthy();
+      expect(screen.getByText(copy(`vu1.landing.spec${n}_body`))).toBeTruthy();
+    }
+  });
+
+  it("renders inside the hardware skin", () => {
+    const { container } = render(<LandingPage signInUrl="/sign-in" signUpUrl={SIGN_UP} />);
+    expect(container.firstElementChild.getAttribute("data-skin")).toBe("hardware");
+    expect(screen.getByRole("heading", { level: 1, name: copy("vu1.landing.title") })).toBeTruthy();
   });
 
   it("keeps the product summary as visible body text for crawlers", () => {
@@ -62,6 +93,6 @@ describe("LandingPage", () => {
 
   it("never renders a raw copy key", () => {
     const { container } = render(<LandingPage signInUrl="/sign-in" signUpUrl={SIGN_UP} />);
-    expect(container.textContent).not.toMatch(/\b(ui2049|landing|dashboard|leaderboard)\.[a-z_]+/);
+    expect(container.textContent).not.toMatch(/\b(vu1|ui2049|landing|dashboard|leaderboard)\.[a-z_]+/);
   });
 });

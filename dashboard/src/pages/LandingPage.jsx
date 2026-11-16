@@ -1,41 +1,50 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useState } from "react";
+
 import { copy } from "../lib/copy";
-import { getAppVersion } from "../lib/app-version";
-import { formatDateUTC } from "../lib/date-range";
-import { CtaBand } from "../ui/2049/base/CtaBand";
-import { Heading } from "../ui/2049/base/Heading";
-import { Label } from "../ui/2049/base/Label";
-import { Text } from "../ui/2049/base/Text";
-import { Features } from "../ui/2049/blocks/Features";
-import { LandingHero } from "../ui/2049/blocks/LandingHero";
-import { Readout } from "../ui/2049/blocks/Readout";
-import { TopNav } from "../ui/2049/blocks/TopNav";
+import { fetchGithubRepoMeta } from "../lib/github-repo-meta";
+import { isScreenshotModeEnabled } from "../lib/screenshot-mode.js";
+import { Device } from "../ui/hardware/device";
+import { Hardware } from "../ui/hardware/hardware";
+import { Toasts } from "../ui/hardware/toaster";
+import { ClientList } from "../ui/vu1/ClientList";
+import { GlobalMeter } from "../ui/vu1/GlobalMeter";
+import { InstallCommand } from "../ui/vu1/InstallCommand";
+import { TopBar } from "../ui/vu1/TopBar";
+import "../ui/vu1/landing.css";
 
 const REPO = "victorGPT/vibeusage";
-const COL_6 = "min-w-[min(100%,420px)] flex-[1_1_calc((100%-176px)*6/12+80px)]";
+const KEY_COLOR = { l: 0.64, c: 0.31, h: 48 };
+const HREFS = { home: "/", dashboard: "/", leaderboard: "/leaderboard" };
 
-// The landing board's sample account, frozen so the hero never depends on a signed-in fetch.
-const SAMPLE_TOTALS = { total_tokens: 195_893_152, total_cost_usd: "60.28" };
-const SAMPLE_TOKENS = [589_300_000, 489_700_000, 407_500_000];
+// ponytail: frozen example figures; no site-wide endpoint exists and the backend stays as is.
+const SAMPLE = {
+  tokens: 8_410_000_000,
+  cost: 21_700,
+  users: 3912,
+  bars: [31, 24, 18, 15, 14, 19, 28, 42, 58, 71, 80, 86, 83, 88, 92, 95, 90, 84, 77, 70, 64, 57, 48, 39],
+};
 
-export function LandingPage({ signUpUrl }) {
-  const appVersion = useMemo(() => getAppVersion(import.meta.env), []);
-  const sampleRange = useMemo(() => {
-    const today = Date.now();
-    return {
-      from: formatDateUTC(new Date(today - 6 * 86_400_000)),
-      to: formatDateUTC(new Date(today)),
+const SPECS = [1, 2, 3];
+const POINTS = ["point1", "point2", "point3"];
+
+// Screenshot mode skips the fetch so captures stay stable; a failed fetch leaves plain "GitHub".
+function useGithubStars() {
+  const [stars, setStars] = useState(null);
+  useEffect(() => {
+    if (isScreenshotModeEnabled(window.location.search)) return undefined;
+    let active = true;
+    fetchGithubRepoMeta(REPO)
+      .then((meta) => active && setStars(meta.stars))
+      .catch(() => {});
+    return () => {
+      active = false;
     };
   }, []);
+  return stars;
+}
 
-  const sampleBoard = useMemo(() => {
-    const names = String(copy("ui2049.landing.sample_names")).split(",");
-    return SAMPLE_TOKENS.map((total, i) => ({
-      rank: i + 1,
-      display_name: names[i] ?? null,
-      total_tokens: total,
-    }));
-  }, []);
+export function LandingPage({ signUpUrl }) {
+  const stars = useGithubStars();
 
   useEffect(() => {
     try {
@@ -46,53 +55,86 @@ export function LandingPage({ signUpUrl }) {
   }, []);
 
   return (
-    <main className="min-h-screen bg-background px-4 pb-12 font-sans text-copy-m font-medium text-foreground md:px-8">
-      <div className="mx-auto flex max-w-[1216px] flex-col gap-12">
-        <TopNav
-          active={null}
-          signedIn={false}
-          dashboardHref="/"
-          leaderboardHref="/leaderboard"
-          githubHref={`https://github.com/${REPO}`}
-          onSignIn={() => window.location.assign(signUpUrl)}
-        />
-        <div className="flex flex-wrap items-center gap-4">
-          <div className={COL_6}>
-            <LandingHero signInHref={signUpUrl} />
-          </div>
-          <div className={COL_6}>
-            <Readout
-              mode="sample"
-              period="week"
-              totals={SAMPLE_TOTALS}
-              from={sampleRange.from}
-              to={sampleRange.to}
-              handle={copy("ui2049.landing.sample_handle")}
-              board={sampleBoard}
-            />
-          </div>
+    <Hardware keyColor={KEY_COLOR}>
+      <div data-vu1="landing" className="px-s4 pt-s4 pb-s8">
+        <div className="mx-auto flex max-w-shell flex-col gap-s6 min-[761px]:gap-s8">
+          <TopBar
+            active="home"
+            signedIn={false}
+            hrefs={HREFS}
+            githubHref={`https://github.com/${REPO}`}
+            stars={stars}
+            onSignIn={() => window.location.assign(signUpUrl)}
+          />
+          <main className="grid-page gap-y-s4">
+            <section className="col-span-12 flex flex-col gap-s4 self-center min-[761px]:col-span-6 min-[761px]:gap-s5">
+              <div className="flex flex-col gap-s3">
+                <p data-vu1-cap="" data-vu1="dim" className="m-0">
+                  {copy("vu1.landing.eyebrow")}
+                </p>
+                <h1 data-vu1="hero-title">{copy("vu1.landing.title")}</h1>
+              </div>
+              <p data-vu1="prose">{copy("vu1.landing.body")}</p>
+              <InstallCommand command={copy("landing.install.command")} />
+              <ClientList />
+              <div data-vu1-cap="" className="flex flex-wrap gap-s3">
+                <a data-kit="button" data-tone="primary" data-vu1="cta" href={signUpUrl}>
+                  {copy("vu1.landing.sign_in")}
+                </a>
+                <a data-kit="button" data-tone="secondary" data-vu1="cta" href="/leaderboard">
+                  {copy("vu1.landing.leaderboard")}
+                </a>
+              </div>
+            </section>
+            <div className="col-span-12 self-center [--device-w:100%] min-[761px]:col-start-8 min-[761px]:col-end-13">
+              <Device model={copy("vu1.device.model")} name={copy("vu1.landing.meter_name")}>
+                <div className="flex flex-col gap-s5">
+                  <GlobalMeter {...SAMPLE} />
+                  <p data-vu1="legend" className="m-0 text-center">
+                    {copy("vu1.landing.meter_note")}
+                  </p>
+                </div>
+              </Device>
+            </div>
+            <section
+              aria-label={copy("vu1.landing.specs_aria")}
+              className="col-span-12 mt-s7 grid-page gap-y-s5 min-[761px]:mt-s8"
+            >
+              {SPECS.map((n) => (
+                <div key={n} className="col-span-12 flex flex-col gap-s2 pt-s4 min-[761px]:col-span-4">
+                  <h3 data-vu1="spec-title">{copy(`vu1.landing.spec${n}_title`)}</h3>
+                  <p data-vu1="prose" data-wide="">
+                    {copy(`vu1.landing.spec${n}_body`)}
+                  </p>
+                </div>
+              ))}
+            </section>
+            <section className="col-span-12 mt-s8 flex flex-col gap-s2">
+              <p data-vu1-cap="" data-vu1="dim" className="m-0">
+                {copy("landing.features.title")}
+              </p>
+              <h2 data-vu1="spec-title">{copy("landing.seo.title")}</h2>
+              <p data-vu1="prose" data-wide="">
+                {copy("landing.seo.summary")}
+              </p>
+              <ul className="m-0 flex list-none flex-col gap-s1 p-0">
+                {POINTS.map((k) => (
+                  <li key={k} data-vu1="prose" data-wide="">
+                    {copy(`landing.seo.${k}`)}
+                  </li>
+                ))}
+              </ul>
+              <p data-vu1="prose" data-wide="">
+                {copy("landing.seo.roadmap")}
+              </p>
+            </section>
+            <p data-vu1-cap="" data-vu1="foot" className="col-span-12 m-0 mt-s8">
+              {copy("vu1.landing.foot")}
+            </p>
+          </main>
         </div>
-        <Features />
-        <section className="flex max-w-[72ch] flex-col gap-4">
-          <Label text={copy("landing.features.title")} />
-          <Heading text={copy("landing.seo.title")} size="s" level={2} />
-          <Text text={copy("landing.seo.summary")} tone="muted" />
-          <ul className="m-0 flex list-none flex-col gap-2 p-0">
-            {["point1", "point2", "point3"].map((k) => (
-              <li key={k}>
-                <Text text={copy(`landing.seo.${k}`)} tone="muted" />
-              </li>
-            ))}
-          </ul>
-          <Text text={copy("landing.seo.roadmap")} size="s" tone="muted" />
-        </section>
-        <CtaBand
-          title={copy("ui2049.landing.cta_title")}
-          buttonLabel={copy("ui2049.state_screen.sign_in")}
-          href={signUpUrl}
-          meta={copy("ui2049.landing.cta_meta", { version: appVersion })}
-        />
       </div>
-    </main>
+      <Toasts />
+    </Hardware>
   );
 }

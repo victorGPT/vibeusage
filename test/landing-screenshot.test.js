@@ -63,13 +63,13 @@ function parseCsv(raw) {
   return rows;
 }
 
-test("LandingPage renders the 2049 landing blocks in board order", () => {
+test("LandingPage renders the VU1 landing blocks in mock order", () => {
   const src = read("dashboard/src/pages/LandingPage.jsx");
-  const order = ["<TopNav", "<LandingHero", "<Readout", "<Features", "<CtaBand"];
+  const order = ["<TopBar", "<InstallCommand", "<ClientList", "<GlobalMeter", "vu1.landing.spec", "landing.seo.title", "vu1.landing.foot"];
   const positions = order.map((tag) => src.indexOf(tag));
   for (const [i, pos] of positions.entries()) assert.ok(pos > 0, `expected ${order[i]} in LandingPage`);
   assert.deepEqual([...positions].sort((a, b) => a - b), positions);
-  assert.match(src, /<Readout[^>]*mode="sample"/);
+  assert.match(src, /<GlobalMeter \{\.\.\.SAMPLE\} \/>/);
 });
 
 test("copy registry includes landing/share meta keys", () => {

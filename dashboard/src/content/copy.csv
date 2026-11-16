@@ -543,3 +543,27 @@ vu1.identity.copied,vu1,DashboardPage,IdentityStrip,copied,"Copied",,active
 vu1.identity.read_only,vu1,DashboardPage,IdentityStrip,read_only,"Public profile · read only",,active
 vu1.dashboard.device_name,vu1,DashboardPage,Device,name,"@{{handle}}",,active
 vu1.keys.install_copied,vu1,DashboardPage,InstallKey,install_copied,"Install command copied",,active
+vu1.landing.eyebrow,vu1,LandingPage,Hero,eyebrow,"Token meter for AI coding CLIs",,active
+vu1.landing.title,vu1,LandingPage,Hero,title,"VIBEUSAGE/VU-1",,active
+vu1.landing.body,vu1,LandingPage,Hero,body,"One meter for every AI coding CLI you run. It reads token counts from Claude Code, Codex, Gemini and the rest on your machine, adds up the bill, and ranks you against everyone else. Token counts only. Your conversations never leave the machine.",,active
+vu1.landing.clis,vu1,*,ClientList,clis,"Claude Code,Codex,Gemini,OpenCode,Kimi,Hermes,OpenClaw",,active
+vu1.landing.clis_aria,vu1,*,ClientList,clis_aria,"Supported CLIs",,active
+vu1.landing.sign_in,vu1,LandingPage,Hero,sign_in,"Sign in with GitHub",,active
+vu1.landing.leaderboard,vu1,LandingPage,Hero,leaderboard,"View leaderboard",,active
+vu1.landing.meter_name,vu1,LandingPage,Device,meter_name,"Sample · global",,active
+vu1.landing.meter_aria,vu1,*,GlobalMeter,meter_aria,"Global usage",,active
+vu1.landing.meter_period,vu1,*,GlobalMeter,meter_period,"Today",,active
+vu1.landing.meter_scope,vu1,*,GlobalMeter,meter_scope,"All users",,active
+vu1.landing.meter_tokens,vu1,*,GlobalMeter,meter_tokens,"Tokens",,active
+vu1.landing.meter_spend,vu1,*,GlobalMeter,meter_spend,"Spend",,active
+vu1.landing.meter_users,vu1,*,GlobalMeter,meter_users,"Users",,active
+vu1.landing.meter_bars_aria,vu1,*,GlobalMeter,meter_bars_aria,"Tokens per hour, all users",,active
+vu1.landing.meter_note,vu1,LandingPage,Device,meter_note,"Example figures",,active
+vu1.landing.specs_aria,vu1,LandingPage,Specs,specs_aria,"How it works",,active
+vu1.landing.spec1_title,vu1,LandingPage,Specs,spec1_title,"Reads locally",,active
+vu1.landing.spec1_body,vu1,LandingPage,Specs,spec1_body,"A small CLI parses the session logs your tools already write and uploads half-hour token totals. Nothing else.",,active
+vu1.landing.spec2_title,vu1,LandingPage,Specs,spec2_title,"Prices every model",,active
+vu1.landing.spec2_body,vu1,LandingPage,Specs,spec2_body,"Input, cached, output and reasoning tokens, each at its own rate, so the bill matches what you actually burned.",,active
+vu1.landing.spec3_title,vu1,LandingPage,Specs,spec3_title,"Ranks you",,active
+vu1.landing.spec3_body,vu1,LandingPage,Specs,spec3_body,"Weekly, monthly and all-time boards. Press share and post the panel as it is.",,active
+vu1.landing.foot,vu1,LandingPage,Footer,foot,"VibeUsage · built on SPEC-01/HARDWARE by @shuding",,active

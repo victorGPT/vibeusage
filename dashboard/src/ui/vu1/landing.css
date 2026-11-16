@@ -1,0 +1,72 @@
+/* Landing surfaces from the VU1 mock (#landing): hero type, CLI chips, the global meter, spec
+ * copy and the footer line. Spacing uses only --spacing-s1..s8. Scoped to the skin. */
+
+[data-skin="hardware"] [data-vu1="landing"] {
+  min-height: 100vh;
+  color: var(--vu1-ink);
+  background-color: #eeeeec;
+  background-image: radial-gradient(rgba(0, 0, 0, 0.025) 1px, transparent 1px);
+  background-size: 3px 3px;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+[data-skin="hardware"] [data-vu1="hero-title"] {
+  margin: 0;
+  font-size: clamp(32px, 6vw, 64px);
+  font-weight: 300;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+[data-skin="hardware"] [data-vu1="prose"] {
+  margin: 0;
+  max-width: 46ch;
+  color: #4a4a47;
+  line-height: 1.7;
+}
+[data-skin="hardware"] [data-vu1="prose"][data-wide] {
+  max-width: 72ch;
+}
+
+[data-skin="hardware"] [data-vu1="clients"] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-s2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+[data-skin="hardware"] [data-vu1="chip"] {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-s2);
+  padding: var(--spacing-s2) var(--spacing-s3);
+  border-radius: 8px;
+  background: #fcfcfa;
+  box-shadow: inset 0 1px 0 #fff, 0 2px 0 #dcdcd8;
+}
+
+/* Links dressed as kit keys, laid out like TopBar's GitHub key. */
+[data-skin="hardware"] [data-vu1="cta"] {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+[data-skin="hardware"] [data-vu1="screen"][data-variant="meter"] [data-kit="bar-graph"] {
+  height: 88px;
+}
+
+[data-skin="hardware"] [data-vu1="spec-title"] {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+[data-skin="hardware"] [data-vu1="foot"] {
+  color: var(--vu1-legend);
+  text-align: center;
+}

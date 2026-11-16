@@ -17,15 +17,15 @@ function hasCopyKey(csv, key) {
 
 test("landing CTA copy keys exist", () => {
   const csv = read(copyPath);
-  for (const key of ["ui2049.state_screen.sign_in", "ui2049.landing.cta_title", "ui2049.landing.cta_meta"]) {
+  for (const key of ["vu1.landing.sign_in", "vu1.landing.leaderboard", "vu1.top.sign_in"]) {
     assert.ok(hasCopyKey(csv, key), `expected copy registry to include ${key}`);
   }
 });
 
-test("both Sign in with GitHub buttons point at the same auth entry", () => {
+test("the top bar Sign in and the hero Sign in key point at the same auth entry", () => {
   const source = read(landingPagePath);
-  const hero = source.match(/<LandingHero[^>]*signInHref=\{(\w+)\}/);
-  const cta = source.match(/<CtaBand[^>]*href=\{(\w+)\}/);
-  assert.ok(hero && cta, "LandingHero and CtaBand take an auth href");
-  assert.equal(hero[1], cta[1]);
+  const bar = source.match(/onSignIn=\{\(\) => window\.location\.assign\((\w+)\)\}/);
+  const hero = source.match(/data-tone="primary"[^>]*href=\{(\w+)\}/);
+  assert.ok(bar && hero, "TopBar onSignIn and the hero key take an auth href");
+  assert.equal(bar[1], hero[1]);
 });

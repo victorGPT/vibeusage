@@ -7,11 +7,16 @@ import "./blocks.css";
 
 export function InstallCommand({ command }: { command: string }) {
   const [copied, setCopied] = useState(false);
+  // A missing or blocked clipboard keeps the Copy label, so the user can still select the text.
   const press = () => {
-    haptic("success");
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 1400);
-    navigator.clipboard?.writeText(command).catch(() => setCopied(false));
+    navigator.clipboard?.writeText(command).then(
+      () => {
+        haptic("success");
+        setCopied(true);
+        window.setTimeout(() => setCopied(false), 1400);
+      },
+      () => {},
+    );
   };
   return (
     <div data-vu1="screen" data-variant="cmd">
