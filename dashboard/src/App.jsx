@@ -433,7 +433,7 @@ export default function App() {
   } else {
     content = (
       <Suspense fallback={loadingShell}>
-        {!publicMode && !screenshotMode && PageComponent !== DashboardPage ? (
+        {!publicMode && !screenshotMode && PageComponent !== DashboardPage && PageComponent !== LeaderboardPage ? (
           <UpgradeBanner requiredVersion={latestVersion} />
         ) : null}
         <PageComponent

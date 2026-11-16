@@ -130,6 +130,19 @@ describe("LeaderboardPage", () => {
     expect(screen.getByRole("link", { name: "Leaderboard" })).toHaveAttribute("aria-current", "page");
   });
 
+  it("tells me a newer CLI is out in a toast, and Update copies the upgrade command", async () => {
+    const writeText = vi.fn(async () => {});
+    vi.stubGlobal("navigator", { ...navigator, clipboard: { writeText } });
+    render(
+      <MemoryRouter initialEntries={["/leaderboard"]}>
+        <LeaderboardPage baseUrl="http://x" auth="token" signedIn latestVersion="9.9.9" />
+      </MemoryRouter>,
+    );
+    const toast = (await screen.findByText(/9\.9\.9/)).closest('[role="status"]');
+    fireEvent.click(within(toast).getByRole("button", { name: "Update" }));
+    expect(writeText).toHaveBeenCalledWith("npx --yes vibeusage init");
+  });
+
   it("shows the empty screen when nobody is ranked", async () => {
     serve([], { rank: null, total_tokens: "0" });
     renderPage();

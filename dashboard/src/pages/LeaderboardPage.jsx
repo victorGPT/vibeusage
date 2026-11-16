@@ -16,6 +16,7 @@ import { RankScreen } from "../ui/vu1/RankScreen.tsx";
 import { Segment } from "../ui/vu1/SourceSegment.tsx";
 import { StateScreen } from "../ui/vu1/StateScreen.tsx";
 import { TopBar } from "../ui/vu1/TopBar.tsx";
+import { UpgradeToast } from "../ui/vu1/UpgradeToast.tsx";
 
 const PAGE_LIMIT = 10;
 const METRIC = "all";
@@ -73,7 +74,20 @@ async function rowsAboveMe(rows, meRank) {
   return NO_ROWS;
 }
 
-export function LeaderboardPage({ baseUrl, auth, currentIdentity, signedIn, sessionSoftExpired, signOut, signInUrl = "/sign-in" }) {
+const copyUpgradeCommand = () => {
+  navigator.clipboard?.writeText(copy("dashboard.upgrade_alert.install_command")).catch(() => {});
+};
+
+export function LeaderboardPage({
+  baseUrl,
+  auth,
+  currentIdentity,
+  signedIn,
+  sessionSoftExpired,
+  signOut,
+  signInUrl = "/sign-in",
+  latestVersion = null,
+}) {
   const location = useLocation();
   const navigate = useNavigate();
   const stars = useGithubStars();
@@ -194,6 +208,7 @@ export function LeaderboardPage({ baseUrl, auth, currentIdentity, signedIn, sess
           </div>
         </main>
       </div>
+      {latestVersion && !isScreenshotModeEnabled(window.location.search) ? <UpgradeToast requiredVersion={latestVersion} onUpdate={copyUpgradeCommand} /> : null}
       <Toasts />
     </Hardware>
   );
