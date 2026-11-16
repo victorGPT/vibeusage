@@ -1,4 +1,4 @@
-import { copy, getCopyRegistry } from "#src/lib/copy.ts";
+import { copy } from "#src/lib/copy.ts";
 
 import type { DailyRow, DateKey, UsagePeriod } from "./types";
 
@@ -13,10 +13,20 @@ export function periodOptions(): Option<UsagePeriod>[] {
   ];
 }
 
-// Source ids as the API sends them; one without a copy key reads as its id.
+// Source ids as the API sends them; one not listed reads as its id.
 export function sourceLabel(id: string): string {
-  const key = `vu1.source.${id}`;
-  return getCopyRegistry().map.has(key) ? copy(key) : id;
+  const labels: Record<string, string> = {
+    all: copy("vu1.source.all"),
+    claude: copy("vu1.source.claude"),
+    codex: copy("vu1.source.codex"),
+    gemini: copy("vu1.source.gemini"),
+    opencode: copy("vu1.source.opencode"),
+    kimi: copy("vu1.source.kimi"),
+    hermes: copy("vu1.source.hermes"),
+    openclaw: copy("vu1.source.openclaw"),
+    other: copy("vu1.source.other"),
+  };
+  return labels[id] ?? id;
 }
 
 const MONTH_DAY = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", timeZone: "UTC" });

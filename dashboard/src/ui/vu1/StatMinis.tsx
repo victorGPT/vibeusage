@@ -29,7 +29,7 @@ export function StatMinis({ rows, dateKey = "day", rolling }: StatMinisProps) {
   return (
     <div className="grid-device gap-y-s4">
       {minis.map(([label, value]) => (
-        <dl key={label} data-vu1="mini" data-vu1-cap="" className="col-span-6 m-0 md:col-span-3">
+        <dl key={label} data-vu1="mini" data-vu1-cap="" className="col-span-6 m-0 min-[761px]:col-span-3">
           <dt>{label}</dt>
           <dd>{value}</dd>
         </dl>

@@ -202,6 +202,14 @@ describe("RankScreen", () => {
   });
 });
 
+describe("RankScreen without channel counts", () => {
+  it("shows a placeholder for the top CLI", () => {
+    render(<RankScreen entries={[{ rank: 1, display_name: "solo", total_tokens: 10 }]} me={null} handle="ada" />);
+    const rows = within(screen.getByRole("table", { name: "Rankings" })).getAllByRole("row");
+    expect(within(rows[1]).getAllByText("--")).toHaveLength(1);
+  });
+});
+
 describe("MyRankLcd", () => {
   it("shows my rank and the gap to the next rank up", () => {
     render(<MyRankLcd me={{ ...ENTRIES[2] }} entries={ENTRIES} />);

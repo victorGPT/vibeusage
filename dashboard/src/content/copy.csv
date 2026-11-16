@@ -528,5 +528,5 @@ vu1.state.error_title,vu1,*,StateScreen,error_title,"Couldn't reach the usage se
 vu1.state.error_body,vu1,*,StateScreen,error_body,"Your local numbers are still counting. Try again in a moment.",,active
 vu1.state.retry,vu1,*,StateScreen,retry,"Retry",,active
 vu1.state.signed_out_title,vu1,*,StateScreen,signed_out_title,"Sign in to read your meter.",,active
-vu1.state.signed_out_body,vu1,*,StateScreen,signed_out_body,"Your data is safe. Sign in again to keep syncing.",,active
+vu1.state.signed_out_body,vu1,*,StateScreen,signed_out_body,"Sign in with GitHub to see your usage and rank.",,active
 vu1.state.sign_in,vu1,*,StateScreen,sign_in,"Sign in with GitHub",,active

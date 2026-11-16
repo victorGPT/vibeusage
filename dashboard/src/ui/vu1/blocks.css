@@ -112,6 +112,11 @@
   background: radial-gradient(130% 160% at 50% 0%, #121211 50%, #1c1c1b 80%, #121211);
   box-shadow: 0 0 0 6px #1a1a19, 0 0 0 7px #000, inset 0 2px 10px rgba(0, 0, 0, 0.6), 0 10px 18px -6px rgba(0, 0, 0, 0.35);
 }
+[data-skin="hardware"] [data-vu1="screen-body"] {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-s4);
+}
 [data-skin="hardware"] [data-vu1="screen-head"] {
   display: flex;
   align-items: center;
@@ -363,9 +368,10 @@
   text-transform: none;
 }
 
-/* Lying flat on a phone, the period lever gets wider detents so the four labels clear. */
+/* Lying flat on a phone, the period lever gets wider detents so the four labels clear.
+ * --col is the kit's detent pitch, a track size rather than spacing. */
 [data-skin="hardware"] [data-vu1="period"] [data-kit="slide-switch"][data-orientation="horizontal"] {
-  --col: calc(var(--spacing-s8) + var(--spacing-s3));
+  --col: 76px;
   width: calc(var(--n) * var(--col));
 }
 
@@ -427,8 +433,11 @@
 }
 
 @media (max-width: 760px) {
-  [data-skin="hardware"] [data-vu1="screen"] {
+  [data-skin="hardware"] [data-vu1="screen"],
+  [data-skin="hardware"] [data-vu1="screen-body"] {
     gap: var(--spacing-s3);
+  }
+  [data-skin="hardware"] [data-vu1="screen"] {
     padding: var(--spacing-s3);
   }
   [data-skin="hardware"] [data-vu1="chart"] [data-kit="bar-graph"] {

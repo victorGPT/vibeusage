@@ -119,10 +119,10 @@ export function BlocksVu1() {
         <div data-vu1-specimen="dashboard" className="col-span-12 lg:col-start-2 lg:col-end-12 [--device-w:100%]">
           <Device model={copy("vu1.device.model")} name={copy("vu1.device.name")}>
             <div className="grid-device gap-y-s5">
-              <div className="col-span-12 flex items-center justify-center md:col-span-2">
+              <div className="col-span-12 flex items-center justify-center min-[761px]:col-span-2">
                 <PeriodSwitch value={period} onChange={setPeriod} />
               </div>
-              <div className="col-span-12 md:col-span-8">
+              <div className="col-span-12 min-[761px]:col-span-8">
                 <UsageScreen
                   range={`${pointLabel(ROWS[0], "day")} – ${pointLabel(ROWS[ROWS.length - 1], "day")}`}
                   totals={totals}
@@ -132,11 +132,11 @@ export function BlocksVu1() {
                   heatmap={HEATMAP}
                 />
               </div>
-              <div className="col-span-12 flex items-center justify-center gap-s5 md:col-span-2 md:flex-col">
+              <div className="col-span-12 flex items-center justify-center gap-s5 min-[761px]:col-span-2 min-[761px]:flex-col">
                 <ShareKey onPress={none} />
                 <InstallKey onPress={none} />
               </div>
-              <div className="col-span-12 md:col-start-3 md:col-end-11">
+              <div className="col-span-12 min-[761px]:col-start-3 min-[761px]:col-end-11">
                 <SourceSegment sources={SOURCES} value={source} onChange={setSource} />
               </div>
               <div className="col-span-12">
@@ -160,10 +160,10 @@ export function BlocksVu1() {
         <div data-vu1-specimen="leaderboard" className="col-span-12 lg:col-start-3 lg:col-end-11 [--device-w:100%]">
           <Device model={copy("vu1.device.model")} name={copy("vu1.device.name")}>
             <div className="grid-device gap-y-s5">
-              <div className="col-span-12 md:col-span-6">
+              <div className="col-span-12 min-[761px]:col-span-6">
                 <Segment label={copy("vu1.period.label")} options={BOARDS} value={board} onChange={setBoard} />
               </div>
-              <div className="col-span-12 flex items-center md:col-span-6 md:justify-end">
+              <div className="col-span-12 flex items-center min-[761px]:col-span-6 min-[761px]:justify-end">
                 <MyRankLcd me={ME} entries={ENTRIES} />
               </div>
               <div className="col-span-12">
@@ -178,12 +178,12 @@ export function BlocksVu1() {
       </div>
 
       <div className="grid-page gap-y-s5">
-        <section aria-label="InstallCommand" data-vu1-specimen="install" className="col-span-12 md:col-span-6">
+        <section aria-label="InstallCommand" data-vu1-specimen="install" className="col-span-12 min-[761px]:col-span-6">
           <InstallCommand command={copy("landing.install.command")} />
         </section>
-        <div className="col-span-12 md:col-span-6" />
+        <div className="col-span-12 min-[761px]:col-span-6" />
         {(["loading", "empty", "error", "signed-out"] as const).map((variant) => (
-          <div key={variant} data-vu1-specimen={`state-${variant}`} className="col-span-12 md:col-span-6">
+          <div key={variant} data-vu1-specimen={`state-${variant}`} className="col-span-12 min-[761px]:col-span-6">
             <StateScreen variant={variant} onRetry={none} onSignIn={none} />
           </div>
         ))}

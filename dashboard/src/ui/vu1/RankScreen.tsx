@@ -15,7 +15,8 @@ function topCli(entry: LeaderboardMe) {
     [num(entry.claude_tokens), copy("vu1.rank.cli_claude")],
     [num(entry.other_tokens), copy("vu1.rank.cli_other")],
   ] as const;
-  return channels.reduce((best, channel) => (channel[0] > best[0] ? channel : best))[1];
+  const best = channels.reduce((top, channel) => (channel[0] > top[0] ? channel : top));
+  return best[0] > 0 ? best[1] : copy("shared.placeholder.short");
 }
 
 // My row is red where it falls; when I am ranked but off this page it is pinned on top.

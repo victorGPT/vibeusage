@@ -143,7 +143,7 @@ export function UsageScreen({ range, totals, rank, delta, rows, dateKey = "day",
   const [tab, setTab] = useState("usage" as Tab);
   return (
     <section data-vu1="screen" aria-label={copy("vu1.usage.tabs_aria")}>
-      <Tabs value={tab} onValueChange={(next: unknown) => setTab(next as Tab)} className="flex flex-col gap-s4">
+      <Tabs value={tab} onValueChange={(next: unknown) => setTab(next as Tab)} data-vu1="screen-body">
         <div data-vu1="screen-head" data-vu1-cap="">
           <TabsList data-vu1="screen-tabs" aria-label={copy("vu1.usage.tabs_aria")}>
             <TabsTab value="usage">{copy("vu1.usage.tab_usage")}</TabsTab>
