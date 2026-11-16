@@ -9,13 +9,13 @@ This overlay applies when using the `frontend-ui-functional` skill in this repos
 - **Project rules first:** Read `CLAUDE.md` before starting. Project-level rules override the base skill.
 - **Copy registry:** All user-facing text must come from `dashboard/src/content/copy.csv`. Update the registry and run `npm run validate:copy` after changes.
 - **UI hardcode guardrails:** Run `npm run validate:ui-hardcode` before shipping UI changes.
-- **Reuse UI primitives:** Prefer existing components in `dashboard/src/ui/2049/base`, `dashboard/src/ui/2049/blocks` and `dashboard/src/ui/shadcn` before creating new ones. `dashboard/DESIGN.md` lists them.
+- **Reuse UI primitives:** Prefer the VU-1 blocks in `dashboard/src/ui/vu1` and the SPEC-01 kit in `dashboard/src/ui/hardware` before creating new ones. `dashboard/DESIGN.md` lists them.
 - **Pages and layouts:** Pages in `dashboard/src/pages` hold only layout containers and component references. Styling belongs in components.
-- **Tokens and styles:** Tailwind v4 has no config file. Tokens live in CSS `@theme` blocks. Use the 2049 tokens in `dashboard/src/styles/2049.css`. The v1 theme in `dashboard/src/styles.css` is only for the leftover v1 pages.
+- **Tokens and styles:** Tailwind v4 has no config file. Layout tokens (the s1..s8 spacing scale and the 12-column grid) live in `dashboard/src/styles/vu1.css`; colors live in the kit and `ui/vu1` CSS.
 
 ## Mandatory Checks (Before PR)
 
-- **Design guardrail:** run `npm --prefix dashboard run guardrail:design` (`dashboard/scripts/check-design-ssot.mjs`). It fails on literal colors and off-scale spacing in 2049 files.
+- **Design guardrail:** run `npm --prefix dashboard run guardrail:design` (`dashboard/scripts/check-design-ssot.mjs`). It fails on spacing off the s1..s8 scale, literal colors and `text-[Npx]` outside the kit.
 - **Copy registry validation:** run `npm run validate:copy`.
 
 ## Notes

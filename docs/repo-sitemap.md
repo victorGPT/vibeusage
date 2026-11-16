@@ -76,18 +76,13 @@ This document is the single source of truth for repository navigation. Use it to
   - `dashboard/src/pages/`
   - `dashboard/src/hooks/`
 - UI layers (design rules in `dashboard/DESIGN.md`):
-  - `dashboard/src/pages/` holds the routed pages. A page arranges blocks and passes data.
-  - `dashboard/src/ui/2049/blocks/` holds the page blocks (readout, rank, models, tables, landing hero, state screens, dialogs, upgrade banner). Their data helpers now live in `dashboard/src/ui/vu1/`.
-  - `dashboard/src/ui/2049/base/` holds the small 2049 parts the blocks are built from.
-  - `dashboard/src/ui/shadcn/` holds the shadcn-layout controls on `@base-ui/react` (button, select, table, dialog, and more).
-  - `dashboard/src/ui/hardware/` holds the SPEC-01 hardware kit (MIT, `LICENSE` beside it), installed with `npx shadcn add` from local copies of the spec-01.vercel.app registry JSON (`@ui-sdk/react` and `@ui-sdk/core` pinned to `0.1.0-beta.5`). `lib/` holds its page-wide behaviors; key sounds and haptics start off (patched in `lib/sound.ts` and `lib/haptics.ts`). Only `/__vu1` renders it so far, inside `<Hardware>`.
-  - `dashboard/src/pages/DashboardPage.jsx` is the first page on VU1: one device built from the `ui/vu1` blocks, inside its own `<Hardware>` and `<Toasts>` root until VU1-P7 moves that wrap to `main.jsx`. The source filter narrows the model breakdown on the client (`sourceSlice` in `ui/vu1/derive.ts`); the data hooks take no source. `App.jsx`'s loading shell uses the VU1 `StateScreen`.
-  - `dashboard/src/pages/LandingPage.jsx` is on VU1 too: TopBar, InstallCommand, ClientList and GlobalMeter on the 12-column grid, inside its own `<Hardware>` and `<Toasts>` root until VU1-P7. Its hero type and chip styles live in `ui/vu1/landing.css`; the meter shows frozen example figures.
-  - `dashboard/src/ui/vu1/` holds the VU1 business blocks built from the hardware kit (TopBar, UsageScreen, PeriodSwitch, SourceSegment, StatMinis, ModelList, RankScreen, MyRankLcd, Pager, InstallCommand, ShareKey and InstallKey, UpgradeToast, StateScreen), their styles in `blocks.css`, and the data helpers both UIs share: `types.ts`, `format.ts`, `derive.ts`, `rank.ts`, `grouping.ts`. Blocks format and derive; they never fetch. `/__vu1`, the Landing page, the Dashboard and `/leaderboard` (`dashboard/src/pages/LeaderboardPage.jsx`) render them so far; `/leaderboard/u/:id` public profiles are gone and redirect to `/leaderboard`.
-  - `dashboard/src/ui/gallery/` is the dev-only token and component gallery at `/__2049` and the SPEC-01 gallery at `/__vu1`, both registered in `dashboard/src/main.jsx`.
-  - `dashboard/src/styles/vu1.css` holds the VU1 layout tokens: the 4px spacing scale `--spacing-s1..s8`, the page and device gutters, `--container-shell`, the 12-column `grid-page` and `grid-device` utilities, and the self-hosted IBM Plex Mono faces.
-  - `dashboard/src/styles/2049.css` holds the 2049 tokens. `dashboard/src/styles.css` imports it and keeps a small v1 theme for `AgentResourcePage`, `dashboard/src/components/ErrorBoundary.jsx` and the sign-in redirects.
-  - `dashboard/design/2049/` holds the design boards (`source/*.dc.html`, with `Main.dc.html` as the spec board) and their PNG renders.
+  - `dashboard/src/main.jsx` wraps the router in `dashboard/src/Shell.jsx`, the one `<Hardware>` root with the toast stack, so every route renders inside the VU-1 skin.
+  - `dashboard/src/pages/` holds the routed pages. A page arranges blocks on the 12-column grid and passes data. `DashboardPage.jsx`, `LeaderboardPage.jsx` and `LandingPage.jsx` are each one VU-1 device; `AgentResourcePage.jsx` uses the Landing type. The source filter narrows the model breakdown on the client (`sourceSlice` in `ui/vu1/derive.ts`); the data hooks take no source. `/leaderboard/u/:id` public profiles are gone and redirect to `/leaderboard`.
+  - `dashboard/src/ui/vu1/` holds the VU-1 blocks built from the hardware kit (TopBar, UsageScreen, PeriodSwitch, SourceSegment, StatMinis, ModelList, RankScreen, MyRankLcd, Pager, InstallCommand, Keys, IdentityStrip, UpgradeToast, StateScreen, ClientList, GlobalMeter), their styles in `blocks.css` and `landing.css`, and the data helpers `types.ts`, `format.ts`, `derive.ts`, `rank.ts`, `grouping.ts`. Blocks format and derive; they never fetch.
+  - `dashboard/src/ui/hardware/` holds the SPEC-01 hardware kit (MIT, `LICENSE` beside it), installed with `npx shadcn add` from local copies of the spec-01.vercel.app registry JSON (`@ui-sdk/react` and `@ui-sdk/core` pinned to `0.1.0-beta.5`). `lib/` holds its page-wide behaviors. The local edits are marked `vibeusage patch` and listed in `dashboard/DESIGN.md`.
+  - `dashboard/src/ui/gallery/` is the dev-only SPEC-01 gallery at `/__vu1`, registered in `dashboard/src/main.jsx`.
+  - `dashboard/src/styles/vu1.css` holds the VU-1 layout tokens: the 4px spacing scale `--spacing-s1..s8`, the page and device gutters, `--container-shell`, the 12-column `grid-page` and `grid-device` utilities, and the self-hosted IBM Plex Mono faces. `dashboard/src/styles.css` imports Tailwind and it.
+  - `dashboard/scripts/check-design-ssot.mjs` (`npm --prefix dashboard run guardrail:design`) blocks spacing off the scale, literal colors and `text-[Npx]` outside the kit.
 - Auth/session integration first-read path:
   - `dashboard/src/main.jsx`
   - `dashboard/src/App.jsx`
@@ -113,7 +108,7 @@ This document is the single source of truth for repository navigation. Use it to
   - Start at `dashboard/src/hooks/use-usage-model-breakdown.ts` for live fetch, cache fallback, and live snapshot reuse.
   - Then read `dashboard/src/lib/model-breakdown.ts` for final fleet/top-model label derivation.
   - Then read `dashboard/src/pages/DashboardPage.jsx` for summary-level fallback selection.
-  - Then read `dashboard/src/ui/2049/blocks/Models.tsx` and `grouping.ts` for the rendered model labels, and `dashboard/src/ui/2049/blocks/CostAnalysisModal.tsx` for the cost breakdown.
+  - Then read `dashboard/src/ui/vu1/ModelList.tsx` and `dashboard/src/ui/vu1/grouping.ts` for the rendered model labels.
   - Browser-local cache helpers live in `dashboard/src/lib/dashboard-cache.ts` and `dashboard/src/lib/dashboard-live-snapshot.ts`.
 - Dashboard provenance contract:
   - `edge` means successful backend truth, including immediate reuse of the last successful live snapshot while a refresh is in flight.

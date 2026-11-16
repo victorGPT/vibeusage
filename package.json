@@ -29,7 +29,7 @@
   "scripts": {
     "build:insforge": "node scripts/build-insforge-functions.cjs",
     "build:insforge:check": "node scripts/build-insforge-functions.cjs --check",
-    "ci:local": "npm test && npm run validate:copy && npm run validate:ui-hardcode && npm run validate:guardrails && node --test test/architecture-guardrails.test.js && npm run build:insforge:check && npm --prefix dashboard run build",
+    "ci:local": "npm run validate:design && npm test && npm run validate:copy && npm run validate:ui-hardcode && npm run validate:guardrails && node --test test/architecture-guardrails.test.js && npm run build:insforge:check && npm --prefix dashboard run build",
     "copy:pull": "node scripts/copy-sync.cjs pull",
     "copy:push": "node scripts/copy-sync.cjs push",
     "dashboard:build": "npm --prefix dashboard run build",
@@ -42,6 +42,7 @@
     "smoke": "node scripts/smoke/insforge-smoke.cjs",
     "test": "node --test --test-concurrency=1 test/*.test.js",
     "validate:copy": "node scripts/validate-copy-registry.cjs",
+    "validate:design": "npm --prefix dashboard run guardrail:design",
     "validate:guardrails": "node scripts/validate-architecture-guardrails.cjs",
     "validate:insforge2-db": "node scripts/ops/insforge2-db-validate.cjs",
     "validate:pr-risk-layer": "node scripts/ops/pr-risk-layer-gate.cjs --config scripts/ops/pr-risk-layer-gate.config.json",

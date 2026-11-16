@@ -36,7 +36,7 @@ describe("App", () => {
     },
   );
 
-  it("hands the latest CLI version to the VU-1 leaderboard instead of drawing the 2049 banner over it", async () => {
+  it("hands the latest CLI version to the VU-1 leaderboard and draws no banner over it", async () => {
     renderAt("/leaderboard?mock=1");
     expect(await screen.findByText("leaderboard page · 9.9.9")).toBeTruthy();
     expect(screen.queryByRole("region", { name: "Update available" })).toBeNull();

@@ -1,28 +1,10 @@
 @import "tailwindcss" source(none);
-@import "./styles/2049.css";
 @import "./styles/vu1.css";
 @source "../index.html";
 @source "./**/*.{js,jsx,ts,tsx}";
 
 /* v4 wraps hover in @media (hover: hover); keep v3 behavior on touch devices. */
 @custom-variant hover (&:hover);
-
-/* v1 theme, kept only for the pages listed below :root. 2049 tokens live in styles/2049.css. */
-@theme {
-  --font-mono:
-    "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-    "Liberation Mono", "Courier New", monospace;
-
-  --tracking-caps: 0.22em;
-
-  --color-ink: #00ff41;
-  --color-ink-bright: #e8ffe9;
-  --color-ink-text: rgba(0, 255, 65, 0.6);
-  --color-ink-muted: rgba(0, 255, 65, 0.35);
-  --color-ink-line: rgba(0, 255, 65, 0.18);
-
-  --color-surface: #050505;
-}
 
 /* v3 preflight defaults that v4 dropped. */
 @layer base {
@@ -55,12 +37,6 @@
   }
 }
 
-/* v1 tokens. What is left styles the pages 2049 has not replaced: AgentResourcePage
- * (/developers and the docs routes), ErrorBoundary and the sign-in redirects. */
-:root {
-  color-scheme: dark;
-}
-
 html,
 body {
   height: 100%;
@@ -68,82 +44,9 @@ body {
 
 body {
   margin: 0;
-  background: var(--color-surface);
-  color: var(--color-ink);
-  font-family:
-    "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-    "Liberation Mono", "Courier New", monospace;
-  font-size: 13px;
-  line-height: 1.5;
 }
 
-/* v1 type scale. Plain declarations, not @theme --text-* tokens: a v4 font-size
- * utility yields to leading-*, tracking-* and font-* at any breakpoint, while v3 let a
- * later breakpoint's size reset them, and the pages rely on that. */
-@utility text-display-2 {
-  font-size: 40px;
-  line-height: 1.05;
-  letter-spacing: -0.02em;
-  font-weight: 900;
-}
-
-@utility text-display-3 {
-  font-size: 28px;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-  font-weight: 900;
-}
-
-@utility text-heading {
-  font-size: 14px;
-  line-height: 1.25;
-  letter-spacing: 0.12em;
-  font-weight: 700;
-}
-
-@utility text-body {
-  font-size: 13px;
-  line-height: 1.5;
-  letter-spacing: 0;
-  font-weight: 500;
-}
-
-@utility text-caption {
-  font-size: 11px;
-  line-height: 1.3;
-  letter-spacing: 0.12em;
-  font-weight: 600;
-}
-
-@utility text-micro {
-  font-size: 10px;
-  line-height: 1.2;
-  letter-spacing: 0.22em;
-  font-weight: 700;
-}
-
-/* AgentResourcePage backdrop: scanlines over a faint grid. */
-@utility fx-scanline {
-  background-image: linear-gradient(
-    to bottom,
-    rgba(18, 16, 16, 0) 50%,
-    rgba(0, 0, 0, 0.1) 50%
-  );
-  background-size: 100% 4px;
-}
-
-@utility fx-grid {
-  background-image:
-    linear-gradient(rgba(0, 255, 65, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 255, 65, 0.03) 1px, transparent 1px);
-  background-size: 50px 50px;
-}
-
-/* Screenshot mode — silence atmospheric layers for deterministic capture. */
-.screenshot-mode .fx-scanline {
-  display: none !important;
-}
-
+/* Share capture: freeze motion so the PNG is deterministic. */
 html.screenshot-capture,
 body.screenshot-capture {
   scroll-behavior: auto;
@@ -154,8 +57,3 @@ html.screenshot-capture * {
   animation: none !important;
   transition: none !important;
 }
-
-body.screenshot-capture .fx-scanline {
-  opacity: 0 !important;
-}
-

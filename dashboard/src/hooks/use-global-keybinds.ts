@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 
-// Global keybind layer — DESIGN.md §11 v3.
-// Hacker / cyberpunk register expects power-user keyboard control.
+// Global keybind layer (DESIGN.md "Keyboard").
 // All bindings are single-key, fire on keydown when no input is focused.
 
 export interface GlobalKeybindHandlers {

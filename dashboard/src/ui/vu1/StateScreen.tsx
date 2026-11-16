@@ -4,7 +4,7 @@ import { Button } from "#src/ui/hardware/button.tsx";
 import { InstallCommand } from "./InstallCommand";
 import "./blocks.css";
 
-export type StateVariant = "loading" | "empty" | "error" | "signed-out" | "install" | "expired" | "invalid";
+export type StateVariant = "loading" | "empty" | "error" | "crash" | "signed-out" | "install" | "expired" | "invalid";
 
 const SKELETON = ["w-3/4", "w-1/2", "w-2/3"];
 
@@ -13,6 +13,7 @@ function title(variant: StateVariant) {
     loading: copy("vu1.state.loading"),
     empty: copy("vu1.state.empty_title"),
     error: copy("vu1.state.error_title"),
+    crash: copy("vu1.state.crash_title"),
     "signed-out": copy("vu1.state.signed_out_title"),
     install: copy("vu1.state.install_title"),
     expired: copy("vu1.state.expired_title"),
@@ -20,9 +21,15 @@ function title(variant: StateVariant) {
   }[variant];
 }
 
-type StateScreenProps = { variant: StateVariant; linkCode?: string | null; onRetry?: () => void; onSignIn?: () => void };
+type StateScreenProps = {
+  variant: StateVariant;
+  linkCode?: string | null;
+  detail?: string;
+  onRetry?: () => void;
+  onSignIn?: () => void;
+};
 
-export function StateScreen({ variant, linkCode, onRetry, onSignIn }: StateScreenProps) {
+export function StateScreen({ variant, linkCode, detail, onRetry, onSignIn }: StateScreenProps) {
   const name = title(variant);
   return (
     <section data-vu1="screen" aria-label={name} aria-busy={variant === "loading" || undefined} className="min-h-60">
@@ -34,6 +41,15 @@ export function StateScreen({ variant, linkCode, onRetry, onSignIn }: StateScree
           <p data-vu1="state-body">{copy("vu1.state.error_body")}</p>
           <div>
             <Button onClick={onRetry}>{copy("vu1.state.retry")}</Button>
+          </div>
+        </>
+      ) : null}
+      {variant === "crash" ? (
+        <>
+          <p data-vu1="state-body">{copy("vu1.state.crash_body")}</p>
+          <p data-vu1="state-body">{detail}</p>
+          <div>
+            <Button onClick={onRetry}>{copy("vu1.state.reload")}</Button>
           </div>
         </>
       ) : null}

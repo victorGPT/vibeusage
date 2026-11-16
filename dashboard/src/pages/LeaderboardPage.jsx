@@ -7,8 +7,6 @@ import { isMockEnabled } from "../lib/mock-data";
 import { isScreenshotModeEnabled } from "../lib/screenshot-mode";
 import { getLeaderboard } from "../lib/vibeusage-api";
 import { Device, DevicePlate } from "../ui/hardware/device.tsx";
-import { Hardware } from "../ui/hardware/hardware.tsx";
-import { Toasts } from "../ui/hardware/toaster.tsx";
 import { periodOptions } from "../ui/vu1/labels.ts";
 import { MyRankLcd } from "../ui/vu1/MyRankLcd.tsx";
 import { Pager } from "../ui/vu1/Pager.tsx";
@@ -20,7 +18,6 @@ import { UpgradeToast } from "../ui/vu1/UpgradeToast.tsx";
 
 const PAGE_LIMIT = 10;
 const METRIC = "all";
-const KEY_COLOR = { l: 0.64, c: 0.31, h: 48 };
 const REPO = "victorGPT/vibeusage";
 export const GITHUB_URL = `https://github.com/${REPO}`;
 const HREFS = { home: "/", dashboard: "/", leaderboard: "/leaderboard" };
@@ -169,7 +166,7 @@ export function LeaderboardPage({
   }
 
   return (
-    <Hardware keyColor={KEY_COLOR} className="min-h-screen px-s4 pt-s4 pb-s8">
+    <div className="px-s4 pt-s4 pb-s8">
       <div className="mx-auto max-w-shell">
         <TopBar
           active="leaderboard"
@@ -210,7 +207,6 @@ export function LeaderboardPage({
         </main>
       </div>
       {latestVersion && !isScreenshotModeEnabled(window.location.search) ? <UpgradeToast requiredVersion={latestVersion} onUpdate={copyUpgradeCommand} /> : null}
-      <Toasts />
-    </Hardware>
+    </div>
   );
 }

@@ -108,7 +108,7 @@ export function BlocksVu1() {
           active="dashboard"
           signedIn={signedIn}
           hrefs={HREFS}
-          githubHref={copy("ui2049.top_nav.github_href")}
+          githubHref={copy("vu1.top.github_href")}
           stars={130}
           onSignIn={() => setSignedIn(true)}
           onSignOut={() => setSignedIn(false)}

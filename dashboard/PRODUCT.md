@@ -20,7 +20,7 @@ product
 
 ## Product Purpose
 
-VibeUsage turns scattered AI CLI token consumption into one **competitive, screenshot-native artifact**. It is not an enterprise ops dashboard, not a billing console, not a wellness "digital detox" reflection. It is a developer's social currency made of their own data. The numbers come from the terminal, carry an amber stamp, and get posted to X.
+VibeUsage turns scattered AI CLI token consumption into one **competitive, screenshot-native artifact**. It is not an enterprise ops dashboard, not a billing console, not a wellness "digital detox" reflection. It is a developer's social currency made of their own data. The numbers come from the terminal, read out on a desk instrument, and get posted to X.
 
 **Success looks like**:
 - Users screenshot a single Panel and post it without further editing.
@@ -29,11 +29,11 @@ VibeUsage turns scattered AI CLI token consumption into one **competitive, scree
 
 ## Brand Personality
 
-Three words: **hacker · retro · cyberpunk**.
+Three words: **instrument · honest · tactile**.
 
-- **Hacker**: honest with the numbers, no rounding for comfort, no "you're amazing!" copy. Every label is short, upper-case and fits on one line.
-- **Retro**: CRT screen material, with scanlines, a vignette and phosphor glow on the big number. Material from old terminals, not 2024 SaaS.
-- **Cyberpunk**: one amber accent on a deep teal ground, and density that signals signal. Blade Runner 2049 street-screen tech, not Web3 dapp purple-blur.
+- **Instrument**: every page is one device, the VU-1. A light gray panel, printed labels, a dark screen for the numbers that matter and gray LCD lists for the rest. It reads like a meter on a desk, not a web dashboard.
+- **Honest**: no rounding for comfort, no "you're amazing!" copy. Every label is short, upper-case and fits on one line, as if printed on the case.
+- **Tactile**: square keys you press, a slide switch for the period, LEDs that light. One red key color marks what is live or yours. Physical controls, not 2024 SaaS cards.
 
 **Tone**:
 - Captions are technical, sometimes self-deprecating. ("you've spent more on Sonnet than on coffee this month")
@@ -41,7 +41,7 @@ Three words: **hacker · retro · cyberpunk**.
 - No emoji in the UI. No exclamation marks in the copy.
 - Empty states read like terminal stderr, not friendly mascot text.
 
-**Emotional goal**: the user feels **seen and slightly called out** — like an old terminal friend that knows exactly how much money they burned today.
+**Emotional goal**: the user feels **seen and slightly called out** — like a meter on the desk that knows exactly how much money they burned today.
 
 ## Anti-references
 
@@ -50,18 +50,18 @@ What this should explicitly **not** look like:
 - **Datadog / Grafana / New Relic** — corporate ops palette (navy, slate, hospital-blue), 24 widgets vying for attention, hover tooltips explaining every axis. VibeUsage assumes the user is a developer who can read a number.
 - **GitHub Wrapped / Spotify Wrapped** — confetti, emoji volcanoes, gradient banners, cartoon illustrations, "you're a top 0.1% listener!" framing. A milestone should feel like a debrief, not a celebration.
 - **SaaS marketing template** — hero-metric block (big number, small label, supporting stats, gradient accent, mid-card CTA), glass cards, gradient text, identical "icon + heading + paragraph" tile grids.
-- **Web3 dapp neon** — purple-pink-cyan gradients, frosted glass, "futuristic" via blur instead of via density. Cyberpunk via signal, not via Photoshop filters.
+- **Web3 dapp neon** — purple-pink-cyan gradients, frosted glass, "futuristic" via blur instead of via density. The device earns its look from layout and material, not filters.
 - **Friendly fintech** — Apple Wallet pastels, soft shadows, large rounded cards. Numbers should not be cushioned.
 
 ## Design Principles
 
-1. **Screenshot is the product**. Every core Panel must be screenshot-worthy on its own. Its composition, density and signature element (the `Stamp` footer, the scanlined main screen) survive cropping. If a panel only works embedded in the page, redesign it.
+1. **Screenshot is the product**. The device must be screenshot-worthy on its own. Its composition, density and signature parts (the nameplate, the dark screen, the red key) survive cropping, and the Share key captures exactly the device. If a part only works embedded in the page, redesign it.
 
-2. **Numbers as hero, labels as supporting cast**. The `Display` number and the screen and value sizes carry the weight. Captions and headings exist to label numbers, never to compete with them. Hierarchy ratio ≥ 1.25 is non-negotiable.
+2. **Numbers as hero, labels as supporting cast**. The readouts on the dark screen carry the weight. Captions and headings exist to label numbers, never to compete with them. Hierarchy ratio ≥ 1.25 is non-negotiable.
 
-3. **Hacker honest, not corporate kind**. No tooltips that explain obvious things. No "great job!" affirmations. No reassuring rounding. Errors look like stderr. Empty states look like `// no data yet`. The product respects the user's literacy.
+3. **Honest, not corporate kind**. No tooltips that explain obvious things. No "great job!" affirmations. No reassuring rounding. Errors look like stderr. Empty states look like `// no data yet`. The product respects the user's literacy.
 
-4. **Retro-cyberpunk as material, not decoration**. Scanlines, the screen vignette and phosphor glow are structural. They earn their place by carrying signal (the main number, the current item, the user's own row). They are never "atmosphere added at the end".
+4. **Hardware as material, not decoration**. The panel, keys, LEDs and screens are structural. They earn their place by carrying signal (the main readout, the current page, the user's own row). Grouping comes from the 12-column grid and distance, not from borders or fills.
 
 5. **Compete, don't comfort**. Leaderboard, handle, rank and the leader mark are core narrative. The product is partly about ranking against peers. Do not soften ranks ("everyone's a winner"), do not hide numbers behind progress bars, do not vague-up cost.
 
@@ -70,11 +70,11 @@ What this should explicitly **not** look like:
 **Target**: WCAG 2.1 AA on contrast, keyboard navigation, focus visibility.
 
 **Specific accommodations**:
-- The 2049 screen material is static. The scanlines do not move or flash.
+- Key sounds and haptics start off. The device does not flash or move on its own.
 - `screenshot-capture` mode (already implemented) disables all motion and freezes layout. The share flow uses it.
-- Information layering does not depend on color discrimination. The amber "me" row and the teal leader mark each come with a structural mark (position number, badge, top rule).
-- The shadcn controls (button, select, switch, toggle group, table) and the TopNav, RankTable, DotHeatmap and Linked links render a 2px amber outline (`outline-ring`) on `:focus-visible`.
-- Labels start at 11px and badges at 10px. Smaller sizes are not in the token system (DESIGN.md section 3).
+- Information layering does not depend on color discrimination. The red "me" row also carries its rank number and is pinned to the top of the list when it is off the page.
+- The kit draws focus rings for keyboard users only (`src/ui/hardware/lib/input-modality.ts`). The heatmap walks day by day with the arrow keys and reads the day out.
+- Printed labels are 10px upper case (DESIGN.md section 4).
 - All UI text routes through `dashboard/src/content/copy.csv`. No string is hard-coded in components.
 
 **Known gap**: no formal screen-reader pass yet for the dashboard chart components. To be addressed in `harden` step of v3.

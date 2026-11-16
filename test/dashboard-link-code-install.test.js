@@ -5,16 +5,7 @@ const path = require("node:path");
 
 const copyPath = path.join(__dirname, "..", "dashboard", "src", "content", "copy.csv");
 const pagePath = path.join(__dirname, "..", "dashboard", "src", "pages", "DashboardPage.jsx");
-const statePath = path.join(
-  __dirname,
-  "..",
-  "dashboard",
-  "src",
-  "ui",
-  "2049",
-  "blocks",
-  "StateScreen.tsx",
-);
+const statePath = path.join(__dirname, "..", "dashboard", "src", "ui", "vu1", "StateScreen.tsx");
 
 function readFile(filePath) {
   return fs.readFileSync(filePath, "utf8");
@@ -44,7 +35,7 @@ test("DashboardPage hands the unexpired link code to the install StateScreen", (
   assert.match(src, /<StateScreen[\s\S]*?linkCode=\{resolvedLinkCode\}/);
   assert.ok(
     screenSrc.includes("dashboard.install.cmd.init_link_code"),
-    "expected link code install command for the CommandBox",
+    "expected link code install command for the InstallCommand",
   );
-  assert.match(screenSrc, /<CommandBox/);
+  assert.match(screenSrc, /<InstallCommand/);
 });

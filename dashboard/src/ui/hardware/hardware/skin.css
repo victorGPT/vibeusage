@@ -1,6 +1,9 @@
 /* The hardware skin. Everything is scoped to [data-skin="hardware"], so it
    styles only what's inside the <Hardware> root. The order matters: later
-   files refine earlier ones. */
+   files refine earlier ones.
+   vibeusage patch: the accordion, dials, dpad, navbar and wheel sheets are gone;
+   nothing in the app renders those parts. Keep date-setter and side-tabs: one
+   defines --lcd-key for the LEDs and bar graph, the other rounds the power LED. */
 @import "./tokens.css";
 @import "./layout.css";
 @import "./hardware-textures.css";
@@ -12,15 +15,10 @@
 @import "./hardware-display.css";
 @import "./hardware-side-tabs.css";
 @import "./hardware-date-setter.css";
-@import "./hardware-wheel.css";
 @import "./hardware-screens.css";
 @import "./hardware-tabs.css";
-@import "./hardware-accordion.css";
-@import "./hardware-dials.css";
-@import "./hardware-dpad.css";
 @import "./hardware-rocker.css";
 @import "./hardware-objects.css";
-@import "./hardware-navbar.css";
 @import "./hardware-lcd.css";
 @import "./hardware-slide-switch.css";
 @import "./hardware-page-wheel.css";

@@ -7,7 +7,6 @@ import { ButtonGroup } from "../hardware/button-group";
 import { CodeBlock } from "../hardware/code-block";
 import { Device } from "../hardware/device";
 import { Display } from "../hardware/display";
-import { Hardware } from "../hardware/hardware";
 import { Icon } from "../hardware/icon";
 import type { IconName } from "../hardware/icon";
 import { ItemList } from "../hardware/item-list";
@@ -17,7 +16,7 @@ import { Segmented } from "../hardware/segmented-control";
 import { Skeleton } from "../hardware/skeleton";
 import { SlideSwitch } from "../hardware/slide-switch";
 import { Tabs } from "../hardware/tabs";
-import { Toasts, notify } from "../hardware/toaster";
+import { notify } from "../hardware/toaster";
 import { BlocksVu1 } from "./BlocksVu1";
 
 // Dev-only SPEC-01 gallery mounted at /__vu1 (see main.jsx). Captions are component names or
@@ -168,7 +167,6 @@ const gap = (el: HTMLElement) =>
   `${getComputedStyle(el.querySelector("[data-grid]")!).columnGap}`;
 
 // SPEC-01's default key, orange-red (src/LabPanel.tsx in shuding/spec-01).
-const KEY = { l: 0.64, c: 0.31, h: 48 };
 
 const number = new Intl.NumberFormat("en-US");
 const compact = new Intl.NumberFormat("en-US", {
@@ -227,11 +225,7 @@ function Rocker() {
 export function GalleryVu1() {
   useEffect(forceStateRules, []);
   return (
-    <Hardware
-      keyColor={KEY}
-      data-vu1-gallery
-      className="min-h-screen px-s4 py-s7"
-    >
+    <div data-vu1-gallery className="px-s4 py-s7">
       <main className="grid-page mx-auto max-w-shell gap-y-s5">
         <BlocksVu1 />
         <Panel name="spacing --spacing-s1..s8" span="col-span-12">
@@ -377,8 +371,7 @@ export function GalleryVu1() {
           <Skeleton lines={3} />
         </Panel>
       </main>
-      <Toasts />
-    </Hardware>
+    </div>
   );
 }
 

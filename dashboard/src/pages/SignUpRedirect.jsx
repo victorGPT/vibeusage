@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   storePostAuthPathFromSearch,
@@ -47,5 +47,5 @@ export function SignUpRedirect() {
     run();
   }, [callbackUrl, navigate]);
 
-  return <div className="min-h-screen bg-surface" />;
+  return null;
 }

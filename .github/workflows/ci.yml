@@ -26,6 +26,8 @@ jobs:
         run: npm ci
       - name: Install dashboard dependencies
         run: npm --prefix dashboard ci
+      - name: Design guardrail
+        run: npm run validate:design
       - name: Run tests
         run: npm test
       - name: Validate copy registry

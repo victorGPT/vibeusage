@@ -66,7 +66,7 @@ test("DashboardPage renders the VU1 device in mock order and drops the cut block
     last += 1 + index;
   }
   assert.match(src, /<StateScreen\b/, "expected StateScreen in the main slot");
-  for (const cut of ["CostAnalysisModal", "Projects", "DailyTable", "KeyboardCheatsheet", "RankRail", "useProjectUsageSummary", "ui/2049"]) {
+  for (const cut of ["CostAnalysisModal", "Projects", "DailyTable", "KeyboardCheatsheet", "RankRail", "useProjectUsageSummary"]) {
     assert.doesNotMatch(src, new RegExp(cut), `expected ${cut} gone from the page`);
   }
 });

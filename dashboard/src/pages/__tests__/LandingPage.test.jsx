@@ -8,7 +8,7 @@ import { LandingPage } from "../LandingPage.jsx";
 const SIGN_UP = "/sign-up?next=%2Fleaderboard";
 
 // jsdom has no ResizeObserver or CSS.supports; the kit's Device refits its zoom with the first and
-// <Hardware> probes caret support with the second.
+// probes caret support with the second.
 beforeAll(() => {
   globalThis.ResizeObserver ??= class {
     observe() {}
@@ -68,12 +68,6 @@ describe("LandingPage", () => {
     }
   });
 
-  it("renders inside the hardware skin", () => {
-    const { container } = render(<LandingPage signInUrl="/sign-in" signUpUrl={SIGN_UP} />);
-    expect(container.firstElementChild.getAttribute("data-skin")).toBe("hardware");
-    expect(screen.getByRole("heading", { level: 1, name: copy("vu1.landing.title") })).toBeTruthy();
-  });
-
   it("keeps the product summary as visible body text for crawlers", () => {
     render(<LandingPage signInUrl="/sign-in" signUpUrl={SIGN_UP} />);
     const keys = ["title", "summary", "point1", "point2", "point3", "roadmap"].map((k) => `landing.seo.${k}`);
@@ -93,6 +87,6 @@ describe("LandingPage", () => {
 
   it("never renders a raw copy key", () => {
     const { container } = render(<LandingPage signInUrl="/sign-in" signUpUrl={SIGN_UP} />);
-    expect(container.textContent).not.toMatch(/\b(vu1|ui2049|landing|dashboard|leaderboard)\.[a-z_]+/);
+    expect(container.textContent).not.toMatch(/\b(vu1|landing|dashboard|leaderboard)\.[a-z_]+/);
   });
 });

@@ -10,7 +10,7 @@ type StatMinisProps = { rows: DailyRow[]; dateKey?: DateKey; rolling?: UsageRoll
 const sum = (list: number[]) => list.reduce((total, value) => total + value, 0);
 
 // Rolling windows come from the API when it sends them; otherwise only daily rows can stand in
-// for them (the same rule as the 2049 Trend).
+// for them.
 export function StatMinis({ rows, dateKey = "day", rolling }: StatMinisProps) {
   const shown = rows.filter((row) => !row.future);
   const values = shown.map(tokens);
