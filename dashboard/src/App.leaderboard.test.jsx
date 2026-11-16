@@ -7,7 +7,7 @@ import App from "./App.jsx";
 
 vi.mock("./lib/npm-version", () => ({ fetchLatestTrackerVersion: async () => "9.9.9" }));
 vi.mock("./pages/LeaderboardPage.jsx", () => ({
-  LeaderboardPage: ({ latestVersion }) => <p>leaderboard page · {latestVersion ?? "none"}</p>,
+  LeaderboardPage: ({ latestVersion }) => <p>{`leaderboard page · ${latestVersion ?? "none"}`}</p>,
 }));
 
 function Where() {
@@ -15,13 +15,14 @@ function Where() {
   return <output aria-label="path">{location.pathname}</output>;
 }
 
-const renderAt = (path) =>
-  render(
+function renderAt(path) {
+  return render(
     <MemoryRouter initialEntries={[path]}>
       <App />
       <Where />
     </MemoryRouter>,
   );
+}
 
 // isMockEnabled reads the window's query, not the router's.
 beforeEach(() => window.history.pushState({}, "", "/?mock=1"));
