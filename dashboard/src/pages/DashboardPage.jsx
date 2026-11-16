@@ -1,6 +1,6 @@
-import React, { startTransition, useCallback, useEffect, useMemo, useState } from "react";
+import React, { startTransition, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useActivityHeatmap } from "../hooks/use-activity-heatmap";
-import { useProjectUsageSummary } from "../hooks/use-project-usage-summary";
+import { useGlobalKeybinds } from "../hooks/use-global-keybinds";
 import { useRecentUsageData } from "../hooks/use-recent-usage-data";
 import { useTrendData } from "../hooks/use-trend-data";
 import { useUsageData } from "../hooks/use-usage-data";
@@ -11,21 +11,19 @@ import {
   resolveAuthAccessToken,
 } from "../lib/auth-token";
 import { copy } from "../lib/copy";
-import { getAppVersion } from "../lib/app-version";
 import { getRangeForPeriod } from "../lib/date-range";
 import { trimLeadingZeroMonths } from "../lib/details";
 import { selectRollingUsageForDisplay } from "../lib/dashboard-period-bindings";
-import { formatUsdCurrency, toDisplayNumber, toFiniteNumber } from "../lib/format";
+import { toDisplayNumber, toFiniteNumber } from "../lib/format";
+import { fetchGithubRepoMeta } from "../lib/github-repo-meta";
 import { shouldShowEmptyState, shouldShowInstallCard } from "../lib/install-status";
 import { getMockNow, isMockEnabled } from "../lib/mock-data";
-import { buildFleetData, resolveModelDisplayName } from "../lib/model-breakdown";
+import { resolveModelDisplayName } from "../lib/model-breakdown";
 import { safeWriteClipboard, safeWriteClipboardImage } from "../lib/safe-browser";
 import { isScreenshotModeEnabled } from "../lib/screenshot-mode";
 import {
-  formatTimeZoneShortLabel,
   getBrowserTimeZone,
   getBrowserTimeZoneOffsetMinutes,
-  getLocalDayKey,
 } from "../lib/timezone";
 import {
   getLeaderboard,
@@ -35,27 +33,27 @@ import {
   getPublicViewProfile,
   requestInstallLinkCode,
 } from "../lib/vibeusage-api";
-import { Heading } from "../ui/2049/base/Heading";
-import { Label } from "../ui/2049/base/Label";
-import { PageFooter } from "../ui/2049/base/PageFooter";
-import { DailyTable } from "../ui/2049/blocks/DailyTable";
-import { subscriptionLabels } from "../ui/vu1/derive";
-import { DotHeatmap } from "../ui/2049/blocks/DotHeatmap";
-import { IdentityBar } from "../ui/2049/blocks/IdentityBar";
-import { Models } from "../ui/2049/blocks/Models";
-import { Projects } from "../ui/2049/blocks/Projects";
-import { RankRail } from "../ui/2049/blocks/RankRail";
-import { Readout } from "../ui/2049/blocks/Readout";
-import { periodLabel } from "../ui/2049/blocks/shared";
-import { StateScreen } from "../ui/2049/blocks/StateScreen";
-import { TopNav } from "../ui/2049/blocks/TopNav";
-import { Trend } from "../ui/2049/blocks/Trend";
-import { CostAnalysisModal } from "../ui/2049/blocks/CostAnalysisModal.tsx";
-import { KeyboardCheatsheet } from "../ui/2049/blocks/KeyboardCheatsheet.tsx";
-import { Button } from "../ui/shadcn/button";
-import { useGlobalKeybinds } from "../hooks/use-global-keybinds";
+import { Device } from "../ui/hardware/device";
+import { Hardware } from "../ui/hardware/hardware";
+import { Toasts, notify } from "../ui/hardware/toaster";
+import { DASHBOARD_SOURCES, sourceSlice, subscriptionLabels } from "../ui/vu1/derive";
+import { IdentityStrip } from "../ui/vu1/IdentityStrip";
+import { InstallKey, ShareKey } from "../ui/vu1/Keys";
+import { pointLabel } from "../ui/vu1/labels";
+import { ModelList } from "../ui/vu1/ModelList";
+import { PeriodSwitch } from "../ui/vu1/PeriodSwitch";
+import { SourceSegment } from "../ui/vu1/SourceSegment";
+import { StateScreen } from "../ui/vu1/StateScreen";
+import { StatMinis } from "../ui/vu1/StatMinis";
+import { TopBar } from "../ui/vu1/TopBar";
+import { UpgradeToast } from "../ui/vu1/UpgradeToast";
+import { UsageScreen } from "../ui/vu1/UsageScreen";
 
-const DETAILS_PAGED_PERIODS = new Set(["day", "total"]);
+// SPEC-01's default key color (the orange-red the kit ships with).
+const KEY_COLOR = { l: 0.64, c: 0.31, h: 48 };
+const GITHUB_REPO = "victorGPT/vibeusage";
+const HREFS = { home: "/", dashboard: "/", leaderboard: "/leaderboard" };
+const LEADERBOARD_PERIODS = new Set(["week", "month", "total"]);
 
 function hasUsageValue(value, level) {
   if (typeof level === "number" && level > 0) return true;
@@ -128,8 +126,10 @@ export function DashboardPage({
   publicMode = false,
   publicToken = null,
   signInUrl = "/sign-in",
+  latestVersion = null,
 }) {
-  const [costModalOpen, setCostModalOpen] = useState(false);
+  const deviceRef = useRef(null);
+  const [stars, setStars] = useState(null);
   const [linkCode, setLinkCode] = useState(null);
   const [linkCodeExpiresAt, setLinkCodeExpiresAt] = useState(null);
   const [linkCodeLoading, setLinkCodeLoading] = useState(false);
@@ -414,8 +414,33 @@ export function DashboardPage({
     };
   }, [linkCodeExpiresAt]);
 
-  // ponytail: one page of 100 ranks. When my rank is past 100 the entry ahead is not in it, so
-  // RankRail hides To-pass; a second request at offset rank-4 would bring it back.
+
+  const timeZone = useMemo(() => getBrowserTimeZone(), []);
+  const tzOffsetMinutes = useMemo(() => getBrowserTimeZoneOffsetMinutes(), []);
+  const mockNow = useMemo(() => getMockNow(), []);
+  const cacheKey = publicMode ? null : auth?.userId || auth?.email || null;
+  const [selectedPeriod, setSelectedPeriod] = useState("week");
+  const [source, setSource] = useState("all");
+  const transitionSelectedPeriod = useCallback((nextPeriod) => {
+    startTransition(() => {
+      setSelectedPeriod(nextPeriod);
+    });
+  }, []);
+  const period = screenshotMode ? "total" : selectedPeriod;
+  const range = useMemo(
+    () =>
+      getRangeForPeriod(period, {
+        timeZone,
+        offsetMinutes: tzOffsetMinutes,
+        now: mockNow,
+      }),
+    [mockNow, period, timeZone, tzOffsetMinutes],
+  );
+  const from = range.from;
+  const to = range.to;
+  const rankPeriod = LEADERBOARD_PERIODS.has(period) ? period : "week";
+
+  // Only my row is read, for the Rank readout; the leaderboard has no Day board, so Day reads the week.
   useEffect(() => {
     if (publicMode || (!authTokenReady && !mockEnabled)) {
       setRankBoard(null);
@@ -439,8 +464,8 @@ export function DashboardPage({
         const data = await getLeaderboard({
           baseUrl,
           accessToken: resolvedToken,
-          period: "week",
-          limit: 100,
+          period: rankPeriod,
+          limit: 1,
           offset: 0,
           signal: controller.signal,
         });
@@ -455,59 +480,18 @@ export function DashboardPage({
       active = false;
       controller.abort();
     };
-  }, [authTokenReady, baseUrl, effectiveAuthToken, mockEnabled, publicMode]);
+  }, [authTokenReady, baseUrl, effectiveAuthToken, mockEnabled, publicMode, rankPeriod]);
 
-  const timeZone = useMemo(() => getBrowserTimeZone(), []);
-  const tzOffsetMinutes = useMemo(() => getBrowserTimeZoneOffsetMinutes(), []);
-  const mockNow = useMemo(() => getMockNow(), []);
-  const cacheKey = publicMode ? null : auth?.userId || auth?.email || null;
-  const [selectedPeriod, setSelectedPeriod] = useState("week");
-  const transitionSelectedPeriod = useCallback((nextPeriod) => {
-    startTransition(() => {
-      setSelectedPeriod(nextPeriod);
-    });
-  }, []);
-  const [cheatsheetOpen, setCheatsheetOpen] = useState(false);
-  const period = screenshotMode ? "total" : selectedPeriod;
-  const range = useMemo(
-    () =>
-      getRangeForPeriod(period, {
-        timeZone,
-        offsetMinutes: tzOffsetMinutes,
-        now: mockNow,
-      }),
-    [mockNow, period, timeZone, tzOffsetMinutes],
-  );
-  const from = range.from;
-  const to = range.to;
-  const weekRange = useMemo(
-    () =>
-      getRangeForPeriod("week", {
-        timeZone,
-        offsetMinutes: tzOffsetMinutes,
-        now: mockNow,
-      }),
-    [mockNow, timeZone, tzOffsetMinutes],
-  );
-  const timeZoneShortLabel = useMemo(
-    () => formatTimeZoneShortLabel({ timeZone, offsetMinutes: tzOffsetMinutes }),
-    [timeZone, tzOffsetMinutes],
-  );
-  const timeZoneRangeLabel = useMemo(
-    () => `Local time (${timeZoneShortLabel})`,
-    [timeZoneShortLabel],
-  );
-  const trendTimeZone = timeZone;
-  const trendTzOffsetMinutes = tzOffsetMinutes;
-  const todayKey = useMemo(
-    () =>
-      getLocalDayKey({
-        timeZone,
-        offsetMinutes: tzOffsetMinutes,
-        date: mockNow || new Date(),
-      }),
-    [mockNow, timeZone, tzOffsetMinutes],
-  );
+  useEffect(() => {
+    if (screenshotMode) return undefined;
+    let active = true;
+    fetchGithubRepoMeta(GITHUB_REPO)
+      .then((meta) => active && setStars(meta.stars))
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [screenshotMode]);
 
   const {
     summary,
@@ -548,19 +532,6 @@ export function DashboardPage({
     tzOffsetMinutes,
   });
 
-  const [projectUsageLimit, setProjectUsageLimit] = useState(3);
-  const { entries: projectUsageEntries } = useProjectUsageSummary({
-    baseUrl,
-    accessToken,
-    guestAllowed,
-    limit: projectUsageLimit,
-    allTime: true,
-    from,
-    to,
-    timeZone,
-    tzOffsetMinutes,
-  });
-
   const { rows: trendRows, refresh: refreshTrend } = useTrendData({
     baseUrl,
     accessToken,
@@ -570,8 +541,8 @@ export function DashboardPage({
     to,
     months: 24,
     cacheKey,
-    timeZone: trendTimeZone,
-    tzOffsetMinutes: trendTzOffsetMinutes,
+    timeZone,
+    tzOffsetMinutes,
     now: mockNow,
   });
 
@@ -598,23 +569,11 @@ export function DashboardPage({
     if (period === "total") return "month";
     return "day";
   }, [period]);
-  const detailsRows = useMemo(() => {
-    if (period === "day") {
-      return Array.isArray(trendRows) ? trendRows.filter((row) => row?.hour && !row?.future) : [];
-    }
-    if (period === "total") {
-      const rows = Array.isArray(trendRows)
-        ? trendRows.filter((row) => row?.month && !row?.future)
-        : [];
-      return trimLeadingZeroMonths(rows);
-    }
-    return Array.isArray(trendRows) ? trendRows.filter((row) => row?.day && !row?.future) : [];
-  }, [period, trendRows]);
-  const trendRowsForDisplay = useMemo(() => {
-    if (period === "day") {
-      return Array.isArray(trendRows) ? trendRows.filter((row) => row?.hour) : [];
-    }
-    return trendRows;
+  const barRows = useMemo(() => {
+    const rows = Array.isArray(trendRows) ? trendRows : [];
+    if (period === "day") return rows.filter((row) => row?.hour);
+    if (period === "total") return trimLeadingZeroMonths(rows.filter((row) => row?.month));
+    return rows;
   }, [period, trendRows]);
 
   const activeDays = useMemo(() => {
@@ -793,55 +752,27 @@ export function DashboardPage({
     intentUrl.searchParams.set("text", screenshotTwitterText);
     return intentUrl.toString();
   }, [screenshotTwitterText]);
+  // The share image is the whole device on the skin's desk color.
   const captureScreenshotBlob = useCallback(async () => {
-    if (typeof window === "undefined") return null;
-    const waitForHeatmapLatest = async () => {
-      const maxWaitMs = 2000;
-      const start = performance.now();
-      while (performance.now() - start < maxWaitMs) {
-        const el = document.querySelector("[data-heatmap-scroll='true']");
-        if (!el) return;
-        if (el.dataset.latestMonthReady === "true") return;
-        await new Promise((resolve) => requestAnimationFrame(resolve));
-      }
-    };
-    const root = document.querySelector("#root") || document.body;
+    const node = deviceRef.current;
+    if (!node) return null;
+    const skin = node.closest("[data-skin]") || document.body;
+    const backgroundColor = getComputedStyle(skin).backgroundColor;
     const docEl = document.documentElement;
-    const { scrollWidth, scrollHeight } = document.documentElement;
-    const backgroundColor = getComputedStyle(docEl).getPropertyValue("--color-background").trim();
     docEl?.classList.add("screenshot-capture");
     document.body?.classList.add("screenshot-capture");
     await new Promise((resolve) => requestAnimationFrame(resolve));
-    await waitForHeatmapLatest();
+    const options = {
+      backgroundColor,
+      pixelRatio: 2,
+      cacheBust: true,
+      filter: (el) => !(el instanceof HTMLElement) || el.dataset?.screenshotExclude !== "true",
+    };
     try {
       const { toBlob, toPng } = await import("html-to-image");
-      const blob = await toBlob(root, {
-        backgroundColor,
-        pixelRatio: 2,
-        cacheBust: true,
-        width: scrollWidth,
-        height: scrollHeight,
-        style: {
-          width: `${scrollWidth}px`,
-          height: `${scrollHeight}px`,
-        },
-        filter: (node) =>
-          !(node instanceof HTMLElement) || node.dataset?.screenshotExclude !== "true",
-      });
+      const blob = await toBlob(node, options);
       if (blob) return blob;
-      const dataUrl = await toPng(root, {
-        backgroundColor,
-        pixelRatio: 2,
-        cacheBust: true,
-        width: scrollWidth,
-        height: scrollHeight,
-        style: {
-          width: `${scrollWidth}px`,
-          height: `${scrollHeight}px`,
-        },
-        filter: (node) =>
-          !(node instanceof HTMLElement) || node.dataset?.screenshotExclude !== "true",
-      });
+      const dataUrl = await toPng(node, options);
       if (!dataUrl) return null;
       const response = await fetch(dataUrl);
       return await response.blob();
@@ -886,22 +817,15 @@ export function DashboardPage({
     }
   }, [captureScreenshotBlob, isCapturing, screenshotTwitterUrl]);
 
-  const summaryCostValue = useMemo(() => {
-    const formatted = formatUsdCurrency(summary?.total_cost_usd);
-    if (!formatted || formatted === "-" || formatted.startsWith("$")) return formatted;
-    return `$${formatted}`;
-  }, [summary?.total_cost_usd]);
-
-  const fleetData = useMemo(
-    () => buildFleetData(modelBreakdown, { copyFn: copy }),
-    [modelBreakdown],
-  );
-
-  const openCostModal = useCallback(() => setCostModalOpen(true), []);
-  const closeCostModal = useCallback(() => setCostModalOpen(false), []);
-  const costInfoEnabled = summaryCostValue && summaryCostValue !== "-" && fleetData.length > 0;
-
   const resolvedLinkCode = !linkCodeExpired ? linkCode : null;
+  const installCommand = resolvedLinkCode
+    ? copy("dashboard.install.cmd.init_link_code", { link_code: resolvedLinkCode })
+    : copy("landing.install.command");
+  const handleCopyInstall = useCallback(async () => {
+    if (await safeWriteClipboard(installCommand)) {
+      notify(copy("vu1.keys.install_copied"), { description: installCommand });
+    }
+  }, [installCommand]);
   const hasActiveDeviceToken = Boolean(
     userStatus?.install?.has_active_device_token ?? userStatus?.install?.hasActiveDeviceToken,
   );
@@ -994,16 +918,10 @@ export function DashboardPage({
 
   const handleSignIn = useCallback(() => window.location.assign(signInUrl), [signInUrl]);
 
-  // Global keybind layer — DESIGN.md §11. Disabled in screenshot mode.
-  // While the cheatsheet is open the modal owns the keyboard: only ? and esc
-  // route through (toggle / close); period / refresh / share are silenced so
-  // they don't bleed past the overlay.
   useGlobalKeybinds({
-    onTogglePeriod: cheatsheetOpen ? undefined : transitionSelectedPeriod,
-    onRefresh: cheatsheetOpen ? undefined : refreshAll,
-    onShare: cheatsheetOpen ? undefined : handleShareToX,
-    onToggleCheatsheet: () => setCheatsheetOpen((o) => !o),
-    onCloseCheatsheet: () => setCheatsheetOpen(false),
+    onTogglePeriod: transitionSelectedPeriod,
+    onRefresh: refreshAll,
+    onShare: handleShareToX,
     enabled: !screenshotMode,
   });
 
@@ -1017,129 +935,90 @@ export function DashboardPage({
     hasSummary: Boolean(summary),
     showEmpty,
   });
+  const sourceView = useMemo(() => sourceSlice(modelBreakdown, source), [modelBreakdown, source]);
+  const readTotals = source === "all" ? (summary ?? {}) : (sourceView.totals ?? {});
+  const fromLabel = pointLabel({ day: from }, "day");
+  const rangeLabel = from === to ? fromLabel : `${fromLabel} – ${pointLabel({ day: to }, "day")}`;
+  const copyUpgradeCommand = useCallback(() => {
+    safeWriteClipboard(copy("dashboard.upgrade_alert.install_command"));
+  }, []);
 
   return (
-    <div className="min-h-screen bg-background px-8 pb-12 font-sans text-foreground">
-      <div className="mx-auto flex max-w-304 flex-col gap-4">
-        {screenshotMode ? (
-          <div className="flex min-h-20 flex-wrap items-center justify-between gap-4 pt-8">
-            <div>
-              <Heading text={copy("dashboard.screenshot.title_line1")} size="m" level={1} />
-              <Heading text={copy("dashboard.screenshot.title_line2")} size="xl" level={1} />
-            </div>
-            <div data-screenshot-exclude="true" className="flex flex-wrap items-center gap-3">
-              <Label text={copy("dashboard.screenshot.twitter_hint")} />
-              <Button onClick={handleShareToX} disabled={isCapturing}>
-                {copy("dashboard.screenshot.twitter_button")}
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <TopNav
+    <Hardware keyColor={KEY_COLOR} className="min-h-screen px-s4 pt-s4 pb-s8">
+      <main className="grid-page mx-auto max-w-shell gap-y-s6 min-[761px]:gap-y-s8">
+        <div className="col-span-12">
+          <TopBar
             active="dashboard"
             signedIn={signedIn}
-            dashboardHref="/"
-            leaderboardHref="/leaderboard"
+            account={!(publicMode && signedIn)}
+            hrefs={HREFS}
             githubHref={copy("ui2049.top_nav.github_href")}
+            stars={stars}
             onSignIn={handleSignIn}
             onSignOut={signOut}
           />
-        )}
-        <IdentityBar
-          handle={identityDisplayName}
-          since={identityStartDate}
-          activeDays={activeDays}
-          subscriptions={identitySubscriptions}
-          owner={!publicMode && signedIn}
-          publicEnabled={publicViewEnabled}
-          publicBusy={publicViewBusy || sessionSoftExpired}
-          onPublicChange={handleTogglePublicView}
-          onCopyShareLink={handleCopyPublicView}
-          shareCopied={publicViewCopied}
-        />
-        <div className="grid gap-4 lg:grid-cols-12">
-          <div className={publicMode ? "min-w-0 lg:col-span-12" : "min-w-0 lg:col-span-8"}>
-            {screen === "readout" ? (
-              <Readout
-                period={period}
-                onPeriodChange={screenshotMode ? undefined : transitionSelectedPeriod}
-                totals={summary ?? {}}
-                from={from}
-                to={to}
-                asOf={todayKey}
-                handle={identityDisplayName}
-                onCostBreakdown={costInfoEnabled ? openCostModal : undefined}
-              />
-            ) : (
-              <StateScreen
-                variant={screen}
-                linkCode={resolvedLinkCode}
-                onSignIn={handleSignIn}
-                onRetry={refreshAll}
-              />
-            )}
-          </div>
-          {publicMode ? null : (
-            <div className="min-w-0 lg:col-span-4 *:min-h-96">
-              <RankRail
-                me={rankBoard?.me ?? null}
-                entries={Array.isArray(rankBoard?.entries) ? rankBoard.entries : []}
-                totalEntries={rankBoard?.total_entries ?? 0}
-                from={rankBoard?.from || weekRange.from}
-                to={rankBoard?.to || weekRange.to}
-                handle={identityDisplayName}
-                leaderboardHref="/leaderboard"
-              />
-            </div>
-          )}
         </div>
-        <div className="grid items-start gap-4 lg:grid-cols-12">
-          <div className="min-w-0 lg:col-span-6 lg:*:min-h-176">
-            <Models
-              breakdown={modelBreakdown ?? {}}
-              periodLabel={periodLabel(period)}
-              from={from}
-              to={to}
-              handle={identityDisplayName}
-            />
-          </div>
-          <div className="flex min-w-0 flex-col gap-4 lg:col-span-6">
-            <div className="lg:*:min-h-66">
-              <DotHeatmap
-                heatmap={{ ...heatmapRange, weeks: [], ...heatmap }}
-                handle={identityDisplayName}
-              />
+        <div ref={deviceRef} className="col-span-12 lg:col-start-2 lg:col-end-12 [--device-w:100%]">
+          <Device model={copy("vu1.device.model")} name={copy("vu1.dashboard.device_name", { handle: identityDisplayName })}>
+            <div className="grid-device gap-y-s5">
+              <div className="col-span-12 flex items-center justify-center min-[761px]:col-span-2">
+                <PeriodSwitch value={period} onChange={screenshotMode ? () => {} : transitionSelectedPeriod} />
+              </div>
+              <div className="col-span-12 min-[761px]:col-span-8">
+                {screen === "readout" ? (
+                  <UsageScreen
+                    range={rangeLabel}
+                    totals={readTotals}
+                    rank={publicMode ? null : (rankBoard?.me?.rank ?? null)}
+                    rows={barRows}
+                    dateKey={detailsDateKey}
+                    heatmap={{ ...heatmapRange, weeks: [], ...heatmap }}
+                  />
+                ) : (
+                  <StateScreen
+                    variant={screen}
+                    linkCode={resolvedLinkCode}
+                    onSignIn={handleSignIn}
+                    onRetry={refreshAll}
+                  />
+                )}
+              </div>
+              <div className="col-span-12 flex items-center justify-center gap-s5 min-[761px]:col-span-2 min-[761px]:flex-col">
+                <ShareKey onPress={handleShareToX} busy={isCapturing} />
+                {publicMode ? null : <InstallKey onPress={handleCopyInstall} />}
+              </div>
+              <div className="col-span-12 min-[761px]:col-start-3 min-[761px]:col-end-11">
+                <SourceSegment sources={DASHBOARD_SOURCES} value={source} onChange={setSource} />
+              </div>
+              <div className="col-span-12">
+                <StatMinis rows={barRows} dateKey={detailsDateKey} rolling={rollingUsage} />
+              </div>
+              <div className="col-span-12">
+                <ModelList breakdown={sourceView.breakdown} />
+              </div>
+              {screenshotMode ? null : (
+                <div data-screenshot-exclude="true" className="col-span-12">
+                  <IdentityStrip
+                    owner={!publicMode && signedIn}
+                    since={identityStartDate}
+                    activeDays={activeDays}
+                    subscriptions={identitySubscriptions}
+                    publicEnabled={publicViewEnabled}
+                    publicBusy={publicViewBusy || sessionSoftExpired}
+                    shareCopied={publicViewCopied}
+                    onPublicChange={handleTogglePublicView}
+                    onCopyShareLink={handleCopyPublicView}
+                  />
+                </div>
+              )}
             </div>
-            <div className="lg:*:min-h-106">
-              <Trend
-                rows={trendRowsForDisplay}
-                dateKey={detailsDateKey}
-                period={period}
-                rolling={rollingUsage}
-              />
-            </div>
-          </div>
+          </Device>
         </div>
-        <Projects
-          entries={projectUsageEntries}
-          limit={projectUsageLimit}
-          onLimitChange={setProjectUsageLimit}
-          totalTokens={period === "total" ? summaryTotalTokens : undefined}
-        />
-        <DailyTable
-          rows={detailsRows}
-          dateKey={detailsDateKey}
-          paged={DETAILS_PAGED_PERIODS.has(period)}
-        />
-        {screenshotMode ? null : (
-          <PageFooter
-            left={timeZoneRangeLabel}
-            right={copy("ui2049.page_footer.version", { version: getAppVersion(import.meta.env) })}
-          />
-        )}
-      </div>
-      <CostAnalysisModal isOpen={costModalOpen} onClose={closeCostModal} fleetData={fleetData} />
-      <KeyboardCheatsheet open={cheatsheetOpen} onClose={() => setCheatsheetOpen(false)} />
-    </div>
+      </main>
+      {publicMode || screenshotMode ? null : (
+        <UpgradeToast requiredVersion={latestVersion} onUpdate={copyUpgradeCommand} />
+      )}
+      <Toasts />
+    </Hardware>
   );
 }

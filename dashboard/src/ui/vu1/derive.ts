@@ -1,6 +1,7 @@
 import { copy } from "#src/lib/copy.ts";
 
-import type { DateKey, HeatmapCell } from "./types";
+import { num } from "./format";
+import type { DateKey, HeatmapCell, ModelBreakdown, UsageTotals } from "./types";
 
 // Five by five cells from a hash of the handle; columns 3 and 4 mirror 1 and 0.
 export function identicon(handle: string): boolean[] {
@@ -77,4 +78,21 @@ export function subscriptionLabels(items: unknown): string[] {
     return tool && plan ? copy("identity_card.subscription_item", { tool, plan }) : "";
   });
   return [...new Set(labels.filter(Boolean))].slice(0, 6);
+}
+
+// The Dashboard's source keys, in the mock's order. Other is every source not named before it.
+export const DASHBOARD_SOURCES = ["all", "claude", "codex", "gemini", "other"];
+const NAMED = new Set(DASHBOARD_SOURCES.slice(1, -1));
+
+// The model breakdown narrowed to one source key, with that source's summed totals. All keeps the
+// page's summary (totals null); so does a breakdown that has not loaded yet.
+export function sourceSlice(breakdown: ModelBreakdown | null | undefined, source: string): { totals: UsageTotals | null; breakdown: ModelBreakdown } {
+  if (!breakdown) return { totals: null, breakdown: {} };
+  if (source === "all") return { totals: null, breakdown };
+  const sources = (breakdown.sources ?? []).filter((s) => (source === "other" ? !NAMED.has(s.source ?? "") : s.source === source));
+  const sum = (key: keyof UsageTotals) => sources.reduce((total, s) => total + num(s.totals?.[key]), 0);
+  return {
+    totals: { total_tokens: sum("total_tokens"), billable_total_tokens: sum("billable_total_tokens"), total_cost_usd: sum("total_cost_usd") },
+    breakdown: { sources },
+  };
 }

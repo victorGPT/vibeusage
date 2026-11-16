@@ -34,7 +34,8 @@ test("DashboardPage shows share visitors the Readout with period switching, read
   assert.match(src, /owner=\{!publicMode && signedIn\}/);
   assert.match(src, /publicBusy=\{publicViewBusy \|\| sessionSoftExpired\}/);
   assert.match(src, /publicMode \? \[\] : subscriptionLabels\(/);
-  assert.match(src, /publicMode \? null : \(\s*<div[^>]*>\s*<RankRail/);
+  assert.match(src, /rank=\{publicMode \? null : /);
+  assert.match(src, /publicMode \? null : <InstallKey/);
   assert.match(src, /const period = screenshotMode \? "total" : selectedPeriod;/);
 });
 
@@ -100,12 +101,14 @@ test("public view panel does not render share link text", () => {
 
 test("public view hides upgrade banner", () => {
   const src = read("dashboard/src/App.jsx");
-  assert.match(src, /\{!publicMode\s*&&\s*!screenshotMode\s*\?\s*\(/);
+  assert.match(src, /\{!publicMode\s*&&\s*!screenshotMode\s*&&\s*PageComponent !== DashboardPage\s*\?\s*\(/);
+  const page = read("dashboard/src/pages/DashboardPage.jsx");
+  assert.match(page, /\{publicMode \|\| screenshotMode \? null : \(\s*<UpgradeToast/);
 });
 
 test("public share header shows login entry", () => {
   const src = read("dashboard/src/pages/DashboardPage.jsx");
-  assert.match(src, /<TopNav[\s\S]*?onSignIn=\{handleSignIn\}/);
+  assert.match(src, /<TopBar[\s\S]*?account=\{!\(publicMode && signedIn\)\}[\s\S]*?onSignIn=\{handleSignIn\}/);
   assert.match(src, /const handleSignIn = useCallback\(\(\) => window\.location\.assign\(signInUrl\)/);
 });
 
