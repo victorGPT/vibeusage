@@ -55,20 +55,20 @@ function useGithubStars() {
 
 const NO_ROWS = [];
 
-// Ranks are dense (tied rows share one), so my row sits at or after row meRank - 1, never before.
-// Returns the rows just above mine, so the gap screen can name the rank to pass from any page.
-// ponytail: walks at most five windows of 100 rows, so more than ~500 tied rows above me gives up.
-async function rowsAboveMe(rows, meRank) {
-  let offset = Math.max(0, meRank - 4);
+// Ranks are dense (tied rows share one), so the rows ranked meRank - 1 start at row meRank - 2 or later.
+// The row to pass is the last one ranked above me before my row; the gap screen needs it from any page.
+// ponytail: walks at most five windows of 100 rows, so more than ~500 tied rows around me gives up.
+async function rowAheadOfMe(rows, meRank) {
+  if (meRank <= 1) return NO_ROWS;
+  let offset = meRank - 2;
+  let ahead = null;
   for (let step = 0; step < 5; step += 1) {
     const page = await rows(offset, 100);
-    const index = page.findIndex((entry) => entry?.is_me);
-    if (index >= 0) {
-      const position = offset + index;
-      if (index >= 3) return page.slice(index - 3, index);
-      return position === 0 ? NO_ROWS : rows(Math.max(0, position - 3), Math.min(3, position));
+    for (const entry of page) {
+      if (entry?.is_me) return ahead ? [ahead] : NO_ROWS;
+      if (entry.rank < meRank) ahead = entry;
     }
-    if (page.length === 0 || page[page.length - 1].rank > meRank) break;
+    if (page.length < 100) break;
     offset += page.length;
   }
   return NO_ROWS;
@@ -143,7 +143,7 @@ export function LeaderboardPage({
       const data = await getLeaderboard({ baseUrl, accessToken, period, metric: METRIC, limit, offset, signal: controller.signal });
       return Array.isArray(data?.entries) ? data.entries : NO_ROWS;
     };
-    rowsAboveMe(rows, meRank).then(
+    rowAheadOfMe(rows, meRank).then(
       (next) => active && setAbove(next),
       () => active && setAbove(NO_ROWS),
     );

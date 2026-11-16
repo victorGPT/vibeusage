@@ -111,6 +111,21 @@ describe("LeaderboardPage", () => {
     expect(within(mine).getByText("1K")).toBeTruthy();
   });
 
+  it("finds the rank to pass when many rows tie with mine", async () => {
+    const rows = [
+      { rank: 1, user_id: "top", display_name: "top", total_tokens: "2000" },
+      ...Array.from({ length: 14 }, (_, i) => ({ rank: 2, user_id: `t${i}`, is_me: i === 13, display_name: `t${i}`, total_tokens: "1000" })),
+    ];
+    serve(rows, { rank: 2, total_tokens: "1000" });
+    renderPage();
+    await rankings();
+    fireEvent.click(screen.getByRole("button", { name: "2" }));
+    await waitFor(() => expect(within(screen.getByRole("table", { name: "Rankings" })).queryByText("top")).toBeNull());
+    const mine = await screen.findByRole("region", { name: "My rank" });
+    await waitFor(() => expect(within(mine).getByText("Gap to #1")).toBeTruthy());
+    expect(within(mine).getByText("1K")).toBeTruthy();
+  });
+
   it("counts the ranked users on the device plate", async () => {
     renderPage();
     await rankings();
