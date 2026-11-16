@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import { abbr, cost, daysBetween, full, pct, range, updated } from "../format";
-import { groupByCli, groupByModel } from "../grouping";
-import { neighbours, pinnedMe } from "../rank";
+import { abbr, cost, daysBetween, full, pct, range, updated } from "#src/ui/vu1/format.ts";
+import { groupByCli, groupByModel } from "#src/ui/vu1/grouping.ts";
+import { neighbours, pinnedMe } from "#src/ui/vu1/rank.ts";
 import { cliNames } from "../shared";
 
 describe("format", () => {

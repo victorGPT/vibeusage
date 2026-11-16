@@ -9,10 +9,10 @@ import { Stat } from "#src/ui/2049/base/Stat.tsx";
 import { Text } from "#src/ui/2049/base/Text.tsx";
 import { Button } from "#src/ui/shadcn/button.tsx";
 
-import { abbr, cost, daysBetween, full, num, pct, range, tokens } from "./format";
+import { abbr, cost, daysBetween, full, num, pct, range, tokens } from "#src/ui/vu1/format.ts";
 import { displayName, periodItems, periodLabel, SCREEN_FILL, SCREEN_MIN_H } from "./shared";
 import { Tabs } from "./Tabs";
-import type { LeaderboardEntry, UsagePeriod, UsageTotals } from "./types";
+import type { LeaderboardEntry, UsagePeriod, UsageTotals } from "#src/ui/vu1/types.ts";
 
 type ReadoutProps = {
   period: UsagePeriod;

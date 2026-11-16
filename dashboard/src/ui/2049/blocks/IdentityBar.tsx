@@ -5,7 +5,7 @@ import { Label } from "#src/ui/2049/base/Label.tsx";
 import { Button } from "#src/ui/shadcn/button.tsx";
 import { Switch } from "#src/ui/shadcn/switch.tsx";
 
-import { identicon } from "./derive";
+import { identicon } from "#src/ui/vu1/derive.ts";
 
 type IdentityBarProps = {
   handle: string;

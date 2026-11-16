@@ -1,6 +1,6 @@
 import { copy } from "#src/lib/copy.ts";
 
-import type { UsagePeriod } from "./types";
+import type { UsagePeriod } from "#src/ui/vu1/types.ts";
 
 export function periodLabel(period: UsagePeriod): string {
   return {

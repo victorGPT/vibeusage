@@ -7,7 +7,7 @@ import { DailyTable } from "../DailyTable";
 import { RankTable } from "../RankTable";
 import { Readout } from "../Readout";
 import { StateScreen, type StateVariant } from "../StateScreen";
-import type { DailyRow, LeaderboardEntry, UsagePeriod, UsageTotals } from "../types";
+import type { DailyRow, LeaderboardEntry, UsagePeriod, UsageTotals } from "#src/ui/vu1/types.ts";
 
 const TOTALS: Record<UsagePeriod, UsageTotals> = {
   day: { total_tokens: 26_100_392, input_tokens: 5_742_086, output_tokens: 1_827_027, cached_input_tokens: 17_878_768, reasoning_output_tokens: 652_510, total_cost_usd: "8.03" },

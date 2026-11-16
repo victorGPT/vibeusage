@@ -12,7 +12,7 @@ import { RankTable } from "../RankTable";
 import { Readout } from "../Readout";
 import { RankList } from "../RankList";
 import { Trend } from "../Trend";
-import type { DailyRow } from "../types";
+import type { DailyRow } from "#src/ui/vu1/types.ts";
 
 // Cases added by the contract review: missing rows, hour and month keys, asOf, signed-out viewers.
 

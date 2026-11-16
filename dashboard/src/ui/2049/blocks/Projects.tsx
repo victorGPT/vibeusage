@@ -7,9 +7,9 @@ import { Text } from "#src/ui/2049/base/Text.tsx";
 import { Card } from "#src/ui/shadcn/card.tsx";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "#src/ui/shadcn/select.tsx";
 
-import { abbr, num, pct, tokens } from "./format";
+import { abbr, num, pct, tokens } from "#src/ui/vu1/format.ts";
 import { Linked } from "./Linked";
-import type { ProjectEntry } from "./types";
+import type { ProjectEntry } from "#src/ui/vu1/types.ts";
 
 type ProjectsProps = {
   entries: ProjectEntry[];

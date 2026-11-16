@@ -3,10 +3,10 @@ import { Label } from "#src/ui/2049/base/Label.tsx";
 import { Stat } from "#src/ui/2049/base/Stat.tsx";
 import { Card } from "#src/ui/shadcn/card.tsx";
 
-import { axisLabel, trendPath } from "./derive";
-import { abbr, num, tokens } from "./format";
+import { axisLabel, trendPath } from "#src/ui/vu1/derive.ts";
+import { abbr, num, tokens } from "#src/ui/vu1/format.ts";
 import { periodLabel } from "./shared";
-import type { DailyRow, DateKey, UsagePeriod, UsageRolling } from "./types";
+import type { DailyRow, DateKey, UsagePeriod, UsageRolling } from "#src/ui/vu1/types.ts";
 
 type TrendProps = { rows: DailyRow[]; dateKey?: DateKey; period: UsagePeriod; rolling?: UsageRolling };
 

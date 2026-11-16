@@ -8,7 +8,7 @@ import { isMockEnabled } from "../lib/mock-data";
 import { getLeaderboard } from "../lib/vibeusage-api";
 import { PageFooter } from "../ui/2049/base/PageFooter.tsx";
 import { PageHeader } from "../ui/2049/base/PageHeader.tsx";
-import { boardMeta } from "../ui/2049/blocks/format.ts";
+import { boardMeta } from "../ui/vu1/format.ts";
 import { periodLabel } from "../ui/2049/blocks/shared.ts";
 import { LeaderboardFilters } from "../ui/2049/blocks/LeaderboardFilters.tsx";
 import { MyRank } from "../ui/2049/blocks/MyRank.tsx";

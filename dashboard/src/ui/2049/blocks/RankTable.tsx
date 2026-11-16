@@ -7,11 +7,11 @@ import { Button } from "#src/ui/shadcn/button.tsx";
 import { Card } from "#src/ui/shadcn/card.tsx";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "#src/ui/shadcn/table.tsx";
 
-import { abbr } from "./format";
+import { abbr } from "#src/ui/vu1/format.ts";
 import { Pager } from "./Pager";
-import { pinnedMe } from "./rank";
+import { pinnedMe } from "#src/ui/vu1/rank.ts";
 import { displayName, periodLabel, rankText, you } from "./shared";
-import type { LeaderboardEntry, LeaderboardMe, LeaderboardPeriod } from "./types";
+import type { LeaderboardEntry, LeaderboardMe, LeaderboardPeriod } from "#src/ui/vu1/types.ts";
 
 type RankTableProps = {
   entries: LeaderboardEntry[];

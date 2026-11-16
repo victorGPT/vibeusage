@@ -8,7 +8,7 @@ import { ScreenFx } from "#src/ui/2049/base/ScreenFx.tsx";
 import { Text } from "#src/ui/2049/base/Text.tsx";
 import { Button } from "#src/ui/shadcn/button.tsx";
 
-import { full } from "./format";
+import { full } from "#src/ui/vu1/format.ts";
 import { periodLabel, SCREEN_FILL, SCREEN_MIN_H } from "./shared";
 
 export type StateVariant = "install" | "expired" | "invalid" | "empty" | "loading" | "error";
