@@ -39,7 +39,7 @@ import { Heading } from "../ui/2049/base/Heading";
 import { Label } from "../ui/2049/base/Label";
 import { PageFooter } from "../ui/2049/base/PageFooter";
 import { DailyTable } from "../ui/2049/blocks/DailyTable";
-import { subscriptionLabels } from "../ui/2049/blocks/derive";
+import { subscriptionLabels } from "../ui/vu1/derive";
 import { DotHeatmap } from "../ui/2049/blocks/DotHeatmap";
 import { IdentityBar } from "../ui/2049/blocks/IdentityBar";
 import { Models } from "../ui/2049/blocks/Models";

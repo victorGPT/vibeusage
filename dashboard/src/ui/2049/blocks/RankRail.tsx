@@ -7,10 +7,10 @@ import { Stat } from "#src/ui/2049/base/Stat.tsx";
 import { Button } from "#src/ui/shadcn/button.tsx";
 import { Card } from "#src/ui/shadcn/card.tsx";
 
-import { abbr, num, range } from "./format";
-import { ahead } from "./rank";
+import { abbr, num, range } from "#src/ui/vu1/format.ts";
+import { ahead } from "#src/ui/vu1/rank.ts";
 import { displayName, rankText } from "./shared";
-import type { LeaderboardEntry, LeaderboardMe } from "./types";
+import type { LeaderboardEntry, LeaderboardMe } from "#src/ui/vu1/types.ts";
 
 type RankRailProps = {
   me: LeaderboardMe | null;

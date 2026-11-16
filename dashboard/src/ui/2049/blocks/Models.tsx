@@ -6,11 +6,11 @@ import { ShareRow } from "#src/ui/2049/base/ShareRow.tsx";
 import { Stamp } from "#src/ui/2049/base/Stamp.tsx";
 import { Card } from "#src/ui/shadcn/card.tsx";
 
-import { abbr, pct, range } from "./format";
-import { groupByCli, groupByModel } from "./grouping";
+import { abbr, pct, range } from "#src/ui/vu1/format.ts";
+import { groupByCli, groupByModel } from "#src/ui/vu1/grouping.ts";
 import { cliNames } from "./shared";
 import { Tabs } from "./Tabs";
-import type { ModelBreakdown } from "./types";
+import type { ModelBreakdown } from "#src/ui/vu1/types.ts";
 
 type GroupBy = "cli" | "model";
 

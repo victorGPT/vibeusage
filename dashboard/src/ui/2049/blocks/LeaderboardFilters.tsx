@@ -2,7 +2,7 @@ import { copy } from "#src/lib/copy.ts";
 
 import { periodItems } from "./shared";
 import { Tabs } from "./Tabs";
-import type { LeaderboardMetric, LeaderboardPeriod } from "./types";
+import type { LeaderboardMetric, LeaderboardPeriod } from "#src/ui/vu1/types.ts";
 
 type LeaderboardFiltersProps = {
   period: LeaderboardPeriod;

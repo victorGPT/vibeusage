@@ -3,11 +3,11 @@ import { Label } from "#src/ui/2049/base/Label.tsx";
 import { RankRow } from "#src/ui/2049/base/RankRow.tsx";
 import { Card } from "#src/ui/shadcn/card.tsx";
 
-import { abbr } from "./format";
+import { abbr } from "#src/ui/vu1/format.ts";
 import { Linked } from "./Linked";
-import { counted } from "./rank";
+import { counted } from "#src/ui/vu1/rank.ts";
 import { displayName, periodLabel, rankText, you } from "./shared";
-import type { LeaderboardEntry, LeaderboardMetric, LeaderboardPeriod } from "./types";
+import type { LeaderboardEntry, LeaderboardMetric, LeaderboardPeriod } from "#src/ui/vu1/types.ts";
 
 type RankListProps = {
   entries: LeaderboardEntry[];

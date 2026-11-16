@@ -7,9 +7,9 @@ import { Label } from "#src/ui/2049/base/Label.tsx";
 import { Stamp } from "#src/ui/2049/base/Stamp.tsx";
 import { Card } from "#src/ui/shadcn/card.tsx";
 
-import { monthLabels, stepDay } from "./derive";
-import { abbr, range } from "./format";
-import type { Heatmap, HeatmapCell } from "./types";
+import { monthLabels, stepDay } from "#src/ui/vu1/derive.ts";
+import { abbr, range } from "#src/ui/vu1/format.ts";
+import type { Heatmap, HeatmapCell } from "#src/ui/vu1/types.ts";
 
 // Dot diameter per level: 2 3 5 7 9 px.
 const DOT = ["size-0.5", "size-0.75", "size-1.25", "size-1.75", "size-2.25"];

@@ -9,10 +9,10 @@ import { ScreenFx } from "#src/ui/2049/base/ScreenFx.tsx";
 import { Stamp } from "#src/ui/2049/base/Stamp.tsx";
 import { Stat } from "#src/ui/2049/base/Stat.tsx";
 
-import { abbr, num, range } from "./format";
-import { ahead, counted, neighbours } from "./rank";
+import { abbr, num, range } from "#src/ui/vu1/format.ts";
+import { ahead, counted, neighbours } from "#src/ui/vu1/rank.ts";
 import { displayName, periodLabel, rankText, SCREEN_FILL, you } from "./shared";
-import type { LeaderboardEntry, LeaderboardMe, LeaderboardMetric, LeaderboardPeriod } from "./types";
+import type { LeaderboardEntry, LeaderboardMe, LeaderboardMetric, LeaderboardPeriod } from "#src/ui/vu1/types.ts";
 
 type MyRankProps = {
   me: LeaderboardMe | null;

@@ -6,11 +6,11 @@ import { Label } from "#src/ui/2049/base/Label.tsx";
 import { Card } from "#src/ui/shadcn/card.tsx";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "#src/ui/shadcn/table.tsx";
 
-import { dateCell } from "./derive";
-import { full, tokens } from "./format";
+import { dateCell } from "#src/ui/vu1/derive.ts";
+import { full, tokens } from "#src/ui/vu1/format.ts";
 import { Pager } from "./Pager";
 import { Tabs } from "./Tabs";
-import type { DailyRow, DateKey } from "./types";
+import type { DailyRow, DateKey } from "#src/ui/vu1/types.ts";
 
 type Sort = "date" | "tokens";
 

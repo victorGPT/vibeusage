@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { axisLabel, dateCell, identicon, monthLabels, stepDay, subscriptionLabels, trendPath } from "../derive";
-import { ahead } from "../rank";
+import { axisLabel, dateCell, identicon, monthLabels, stepDay, subscriptionLabels, trendPath } from "#src/ui/vu1/derive.ts";
+import { ahead } from "#src/ui/vu1/rank.ts";
 
 describe("identicon", () => {
   it("draws 25 cells whose columns mirror around the middle", () => {

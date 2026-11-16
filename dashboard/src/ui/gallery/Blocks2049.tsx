@@ -30,7 +30,7 @@ import { Readout } from "../2049/blocks/Readout";
 import { StateScreen, type StateVariant } from "../2049/blocks/StateScreen";
 import { TopNav } from "../2049/blocks/TopNav";
 import { Trend } from "../2049/blocks/Trend";
-import type { LeaderboardEntry, LeaderboardMetric, LeaderboardPeriod, UsagePeriod } from "../2049/blocks/types";
+import type { LeaderboardEntry, LeaderboardMetric, LeaderboardPeriod, UsagePeriod } from "../vu1/types";
 
 // Every 2049 block rendered from src/lib/mock-data, laid out like the Dashboard, Leaderboard,
 // Landing and States boards. Each block sits in a [data-block] section so lanes can find it.

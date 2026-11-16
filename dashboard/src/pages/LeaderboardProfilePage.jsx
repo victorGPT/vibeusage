@@ -9,7 +9,7 @@ import { Label } from "../ui/2049/base/Label.tsx";
 import { PageFooter } from "../ui/2049/base/PageFooter.tsx";
 import { PageHeader } from "../ui/2049/base/PageHeader.tsx";
 import { Stat } from "../ui/2049/base/Stat.tsx";
-import { abbr, boardMeta } from "../ui/2049/blocks/format.ts";
+import { abbr, boardMeta } from "../ui/vu1/format.ts";
 import { displayName, periodLabel, rankText } from "../ui/2049/blocks/shared.ts";
 import { StateScreen } from "../ui/2049/blocks/StateScreen.tsx";
 import { TopNav } from "../ui/2049/blocks/TopNav.tsx";
