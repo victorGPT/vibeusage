@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-16T15:51:53.709Z",
+  "generatedAt": "2026-11-16T15:57:48.364Z",
   "root": "dashboard/src",
   "rules": {
     "colors": "hex/rgb(a) literals",
@@ -7,16 +7,9 @@
   },
   "totals": {
     "colors": 1,
-    "rawText": 7
+    "rawText": 6
   },
   "files": {
-    "dashboard/src/ui/gallery/GalleryVu1.tsx": {
-      "colors": 0,
-      "rawText": 1,
-      "rawTextTokens": [
-        "setText(read(ref.current!.parentElement!)), [read]); return ("
-      ]
-    },
     "dashboard/src/ui/hardware/button-group.tsx": {
       "colors": 0,
       "rawText": 1,

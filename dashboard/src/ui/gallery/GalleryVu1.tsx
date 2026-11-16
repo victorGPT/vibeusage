@@ -42,6 +42,7 @@ const STATES = [
   ["focus", ":focus-visible"],
 ] as const;
 type State = (typeof STATES)[number][0];
+const DEFAULT_STATE = "default";
 
 // Copies every skin rule written for :hover, :active or :focus-visible with the pseudo-class
 // swapped for [data-force="…"], so each state can sit still beside the default for a screenshot.
@@ -127,7 +128,7 @@ function Panel({
             <div className="grid w-full grid-cols-1 gap-s5 sm:grid-cols-2 xl:grid-cols-4">
               <figure className="flex flex-col items-center gap-s2">
                 {children}
-                <figcaption data-kit="caption">{"default"}</figcaption>
+                <figcaption data-kit="caption">{DEFAULT_STATE}</figcaption>
               </figure>
               {STATES.map(([state]) => (
                 <Forced key={state} state={state}>
@@ -147,7 +148,12 @@ function Panel({
 function Readback({ read }: { read: (el: HTMLElement) => string }) {
   const ref = useRef<HTMLSpanElement>(null);
   const [text, setText] = useState("");
-  useLayoutEffect(() => setText(read(ref.current!.parentElement!)), [read]);
+  useLayoutEffect(
+    function measure() {
+      setText(read(ref.current!.parentElement!));
+    },
+    [read],
+  );
   return (
     <span ref={ref} data-kit="value">
       {text}
