@@ -176,52 +176,6 @@ export async function setPublicVisibility({
   });
 }
 
-export async function getLeaderboardProfile({
-  baseUrl,
-  accessToken,
-  userId,
-  period,
-  signal,
-}: AnyRecord = {}) {
-  const resolvedAccessToken = await resolveAccessToken(accessToken);
-  if (isMockEnabled()) {
-    const mock = getMockLeaderboard({
-      seed: resolvedAccessToken,
-      period,
-      metric: "all",
-      limit: 250,
-      offset: 0,
-    });
-    const entries = Array.isArray(mock?.entries) ? mock.entries : [];
-    const match = entries.find((entry: any) => entry?.user_id === userId) || null;
-    return {
-      period: mock?.period ?? "week",
-      from: mock?.from ?? null,
-      to: mock?.to ?? null,
-      generated_at: mock?.generated_at ?? new Date().toISOString(),
-      entry: match
-        ? {
-            user_id: match.user_id ?? null,
-            display_name: match.display_name ?? null,
-            avatar_url: match.avatar_url ?? null,
-            rank: match.rank ?? null,
-            gpt_tokens: match.gpt_tokens ?? "0",
-            claude_tokens: match.claude_tokens ?? "0",
-            other_tokens: match.other_tokens ?? "0",
-            total_tokens: match.total_tokens ?? "0",
-          }
-        : null,
-    };
-  }
-  return requestJson({
-    baseUrl,
-    accessToken: resolvedAccessToken,
-    slug: PATHS.leaderboardProfile,
-    params: { user_id: String(userId || ""), period: String(period || "") },
-    fetchOptions: buildSignalFetchOptions(signal),
-  });
-}
-
 export async function getUserStatus({ baseUrl, accessToken, signal }: AnyRecord = {}) {
   const resolvedAccessToken = await resolveAccessToken(accessToken);
   if (isMockEnabled()) {

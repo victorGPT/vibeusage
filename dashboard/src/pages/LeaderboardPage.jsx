@@ -1,57 +1,33 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { isAccessTokenReady, resolveAuthAccessToken } from "../lib/auth-token";
-import { getAppVersion } from "../lib/app-version";
 import { copy } from "../lib/copy";
-import { clampInt } from "../lib/leaderboard-ui";
+import { fetchGithubRepoMeta } from "../lib/github-repo-meta";
 import { isMockEnabled } from "../lib/mock-data";
+import { isScreenshotModeEnabled } from "../lib/screenshot-mode";
 import { getLeaderboard } from "../lib/vibeusage-api";
-import { PageFooter } from "../ui/2049/base/PageFooter.tsx";
-import { PageHeader } from "../ui/2049/base/PageHeader.tsx";
-import { boardMeta } from "../ui/vu1/format.ts";
-import { periodLabel } from "../ui/2049/blocks/shared.ts";
-import { LeaderboardFilters } from "../ui/2049/blocks/LeaderboardFilters.tsx";
-import { MyRank } from "../ui/2049/blocks/MyRank.tsx";
-import { RankList } from "../ui/2049/blocks/RankList.tsx";
-import { RankTable } from "../ui/2049/blocks/RankTable.tsx";
-import { StateScreen } from "../ui/2049/blocks/StateScreen.tsx";
-import { TopNav } from "../ui/2049/blocks/TopNav.tsx";
+import { Device, DevicePlate } from "../ui/hardware/device.tsx";
+import { Hardware } from "../ui/hardware/hardware.tsx";
+import { Toasts } from "../ui/hardware/toaster.tsx";
+import { periodOptions } from "../ui/vu1/labels.ts";
+import { MyRankLcd } from "../ui/vu1/MyRankLcd.tsx";
+import { Pager } from "../ui/vu1/Pager.tsx";
+import { RankScreen } from "../ui/vu1/RankScreen.tsx";
+import { Segment } from "../ui/vu1/SourceSegment.tsx";
+import { StateScreen } from "../ui/vu1/StateScreen.tsx";
+import { TopBar } from "../ui/vu1/TopBar.tsx";
 
-const PAGE_LIMIT = 20;
-export const GITHUB_URL = "https://github.com/victorGPT/vibeusage";
+const PAGE_LIMIT = 10;
+const METRIC = "all";
+const KEY_COLOR = { l: 0.64, c: 0.31, h: 48 };
+const REPO = "victorGPT/vibeusage";
+export const GITHUB_URL = `https://github.com/${REPO}`;
+const HREFS = { home: "/", dashboard: "/", leaderboard: "/leaderboard" };
+const BOARDS = periodOptions().filter((option) => option.value !== "day");
 
 function normalizePeriod(value) {
-  if (typeof value !== "string") return null;
-  const v = value.trim().toLowerCase();
-  if (v === "week") return v;
-  if (v === "month") return v;
-  if (v === "total") return v;
-  return null;
-}
-
-function normalizeMetric(value) {
-  if (typeof value !== "string") return null;
-  const v = value.trim().toLowerCase();
-  return v === "all" || v === "gpt" || v === "claude" ? v : null;
-}
-
-function normalizeLeaderboardError(err) {
-  if (!err) return copy("shared.error.prefix", { error: copy("leaderboard.error.unknown") });
-  const msg = err?.message || String(err);
-  const safe = String(msg || "").trim() || copy("leaderboard.error.unknown");
-  return copy("shared.error.prefix", { error: safe });
-}
-
-function buildPublicViewPath(userId, search = "") {
-  if (typeof userId !== "string") return null;
-  const normalized = userId.trim().toLowerCase();
-  if (!normalized) return null;
-
-  const params = new URLSearchParams(typeof search === "string" ? search : "");
-  const period = normalizePeriod(params.get("period"));
-  const suffix = period ? `?period=${period}` : "";
-
-  return `/share/pv1-${normalized}${suffix}`;
+  const v = typeof value === "string" ? value.trim().toLowerCase() : "";
+  return BOARDS.some((option) => option.value === v) ? v : "week";
 }
 
 function handleFromIdentity(identity) {
@@ -60,275 +36,165 @@ function handleFromIdentity(identity) {
   return label.replace(/[^a-zA-Z0-9._-]/g, "_");
 }
 
-const NO_ROWS = [];
-const NO_PLACE = { position: null, near: NO_ROWS };
+// Screenshot mode skips the fetch so captures stay stable; a failed fetch leaves plain "GitHub".
+function useGithubStars() {
+  const [stars, setStars] = useState(null);
+  useEffect(() => {
+    if (isScreenshotModeEnabled(window.location.search)) return undefined;
+    let active = true;
+    fetchGithubRepoMeta(REPO)
+      .then((meta) => active && setStars(meta.stars))
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, []);
+  return stars;
+}
 
-const loadLeaders = (rows) => rows(0, 10);
+const NO_ROWS = [];
 
 // Ranks are dense (tied rows share one), so my row sits at or after row meRank - 1, never before.
+// Returns the rows just above mine, so the gap screen can name the rank to pass from any page.
 // ponytail: walks at most five windows of 100 rows, so more than ~500 tied rows above me gives up.
-async function locateMe(rows, meRank) {
+async function rowsAboveMe(rows, meRank) {
   let offset = Math.max(0, meRank - 4);
   for (let step = 0; step < 5; step += 1) {
     const page = await rows(offset, 100);
     const index = page.findIndex((entry) => entry?.is_me);
     if (index >= 0) {
       const position = offset + index;
-      const near =
-        index + 4 <= page.length
-          ? page.slice(Math.max(0, index - 3), index + 4)
-          : await rows(Math.max(0, position - 3), 7);
-      return { position, near };
+      if (index >= 3) return page.slice(index - 3, index);
+      return position === 0 ? NO_ROWS : rows(Math.max(0, position - 3), Math.min(3, position));
     }
     if (page.length === 0 || page[page.length - 1].rank > meRank) break;
     offset += page.length;
   }
-  return NO_PLACE;
+  return NO_ROWS;
 }
 
-// Reads the board beside the paged table: the leaders for Top 10, my row position for MyRank and Jump to me.
-function useBoardSide({ enabled, baseUrl, authToken, period, metric, reloadToken }, load, arg, initial) {
-  const [value, setValue] = useState(initial);
-  useEffect(() => {
-    if (!enabled || arg === null) return;
-    let active = true;
-    const controller = new AbortController();
-    const rows = async (offset, limit) => {
-      const token = authToken ? await resolveAuthAccessToken(authToken) : null;
-      const data = await getLeaderboard({
-        baseUrl,
-        accessToken: token,
-        period,
-        metric,
-        limit,
-        offset,
-        signal: controller.signal,
-      });
-      return Array.isArray(data?.entries) ? data.entries : NO_ROWS;
-    };
-    load(rows, arg).then(
-      (next) => active && setValue(next),
-      () => active && setValue(initial),
-    );
-    return () => {
-      active = false;
-      controller.abort();
-    };
-  }, [arg, authToken, baseUrl, enabled, initial, load, metric, period, reloadToken]);
-  return value;
-}
-
-export function LeaderboardPage({
-  baseUrl,
-  auth,
-  currentIdentity,
-  signedIn,
-  sessionSoftExpired,
-  signOut,
-  signInUrl = "/sign-in",
-}) {
+export function LeaderboardPage({ baseUrl, auth, currentIdentity, signedIn, sessionSoftExpired, signOut, signInUrl = "/sign-in" }) {
   const location = useLocation();
   const navigate = useNavigate();
+  const stars = useGithubStars();
   const mockEnabled = isMockEnabled();
   const authTokenAllowed = signedIn && !sessionSoftExpired;
-  const authAccessToken = useMemo(() => {
-    if (!authTokenAllowed) return null;
-    if (typeof auth === "function") return auth;
-    if (typeof auth === "string") return auth;
-    if (auth && typeof auth === "object") return auth;
-    return null;
-  }, [auth, authTokenAllowed]);
-  const effectiveAuthToken = authTokenAllowed ? authAccessToken : null;
-  const authTokenReady = authTokenAllowed && isAccessTokenReady(effectiveAuthToken);
+  const authToken = authTokenAllowed && auth ? auth : null;
+  const authTokenReady = authTokenAllowed && isAccessTokenReady(authToken);
   const fetchReady = Boolean(baseUrl) && (mockEnabled || !authTokenAllowed || authTokenReady);
 
-  const [listPage, setListPage] = useState(1);
-  const [listReloadToken, setListReloadToken] = useState(0);
-  const [listState, setListState] = useState(() => ({
-    loading: false,
-    error: null,
-    data: null,
-  }));
+  const period = useMemo(() => normalizePeriod(new URLSearchParams(location?.search || "").get("period")), [location?.search]);
+  // The page belongs to the board it was picked on, so a new period starts at page 1 without a stale fetch.
+  const [paged, setPaged] = useState({ period, page: 1 });
+  const page = paged.period === period ? paged.page : 1;
+  const setPage = (next) => setPaged({ period, page: next });
+  const [reloadToken, setReloadToken] = useState(0);
+  const [board, setBoard] = useState({ error: false, data: null });
+  const [above, setAbove] = useState(NO_ROWS);
 
-  const params = useMemo(() => new URLSearchParams(location?.search || ""), [location?.search]);
-  const period = normalizePeriod(params.get("period")) || "week";
-  const metric = normalizeMetric(params.get("metric")) || "all";
-  const periodSearch = location?.search || "";
-
-  const handleFilterChange = (key, value) => {
-    if (!value || params.get(key) === value) return;
+  const choosePeriod = (value) => {
     const next = new URLSearchParams(location?.search || "");
-    next.set(key, value);
-    setListPage(1);
+    next.set("period", value);
     navigate(`${location?.pathname || "/leaderboard"}?${next.toString()}`, { replace: true });
   };
 
-  useEffect(() => {
-    setListPage(1);
-  }, [period, metric]);
+  const me = board.data?.me ?? null;
+  const meRank = typeof me?.rank === "number" ? me.rank : null;
 
   useEffect(() => {
-    if (mockEnabled) return;
-    if (!authTokenAllowed) return;
-    if (authTokenReady) return;
-    setListState({ loading: false, error: null, data: null });
-  }, [authTokenAllowed, authTokenReady, mockEnabled]);
-
-  const listOffset = useMemo(() => {
-    const safePage = clampInt(listPage, { min: 1, max: 1_000_000, fallback: 1 });
-    return (safePage - 1) * PAGE_LIMIT;
-  }, [listPage]);
-
-  useEffect(() => {
-    if (!baseUrl) return;
-    if (!mockEnabled && authTokenAllowed && !authTokenReady) return;
+    if (!fetchReady) return undefined;
     let active = true;
     const controller = new AbortController();
-    setListState((prev) => ({ ...prev, loading: true, error: null }));
-    (async () => {
-      const token = authTokenAllowed
-        ? await resolveAuthAccessToken(effectiveAuthToken)
-        : null;
-      const data = await getLeaderboard({
-        baseUrl,
-        accessToken: token,
-        period,
-        metric,
-        limit: PAGE_LIMIT,
-        offset: listOffset,
-        signal: controller.signal,
-      });
-      if (!active) return;
-      setListState({ loading: false, error: null, data });
-    })().catch((err) => {
-      if (!active) return;
-      setListState({ loading: false, error: normalizeLeaderboardError(err), data: null });
-    });
+    const rows = async (offset, limit) => {
+      const accessToken = authToken ? await resolveAuthAccessToken(authToken) : null;
+      return getLeaderboard({ baseUrl, accessToken, period, metric: METRIC, limit, offset, signal: controller.signal });
+    };
+    setBoard((prev) => ({ ...prev, error: false }));
+    rows((page - 1) * PAGE_LIMIT, PAGE_LIMIT).then(
+      (data) => active && setBoard({ error: false, data }),
+      () => active && setBoard({ error: true, data: null }),
+    );
     return () => {
       active = false;
       controller.abort();
     };
-  }, [
-    baseUrl,
-    effectiveAuthToken,
-    authTokenAllowed,
-    authTokenReady,
-    listOffset,
-    listReloadToken,
-    metric,
-    mockEnabled,
-    period,
-  ]);
+  }, [authToken, baseUrl, fetchReady, page, period, reloadToken]);
 
-  const listData = listState.data;
-  const me = listData?.me || null;
-  const meRank = typeof me?.rank === "number" ? me.rank : null;
-  const slice = {
-    enabled: fetchReady,
-    baseUrl,
-    authToken: effectiveAuthToken,
-    period,
-    metric,
-    reloadToken: listReloadToken,
-  };
-  const leaders = useBoardSide(slice, loadLeaders, 0, NO_ROWS);
-  const place = useBoardSide(slice, locateMe, meRank, NO_PLACE);
+  useEffect(() => {
+    if (!fetchReady || meRank == null) return undefined;
+    let active = true;
+    const controller = new AbortController();
+    const rows = async (offset, limit) => {
+      const accessToken = authToken ? await resolveAuthAccessToken(authToken) : null;
+      const data = await getLeaderboard({ baseUrl, accessToken, period, metric: METRIC, limit, offset, signal: controller.signal });
+      return Array.isArray(data?.entries) ? data.entries : NO_ROWS;
+    };
+    rowsAboveMe(rows, meRank).then(
+      (next) => active && setAbove(next),
+      () => active && setAbove(NO_ROWS),
+    );
+    return () => {
+      active = false;
+      controller.abort();
+    };
+  }, [authToken, baseUrl, fetchReady, meRank, period, reloadToken]);
 
-  const handle = handleFromIdentity(currentIdentity);
-  const from = listData?.from || "";
-  const to = listData?.to || "";
-  const currentPage = listData?.page ?? listPage;
-  const totalPages = listData?.total_pages ?? currentPage;
-  const totalEntries = listData?.total_entries ?? 0;
-  const profileHref = (entry) =>
-    entry?.is_public ? buildPublicViewPath(entry.user_id, periodSearch) : null;
+  const entries = Array.isArray(board.data?.entries) ? board.data.entries : NO_ROWS;
+  const totalEntries = board.data?.total_entries ?? 0;
 
-  let board = null;
-  if (listState.error) {
-    board = <StateScreen variant="error" onRetry={() => setListReloadToken((v) => v + 1)} />;
-  } else if (!listData) {
-    board = <StateScreen variant="loading" />;
+  let body;
+  if (board.error) {
+    body = <StateScreen variant="error" onRetry={() => setReloadToken((v) => v + 1)} />;
+  } else if (!board.data) {
+    body = <StateScreen variant="loading" />;
   } else if (totalEntries === 0) {
-    board = (
-      <StateScreen
-        variant="empty"
-        kicker={copy("ui2049.rank_table.kicker", { period: periodLabel(period), count: 0 })}
-      />
-    );
+    body = <StateScreen variant="empty" />;
   } else {
-    board = (
-      <>
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
-          <div className="lg:col-span-8">
-            <MyRank
-              me={me}
-              entries={place.near}
-              totalEntries={totalEntries}
-              period={period}
-              metric={metric}
-              from={from}
-              to={to}
-              handle={handle}
-            />
-          </div>
-          <div className="lg:col-span-4">
-            <RankList entries={leaders} period={period} metric={metric} handle={handle} profileHref={profileHref} />
-          </div>
-        </div>
-        <RankTable
-          entries={Array.isArray(listData.entries) ? listData.entries : []}
-          me={me}
-          handle={handle}
-          page={currentPage}
-          totalPages={totalPages}
-          totalEntries={totalEntries}
-          period={period}
-          onPageChange={setListPage}
-          onJumpToMe={
-            meRank == null
-              ? undefined
-              : () =>
-                  setListPage(
-                    place.position == null
-                      ? Math.ceil(meRank / PAGE_LIMIT)
-                      : Math.floor(place.position / PAGE_LIMIT) + 1,
-                  )
-          }
-          profileHref={profileHref}
-        />
-      </>
-    );
+    body = <RankScreen entries={entries} me={me} handle={handleFromIdentity(currentIdentity)} />;
   }
 
   return (
-    <main className="min-h-screen bg-background px-4 pb-12 font-sans text-copy-m font-medium text-foreground md:px-8">
-      <div className="mx-auto flex max-w-304 flex-col gap-4">
-        <TopNav
+    <Hardware keyColor={KEY_COLOR} className="min-h-screen px-s4 pt-s4 pb-s8">
+      <div className="mx-auto max-w-shell">
+        <TopBar
           active="leaderboard"
           signedIn={Boolean(signedIn)}
-          dashboardHref="/"
-          leaderboardHref="/leaderboard"
+          hrefs={HREFS}
           githubHref={GITHUB_URL}
+          stars={stars}
           onSignIn={() => window.location.assign(signInUrl)}
           onSignOut={signOut}
         />
-        <div className="flex flex-wrap items-end gap-x-8 gap-y-4">
-          <div className="min-w-0 flex-auto basis-90">
-            <PageHeader title={copy("leaderboard.title")} meta={from && to ? boardMeta(from, to, listData?.generated_at) : undefined} />
+        <main className="grid-page mt-s6 min-[761px]:mt-s8">
+          <div className="col-span-12 lg:col-start-3 lg:col-end-11 [--device-w:100%]">
+            <Device model={copy("vu1.device.model")} name={copy("vu1.top.leaderboard")} plate="none">
+              <div className="grid-device gap-y-s5">
+                <div className="col-span-12 flex items-baseline justify-between gap-s2">
+                  <DevicePlate model={copy("vu1.device.model")} name={copy("vu1.top.leaderboard")} />
+                  {board.data ? (
+                    <span data-vu1="dim" data-vu1-cap="">
+                      {copy("vu1.board.users", { count: totalEntries.toLocaleString("en-US") })}
+                    </span>
+                  ) : null}
+                </div>
+                <div className="col-span-12 min-[761px]:col-span-6">
+                  <Segment label={copy("vu1.board.label")} options={BOARDS} value={period} onChange={choosePeriod} />
+                </div>
+                <div className="col-span-12 flex items-center min-[761px]:col-span-6 min-[761px]:justify-end">
+                  <MyRankLcd me={me} entries={[...above, ...entries]} />
+                </div>
+                <div className="col-span-12">{body}</div>
+                {totalEntries ? (
+                  <div className="col-span-12">
+                    <Pager page={board.data.page ?? page} pageCount={board.data.total_pages ?? page} onPageChange={setPage} />
+                  </div>
+                ) : null}
+              </div>
+            </Device>
           </div>
-          <LeaderboardFilters
-            period={period}
-            onPeriodChange={(value) => handleFilterChange("period", value)}
-            metric={metric}
-            onMetricChange={(value) => handleFilterChange("metric", value)}
-          />
-        </div>
-        {board}
-        <PageFooter
-          left={copy("ui2049.page_footer.leaderboard_time")}
-          right={copy("ui2049.page_footer.version", { version: getAppVersion(import.meta.env) })}
-        />
+        </main>
       </div>
-    </main>
+      <Toasts />
+    </Hardware>
   );
 }
