@@ -431,6 +431,25 @@
 [data-skin="hardware"] [data-vu1="segment"][data-print="key"] [data-kit="led"] {
   display: none;
 }
+/* A keyed segment never runs past its column span: short of room, its equal keys give up side
+ * padding instead. */
+[data-skin="hardware"] [data-vu1="segment"][data-print="key"] {
+  grid-template-columns: minmax(0, 1fr);
+}
+[data-skin="hardware"] [data-vu1="segment"][data-print="key"] [data-kit="segmented"]:not(#_) {
+  max-width: 100%;
+}
+/* Folded onto a phone row, a keyed segment fills the row with equal keys, so the row meets both
+ * edges of the device. */
+@media (max-width: 760px) {
+  [data-skin="hardware"] [data-vu1="segment"][data-print="key"] [data-kit="segmented"]:not(#_) {
+    width: 100%;
+  }
+  [data-skin="hardware"] [data-vu1="segment"][data-print="key"] [data-kit="segment"]:not(#_):not(#_):not(#_) {
+    min-width: 0;
+    padding: 0 var(--spacing-s1);
+  }
+}
 
 /* Print is flat. The kit engraves every letter with a white shadow that fuzzes small gray type;
  * only the Landing hero title keeps it (landing.css). */
