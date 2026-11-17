@@ -117,7 +117,7 @@ export function BlocksVu1() {
 
       <div className="grid-page">
         <div data-vu1-specimen="dashboard" className="col-span-12 lg:col-start-2 lg:col-end-12 [--device-w:100%]">
-          <Device model={copy("vu1.device.model")} name={copy("vu1.device.name")}>
+          <Device model={copy("vu1.device.name")} name={copy("vu1.top.dashboard")}>
             <div className="grid-device gap-y-s5">
               <div className="col-span-12 flex items-center justify-center min-[761px]:col-span-2">
                 <PeriodSwitch value={period} onChange={setPeriod} />
@@ -158,7 +158,7 @@ export function BlocksVu1() {
 
       <div className="grid-page">
         <div data-vu1-specimen="leaderboard" className="col-span-12 lg:col-start-3 lg:col-end-11 [--device-w:100%]">
-          <Device model={copy("vu1.device.model")} name={copy("vu1.device.name")}>
+          <Device model={copy("vu1.device.name")} name={copy("vu1.top.leaderboard")}>
             <div className="grid-device gap-y-s5">
               <div className="col-span-12 min-[761px]:col-span-6">
                 <Segment label={copy("vu1.period.label")} options={BOARDS} value={board} onChange={setBoard} />

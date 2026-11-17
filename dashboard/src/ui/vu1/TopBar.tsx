@@ -36,7 +36,6 @@ export function TopBar({ active, signedIn, hrefs, githubHref, stars, account = t
       <span data-vu1="brand">
         <span data-vu1="led" data-on="" aria-hidden />
         {copy("vu1.device.name")}
-        <span data-vu1="dim">{copy("vu1.device.model")}</span>
       </span>
       <nav data-vu1="nav" data-vu1-cap="" aria-label={copy("vu1.top.nav_aria")}>
         {links.map(([page, label]) => (

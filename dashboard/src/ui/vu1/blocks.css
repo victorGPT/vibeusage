@@ -375,18 +375,40 @@
   width: calc(var(--n) * var(--col));
 }
 
-/* Round keys with a printed legend under them */
+/* Round keys with a printed legend under them. The device's 38px key height would squash them
+ * into ovals; they keep the kit's 48px circle. */
 [data-skin="hardware"] [data-vu1="keycol"] {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--spacing-s2);
 }
+[data-skin="hardware"] [data-vu1="keycol"] [data-kit="button"]:not(#_):not(#_) {
+  width: 48px;
+  height: 48px;
+  min-width: 0;
+  padding: 0;
+}
 [data-skin="hardware"] [data-vu1="legend"] {
   color: var(--vu1-legend);
   font-size: 9px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
+}
+
+/* A segmented control is as wide as its keys, as on SPEC-01, not the column it sits in. */
+[data-skin="hardware"] [data-vu1="segment"] [data-kit="segmented"]:not(#_) {
+  width: max-content;
+}
+[data-skin="hardware"] [data-vu1="segment"] [data-kit="segment"]:not(#_) {
+  min-width: 48px;
+}
+
+/* Print is flat. The kit engraves every letter with a white shadow that fuzzes small gray type;
+ * only the Landing hero title keeps it (landing.css). */
+[data-skin="hardware"]:not(#_),
+[data-skin="hardware"] [data-kit="button"]:not(#_):not(#_) {
+  text-shadow: none;
 }
 
 /* Pager: a centered row of page keys */

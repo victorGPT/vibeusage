@@ -57,6 +57,13 @@ beforeEach(() => serve(ROWS, ME));
 afterEach(() => api.getLeaderboard.mockReset());
 
 describe("LeaderboardPage", () => {
+  it("marks the device with the product name, not the VU-1 model", async () => {
+    const { container } = renderPage();
+    await rankings();
+    expect(container.textContent).toContain("VIBEUSAGE");
+    expect(container.textContent).not.toContain("VU-1");
+  });
+
   it("pins my row in red on top when the page shown does not hold it", async () => {
     renderPage();
     const rows = bodyRows(await rankings());

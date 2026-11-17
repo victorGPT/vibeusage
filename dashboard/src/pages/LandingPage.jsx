@@ -83,7 +83,7 @@ export function LandingPage({ signUpUrl }) {
             </div>
           </section>
           <div className="col-span-12 self-center [--device-w:100%] min-[761px]:col-start-8 min-[761px]:col-end-13">
-            <Device model={copy("vu1.device.model")} name={copy("vu1.landing.meter_name")}>
+            <Device model={copy("vu1.device.name")} name={copy("vu1.landing.meter_name")}>
               <div className="flex flex-col gap-s5">
                 <GlobalMeter {...SAMPLE} />
                 <p data-vu1="legend" className="m-0 text-center">
