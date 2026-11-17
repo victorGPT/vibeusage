@@ -7,13 +7,14 @@ import { haptic } from "#src/ui/hardware/lib/haptics.ts";
 import { sourceLabel, type Option } from "./labels";
 import "./blocks.css";
 
-type SegmentProps<T extends string> = { label: string; options: Option<T>[]; value: T; onChange: (value: T) => void };
+// print="key" sets each name on its slot (DESIGN.md "Segmented"); without it the kit prints names under the slots.
+type SegmentProps<T extends string> = { label: string; options: Option<T>[]; value: T; onChange: (value: T) => void; print?: "key" };
 
 // The kit's segmented control, controlled: the page owns the value, so arrow keys and focus
 // survive a change. Same parts and data-kit names as src/ui/hardware/segmented-control.tsx.
-export function Segment<T extends string>({ label, options, value, onChange }: SegmentProps<T>) {
+export function Segment<T extends string>({ label, options, value, onChange, print }: SegmentProps<T>) {
   return (
-    <Field data-kit="field" data-vu1="segment">
+    <Field data-kit="field" data-vu1="segment" data-print={print}>
       <FieldLabel data-kit="label" className="sr-only">
         {label}
       </FieldLabel>

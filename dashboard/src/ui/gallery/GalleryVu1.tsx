@@ -18,6 +18,7 @@ import { SlideSwitch } from "../hardware/slide-switch";
 import { Tabs } from "../hardware/tabs";
 import { notify } from "../hardware/toaster";
 import { BlocksVu1 } from "./BlocksVu1";
+import { DoDontVu1 } from "./DoDontVu1";
 
 // Dev-only SPEC-01 gallery mounted at /__vu1 (see main.jsx). Captions are component names or
 // values read back from the rendered element; specimen text comes from copy keys.
@@ -228,6 +229,7 @@ export function GalleryVu1() {
     <div data-vu1-gallery className="px-s4 py-s7">
       <main className="grid-page mx-auto max-w-shell gap-y-s5">
         <BlocksVu1 />
+        <DoDontVu1 />
         <Panel name="spacing --spacing-s1..s8" span="col-span-12">
           <div className="flex w-full flex-wrap items-end justify-between gap-s5">
             {SCALE.map(([name, cls]) => (
