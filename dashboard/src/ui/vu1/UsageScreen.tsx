@@ -1,6 +1,6 @@
 import { Tabs, TabsList, TabsPanel, TabsTab } from "@ui-sdk/react/tabs";
 import { useState } from "react";
-import type { KeyboardEvent } from "react";
+import type { CSSProperties, KeyboardEvent } from "react";
 
 import { copy } from "#src/lib/copy.ts";
 import { BarGraph } from "#src/ui/hardware/bar-graph.tsx";
@@ -66,14 +66,17 @@ function readings(totals: UsageTotals, rank: number | null, delta: UsageDelta = 
 // ponytail: a character budget, not a measurement; audit-axis.mjs checks the real gaps.
 const PHONE_CHARS = 30;
 const spread = (n: number, count: number) => Array.from({ length: count }, (_, i) => Math.round((i * (n - 1)) / (count - 1)));
+const centres = (n: number, count: number) => Array.from({ length: count }, (_, i) => Math.floor(((i + 0.5) * n) / count));
 
-// Up to seven labels under the bars (five past a week), first and last always among them. Past the
-// phone budget every other one is marked wide, so a phone keeps about half, first and last still in.
+// Wide screens spread up to seven labels (five past a week) edge to edge, first and last bar among
+// them. A phone centres each label under its own bar, one per equal stretch of the period, so the
+// end labels sit in from narrow end bars; past the phone budget it keeps about half as many.
 function axis(rows: DailyRow[], dateKey: DateKey) {
   const count = Math.min(rows.length, rows.length <= 7 ? 7 : 5);
-  const labels = (count < 2 ? rows : spread(rows.length, count).map((i) => rows[i])).map((row) => pointLabel(row, dateKey));
-  const phone = new Set(labels.join("").length > PHONE_CHARS ? spread(labels.length, Math.ceil(labels.length / 2)) : labels.keys());
-  return labels.map((text, i) => ({ text, wide: !phone.has(i) }));
+  const label = (bar: number) => ({ text: pointLabel(rows[bar], dateKey), bar });
+  const wide = (count < 2 ? [...rows.keys()] : spread(rows.length, count)).map(label);
+  const fits = PHONE_CHARS >= wide.map((item) => item.text).join("").length;
+  return { wide, phone: centres(rows.length, fits ? count : Math.ceil(count / 2)).map(label) };
 }
 
 const STEPS: Record<string, (at: number, last: number) => number> = {
@@ -88,6 +91,7 @@ const STEPS: Record<string, (at: number, last: number) => number> = {
 // the latest bar, and arrow keys, Home and End move between bars.
 function UsageBars({ rows, dateKey }: { rows: DailyRow[]; dateKey: DateKey }) {
   const values = rows.map(lit);
+  const labels = axis(rows, dateKey);
   const max = Math.max(0, ...values);
   // ponytail: days still to come only trail the period, so the readable bars are 0..last.
   const last = rows.map((row) => !row.future).lastIndexOf(true);
@@ -120,9 +124,14 @@ function UsageBars({ rows, dateKey }: { rows: DailyRow[]; dateKey: DateKey }) {
           );
         }}
       />
-      <div data-vu1="axis" aria-hidden>
-        {axis(rows, dateKey).map((label, i) => (
-          <span key={i} data-vu1-wide={label.wide || undefined}>
+      <div data-vu1="axis" aria-hidden style={{ "--columns": rows.length } as CSSProperties}>
+        {labels.wide.map((label) => (
+          <span key={`w${label.bar}`} data-vu1-wide="">
+            {label.text}
+          </span>
+        ))}
+        {labels.phone.map((label) => (
+          <span key={`p${label.bar}`} data-vu1-phone="" style={{ "--bar": label.bar + 1 } as CSSProperties}>
             {label.text}
           </span>
         ))}

@@ -189,7 +189,24 @@
   color: var(--color-screen-dim);
   font-size: var(--font-size-label);
 }
+[data-skin="hardware"] [data-vu1="axis"] > [data-vu1-phone] {
+  display: none;
+}
+/* On a phone the axis takes the bars' columns and each label centres under its own bar.
+   ponytail: s1 (4px) stands in for the kit's 3px bar gap, so a centre drifts under 1px. */
 @media (max-width: 760px) {
+  [data-skin="hardware"] [data-vu1="axis"] {
+    display: grid;
+    grid-template-columns: repeat(var(--columns), minmax(0, 1fr));
+    column-gap: var(--spacing-s1);
+  }
+  [data-skin="hardware"] [data-vu1="axis"] > [data-vu1-phone] {
+    display: block;
+    grid-row: 1;
+    grid-column: var(--bar);
+    justify-self: center;
+    white-space: nowrap;
+  }
   [data-skin="hardware"] [data-vu1="axis"] > [data-vu1-wide] {
     display: none;
   }

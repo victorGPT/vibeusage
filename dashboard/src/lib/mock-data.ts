@@ -127,6 +127,13 @@ function readMockMissingCount() {
   return 0;
 }
 
+// mock_months=N gives Total N months of history (1..24), so short histories can be audited.
+function readMockMonths() {
+  if (typeof window === "undefined") return 0;
+  const n = Number(new URLSearchParams(window.location.search).get("mock_months"));
+  return Number.isInteger(n) && n > 0 && n <= 24 ? n : 0;
+}
+
 function toSeed(seed: any) {
   const raw = seed == null ? readMockSeed() : String(seed);
   return raw.trim() || DEFAULT_MOCK_SEED;
@@ -354,7 +361,8 @@ export function getMockUsageHourly({ day, seed }: AnyRecord = {}) {
   return { day: dayKey, data: rows };
 }
 
-export function getMockUsageMonthly({ months = 24, to, seed }: AnyRecord = {}) {
+export function getMockUsageMonthly({ months: asked = 24, to, seed }: AnyRecord = {}) {
+  const months = readMockMonths() || asked;
   const end = parseUtcDate(to) || parseUtcDate(formatDateLocal(new Date())) || new Date();
   const endDay = formatDateUTC(end);
   const rows = buildMonthlyRows({ months, to: endDay, seed });
