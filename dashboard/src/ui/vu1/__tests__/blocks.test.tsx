@@ -63,7 +63,7 @@ describe("Segment with the periods", () => {
   it("reports the period id picked by click or arrow key", async () => {
     const onChange = vi.fn();
     const user = userEvent.setup();
-    render(<Segment label="Period" options={periodOptions()} value="week" onChange={onChange} print="key" />);
+    render(<Segment label="Period" options={periodOptions()} value="week" onChange={onChange} />);
     const week = screen.getByRole("radio", { name: "Week" });
     expect(week).toBeChecked();
     await user.click(screen.getByRole("radio", { name: "Total" }));

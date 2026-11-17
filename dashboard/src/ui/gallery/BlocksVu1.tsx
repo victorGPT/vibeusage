@@ -129,7 +129,7 @@ export function BlocksVu1() {
                 />
               </div>
               <div className="col-span-7 row-start-2 min-[761px]:col-span-4">
-                <Segment label={copy("vu1.period.label")} options={periodOptions()} value={period} onChange={setPeriod} print="key" />
+                <Segment label={copy("vu1.period.label")} options={periodOptions()} value={period} onChange={setPeriod} />
               </div>
               <div className="col-span-12 row-start-3 min-[761px]:col-start-5 min-[761px]:col-end-10 min-[761px]:row-start-2">
                 <SourceSegment sources={SOURCES} value={source} onChange={setSource} />
@@ -148,7 +148,7 @@ export function BlocksVu1() {
                 />
               </div>
               <div className="col-span-12">
-                <ModelList breakdown={BREAKDOWN} frame="single" />
+                <ModelList breakdown={BREAKDOWN} />
               </div>
             </div>
           </Device>

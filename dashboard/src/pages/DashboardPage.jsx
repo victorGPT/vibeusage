@@ -985,7 +985,6 @@ export function DashboardPage({
                   options={periodOptions()}
                   value={period}
                   onChange={screenshotMode ? () => {} : transitionSelectedPeriod}
-                  print="key"
                 />
               </div>
               <div className="col-span-12 row-start-3 min-[761px]:col-start-5 min-[761px]:col-end-10 min-[761px]:row-start-2">
@@ -999,7 +998,7 @@ export function DashboardPage({
                 <StatMinis rows={barRows} dateKey={detailsDateKey} rolling={rollingUsage} />
               </div>
               <div className="col-span-12">
-                <ModelList breakdown={sourceView.breakdown} frame="single" />
+                <ModelList breakdown={sourceView.breakdown} />
               </div>
               {screenshotMode ? null : (
                 <div data-screenshot-exclude="true" className="col-span-12">

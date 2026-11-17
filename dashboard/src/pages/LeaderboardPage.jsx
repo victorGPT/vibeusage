@@ -162,7 +162,7 @@ export function LeaderboardPage({
   } else if (totalEntries === 0) {
     body = <StateScreen variant="no-entries" />;
   } else {
-    body = <RankScreen entries={entries} me={me} handle={handleFromIdentity(currentIdentity)} frame="single" />;
+    body = <RankScreen entries={entries} me={me} handle={handleFromIdentity(currentIdentity)} />;
   }
 
   return (
@@ -191,7 +191,7 @@ export function LeaderboardPage({
                   ) : null}
                 </div>
                 <div className="col-span-12 min-[761px]:col-span-6">
-                  <Segment label={copy("vu1.period.label")} options={BOARDS} value={period} onChange={choosePeriod} print="key" />
+                  <Segment label={copy("vu1.period.label")} options={BOARDS} value={period} onChange={choosePeriod} />
                 </div>
                 <div className="col-span-12 flex items-center min-[761px]:col-span-6 min-[761px]:justify-end">
                   <MyRankLcd me={me} entries={[...above, ...entries]} />
