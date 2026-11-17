@@ -64,14 +64,14 @@ describe("StateScreen, dashboard variants", () => {
     const user = userEvent.setup();
     const onSignIn = vi.fn();
     render(<StateScreen variant="expired" onSignIn={onSignIn} />);
-    expect(screen.getByRole("heading", { name: "Your session expired." })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Session expired." })).toBeTruthy();
     await user.click(screen.getByRole("button", { name: "Sign in" }));
     expect(onSignIn).toHaveBeenCalled();
   });
 
   it("tells a share visitor the link is wrong", () => {
     render(<StateScreen variant="invalid" />);
-    expect(screen.getByRole("heading", { name: "This profile is private or the link is wrong." })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "This profile is private or the link is invalid." })).toBeTruthy();
     expect(screen.queryByRole("button")).toBeNull();
   });
 });

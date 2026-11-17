@@ -180,14 +180,14 @@ describe("LeaderboardPage", () => {
       </MemoryRouter>,
     );
     const toast = (await screen.findByText(/9\.9\.9/)).closest('[role="status"]');
-    fireEvent.click(within(toast).getByRole("button", { name: "Update" }));
+    fireEvent.click(within(toast).getByRole("button", { name: "Copy update command" }));
     expect(writeText).toHaveBeenCalledWith("npx --yes vibeusage init");
   });
 
   it("shows the empty screen when nobody is ranked", async () => {
     serve([], { rank: null, total_tokens: "0" });
     renderPage();
-    expect(await screen.findByRole("region", { name: "Waiting for first sync" })).toBeTruthy();
+    expect(await screen.findByRole("region", { name: "No entries for this period." })).toBeTruthy();
     expect(screen.queryByRole("table")).toBeNull();
   });
 

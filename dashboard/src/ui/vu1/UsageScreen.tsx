@@ -5,6 +5,8 @@ import type { KeyboardEvent } from "react";
 import { copy } from "#src/lib/copy.ts";
 import { BarGraph } from "#src/ui/hardware/bar-graph.tsx";
 
+import { KeyTip } from "./KeyTip";
+
 import { stepDay } from "./derive";
 import { abbr, cost, num, tokens } from "./format";
 import { pointLabel } from "./labels";
@@ -45,6 +47,7 @@ function readings(totals: UsageTotals, rank: number | null, delta: UsageDelta = 
     {
       key: "cost",
       label: copy("vu1.usage.cost"),
+      hint: copy("vu1.usage.cost_hint"),
       value: cost(totals.total_cost_usd),
       delta: delta.cost == null ? "" : `${sign(delta.cost)}${cost(Math.abs(delta.cost))}`,
       up: false,
@@ -87,11 +90,11 @@ function UsageBars({ rows, dateKey }: { rows: DailyRow[]; dateKey: DateKey }) {
 }
 
 // Week-major LEDs like the board: arrow keys step a day up or down and a week left or right,
-// Home and End jump to the ends, and the line under the dots reads the day out.
+// Home and End jump to the ends, and the line under the dots reads the day out, the latest day until one is picked.
 function ActivityDots({ heatmap }: { heatmap: Heatmap }) {
   const [active, setActive] = useState(null as number | null);
   const cells = heatmap.weeks.flatMap((week) => Array.from({ length: 7 }, (_, d) => week[d] ?? null));
-  const current = active == null ? null : cells[active];
+  const current = cells[active ?? stepDay(cells, 0, "End") ?? -1];
   const dayText = (cell: HeatmapCell) => {
     if (!num(cell.value)) return copy("vu1.heat.day_none", { date: cell.day });
     return copy("vu1.heat.day", { date: cell.day, value: abbr(cell.value) });
@@ -126,7 +129,7 @@ function ActivityDots({ heatmap }: { heatmap: Heatmap }) {
         </div>
       </div>
       <div data-vu1="heat-read" data-vu1-cap="">
-        <span aria-live="polite">{current ? dayText(current) : copy("vu1.heat.hint")}</span>
+        <span aria-live="polite">{current ? dayText(current) : null}</span>
         <span data-vu1="heat-legend" aria-hidden>
           {copy("vu1.heat.less")}
           {LEVELS.map((level) => (
@@ -154,7 +157,17 @@ export function UsageScreen({ range, totals, rank, delta, rows, dateKey = "day",
         <dl data-vu1="reads" data-vu1-cap="" className="m-0">
           {readings(totals, rank, delta).map((read) => (
             <div key={read.key} data-vu1="read">
-              <dt>{read.label}</dt>
+              <dt>
+                {read.hint ? (
+                  <KeyTip label={read.hint}>
+                    <span tabIndex={0} data-vu1="hint">
+                      {read.label}
+                    </span>
+                  </KeyTip>
+                ) : (
+                  read.label
+                )}
+              </dt>
               <dd data-vu1="read-value">{read.value}</dd>
               <dd data-vu1="read-delta" data-up={read.up || undefined}>
                 {read.delta}

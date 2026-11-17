@@ -160,7 +160,7 @@ export function LeaderboardPage({
   } else if (!board.data) {
     body = <StateScreen variant="loading" />;
   } else if (totalEntries === 0) {
-    body = <StateScreen variant="empty" />;
+    body = <StateScreen variant="no-entries" />;
   } else {
     body = <RankScreen entries={entries} me={me} handle={handleFromIdentity(currentIdentity)} frame="single" />;
   }
