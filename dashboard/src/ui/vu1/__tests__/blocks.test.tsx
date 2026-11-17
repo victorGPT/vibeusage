@@ -181,6 +181,13 @@ describe("ModelList", () => {
     expect(within(rows[5]).getByText("$2.00")).toBeTruthy();
     expect(screen.queryByText("Model f")).toBeNull();
   });
+
+  it("marks the CLI column and the share bar as what narrow screens drop", () => {
+    const { container } = render(<ModelList breakdown={breakdown} />);
+    const minor = [...container.querySelectorAll("[data-minor]")];
+    expect(minor.filter((el) => el.matches("th, td")).map((el) => el.textContent)).toEqual(["CLI", "Claude", "Claude", "Claude", "Claude", "Codex"]);
+    expect(minor.filter((el) => el.matches('[data-vu1="meter"]'))).toHaveLength(5);
+  });
 });
 
 describe("RankScreen", () => {
@@ -199,6 +206,12 @@ describe("RankScreen", () => {
     expect(rows).toHaveLength(4);
     expect(rows[1]).toHaveAttribute("data-me", "true");
     expect(within(rows[1]).getByText("120")).toBeTruthy();
+  });
+
+  it("marks only the top CLI column as what narrow screens drop", () => {
+    const { container } = render(<RankScreen entries={ENTRIES} me={null} handle="ada" />);
+    const minor = [...container.querySelectorAll("[data-minor]")];
+    expect(minor.map((el) => el.textContent)).toEqual(["Top CLI", "Claude", "GPT", "Other"]);
   });
 });
 

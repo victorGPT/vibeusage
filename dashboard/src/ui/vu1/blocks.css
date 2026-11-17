@@ -316,6 +316,22 @@
 [data-skin="hardware"] tr[data-me] [data-vu1="meter"]::after {
   background: repeating-linear-gradient(90deg, var(--vu1-red) 0 3px, transparent 3px 5px);
 }
+/* Narrow screens drop the minor columns; the name cell takes what is left and ellipsizes. */
+@media (max-width: 760px) {
+  [data-skin="hardware"] [data-vu1="list"] [data-minor] {
+    display: none;
+  }
+  [data-skin="hardware"] [data-vu1="list"] th,
+  [data-skin="hardware"] [data-vu1="list"] td {
+    padding-inline: var(--spacing-s2);
+  }
+  [data-skin="hardware"] [data-vu1="list"] td[data-name] {
+    width: 100%;
+    max-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
 [data-skin="hardware"] [data-vu1="mini"] {
   display: flex;
   flex-direction: column;
