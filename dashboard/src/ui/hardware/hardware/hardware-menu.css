@@ -7,13 +7,13 @@
   min-width: 190px;
   padding: 8px;
   border: 0;
-  border-radius: calc(10px * var(--corner-scale));
+  border-radius: var(--radius-10);
   background: var(--gray-glass);
   box-shadow:
-    inset 0 1px 3px rgb(0 0 0 / 0.22),
-    inset 0 0 0 0.5px rgb(0 0 0 / 0.15),
-    0 0 0 5px #f2f2f0,
-    0 0 0 6px rgb(0 0 0 / calc(0.06 * var(--shadow-k))),
+    inset 0 1px 3px var(--palette-black-a22),
+    inset 0 0 0 0.5px var(--palette-black-a15),
+    0 0 0 5px var(--palette-gray-961),
+    0 0 0 6px rgb(var(--palette-black-rgb) / calc(0.06 * var(--shadow-k))),
     var(--float);
   font-family: var(--mono, monospace);
 }
@@ -25,7 +25,7 @@
   height: 30px;
   padding: 0 10px;
   border: 0;
-  border-radius: 3px;
+  border-radius: var(--radius-fixed-3);
   font: 500 11px/1 var(--mono, monospace);
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -43,7 +43,7 @@
   }
 
   &[data-highlighted] {
-    color: #c6c7c1;
+    color: var(--palette-gray-827);
     background: var(--gray-ink);
   }
 }
@@ -52,7 +52,7 @@
   color: var(--gray-dim);
 
   [data-highlighted] > & {
-    color: rgb(198 199 193 / 0.6);
+    color: var(--palette-gray-827-a60);
   }
 }
 
@@ -61,7 +61,7 @@
   flex-shrink: 0;
   width: 9px;
   height: 9px;
-  border-radius: 1px;
+  border-radius: var(--radius-fixed-1);
   font-size: 0;
   color: transparent;
   background: none;
@@ -74,7 +74,7 @@
   }
 
   [data-highlighted] > & {
-    color: #c6c7c1;
+    color: var(--palette-gray-827);
   }
 
   &[data-checked] {
@@ -110,7 +110,7 @@
 @keyframes menu-chosen {
   0%,
   50% {
-    color: #c6c7c1;
+    color: var(--palette-gray-827);
     background: var(--gray-ink);
   }
 
@@ -141,12 +141,12 @@
   display: inline-flex;
   gap: 5px;
   padding: 5px 5px 8px;
-  border-radius: calc(13px * var(--corner-scale));
-  background: #e9e9e6;
+  border-radius: var(--radius-13);
+  background: var(--palette-gray-933);
   box-shadow:
-    inset 0 1px 3px rgb(0 0 0 / calc(0.1 * var(--shadow-k))),
-    inset 0 0 0 1px rgb(0 0 0 / 0.04),
-    0 1px 0 #fff;
+    inset 0 1px 3px rgb(var(--palette-black-rgb) / calc(0.1 * var(--shadow-k))),
+    inset 0 0 0 1px var(--palette-black-a4),
+    0 1px 0 var(--palette-white);
 }
 
 [data-skin="hardware"] [data-kit="menubar-trigger"]:not(#_):not(#_):not(#_):not(#_) {
@@ -155,18 +155,18 @@
   min-width: 64px;
   padding: 0 14px;
   border: 0;
-  border-radius: calc(8px * var(--corner-scale));
+  border-radius: var(--radius-8);
   font: var(--label);
   font-size: 9px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--ink);
-  background: linear-gradient(0deg, #ffffff, #f2f2f0 70%, #eeeeec);
+  background: linear-gradient(0deg, var(--palette-white), var(--palette-gray-961) 70%, var(--palette-gray-949));
   box-shadow:
-    inset 0 1px 0 #fff,
-    0 0 0 0.5px rgb(0 0 0 / 0.1),
-    0 var(--lift) 0 #d6d6d2,
-    0 calc(var(--lift) + 0.5px) 1.5px rgb(0 0 0 / calc(0.14 * var(--shadow-k)));
+    inset 0 1px 0 var(--palette-white),
+    0 0 0 0.5px var(--palette-black-a10),
+    0 var(--lift) 0 var(--palette-gray-875),
+    0 calc(var(--lift) + 0.5px) 1.5px rgb(var(--palette-black-rgb) / calc(0.14 * var(--shadow-k)));
   translate: 0 calc(var(--lift) * -1 + 3px);
   text-shadow: none;
   cursor: pointer;
@@ -181,7 +181,7 @@
 
   &:is([data-open], [aria-expanded="true"], :active) {
     --lift: 0.5px;
-    background: linear-gradient(0deg, #f1f1ef, #e6e6e3 70%, #e2e2df);
+    background: linear-gradient(0deg, var(--palette-gray-958), var(--palette-gray-924) 70%, var(--palette-gray-912-3));
   }
 
   &:focus-visible {
@@ -196,8 +196,8 @@
   padding: 6px 6px 9px;
   background: none;
   box-shadow:
-    inset 0 0 0 1px rgb(0 0 0 / 0.12),
-    inset 0 1px 0 1px rgb(255 255 255 / 0.85);
+    inset 0 0 0 1px var(--palette-black-a12),
+    inset 0 1px 0 1px var(--palette-white-a85);
 }
 
 /* A key's base is centered in the menubar's frame. Standing, the face rises

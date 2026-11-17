@@ -82,7 +82,7 @@ This document is the single source of truth for repository navigation. Use it to
   - `dashboard/src/ui/hardware/` holds the SPEC-01 hardware kit (MIT, `LICENSE` beside it), installed with `npx shadcn add` from local copies of the spec-01.vercel.app registry JSON (`@ui-sdk/react` and `@ui-sdk/core` pinned to `0.1.0-beta.5`). `lib/` holds its page-wide behaviors. The local edits are marked `vibeusage patch` and listed in `dashboard/DESIGN.md`.
   - `dashboard/src/ui/gallery/` is the dev-only SPEC-01 gallery at `/__vu1`, registered in `dashboard/src/main.jsx`.
   - `dashboard/src/styles/vu1.css` holds the VU-1 layout tokens: the 4px spacing scale `--spacing-s1..s8`, the page and device gutters, `--container-shell`, the 12-column `grid-page` and `grid-device` utilities, and the self-hosted IBM Plex Mono faces. `dashboard/src/styles.css` imports Tailwind and it.
-  - `dashboard/scripts/check-design-ssot.mjs` (`npm --prefix dashboard run guardrail:design`) blocks spacing off the scale, literal colors and `text-[Npx]` outside the kit.
+  - `dashboard/scripts/check-design-ssot.mjs` (`npm --prefix dashboard run guardrail:design`) blocks literal colors and radii outside `dashboard/src/styles/tokens.css`, and spacing off the scale and `text-[Npx]` outside the kit.
 - Auth/session integration first-read path:
   - `dashboard/src/main.jsx`
   - `dashboard/src/App.jsx`

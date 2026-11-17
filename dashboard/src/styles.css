@@ -1,5 +1,6 @@
 @import "tailwindcss" source(none);
 @import "./styles/vu1.css";
+@import "./styles/tokens.css";
 @source "../index.html";
 @source "./**/*.{js,jsx,ts,tsx}";
 
@@ -13,7 +14,7 @@
   ::before,
   ::backdrop,
   ::file-selector-button {
-    border-color: #e5e7eb;
+    border-color: var(--palette-gray-928);
   }
 
   input,
@@ -24,7 +25,7 @@
 
   input::placeholder,
   textarea::placeholder {
-    color: #9ca3af;
+    color: var(--palette-gray-714);
   }
 
   button,

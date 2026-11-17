@@ -3,9 +3,9 @@
 
 [data-skin="hardware"] [data-vu1="landing"] {
   min-height: 100vh;
-  color: var(--vu1-ink);
-  background-color: #eeeeec;
-  background-image: radial-gradient(rgba(0, 0, 0, 0.025) 1px, transparent 1px);
+  color: var(--color-ink);
+  background-color: var(--palette-gray-949);
+  background-image: radial-gradient(var(--palette-black-a2p5) 1px, transparent 1px);
   background-size: 3px 3px;
   font-size: 12px;
   letter-spacing: 0.02em;
@@ -23,7 +23,7 @@
 [data-skin="hardware"] [data-vu1="prose"] {
   margin: 0;
   max-width: 46ch;
-  color: #4a4a47;
+  color: var(--palette-gray-408);
   line-height: 1.7;
 }
 [data-skin="hardware"] [data-vu1="prose"][data-wide] {
@@ -43,9 +43,9 @@
   align-items: center;
   gap: var(--spacing-s2);
   padding: var(--spacing-s2) var(--spacing-s3);
-  border-radius: 8px;
-  background: #fcfcfa;
-  box-shadow: inset 0 1px 0 #fff, 0 2px 0 #dcdcd8;
+  border-radius: var(--radius-fixed-8);
+  background: var(--palette-gray-991);
+  box-shadow: inset 0 1px 0 var(--palette-white), 0 2px 0 var(--palette-gray-893);
 }
 
 /* Links dressed as kit keys, laid out like TopBar's GitHub key. */
@@ -68,6 +68,6 @@
 }
 
 [data-skin="hardware"] [data-vu1="foot"] {
-  color: var(--vu1-legend);
+  color: var(--color-legend);
   text-align: center;
 }

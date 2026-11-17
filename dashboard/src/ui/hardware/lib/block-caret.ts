@@ -63,7 +63,7 @@ function installBlockCaret() {
       letterSpacing: style.letterSpacing,
       textTransform: style.textTransform,
       background: ownCaret,
-      color: style.backgroundColor === "rgba(0, 0, 0, 0)" ? "#000" : style.backgroundColor,
+      color: style.backgroundColor === "rgba(0, 0, 0, 0)" ? "var(--palette-black)" : style.backgroundColor,
     })
     block.textContent = under
     // Restart the blink on every move, as a native caret does.

@@ -10,16 +10,17 @@
 }
 
 [data-skin="hardware"] [data-kit="display-bezel"] {
-  padding: 11px;
-  border-radius: calc(14px * var(--corner-scale));
-  background: var(--tex-matte), linear-gradient(180deg, #1d1d1c, #0d0d0c 40%, #090908);
+  --bezel-inset: 11px;
+  padding: var(--bezel-inset);
+  border-radius: var(--radius-14);
+  background: var(--tex-matte), linear-gradient(180deg, var(--palette-gray-230), var(--palette-gray-159) 40%, var(--palette-gray-139));
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.12),
-    inset 0 -1px 0 rgb(0 0 0 / calc(0.8 * var(--shadow-k))),
-    0 0 0 1px rgb(0 0 0 / calc(0.55 * var(--shadow-k))),
-    0 1px 0 1px rgb(255 255 255 / 0.9),
-    0 4px 3px rgb(0 0 0 / calc(0.18 * var(--shadow-k))),
-    0 22px 36px -14px rgb(0 0 0 / calc(0.5 * var(--shadow-k)));
+    inset 0 1px 0 var(--palette-white-a12),
+    inset 0 -1px 0 rgb(var(--palette-black-rgb) / calc(0.8 * var(--shadow-k))),
+    0 0 0 1px rgb(var(--palette-black-rgb) / calc(0.55 * var(--shadow-k))),
+    0 1px 0 1px var(--palette-white-a90),
+    0 4px 3px rgb(var(--palette-black-rgb) / calc(0.18 * var(--shadow-k))),
+    0 22px 36px -14px rgb(var(--palette-black-rgb) / calc(0.5 * var(--shadow-k)));
 }
 
 [data-skin="hardware"] [data-kit="display-screen"] {
@@ -27,9 +28,9 @@
   overflow: hidden;
   /* Concentric with the bezel: its radius less the bezel's padding, so the
      black rim is the same width along the sides and round the corners. */
-  border-radius: max(2px, calc(14px * var(--corner-scale) - 11px));
-  background: #000;
-  box-shadow: 0 0 0 1px #000;
+  border-radius: max(var(--radius-fixed-2), calc(var(--radius-14) - var(--bezel-inset)));
+  background: var(--palette-black);
+  box-shadow: 0 0 0 1px var(--palette-black);
   isolation: isolate;
   /* The panel's print is debossed with a white edge below it. On a lit
      screen that edge would show as a second image, so it stops here. */
@@ -51,11 +52,11 @@
     z-index: 2;
     pointer-events: none;
     border-radius: inherit;
-    background: linear-gradient(162deg, rgb(255 255 255 / 0.14), rgb(255 255 255 / 0.03) 32%, transparent 46%);
+    background: linear-gradient(162deg, var(--palette-white-a14), var(--palette-white-a3) 32%, transparent 46%);
     box-shadow:
-      inset 0 0 0 1px rgb(0 0 0 / calc(0.9 * var(--shadow-k))),
-      inset 0 2px 6px rgb(0 0 0 / calc(0.7 * var(--shadow-k))),
-      inset 0 0 22px 4px rgb(0 0 0 / calc(0.45 * var(--shadow-k)));
+      inset 0 0 0 1px rgb(var(--palette-black-rgb) / calc(0.9 * var(--shadow-k))),
+      inset 0 2px 6px rgb(var(--palette-black-rgb) / calc(0.7 * var(--shadow-k))),
+      inset 0 0 22px 4px rgb(var(--palette-black-rgb) / calc(0.45 * var(--shadow-k)));
   }
 
   /* A barely-there pixel grid, seen only up close. */
@@ -65,7 +66,7 @@
     inset: 0;
     z-index: 1;
     pointer-events: none;
-    background: repeating-linear-gradient(0deg, rgb(0 0 0 / 0.025) 0 1px, transparent 1px 2px);
+    background: repeating-linear-gradient(0deg, var(--palette-black-a2p5) 0 1px, transparent 1px 2px);
     mix-blend-mode: multiply;
   }
 }
@@ -86,9 +87,9 @@
   padding: 14px 16px 16px;
   font: 12px/1.65 var(--mono, "Spec Mono", monospace);
   letter-spacing: 0.04em;
-  color: #f2f2ee;
-  text-shadow: 0 0 6px rgb(255 255 255 / 0.35);
-  background: radial-gradient(130% 150% at 50% 0%, #161615, #050505 70%);
+  color: var(--palette-gray-960);
+  text-shadow: 0 0 6px var(--palette-white-a35);
+  background: radial-gradient(130% 150% at 50% 0%, var(--palette-gray-200), var(--palette-gray-115) 70%);
   overflow-x: auto;
 
   & ol {
@@ -106,8 +107,8 @@
   }
 
   & li[data-error] code {
-    color: #ff6b5e;
-    text-shadow: 0 0 8px rgb(255 80 60 / 0.5);
+    color: var(--palette-red-709);
+    text-shadow: 0 0 8px var(--palette-red-674-a50);
   }
 
   & code {
@@ -121,27 +122,27 @@
 [data-skin="hardware"] [data-kit="code-number"] {
   flex-shrink: 0;
   width: 2.6em;
-  color: rgb(242 242 238 / 0.35);
+  color: var(--palette-gray-960-a35);
   text-shadow: none;
   user-select: none;
 }
 
 [data-skin="hardware"] [data-kit="code"] [data-token="keyword"] {
-  color: #8fd3ff;
-  text-shadow: 0 0 8px rgb(143 211 255 / 0.45);
+  color: var(--palette-blue-837);
+  text-shadow: 0 0 8px var(--palette-blue-837-a45);
 }
 
 [data-skin="hardware"] [data-kit="code"] [data-token="string"] {
-  color: #ffb347;
-  text-shadow: 0 0 8px rgb(255 179 71 / 0.45);
+  color: var(--palette-orange-821);
+  text-shadow: 0 0 8px var(--palette-orange-821-a45);
 }
 
 [data-skin="hardware"] [data-kit="code"] [data-token="number"] {
-  color: #ffd98a;
+  color: var(--palette-yellow-901);
 }
 
 [data-skin="hardware"] [data-kit="code"] [data-token="comment"] {
-  color: rgb(242 242 238 / 0.4);
+  color: var(--palette-gray-960-a40);
   text-shadow: none;
 }
 
@@ -154,7 +155,7 @@
   margin-inline-start: 1px;
   align-self: center;
   background: currentColor;
-  box-shadow: 0 0 6px rgb(255 255 255 / 0.4);
+  box-shadow: 0 0 6px var(--palette-white-a40);
 
   &[data-idle] {
     animation: code-blink 1s steps(1) infinite;
@@ -209,11 +210,11 @@
   height: 44px;
   padding: 0;
   border: 0;
-  border-radius: 0 calc(4px * var(--corner-scale)) calc(4px * var(--corner-scale)) 0;
-  background: var(--tex-matte), linear-gradient(90deg, #121211, #3a3a38 55%, #232322);
+  border-radius: 0 var(--radius-4) var(--radius-4) 0;
+  background: var(--tex-matte), linear-gradient(90deg, var(--palette-gray-182), var(--palette-gray-348) 55%, var(--palette-gray-256));
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.12),
-    1px 0 0 #0c0c0b,
+    inset 0 1px 0 var(--palette-white-a12),
+    1px 0 0 var(--palette-gray-154),
     2px 2px 3px hsl(var(--shadow-color, 45deg 8% 30%) / 0.35);
   cursor: pointer;
   transition:
@@ -223,7 +224,7 @@
   &:active,
   &[data-copied] {
     translate: -3px 0;
-    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.08);
+    box-shadow: inset 0 1px 0 var(--palette-white-a8);
   }
 
   &:focus-visible {

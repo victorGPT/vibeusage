@@ -4,22 +4,22 @@
 [data-skin="hardware"] {
   --gray-glass:
     var(--tex-matte),
-    linear-gradient(180deg, #b6b7b1, #c8c9c3 35%, #c2c3bd);
-  --gray-ink: #141413;
-  --gray-dim: rgb(20 20 19 / 0.6);
-  --gray-ghost: rgb(20 20 19 / 0.07);
+    linear-gradient(180deg, var(--palette-gray-777), var(--palette-gray-833) 35%, var(--palette-gray-815));
+  --gray-ink: var(--palette-gray-191);
+  --gray-dim: var(--palette-gray-191-a60);
+  --gray-ghost: var(--palette-gray-191-a7);
   /* Dark print on gray glass sits a hair above it, with a faint shadow. */
   /* The print floats above the reflective backing and casts a sharp shadow
      down and to the right, as on a real segment display. */
-  --lcd-print: 0.25px 1px 0 rgb(20 20 19 / 14%);
+  --lcd-print: 0.25px 1px 0 var(--palette-gray-191-a14);
   /* Key-colored print casts the same gray, a little lighter: under opaque
      key color the regular 14% reads darker than it does under the gray
      print, which is translucent. */
-  --lcd-print-key: 0.25px 1px 0 rgb(20 20 19 / 9%);
+  --lcd-print-key: 0.25px 1px 0 var(--palette-gray-191-a9);
   --gray-well:
-    inset 0 1px 3px rgb(0 0 0 / 0.25),
-    inset 0 0 0 0.5px rgb(0 0 0 / 0.15),
-    0 1px 0 #fff;
+    inset 0 1px 3px var(--palette-black-a25),
+    inset 0 0 0 0.5px var(--palette-black-a15),
+    0 1px 0 var(--palette-white);
 }
 
 [data-skin="hardware"] [data-kit="lcd"] {
@@ -27,7 +27,7 @@
   gap: 6px;
   min-width: 0;
   padding: 10px 14px 9px;
-  border-radius: calc(7px * var(--corner-scale));
+  border-radius: var(--radius-7);
   color: var(--gray-ink);
   background: var(--gray-glass);
   box-shadow: var(--gray-well);
@@ -37,13 +37,13 @@
   &[data-size="sm"] {
     gap: 3px;
     padding: 5px 8px 4px;
-    border-radius: calc(4px * var(--corner-scale));
+    border-radius: var(--radius-4);
   }
 
   &[data-size="lg"] {
     gap: 8px;
     padding: 14px 20px 12px;
-    border-radius: calc(10px * var(--corner-scale));
+    border-radius: var(--radius-10);
   }
 }
 
@@ -91,11 +91,11 @@
   color: var(--gray-ink);
   background: var(--gray-glass);
   box-shadow:
-    inset 0 1px 3px rgb(0 0 0 / 0.22),
-    inset 0 0 0 0.5px rgb(0 0 0 / 0.15),
-    0 0 0 5px #f2f2f0,
-    0 0 0 6px rgb(0 0 0 / calc(0.06 * var(--shadow-k))),
-    0 10px 24px -8px rgb(0 0 0 / calc(0.3 * var(--shadow-k)));
+    inset 0 1px 3px var(--palette-black-a22),
+    inset 0 0 0 0.5px var(--palette-black-a15),
+    0 0 0 5px var(--palette-gray-961),
+    0 0 0 6px rgb(var(--palette-black-rgb) / calc(0.06 * var(--shadow-k))),
+    0 10px 24px -8px rgb(var(--palette-black-rgb) / calc(0.3 * var(--shadow-k)));
   text-shadow: none;
 }
 
@@ -166,10 +166,10 @@
     inset: -9px auto auto 22px;
     width: 18px;
     height: 10px;
-    border-radius: 3px 3px 0 0;
-    background: linear-gradient(180deg, #f6f6f4, #f1f0ed);
+    border-radius: var(--radius-fixed-3) var(--radius-fixed-3) 0 0;
+    background: linear-gradient(180deg, var(--palette-gray-973), var(--palette-gray-955-2));
     box-shadow:
-      inset 0 1px 0 #fff,
+      inset 0 1px 0 var(--palette-white),
       0 0 0 1px hsl(var(--shadow-color) / 0.1);
     clip-path: inset(-2px -2px 1px -2px);
   }
@@ -214,14 +214,14 @@
    keys sitting on the glass. */
 [data-skin="hardware"] [data-kit="popover"] [data-kit="popover-surface"]:not([data-size]):not(#_):not(#_):not(#_):not(#_):not(#_) {
   padding: 16px 16px 14px 18px;
-  border-radius: calc(10px * var(--corner-scale));
+  border-radius: var(--radius-10);
   background: var(--gray-glass);
   box-shadow:
-    inset 0 1px 3px rgb(0 0 0 / 0.22),
-    inset 0 0 0 0.5px rgb(0 0 0 / 0.15),
-    0 0 0 5px #f2f2f0,
-    0 0 0 6px rgb(0 0 0 / calc(0.06 * var(--shadow-k))),
-    0 10px 24px -8px rgb(0 0 0 / calc(0.3 * var(--shadow-k)));
+    inset 0 1px 3px var(--palette-black-a22),
+    inset 0 0 0 0.5px var(--palette-black-a15),
+    0 0 0 5px var(--palette-gray-961),
+    0 0 0 6px rgb(var(--palette-black-rgb) / calc(0.06 * var(--shadow-k))),
+    0 10px 24px -8px rgb(var(--palette-black-rgb) / calc(0.3 * var(--shadow-k)));
 
   &::before {
     content: none;
@@ -278,19 +278,19 @@
 
 [data-skin="hardware"] [data-kit="toast"]:not(#_):not(#_):not(#_):not(#_) {
   box-shadow:
-    inset 0 1px 3px rgb(0 0 0 / 0.22),
-    inset 0 0 0 0.5px rgb(0 0 0 / 0.15),
-    0 0 0 5px #f2f2f0,
-    0 0 0 6px rgb(0 0 0 / calc(0.06 * var(--shadow-k))),
+    inset 0 1px 3px var(--palette-black-a22),
+    inset 0 0 0 0.5px var(--palette-black-a15),
+    0 0 0 5px var(--palette-gray-961),
+    0 0 0 6px rgb(var(--palette-black-rgb) / calc(0.06 * var(--shadow-k))),
     var(--float);
 }
 
 [data-skin="hardware"] [data-kit="popover"] [data-kit="popover-surface"]:not([data-size]):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) {
   box-shadow:
-    inset 0 1px 3px rgb(0 0 0 / 0.22),
-    inset 0 0 0 0.5px rgb(0 0 0 / 0.15),
-    0 0 0 5px #f2f2f0,
-    0 0 0 6px rgb(0 0 0 / calc(0.06 * var(--shadow-k))),
+    inset 0 1px 3px var(--palette-black-a22),
+    inset 0 0 0 0.5px var(--palette-black-a15),
+    0 0 0 5px var(--palette-gray-961),
+    0 0 0 6px rgb(var(--palette-black-rgb) / calc(0.06 * var(--shadow-k))),
     var(--float);
 }
 
@@ -298,10 +298,10 @@
 [data-skin="hardware"] [data-kit="tooltip-legend"]:not(#_):not(#_) {
   bottom: calc(100% + 12px);
   box-shadow:
-    inset 0 1px 2px rgb(0 0 0 / 0.22),
-    inset 0 0 0 0.5px rgb(0 0 0 / 0.12),
-    0 0 0 3px #f2f2f0,
-    0 0 0 3.5px rgb(0 0 0 / calc(0.06 * var(--shadow-k))),
+    inset 0 1px 2px var(--palette-black-a22),
+    inset 0 0 0 0.5px var(--palette-black-a12),
+    0 0 0 3px var(--palette-gray-961),
+    0 0 0 3.5px rgb(var(--palette-black-rgb) / calc(0.06 * var(--shadow-k))),
     var(--float-sm);
 }
 
@@ -345,56 +345,56 @@
 /* The floating LCD boards stand on a thin edge of their own: a light band
    just past the rim, a half pixel lower, so the board reads as a slab. */
 [data-skin="hardware"] {
-  --board-edge: 0 0.5px 0 6px #dddddd;
+  --board-edge: 0 0.5px 0 6px var(--palette-gray-898);
 }
 
 [data-skin="hardware"] [data-kit="toast"]:not(#_):not(#_):not(#_):not(#_):not(#_) {
   box-shadow:
-    inset 0 1px 3px rgb(0 0 0 / 0.22),
-    inset 0 0 0 0.5px rgb(0 0 0 / 0.15),
-    0 0 0 5px #f2f2f0,
+    inset 0 1px 3px var(--palette-black-a22),
+    inset 0 0 0 0.5px var(--palette-black-a15),
+    0 0 0 5px var(--palette-gray-961),
     var(--board-edge),
-    0 0 0 6.5px rgb(0 0 0 / calc(0.06 * var(--shadow-k))),
+    0 0 0 6.5px rgb(var(--palette-black-rgb) / calc(0.06 * var(--shadow-k))),
     var(--float);
 }
 
 [data-skin="hardware"] [data-kit="popover"] [data-kit="popover-surface"]:not([data-size]):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) {
   box-shadow:
-    inset 0 1px 3px rgb(0 0 0 / 0.22),
-    inset 0 0 0 0.5px rgb(0 0 0 / 0.15),
-    0 0 0 5px #f2f2f0,
+    inset 0 1px 3px var(--palette-black-a22),
+    inset 0 0 0 0.5px var(--palette-black-a15),
+    0 0 0 5px var(--palette-gray-961),
     var(--board-edge),
-    0 0 0 6.5px rgb(0 0 0 / calc(0.06 * var(--shadow-k))),
+    0 0 0 6.5px rgb(var(--palette-black-rgb) / calc(0.06 * var(--shadow-k))),
     var(--float);
 }
 
 [data-skin="hardware"] [data-kit="popup"]:not([data-screen]):not(#_):not(#_):not(#_):not(#_) {
   box-shadow:
-    inset 0 1px 3px rgb(0 0 0 / 0.22),
-    inset 0 0 0 0.5px rgb(0 0 0 / 0.15),
-    0 0 0 5px #f2f2f0,
+    inset 0 1px 3px var(--palette-black-a22),
+    inset 0 0 0 0.5px var(--palette-black-a15),
+    0 0 0 5px var(--palette-gray-961),
     var(--board-edge),
-    0 0 0 6.5px rgb(0 0 0 / calc(0.06 * var(--shadow-k))),
+    0 0 0 6.5px rgb(var(--palette-black-rgb) / calc(0.06 * var(--shadow-k))),
     var(--float);
 }
 
 [data-skin="hardware"] [data-kit="hover-lcd"]:not(#_):not(#_) {
   box-shadow:
-    inset 0 1px 3px rgb(0 0 0 / 0.25),
-    inset 0 0 0 0.5px rgb(0 0 0 / 0.15),
-    0 0 0 5px #f2f2f0,
+    inset 0 1px 3px var(--palette-black-a25),
+    inset 0 0 0 0.5px var(--palette-black-a15),
+    0 0 0 5px var(--palette-gray-961),
     var(--board-edge),
-    0 0 0 6.5px rgb(0 0 0 / calc(0.06 * var(--shadow-k))),
+    0 0 0 6.5px rgb(var(--palette-black-rgb) / calc(0.06 * var(--shadow-k))),
     var(--float);
 }
 
 [data-skin="hardware"] [data-kit="tooltip-legend"]:not(#_):not(#_):not(#_) {
   box-shadow:
-    inset 0 1px 2px rgb(0 0 0 / 0.22),
-    inset 0 0 0 0.5px rgb(0 0 0 / 0.12),
-    0 0 0 3px #f2f2f0,
-    0 0.5px 0 4px #dddddd,
-    0 0 0 4.5px rgb(0 0 0 / calc(0.06 * var(--shadow-k))),
+    inset 0 1px 2px var(--palette-black-a22),
+    inset 0 0 0 0.5px var(--palette-black-a12),
+    0 0 0 3px var(--palette-gray-961),
+    0 0.5px 0 4px var(--palette-gray-898),
+    0 0 0 4.5px rgb(var(--palette-black-rgb) / calc(0.06 * var(--shadow-k))),
     var(--float-sm);
 }
 
@@ -447,14 +447,14 @@
    a layer with the same corner shape. */
 [data-skin="hardware"] [data-kit="popover"] [data-kit="popover-surface"]:not([data-size]):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) {
   --rim: 5px;
-  --glass-r: calc(10px * var(--corner-scale));
+  --glass-radius: var(--radius-10);
   padding: calc(16px + var(--rim)) calc(16px + var(--rim)) calc(14px + var(--rim)) calc(18px + var(--rim));
-  border-radius: calc(var(--glass-r) + var(--rim));
-  background: #f2f2f0;
+  border-radius: calc(var(--glass-radius) + var(--rim));
+  background: var(--palette-gray-961);
   box-shadow:
-    inset 0 1px 0 #fff,
-    0 0 0 0.5px rgb(0 0 0 / calc(0.08 * var(--shadow-k))),
-    0 0.5px 0 1px #dddddd,
+    inset 0 1px 0 var(--palette-white),
+    0 0 0 0.5px rgb(var(--palette-black-rgb) / calc(0.08 * var(--shadow-k))),
+    0 0.5px 0 1px var(--palette-gray-898),
     var(--float);
 
   &::before {
@@ -464,11 +464,11 @@
     inset: var(--rim);
     z-index: 0;
     border: 0;
-    border-radius: var(--glass-r);
+    border-radius: var(--glass-radius);
     background: var(--gray-glass);
     box-shadow:
-      inset 0 1px 3px rgb(0 0 0 / 0.22),
-      inset 0 0 0 0.5px rgb(0 0 0 / 0.15);
+      inset 0 1px 3px var(--palette-black-a22),
+      inset 0 0 0 0.5px var(--palette-black-a15);
     pointer-events: none;
   }
 

@@ -38,15 +38,15 @@
     gap: 4px;
     height: 110px;
     padding: 8px;
-    border-radius: calc(4px * var(--corner-scale));
-    background: #0d0d0c;
+    border-radius: var(--radius-4);
+    background: var(--palette-gray-159);
   }
 
   & [data-kit="bar"] {
     flex: 1;
     height: calc(var(--value) * 100%);
-    background: linear-gradient(0deg, var(--key-color) 0 70%, color-mix(in oklab, var(--key-color), #fff 50%));
-    mask: repeating-linear-gradient(0deg, #000 0 4px, transparent 4px 6px);
+    background: linear-gradient(0deg, var(--key-color) 0 70%, color-mix(in oklab, var(--key-color), var(--palette-white) 50%));
+    mask: repeating-linear-gradient(0deg, var(--palette-black) 0 4px, transparent 4px 6px);
     transition: height 300ms var(--ease-settle);
   }
 

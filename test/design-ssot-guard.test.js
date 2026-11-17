@@ -21,6 +21,7 @@ test("design guard passes spacing taken from the s1..s8 scale", () => {
   const out = runGuard({
     "src/ui/vu1/Ok.tsx": 'export const Ok = () => <div className="grid-page gap-s4 p-s2 mt-s8 m-0 -mt-s1" style={{ gap: "var(--spacing-s3)" }} />;\n',
     "src/ui/vu1/ok.css": "[data-vu1] { padding: var(--spacing-s2) 0; margin: 0 auto; gap: calc(var(--spacing-s4) * 2); }\n",
+    "src/ui/vu1/alias.css": "[data-vu1] { padding: var(--spacing-inset); gap: var(--spacing-stack); margin-top: var(--spacing-section); }\n",
   });
   assert.equal(out.status, 0, out.stdout + out.stderr);
 });
@@ -65,7 +66,112 @@ test("design guard blocks fractions of zero and multi-line inline styles", () =>
   assert.doesNotMatch(out.stderr, /Frac\.jsx:11/, "padding: 0 is on the scale");
 });
 
-test("design guard leaves the vendored SPEC-01 kit alone", () => {
+test("design guard leaves the kit's own spacing alone", () => {
   const out = runGuard({ "src/ui/hardware/hardware/kit.css": "[data-kit] { padding: 9px 11px; }\n" });
+  assert.equal(out.status, 0, out.stdout + out.stderr);
+});
+
+test("design guard blocks literal colors in CSS, the kit included", () => {
+  const out = runGuard({
+    "src/ui/vu1/c.css": [
+      "[data-vu1] { color: #fff; }",
+      "[data-vu1] { background: linear-gradient(180deg, rgba(0, 0, 0, 0.2), transparent); }",
+      "[data-vu1] { border-color: white; }",
+      "[data-vu1] {",
+      "  box-shadow:",
+      "    0 1px 0 rgb(255 255 255 / 0.9);",
+      "}",
+      "[data-vu1] { --lit: oklch(0.72 0.19 150); }",
+      "[data-vu1] { box-shadow: 0 0 0 1px rgb(0 0 0 / calc(0.5 * var(--k))); }",
+    ].join("\n"),
+    "src/ui/hardware/hardware/kit.css": "[data-kit] { fill: #1d1d1c; }\n",
+  });
+  assert.equal(out.status, 1);
+  for (const hit of ["c.css:1", "c.css:2", "c.css:3", "c.css:6", "c.css:8", "c.css:9", "kit.css:1"]) {
+    assert.match(out.stderr, new RegExp(hit.replace(".", "\\.") + " "), `expected ${hit} flagged`);
+  }
+});
+
+test("design guard passes colors taken from tokens", () => {
+  const out = runGuard({
+    "src/ui/vu1/ok.css": [
+      "/* a #fff highlight on white keys */",
+      "[data-vu1]:not(#_) { color: var(--color-ink); background: transparent; border-color: currentColor; }",
+      "[data-vu1] { --key-ink: oklch(from var(--theme) calc(l - 0.1) c h); }",
+      "[data-vu1] { box-shadow: 0 0 0 1px hsl(var(--shadow-color) / 0.1); }",
+      "[data-vu1] { --edge: color-mix(in oklab, var(--key-color) 70%, var(--palette-black)); }",
+      "@media (max-width: 760px) { [data-vu1] { color: var(--color-legend); } }",
+      "@supports (corner-shape: squircle) { [data-vu1] { corner-shape: squircle; } }",
+    ].join("\n"),
+    "src/styles/tokens.css": ":root { --palette-white: #fff; --radius-14: calc(14px * var(--corner-scale)); }\n",
+  });
+  assert.equal(out.status, 0, out.stdout + out.stderr);
+});
+
+test("design guard blocks literal radii, the kit included", () => {
+  const out = runGuard({
+    "src/ui/vu1/r.css": [
+      "[data-vu1] { border-radius: 6px; }",
+      "[data-vu1] { border-top-left-radius: calc(4px * var(--corner-scale)); }",
+      "[data-vu1] { --key-radius: 10px; }",
+      "[data-vu1] { border-radius: calc(var(--radius-14) - 11px); }",
+      "[data-vu1] { border-radius: var(--radius-75) / 25%; }",
+      "[data-vu1] { BORDER-RADIUS: 4PX; }",
+      "[data-vu1] { border-radius: 1ch; }",
+    ].join("\n"),
+    "src/ui/hardware/hardware/kit.css": "[data-kit] { border-radius: 0 3px 3px 0; }\n",
+    "src/ui/vu1/Bad.tsx": 'export const B = () => <div className="rounded-[6px]" style={{ borderRadius: 4 }} />;\n',
+    "src/ui/hardware/Kit.tsx": 'export const K = () => <div style={{ borderRadius: "6px" }} />;\n',
+  });
+  assert.equal(out.status, 1);
+  for (const hit of ["r.css:1", "r.css:2", "r.css:3", "r.css:4", "r.css:5", "r.css:6", "r.css:7", "kit.css:1", "Bad.tsx:1", "Kit.tsx:1"]) {
+    assert.match(out.stderr, new RegExp(hit.replace(".", "\\.") + " "), `expected ${hit} flagged`);
+  }
+});
+
+test("design guard passes radii taken from tokens, 0 and 50%", () => {
+  const out = runGuard({
+    "src/ui/vu1/ok.css": [
+      "[data-vu1] { border-radius: 50%; }",
+      "[data-vu1] { border-radius: 0 var(--radius-4) var(--radius-4) 0 !important; }",
+      "[data-vu1] { border-radius: calc(var(--radius-14) - var(--bezel-inset)); }",
+      "[data-vu1] { border-radius: calc(var(--h) / 2) calc(var(--h) * 0.3); }",
+      "[data-vu1] { border-radius: inherit; }",
+    ].join("\n"),
+  });
+  assert.equal(out.status, 0, out.stdout + out.stderr);
+});
+
+test("design guard blocks literal colors in TSX and JSX, the kit included", () => {
+  const probe = [
+    'export const A = () => <div style={{ color: "#ABC" }} />;',
+    'export const B = () => <div style={{ background: "rgb(0, 0, 0)" }} />;',
+    "export const C = () => <div style={{ borderColor: 'hsl(0 0% 0%)' }} />;",
+    'export const D = () => <div style={{ boxShadow: "0 0 0 1px white" }} />;',
+    'export const E = () => <path fill="#000" />;',
+    'export const F = () => <path stroke="red" />;',
+    'export const G = () => <stop stopColor="black" />;',
+    'export const H = () => <circle fill={"#fff"} />;',
+  ].join("\n");
+  const out = runGuard({ "src/ui/vu1/Probe.tsx": probe, "src/ui/hardware/Probe.jsx": probe });
+  assert.equal(out.status, 1);
+  for (const dir of ["vu1/Probe.tsx", "hardware/Probe.jsx"]) {
+    for (let line = 1; line <= 8; line++) {
+      assert.match(out.stderr, new RegExp(`${dir.replace(".", "\\.")}:${line} `), `expected ${dir}:${line} flagged`);
+    }
+  }
+});
+
+test("design guard passes token colors and radii in TSX", () => {
+  const out = runGuard({
+    "src/ui/hardware/Ok.tsx": [
+      'export const A = () => <div style={{ color: "var(--color-ink)", gap: 6 }} />;',
+      'export const B = () => <path fill="currentColor" stroke="none" />;',
+      "export const C = () => <div style={{ borderRadius: 0 }} />;",
+      'export const D = () => <div style={{ borderRadius: "50%" }} />;',
+      'export const E = () => <div style={{ borderRadius: "var(--radius-4)" }} />;',
+      'export const F = () => <a href="#top" />;',
+    ].join("\n"),
+  });
   assert.equal(out.status, 0, out.stdout + out.stderr);
 });
