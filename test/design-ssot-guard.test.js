@@ -121,9 +121,10 @@ test("design guard blocks literal radii, the kit included", () => {
     ].join("\n"),
     "src/ui/hardware/hardware/kit.css": "[data-kit] { border-radius: 0 3px 3px 0; }\n",
     "src/ui/vu1/Bad.tsx": 'export const B = () => <div className="rounded-[6px]" style={{ borderRadius: 4 }} />;\n',
+    "src/ui/hardware/Kit.tsx": 'export const K = () => <div style={{ borderRadius: "6px" }} />;\n',
   });
   assert.equal(out.status, 1);
-  for (const hit of ["r.css:1", "r.css:2", "r.css:3", "r.css:4", "r.css:5", "r.css:6", "r.css:7", "kit.css:1", "Bad.tsx:1"]) {
+  for (const hit of ["r.css:1", "r.css:2", "r.css:3", "r.css:4", "r.css:5", "r.css:6", "r.css:7", "kit.css:1", "Bad.tsx:1", "Kit.tsx:1"]) {
     assert.match(out.stderr, new RegExp(hit.replace(".", "\\.") + " "), `expected ${hit} flagged`);
   }
 });
@@ -136,6 +137,40 @@ test("design guard passes radii taken from tokens, 0 and 50%", () => {
       "[data-vu1] { border-radius: calc(var(--radius-14) - var(--bezel-inset)); }",
       "[data-vu1] { border-radius: calc(var(--h) / 2) calc(var(--h) * 0.3); }",
       "[data-vu1] { border-radius: inherit; }",
+    ].join("\n"),
+  });
+  assert.equal(out.status, 0, out.stdout + out.stderr);
+});
+
+test("design guard blocks literal colors in TSX and JSX, the kit included", () => {
+  const probe = [
+    'export const A = () => <div style={{ color: "#ABC" }} />;',
+    'export const B = () => <div style={{ background: "rgb(0, 0, 0)" }} />;',
+    "export const C = () => <div style={{ borderColor: 'hsl(0 0% 0%)' }} />;",
+    'export const D = () => <div style={{ boxShadow: "0 0 0 1px white" }} />;',
+    'export const E = () => <path fill="#000" />;',
+    'export const F = () => <path stroke="red" />;',
+    'export const G = () => <stop stopColor="black" />;',
+    'export const H = () => <circle fill={"#fff"} />;',
+  ].join("\n");
+  const out = runGuard({ "src/ui/vu1/Probe.tsx": probe, "src/ui/hardware/Probe.jsx": probe });
+  assert.equal(out.status, 1);
+  for (const dir of ["vu1/Probe.tsx", "hardware/Probe.jsx"]) {
+    for (let line = 1; line <= 8; line++) {
+      assert.match(out.stderr, new RegExp(`${dir.replace(".", "\\.")}:${line} `), `expected ${dir}:${line} flagged`);
+    }
+  }
+});
+
+test("design guard passes token colors and radii in TSX", () => {
+  const out = runGuard({
+    "src/ui/hardware/Ok.tsx": [
+      'export const A = () => <div style={{ color: "var(--color-ink)", gap: 6 }} />;',
+      'export const B = () => <path fill="currentColor" stroke="none" />;',
+      "export const C = () => <div style={{ borderRadius: 0 }} />;",
+      'export const D = () => <div style={{ borderRadius: "50%" }} />;',
+      'export const E = () => <div style={{ borderRadius: "var(--radius-4)" }} />;',
+      'export const F = () => <a href="#top" />;',
     ].join("\n"),
   });
   assert.equal(out.status, 0, out.stdout + out.stderr);

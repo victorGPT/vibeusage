@@ -50,18 +50,35 @@ const STYLE_SPACING = {
   ),
 };
 
-const STYLE_RADIUS = {
-  label: "inline style radius (radii are var(--radius-*) in CSS)",
-  pattern: /\bborder\w*Radius\s*:/g,
-};
-
 function inlineStyleHits(text) {
   const hits = [];
   for (const block of text.matchAll(STYLE_BLOCK)) {
     const start = block.index + "style={{".length;
-    for (const check of [STYLE_SPACING, STYLE_RADIUS]) {
-      for (const m of block[1].matchAll(check.pattern)) hits.push({ check, offset: start + m.index });
+    for (const m of block[1].matchAll(STYLE_SPACING.pattern)) hits.push({ label: STYLE_SPACING.label, offset: start + m.index });
+  }
+  return hits;
+}
+
+const CODE_COLOR = "literal color in a style prop or SVG color attribute (use var(--color-*) or var(--palette-*))";
+const CODE_RADIUS = "literal inline borderRadius (use var(--radius-*); 0 and 50% are fine)";
+const SVG_COLOR = /\b(?:fill|stroke|stopColor|stop-color|floodColor|flood-color|lightingColor|lighting-color|color)\s*=\s*(?:"([^"]*)"|'([^']*)'|\{\s*(["'`])([^"'`]*)\3\s*\})/g;
+
+// Colors in style={{...}} values and SVG color attributes, and literal inline radii.
+function codeTokenHits(text) {
+  const hits = [];
+  for (const block of text.matchAll(STYLE_BLOCK)) {
+    const start = block.index + "style={{".length;
+    const body = block[1].replace(/["'`]/g, " ");
+    for (const c of colorLiterals(body)) hits.push({ label: CODE_COLOR, offset: start + c.index });
+    for (const m of body.matchAll(/\bborder\w*Radius\s*:\s*([^,}\n]*)/g)) {
+      const value = m[1].trim();
+      const literal = /^-?\d*\.?\d+$/.test(value) ? Number(value) !== 0 : radiusLiterals(value).length > 0;
+      if (literal) hits.push({ label: CODE_RADIUS, offset: start + m.index });
     }
+  }
+  for (const m of text.matchAll(SVG_COLOR)) {
+    const value = m[1] ?? m[2] ?? m[4];
+    if (colorLiterals(value).length) hits.push({ label: CODE_COLOR, offset: m.index });
   }
   return hits;
 }
@@ -176,9 +193,12 @@ export function scan(root) {
     if (checks === CSS_CHECKS && rel !== TOKENS) {
       for (const hit of tokenHits(text)) flag(hit.label, lineAt(hit.offset));
     }
+    if (checks === CODE_CHECKS) {
+      for (const hit of codeTokenHits(text)) flag(hit.label, lineAt(hit.offset));
+    }
     if (rel.startsWith(VENDOR)) continue;
     if (checks === CODE_CHECKS) {
-      for (const hit of inlineStyleHits(text)) flag(hit.check.label, lineAt(hit.offset));
+      for (const hit of inlineStyleHits(text)) flag(hit.label, lineAt(hit.offset));
     }
     lines.forEach((line, i) => {
       for (const check of checks) {

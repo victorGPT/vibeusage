@@ -86,12 +86,13 @@ The kit's colors and radii are tokens (section 3), so a rerun of `npx shadcn add
 
 - `scripts/check-design-ssot.mjs` runs as `npm run guardrail:design` and before `npm test` in `dashboard/`, and from the repo root as `npm run validate:design`, the first step of `npm run ci:local` and of the CI workflow. Everywhere under `src/` except `src/styles/tokens.css`, the kit included, it fails on:
   - a literal color in a CSS value: hex, a named color, or `rgb()`, `hsl()`, `oklch()` and the like with number channels (a relative color, `oklch(from var(...) ...)`, or channels from `var()` is fine),
-  - a length in a `*-radius` value other than 0 or 50%.
+  - a length in a `*-radius` value other than 0 or 50%,
+  - in JS and TS: a literal color, named colors included, in a `style={{...}}` value or an SVG color attribute (`fill`, `stroke`, `stopColor`, `floodColor`, `lightingColor`, `color`), and an inline `borderRadius` that is a length other than 0 or 50%.
 - Under `src/`, except the kit in `src/ui/hardware/`, it also fails on:
   - a padding, margin, gap or space utility off the scale (`gap-5`, `p-[13px]`, `space-y-2`),
   - an inline `style` padding, margin or gap that is not 0 or a scale token, read across lines from `style={{` to the first `}}` (a nested `}}` inside the object would end the read early),
   - a CSS padding, margin or gap value that is not 0, `auto` or a scale token (the gutters, inset, stack and section count, since they alias scale steps; `0.5` is not 0),
-  - a literal color, a `rounded-[...]` radius or a `text-[Npx]` size in a className, or an inline `borderRadius`.
+  - a literal color, a `rounded-[...]` radius or a `text-[Npx]` size in a className.
 - `scripts/ops/validate-ui-hardcode.cjs` runs as `npm run validate:ui-hardcode` from the repo root. It counts hex and rgb literals and raw JSX text per file under `dashboard/src` against `scripts/ops/ui-hardcode-baseline.json`.
 - All user-facing text comes from `src/content/copy.csv` through `copy()`. Run `npm run validate:copy` after changing it.
 
