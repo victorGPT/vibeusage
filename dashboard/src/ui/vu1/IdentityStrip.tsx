@@ -26,7 +26,7 @@ export function IdentityStrip({ owner, since, activeDays, subscriptions = [], pu
         ))}
       </div>
       {owner ? (
-        <div className="flex flex-wrap items-center gap-s2">
+        <div className="ml-auto flex flex-wrap items-center gap-s2">
           <Button role="switch" aria-checked={publicEnabled} disabled={publicBusy} onClick={() => onPublicChange?.(!publicEnabled)}>
             <span data-vu1="led" data-on={publicEnabled || undefined} aria-hidden />
             {copy("vu1.identity.public")}
@@ -36,7 +36,7 @@ export function IdentityStrip({ owner, since, activeDays, subscriptions = [], pu
           </Button>
         </div>
       ) : (
-        <span>{copy("vu1.identity.read_only")}</span>
+        <span className="ml-auto">{copy("vu1.identity.read_only")}</span>
       )}
     </div>
   );

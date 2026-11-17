@@ -13,7 +13,7 @@ Every page is one VU-1 device built from the SPEC-01 hardware kit (spec-01.verce
 
 The layout speaks for itself. Group with the grid and with distance, never with borders, fills or rules.
 
-- **Grid.** Pages use `grid-page`, 12 columns with a fixed gutter. Inside a device, `grid-device` lays the parts (period switch, screen, keys, the row of minis, the lists) on the same 12 column lines, so their left and right edges line up.
+- **Grid.** Pages use `grid-page`, 12 columns with a fixed gutter. Inside a device, `grid-device` lays the parts (screen, period and source segments, keys, the row of minis, the lists) on the same 12 column lines, so every row starts and ends on the same two outer lines.
 - **Scale.** Spacing comes only from this 4px scale. Use the tokens (`p-s4`, `gap-s2`, `mt-s8`) or `var(--spacing-s1)` through `var(--spacing-s8)`. `0` and `auto` are fine. Nothing else is.
 
 | Token | Value |
@@ -63,7 +63,7 @@ Pages arrange blocks on the grid and pass data. They do not style text, draw bor
 
 - `TopBar` carries the brand, page navigation, the GitHub star count, sign in or out and the key-sound switch.
 - `UsageScreen` is the dark screen with the USAGE and ACTIVITY tabs, three readouts, the bar chart and the 52-week LED heatmap (arrow keys walk the days).
-- `PeriodSwitch`, `SourceSegment` and `StatMinis` are the period switch, the source segment and the four minis under the screen.
+- `Segment` with `periodOptions()` is the period choice, `SourceSegment` the source choice (both `print="key"`), and `StatMinis` the four minis under the screen.
 - `ModelList` and `RankScreen` are the gray LCD lists. `MyRankLcd` and `Pager` sit beside the board.
 - `InstallCommand`, `Keys` (Share and Install), `IdentityStrip`, `UpgradeToast` and `StateScreen` (loading, empty, error, crash, signed out, install, expired, invalid) cover the rest.
 - `ClientList` and `GlobalMeter` are Landing only.
@@ -105,7 +105,7 @@ Pick a component by what the content means, not by how it looks, and give one me
 
 - **Purpose.** Choose one of a few options that exclude each other; the choice applies at once.
 - **When.** 2 to 5 short options, such as the period (Day, Week, Month, Total) or the source (All, Claude, Codex).
-- **Do.** Print each option's name on its slot, at `--font-size-label` or larger, and size the control to its options.
+- **Do.** Print each option's name on its slot, at `--font-size-label` or larger, and size the control to its options, never past its column span; on a phone it fills its row with equal keys.
 - **Don't.** Leave the slots blank with the names printed under them; it reads as a lever and people do not see where to press.
 
 ### SlideSwitch

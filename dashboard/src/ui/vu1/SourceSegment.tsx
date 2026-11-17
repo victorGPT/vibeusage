@@ -46,6 +46,7 @@ export function SourceSegment({ sources, value, onChange }: { sources: string[];
       options={sources.map((id) => ({ value: id, label: sourceLabel(id) }))}
       value={value}
       onChange={onChange}
+      print="key"
     />
   );
 }

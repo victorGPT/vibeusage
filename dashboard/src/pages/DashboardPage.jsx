@@ -12,7 +12,6 @@ import {
 } from "../lib/auth-token";
 import { copy } from "../lib/copy";
 import { getRangeForPeriod } from "../lib/date-range";
-import { trimLeadingZeroMonths } from "../lib/details";
 import { selectRollingUsageForDisplay } from "../lib/dashboard-period-bindings";
 import { toDisplayNumber, toFiniteNumber } from "../lib/format";
 import { fetchGithubRepoMeta } from "../lib/github-repo-meta";
@@ -38,10 +37,9 @@ import { notify } from "../ui/hardware/toaster";
 import { DASHBOARD_SOURCES, sourceSlice, subscriptionLabels } from "../ui/vu1/derive";
 import { IdentityStrip } from "../ui/vu1/IdentityStrip";
 import { InstallKey, ShareKey } from "../ui/vu1/Keys";
-import { pointLabel } from "../ui/vu1/labels";
+import { periodOptions, pointLabel } from "../ui/vu1/labels";
 import { ModelList } from "../ui/vu1/ModelList";
-import { PeriodSwitch } from "../ui/vu1/PeriodSwitch";
-import { SourceSegment } from "../ui/vu1/SourceSegment";
+import { Segment, SourceSegment } from "../ui/vu1/SourceSegment";
 import { StateScreen } from "../ui/vu1/StateScreen";
 import { StatMinis } from "../ui/vu1/StatMinis";
 import { TopBar } from "../ui/vu1/TopBar";
@@ -570,7 +568,7 @@ export function DashboardPage({
   const barRows = useMemo(() => {
     const rows = Array.isArray(trendRows) ? trendRows : [];
     if (period === "day") return rows.filter((row) => row?.hour);
-    if (period === "total") return trimLeadingZeroMonths(rows.filter((row) => row?.month));
+    if (period === "total") return rows.filter((row) => row?.month);
     return rows;
   }, [period, trendRows]);
 
@@ -959,10 +957,7 @@ export function DashboardPage({
         <div ref={deviceRef} className="col-span-12 lg:col-start-2 lg:col-end-12 [--device-w:100%]">
           <Device model={copy("vu1.device.name")} name={copy("vu1.dashboard.device_name", { handle: identityDisplayName })}>
             <div className="grid-device gap-y-s5">
-              <div className="col-span-12 flex items-center justify-center min-[761px]:col-span-2">
-                <PeriodSwitch value={period} onChange={screenshotMode ? () => {} : transitionSelectedPeriod} />
-              </div>
-              <div className="col-span-12 min-[761px]:col-span-8">
+              <div className="col-span-12">
                 {screen === "readout" ? (
                   <UsageScreen
                     range={rangeLabel}
@@ -981,18 +976,27 @@ export function DashboardPage({
                   />
                 )}
               </div>
-              <div className="col-span-12 flex items-center justify-center gap-s5 min-[761px]:col-span-2 min-[761px]:flex-col">
+              <div className="col-span-7 row-start-2 min-[761px]:col-span-4">
+                <Segment
+                  label={copy("vu1.period.label")}
+                  options={periodOptions()}
+                  value={period}
+                  onChange={screenshotMode ? () => {} : transitionSelectedPeriod}
+                  print="key"
+                />
+              </div>
+              <div className="col-span-12 row-start-3 min-[761px]:col-start-5 min-[761px]:col-end-10 min-[761px]:row-start-2">
+                <SourceSegment sources={DASHBOARD_SOURCES} value={source} onChange={setSource} />
+              </div>
+              <div className="col-span-5 row-start-2 flex justify-end gap-s4 min-[761px]:col-start-10 min-[761px]:col-end-13 min-[761px]:gap-s5">
                 <ShareKey onPress={handleShareToX} busy={isCapturing} />
                 {publicMode ? null : <InstallKey onPress={handleCopyInstall} />}
-              </div>
-              <div className="col-span-12 min-[761px]:col-start-3 min-[761px]:col-end-11">
-                <SourceSegment sources={DASHBOARD_SOURCES} value={source} onChange={setSource} />
               </div>
               <div className="col-span-12">
                 <StatMinis rows={barRows} dateKey={detailsDateKey} rolling={rollingUsage} />
               </div>
               <div className="col-span-12">
-                <ModelList breakdown={sourceView.breakdown} />
+                <ModelList breakdown={sourceView.breakdown} frame="single" />
               </div>
               {screenshotMode ? null : (
                 <div data-screenshot-exclude="true" className="col-span-12">

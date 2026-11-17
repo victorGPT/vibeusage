@@ -50,11 +50,11 @@ test("DashboardPage renders the VU1 device in mock order and drops the cut block
   const order = [
     "TopBar",
     "Device",
-    "PeriodSwitch",
     "UsageScreen",
+    "Segment",
+    "SourceSegment",
     "ShareKey",
     "InstallKey",
-    "SourceSegment",
     "StatMinis",
     "ModelList",
     "IdentityStrip",

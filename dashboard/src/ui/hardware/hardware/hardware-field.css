@@ -3841,7 +3841,7 @@
 /* Every field's label is the same small print as the switch's and the
    segmented control's. */
 [data-skin="hardware"] [data-kit="field"] > [data-kit="label"]:not(#_):not(#_) {
-  font-size: 8px;
+  font-size: var(--font-size-label);
   letter-spacing: 0.1em;
 }
 

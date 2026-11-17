@@ -1546,7 +1546,7 @@
   align-items: baseline;
 
   & strong {
-    font: 600 8px/1 var(--mono, "Spec Mono", monospace);
+    font: 600 var(--font-size-label)/1 var(--mono, "Spec Mono", monospace);
     letter-spacing: 0.14em;
   }
 
@@ -1555,7 +1555,7 @@
   }
 
   & span:last-child {
-    font-size: 8px;
+    font-size: var(--font-size-label);
     letter-spacing: 0.14em;
   }
 }

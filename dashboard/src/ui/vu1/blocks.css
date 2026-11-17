@@ -5,7 +5,7 @@
 [data-skin="hardware"] [data-vu1-cap] {
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  font-size: 10px;
+  font-size: var(--font-size-label);
   font-variant-numeric: tabular-nums;
 }
 
@@ -96,11 +96,16 @@
   gap: var(--spacing-s4);
   min-width: 0;
   padding: var(--spacing-s4);
-  border-radius: var(--radius-fixed-12);
+  border: 7px solid var(--palette-gray-217);
+  border-radius: var(--radius-fixed-17);
+  /* The bezel sits inside the box (border plus an inset outline for its black edge), so the
+   * screen's painted edge is its box edge and lines up with the blocks beside it. */
+  outline: 1px solid var(--palette-black);
+  outline-offset: -1px;
   color: var(--color-screen-ink);
   text-shadow: none;
-  background: radial-gradient(130% 160% at 50% 0%, var(--palette-gray-182) 50%, var(--palette-gray-226) 80%, var(--palette-gray-182));
-  box-shadow: 0 0 0 6px var(--palette-gray-217), 0 0 0 7px var(--palette-black), inset 0 2px 10px var(--palette-black-a60), 0 10px 18px -6px var(--palette-black-a35);
+  background: radial-gradient(130% 160% at 50% 0%, var(--palette-gray-182) 50%, var(--palette-gray-226) 80%, var(--palette-gray-182)) padding-box;
+  box-shadow: inset 0 2px 10px var(--palette-black-a60), 0 10px 18px -6px var(--palette-black-a35);
 }
 [data-skin="hardware"] [data-vu1="screen-body"] {
   display: flex;
@@ -151,7 +156,7 @@
 }
 [data-skin="hardware"] [data-vu1="read"] dt {
   color: var(--color-screen-dim);
-  font-size: 9px;
+  font-size: var(--font-size-label);
   letter-spacing: 0.16em;
 }
 [data-skin="hardware"] [data-vu1="read"] dd {
@@ -182,7 +187,7 @@
   display: flex;
   justify-content: space-between;
   color: var(--color-screen-dim);
-  font-size: 9px;
+  font-size: var(--font-size-label);
 }
 
 /* Activity: 52 weeks of LEDs, one column per week. Cell size is the LED pitch, no gap. */
@@ -231,7 +236,7 @@
   justify-content: space-between;
   gap: var(--spacing-s3);
   color: var(--color-screen-dim);
-  font-size: 9px;
+  font-size: var(--font-size-label);
 }
 [data-skin="hardware"] [data-vu1="heat-legend"] {
   display: flex;
@@ -263,7 +268,7 @@
   padding: var(--spacing-s1) var(--spacing-s3) var(--spacing-s2);
   border-bottom: 1px dashed var(--palette-gray-191-a35);
   color: var(--palette-gray-191-a60);
-  font-size: 9px;
+  font-size: var(--font-size-label);
   font-weight: 500;
   letter-spacing: 0.16em;
   text-align: left;
@@ -339,7 +344,7 @@
 }
 [data-skin="hardware"] [data-vu1="mini"] dt {
   color: var(--palette-gray-191-a60);
-  font-size: 9px;
+  font-size: var(--font-size-label);
   letter-spacing: 0.16em;
 }
 [data-skin="hardware"] [data-vu1="mini"] dd {
@@ -379,13 +384,6 @@
   text-transform: none;
 }
 
-/* Lying flat on a phone, the period lever gets wider detents so the four labels clear.
- * --col is the kit's detent pitch, a track size rather than spacing. */
-[data-skin="hardware"] [data-vu1="period"] [data-kit="slide-switch"][data-orientation="horizontal"] {
-  --col: 76px;
-  width: calc(var(--n) * var(--col));
-}
-
 /* Round keys with a printed legend under them. The device's 38px key height would squash them
  * into ovals; they keep the kit's 48px circle. */
 [data-skin="hardware"] [data-vu1="keycol"] {
@@ -402,7 +400,7 @@
 }
 [data-skin="hardware"] [data-vu1="legend"] {
   color: var(--color-legend);
-  font-size: 9px;
+  font-size: var(--font-size-label);
   letter-spacing: 0.16em;
   text-transform: uppercase;
 }
@@ -425,6 +423,25 @@
 }
 [data-skin="hardware"] [data-vu1="segment"][data-print="key"] [data-kit="led"] {
   display: none;
+}
+/* A keyed segment never runs past its column span: short of room, its equal keys give up side
+ * padding instead. */
+[data-skin="hardware"] [data-vu1="segment"][data-print="key"] {
+  grid-template-columns: minmax(0, 1fr);
+}
+[data-skin="hardware"] [data-vu1="segment"][data-print="key"] [data-kit="segmented"]:not(#_) {
+  max-width: 100%;
+}
+/* Folded onto a phone row, a keyed segment fills the row with equal keys, so the row meets both
+ * edges of the device. */
+@media (max-width: 760px) {
+  [data-skin="hardware"] [data-vu1="segment"][data-print="key"] [data-kit="segmented"]:not(#_) {
+    width: 100%;
+  }
+  [data-skin="hardware"] [data-vu1="segment"][data-print="key"] [data-kit="segment"]:not(#_):not(#_):not(#_) {
+    min-width: 0;
+    padding: 0 var(--spacing-s1);
+  }
 }
 
 /* Print is flat. The kit engraves every letter with a white shadow that fuzzes small gray type;
