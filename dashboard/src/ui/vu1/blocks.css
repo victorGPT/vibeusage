@@ -189,6 +189,11 @@
   color: var(--color-screen-dim);
   font-size: var(--font-size-label);
 }
+@media (max-width: 760px) {
+  [data-skin="hardware"] [data-vu1="axis"] > [data-vu1-wide] {
+    display: none;
+  }
+}
 
 /* Activity: 52 weeks of LEDs, one column per week. Cell size is the LED pitch, no gap. */
 [data-skin="hardware"] [data-vu1="heat-scroll"] {

@@ -62,11 +62,18 @@ function readings(totals: UsageTotals, rank: number | null, delta: UsageDelta = 
   ];
 }
 
-// At most five labels under the bars, first and last always among them.
+// A 360px phone axis holds about this many characters with --spacing-s2 between labels.
+// ponytail: a character budget, not a measurement; audit-axis.mjs checks the real gaps.
+const PHONE_CHARS = 30;
+const spread = (n: number, count: number) => Array.from({ length: count }, (_, i) => Math.round((i * (n - 1)) / (count - 1)));
+
+// Up to seven labels under the bars (five past a week), first and last always among them. Past the
+// phone budget every other one is marked wide, so a phone keeps about half, first and last still in.
 function axis(rows: DailyRow[], dateKey: DateKey) {
   const count = Math.min(rows.length, rows.length <= 7 ? 7 : 5);
-  if (count < 2) return rows.map((row) => pointLabel(row, dateKey));
-  return Array.from({ length: count }, (_, i) => pointLabel(rows[Math.round((i * (rows.length - 1)) / (count - 1))], dateKey));
+  const labels = (count < 2 ? rows : spread(rows.length, count).map((i) => rows[i])).map((row) => pointLabel(row, dateKey));
+  const phone = new Set(labels.join("").length > PHONE_CHARS ? spread(labels.length, Math.ceil(labels.length / 2)) : labels.keys());
+  return labels.map((text, i) => ({ text, wide: !phone.has(i) }));
 }
 
 const STEPS: Record<string, (at: number, last: number) => number> = {
@@ -115,7 +122,9 @@ function UsageBars({ rows, dateKey }: { rows: DailyRow[]; dateKey: DateKey }) {
       />
       <div data-vu1="axis" aria-hidden>
         {axis(rows, dateKey).map((label, i) => (
-          <span key={i}>{label}</span>
+          <span key={i} data-vu1-wide={label.wide || undefined}>
+            {label.text}
+          </span>
         ))}
       </div>
     </div>

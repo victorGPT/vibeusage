@@ -129,6 +129,39 @@ describe("UsageScreen", () => {
     expect(screen.getByText("Jan 4")).toBeTruthy();
   });
 
+  // Spans marked data-vu1-wide drop out at phone widths (blocks.css), so a phone reads the rest.
+  const axisLabels = () => {
+    const spans = [...document.querySelectorAll('[data-vu1="axis"] > span')];
+    return { all: spans.map((s) => s.textContent), phone: spans.filter((s) => !s.hasAttribute("data-vu1-wide")).map((s) => s.textContent) };
+  };
+  const days = (from: string, n: number): DailyRow[] =>
+    Array.from({ length: n }, (_, i) => ({ day: new Date(Date.parse(`${from}T00:00:00Z`) + i * 86_400_000).toISOString().slice(0, 10), total_tokens: 1 }));
+
+  it("keeps every other week label on a phone, first and last among them", () => {
+    render(<UsageScreen {...props} rows={days("2025-11-16", 7)} />);
+    expect(axisLabels()).toEqual({
+      all: ["Nov 16", "Nov 17", "Nov 18", "Nov 19", "Nov 20", "Nov 21", "Nov 22"],
+      phone: ["Nov 16", "Nov 18", "Nov 20", "Nov 22"],
+    });
+  });
+
+  it("thins the month keys of a short total on a phone, last month kept", () => {
+    const months: DailyRow[] = ["2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12"].map((month) => ({ month, total_tokens: 1 }));
+    render(<UsageScreen {...props} rows={months} dateKey="month" />);
+    const { all, phone } = axisLabels();
+    expect(all).toHaveLength(6);
+    expect(phone[0]).toBe("2025-07");
+    expect(phone.at(-1)).toBe("2025-12");
+    expect(phone.length).toBeLessThanOrEqual(4);
+  });
+
+  it("keeps all five labels of a month on a phone", () => {
+    render(<UsageScreen {...props} rows={days("2025-11-01", 30)} />);
+    const { all, phone } = axisLabels();
+    expect(all).toHaveLength(5);
+    expect(phone).toEqual(all);
+  });
+
   it("reads a bar's day and tokens on hover", async () => {
     const user = userEvent.setup();
     render(<UsageScreen {...props} />);
