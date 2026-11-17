@@ -35,13 +35,13 @@
   &::before {
     content: "";
     position: absolute;
-    border-radius: 3px;
+    border-radius: var(--radius-fixed-3);
     corner-shape: round;
-    background: linear-gradient(90deg, #1b1b1a, #2c2c2a);
+    background: linear-gradient(90deg, var(--palette-gray-222), var(--palette-gray-292));
     box-shadow:
-      inset 0 1px 2px rgb(0 0 0 / 0.5),
-      0 0 0 1px rgb(0 0 0 / 0.06),
-      0 1px 0 1px rgb(255 255 255 / 0.8);
+      inset 0 1px 2px var(--palette-black-a50),
+      0 0 0 1px var(--palette-black-a6),
+      0 1px 0 1px var(--palette-white-a80);
   }
 
   &[data-orientation="horizontal"]::before {
@@ -74,7 +74,7 @@
   letter-spacing: 0.12em;
   text-transform: uppercase;
   white-space: nowrap;
-  color: #8a8984;
+  color: var(--palette-gray-629);
   background: none;
   box-shadow: none;
   translate: none;
@@ -100,7 +100,7 @@
     width: auto;
     height: auto;
     border-radius: 0;
-    background: #b5b4af;
+    background: var(--palette-gray-769-2);
     box-shadow: none;
   }
 
@@ -147,16 +147,16 @@
 [data-skin="hardware"] [data-kit="slide-switch-lever"] {
   position: absolute;
   z-index: 1;
-  border-radius: calc(4px * var(--corner-scale));
+  border-radius: var(--radius-4);
   background:
-    repeating-linear-gradient(var(--rib-dir, 90deg), rgb(0 0 0 / 0.12) 0 1px, transparent 1px 3px) center / 50% 60% no-repeat,
-    linear-gradient(0deg, #ffffff, #efefec 70%, #e9e9e6);
+    repeating-linear-gradient(var(--rib-dir, 90deg), var(--palette-black-a12) 0 1px, transparent 1px 3px) center / 50% 60% no-repeat,
+    linear-gradient(0deg, var(--palette-white), var(--palette-gray-951) 70%, var(--palette-gray-933));
   box-shadow:
-    inset 0 1px 0 #fff,
-    0 0 0 0.5px rgb(0 0 0 / 0.18),
-    0 2px 0 #d2d2ce,
-    0 2.5px 1px rgb(0 0 0 / calc(0.14 * var(--shadow-k))),
-    0 4px 8px -3px rgb(0 0 0 / calc(0.18 * var(--shadow-k)));
+    inset 0 1px 0 var(--palette-white),
+    0 0 0 0.5px var(--palette-black-a18),
+    0 2px 0 var(--palette-gray-863),
+    0 2.5px 1px rgb(var(--palette-black-rgb) / calc(0.14 * var(--shadow-k))),
+    0 4px 8px -3px rgb(var(--palette-black-rgb) / calc(0.18 * var(--shadow-k)));
   pointer-events: none;
   transition:
     left 300ms var(--ease-detent),

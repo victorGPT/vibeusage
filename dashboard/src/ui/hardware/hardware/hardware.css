@@ -1,17 +1,17 @@
 [data-skin="hardware"] {
-  --paper: #efefeb;
-  --metal: #e2e2dd;
-  --hair: #c8c8c2;
-  --ink: #1b1b19;
-  --dim: #8a8a84;
-  --key-color: var(--theme, #1c1c1c);
-  --blue: #2f5fe6;
-  --green: #22a05a;
+  --paper: var(--palette-gray-951-2);
+  --metal: var(--palette-gray-911);
+  --hair: var(--palette-gray-831);
+  --ink: var(--palette-gray-221);
+  --dim: var(--palette-gray-632);
+  --key-color: var(--theme, var(--palette-gray-226-2));
+  --blue: var(--palette-blue-537);
+  --green: var(--palette-green-623);
   --mono: "SF Mono", "JetBrains Mono", ui-monospace, Menlo, monospace;
   --dot-pitch: 16;
-  --dot-color: rgb(0 0 0 / 0.16);
+  --dot-color: var(--palette-black-a16);
   color: var(--ink);
-  background: radial-gradient(circle, rgb(0 0 0 / 0.14) 1px, transparent 1.2px) 0 0 / 16px 16px, var(--paper);
+  background: radial-gradient(circle, var(--palette-black-a14) 1px, transparent 1.2px) 0 0 / 16px 16px, var(--paper);
   font-family: var(--mono);
   font-size: 11px;
   text-transform: lowercase;
@@ -32,12 +32,12 @@
   & [data-kit="module"] {
     min-height: 190px;
     padding: 16px 18px 20px;
-    border-radius: calc(10px * var(--corner-scale));
-    background: linear-gradient(180deg, #e8e8e4, var(--metal));
+    border-radius: var(--radius-10);
+    background: linear-gradient(180deg, var(--palette-gray-930), var(--metal));
     box-shadow:
       inset 0 0 0 1px var(--hair),
-      inset 0 1px 0 #fff,
-      0 1px 0 #d4d4ce;
+      inset 0 1px 0 var(--palette-white),
+      0 1px 0 var(--palette-gray-868);
 
     /* Four screws, one in each corner. */
     &::after {
@@ -46,10 +46,10 @@
       inset: 7px;
       pointer-events: none;
       background:
-        radial-gradient(circle at 3px 3px, #b9b9b3 2px, transparent 2.5px) top left / 7px 7px no-repeat,
-        radial-gradient(circle at 3px 3px, #b9b9b3 2px, transparent 2.5px) top right / 7px 7px no-repeat,
-        radial-gradient(circle at 3px 3px, #b9b9b3 2px, transparent 2.5px) bottom left / 7px 7px no-repeat,
-        radial-gradient(circle at 3px 3px, #b9b9b3 2px, transparent 2.5px) bottom right / 7px 7px no-repeat;
+        radial-gradient(circle at 3px 3px, var(--palette-gray-784) 2px, transparent 2.5px) top left / 7px 7px no-repeat,
+        radial-gradient(circle at 3px 3px, var(--palette-gray-784) 2px, transparent 2.5px) top right / 7px 7px no-repeat,
+        radial-gradient(circle at 3px 3px, var(--palette-gray-784) 2px, transparent 2.5px) bottom left / 7px 7px no-repeat,
+        radial-gradient(circle at 3px 3px, var(--palette-gray-784) 2px, transparent 2.5px) bottom right / 7px 7px no-repeat;
     }
   }
 
@@ -63,7 +63,7 @@
       /* On a very light key the text prints black on a label of the key color. */
       background: var(--key-highlight);
       box-shadow: 0 0 0 2px var(--key-highlight);
-      border-radius: 1px;
+      border-radius: var(--radius-fixed-1);
     }
   }
 
@@ -95,14 +95,14 @@
     height: 44px;
     padding: 0 14px;
     border: 0;
-    border-radius: calc(6px * var(--corner-scale));
+    border-radius: var(--radius-6);
     font: inherit;
     text-transform: lowercase;
     color: var(--ink);
-    background: #f8f8f5;
+    background: var(--palette-gray-978);
     box-shadow:
-      inset 0 0 0 1px #d2d2cc,
-      0 2px 0 #bdbdb7;
+      inset 0 0 0 1px var(--palette-gray-862),
+      0 2px 0 var(--palette-gray-797);
     cursor: pointer;
     transition:
       translate 60ms,
@@ -111,11 +111,11 @@
     &:active,
     &[data-open] {
       translate: 0 2px;
-      box-shadow: inset 0 0 0 1px #d2d2cc;
+      box-shadow: inset 0 0 0 1px var(--palette-gray-862);
     }
 
     &[data-tone="primary"] {
-      color: #fff;
+      color: var(--palette-white);
       background: var(--key-color);
       box-shadow: 0 2px 0 var(--key-color-edge);
 
@@ -133,7 +133,7 @@
       padding: 0;
       border-radius: 50%;
       background: var(--ink);
-      box-shadow: 0 2px 0 #000;
+      box-shadow: 0 2px 0 var(--palette-black);
     }
   }
 
@@ -147,7 +147,7 @@
   & [data-icon="more"] {
     width: 18px;
     height: 4px;
-    background: radial-gradient(circle, #fff 1.6px, transparent 2px) 0 0 / 6px 4px;
+    background: radial-gradient(circle, var(--palette-white) 1.6px, transparent 2px) 0 0 / 6px 4px;
   }
 
   & [data-kit="switch-row"] {
@@ -163,9 +163,9 @@
     height: 22px;
     padding: 2px;
     border: 0;
-    border-radius: calc(3px * var(--corner-scale));
-    background: #cbcbc5;
-    box-shadow: inset 0 1px 2px rgb(0 0 0 / calc(0.25 * var(--shadow-k)));
+    border-radius: var(--radius-3);
+    background: var(--palette-gray-840);
+    box-shadow: inset 0 1px 2px rgb(var(--palette-black-rgb) / calc(0.25 * var(--shadow-k)));
     cursor: pointer;
 
     &::before,
@@ -192,9 +192,9 @@
     display: block;
     width: 22px;
     height: 18px;
-    border-radius: calc(2px * var(--corner-scale));
+    border-radius: var(--radius-2);
     background:
-      repeating-linear-gradient(90deg, transparent 0 3px, rgb(255 255 255 / 0.18) 3px 4px) 6px 4px / 10px 10px no-repeat,
+      repeating-linear-gradient(90deg, transparent 0 3px, var(--palette-white-a18) 3px 4px) 6px 4px / 10px 10px no-repeat,
       var(--ink);
     transition: translate 120ms var(--ease-detent);
 
@@ -215,16 +215,16 @@
     width: 48px;
     height: 48px;
     border: 0;
-    border-radius: calc(6px * var(--corner-scale));
-    background: #f8f8f5;
+    border-radius: var(--radius-6);
+    background: var(--palette-gray-978);
     box-shadow:
-      inset 0 0 0 1px #d2d2cc,
-      0 2px 0 #bdbdb7;
+      inset 0 0 0 1px var(--palette-gray-862),
+      0 2px 0 var(--palette-gray-797);
     cursor: pointer;
 
     &:active {
       translate: 0 2px;
-      box-shadow: inset 0 0 0 1px #d2d2cc;
+      box-shadow: inset 0 0 0 1px var(--palette-gray-862);
     }
   }
 
@@ -235,7 +235,7 @@
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: #c4c4be;
+    background: var(--palette-gray-819);
 
     &[data-checked] {
       background: var(--key-color);
@@ -249,8 +249,8 @@
     grid-template-columns: repeat(4, 1fr);
     gap: 1px;
     padding: 1px;
-    border-radius: calc(6px * var(--corner-scale));
-    background: #d2d2cc;
+    border-radius: var(--radius-6);
+    background: var(--palette-gray-862);
   }
 
   & [data-kit="segment"] {
@@ -259,15 +259,15 @@
     font: inherit;
     font-size: 14px;
     color: var(--dim);
-    background: #f8f8f5;
+    background: var(--palette-gray-978);
     cursor: pointer;
 
     &:first-of-type {
-      border-radius: calc(5px * var(--corner-scale)) 0 0 calc(5px * var(--corner-scale));
+      border-radius: var(--radius-5) 0 0 var(--radius-5);
     }
 
     &:last-of-type {
-      border-radius: 0 calc(5px * var(--corner-scale)) calc(5px * var(--corner-scale)) 0;
+      border-radius: 0 var(--radius-5) var(--radius-5) 0;
     }
 
     &[data-selected] {
@@ -296,7 +296,7 @@
 
   & [data-kit="slider-control"] {
     --ticks: 20;
-    --tick-color: #1b1b19;
+    --tick-color: var(--palette-gray-221);
     padding: 14px 0 22px;
     background: linear-gradient(90deg, var(--ink) 1px, transparent 1px) 0 100% / 5% 8px repeat-x;
   }
@@ -314,10 +314,10 @@
     width: 26px;
     height: 26px;
     border-radius: 50%;
-    background: #f8f8f5;
+    background: var(--palette-gray-978);
     box-shadow:
-      inset 0 0 0 1px #c8c8c2,
-      0 2px 0 #bdbdb7;
+      inset 0 0 0 1px var(--palette-gray-831),
+      0 2px 0 var(--palette-gray-797);
     translate: -50% -50%;
 
     &::after {
@@ -334,7 +334,7 @@
 
   & [data-kit="knob"] {
     --ticks: 27;
-    --tick-color: #a4a49e;
+    --tick-color: var(--palette-gray-717);
     --lit-color: var(--key-color);
     display: grid;
     justify-items: center;
@@ -354,8 +354,8 @@
       position: absolute;
       inset: 0;
       border-radius: 50%;
-      background: conic-gradient(from -135deg, var(--key-color) calc(var(--lit) * 270deg), #c4c4be 0 270deg, transparent 0);
-      mask: radial-gradient(circle, transparent 31px, #000 32px, #000 35px, transparent 36px);
+      background: conic-gradient(from -135deg, var(--key-color) calc(var(--lit) * 270deg), var(--palette-gray-819) 0 270deg, transparent 0);
+      mask: radial-gradient(circle, transparent 31px, var(--palette-black) 32px, var(--palette-black) 35px, transparent 36px);
     }
 
   }
@@ -364,10 +364,10 @@
     position: absolute;
     inset: 12px;
     border-radius: 50%;
-    background: var(--cap, #f8f8f5);
+    background: var(--cap, var(--palette-gray-978));
     box-shadow:
-      0 3px 0 color-mix(in oklab, var(--cap, #f8f8f5) 70%, #000),
-      0 6px 10px rgb(0 0 0 / calc(0.12 * var(--shadow-k)));
+      0 3px 0 color-mix(in oklab, var(--cap, var(--palette-gray-978)) 70%, var(--palette-black)),
+      0 6px 10px rgb(var(--palette-black-rgb) / calc(0.12 * var(--shadow-k)));
     rotate: var(--turn);
 
     &::after {
@@ -377,7 +377,7 @@
       left: 50%;
       width: 3px;
       height: 13px;
-      border-radius: calc(2px * var(--corner-scale));
+      border-radius: var(--radius-2);
       background: var(--notch, var(--ink));
       translate: -50% 0;
     }
@@ -385,17 +385,17 @@
 
   & [data-color="blue"] {
     --cap: var(--blue);
-    --notch: #fff;
+    --notch: var(--palette-white);
   }
 
   & [data-color="orange"] {
     --cap: var(--key-color);
-    --notch: #fff;
+    --notch: var(--palette-white);
   }
 
   & [data-color="green"] {
     --cap: var(--green);
-    --notch: #fff;
+    --notch: var(--palette-white);
   }
 
   & [data-kit="knob-readout"] {
@@ -417,15 +417,15 @@
     justify-content: space-between;
     padding: 0 12px;
     border: 0;
-    border-radius: calc(4px * var(--corner-scale));
+    border-radius: var(--radius-4);
     font: inherit;
     font-size: 15px;
     text-transform: lowercase;
-    color: #f4f4f1;
-    background: #0d0d0c;
+    color: var(--palette-gray-966-2);
+    background: var(--palette-gray-159);
     box-shadow:
-      inset 0 0 0 1px #000,
-      inset 0 0 0 3px #262624;
+      inset 0 0 0 1px var(--palette-black),
+      inset 0 0 0 3px var(--palette-gray-268);
     caret-color: var(--key-color);
     caret-shape: block;
     cursor: pointer;
@@ -443,14 +443,14 @@
     text-transform: lowercase;
 
     &[data-slot="select-content"] {
-      border-radius: calc(4px * var(--corner-scale));
-      color: #f4f4f1;
-      background: #0d0d0c;
+      border-radius: var(--radius-4);
+      color: var(--palette-gray-966-2);
+      background: var(--palette-gray-159);
       font-size: 14px;
 
       & [data-highlighted] {
-        color: #0d0d0c;
-        background: #f4f4f1;
+        color: var(--palette-gray-159);
+        background: var(--palette-gray-966-2);
       }
 
       & [data-selected]::after {
@@ -460,15 +460,15 @@
     }
 
     &[data-slot="menu-content"] {
-      border-radius: calc(6px * var(--corner-scale));
+      border-radius: var(--radius-6);
       color: var(--ink);
-      background: #f8f8f5;
+      background: var(--palette-gray-978);
       box-shadow:
         inset 0 0 0 1px var(--hair),
-        0 12px 28px -10px rgb(0 0 0 / calc(0.25 * var(--shadow-k)));
+        0 12px 28px -10px rgb(var(--palette-black-rgb) / calc(0.25 * var(--shadow-k)));
 
       & [data-highlighted] {
-        color: #fff;
+        color: var(--palette-white);
         background: var(--key-color);
       }
     }
@@ -478,7 +478,7 @@
     display: flex;
     gap: 12px;
     padding: 8px 10px;
-    border-radius: calc(3px * var(--corner-scale));
+    border-radius: var(--radius-3);
     outline: none;
     cursor: pointer;
   }
@@ -496,35 +496,35 @@
     position: relative;
     height: 14px;
     padding: 3px;
-    border-radius: calc(3px * var(--corner-scale));
-    background: #0d0d0c;
+    border-radius: var(--radius-3);
+    background: var(--palette-gray-159);
 
     &::before {
       content: "";
       position: absolute;
       inset: 3px;
-      background: #2a2a27;
+      background: var(--palette-gray-284-2);
     }
   }
 
   & [data-kit="meter-indicator"] {
-    mask: repeating-linear-gradient(90deg, #000 0 calc(5% - 2px), transparent calc(5% - 2px) 5%);
+    mask: repeating-linear-gradient(90deg, var(--palette-black) 0 calc(5% - 2px), transparent calc(5% - 2px) 5%);
   }
 
   & [data-kit="meter-track"]::before {
-    mask: repeating-linear-gradient(90deg, #000 0 calc(5% - 2px), transparent calc(5% - 2px) 5%);
+    mask: repeating-linear-gradient(90deg, var(--palette-black) 0 calc(5% - 2px), transparent calc(5% - 2px) 5%);
   }
 
   & [data-kit="meter-indicator"] {
     position: relative;
     height: 100%;
-    background: linear-gradient(90deg, var(--green) 0 60%, #f2c200 60% 80%, var(--key-color) 80%);
+    background: linear-gradient(90deg, var(--green) 0 60%, var(--palette-yellow-833) 60% 80%, var(--key-color) 80%);
   }
 
   & [data-kit="backdrop"] {
     position: fixed;
     inset: 0;
-    background: rgb(239 239 235 / 0.7);
+    background: var(--palette-gray-951-2-a70);
     backdrop-filter: blur(2px);
   }
 
@@ -541,11 +541,11 @@
 
   & [data-kit="dialog-surface"] {
     padding: 28px;
-    border-radius: calc(10px * var(--corner-scale));
-    background: linear-gradient(180deg, #e8e8e4, var(--metal));
+    border-radius: var(--radius-10);
+    background: linear-gradient(180deg, var(--palette-gray-930), var(--metal));
     box-shadow:
       inset 0 0 0 1px var(--hair),
-      0 30px 60px -20px rgb(0 0 0 / calc(0.35 * var(--shadow-k)));
+      0 30px 60px -20px rgb(var(--palette-black-rgb) / calc(0.35 * var(--shadow-k)));
     font-size: 12px;
   }
 
@@ -586,10 +586,10 @@
 [data-skin="hardware"] [data-kit="chain-trigger"] {
   color: inherit;
   text-decoration: underline dotted;
-  text-decoration-color: rgb(0 0 0 / 0.28);
+  text-decoration-color: var(--palette-black-a28);
   text-underline-offset: 4px;
   cursor: help;
-  border-radius: 2px;
+  border-radius: var(--radius-fixed-2);
 
   &:hover,
   &[data-popup-open],
@@ -608,7 +608,7 @@
   margin: 0;
   font: 400 9px/1.6 var(--mono);
   letter-spacing: 0.02em;
-  color: #5f5e59;
+  color: var(--palette-gray-481);
   text-transform: none;
 
   /* Each label runs into its list, which wraps across the card, so long
@@ -646,10 +646,10 @@
   width: min(340px, calc(100vw - 48px));
 
   & [data-kit="sdk-chain"] {
-    color: rgb(20 20 19 / 0.72);
+    color: var(--palette-gray-191-a72);
 
     & dt {
-      color: #141413;
+      color: var(--palette-gray-191);
       font-weight: 600;
     }
   }

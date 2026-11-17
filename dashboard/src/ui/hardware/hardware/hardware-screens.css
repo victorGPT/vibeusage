@@ -7,9 +7,9 @@
 [data-skin="hardware"] {
   --screen-glass:
     var(--tex-matte),
-    radial-gradient(130% 160% at 50% 0%, #121211 50%, #1c1c1b 80%, #262624 100%);
-  --screen-ink: #f2f2ee;
-  --screen-dim: rgb(242 242 238 / 0.58);
+    radial-gradient(130% 160% at 50% 0%, var(--palette-gray-182) 50%, var(--palette-gray-226) 80%, var(--palette-gray-268) 100%);
+  --screen-ink: var(--palette-gray-960);
+  --screen-dim: var(--palette-gray-960-a58);
   --screen-flip: 420ms var(--ease-settle);
 }
 
@@ -23,13 +23,13 @@
   grid-template-columns: minmax(0, 1fr);
   gap: 0;
   padding: 12px 12px 14px;
-  border-radius: calc(16px * var(--corner-scale));
+  border-radius: var(--radius-16);
   background:
     var(--tex-matte),
-    linear-gradient(180deg, #f1f0ed, #e4e3df);
+    linear-gradient(180deg, var(--palette-gray-955-2), var(--palette-gray-915-2));
   box-shadow:
-    inset 0 1px 0 #fff,
-    inset 0 -2px 0 rgb(0 0 0 / calc(0.06 * var(--shadow-k))),
+    inset 0 1px 0 var(--palette-white),
+    inset 0 -2px 0 rgb(var(--palette-black-rgb) / calc(0.06 * var(--shadow-k))),
     0 0 0 1px hsl(var(--shadow-color) / calc(0.12 * var(--shadow-k))),
     var(--elev-high);
   transform-origin: 50% 100%;
@@ -46,14 +46,14 @@
     content: "";
     grid-row: 1 / 3;
     grid-column: 1;
-    border: 2px solid #1a1918;
-    border-radius: calc(9px * var(--corner-scale));
+    border: 2px solid var(--palette-gray-214);
+    border-radius: var(--radius-9);
     background: var(--screen-glass);
     box-shadow:
-      inset 0 0 0 1px rgb(255 255 255 / 0.04),
-      inset 0 0 14px 2px rgb(255 255 255 / 0.05),
-      inset 0 -1px 0 rgb(0 0 0 / calc(0.6 * var(--shadow-k))),
-      0 1px 0 #fff;
+      inset 0 0 0 1px var(--palette-white-a4),
+      inset 0 0 14px 2px var(--palette-white-a5),
+      inset 0 -1px 0 rgb(var(--palette-black-rgb) / calc(0.6 * var(--shadow-k))),
+      0 1px 0 var(--palette-white);
   }
 
   /* The hinge: a metal pin in knuckles along the edge it turns on. */
@@ -63,11 +63,11 @@
     inset-inline: 22%;
     bottom: -5px;
     height: 7px;
-    border-radius: 4px;
+    border-radius: var(--radius-fixed-4);
     background:
-      repeating-linear-gradient(90deg, transparent 0 22%, rgb(0 0 0 / 0.28) 22% calc(22% + 1px), transparent calc(22% + 1px) 33.33%),
-      linear-gradient(180deg, #fbfbf9, #c9c8c3 55%, #9f9e99);
-    box-shadow: 0 1px 2px rgb(0 0 0 / calc(0.25 * var(--shadow-k)));
+      repeating-linear-gradient(90deg, transparent 0 22%, var(--palette-black-a28) 22% calc(22% + 1px), transparent calc(22% + 1px) 33.33%),
+      linear-gradient(180deg, var(--palette-gray-988), var(--palette-gray-832) 55%, var(--palette-gray-699));
+    box-shadow: 0 1px 2px rgb(var(--palette-black-rgb) / calc(0.25 * var(--shadow-k)));
   }
 
   & [data-kit="dialog-title"] {
@@ -80,7 +80,7 @@
     font: 400 15px/1.3 var(--mono, monospace);
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    text-shadow: 0 0 8px rgb(255 255 255 / 0.3);
+    text-shadow: 0 0 8px var(--palette-white-a30);
     transition: opacity 160ms 260ms;
 
     @starting-style {
@@ -108,7 +108,7 @@
     padding: 10px 20px 20px;
     color: var(--screen-dim);
     font: 400 12px/1.6 var(--mono, monospace);
-    text-shadow: 0 0 6px rgb(255 255 255 / 0.15);
+    text-shadow: 0 0 6px var(--palette-white-a15);
     transition: opacity 160ms 300ms;
 
     @starting-style {
@@ -188,13 +188,13 @@
 [data-skin="hardware"] [data-kit="dialog-surface"][data-size="command"]:not(#_):not(#_):not(#_) {
   position: relative;
   padding: 12px 12px 14px;
-  border-radius: calc(16px * var(--corner-scale));
+  border-radius: var(--radius-16);
   background:
     var(--tex-matte),
-    linear-gradient(180deg, #f1f0ed, #e4e3df);
+    linear-gradient(180deg, var(--palette-gray-955-2), var(--palette-gray-915-2));
   box-shadow:
-    inset 0 1px 0 #fff,
-    inset 0 -2px 0 rgb(0 0 0 / calc(0.06 * var(--shadow-k))),
+    inset 0 1px 0 var(--palette-white),
+    inset 0 -2px 0 rgb(var(--palette-black-rgb) / calc(0.06 * var(--shadow-k))),
     0 0 0 1px hsl(var(--shadow-color) / calc(0.12 * var(--shadow-k))),
     var(--elev-high);
   transform-origin: 50% 100%;
@@ -210,14 +210,14 @@
     gap: 6px;
     min-height: 260px;
     padding: 10px;
-    border: 2px solid #1a1918;
-    border-radius: calc(9px * var(--corner-scale));
+    border: 2px solid var(--palette-gray-214);
+    border-radius: var(--radius-9);
     color: var(--screen-ink);
     background: var(--screen-glass);
     box-shadow:
-      inset 0 0 0 1px rgb(255 255 255 / 0.04),
-      inset 0 0 14px 2px rgb(255 255 255 / 0.05),
-      0 1px 0 #fff;
+      inset 0 0 0 1px var(--palette-white-a4),
+      inset 0 0 14px 2px var(--palette-white-a5),
+      0 1px 0 var(--palette-white);
     font: 400 13px/1.3 var(--mono, monospace);
     align-content: start;
   }
@@ -226,17 +226,17 @@
     height: 40px;
     padding-inline: 30px 10px;
     border: 0;
-    border-bottom: 1px dashed rgb(242 242 238 / 0.2);
+    border-bottom: 1px dashed var(--palette-gray-960-a20);
     border-radius: 0;
     background:
       url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M2 1L7 5L2 9' fill='none' stroke='%23f2f2ee' stroke-width='1.6'/%3E%3C/svg%3E") 10px center / 10px 10px no-repeat;
     box-shadow: none;
     outline: none;
-    text-shadow: 0 0 6px rgb(255 255 255 / 0.25);
+    text-shadow: 0 0 6px var(--palette-white-a25);
     caret-color: var(--lcd-key);
 
     &::placeholder {
-      color: rgb(242 242 238 / 0.35);
+      color: var(--palette-gray-960-a35);
     }
   }
 
@@ -249,11 +249,11 @@
 
   & [data-kit="option"] {
     padding: 8px 10px;
-    border-radius: 3px;
+    border-radius: var(--radius-fixed-3);
     color: var(--screen-dim);
     background: transparent;
     box-shadow: none;
-    text-shadow: 0 0 6px rgb(255 255 255 / 0.15);
+    text-shadow: 0 0 6px var(--palette-white-a15);
     text-transform: uppercase;
     letter-spacing: 0.06em;
     font-size: 12px;
@@ -280,11 +280,11 @@
     inset-inline: 22%;
     bottom: -5px;
     height: 7px;
-    border-radius: 4px;
+    border-radius: var(--radius-fixed-4);
     background:
-      repeating-linear-gradient(90deg, transparent 0 22%, rgb(0 0 0 / 0.28) 22% calc(22% + 1px), transparent calc(22% + 1px) 33.33%),
-      linear-gradient(180deg, #fbfbf9, #c9c8c3 55%, #9f9e99);
-    box-shadow: 0 1px 2px rgb(0 0 0 / calc(0.25 * var(--shadow-k)));
+      repeating-linear-gradient(90deg, transparent 0 22%, var(--palette-black-a28) 22% calc(22% + 1px), transparent calc(22% + 1px) 33.33%),
+      linear-gradient(180deg, var(--palette-gray-988), var(--palette-gray-832) 55%, var(--palette-gray-699));
+    box-shadow: 0 1px 2px rgb(var(--palette-black-rgb) / calc(0.25 * var(--shadow-k)));
   }
 }
 
@@ -322,20 +322,20 @@
   left: 50%;
   translate: -50% 0;
   padding: 5px 8px 4px;
-  border-radius: calc(5px * var(--corner-scale));
+  border-radius: var(--radius-5);
   background:
     var(--tex-matte),
-    linear-gradient(180deg, #b9bab4, #c9cac4 40%, #c4c5bf);
+    linear-gradient(180deg, var(--palette-gray-786), var(--palette-gray-837) 40%, var(--palette-gray-821));
   box-shadow:
-    inset 0 1px 2px rgb(0 0 0 / calc(0.22 * var(--shadow-k))),
-    inset 0 0 0 0.5px rgb(0 0 0 / calc(0.12 * var(--shadow-k))),
-    0 1px 0 #fff,
-    0 2px 4px -1px rgb(0 0 0 / calc(0.2 * var(--shadow-k)));
+    inset 0 1px 2px rgb(var(--palette-black-rgb) / calc(0.22 * var(--shadow-k))),
+    inset 0 0 0 0.5px rgb(var(--palette-black-rgb) / calc(0.12 * var(--shadow-k))),
+    0 1px 0 var(--palette-white),
+    0 2px 4px -1px rgb(var(--palette-black-rgb) / calc(0.2 * var(--shadow-k)));
   font: 600 9px/1 var(--mono, monospace);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   white-space: pre;
-  color: rgb(17 17 17 / 0.1);
+  color: var(--palette-gray-178-a10);
   text-shadow: none;
   pointer-events: none;
   user-select: none;
@@ -347,7 +347,7 @@
   }
 
   &[data-open] > span {
-    color: #111;
+    color: var(--palette-gray-178);
     text-shadow: var(--lcd-print);
     transition-delay: calc(var(--i) * 28ms);
   }
@@ -370,7 +370,7 @@
   border: 0;
   border-radius: 50%;
   corner-shape: round;
-  color: #8f8e89;
+  color: var(--palette-gray-646);
   background: none;
   cursor: help;
   transition: color 120ms;
@@ -396,8 +396,8 @@
   height: 14px;
   border-radius: 50%;
   corner-shape: round;
-  background: radial-gradient(circle at 40% 35%, color-mix(in oklab, var(--key-color), #fff 18%), var(--key-color) 70%);
-  box-shadow: inset 0 -1px 1px rgb(0 0 0 / 0.18);
+  background: radial-gradient(circle at 40% 35%, color-mix(in oklab, var(--key-color), var(--palette-white) 18%), var(--key-color) 70%);
+  box-shadow: inset 0 -1px 1px var(--palette-black-a18);
 }
 
 /* Fieldset: a group under a printed bracket. The legend is set into a thin
@@ -407,7 +407,7 @@
   /* The space between each rule and the contents. The top rule runs through
      the middle of the legend, so the gap below the legend is that space less
      half the legend's height, and the two sides come out equal. */
-  --rule: rgb(0 0 0 / 0.28);
+  --rule: var(--palette-black-a28);
   --space: 16px;
   --legend-half: 4px;
   position: relative;
@@ -451,7 +451,7 @@
   line-height: 1;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #6a6964;
+  color: var(--palette-gray-520);
 
   &::before,
   &::after {
@@ -486,24 +486,24 @@
 /* Alert: the same bracket, its rule in the status color, with the status
    inlay and the title set into it and the message printed below. */
 [data-skin="hardware"] [data-kit="alert"]:not(#_):not(#_):not(#_) {
-  --status: oklch(0.62 0.01 90);
+  --status: var(--palette-gray-620);
   color: var(--ink);
   text-shadow: none;
 
   &[data-tone="success"] {
-    --status: oklch(0.7 0.19 150);
+    --status: var(--palette-green-700);
   }
 
   &[data-tone="info"] {
-    --status: oklch(0.6 0.21 258);
+    --status: var(--palette-blue-600);
   }
 
   &[data-tone="warning"] {
-    --status: oklch(0.78 0.17 75);
+    --status: var(--palette-yellow-780);
   }
 
   &[data-tone="danger"] {
-    --status: oklch(0.62 0.24 28);
+    --status: var(--palette-red-620);
   }
 }
 
@@ -524,7 +524,7 @@
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--ink);
-  text-shadow: 0 1px 0 rgb(255 255 255 / 0.85);
+  text-shadow: 0 1px 0 var(--palette-white-a85);
 }
 
 [data-skin="hardware"] [data-kit="alert-description"]:not(#_):not(#_) {
@@ -532,8 +532,8 @@
   padding: 0 6px;
   font: 400 12px/1.5 var(--mono, monospace);
   text-align: center;
-  color: #6a6964;
-  text-shadow: 0 1px 0 rgb(255 255 255 / 0.85);
+  color: var(--palette-gray-520);
+  text-shadow: 0 1px 0 var(--palette-white-a85);
 }
 
 /* Hover card: a gray LCD, like the tooltip, that swings down from the link
@@ -546,17 +546,17 @@
   row-gap: 4px;
   width: 268px;
   padding: 14px 16px;
-  border-radius: calc(10px * var(--corner-scale));
-  color: #141413;
+  border-radius: var(--radius-10);
+  color: var(--palette-gray-191);
   background:
     var(--tex-matte),
-    linear-gradient(180deg, #b6b7b1, #c8c9c3 35%, #c2c3bd);
+    linear-gradient(180deg, var(--palette-gray-777), var(--palette-gray-833) 35%, var(--palette-gray-815));
   box-shadow:
-    inset 0 1px 3px rgb(0 0 0 / 0.25),
-    inset 0 0 0 0.5px rgb(0 0 0 / 0.15),
-    0 0 0 5px #f2f2f0,
-    0 0 0 6px rgb(0 0 0 / calc(0.06 * var(--shadow-k))),
-    0 8px 18px -6px rgb(0 0 0 / calc(0.25 * var(--shadow-k)));
+    inset 0 1px 3px var(--palette-black-a25),
+    inset 0 0 0 0.5px var(--palette-black-a15),
+    0 0 0 5px var(--palette-gray-961),
+    0 0 0 6px rgb(var(--palette-black-rgb) / calc(0.06 * var(--shadow-k))),
+    0 8px 18px -6px rgb(var(--palette-black-rgb) / calc(0.25 * var(--shadow-k)));
   font-family: var(--mono, monospace);
   text-shadow: none;
   transform-origin: 50% 0;
@@ -585,7 +585,7 @@
     grid-column: 2;
     font-size: 11px;
     line-height: 1.45;
-    color: rgb(20 20 19 / 0.72);
+    color: var(--palette-gray-191-a72);
   }
 }
 
@@ -606,11 +606,11 @@
   grid-column: 1 / -1;
   margin-top: 8px !important;
   padding-top: 8px;
-  border-top: 1px dashed rgb(20 20 19 / 0.25);
+  border-top: 1px dashed var(--palette-gray-191-a25);
   font-size: 8px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: rgb(20 20 19 / 0.65);
+  color: var(--palette-gray-191-a65);
 }
 
 @keyframes lcd-print {
@@ -644,8 +644,8 @@
 [data-skin="hardware"] :is([data-kit="fieldset"], [data-kit="alert"]) > [data-kit="legend"]:not(#_):not(#_)::before,
 [data-skin="hardware"] :is([data-kit="fieldset"], [data-kit="alert"]) > [data-kit="legend"]:not(#_):not(#_)::after {
   filter:
-    drop-shadow(0 -0.5px 0.6px rgb(0 0 0 / 0.22))
-    drop-shadow(0.5px 1px 0 rgb(255 255 255 / 1));
+    drop-shadow(0 -0.5px 0.6px var(--palette-black-a22))
+    drop-shadow(0.5px 1px 0 var(--palette-white));
 }
 
 /* Dialogs and the command palette open in the middle of the screen. They
@@ -711,16 +711,16 @@
    resting on a line. */
 [data-skin="hardware"] [data-kit="popup"][data-screen]:not(#_):not(#_):not(#_) {
   padding: 8px;
-  border: 2px solid #121211;
-  border-radius: calc(10px * var(--corner-scale));
-  color: #f2f2ee;
+  border: 2px solid var(--palette-gray-182);
+  border-radius: var(--radius-10);
+  color: var(--palette-gray-960);
   background:
     var(--tex-matte),
-    radial-gradient(130% 160% at 50% 0%, #121211 50%, #1b1b1a 85%);
+    radial-gradient(130% 160% at 50% 0%, var(--palette-gray-182) 50%, var(--palette-gray-222) 85%);
   box-shadow:
-    inset 0 0 0 1px rgb(255 255 255 / 0.04),
-    inset 0 0 14px 2px rgb(255 255 255 / 0.04),
-    0 0 0 1px rgb(0 0 0 / 0.1),
+    inset 0 0 0 1px var(--palette-white-a4),
+    inset 0 0 14px 2px var(--palette-white-a4),
+    0 0 0 1px var(--palette-black-a10),
     var(--elev-high);
   font-family: var(--mono, monospace);
   text-shadow: none;
@@ -731,11 +731,11 @@
     gap: 10px;
     min-height: 30px;
     padding: 0 10px;
-    border-radius: 3px;
+    border-radius: var(--radius-fixed-3);
     font: 400 12px/1 var(--mono, monospace);
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: rgb(242 242 238 / 0.5);
+    color: var(--palette-gray-960-a50);
     background: none;
     box-shadow: none;
 
@@ -748,9 +748,9 @@
     }
 
     &[data-highlighted] {
-      color: #f2f2ee;
-      text-shadow: 0 0 6px rgb(255 255 255 / 0.3);
-      background: rgb(255 255 255 / 0.04);
+      color: var(--palette-gray-960);
+      text-shadow: 0 0 6px var(--palette-white-a30);
+      background: var(--palette-white-a4);
 
       &::before {
         background: var(--lcd-key);
@@ -759,7 +759,7 @@
     }
 
     &[data-selected]:not([data-highlighted]) {
-      color: rgb(242 242 238 / 0.85);
+      color: var(--palette-gray-960-a85);
     }
 
     & [data-kit="option-check"],
@@ -773,7 +773,7 @@
     font-size: 12px;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: rgb(242 242 238 / 0.45);
+    color: var(--palette-gray-960-a45);
 
     &:is([hidden], :empty) {
       display: none;

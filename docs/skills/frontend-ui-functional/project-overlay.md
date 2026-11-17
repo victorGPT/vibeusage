@@ -15,7 +15,7 @@ This overlay applies when using the `frontend-ui-functional` skill in this repos
 
 ## Mandatory Checks (Before PR)
 
-- **Design guardrail:** run `npm --prefix dashboard run guardrail:design` (`dashboard/scripts/check-design-ssot.mjs`). It fails on spacing off the s1..s8 scale, literal colors and `text-[Npx]` outside the kit.
+- **Design guardrail:** run `npm --prefix dashboard run guardrail:design` (`dashboard/scripts/check-design-ssot.mjs`). It fails on a literal color or radius anywhere outside `dashboard/src/styles/tokens.css`, and on spacing off the s1..s8 scale and `text-[Npx]` outside the kit.
 - **Copy registry validation:** run `npm run validate:copy`.
 
 ## Notes

@@ -18,12 +18,12 @@
   flex: 1;
   max-width: 320px;
   height: 52px;
-  border-radius: calc(10px * var(--corner-scale));
-  background: #efefed;
+  border-radius: var(--radius-10);
+  background: var(--palette-gray-952-2);
   box-shadow:
-    inset 0 1px 2px rgb(0 0 0 / 0.08),
-    inset 0 0 0 1px rgb(0 0 0 / 0.04),
-    0 1px 0 #fff;
+    inset 0 1px 2px var(--palette-black-a8),
+    inset 0 0 0 1px var(--palette-black-a4),
+    0 1px 0 var(--palette-white);
   overflow: hidden;
   cursor: grab;
   touch-action: none;
@@ -45,11 +45,11 @@
     content: "";
     position: absolute;
     inset: 5px 4px;
-    border-radius: calc(6px * var(--corner-scale));
-    background: linear-gradient(90deg, #dddcd8, #f4f4f2 24%, #fdfdfc 50%, #f4f4f2 76%, #dddcd8);
+    border-radius: var(--radius-6);
+    background: linear-gradient(90deg, var(--palette-gray-894), var(--palette-gray-967) 24%, var(--palette-gray-994) 50%, var(--palette-gray-967) 76%, var(--palette-gray-894));
     box-shadow:
-      0 0 0 0.5px rgb(0 0 0 / 0.06),
-      0 1px 1.5px rgb(0 0 0 / 0.08);
+      0 0 0 0.5px var(--palette-black-a6),
+      0 1px 1.5px var(--palette-black-a8);
   }
 
   /* The index marks above and below the current page. */
@@ -78,7 +78,7 @@
   width: 34px;
   font: 400 16px/1 var(--mono, monospace);
   font-variant-numeric: tabular-nums;
-  color: #8f8e89;
+  color: var(--palette-gray-646);
   backface-visibility: hidden;
   transition: color 90ms;
   will-change: transform;
@@ -112,7 +112,7 @@
     grid-area: 1 / 1;
     width: 1.5px;
     height: 4px;
-    background: #cfcec9;
+    background: var(--palette-gray-851);
     will-change: transform;
   }
 }

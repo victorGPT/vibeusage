@@ -21,13 +21,13 @@
   --wall-l: var(--edge);
   --wall-r: var(--edge);
   --cap-w: 120px;
-  --face: #f6f6f4;
-  --rim: linear-gradient(180deg, #dadad6, #cbcbc6);
-  --ink-part: #2a2a28;
-  --divider: rgb(0 0 0 / 0.13);
-  --divider-light: rgb(255 255 255 / 0.95);
-  --press-shade: rgb(0 0 0 / 0.05);
-  --r: calc(11px * var(--corner-scale));
+  --face: var(--palette-gray-973);
+  --rim: linear-gradient(180deg, var(--palette-gray-887), var(--palette-gray-841));
+  --ink-part: var(--palette-gray-284);
+  --divider: var(--palette-black-a13);
+  --divider-light: var(--palette-white-a95);
+  --press-shade: var(--palette-black-a5);
+  --rocker-radius: var(--radius-11);
   /* The cap stands up to ~3px above the group's box, and WebKit can clip
      what overflows an element with a filter, here the shared shadow. So
      the box reaches 4px above the cap, with the margin taking it back so
@@ -49,12 +49,12 @@
     --wall-r 80ms cubic-bezier(0.3, 0, 0.6, 1);
 
   &[data-tone="primary"] {
-    --face: #2a2a28;
-    --rim: linear-gradient(180deg, #161615, #0a0a0a);
-    --ink-part: #f1f1ee;
-    --divider: rgb(0 0 0 / 0.6);
-    --divider-light: rgb(255 255 255 / 0.09);
-    --press-shade: rgb(0 0 0 / 0.3);
+    --face: var(--palette-gray-284);
+    --rim: linear-gradient(180deg, var(--palette-gray-200), var(--palette-gray-145));
+    --ink-part: var(--palette-gray-957);
+    --divider: var(--palette-black-a60);
+    --divider-light: var(--palette-white-a9);
+    --press-shade: var(--palette-black-a30);
   }
 
   /* The base: the wall, the same shape as the cap, left in place. */
@@ -63,7 +63,7 @@
     position: absolute;
     inset: var(--room) 0 0;
     z-index: -1;
-    border-radius: var(--r);
+    border-radius: var(--rocker-radius);
     background: var(--rim);
   }
 }
@@ -71,22 +71,22 @@
 [data-skin="hardware"] [data-kit="rocker-cap"] {
   position: relative;
   display: flex;
-  border-radius: var(--r);
+  border-radius: var(--rocker-radius);
   background:
-    linear-gradient(0deg, rgb(255 255 255 / 0.55), rgb(255 255 255 / 0) 55%, rgb(0 0 0 / 0.025)),
+    linear-gradient(0deg, var(--palette-white-a55), var(--palette-white-a0) 55%, var(--palette-black-a2p5)),
     var(--face);
   box-shadow:
-    inset 0 1px 0 #fff,
-    inset 0 -1px 0 rgb(0 0 0 / 0.04);
+    inset 0 1px 0 var(--palette-white),
+    inset 0 -1px 0 var(--palette-black-a4);
   translate: 0 calc((var(--wall-l) + var(--wall-r)) / -2);
   transform: skewY(atan2(var(--wall-l) - var(--wall-r), var(--cap-w)));
 
   /* The dark cap is the latching keys' matte plastic. */
   [data-tone="primary"] > & {
-    background: var(--tex-matte), linear-gradient(180deg, #41413d, #2a2a28 55%, #222220);
+    background: var(--tex-matte), linear-gradient(180deg, var(--palette-gray-374), var(--palette-gray-284) 55%, var(--palette-gray-251));
     box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 0.18),
-      inset 0 -1px 1px rgb(0 0 0 / 0.4);
+      inset 0 1px 0 var(--palette-white-a18),
+      inset 0 -1px 1px var(--palette-black-a40);
   }
 
   [data-orientation="vertical"] > & {
@@ -155,11 +155,11 @@
   }
 
   &:first-child {
-    border-radius: var(--r) 0 0 var(--r);
+    border-radius: var(--rocker-radius) 0 0 var(--rocker-radius);
   }
 
   &:last-child {
-    border-radius: 0 var(--r) var(--r) 0;
+    border-radius: 0 var(--rocker-radius) var(--rocker-radius) 0;
   }
 
   &:focus-visible {
@@ -171,11 +171,11 @@
 
 [data-skin="hardware"] [data-kit="rocker"][data-orientation="vertical"] [data-kit="rocker-part"]:not(#_) {
   &:first-child {
-    border-radius: var(--r) var(--r) 0 0;
+    border-radius: var(--rocker-radius) var(--rocker-radius) 0 0;
   }
 
   &:last-child {
-    border-radius: 0 0 var(--r) var(--r);
+    border-radius: 0 0 var(--rocker-radius) var(--rocker-radius);
   }
 }
 

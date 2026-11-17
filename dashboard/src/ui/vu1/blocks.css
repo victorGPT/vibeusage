@@ -2,16 +2,6 @@
  * (.nawaban/vu1-mock.html); controls keep the SPEC-01 kit look from src/ui/hardware.
  * Spacing uses only --spacing-s1..s8. Scoped to the skin. */
 
-[data-skin="hardware"] {
-  --vu1-red: #ff2a12;
-  --vu1-red-hi: #ff8f6b;
-  --vu1-ink: #1d1d1c;
-  --vu1-legend: #6f6e69;
-  --vu1-screen-ink: #f2f2ee;
-  --vu1-screen-dim: rgba(242, 242, 238, 0.66);
-  --vu1-lcd-ink: #141413;
-}
-
 [data-skin="hardware"] [data-vu1-cap] {
   text-transform: uppercase;
   letter-spacing: 0.12em;
@@ -24,12 +14,12 @@
   height: 8px;
   flex: none;
   border-radius: 50%;
-  background: #c9c8c3;
-  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.2);
+  background: var(--palette-gray-832);
+  box-shadow: inset 0 1px 1px var(--palette-black-a20);
 }
 [data-skin="hardware"] [data-vu1="led"][data-on] {
-  background: var(--vu1-red);
-  box-shadow: 0 0 6px var(--vu1-red), 0 0 0 1px rgba(0, 0, 0, 0.08);
+  background: var(--color-accent);
+  box-shadow: 0 0 6px var(--color-accent), 0 0 0 1px var(--palette-black-a8);
 }
 
 /* Top bar */
@@ -39,10 +29,10 @@
   align-items: center;
   gap: var(--spacing-s4);
   padding: var(--spacing-s3) var(--spacing-s5);
-  border-radius: 14px;
-  color: var(--vu1-ink);
-  background: linear-gradient(180deg, #f5f5f2, #ecece8);
-  box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(0, 0, 0, 0.04), 0 2px 6px rgba(0, 0, 0, 0.05), 0 18px 40px -24px rgba(0, 0, 0, 0.25);
+  border-radius: var(--radius-fixed-14);
+  color: var(--color-ink);
+  background: linear-gradient(180deg, var(--palette-gray-969), var(--palette-gray-942));
+  box-shadow: inset 0 1px 0 var(--palette-white), 0 0 0 1px var(--palette-black-a4), 0 2px 6px var(--palette-black-a5), 0 18px 40px -24px var(--palette-black-a25);
 }
 [data-skin="hardware"] [data-vu1="brand"] {
   display: flex;
@@ -54,7 +44,7 @@
   text-transform: uppercase;
 }
 [data-skin="hardware"] [data-vu1="dim"] {
-  color: var(--vu1-legend);
+  color: var(--color-legend);
   font-weight: 400;
 }
 [data-skin="hardware"] [data-vu1="nav"] {
@@ -68,12 +58,12 @@
   align-items: center;
   gap: var(--spacing-s2);
   padding: var(--spacing-s2) var(--spacing-s3);
-  border-radius: 8px;
-  color: var(--vu1-legend);
+  border-radius: var(--radius-fixed-8);
+  color: var(--color-legend);
   text-decoration: none;
 }
 [data-skin="hardware"] [data-vu1="nav"] a:is([aria-current="page"], :hover) {
-  color: var(--vu1-ink);
+  color: var(--color-ink);
 }
 [data-skin="hardware"] [data-vu1="tools"] {
   display: flex;
@@ -87,7 +77,7 @@
   text-decoration: none;
 }
 [data-skin="hardware"] [data-vu1="star"] {
-  color: var(--vu1-red);
+  color: var(--color-accent);
 }
 @media (max-width: 760px) {
   [data-skin="hardware"] [data-vu1="topbar"] {
@@ -106,11 +96,11 @@
   gap: var(--spacing-s4);
   min-width: 0;
   padding: var(--spacing-s4);
-  border-radius: 12px;
-  color: var(--vu1-screen-ink);
+  border-radius: var(--radius-fixed-12);
+  color: var(--color-screen-ink);
   text-shadow: none;
-  background: radial-gradient(130% 160% at 50% 0%, #121211 50%, #1c1c1b 80%, #121211);
-  box-shadow: 0 0 0 6px #1a1a19, 0 0 0 7px #000, inset 0 2px 10px rgba(0, 0, 0, 0.6), 0 10px 18px -6px rgba(0, 0, 0, 0.35);
+  background: radial-gradient(130% 160% at 50% 0%, var(--palette-gray-182) 50%, var(--palette-gray-226) 80%, var(--palette-gray-182));
+  box-shadow: 0 0 0 6px var(--palette-gray-217), 0 0 0 7px var(--palette-black), inset 0 2px 10px var(--palette-black-a60), 0 10px 18px -6px var(--palette-black-a35);
 }
 [data-skin="hardware"] [data-vu1="screen-body"] {
   display: flex;
@@ -122,7 +112,7 @@
   align-items: center;
   gap: var(--spacing-s4);
   padding-bottom: var(--spacing-s2);
-  border-bottom: 1px dashed rgba(242, 242, 238, 0.25);
+  border-bottom: 1px dashed var(--palette-gray-960-a25);
 }
 [data-skin="hardware"] [data-vu1="screen-tabs"] {
   display: flex;
@@ -132,22 +122,22 @@
   padding: 0;
   border: 0;
   background: none;
-  color: var(--vu1-screen-dim);
+  color: var(--color-screen-dim);
   font: inherit;
   letter-spacing: inherit;
   text-transform: inherit;
   cursor: pointer;
 }
 [data-skin="hardware"] [data-vu1="screen-tabs"] [role="tab"][aria-selected="true"] {
-  color: var(--vu1-red);
+  color: var(--color-accent);
 }
 [data-skin="hardware"] [data-vu1="screen"] :focus-visible {
-  outline: 1px dashed var(--vu1-screen-dim);
+  outline: 1px dashed var(--color-screen-dim);
   outline-offset: var(--spacing-s1);
 }
 [data-skin="hardware"] [data-vu1="range"] {
   margin-left: auto;
-  color: var(--vu1-screen-dim);
+  color: var(--color-screen-dim);
 }
 [data-skin="hardware"] [data-vu1="reads"] {
   display: grid;
@@ -160,7 +150,7 @@
   gap: var(--spacing-s1);
 }
 [data-skin="hardware"] [data-vu1="read"] dt {
-  color: var(--vu1-screen-dim);
+  color: var(--color-screen-dim);
   font-size: 9px;
   letter-spacing: 0.16em;
 }
@@ -175,10 +165,10 @@
 }
 [data-skin="hardware"] [data-vu1="read-delta"] {
   min-height: 1.2em;
-  color: var(--vu1-screen-dim);
+  color: var(--color-screen-dim);
 }
 [data-skin="hardware"] [data-vu1="read-delta"][data-up] {
-  color: var(--vu1-red);
+  color: var(--color-accent);
 }
 [data-skin="hardware"] [data-vu1="chart"] {
   display: flex;
@@ -191,7 +181,7 @@
 [data-skin="hardware"] [data-vu1="axis"] {
   display: flex;
   justify-content: space-between;
-  color: var(--vu1-screen-dim);
+  color: var(--color-screen-dim);
   font-size: 9px;
 }
 
@@ -223,16 +213,16 @@
   border-radius: 50%;
   background: var(--lit);
 }
-[data-skin="hardware"] [data-vu1="heat"] i[data-level="0"] { --dot: 3px; --lit: rgba(242, 242, 238, 0.14); }
-[data-skin="hardware"] [data-vu1="heat"] i[data-level="1"] { --dot: 4px; --lit: #7a1a0e; }
-[data-skin="hardware"] [data-vu1="heat"] i[data-level="2"] { --dot: 5px; --lit: #b8240f; }
-[data-skin="hardware"] [data-vu1="heat"] i[data-level="3"] { --dot: 7px; --lit: var(--vu1-red); }
-[data-skin="hardware"] [data-vu1="heat"] i[data-level="4"] { --dot: 8px; --lit: var(--vu1-red-hi); }
+[data-skin="hardware"] [data-vu1="heat"] i[data-level="0"] { --dot: 3px; --lit: var(--palette-gray-960-a14); }
+[data-skin="hardware"] [data-vu1="heat"] i[data-level="1"] { --dot: 4px; --lit: var(--palette-red-382); }
+[data-skin="hardware"] [data-vu1="heat"] i[data-level="2"] { --dot: 5px; --lit: var(--palette-red-508); }
+[data-skin="hardware"] [data-vu1="heat"] i[data-level="3"] { --dot: 7px; --lit: var(--color-accent); }
+[data-skin="hardware"] [data-vu1="heat"] i[data-level="4"] { --dot: 8px; --lit: var(--color-accent-hi); }
 [data-skin="hardware"] [data-vu1="heat-grid"] i[data-level="4"]::after {
-  box-shadow: 0 0 4px var(--vu1-red);
+  box-shadow: 0 0 4px var(--color-accent);
 }
 [data-skin="hardware"] [data-vu1="heat-grid"] i[data-cur]::after {
-  outline: 1px solid var(--vu1-screen-ink);
+  outline: 1px solid var(--color-screen-ink);
   outline-offset: 1px;
 }
 [data-skin="hardware"] [data-vu1="heat-read"] {
@@ -240,7 +230,7 @@
   flex-wrap: wrap;
   justify-content: space-between;
   gap: var(--spacing-s3);
-  color: var(--vu1-screen-dim);
+  color: var(--color-screen-dim);
   font-size: 9px;
 }
 [data-skin="hardware"] [data-vu1="heat-legend"] {
@@ -254,11 +244,11 @@
   min-width: 0;
   overflow-x: auto;
   padding: var(--spacing-s3) var(--spacing-s4);
-  border-radius: 12px;
-  color: var(--vu1-lcd-ink);
-  background: linear-gradient(180deg, #b6b7b1, #c8c9c3 35%, #c2c3bd);
-  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.25), 0 0 0 6px #e6e6e2, 0 0 0 7px rgba(0, 0, 0, 0.08);
-  text-shadow: 0.25px 1px 0 rgba(20, 20, 19, 0.14);
+  border-radius: var(--radius-fixed-12);
+  color: var(--color-lcd-ink);
+  background: var(--fill-lcd);
+  box-shadow: inset 0 2px 6px var(--palette-black-a25), 0 0 0 6px var(--palette-gray-924-2), 0 0 0 7px var(--palette-black-a8);
+  text-shadow: 0.25px 1px 0 var(--palette-gray-191-a14);
 }
 [data-skin="hardware"] [data-vu1="list"] {
   width: 100%;
@@ -266,8 +256,8 @@
 }
 [data-skin="hardware"] [data-vu1="list"] th {
   padding: var(--spacing-s1) var(--spacing-s3) var(--spacing-s2);
-  border-bottom: 1px dashed rgba(20, 20, 19, 0.35);
-  color: rgba(20, 20, 19, 0.6);
+  border-bottom: 1px dashed var(--palette-gray-191-a35);
+  color: var(--palette-gray-191-a60);
   font-size: 9px;
   font-weight: 500;
   letter-spacing: 0.16em;
@@ -282,7 +272,7 @@
   text-align: right;
 }
 [data-skin="hardware"] [data-vu1="list"] tr[data-me] td {
-  color: var(--vu1-red);
+  color: var(--color-accent);
   font-weight: 600;
 }
 /* The mock's dashes either side of my row; decoration, not copy. */
@@ -304,17 +294,17 @@
   height: 6px;
   margin-right: var(--spacing-s2);
   vertical-align: middle;
-  background: repeating-linear-gradient(90deg, rgba(20, 20, 19, 0.18) 0 3px, transparent 3px 5px);
+  background: repeating-linear-gradient(90deg, var(--palette-gray-191-a18) 0 3px, transparent 3px 5px);
 }
 [data-skin="hardware"] [data-vu1="meter"]::after {
   content: "";
   position: absolute;
   inset: 0 auto 0 0;
   width: calc(var(--share) * 100%);
-  background: repeating-linear-gradient(90deg, var(--vu1-lcd-ink) 0 3px, transparent 3px 5px);
+  background: repeating-linear-gradient(90deg, var(--color-lcd-ink) 0 3px, transparent 3px 5px);
 }
 [data-skin="hardware"] tr[data-me] [data-vu1="meter"]::after {
-  background: repeating-linear-gradient(90deg, var(--vu1-red) 0 3px, transparent 3px 5px);
+  background: repeating-linear-gradient(90deg, var(--color-accent) 0 3px, transparent 3px 5px);
 }
 /* Narrow screens drop the minor columns; the name cell takes what is left and ellipsizes. */
 @media (max-width: 760px) {
@@ -337,13 +327,13 @@
   flex-direction: column;
   gap: var(--spacing-s1);
   padding: var(--spacing-s2) var(--spacing-s3);
-  border-radius: 8px;
-  color: var(--vu1-lcd-ink);
-  background: linear-gradient(180deg, #b6b7b1, #c8c9c3 35%, #c2c3bd);
-  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.22);
+  border-radius: var(--radius-fixed-8);
+  color: var(--color-lcd-ink);
+  background: var(--fill-lcd);
+  box-shadow: inset 0 2px 5px var(--palette-black-a22);
 }
 [data-skin="hardware"] [data-vu1="mini"] dt {
-  color: rgba(20, 20, 19, 0.6);
+  color: var(--palette-gray-191-a60);
   font-size: 9px;
   letter-spacing: 0.16em;
 }
@@ -362,11 +352,11 @@
   padding: var(--spacing-s2) var(--spacing-s4);
 }
 [data-skin="hardware"] [data-vu1="screen"] [data-vu1="dim"] {
-  color: var(--vu1-screen-dim);
+  color: var(--color-screen-dim);
 }
 [data-skin="hardware"] [data-vu1="red"],
 [data-skin="hardware"] [data-vu1="prompt"] {
-  color: var(--vu1-red);
+  color: var(--color-accent);
 }
 [data-skin="hardware"] [data-vu1="screen"][data-variant="cmd"] {
   flex-direction: row;
@@ -406,7 +396,7 @@
   padding: 0;
 }
 [data-skin="hardware"] [data-vu1="legend"] {
-  color: var(--vu1-legend);
+  color: var(--color-legend);
   font-size: 9px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -442,15 +432,15 @@
 [data-skin="hardware"] [data-vu1="state-body"] {
   margin: 0;
   max-width: 46ch;
-  color: var(--vu1-screen-dim);
+  color: var(--color-screen-dim);
   line-height: 1.7;
   text-transform: none;
 }
 [data-skin="hardware"] [data-vu1="skeleton"] {
   display: block;
   height: var(--spacing-s3);
-  border-radius: 4px;
-  background: rgba(242, 242, 238, 0.12);
+  border-radius: var(--radius-fixed-4);
+  background: var(--palette-gray-960-a12);
 }
 
 /* Upgrade toast, bottom right */
@@ -464,10 +454,10 @@
   gap: var(--spacing-s3);
   max-width: calc(100% - var(--spacing-s7));
   padding: var(--spacing-s3) var(--spacing-s4);
-  border-radius: 12px;
-  color: var(--vu1-screen-ink);
-  background: #1c1c1b;
-  box-shadow: 0 12px 30px -8px rgba(0, 0, 0, 0.45);
+  border-radius: var(--radius-fixed-12);
+  color: var(--color-screen-ink);
+  background: var(--palette-gray-226);
+  box-shadow: 0 12px 30px -8px var(--palette-black-a45);
 }
 
 @media (max-width: 760px) {

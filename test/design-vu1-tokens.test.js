@@ -26,6 +26,20 @@ test("the spacing scale is exactly the mock's --s1..--s8", () => {
   assert.deepEqual(Object.fromEntries(scale.map(([k, v]) => [k.slice(8), v])), SCALE);
 });
 
+test("inset, stack and section name steps of the scale", () => {
+  const tokens = themeTokens();
+  assert.equal(tokens.get("spacing-inset"), "var(--spacing-s4)");
+  assert.equal(tokens.get("spacing-stack"), "var(--spacing-s2)");
+  assert.equal(tokens.get("spacing-section"), "var(--spacing-s5)");
+});
+
+test("functional text has an 11px floor on the type scale", () => {
+  const css = fs.readFileSync(path.join(__dirname, "..", "dashboard", "src", "styles", "tokens.css"), "utf8");
+  const sizes = Object.fromEntries([...css.matchAll(/--font-size-([\w-]+):\s*(\d+)px;/g)].map((m) => [m[1], Number(m[2])]));
+  assert.equal(sizes.label, 11);
+  assert.ok(Object.values(sizes).every((px) => px >= 11), JSON.stringify(sizes));
+});
+
 test("gutters and shell match the mock grid", () => {
   const tokens = themeTokens();
   assert.equal(tokens.get("spacing-gutter"), "var(--spacing-s5)");

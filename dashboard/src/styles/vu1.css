@@ -1,6 +1,8 @@
 /* VU1 layout tokens, from :root of the VU1 UI mock (.nawaban/vu1-mock.html, 11-17 grid revision).
  * Spacing uses only --spacing-s1..s8 (4 8 12 16 24 32 48 64). Inside a group the gap is at least
- * one step smaller than between groups. Pages and device interiors share one 12-column grid. */
+ * one step smaller than between groups. Pages and device interiors share one 12-column grid.
+ * inset is a container's padding, the same on all four sides; stack is the gap inside a group;
+ * section is the gap between groups. */
 @theme static {
   --spacing-s1: 4px;
   --spacing-s2: 8px;
@@ -10,6 +12,10 @@
   --spacing-s6: 32px;
   --spacing-s7: 48px;
   --spacing-s8: 64px;
+
+  --spacing-inset: var(--spacing-s4);
+  --spacing-stack: var(--spacing-s2);
+  --spacing-section: var(--spacing-s5);
 
   --spacing-gutter: var(--spacing-s5);
   --spacing-gutter-device: var(--spacing-s4);

@@ -57,7 +57,7 @@
    color, 2.8:1 on their panels. This darker gray clears 4.5:1 and keeps
    the printed look. */
 [data-skin="hardware"] :is([data-kit="accordion-panel"] p, [data-kit="resizable-panel"]):not(#_):not(#_):not(#_):not(#_):not(#_) {
-  color: #5f5e59;
+  color: var(--palette-gray-481);
 }
 
 /* No native control styling. The kit draws every key and field itself, but
