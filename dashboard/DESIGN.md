@@ -63,7 +63,7 @@ Pages arrange blocks on the grid and pass data. They do not style text, draw bor
 
 - `TopBar` carries the brand, page navigation, the GitHub star count, sign in or out and the key-sound switch.
 - `UsageScreen` is the dark screen with the USAGE and ACTIVITY tabs, three readouts, the bar chart and the 52-week LED heatmap (arrow keys walk the days).
-- `Segment` with `periodOptions()` is the period choice, `SourceSegment` the source choice (both `print="key"`), and `StatMinis` the four minis under the screen.
+- `Segment` with `periodOptions()` is the period choice, `SourceSegment` the source choice, and `StatMinis` the four minis under the screen.
 - `ModelList` and `RankScreen` are the gray LCD lists. `MyRankLcd` and `Pager` sit beside the board.
 - `InstallCommand`, `Keys` (Share and Install), `IdentityStrip`, `UpgradeToast` and `StateScreen` (loading, empty, error, crash, signed out, install, expired, invalid) cover the rest.
 - `ClientList` and `GlobalMeter` are Landing only.
@@ -84,20 +84,20 @@ Pick a component by what the content means, not by how it looks, and give one me
 
 | Meaning | Component | Use |
 | --- | --- | --- |
-| One of 2 to 5 options | Segmented | `Segment` in `src/ui/vu1/SourceSegment.tsx`, with `print="key"` |
+| One of 2 to 5 options | Segmented | `Segment` in `src/ui/vu1/SourceSegment.tsx` |
 | One of more than 5 ordered steps | SlideSwitch | `src/ui/hardware/slide-switch.tsx` (a continuous value has no component yet) |
 | An action | Keys | `ShareKey` and `InstallKey` in `src/ui/vu1/Keys.tsx`, `Button` in `src/ui/hardware/button.tsx` |
 | Views of one screen | Tabs | the tabs in `src/ui/vu1/UsageScreen.tsx` |
 | A few headline readings and a chart | UsageScreen | `src/ui/vu1/UsageScreen.tsx` |
 | One or two readings in a row, such as the reader's rank | MyRankLcd | `src/ui/vu1/MyRankLcd.tsx` |
 | A label and its value | Mini | `src/ui/vu1/StatMinis.tsx` |
-| Rows that share columns | Table | `src/ui/vu1/ModelList.tsx`, `src/ui/vu1/RankScreen.tsx`, with `frame="single"` |
+| Rows that share columns | Table | `src/ui/vu1/ModelList.tsx`, `src/ui/vu1/RankScreen.tsx` |
 | Pages of a table | Pager | `src/ui/vu1/Pager.tsx` |
 | A hint, or an explanation few people need | Tooltip | `@ui-sdk/react/tooltip` with `data-kit="tooltip"`, styled by the kit; `KeyTip` in `src/ui/vu1/KeyTip.tsx` names an icon key |
 | Nothing to show yet: loading, empty, error, signed out | StateScreen | `src/ui/vu1/StateScreen.tsx` |
 | A message that comes and goes | Toast | `notify` in `src/ui/hardware/toaster.tsx`, `UpgradeToast` |
 
-`print="key"` and `frame="single"` are the target look. The Dashboard and the Leaderboard use them. The props stay only while the `/__vu1` Don't pairs render the old look. The kit's own `Segmented` (`src/ui/hardware/segmented-control.tsx`) is uncontrolled, the kit's `ItemList` is a selectable listbox, and the kit's `Lcd` and `Display` duplicate the VU-1 screens. They stay in the gallery and pages do not use them.
+`Segment` always prints names on the keys and `ModelList` and `RankScreen` always have one frame; neither takes a prop for the old look. The `/__vu1` Don't pairs draw it with the kit's `Segmented` and a list inside the kit's `Lcd`. The kit's own `Segmented` (`src/ui/hardware/segmented-control.tsx`) is uncontrolled, the kit's `ItemList` is a selectable listbox, and the kit's `Lcd` and `Display` duplicate the VU-1 screens. They stay in the gallery and pages do not use them.
 
 **One frame.** A surface (screen, LCD, mini) sits straight on the device panel with one frame. A surface never sits inside another surface's frame, and its padding is the same on all four sides.
 
@@ -147,7 +147,7 @@ Pick a component by what the content means, not by how it looks, and give one me
 
 - **Purpose.** Rows that share columns: models, the leaderboard.
 - **When.** More than one item with the same fields.
-- **Do.** One frame on the panel (`frame="single"`) with the same padding on all sides. A bar column (`data-fill` on its cells) takes the width the other columns leave, and its meter spans it.
+- **Do.** One frame on the panel with the same padding on all sides. A bar column (`data-fill` on its cells) takes the width the other columns leave, and its meter spans it.
 - **Don't.** A bezel ring around the table's frame, so it reads as a box inside a box.
 
 ### Pager

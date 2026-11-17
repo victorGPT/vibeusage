@@ -21,7 +21,7 @@ function topCli(entry: LeaderboardMe) {
 }
 
 // My row is red where it falls; when I am ranked but off this page it is pinned on top.
-export function RankScreen({ entries, me, handle, frame }: { entries: LeaderboardEntry[]; me: LeaderboardMe | null; handle: string; frame?: "single" }) {
+export function RankScreen({ entries, me, handle }: { entries: LeaderboardEntry[]; me: LeaderboardMe | null; handle: string }) {
   const pinned = pinnedMe(entries, me);
   const rows: Row[] = [
     ...(pinned ? [{ entry: pinned, me: true }] : []),
@@ -32,7 +32,7 @@ export function RankScreen({ entries, me, handle, frame }: { entries: Leaderboar
     max = Math.max(max, num(row.entry.total_tokens));
   }
   return (
-    <div data-vu1="lcd" data-frame={frame}>
+    <div data-vu1="lcd">
       <table data-vu1="list" data-vu1-cap="" aria-label={copy("vu1.rank.aria")}>
         <thead>
           <tr>

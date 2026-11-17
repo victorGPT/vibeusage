@@ -248,18 +248,12 @@
 [data-skin="hardware"] [data-vu1="lcd"] {
   min-width: 0;
   overflow-x: auto;
-  padding: var(--spacing-s3) var(--spacing-s4);
+  padding: var(--spacing-s4);
   border-radius: var(--radius-fixed-12);
   color: var(--color-lcd-ink);
   background: var(--fill-lcd);
-  box-shadow: inset 0 2px 6px var(--palette-black-a25), 0 0 0 6px var(--palette-gray-924-2), 0 0 0 7px var(--palette-black-a8);
-  text-shadow: 0.25px 1px 0 var(--palette-gray-191-a14);
-}
-/* frame="single": one recessed frame, the same inset on all four sides, no bezel ring around it, so its
- * edges are the column lines it is placed on. */
-[data-skin="hardware"] [data-vu1="lcd"][data-frame="single"] {
-  padding: var(--spacing-s4);
   box-shadow: inset 0 2px 6px var(--palette-black-a25);
+  text-shadow: 0.25px 1px 0 var(--palette-gray-191-a14);
 }[data-skin="hardware"] [data-vu1="list"] {
   width: 100%;
   border-collapse: collapse;
@@ -430,34 +424,34 @@
 [data-skin="hardware"] [data-vu1="segment"] [data-kit="segment"]:not(#_) {
   min-width: 48px;
 }
-/* print="key": the name sits on its slot at label size, so the control reads as keys, not a lever.
+/* The name sits on its slot at label size, so the control reads as keys, not a lever.
  * Three ids outrank the device's legend rule (devices.css). */
-[data-skin="hardware"] [data-vu1="segment"][data-print="key"] [data-kit="segment"]:not(#_):not(#_):not(#_) {
+[data-skin="hardware"] [data-vu1="segment"] [data-kit="segment"]:not(#_):not(#_):not(#_) {
   z-index: 2;
   align-items: center;
   height: calc(var(--slot-height) + 8px);
   padding: 0 var(--spacing-s3);
   font-size: var(--font-size-label);
 }
-[data-skin="hardware"] [data-vu1="segment"][data-print="key"] [data-kit="led"] {
+[data-skin="hardware"] [data-vu1="segment"] [data-kit="led"] {
   display: none;
 }
 /* A keyed segment never runs past its column span: short of room, its equal keys give up side
  * padding instead. */
-[data-skin="hardware"] [data-vu1="segment"][data-print="key"] {
+[data-skin="hardware"] [data-vu1="segment"] {
   grid-template-columns: minmax(0, 1fr);
 }
-[data-skin="hardware"] [data-vu1="segment"][data-print="key"] [data-kit="segmented"]:not(#_) {
+[data-skin="hardware"] [data-vu1="segment"] [data-kit="segmented"]:not(#_) {
   max-width: 100%;
 }
 /* Folded onto a phone row, a keyed segment fills the row, so the row meets both edges of the device.
  * Its keys size to their names with at least s2 either side; five sources still fit at 360px. */
 @media (max-width: 760px) {
-  [data-skin="hardware"] [data-vu1="segment"][data-print="key"] [data-kit="segmented"]:not(#_) {
+  [data-skin="hardware"] [data-vu1="segment"] [data-kit="segmented"]:not(#_) {
     width: 100%;
     grid-auto-columns: auto;
   }
-  [data-skin="hardware"] [data-vu1="segment"][data-print="key"] [data-kit="segment"]:not(#_):not(#_):not(#_) {
+  [data-skin="hardware"] [data-vu1="segment"] [data-kit="segment"]:not(#_):not(#_):not(#_) {
     min-width: 0;
     padding: 0 var(--spacing-s2);
     letter-spacing: 0.08em;

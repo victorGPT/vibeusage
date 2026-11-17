@@ -3,6 +3,8 @@ import type { ReactNode } from "react";
 
 import { copy } from "../../lib/copy";
 import { Button } from "../hardware/button";
+import { Lcd } from "../hardware/lcd";
+import { Segmented } from "../hardware/segmented-control";
 import { SlideSwitch } from "../hardware/slide-switch";
 import { InstallKey, ShareKey } from "../vu1/Keys";
 import { ModelList } from "../vu1/ModelList";
@@ -19,6 +21,7 @@ type Rule = { id: string; title: string; component: string; pair: [ReactNode, Re
 
 const none = () => {};
 const SOURCES = ["all", "claude", "codex", "gemini", "other"].map((id) => ({ value: id, label: sourceLabel(id) }));
+const SOURCE_NAMES = SOURCES.map((option) => option.label);
 const DAY = 86_400_000;
 const END = Date.UTC(2026, 10, 16);
 const WEEK: DailyRow[] = [0, 0, 0, 0, 0, 62e6, 100e6].map((total_tokens, i) => ({
@@ -44,22 +47,22 @@ const BREAKDOWN: ModelBreakdown = {
 };
 
 const week = (rows: DailyRow[]) => <UsageScreen range={RANGE} totals={TOTALS} rank={38} rows={rows} heatmap={NO_HEATMAP} />;
-const periods = (print?: "key") => (
-  <Segment label={copy("vu1.period.label")} options={periodOptions()} value={"week" as UsagePeriod} onChange={none} print={print} />
-);
 
 export const RULES: Rule[] = [
   {
     id: "segmented",
     title: copy("vu1.gallery.rule.segmented"),
     component: "src/ui/vu1/SourceSegment.tsx",
-    pair: [<Segment label={copy("vu1.source.label")} options={SOURCES} value="all" onChange={none} print="key" />, <Segment label={copy("vu1.source.label")} options={SOURCES} value="all" onChange={none} />],
+    pair: [
+      <Segment label={copy("vu1.source.label")} options={SOURCES} value="all" onChange={none} />,
+      <Segmented label={copy("vu1.source.label")} options={SOURCE_NAMES} defaultValue={SOURCE_NAMES[0]} />,
+    ],
   },
   {
     id: "slide-switch",
     title: copy("vu1.gallery.rule.slide_switch"),
     component: "src/ui/hardware/slide-switch.tsx",
-    pair: [periods("key"), <SlideSwitch label={copy("vu1.period.label")} options={periodOptions().map((option) => option.label)} value={copy("vu1.period.week")} orientation="vertical" />],
+    pair: [<Segment label={copy("vu1.period.label")} options={periodOptions()} value={"week" as UsagePeriod} onChange={none} />, <SlideSwitch label={copy("vu1.period.label")} options={periodOptions().map((option) => option.label)} value={copy("vu1.period.week")} orientation="vertical" />],
   },
   {
     id: "keys",
@@ -91,7 +94,12 @@ export const RULES: Rule[] = [
     id: "table",
     title: copy("vu1.gallery.rule.table"),
     component: "src/ui/vu1/ModelList.tsx",
-    pair: [<ModelList breakdown={BREAKDOWN} frame="single" />, <ModelList breakdown={BREAKDOWN} />],
+    pair: [
+      <ModelList breakdown={BREAKDOWN} />,
+      <Lcd>
+        <ModelList breakdown={BREAKDOWN} />
+      </Lcd>,
+    ],
   },
 ];
 
