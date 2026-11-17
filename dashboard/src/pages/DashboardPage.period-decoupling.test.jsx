@@ -226,6 +226,24 @@ describe("DashboardPage device controls", () => {
     }
   });
 
+  it("gives Total one slot per month of the window, leading empty months included", async () => {
+    const months = Array.from({ length: 24 }, (_, i) => ({
+      month: `${2024 + Math.floor((i + 3) / 12)}-${String(((i + 3) % 12) + 1).padStart(2, "0")}`,
+      billable_total_tokens: i < 21 ? 0 : 1_000_000,
+    }));
+    const original = trendHook.useTrendData.getMockImplementation();
+    trendHook.useTrendData.mockImplementation(({ period }) => ({ rows: period === "total" ? months : [], loading: false, error: null, refresh: vi.fn() }));
+    try {
+      const user = userEvent.setup();
+      renderOwner();
+      await user.click(await screen.findByRole("radio", { name: "Total" }));
+      const bars = within(screen.getByRole("region", { name: "Screen" })).getByRole("img", { name: /peak/ });
+      await waitFor(() => expect(bars.querySelectorAll('[data-kit="bar-graph-bar"]')).toHaveLength(24));
+    } finally {
+      trendHook.useTrendData.mockImplementation(original);
+    }
+  });
+
   it("reads tokens and cost for the picked source", async () => {
     const user = userEvent.setup();
     renderOwner();

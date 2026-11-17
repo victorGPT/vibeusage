@@ -12,7 +12,6 @@ import {
 } from "../lib/auth-token";
 import { copy } from "../lib/copy";
 import { getRangeForPeriod } from "../lib/date-range";
-import { trimLeadingZeroMonths } from "../lib/details";
 import { selectRollingUsageForDisplay } from "../lib/dashboard-period-bindings";
 import { toDisplayNumber, toFiniteNumber } from "../lib/format";
 import { fetchGithubRepoMeta } from "../lib/github-repo-meta";
@@ -570,7 +569,7 @@ export function DashboardPage({
   const barRows = useMemo(() => {
     const rows = Array.isArray(trendRows) ? trendRows : [];
     if (period === "day") return rows.filter((row) => row?.hour);
-    if (period === "total") return trimLeadingZeroMonths(rows.filter((row) => row?.month));
+    if (period === "total") return rows.filter((row) => row?.month);
     return rows;
   }, [period, trendRows]);
 

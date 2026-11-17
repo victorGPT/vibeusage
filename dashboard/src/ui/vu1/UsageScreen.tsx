@@ -30,7 +30,6 @@ type UsageScreenProps = {
 const LEVELS = [0, 1, 2, 3, 4];
 const SIGNS = ["−", "", "+"];
 const sign = (value: number) => SIGNS[Math.sign(value) + 1];
-const past = (row: DailyRow) => !row.future;
 
 function readings(totals: UsageTotals, rank: number | null, delta: UsageDelta = {}) {
   const rankDelta = delta.rank ?? 0;
@@ -66,9 +65,9 @@ function axis(rows: DailyRow[], dateKey: DateKey) {
   return Array.from({ length: count }, (_, i) => pointLabel(rows[Math.round((i * (rows.length - 1)) / (count - 1))], dateKey));
 }
 
+// One slot per unit of the period, so a week is always seven; days still to come stay unlit.
 function UsageBars({ rows, dateKey }: { rows: DailyRow[]; dateKey: DateKey }) {
-  const shown = rows.filter(past);
-  const values = shown.map(tokens);
+  const values = rows.map((row) => (row.future ? 0 : tokens(row)));
   const max = Math.max(0, ...values);
   return (
     <div data-vu1="chart">
@@ -78,7 +77,7 @@ function UsageBars({ rows, dateKey }: { rows: DailyRow[]; dateKey: DateKey }) {
         segments={30}
       />
       <div data-vu1="axis" aria-hidden>
-        {axis(shown, dateKey).map((label, i) => (
+        {axis(rows, dateKey).map((label, i) => (
           <span key={i}>{label}</span>
         ))}
       </div>
