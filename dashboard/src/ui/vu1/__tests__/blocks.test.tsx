@@ -112,7 +112,7 @@ describe("UsageScreen", () => {
     expect(screen.getByText("+9% from previous period")).toBeTruthy();
     expect(screen.getByText("+$52.80")).toBeTruthy();
     expect(screen.getByText("▲ 3")).toBeTruthy();
-    expect(screen.getByRole("img", { name: /peak 7\.0M/ })).toBeTruthy();
+    expect(screen.getByRole("group", { name: /peak 7\.0M/ })).toBeTruthy();
   });
 
   it("draws a week as seven slots even when only two days have passed", () => {
@@ -122,11 +122,62 @@ describe("UsageScreen", () => {
       future: i >= 2,
     }));
     render(<UsageScreen {...props} rows={week} />);
-    const bars = screen.getByRole("img", { name: /peak 2\.0M/ }).querySelectorAll('[data-kit="bar-graph-bar"]');
+    const bars = screen.getByRole("group", { name: /peak 2\.0M/ }).querySelectorAll('[data-kit="bar-graph-bar"]');
     expect(bars).toHaveLength(7);
     expect([...bars].map((bar) => (bar as HTMLElement).style.getPropertyValue("--v"))).toEqual(["0.5", "1", "0", "0", "0", "0", "0"]);
     expect(screen.getByText("Dec 29")).toBeTruthy();
     expect(screen.getByText("Jan 4")).toBeTruthy();
+  });
+
+  it("reads a bar's day and tokens on hover", async () => {
+    const user = userEvent.setup();
+    render(<UsageScreen {...props} />);
+    const bars = screen.getByRole("group", { name: /peak 7\.0M/ }).querySelectorAll('[data-kit="bar-graph-bar"]');
+    await user.hover(bars[5]);
+    expect(await screen.findByRole("tooltip")).toHaveTextContent("Nov 15 · 6.0M tokens");
+  });
+
+  it("is one tab stop on the latest day, and arrow keys step the read between bars", async () => {
+    const user = userEvent.setup();
+    render(<UsageScreen {...props} />);
+    const tip = () => screen.getByRole("tooltip");
+    const bars = [...screen.getByRole("group", { name: /peak/ }).querySelectorAll('[data-kit="bar-graph-bar"]')] as HTMLElement[];
+    expect(bars.filter((bar) => bar.tabIndex === 0)).toEqual([bars[6]]);
+    act(() => bars[6].focus());
+    expect(await screen.findByRole("tooltip")).toHaveTextContent("Nov 16 · 7.0M tokens");
+    await user.keyboard("{ArrowLeft}");
+    expect(document.activeElement).toBe(bars[5]);
+    expect(tip()).toHaveTextContent("Nov 15 · 6.0M tokens");
+    await user.keyboard("{Home}");
+    expect(tip()).toHaveTextContent("Nov 10 · 1.0M tokens");
+    await user.keyboard("{ArrowRight}");
+    expect(tip()).toHaveTextContent("Nov 11 · 2.0M tokens");
+  });
+
+  it("keeps one tab stop when the period shrinks under the picked bar", () => {
+    const month: DailyRow[] = Array.from({ length: 30 }, (_, i) => ({ day: `2026-11-${String(i + 1).padStart(2, "0")}`, total_tokens: 1_000_000 }));
+    const { rerender } = render(<UsageScreen {...props} rows={month} />);
+    const monthBars = [...screen.getByRole("group", { name: /peak/ }).querySelectorAll('[data-kit="bar-graph-bar"]')] as HTMLElement[];
+    act(() => {
+      monthBars[25].focus();
+    });
+    rerender(<UsageScreen {...props} />);
+    const bars = [...screen.getByRole("group", { name: /peak/ }).querySelectorAll('[data-kit="bar-graph-bar"]')] as HTMLElement[];
+    expect(bars.filter((bar) => bar.tabIndex === 0)).toEqual([bars[6]]);
+  });
+
+  it("reads a day with nothing as no usage, and skips days still to come", async () => {
+    const user = userEvent.setup();
+    const week: DailyRow[] = DAYS.map((day, i) => ({ day, total_tokens: i === 1 ? 0 : 1_000_000, future: i >= 3 }));
+    render(<UsageScreen {...props} rows={week} />);
+    const bars = [...screen.getByRole("group", { name: /peak/ }).querySelectorAll('[data-kit="bar-graph-bar"]')];
+    act(() => (bars[2] as HTMLElement).focus());
+    expect(await screen.findByRole("tooltip")).toHaveTextContent("Nov 12 · 1.0M tokens");
+    await user.keyboard("{ArrowLeft}");
+    expect(screen.getByRole("tooltip")).toHaveTextContent("Nov 11 · no usage");
+    await user.keyboard("{End}");
+    expect(document.activeElement).toBe(bars[2]);
+    expect(bars.slice(3).every((bar) => !bar.hasAttribute("tabindex"))).toBe(true);
   });
 
   it("explains how cost is priced in a tooltip on its label", async () => {

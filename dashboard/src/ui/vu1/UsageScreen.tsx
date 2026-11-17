@@ -69,16 +69,49 @@ function axis(rows: DailyRow[], dateKey: DateKey) {
   return Array.from({ length: count }, (_, i) => pointLabel(rows[Math.round((i * (rows.length - 1)) / (count - 1))], dateKey));
 }
 
+const STEPS: Record<string, (at: number, last: number) => number> = {
+  ArrowLeft: (at) => Math.max(0, at - 1),
+  ArrowRight: (at, last) => Math.min(last, at + 1),
+  Home: () => 0,
+  End: (_, last) => last,
+};
+
 // One slot per unit of the period, so a week is always seven; days still to come stay unlit.
+// Each past bar reads its date and tokens on hover, focus or tap. The chart is one tab stop on
+// the latest bar, and arrow keys, Home and End move between bars.
 function UsageBars({ rows, dateKey }: { rows: DailyRow[]; dateKey: DateKey }) {
   const values = rows.map(lit);
   const max = Math.max(0, ...values);
+  // ponytail: days still to come only trail the period, so the readable bars are 0..last.
+  const last = rows.map((row) => !row.future).lastIndexOf(true);
+  const [active, setActive] = useState(null as number | null);
+  const current = active != null && last >= active ? active : last;
+  const read = (row: DailyRow) => {
+    const date = pointLabel(row, dateKey);
+    return tokens(row) ? copy("vu1.heat.day", { date, value: abbr(tokens(row)) }) : copy("vu1.heat.day_none", { date });
+  };
+  const onKeyDown = (event: KeyboardEvent<HTMLElement>, at: number) => {
+    const step = STEPS[event.key];
+    if (!step) return;
+    event.preventDefault();
+    const bars = event.currentTarget.closest('[data-kit="bar-graph"]')?.querySelectorAll('[data-kit="bar-graph-bar"]');
+    (bars?.[step(at, last)] as HTMLElement | undefined)?.focus();
+  };
   return (
     <div data-vu1="chart">
       <BarGraph
         label={copy("vu1.usage.bars_aria", { value: abbr(max) })}
         values={values.map((value) => (max ? value / max : 0))}
         segments={30}
+        bar={(props, i) => {
+          return rows[i].future ? (
+            <span {...props} />
+          ) : (
+            <KeyTip label={read(rows[i])} toggleable>
+              <span {...props} tabIndex={i === current ? 0 : -1} onFocus={() => setActive(i)} onKeyDown={(event) => onKeyDown(event, i)} />
+            </KeyTip>
+          );
+        }}
       />
       <div data-vu1="axis" aria-hidden>
         {axis(rows, dateKey).map((label, i) => (

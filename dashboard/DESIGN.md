@@ -160,7 +160,7 @@ Pick a component by what the content means, not by how it looks, and give one me
 ### Tooltip
 
 - **Purpose.** Hold text that most people do not need every time: what an icon key does, how a figure is counted.
-- **When.** An icon key without a printed legend, or a description longer than a label.
+- **When.** An icon key without a printed legend, a description longer than a label, or a bar of a chart, whose figure the graph only draws.
 - **Do.** Put the description behind a Tooltip on the label or key it explains.
 - **Don't.** Print the description on the page by default.
 

@@ -237,7 +237,7 @@ describe("DashboardPage device controls", () => {
       const user = userEvent.setup();
       renderOwner();
       await user.click(await screen.findByRole("radio", { name: "Total" }));
-      const bars = within(screen.getByRole("region", { name: "Screen" })).getByRole("img", { name: /peak/ });
+      const bars = within(screen.getByRole("region", { name: "Screen" })).getByRole("group", { name: /peak/ });
       await waitFor(() => expect(bars.querySelectorAll('[data-kit="bar-graph-bar"]')).toHaveLength(24));
     } finally {
       trendHook.useTrendData.mockImplementation(original);
