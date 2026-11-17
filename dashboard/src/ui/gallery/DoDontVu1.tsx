@@ -51,19 +51,19 @@ const periods = (print?: "key") => (
 export const RULES: Rule[] = [
   {
     id: "segmented",
-    title: "Segmented",
+    title: copy("vu1.gallery.rule.segmented"),
     component: "src/ui/vu1/SourceSegment.tsx",
     pair: [<Segment label={copy("vu1.source.label")} options={SOURCES} value="all" onChange={none} print="key" />, <Segment label={copy("vu1.source.label")} options={SOURCES} value="all" onChange={none} />],
   },
   {
     id: "slide-switch",
-    title: "SlideSwitch",
+    title: copy("vu1.gallery.rule.slide_switch"),
     component: "src/ui/hardware/slide-switch.tsx",
     pair: [periods("key"), <PeriodSwitch value="week" onChange={none} />],
   },
   {
     id: "keys",
-    title: "Keys",
+    title: copy("vu1.gallery.rule.keys"),
     component: "src/ui/vu1/Keys.tsx",
     pair: [(
       <div className="flex gap-s5">
@@ -83,21 +83,21 @@ export const RULES: Rule[] = [
   },
   {
     id: "bar-chart",
-    title: "UsageScreen",
+    title: copy("vu1.gallery.rule.usage_screen"),
     component: "src/ui/vu1/UsageScreen.tsx",
     pair: [week(WEEK), week(ACTIVE)],
   },
   {
     id: "table",
-    title: "Table",
+    title: copy("vu1.gallery.rule.table"),
     component: "src/ui/vu1/ModelList.tsx",
     pair: [<ModelList breakdown={BREAKDOWN} frame="single" />, <ModelList breakdown={BREAKDOWN} />],
   },
 ];
 
 const VERDICTS = [
-  ["do", "DO"],
-  ["dont", "DON'T"],
+  ["do", copy("vu1.gallery.do")],
+  ["dont", copy("vu1.gallery.dont")],
 ] as const;
 
 export function DoDontVu1() {
