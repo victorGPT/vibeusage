@@ -167,6 +167,7 @@ export function LeaderboardPage({
 
   return (
     <div className="px-s4 pt-s4 pb-s8">
+      {latestVersion && !isScreenshotModeEnabled(window.location.search) ? <UpgradeToast requiredVersion={latestVersion} onUpdate={copyUpgradeCommand} /> : null}
       <div className="mx-auto max-w-shell">
         <TopBar
           active="leaderboard"
@@ -206,7 +207,6 @@ export function LeaderboardPage({
           </div>
         </main>
       </div>
-      {latestVersion && !isScreenshotModeEnabled(window.location.search) ? <UpgradeToast requiredVersion={latestVersion} onUpdate={copyUpgradeCommand} /> : null}
     </div>
   );
 }

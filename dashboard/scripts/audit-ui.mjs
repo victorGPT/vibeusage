@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Serves the built dashboard and runs the layout audits against it at phone, tablet and desktop widths:
-// audit-small-type (no visible text under --font-size-label) and audit-edges (one left and one right
-// line inside every device). Exits 1 when any run fails. Run after `npm run build`.
+// audit-small-type (no visible text under --font-size-label) audit-edges (one left and one right
+// line inside every device) and audit-toast (the upgrade toast covers nothing at phone widths). Exits 1 when any run fails. Run after `npm run build`.
 // The server is this process's own socket on a port the OS hands out, so the audits can only reach
 // this build; a taken port (AUDIT_UI_PORT pins one) fails the gate instead of auditing whoever holds it.
 //   node scripts/audit-ui.mjs
@@ -12,7 +12,7 @@ import path from "node:path";
 import process from "node:process";
 
 const WIDTHS = [360, 375, 390, 1024, 1440];
-const AUDITS = ["scripts/audit-small-type.mjs", "scripts/audit-edges.mjs"];
+const AUDITS = ["scripts/audit-small-type.mjs", "scripts/audit-edges.mjs", "scripts/audit-toast.mjs"];
 const DIST = path.resolve("dist");
 const TYPES = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png", ".webp": "image/webp", ".ico": "image/x-icon", ".json": "application/json", ".woff2": "font/woff2", ".woff": "font/woff", ".txt": "text/plain", ".webmanifest": "application/manifest+json" };
 

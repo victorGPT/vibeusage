@@ -504,7 +504,7 @@
   background: var(--palette-gray-960-a12);
 }
 
-/* Upgrade toast, bottom right */
+/* Upgrade toast: floats bottom right; at phone widths it sits in the flow above the page so it covers nothing */
 [data-skin="hardware"] [data-vu1="toast"] {
   position: fixed;
   right: max(var(--spacing-s5), calc(env(safe-area-inset-right, 0px) + var(--spacing-s5)));
@@ -522,6 +522,11 @@
 }
 
 @media (max-width: 760px) {
+  [data-skin="hardware"] [data-vu1="toast"] {
+    position: static;
+    max-width: none;
+    margin-bottom: var(--spacing-s4);
+  }
   [data-skin="hardware"] [data-vu1="screen"],
   [data-skin="hardware"] [data-vu1="screen-body"] {
     gap: var(--spacing-s3);

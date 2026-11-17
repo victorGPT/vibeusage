@@ -941,6 +941,9 @@ export function DashboardPage({
 
   return (
     <div className="px-s4 pt-s4 pb-s8">
+      {publicMode || screenshotMode ? null : (
+        <UpgradeToast requiredVersion={latestVersion} onUpdate={copyUpgradeCommand} />
+      )}
       <main className="grid-page mx-auto max-w-shell gap-y-s6 min-[761px]:gap-y-s8">
         <div className="col-span-12">
           <TopBar
@@ -1017,9 +1020,6 @@ export function DashboardPage({
           </Device>
         </div>
       </main>
-      {publicMode || screenshotMode ? null : (
-        <UpgradeToast requiredVersion={latestVersion} onUpdate={copyUpgradeCommand} />
-      )}
     </div>
   );
 }
