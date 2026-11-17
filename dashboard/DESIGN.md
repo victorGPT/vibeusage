@@ -78,11 +78,125 @@ The kit's colors and radii are tokens (section 3), so a rerun of `npx shadcn add
 - `src/ui/hardware/hardware/hardware-textures.css` points at the noise tiles in `src/ui/hardware/hardware/textures/` instead of embedding them as base64, so the render-blocking CSS stays small.
 - `src/ui/hardware/hardware/skin.css` leaves out the accordion, dials, dpad, navbar and wheel sheets, which nothing renders.
 
-## 6. Gallery
+## 6. Component semantics
 
-`/__vu1` is the dev-only gallery, registered in `src/main.jsx` when `import.meta.env.DEV`. `src/ui/gallery/GalleryVu1.tsx` shows every kit part in its rest, hover, pressed and focus states with the spacing scale and the grid. `src/ui/gallery/BlocksVu1.tsx` shows every VU-1 block with sample data. Production builds leave it out.
+Pick a component by what the content means, not by how it looks, and give one meaning one component everywhere: the period is chosen with the same Segmented on the Dashboard and on the Leaderboard. The split follows Radix and Carbon: choosing, acting, reading, listing and telling. Each component below says what it is for, when to use it, one Do and one Don't. `/__vu1` shows the pairs side by side with real components (`src/ui/gallery/DoDontVu1.tsx`), and a test fails when a pair has no subsection here.
 
-## 7. Guardrail
+| Meaning | Component | Use |
+| --- | --- | --- |
+| One of 2 to 5 options | Segmented | `Segment` in `src/ui/vu1/SourceSegment.tsx`, with `print="key"` |
+| One of more than 5 ordered steps | SlideSwitch | `src/ui/hardware/slide-switch.tsx` (a continuous value has no component yet) |
+| An action | Keys | `ShareKey` and `InstallKey` in `src/ui/vu1/Keys.tsx`, `Button` in `src/ui/hardware/button.tsx` |
+| Views of one screen | Tabs | the tabs in `src/ui/vu1/UsageScreen.tsx` |
+| A few headline readings and a chart | UsageScreen | `src/ui/vu1/UsageScreen.tsx` |
+| One or two readings in a row, such as the reader's rank | MyRankLcd | `src/ui/vu1/MyRankLcd.tsx` |
+| A label and its value | Mini | `src/ui/vu1/StatMinis.tsx` |
+| Rows that share columns | Table | `src/ui/vu1/ModelList.tsx`, `src/ui/vu1/RankScreen.tsx`, with `frame="single"` |
+| Pages of a table | Pager | `src/ui/vu1/Pager.tsx` |
+| A hint, or an explanation few people need | Tooltip | `@ui-sdk/react/tooltip` with `data-kit="tooltip"`, styled by the kit |
+| Nothing to show yet: loading, empty, error, signed out | StateScreen | `src/ui/vu1/StateScreen.tsx` |
+| A message that comes and goes | Toast | `notify` in `src/ui/hardware/toaster.tsx`, `UpgradeToast` |
+
+`print="key"` and `frame="single"` are the target look. They are opt-in until VU2-P3 and VU2-P4 move the pages onto them; then they become the only look and the props go. The kit's own `Segmented` (`src/ui/hardware/segmented-control.tsx`) is uncontrolled, the kit's `ItemList` is a selectable listbox, and the kit's `Lcd` and `Display` duplicate the VU-1 screens. They stay in the gallery and pages do not use them.
+
+**One frame.** A surface (screen, LCD, mini) sits straight on the device panel with one frame. A surface never sits inside another surface's frame, and its padding is the same on all four sides.
+
+### Segmented
+
+- **Purpose.** Choose one of a few options that exclude each other; the choice applies at once.
+- **When.** 2 to 5 short options, such as the period (Day, Week, Month, Total) or the source (All, Claude, Codex).
+- **Do.** Print each option's name on its slot, at `--font-size-label` or larger, and size the control to its options.
+- **Don't.** Leave the slots blank with the names printed under them; it reads as a lever and people do not see where to press.
+
+### SlideSwitch
+
+- **Purpose.** Set one of many ordered steps by moving a lever.
+- **When.** More than 5 steps. A continuous value has no component yet; add one when a page needs it.
+- **Do.** Use a Segmented for 4 periods, the same one on every page that chooses a period.
+- **Don't.** Use a SlideSwitch for 4 named options on one page and a Segmented for the same choice on another.
+
+### Keys
+
+- **Purpose.** Run an action.
+- **When.** Share, install, copy, sign in, retry.
+- **Do.** At most one primary (red) key in view; the others are secondary. An icon key prints its legend under it or shows a Tooltip.
+- **Don't.** Two red keys side by side, or an icon key whose name is only in `aria-label`.
+
+### Tabs
+
+- **Purpose.** Switch between views of the same data in one screen.
+- **When.** USAGE and ACTIVITY on the usage screen.
+- **Do.** Keep the tabs in the screen's head and the readings the same across tabs.
+- **Don't.** Use tabs to choose a filter such as the period or the source; that is a Segmented.
+
+### UsageScreen
+
+- **Purpose.** The dark screen: the period's headline readings and its chart.
+- **When.** Once per Dashboard. One or two readings in a row, such as the reader's rank, go on `MyRankLcd`.
+- **Do.** Give the bar chart one slot per unit of the period (7 for a week, the days of the month, the months of the total) and draw a dark slot for a unit with no usage.
+- **Don't.** Give the chart one slot per row of data: a week with two active days turns into two wide slabs.
+
+### Mini
+
+- **Purpose.** One label and one value on a small gray LCD.
+- **When.** Rolling figures under the screen: last 7 days, last 30 days, average, peak.
+- **Do.** Four minis in one row on the device grid, label above value.
+- **Don't.** Put label and value pairs in a table, or a mini inside another frame.
+
+### Table
+
+- **Purpose.** Rows that share columns: models, the leaderboard.
+- **When.** More than one item with the same fields.
+- **Do.** One frame on the panel (`frame="single"`) with the same padding on all sides.
+- **Don't.** A bezel ring around the table's frame, so it reads as a box inside a box.
+
+### Pager
+
+- **Purpose.** Move through pages of a table.
+- **When.** Under a table with more rows than one page.
+- **Do.** Sit on the table's column lines, centered under it.
+- **Don't.** Arrow keys with no visible name or Tooltip.
+
+### Tooltip
+
+- **Purpose.** Hold text that most people do not need every time: what an icon key does, how a figure is counted.
+- **When.** An icon key without a printed legend, or a description longer than a label.
+- **Do.** Put the description behind a Tooltip on the label or key it explains.
+- **Don't.** Print the description on the page by default.
+
+### StateScreen
+
+- **Purpose.** Fill the screen's place when there is nothing to show.
+- **When.** Loading, empty, error, crash, signed out, install, expired, invalid.
+- **Do.** A title, at most one sentence, and at most one key.
+- **Don't.** A paragraph of help, or a red key beside another red key on the page.
+
+### Toast
+
+- **Purpose.** Say that something happened, then go away.
+- **When.** Copied, shared, a newer CLI is out.
+- **Do.** One line, bottom right, with at most one key.
+- **Don't.** Put anything in a toast that the reader must act on later.
+
+### Text levels
+
+Four levels, nothing between them. Functional text, meaning legends, column heads, key names and labels, is never below `--font-size-label` (11px).
+
+| Level | Use | Size |
+| --- | --- | --- |
+| Page title | The Landing hero title, the only page title | its own size in `src/ui/vu1/landing.css` |
+| Section title | The device's name line, a screen's tabs, a gallery caption | `--font-size-label`, upper case |
+| Label | A reading's or mini's label, a column head, a key legend | `--font-size-label`, upper case |
+| Description | A sentence that explains | `--font-size-body`, written, not spoken; in a Tooltip by default |
+
+- **Do.** Keep the page title, the section titles and the label and value pairs; fold the rest into a Tooltip.
+- **Don't.** Print 8 to 10px legends, or marketing lines and chatty help on the page.
+
+## 7. Gallery
+
+`/__vu1` is the dev-only gallery, registered in `src/main.jsx` when `import.meta.env.DEV`. `src/ui/gallery/GalleryVu1.tsx` shows every kit part in its rest, hover, pressed and focus states with the spacing scale and the grid. `src/ui/gallery/BlocksVu1.tsx` shows every VU-1 block with sample data, and `src/ui/gallery/DoDontVu1.tsx` shows the Do and Don't pairs of section 6. Production builds leave it out.
+
+## 8. Guardrail
 
 - `scripts/check-design-ssot.mjs` runs as `npm run guardrail:design` and before `npm test` in `dashboard/`, and from the repo root as `npm run validate:design`, the first step of `npm run ci:local` and of the CI workflow. Everywhere under `src/` except `src/styles/tokens.css`, the kit included, it fails on:
   - a literal color in a CSS value: hex, a named color, or `rgb()`, `hsl()`, `oklch()` and the like with number channels (a relative color, `oklch(from var(...) ...)`, or channels from `var()` is fine),
@@ -96,10 +210,10 @@ The kit's colors and radii are tokens (section 3), so a rerun of `npx shadcn add
 - `scripts/ops/validate-ui-hardcode.cjs` runs as `npm run validate:ui-hardcode` from the repo root. It counts hex and rgb literals and raw JSX text per file under `dashboard/src` against `scripts/ops/ui-hardcode-baseline.json`.
 - All user-facing text comes from `src/content/copy.csv` through `copy()`. Run `npm run validate:copy` after changing it.
 
-## 8. Adding a token
+## 9. Adding a token
 
 Add a spacing token to `src/styles/vu1.css`, a color, radius or font size to `src/styles/tokens.css`, and say so in this file. Reuse a palette entry before adding one; a block reaches for a role (`--color-*`) before the palette. Do not hard-code a new value in a block.
 
-## 9. Keyboard
+## 10. Keyboard
 
 `src/hooks/use-global-keybinds.ts` binds single keys on the Dashboard: `d`, `w`, `m` and `t` switch the period, `r` refreshes and `s` shares. Bindings use no modifier keys and are off while a text field has focus or in screenshot mode.

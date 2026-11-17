@@ -250,6 +250,11 @@
   box-shadow: inset 0 2px 6px var(--palette-black-a25), 0 0 0 6px var(--palette-gray-924-2), 0 0 0 7px var(--palette-black-a8);
   text-shadow: 0.25px 1px 0 var(--palette-gray-191-a14);
 }
+/* frame="single": one recessed frame, the same inset on all four sides, no bezel ring around it. */
+[data-skin="hardware"] [data-vu1="lcd"][data-frame="single"] {
+  padding: var(--spacing-s4);
+  box-shadow: inset 0 2px 6px var(--palette-black-a25);
+}
 [data-skin="hardware"] [data-vu1="list"] {
   width: 100%;
   border-collapse: collapse;
@@ -408,6 +413,18 @@
 }
 [data-skin="hardware"] [data-vu1="segment"] [data-kit="segment"]:not(#_) {
   min-width: 48px;
+}
+/* print="key": the name sits on its slot at label size, so the control reads as keys, not a lever.
+ * Three ids outrank the device's legend rule (devices.css). */
+[data-skin="hardware"] [data-vu1="segment"][data-print="key"] [data-kit="segment"]:not(#_):not(#_):not(#_) {
+  z-index: 2;
+  align-items: center;
+  height: calc(var(--slot-height) + 8px);
+  padding: 0 var(--spacing-s3);
+  font-size: var(--font-size-label);
+}
+[data-skin="hardware"] [data-vu1="segment"][data-print="key"] [data-kit="led"] {
+  display: none;
 }
 
 /* Print is flat. The kit engraves every letter with a white shadow that fuzzes small gray type;

@@ -9,7 +9,8 @@ import type { ModelBreakdown } from "./types";
 import "./blocks.css";
 
 // Share is of every model, not just the ones shown.
-export function ModelList({ breakdown, limit = 5 }: { breakdown: ModelBreakdown; limit?: number }) {
+// frame="single" drops the bezel ring, so the list is one frame on the panel (DESIGN.md "Table").
+export function ModelList({ breakdown, limit = 5, frame }: { breakdown: ModelBreakdown; limit?: number; frame?: "single" }) {
   const names = Object.fromEntries((breakdown.sources ?? []).map((s) => [s.source ?? "", sourceLabel(s.source ?? "")]));
   const groups = groupByModel(breakdown, names);
   let total = 0;
@@ -17,7 +18,7 @@ export function ModelList({ breakdown, limit = 5 }: { breakdown: ModelBreakdown;
     total += group.tokens;
   }
   return (
-    <div data-vu1="lcd">
+    <div data-vu1="lcd" data-frame={frame}>
       <table data-vu1="list" data-vu1-cap="" aria-label={copy("vu1.models.aria")}>
         <thead>
           <tr>

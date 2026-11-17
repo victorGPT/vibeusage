@@ -340,3 +340,10 @@ vu1.landing.spec3_body,vu1,LandingPage,Specs,spec3_body,"Weekly, monthly and all
 vu1.landing.foot,vu1,LandingPage,Footer,foot,"VibeUsage · built on SPEC-01/HARDWARE by @shuding",,active
 vu1.board.label,vu1,LeaderboardPage,Segment,label,"Board",,active
 vu1.board.users,vu1,LeaderboardPage,DevicePlate,users,"{{count}} users",,active
+vu1.gallery.do,vu1,Gallery,DoDontVu1,verdict_do,"DO",,active
+vu1.gallery.dont,vu1,Gallery,DoDontVu1,verdict_dont,"DON'T",,active
+vu1.gallery.rule.segmented,vu1,Gallery,DoDontVu1,rule_segmented,"Segmented",,active
+vu1.gallery.rule.slide_switch,vu1,Gallery,DoDontVu1,rule_slide_switch,"SlideSwitch",,active
+vu1.gallery.rule.keys,vu1,Gallery,DoDontVu1,rule_keys,"Keys",,active
+vu1.gallery.rule.usage_screen,vu1,Gallery,DoDontVu1,rule_usage_screen,"UsageScreen",,active
+vu1.gallery.rule.table,vu1,Gallery,DoDontVu1,rule_table,"Table",,active
