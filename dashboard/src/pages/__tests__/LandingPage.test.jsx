@@ -54,25 +54,22 @@ describe("LandingPage", () => {
     expect(screen.getByRole("button", { name: copy("vu1.install.copy") })).toBeTruthy();
   });
 
-  it("labels the global meter as example figures", () => {
+  it("labels the global meter as example data on its plate", () => {
     render(<LandingPage signInUrl="/sign-in" signUpUrl={SIGN_UP} />);
     const device = screen.getByRole("region", { name: copy("vu1.landing.meter_name") });
+    expect(copy("vu1.landing.meter_name")).toMatch(/example data/i);
     expect(within(device).getByRole("region", { name: copy("vu1.landing.meter_aria") })).toBeTruthy();
-    expect(within(device).getByText(copy("vu1.landing.meter_note"))).toBeTruthy();
   });
 
-  it("states the three specs as headings with their bodies", () => {
+  it("says what is read and what is uploaded in the hero, without a spec section", () => {
     render(<LandingPage signInUrl="/sign-in" signUpUrl={SIGN_UP} />);
-    for (const n of [1, 2, 3]) {
-      expect(screen.getByRole("heading", { level: 3, name: copy(`vu1.landing.spec${n}_title`) })).toBeTruthy();
-      expect(screen.getByText(copy(`vu1.landing.spec${n}_body`))).toBeTruthy();
-    }
+    expect(screen.getByText(copy("vu1.landing.body"))).toHaveTextContent(/Only half-hour token totals are uploaded/);
+    expect(screen.queryAllByRole("heading", { level: 3 })).toEqual([]);
   });
 
-  it("keeps the product summary as visible body text for crawlers", () => {
+  it("keeps one product summary as visible body text for crawlers", () => {
     render(<LandingPage signInUrl="/sign-in" signUpUrl={SIGN_UP} />);
-    const keys = ["title", "summary", "point1", "point2", "point3", "roadmap"].map((k) => `landing.seo.${k}`);
-    for (const key of keys) {
+    for (const key of ["landing.seo.title", "landing.seo.summary"]) {
       const el = screen.getByText(copy(key));
       for (let node = el; node; node = node.parentElement) {
         expect(node.hidden, key).toBe(false);
@@ -80,10 +77,8 @@ describe("LandingPage", () => {
         expect(node.className, key).not.toMatch(/\b(sr-only|hidden|invisible)\b/);
       }
     }
-    expect(screen.getByRole("heading", { level: 2, name: copy("landing.seo.title") })).toBeTruthy();
-    expect(screen.getAllByRole("listitem").map((li) => li.textContent)).toEqual(
-      expect.arrayContaining(["point1", "point2", "point3"].map((k) => copy(`landing.seo.${k}`))),
-    );
+    expect(screen.getAllByRole("heading", { level: 2 }).map((h) => h.textContent)).toEqual([copy("landing.seo.title")]);
+    expect(within(screen.getByRole("main")).queryAllByRole("list").filter((l) => !l.closest("[aria-label]"))).toEqual([]);
   });
 
   it("names the product without the VU-1 model and keeps the hero keys to one or two words", () => {

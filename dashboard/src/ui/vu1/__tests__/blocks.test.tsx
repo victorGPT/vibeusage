@@ -109,7 +109,7 @@ describe("UsageScreen", () => {
     expect(screen.getByText("412.0M")).toBeTruthy();
     expect(screen.getByText("$648.30")).toBeTruthy();
     expect(screen.getByText("#37")).toBeTruthy();
-    expect(screen.getByText("+9% vs prev")).toBeTruthy();
+    expect(screen.getByText("+9% from previous period")).toBeTruthy();
     expect(screen.getByText("+$52.80")).toBeTruthy();
     expect(screen.getByText("▲ 3")).toBeTruthy();
     expect(screen.getByRole("img", { name: /peak 7\.0M/ })).toBeTruthy();
@@ -127,6 +127,20 @@ describe("UsageScreen", () => {
     expect([...bars].map((bar) => (bar as HTMLElement).style.getPropertyValue("--v"))).toEqual(["0.5", "1", "0", "0", "0", "0", "0"]);
     expect(screen.getByText("Dec 29")).toBeTruthy();
     expect(screen.getByText("Jan 4")).toBeTruthy();
+  });
+
+  it("explains how cost is priced in a tooltip on its label", async () => {
+    render(<UsageScreen {...props} />);
+    act(() => screen.getByText("Cost").focus());
+    expect(await screen.findByRole("tooltip")).toHaveTextContent("priced at the model's own rate");
+  });
+
+  it("reads out the latest day before any day is picked, with no instructions", async () => {
+    const user = userEvent.setup();
+    render(<UsageScreen {...props} />);
+    await user.click(screen.getByRole("tab", { name: "Activity" }));
+    expect(screen.getByText("2026-11-14 · 14.0M tokens")).toBeTruthy();
+    expect(screen.queryByText(/arrow keys or hover/i)).toBeNull();
   });
 
   it("switches to the activity dots and walks days with the arrow keys", async () => {
@@ -156,6 +170,8 @@ describe("UsageScreen", () => {
     await user.keyboard("{ArrowRight}{Enter}");
     expect(screen.getByRole("tab", { name: "Activity" })).toHaveAttribute("aria-selected", "true");
     await user.tab();
+    expect(document.activeElement).toBe(screen.getByText("Cost"));
+    await user.tab();
     expect(document.activeElement).toBe(screen.getByRole("img", { name: /Arrow keys move between days/ }));
   });
 });
@@ -163,7 +179,7 @@ describe("UsageScreen", () => {
 describe("StatMinis", () => {
   it("shows the rolling windows and the peak day", () => {
     render(<StatMinis rows={ROWS} rolling={{ last_7d: { totals: { billable_total_tokens: 412_000_000 } }, last_30d: { totals: { billable_total_tokens: 1_840_000_000 }, avg_per_active_day: 63_400_000 } }} />);
-    for (const text of ["Last 7 days", "412.0M", "Last 30 days", "1.84B", "Avg / active day", "63.4M", "Peak · Nov 16", "7.0M"]) {
+    for (const text of ["Last 7 days", "412.0M", "Last 30 days", "1.84B", "Average per active day", "63.4M", "Peak · Nov 16", "7.0M"]) {
       expect(screen.getByText(text)).toBeTruthy();
     }
   });
@@ -212,6 +228,12 @@ describe("RankScreen", () => {
     expect(rows[3]).toHaveAttribute("data-me", "true");
     expect(within(rows[1]).getByText("Claude")).toBeTruthy();
     expect(within(rows[2]).getByText("GPT")).toBeTruthy();
+  });
+
+  it("explains the Load column in a tooltip on its header", async () => {
+    render(<RankScreen entries={ENTRIES} me={null} handle="ada" />);
+    act(() => screen.getByText("Load").focus());
+    expect(await screen.findByRole("tooltip")).toHaveTextContent("Tokens relative to the highest total on this page.");
   });
 
   it("pins my row on top when I am off this page", () => {
@@ -325,7 +347,7 @@ describe("UpgradeToast", () => {
     const onUpdate = vi.fn();
     const { unmount } = render(<UpgradeToast requiredVersion="0.9.2" onUpdate={onUpdate} />);
     expect(screen.getByRole("status")).toHaveTextContent("CLI 0.9.2 available");
-    await user.click(screen.getByRole("button", { name: "Update" }));
+    await user.click(screen.getByRole("button", { name: "Copy update command" }));
     expect(onUpdate).toHaveBeenCalled();
     expect(screen.queryByRole("status")).toBeNull();
     unmount();
@@ -336,7 +358,7 @@ describe("UpgradeToast", () => {
   it("still names a new version after the versionless note was dismissed", async () => {
     const user = userEvent.setup();
     const { unmount } = render(<UpgradeToast requiredVersion={null} />);
-    await user.click(screen.getByRole("button", { name: "Update" }));
+    await user.click(screen.getByRole("button", { name: "Copy update command" }));
     unmount();
     render(<UpgradeToast requiredVersion="0.9.3" />);
     expect(screen.getByRole("status")).toHaveTextContent("CLI 0.9.3 available");
@@ -357,7 +379,11 @@ describe("StateScreen", () => {
     rerender(view("error", { onRetry }));
     await user.click(screen.getByRole("button", { name: "Retry" }));
     expect(onRetry).toHaveBeenCalled();
+    rerender(view("no-entries"));
+    expect(screen.getByRole("region", { name: "No entries for this period." })).toBeTruthy();
+    expect(screen.queryByText(/sync/i)).toBeNull();
     rerender(view("signed-out", { onSignIn }));
+    expect(screen.getByRole("region")).toHaveTextContent(/^Sign in with GitHub to view your usage and rank\.Sign in$/);
     await user.tab();
     await user.keyboard("{Enter}");
     expect(onSignIn).toHaveBeenCalled();

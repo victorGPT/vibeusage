@@ -536,3 +536,10 @@
     font-size: 20px;
   }
 }
+
+/* A label with a tooltip (KeyTip): dotted underline says there is more on hover or focus. */
+[data-skin="hardware"] [data-vu1="hint"] {
+  text-decoration: underline dotted;
+  text-underline-offset: 0.25em;
+  cursor: help;
+}

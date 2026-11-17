@@ -4,7 +4,7 @@ import { Button } from "#src/ui/hardware/button.tsx";
 import { InstallCommand } from "./InstallCommand";
 import "./blocks.css";
 
-export type StateVariant = "loading" | "empty" | "error" | "crash" | "signed-out" | "install" | "expired" | "invalid";
+export type StateVariant = "loading" | "empty" | "error" | "crash" | "signed-out" | "install" | "expired" | "invalid" | "no-entries";
 
 const SKELETON = ["w-3/4", "w-1/2", "w-2/3"];
 
@@ -18,6 +18,7 @@ function title(variant: StateVariant) {
     install: copy("vu1.state.install_title"),
     expired: copy("vu1.state.expired_title"),
     invalid: copy("vu1.state.invalid_title"),
+    "no-entries": copy("vu1.state.no_entries_title"),
   }[variant];
 }
 
@@ -64,7 +65,7 @@ export function StateScreen({ variant, linkCode, detail, onRetry, onSignIn }: St
       {variant === "invalid" ? <p data-vu1="state-body">{copy("vu1.state.invalid_body")}</p> : null}
       {variant === "signed-out" || variant === "expired" ? (
         <>
-          <p data-vu1="state-body">{variant === "expired" ? copy("vu1.state.expired_body") : copy("vu1.state.signed_out_body")}</p>
+          {variant === "expired" ? <p data-vu1="state-body">{copy("vu1.state.expired_body")}</p> : null}
           <div>
             <Button tone="primary" onClick={onSignIn}>
               {copy("vu1.state.sign_in")}

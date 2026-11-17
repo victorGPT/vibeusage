@@ -189,7 +189,7 @@ function breakdown(sources) {
   return { breakdown: { sources }, loading: false, source: "edge", error: null, refresh: vi.fn() };
 }
 
-const readout = (name) => within(screen.getByRole("region", { name: "Screen" })).getByText(name).parentElement;
+const readout = (name) => within(screen.getByRole("region", { name: "Screen" })).getByText(name).closest('[data-vu1="read"]');
 
 describe("DashboardPage device controls", () => {
   afterEach(() => {
@@ -391,6 +391,6 @@ describe("DashboardPage share link", () => {
     usageDataHook.useUsageData.mockReturnValue({ ...usage(null), error: { status: 401, message: "Unauthorized" } });
     heatmapHook.useActivityHeatmap.mockReturnValue(activity(0));
     renderOwner({ publicMode: true, publicToken: "bad" });
-    expect(await screen.findByText("This profile is private or the link is wrong.")).toBeInTheDocument();
+    expect(await screen.findByText("This profile is private or the link is invalid.")).toBeInTheDocument();
   });
 });

@@ -21,9 +21,6 @@ const SAMPLE = {
   bars: [31, 24, 18, 15, 14, 19, 28, 42, 58, 71, 80, 86, 83, 88, 92, 95, 90, 84, 77, 70, 64, 57, 48, 39],
 };
 
-const SPECS = [1, 2, 3];
-const POINTS = ["point1", "point2", "point3"];
-
 // Screenshot mode skips the fetch so captures stay stable; a failed fetch leaves plain "GitHub".
 function useGithubStars() {
   const [stars, setStars] = useState(null);
@@ -84,44 +81,13 @@ export function LandingPage({ signUpUrl }) {
           </section>
           <div className="col-span-12 self-center [--device-w:100%] min-[761px]:col-start-8 min-[761px]:col-end-13">
             <Device model={copy("vu1.device.name")} name={copy("vu1.landing.meter_name")}>
-              <div className="flex flex-col gap-s5">
-                <GlobalMeter {...SAMPLE} />
-                <p data-vu1="legend" className="m-0">
-                  {copy("vu1.landing.meter_note")}
-                </p>
-              </div>
+              <GlobalMeter {...SAMPLE} />
             </Device>
           </div>
-          <section
-            aria-label={copy("vu1.landing.specs_aria")}
-            className="col-span-12 mt-s7 grid-page gap-y-s5 min-[761px]:mt-s8"
-          >
-            {SPECS.map((n) => (
-              <div key={n} className="col-span-12 flex flex-col gap-s2 pt-s4 min-[761px]:col-span-4">
-                <h3 data-vu1="spec-title">{copy(`vu1.landing.spec${n}_title`)}</h3>
-                <p data-vu1="prose" data-wide="">
-                  {copy(`vu1.landing.spec${n}_body`)}
-                </p>
-              </div>
-            ))}
-          </section>
           <section className="col-span-12 mt-s8 flex flex-col gap-s2">
-            <p data-vu1-cap="" data-vu1="dim" className="m-0">
-              {copy("landing.features.title")}
-            </p>
             <h2 data-vu1="spec-title">{copy("landing.seo.title")}</h2>
             <p data-vu1="prose" data-wide="">
               {copy("landing.seo.summary")}
-            </p>
-            <ul className="m-0 flex list-none flex-col gap-s1 p-0">
-              {POINTS.map((k) => (
-                <li key={k} data-vu1="prose" data-wide="">
-                  {copy(`landing.seo.${k}`)}
-                </li>
-              ))}
-            </ul>
-            <p data-vu1="prose" data-wide="">
-              {copy("landing.seo.roadmap")}
             </p>
           </section>
           <p data-vu1-cap="" data-vu1="foot" className="col-span-12 m-0 mt-s8">

@@ -3,6 +3,7 @@ import type { CSSProperties } from "react";
 import { copy } from "#src/lib/copy.ts";
 
 import { abbr, num } from "./format";
+import { KeyTip } from "./KeyTip";
 import { pinnedMe } from "./rank";
 import type { LeaderboardEntry, LeaderboardMe } from "./types";
 import "./blocks.css";
@@ -45,7 +46,13 @@ export function RankScreen({ entries, me, handle, frame }: { entries: Leaderboar
             <th scope="col" data-num="">
               {copy("vu1.rank.tokens")}
             </th>
-            <th scope="col">{copy("vu1.rank.load")}</th>
+            <th scope="col">
+              <KeyTip label={copy("vu1.rank.load_hint")}>
+                <span tabIndex={0} data-vu1="hint">
+                  {copy("vu1.rank.load")}
+                </span>
+              </KeyTip>
+            </th>
           </tr>
         </thead>
         <tbody>
