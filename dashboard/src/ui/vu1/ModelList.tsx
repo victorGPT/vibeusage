@@ -22,7 +22,9 @@ export function ModelList({ breakdown, limit = 5 }: { breakdown: ModelBreakdown;
         <thead>
           <tr>
             <th scope="col">{copy("vu1.models.model")}</th>
-            <th scope="col">{copy("vu1.models.cli")}</th>
+            <th scope="col" data-minor="">
+              {copy("vu1.models.cli")}
+            </th>
             <th scope="col" data-num="">
               {copy("vu1.models.tokens")}
             </th>
@@ -38,11 +40,11 @@ export function ModelList({ breakdown, limit = 5 }: { breakdown: ModelBreakdown;
             return (
               <tr key={group.key} data-me={i === 0 || undefined}>
                 <td data-name="">{group.label}</td>
-                <td>{group.detail.join(", ")}</td>
+                <td data-minor="">{group.detail.join(", ")}</td>
                 <td data-num="">{abbr(group.tokens)}</td>
                 <td data-num="">{cost(group.cost)}</td>
                 <td>
-                  <span data-vu1="meter" aria-hidden style={{ "--share": share } as CSSProperties} />
+                  <span data-vu1="meter" data-minor="" aria-hidden style={{ "--share": share } as CSSProperties} />
                   {`${Math.round(share * 100)}%`}
                 </td>
               </tr>

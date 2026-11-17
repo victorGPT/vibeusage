@@ -39,7 +39,9 @@ export function RankScreen({ entries, me, handle }: { entries: LeaderboardEntry[
               {copy("vu1.rank.rank")}
             </th>
             <th scope="col">{copy("vu1.rank.handle")}</th>
-            <th scope="col">{copy("vu1.rank.top_cli")}</th>
+            <th scope="col" data-minor="">
+              {copy("vu1.rank.top_cli")}
+            </th>
             <th scope="col" data-num="">
               {copy("vu1.rank.tokens")}
             </th>
@@ -51,7 +53,7 @@ export function RankScreen({ entries, me, handle }: { entries: LeaderboardEntry[
             <tr key={entry.user_id ?? `${entry.rank}-${i}`} data-me={mine || undefined}>
               <td data-num="">{entry.rank ?? copy("shared.placeholder.short")}</td>
               <td data-name="">{mine ? handle : (entry.display_name ?? copy("shared.placeholder.short"))}</td>
-              <td>{topCli(entry)}</td>
+              <td data-minor="">{topCli(entry)}</td>
               <td data-num="">{abbr(entry.total_tokens)}</td>
               <td>
                 <span data-vu1="meter" aria-hidden style={{ "--share": num(entry.total_tokens) / max } as CSSProperties} />
