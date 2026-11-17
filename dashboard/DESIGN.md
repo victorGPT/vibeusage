@@ -49,7 +49,7 @@ One family, IBM Plex Mono, self-hosted as latin woff2 in weights 200, 300, 400 a
 - Printed labels carry `data-vu1-cap`: 10px, upper case, 0.12em tracking, tabular figures.
 - The Landing title is `data-vu1="hero-title"` in `src/ui/vu1/landing.css`, weight 300.
 - Sizes belong to the kit and the VU-1 CSS. A className never sets a font size.
-- **Scale.** `src/styles/tokens.css` defines `--font-size-label` (11px), `--font-size-body` (12px), `--font-size-title` (16px) and `--font-size-readout` (20px). Functional text, meaning legends, table headers and key names, is never below `--font-size-label`. The blocks still print 8 to 10px legends (`data-vu1-cap` and others); VU2-P3/P4 move them onto the scale.
+- **Scale.** `src/styles/tokens.css` defines `--font-size-label` (11px), `--font-size-body` (12px), `--font-size-title` (16px) and `--font-size-readout` (20px). Functional text, meaning legends, table headers and key names, is never below `--font-size-label`. The kit's `--label` (key names, page keys, tooltips) is `--font-size-label`. The shared blocks still print 8 to 10px legends (`data-vu1-cap` and others) until VU2-P3 moves them onto the scale.
 
 ## 5. Components
 
@@ -93,11 +93,11 @@ Pick a component by what the content means, not by how it looks, and give one me
 | A label and its value | Mini | `src/ui/vu1/StatMinis.tsx` |
 | Rows that share columns | Table | `src/ui/vu1/ModelList.tsx`, `src/ui/vu1/RankScreen.tsx`, with `frame="single"` |
 | Pages of a table | Pager | `src/ui/vu1/Pager.tsx` |
-| A hint, or an explanation few people need | Tooltip | `@ui-sdk/react/tooltip` with `data-kit="tooltip"`, styled by the kit |
+| A hint, or an explanation few people need | Tooltip | `@ui-sdk/react/tooltip` with `data-kit="tooltip"`, styled by the kit; `KeyTip` in `src/ui/vu1/KeyTip.tsx` names an icon key |
 | Nothing to show yet: loading, empty, error, signed out | StateScreen | `src/ui/vu1/StateScreen.tsx` |
 | A message that comes and goes | Toast | `notify` in `src/ui/hardware/toaster.tsx`, `UpgradeToast` |
 
-`print="key"` and `frame="single"` are the target look. They are opt-in until VU2-P3 and VU2-P4 move the pages onto them; then they become the only look and the props go. The kit's own `Segmented` (`src/ui/hardware/segmented-control.tsx`) is uncontrolled, the kit's `ItemList` is a selectable listbox, and the kit's `Lcd` and `Display` duplicate the VU-1 screens. They stay in the gallery and pages do not use them.
+`print="key"` and `frame="single"` are the target look. The Leaderboard uses them. They stay opt-in until VU2-P3 moves the Dashboard onto them; then they become the only look and the props go. The kit's own `Segmented` (`src/ui/hardware/segmented-control.tsx`) is uncontrolled, the kit's `ItemList` is a selectable listbox, and the kit's `Lcd` and `Display` duplicate the VU-1 screens. They stay in the gallery and pages do not use them.
 
 **One frame.** A surface (screen, LCD, mini) sits straight on the device panel with one frame. A surface never sits inside another surface's frame, and its padding is the same on all four sides.
 
@@ -147,14 +147,14 @@ Pick a component by what the content means, not by how it looks, and give one me
 
 - **Purpose.** Rows that share columns: models, the leaderboard.
 - **When.** More than one item with the same fields.
-- **Do.** One frame on the panel (`frame="single"`) with the same padding on all sides.
+- **Do.** One frame on the panel (`frame="single"`) with the same padding on all sides. A bar column (`data-fill` on its cells) takes the width the other columns leave, and its meter spans it.
 - **Don't.** A bezel ring around the table's frame, so it reads as a box inside a box.
 
 ### Pager
 
 - **Purpose.** Move through pages of a table.
 - **When.** Under a table with more rows than one page.
-- **Do.** Sit on the table's column lines, centered under it.
+- **Do.** Sit on the table's column lines: Previous on the left line, Next on the right line, the page keys centered between them.
 - **Don't.** Arrow keys with no visible name or Tooltip.
 
 ### Tooltip

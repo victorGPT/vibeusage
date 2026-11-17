@@ -255,12 +255,12 @@
   box-shadow: inset 0 2px 6px var(--palette-black-a25), 0 0 0 6px var(--palette-gray-924-2), 0 0 0 7px var(--palette-black-a8);
   text-shadow: 0.25px 1px 0 var(--palette-gray-191-a14);
 }
-/* frame="single": one recessed frame, the same inset on all four sides, no bezel ring around it. */
+/* frame="single": one recessed frame, the same inset on all four sides, no bezel ring around it, so its
+ * edges are the column lines it is placed on. */
 [data-skin="hardware"] [data-vu1="lcd"][data-frame="single"] {
   padding: var(--spacing-s4);
   box-shadow: inset 0 2px 6px var(--palette-black-a25);
-}
-[data-skin="hardware"] [data-vu1="list"] {
+}[data-skin="hardware"] [data-vu1="list"] {
   width: 100%;
   border-collapse: collapse;
 }
@@ -316,6 +316,25 @@
 [data-skin="hardware"] tr[data-me] [data-vu1="meter"]::after {
   background: repeating-linear-gradient(90deg, var(--color-accent) 0 3px, transparent 3px 5px);
 }
+/* A fill column takes the width the other columns leave, and its meter spans it. My row's closing dash
+ * then sits in the padding, mirroring the opening one. */
+[data-skin="hardware"] [data-vu1="list"] td[data-fill] {
+  position: relative;
+  width: 100%;
+}
+[data-skin="hardware"] [data-vu1="list"] td[data-fill] [data-vu1="meter"] {
+  display: block;
+  width: 100%;
+  min-width: 72px;
+  margin-right: 0;
+}
+[data-skin="hardware"] [data-vu1="list"] tr[data-me] td[data-fill]::after {
+  content: "—";
+  position: absolute;
+  top: 50%;
+  right: calc(-1 * var(--spacing-s2));
+  translate: 0 -50%;
+}
 /* Narrow screens drop the minor columns; the name cell takes what is left and ellipsizes. */
 @media (max-width: 760px) {
   [data-skin="hardware"] [data-vu1="list"] [data-minor] {
@@ -330,8 +349,7 @@
     max-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
-  }
-}
+  }}
 [data-skin="hardware"] [data-vu1="mini"] {
   display: flex;
   flex-direction: column;
@@ -451,9 +469,16 @@
   text-shadow: none;
 }
 
-/* Pager: a centered row of page keys */
+/* Pager: Previous on the left line, Next on the right line, the page keys centered between them. */
 [data-skin="hardware"] [data-vu1="pager"] [data-kit="pagination-list"] {
+  width: 100%;
   justify-content: center;
+}
+[data-skin="hardware"] [data-vu1="pager"] [data-kit="pagination-list"] > :first-child {
+  margin-right: auto;
+}
+[data-skin="hardware"] [data-vu1="pager"] [data-kit="pagination-list"] > :last-child {
+  margin-left: auto;
 }
 
 /* State screen */

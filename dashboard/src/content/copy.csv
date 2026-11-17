@@ -338,7 +338,6 @@ vu1.landing.spec2_body,vu1,LandingPage,Specs,spec2_body,"Input, cached, output a
 vu1.landing.spec3_title,vu1,LandingPage,Specs,spec3_title,"Ranks you",,active
 vu1.landing.spec3_body,vu1,LandingPage,Specs,spec3_body,"Weekly, monthly and all-time boards. Press share and post the panel as it is.",,active
 vu1.landing.foot,vu1,LandingPage,Footer,foot,"VibeUsage · built on SPEC-01/HARDWARE by @shuding",,active
-vu1.board.label,vu1,LeaderboardPage,Segment,label,"Board",,active
 vu1.board.users,vu1,LeaderboardPage,DevicePlate,users,"{{count}} users",,active
 vu1.gallery.do,vu1,Gallery,DoDontVu1,verdict_do,"DO",,active
 vu1.gallery.dont,vu1,Gallery,DoDontVu1,verdict_dont,"DON'T",,active

@@ -266,6 +266,16 @@ describe("Pager", () => {
     await user.keyboard("{Enter}");
     expect(onPageChange).toHaveBeenLastCalledWith(4);
   });
+
+  it("names the arrow keys in a tooltip", async () => {
+    const user = userEvent.setup();
+    render(<Pager page={3} pageCount={392} onPageChange={() => {}} />);
+    await user.hover(screen.getByRole("button", { name: "Previous page" }));
+    expect(await screen.findByRole("tooltip")).toHaveTextContent("Previous page");
+    await user.unhover(screen.getByRole("button", { name: "Previous page" }));
+    await user.hover(screen.getByRole("button", { name: "Next page" }));
+    expect(await screen.findByRole("tooltip", { name: "Next page" })).toBeTruthy();
+  });
 });
 
 describe("InstallCommand", () => {
@@ -384,15 +394,21 @@ describe("TopBar", () => {
     expect(sound).toHaveAttribute("aria-pressed", "true");
   });
 
+  it("names the sound key in a tooltip", async () => {
+    render(<TopBar active={null} signedIn={false} hrefs={{ home: "/", dashboard: "/d", leaderboard: "/l" }} githubHref="#" stars={null} />);
+    screen.getByRole("button", { name: "Key sounds" }).focus();
+    expect(await screen.findByRole("tooltip")).toHaveTextContent("Key sounds");
+  });
+
   it("prints the brand without the VU-1 model", () => {
     const { container } = render(<TopBar active={null} signedIn={false} hrefs={{ home: "/", dashboard: "/d", leaderboard: "/l" }} githubHref="#" stars={null} />);
     expect(container.textContent).toContain("VIBEUSAGE");
     expect(container.textContent).not.toContain("VU-1");
   });
 
-  it("offers Sign in when signed out", () => {
+  it("offers Sign in when signed out, as a plain key so the page keeps its one red key", () => {
     render(<TopBar active={null} signedIn={false} hrefs={{ home: "/", dashboard: "/d", leaderboard: "/l" }} githubHref="#" stars={null} />);
-    expect(screen.getByRole("button", { name: "Sign in" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Sign in" })).not.toHaveAttribute("data-tone", "primary");
     expect(screen.getByRole("link", { name: /GitHub/ })).not.toHaveTextContent("★");
   });
 });
