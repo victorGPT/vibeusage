@@ -300,7 +300,7 @@ vu1.state.reload,vu1,*,StateScreen,reload,"Reload",,active
 vu1.top.github_href,vu1,*,TopBar,github_href,"https://github.com/victorGPT/vibeusage",,active
 vu1.state.signed_out_title,vu1,*,StateScreen,signed_out_title,"Sign in to read your meter.",,active
 vu1.state.signed_out_body,vu1,*,StateScreen,signed_out_body,"Sign in with GitHub to see your usage and rank.",,active
-vu1.state.sign_in,vu1,*,StateScreen,sign_in,"Sign in with GitHub",,active
+vu1.state.sign_in,vu1,*,StateScreen,sign_in,"Sign in",,active
 vu1.state.install_title,vu1,*,StateScreen,install_title,"Install the tracker",,active
 vu1.state.install_body,vu1,*,StateScreen,install_body,"Install Node.js 18+ then run:",,active
 vu1.state.expired_title,vu1,*,StateScreen,expired_title,"Your session expired.",,active

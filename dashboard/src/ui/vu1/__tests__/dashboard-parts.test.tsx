@@ -65,7 +65,7 @@ describe("StateScreen, dashboard variants", () => {
     const onSignIn = vi.fn();
     render(<StateScreen variant="expired" onSignIn={onSignIn} />);
     expect(screen.getByRole("heading", { name: "Your session expired." })).toBeTruthy();
-    await user.click(screen.getByRole("button", { name: "Sign in with GitHub" }));
+    await user.click(screen.getByRole("button", { name: "Sign in" }));
     expect(onSignIn).toHaveBeenCalled();
   });
 
