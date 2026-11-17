@@ -257,8 +257,8 @@ export function GalleryVu1() {
         <Panel name="device / grid-device" span="col-span-12">
           <div className="w-full [--device-w:100%]">
             <Device
-              model={copy("vu1.device.model")}
-              name={copy("vu1.device.name")}
+              model={copy("vu1.device.name")}
+              name={copy("vu1.top.dashboard")}
             >
               <div className="flex flex-col gap-s2">
                 <div data-grid className="grid-device">

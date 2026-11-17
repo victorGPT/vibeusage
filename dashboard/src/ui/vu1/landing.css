@@ -18,6 +18,7 @@
   font-weight: 300;
   line-height: 1;
   letter-spacing: -0.02em;
+  text-shadow: var(--engraved);
 }
 [data-skin="hardware"] [data-vu1="prose"] {
   margin: 0;

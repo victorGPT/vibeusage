@@ -357,6 +357,12 @@ describe("TopBar", () => {
     expect(sound).toHaveAttribute("aria-pressed", "true");
   });
 
+  it("prints the brand without the VU-1 model", () => {
+    const { container } = render(<TopBar active={null} signedIn={false} hrefs={{ home: "/", dashboard: "/d", leaderboard: "/l" }} githubHref="#" stars={null} />);
+    expect(container.textContent).toContain("VIBEUSAGE");
+    expect(container.textContent).not.toContain("VU-1");
+  });
+
   it("offers Sign in when signed out", () => {
     render(<TopBar active={null} signedIn={false} hrefs={{ home: "/", dashboard: "/d", leaderboard: "/l" }} githubHref="#" stars={null} />);
     expect(screen.getByRole("button", { name: "Sign in" })).toBeTruthy();

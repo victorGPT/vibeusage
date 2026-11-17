@@ -34,7 +34,8 @@ describe("LandingPage", () => {
 
   it("links the leaderboard from the hero and marks Home as the current page", () => {
     render(<LandingPage signInUrl="/sign-in" signUpUrl={SIGN_UP} />);
-    expect(screen.getByRole("link", { name: copy("vu1.landing.leaderboard") }).getAttribute("href")).toBe("/leaderboard");
+    const hero = screen.getByRole("main");
+    expect(within(hero).getByRole("link", { name: copy("vu1.landing.leaderboard") }).getAttribute("href")).toBe("/leaderboard");
     const nav = screen.getByRole("navigation", { name: copy("vu1.top.nav_aria") });
     expect(within(nav).getByRole("link", { name: copy("vu1.top.home") }).getAttribute("aria-current")).toBe("page");
   });
@@ -83,6 +84,15 @@ describe("LandingPage", () => {
     expect(screen.getAllByRole("listitem").map((li) => li.textContent)).toEqual(
       expect.arrayContaining(["point1", "point2", "point3"].map((k) => copy(`landing.seo.${k}`))),
     );
+  });
+
+  it("names the product without the VU-1 model and keeps the hero keys to one or two words", () => {
+    const { container } = render(<LandingPage signInUrl="/sign-in" signUpUrl={SIGN_UP} />);
+    expect(container.textContent).not.toContain("VU-1");
+    expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("VIBEUSAGE");
+    const hero = screen.getByRole("main");
+    expect(within(hero).getByRole("link", { name: "Sign in" }).getAttribute("href")).toBe(SIGN_UP);
+    expect(within(hero).getByRole("link", { name: "Leaderboard" }).getAttribute("href")).toBe("/leaderboard");
   });
 
   it("never renders a raw copy key", () => {

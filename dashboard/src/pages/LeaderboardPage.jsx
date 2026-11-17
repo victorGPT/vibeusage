@@ -179,10 +179,10 @@ export function LeaderboardPage({
         />
         <main className="grid-page mt-s6 min-[761px]:mt-s8">
           <div className="col-span-12 lg:col-start-3 lg:col-end-11 [--device-w:100%]">
-            <Device model={copy("vu1.device.model")} name={copy("vu1.top.leaderboard")} plate="none">
+            <Device model={copy("vu1.device.name")} name={copy("vu1.top.leaderboard")} plate="none">
               <div className="grid-device gap-y-s5">
                 <div className="col-span-12 flex items-baseline justify-between gap-s2">
-                  <DevicePlate model={copy("vu1.device.model")} name={copy("vu1.top.leaderboard")} />
+                  <DevicePlate model={copy("vu1.device.name")} name={copy("vu1.top.leaderboard")} />
                   {board.data ? (
                     <span data-vu1="dim" data-vu1-cap="">
                       {copy("vu1.board.users", { count: totalEntries.toLocaleString("en-US") })}

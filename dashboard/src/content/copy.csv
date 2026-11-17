@@ -210,7 +210,6 @@ dashboard.identity.fallback,dashboard,DashboardPage,IdentityCard,handle_fallback
 dashboard.screenshot.twitter_text,dashboard,DashboardPage,ScreenshotShare,share_text,"This year\nI handed {{total_tokens}} tokens to Coding Agent\n\nThe one that stayed with me until the end\nwas {{agent_name}}\n\n{{model_name}} usage: {{model_percent}}%\n\nData: VibeUsage @victor_wu_eth\n\nRun in your terminal:\nnpx --yes vibeusage init\n(Paste Image Stats with CMD / CTRL + V)",,active
 
 
-vu1.device.model,vu1,Gallery,Device,model,"VU-1",,active
 vu1.device.name,vu1,Gallery,Device,name,"VIBEUSAGE",,active
 vu1.top.nav_aria,vu1,*,TopBar,nav_aria,"Pages",,active
 vu1.top.home,vu1,*,TopBar,home,"Home",,active
@@ -301,7 +300,7 @@ vu1.state.reload,vu1,*,StateScreen,reload,"Reload",,active
 vu1.top.github_href,vu1,*,TopBar,github_href,"https://github.com/victorGPT/vibeusage",,active
 vu1.state.signed_out_title,vu1,*,StateScreen,signed_out_title,"Sign in to read your meter.",,active
 vu1.state.signed_out_body,vu1,*,StateScreen,signed_out_body,"Sign in with GitHub to see your usage and rank.",,active
-vu1.state.sign_in,vu1,*,StateScreen,sign_in,"Sign in with GitHub",,active
+vu1.state.sign_in,vu1,*,StateScreen,sign_in,"Sign in",,active
 vu1.state.install_title,vu1,*,StateScreen,install_title,"Install the tracker",,active
 vu1.state.install_body,vu1,*,StateScreen,install_body,"Install Node.js 18+ then run:",,active
 vu1.state.expired_title,vu1,*,StateScreen,expired_title,"Your session expired.",,active
@@ -316,12 +315,12 @@ vu1.identity.read_only,vu1,DashboardPage,IdentityStrip,read_only,"Public profile
 vu1.dashboard.device_name,vu1,DashboardPage,Device,name,"@{{handle}}",,active
 vu1.keys.install_copied,vu1,DashboardPage,InstallKey,install_copied,"Install command copied",,active
 vu1.landing.eyebrow,vu1,LandingPage,Hero,eyebrow,"Token meter for AI coding CLIs",,active
-vu1.landing.title,vu1,LandingPage,Hero,title,"VIBEUSAGE/VU-1",,active
+vu1.landing.title,vu1,LandingPage,Hero,title,"VIBEUSAGE",,active
 vu1.landing.body,vu1,LandingPage,Hero,body,"One meter for every AI coding CLI you run. It reads token counts from Claude Code, Codex, Gemini and the rest on your machine, adds up the bill, and ranks you against everyone else. Token counts only. Your conversations never leave the machine.",,active
 vu1.landing.clis,vu1,*,ClientList,clis,"Claude Code,Codex,Gemini,OpenCode,Kimi,Hermes,OpenClaw",,active
 vu1.landing.clis_aria,vu1,*,ClientList,clis_aria,"Supported CLIs",,active
-vu1.landing.sign_in,vu1,LandingPage,Hero,sign_in,"Sign in with GitHub",,active
-vu1.landing.leaderboard,vu1,LandingPage,Hero,leaderboard,"View leaderboard",,active
+vu1.landing.sign_in,vu1,LandingPage,Hero,sign_in,"Sign in",,active
+vu1.landing.leaderboard,vu1,LandingPage,Hero,leaderboard,"Leaderboard",,active
 vu1.landing.meter_name,vu1,LandingPage,Device,meter_name,"Sample · global",,active
 vu1.landing.meter_aria,vu1,*,GlobalMeter,meter_aria,"Global usage",,active
 vu1.landing.meter_period,vu1,*,GlobalMeter,meter_period,"Today",,active

@@ -957,7 +957,7 @@ export function DashboardPage({
           />
         </div>
         <div ref={deviceRef} className="col-span-12 lg:col-start-2 lg:col-end-12 [--device-w:100%]">
-          <Device model={copy("vu1.device.model")} name={copy("vu1.dashboard.device_name", { handle: identityDisplayName })}>
+          <Device model={copy("vu1.device.name")} name={copy("vu1.dashboard.device_name", { handle: identityDisplayName })}>
             <div className="grid-device gap-y-s5">
               <div className="col-span-12 flex items-center justify-center min-[761px]:col-span-2">
                 <PeriodSwitch value={period} onChange={screenshotMode ? () => {} : transitionSelectedPeriod} />
