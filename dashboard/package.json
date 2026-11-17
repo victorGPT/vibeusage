@@ -14,6 +14,7 @@
     "compare:baselines": "node scripts/compare-visual-baselines.mjs",
     "verify:share-clipboard": "node scripts/verify-share-clipboard.mjs",
     "guardrail:design": "node scripts/check-design-ssot.mjs",
+    "audit:ui": "node scripts/audit-ui.mjs",
     "pretest": "npm run guardrail:design",
     "test": "vitest run",
     "test:watch": "vitest"

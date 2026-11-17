@@ -5,6 +5,8 @@ import { copy } from "#src/lib/copy.ts";
 import { Button } from "#src/ui/hardware/button.tsx";
 import { Icon } from "#src/ui/hardware/icon.tsx";
 import { onSoundChange, setSoundEnabled, soundEnabled } from "#src/ui/hardware/lib/sound.ts";
+
+import { KeyTip } from "./KeyTip";
 import "./blocks.css";
 
 const serverSound = () => false;
@@ -60,13 +62,13 @@ export function TopBar({ active, signedIn, hrefs, githubHref, stars, account = t
         {!account ? null : signedIn ? (
           <Button onClick={onSignOut}>{copy("vu1.top.sign_out")}</Button>
         ) : (
-          <Button tone="primary" onClick={onSignIn}>
-            {copy("vu1.top.sign_in")}
-          </Button>
+          <Button onClick={onSignIn}>{copy("vu1.top.sign_in")}</Button>
         )}
-        <Button round aria-label={copy("vu1.top.sound")} aria-pressed={sound} onClick={() => setSoundEnabled(!sound)}>
-          <Icon name={sound ? "volume" : "volume-mute"} />
-        </Button>
+        <KeyTip label={copy("vu1.top.sound")}>
+          <Button round aria-label={copy("vu1.top.sound")} aria-pressed={sound} onClick={() => setSoundEnabled(!sound)}>
+            <Icon name={sound ? "volume" : "volume-mute"} />
+          </Button>
+        </KeyTip>
       </div>
     </header>
   );

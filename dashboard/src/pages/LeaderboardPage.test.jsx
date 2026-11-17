@@ -103,6 +103,12 @@ describe("LeaderboardPage", () => {
     expect(screen.getByRole("radio", { name: "Month" })).toHaveAttribute("aria-checked", "true");
   });
 
+  it("names the period control Period, the same label as the Dashboard's", async () => {
+    renderPage();
+    await rankings();
+    expect(screen.getByRole("radio", { name: "Week" }).closest("[data-vu1=segment]")).toHaveTextContent("Period");
+  });
+
   it("starts a board on page 1 again after visiting another board", async () => {
     renderPage();
     await rankings();

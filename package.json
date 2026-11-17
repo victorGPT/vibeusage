@@ -29,7 +29,7 @@
   "scripts": {
     "build:insforge": "node scripts/build-insforge-functions.cjs",
     "build:insforge:check": "node scripts/build-insforge-functions.cjs --check",
-    "ci:local": "npm run validate:design && npm test && npm run validate:copy && npm run validate:ui-hardcode && npm run validate:guardrails && node --test test/architecture-guardrails.test.js && npm run build:insforge:check && npm --prefix dashboard run build",
+    "ci:local": "npm run validate:design && npm test && npm run validate:copy && npm run validate:ui-hardcode && npm run validate:guardrails && node --test test/architecture-guardrails.test.js && npm run build:insforge:check && npm --prefix dashboard run build && npm --prefix dashboard run audit:ui",
     "copy:pull": "node scripts/copy-sync.cjs pull",
     "copy:push": "node scripts/copy-sync.cjs push",
     "dashboard:build": "npm --prefix dashboard run build",

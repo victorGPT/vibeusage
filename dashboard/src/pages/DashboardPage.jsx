@@ -976,7 +976,7 @@ export function DashboardPage({
                   />
                 )}
               </div>
-              <div className="col-span-7 row-start-2 min-[761px]:col-span-4">
+              <div className="col-span-12 row-start-2 min-[761px]:col-span-4">
                 <Segment
                   label={copy("vu1.period.label")}
                   options={periodOptions()}
@@ -988,7 +988,7 @@ export function DashboardPage({
               <div className="col-span-12 row-start-3 min-[761px]:col-start-5 min-[761px]:col-end-10 min-[761px]:row-start-2">
                 <SourceSegment sources={DASHBOARD_SOURCES} value={source} onChange={setSource} />
               </div>
-              <div className="col-span-5 row-start-2 flex justify-end gap-s4 min-[761px]:col-start-10 min-[761px]:col-end-13 min-[761px]:gap-s5">
+              <div className="col-span-12 row-start-4 flex justify-end gap-s4 min-[761px]:col-start-10 min-[761px]:col-end-13 min-[761px]:row-start-2 min-[761px]:gap-s5">
                 <ShareKey onPress={handleShareToX} busy={isCapturing} />
                 {publicMode ? null : <InstallKey onPress={handleCopyInstall} />}
               </div>

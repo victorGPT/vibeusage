@@ -55,7 +55,7 @@ export function RankScreen({ entries, me, handle, frame }: { entries: Leaderboar
               <td data-name="">{mine ? handle : (entry.display_name ?? copy("shared.placeholder.short"))}</td>
               <td data-minor="">{topCli(entry)}</td>
               <td data-num="">{abbr(entry.total_tokens)}</td>
-              <td>
+              <td data-fill="">
                 <span data-vu1="meter" aria-hidden style={{ "--share": num(entry.total_tokens) / max } as CSSProperties} />
               </td>
             </tr>

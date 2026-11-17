@@ -19,7 +19,7 @@
   --red: var(--palette-red-654);
   --sans: "Spec Mono", "IBM Plex Mono", ui-monospace, Menlo, monospace;
   --mono: var(--sans);
-  --label: 500 10px/1.2 var(--sans);
+  --label: 500 var(--font-size-label)/1.2 var(--sans);
   --dim: var(--palette-gray-578);
   --dot-color: transparent;
   color: var(--ink);

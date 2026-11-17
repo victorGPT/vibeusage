@@ -10,6 +10,8 @@ import {
 
 import { copy } from "#src/lib/copy.ts";
 import { Icon } from "#src/ui/hardware/icon.tsx";
+
+import { KeyTip } from "./KeyTip";
 import "./blocks.css";
 
 type PagerProps = { page: number; pageCount: number; onPageChange: (page: number) => void };
@@ -28,9 +30,11 @@ export function Pager({ page, pageCount, onPageChange }: PagerProps) {
         {({ items }) => (
           <>
             <PaginationItem>
-              <PaginationPrevious data-kit="page" aria-label={copy("vu1.pager.prev")}>
-                <Icon name="prev" />
-              </PaginationPrevious>
+              <KeyTip label={copy("vu1.pager.prev")}>
+                <PaginationPrevious data-kit="page" aria-label={copy("vu1.pager.prev")}>
+                  <Icon name="prev" />
+                </PaginationPrevious>
+              </KeyTip>
             </PaginationItem>
             {items.map((item, i) => (
               <PaginationItem key={`${item}-${i}`}>
@@ -42,9 +46,11 @@ export function Pager({ page, pageCount, onPageChange }: PagerProps) {
               </PaginationItem>
             ))}
             <PaginationItem>
-              <PaginationNext data-kit="page" aria-label={copy("vu1.pager.next")}>
-                <Icon name="next" />
-              </PaginationNext>
+              <KeyTip label={copy("vu1.pager.next")}>
+                <PaginationNext data-kit="page" aria-label={copy("vu1.pager.next")}>
+                  <Icon name="next" />
+                </PaginationNext>
+              </KeyTip>
             </PaginationItem>
           </>
         )}
