@@ -5,7 +5,7 @@
 [data-skin="hardware"] [data-vu1-cap] {
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  font-size: 10px;
+  font-size: var(--font-size-label);
   font-variant-numeric: tabular-nums;
 }
 
@@ -151,7 +151,7 @@
 }
 [data-skin="hardware"] [data-vu1="read"] dt {
   color: var(--color-screen-dim);
-  font-size: 9px;
+  font-size: var(--font-size-label);
   letter-spacing: 0.16em;
 }
 [data-skin="hardware"] [data-vu1="read"] dd {
@@ -182,7 +182,7 @@
   display: flex;
   justify-content: space-between;
   color: var(--color-screen-dim);
-  font-size: 9px;
+  font-size: var(--font-size-label);
 }
 
 /* Activity: 52 weeks of LEDs, one column per week. Cell size is the LED pitch, no gap. */
@@ -231,7 +231,7 @@
   justify-content: space-between;
   gap: var(--spacing-s3);
   color: var(--color-screen-dim);
-  font-size: 9px;
+  font-size: var(--font-size-label);
 }
 [data-skin="hardware"] [data-vu1="heat-legend"] {
   display: flex;
@@ -263,7 +263,7 @@
   padding: var(--spacing-s1) var(--spacing-s3) var(--spacing-s2);
   border-bottom: 1px dashed var(--palette-gray-191-a35);
   color: var(--palette-gray-191-a60);
-  font-size: 9px;
+  font-size: var(--font-size-label);
   font-weight: 500;
   letter-spacing: 0.16em;
   text-align: left;
@@ -339,7 +339,7 @@
 }
 [data-skin="hardware"] [data-vu1="mini"] dt {
   color: var(--palette-gray-191-a60);
-  font-size: 9px;
+  font-size: var(--font-size-label);
   letter-spacing: 0.16em;
 }
 [data-skin="hardware"] [data-vu1="mini"] dd {
@@ -402,7 +402,7 @@
 }
 [data-skin="hardware"] [data-vu1="legend"] {
   color: var(--color-legend);
-  font-size: 9px;
+  font-size: var(--font-size-label);
   letter-spacing: 0.16em;
   text-transform: uppercase;
 }
