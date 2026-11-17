@@ -221,11 +221,11 @@ vu1.top.new_tab,vu1,*,TopBar,new_tab,"(opens in a new tab)",,active
 vu1.top.sign_in,vu1,*,TopBar,sign_in,"Sign in",,active
 vu1.top.sign_out,vu1,*,TopBar,sign_out,"Sign out",,active
 vu1.top.sound,vu1,*,TopBar,sound,"Key sounds",,active
-vu1.period.label,vu1,DashboardPage,PeriodSwitch,label,"Period",,active
-vu1.period.day,vu1,*,PeriodSwitch,day,"Day",,active
-vu1.period.week,vu1,*,PeriodSwitch,week,"Week",,active
-vu1.period.month,vu1,*,PeriodSwitch,month,"Month",,active
-vu1.period.total,vu1,*,PeriodSwitch,total,"Total",,active
+vu1.period.label,vu1,DashboardPage,Segment,label,"Period",,active
+vu1.period.day,vu1,*,Segment,day,"Day",,active
+vu1.period.week,vu1,*,Segment,week,"Week",,active
+vu1.period.month,vu1,*,Segment,month,"Month",,active
+vu1.period.total,vu1,*,Segment,total,"Total",,active
 vu1.source.label,vu1,DashboardPage,SourceSegment,label,"Source",,active
 vu1.source.all,vu1,*,SourceSegment,all,"All",,active
 vu1.source.claude,vu1,*,SourceSegment,claude,"Claude",,active

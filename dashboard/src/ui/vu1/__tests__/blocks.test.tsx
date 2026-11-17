@@ -6,12 +6,12 @@ import { setSoundEnabled } from "#src/ui/hardware/lib/sound.ts";
 
 import { InstallCommand } from "../InstallCommand";
 import { InstallKey, ShareKey } from "../Keys";
+import { periodOptions } from "../labels";
 import { ModelList } from "../ModelList";
 import { MyRankLcd } from "../MyRankLcd";
 import { Pager } from "../Pager";
-import { PeriodSwitch } from "../PeriodSwitch";
 import { RankScreen } from "../RankScreen";
-import { SourceSegment } from "../SourceSegment";
+import { Segment, SourceSegment } from "../SourceSegment";
 import { StateScreen, type StateVariant } from "../StateScreen";
 import { StatMinis } from "../StatMinis";
 import { TopBar } from "../TopBar";
@@ -59,17 +59,17 @@ const ENTRIES: LeaderboardEntry[] = [
   { rank: 37, display_name: "ada", is_me: true, total_tokens: 398_800_000, gpt_tokens: 0, claude_tokens: 0, other_tokens: 5 },
 ];
 
-describe("PeriodSwitch", () => {
-  it("reports the period picked by click or arrow key", async () => {
+describe("Segment with the periods", () => {
+  it("reports the period id picked by click or arrow key", async () => {
     const onChange = vi.fn();
     const user = userEvent.setup();
-    render(<PeriodSwitch value="week" onChange={onChange} />);
+    render(<Segment label="Period" options={periodOptions()} value="week" onChange={onChange} print="key" />);
     const week = screen.getByRole("radio", { name: "Week" });
     expect(week).toBeChecked();
     await user.click(screen.getByRole("radio", { name: "Total" }));
     expect(onChange).toHaveBeenLastCalledWith("total");
     week.focus();
-    await user.keyboard("{ArrowDown}");
+    await user.keyboard("{ArrowRight}");
     expect(onChange).toHaveBeenLastCalledWith("month");
   });
 });

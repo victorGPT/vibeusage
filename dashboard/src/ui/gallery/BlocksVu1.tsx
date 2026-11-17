@@ -7,7 +7,6 @@ import { InstallKey, ShareKey } from "../vu1/Keys";
 import { ModelList } from "../vu1/ModelList";
 import { MyRankLcd } from "../vu1/MyRankLcd";
 import { Pager } from "../vu1/Pager";
-import { PeriodSwitch } from "../vu1/PeriodSwitch";
 import { RankScreen } from "../vu1/RankScreen";
 import { Segment, SourceSegment } from "../vu1/SourceSegment";
 import { periodOptions, pointLabel } from "../vu1/labels";
@@ -119,10 +118,7 @@ export function BlocksVu1() {
         <div data-vu1-specimen="dashboard" className="col-span-12 lg:col-start-2 lg:col-end-12 [--device-w:100%]">
           <Device model={copy("vu1.device.name")} name={copy("vu1.top.dashboard")}>
             <div className="grid-device gap-y-s5">
-              <div className="col-span-12 flex items-center justify-center min-[761px]:col-span-2">
-                <PeriodSwitch value={period} onChange={setPeriod} />
-              </div>
-              <div className="col-span-12 min-[761px]:col-span-8">
+              <div className="col-span-12">
                 <UsageScreen
                   range={`${pointLabel(ROWS[0], "day")} – ${pointLabel(ROWS[ROWS.length - 1], "day")}`}
                   totals={totals}
@@ -132,12 +128,15 @@ export function BlocksVu1() {
                   heatmap={HEATMAP}
                 />
               </div>
-              <div className="col-span-12 flex items-center justify-center gap-s5 min-[761px]:col-span-2 min-[761px]:flex-col">
+              <div className="col-span-7 row-start-2 min-[761px]:col-span-4">
+                <Segment label={copy("vu1.period.label")} options={periodOptions()} value={period} onChange={setPeriod} print="key" />
+              </div>
+              <div className="col-span-12 row-start-3 min-[761px]:col-start-5 min-[761px]:col-end-10 min-[761px]:row-start-2">
+                <SourceSegment sources={SOURCES} value={source} onChange={setSource} />
+              </div>
+              <div className="col-span-5 row-start-2 flex justify-end gap-s4 min-[761px]:col-start-10 min-[761px]:col-end-13 min-[761px]:gap-s5">
                 <ShareKey onPress={none} />
                 <InstallKey onPress={none} />
-              </div>
-              <div className="col-span-12 min-[761px]:col-start-3 min-[761px]:col-end-11">
-                <SourceSegment sources={SOURCES} value={source} onChange={setSource} />
               </div>
               <div className="col-span-12">
                 <StatMinis
@@ -149,7 +148,7 @@ export function BlocksVu1() {
                 />
               </div>
               <div className="col-span-12">
-                <ModelList breakdown={BREAKDOWN} />
+                <ModelList breakdown={BREAKDOWN} frame="single" />
               </div>
             </div>
           </Device>

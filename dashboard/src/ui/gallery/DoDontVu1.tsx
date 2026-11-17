@@ -3,9 +3,9 @@ import type { ReactNode } from "react";
 
 import { copy } from "../../lib/copy";
 import { Button } from "../hardware/button";
+import { SlideSwitch } from "../hardware/slide-switch";
 import { InstallKey, ShareKey } from "../vu1/Keys";
 import { ModelList } from "../vu1/ModelList";
-import { PeriodSwitch } from "../vu1/PeriodSwitch";
 import { Segment } from "../vu1/SourceSegment";
 import { periodOptions, pointLabel, sourceLabel } from "../vu1/labels";
 import type { DailyRow, ModelBreakdown, UsagePeriod } from "../vu1/types";
@@ -59,7 +59,7 @@ export const RULES: Rule[] = [
     id: "slide-switch",
     title: copy("vu1.gallery.rule.slide_switch"),
     component: "src/ui/hardware/slide-switch.tsx",
-    pair: [periods("key"), <PeriodSwitch value="week" onChange={none} />],
+    pair: [periods("key"), <SlideSwitch label={copy("vu1.period.label")} options={periodOptions().map((option) => option.label)} value={copy("vu1.period.week")} orientation="vertical" />],
   },
   {
     id: "keys",
