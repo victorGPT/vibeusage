@@ -1,72 +1,128 @@
 #!/usr/bin/env node
-// Edge census for the Dashboard device: the painted left and right x of every block in the device
-// grid, and the distinct outer lines the rows start and end on. VU2 layout A declares 2 outer lines.
-// Exits 1 when the count differs or a block paints past the grid.
-//   node scripts/audit-edges.mjs http://localhost:5173 [width] [expected]
+// Edge census for every page's device (VU2 layout A). For each block inside the device (its content,
+// below the plate) and each top-level block of the page, prints its slot (the grid cell it is placed in)
+// and its painted box, ring included. An edge counts as a line when the painted box reaches its slot
+// there; an edge short of its slot (a content-width control, centred text) and the right edge of plain
+// text, which is set ragged, are listed as free. Blocks sharing a grid row count only the row's ends. Exits 1 unless the device content has one left and
+// one right line on every page and no block paints past its slot. Lines outside the device are printed only.
+//   node scripts/audit-edges.mjs http://localhost:5173 [width]
 import process from "node:process";
 import { chromium } from "playwright";
 
 const base = process.argv[2] ?? "http://localhost:5173";
 const width = Number(process.argv[3] ?? 1440);
-const expected = Number(process.argv[4] ?? 2);
 const MOCK = "mock=1&mock_seed=baseline&mock_today=2025-12-31&mock_now=2025-12-31T12:00:00Z";
+const PAGES = [
+  ["dashboard", `/?${MOCK}`],
+  ["leaderboard", `/leaderboard?${MOCK}`],
+  ["landing", "/"],
+];
 
 const browser = await chromium.launch();
 const page = await browser.newPage({ viewport: { width, height: 900 } });
-await page.goto(`${base}/?${MOCK}`, { waitUntil: "networkidle" });
-await page.waitForTimeout(800);
-const report = await page.evaluate(() => {
-  const grid = document.querySelector("main .grid-device");
-  const painted = (el) => {
-    const style = getComputedStyle(el);
-    if (style.visibility === "hidden" || el.closest(".sr-only")) return false;
-    if (style.backgroundColor !== "rgba(0, 0, 0, 0)" || style.backgroundImage !== "none" || style.boxShadow !== "none") return true;
-    if (parseFloat(style.borderLeftWidth) || parseFloat(style.borderTopWidth)) return true;
-    return [...el.childNodes].some((node) => node.nodeType === 3 && node.textContent.trim());
-  };
-  // A bezel drawn as an outer box-shadow ring or an outline paints past the border box.
-  const ring = (el) => {
-    const style = getComputedStyle(el);
-    let left = 0;
-    let right = 0;
-    for (const shadow of style.boxShadow === "none" ? [] : style.boxShadow.split(/,(?![^(]*\))/)) {
-      if (/inset/.test(shadow)) continue;
-      const [x = 0, , blur = 0, spread = 0] = (shadow.replace(/rgba?\([^)]*\)|#\w+|[a-z-]+\([^)]*\)/g, "").match(/-?[\d.]+px/g) ?? []).map(parseFloat);
-      if (blur) continue;
-      left = Math.max(left, spread - x);
-      right = Math.max(right, spread + x);
+let report = "";
+let failures = 0;
+for (const [name, path] of PAGES) {
+  await page.goto(base + path, { waitUntil: "networkidle" });
+  await page.waitForTimeout(800);
+  const census = await page.evaluate(() => {
+    const visible = (el) => {
+      const s = getComputedStyle(el);
+      const r = el.getBoundingClientRect();
+      return s.display !== "none" && s.visibility !== "hidden" && s.opacity !== "0" && r.width > 0 && r.height > 0 && !el.closest(".sr-only");
+    };
+    const kids = (el) => [...el.children].filter(visible);
+    const ring = (s) => {
+      let spread = 0;
+      for (const part of s.boxShadow.split(/,(?![^(]*\))/)) {
+        if (part.includes("inset")) continue;
+        const px = part.replace(/rgba?\([^)]*\)|oklch\([^)]*\)|#[0-9a-f]+/gi, "").match(/-?[\d.]+px/g) ?? [];
+        if (px.length >= 4 && parseFloat(px[0]) === 0 && parseFloat(px[1]) === 0 && parseFloat(px[2]) === 0) spread = Math.max(spread, parseFloat(px[3]));
+      }
+      return spread;
+    };
+    const paints = (s) => s.backgroundImage !== "none" || s.backgroundColor !== "rgba(0, 0, 0, 0)" || s.boxShadow !== "none";
+    // The painted box: a block that paints is its own box plus its ring; a wrapper reports what it holds.
+    const painted = (el) => {
+      const s = getComputedStyle(el);
+      const r = el.getBoundingClientRect();
+      if (paints(s) || el.matches("[data-kit]:not([data-kit=field])")) {
+        const k = ring(s);
+        return [r.left - k, r.right + k];
+      }
+      const inner = kids(el);
+      if (!inner.length) {
+        const range = document.createRange();
+        range.selectNodeContents(el);
+        const t = range.getBoundingClientRect();
+        return t.width ? [t.left, t.right] : [r.left, r.right];
+      }
+      const boxes = inner.map(painted);
+      return [Math.min(...boxes.map((b) => b[0])), Math.max(...boxes.map((b) => b[1]))];
+    };
+    const tag = (el) => {
+      for (const at of [el, ...el.querySelectorAll("*")]) {
+        const key = at.getAttribute("data-vu1") || at.getAttribute("data-kit") || (at.hasAttribute("data-device") ? "device" : at.hasAttribute("data-device-plate") ? "plate" : null);
+        if (key) return key;
+      }
+      return el.tagName.toLowerCase();
+    };
+    // A layout grid of several columns (grid-page, grid-device) is a row of slots; anything else is one block.
+    const slots = (els) =>
+      els.flatMap((el) => {
+        const s = getComputedStyle(el);
+        const columns = s.gridTemplateColumns.split(" ").length;
+        if (!paints(s) && s.display === "grid" && columns > 1 && !el.matches("[data-vu1], [data-kit]")) return slots(kids(el));
+        return [el];
+      });
+    const sides = (els) => {
+      const rows = slots(els).map((el) => {
+        const slot = el.getBoundingClientRect();
+        const [l, r] = painted(el);
+        const at = { block: tag(el), top: Math.round(slot.top), slot: [Math.round(slot.left), Math.round(slot.right)], painted: [Math.round(l), Math.round(r)] };
+        // Text that paints nothing is set ragged-right: only its left edge is a line.
+        const surface = [el, ...el.querySelectorAll("*")].some((x) => visible(x) && (paints(getComputedStyle(x)) || x.matches("[data-kit]:not([data-kit=field])")));
+        at.freeLeft = at.painted[0] > at.slot[0] + 1;
+        at.freeRight = !surface || at.painted[1] < at.slot[1] - 1;
+        at.spill = at.painted[0] < at.slot[0] - 1 || at.painted[1] > at.slot[1] + 1;
+        return at;
+      });
+      // Edges within 1px of each other are one line.
+      const uniq = (xs) => [...new Set(xs)].sort((a, b) => a - b).filter((x, i, all) => i === 0 || x - all[i - 1] > 1);
+      // Blocks side by side in one grid row (Period, Source, keys) share it: only the row's first left
+      // edge and last right edge are its lines; the column lines between them are the layout's own.
+      const first = new Map();
+      const last = new Map();
+      for (const r of rows) {
+        if (!first.has(r.top) || r.slot[0] < first.get(r.top).slot[0]) first.set(r.top, r);
+        if (!last.has(r.top) || r.slot[1] > last.get(r.top).slot[1]) last.set(r.top, r);
+      }
+      return {
+        rows,
+        lefts: uniq([...first.values()].filter((r) => !r.freeLeft).map((r) => r.painted[0])),
+        rights: uniq([...last.values()].filter((r) => !r.freeRight).map((r) => r.painted[1])),
+      };
+    };
+    const device = document.querySelector("[data-device]");
+    const inside = kids(device).filter((el) => !el.hasAttribute("data-device-plate"));
+    const shell = document.querySelector(".max-w-shell");
+    const outside = kids(shell).flatMap((el) => (el.tagName === "MAIN" ? kids(el) : [el]));
+    return { inside: sides(inside), outside: sides(outside) };
+  });
+  for (const where of ["inside", "outside"]) {
+    const r = census[where];
+    report += `${name} ${width} ${where}: ${r.lefts.length} left line(s) [${r.lefts}], ${r.rights.length} right line(s) [${r.rights}]\n`;
+    for (const row of r.rows) {
+      const free = [row.freeLeft && "left free", row.freeRight && "right free"].filter(Boolean).join(", ");
+      report += `  ${row.block.padEnd(14)} slot ${row.slot.join("-").padEnd(10)} painted ${row.painted.join("-").padEnd(10)} ${free}${where === "inside" && row.spill ? " SPILL" : ""}\n`;
     }
-    const outline = style.outlineStyle === "none" ? 0 : parseFloat(style.outlineWidth) + parseFloat(style.outlineOffset);
-    return [Math.max(left, outline), Math.max(right, outline)];
-  };
-  const g = grid.getBoundingClientRect();
-  const blocks = [...grid.children].map((cell) => {
-    let left = Infinity;
-    let right = -Infinity;
-    for (const el of [cell, ...cell.querySelectorAll("*")]) {
-      const box = el.getBoundingClientRect();
-      if (!box.width || !box.height || !painted(el)) continue;
-      const [out, outRight] = ring(el);
-      left = Math.min(left, box.left - out);
-      right = Math.max(right, box.right + outRight);
-    }
-    const name = cell.querySelector("[data-vu1], [data-kit]");
-    const label = name?.getAttribute("data-vu1") ?? name?.getAttribute("data-kit") ?? cell.tagName.toLowerCase();
-    return { block: label, top: Math.round(cell.getBoundingClientRect().top), left: Math.round(left), right: Math.round(right) };
-  }).filter((b) => Number.isFinite(b.left));
-  const rows = new Map();
-  for (const b of blocks) rows.set(b.top, [...(rows.get(b.top) ?? []), b]);
-  const outer = new Set();
-  for (const row of rows.values()) {
-    outer.add(Math.min(...row.map((b) => b.left)));
-    outer.add(Math.max(...row.map((b) => b.right)));
   }
-  return { grid: { left: Math.round(g.left), right: Math.round(g.right) }, blocks, outer: [...outer].sort((a, b) => a - b) };
-});
+  const inside = census.inside;
+  if (inside.lefts.length !== 1 || inside.rights.length !== 1 || inside.rows.some((row) => row.spill)) {
+    failures += 1;
+    report += `FAIL ${name} ${width}: the device content needs one left and one right line, nothing past its slot\n`;
+  }
+}
 await browser.close();
-for (const b of report.blocks) console.log(`${b.block}\ttop ${b.top}\tleft ${b.left}\tright ${b.right}`);
-const spill = report.blocks.filter((b) => b.left < report.grid.left || b.right > report.grid.right);
-console.log(`grid ${report.grid.left}–${report.grid.right} at ${width}px`);
-console.log(`outer lines: ${report.outer.length} (${report.outer.join(", ")}), expected ${expected}`);
-for (const b of spill) console.log(`spill: ${b.block} ${b.left}–${b.right}`);
-process.exit(report.outer.length === expected && !spill.length ? 0 : 1);
+process.stdout.write(report);
+process.exit(failures ? 1 : 0);

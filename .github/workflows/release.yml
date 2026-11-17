@@ -77,6 +77,8 @@ jobs:
         run: npm ci
       - name: Install dashboard dependencies
         run: npm --prefix dashboard ci
+      - name: Install Chromium for the layout audits
+        run: npm --prefix dashboard exec -- playwright install --with-deps chromium
       - name: Run release CI gate
         run: npm run ci:local
 

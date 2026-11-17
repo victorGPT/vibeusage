@@ -49,7 +49,7 @@ One family, IBM Plex Mono, self-hosted as latin woff2 in weights 200, 300, 400 a
 - Printed labels carry `data-vu1-cap`: 10px, upper case, 0.12em tracking, tabular figures.
 - The Landing title is `data-vu1="hero-title"` in `src/ui/vu1/landing.css`, weight 300.
 - Sizes belong to the kit and the VU-1 CSS. A className never sets a font size.
-- **Scale.** `src/styles/tokens.css` defines `--font-size-label` (11px), `--font-size-body` (12px), `--font-size-title` (16px) and `--font-size-readout` (20px). Functional text, meaning legends, table headers and key names, is never below `--font-size-label`. The kit's `--label` (key names, page keys, tooltips) is `--font-size-label`. The shared blocks still print 8 to 10px legends (`data-vu1-cap` and others) until VU2-P3 moves them onto the scale.
+- **Scale.** `src/styles/tokens.css` defines `--font-size-label` (11px), `--font-size-body` (12px), `--font-size-title` (16px) and `--font-size-readout` (20px). Functional text, meaning legends, table headers and key names, is never below `--font-size-label`. The kit's `--label` (key names, page keys, tooltips) is `--font-size-label` too. `npm --prefix dashboard run audit:ui` (in `ci:local` and CI) fails on any visible text below it, and on a device whose content leaves its one left and one right line.
 
 ## 5. Components
 
@@ -97,7 +97,7 @@ Pick a component by what the content means, not by how it looks, and give one me
 | Nothing to show yet: loading, empty, error, signed out | StateScreen | `src/ui/vu1/StateScreen.tsx` |
 | A message that comes and goes | Toast | `notify` in `src/ui/hardware/toaster.tsx`, `UpgradeToast` |
 
-`print="key"` and `frame="single"` are the target look. The Leaderboard uses them. They stay opt-in until VU2-P3 moves the Dashboard onto them; then they become the only look and the props go. The kit's own `Segmented` (`src/ui/hardware/segmented-control.tsx`) is uncontrolled, the kit's `ItemList` is a selectable listbox, and the kit's `Lcd` and `Display` duplicate the VU-1 screens. They stay in the gallery and pages do not use them.
+`print="key"` and `frame="single"` are the target look. The Dashboard and the Leaderboard use them. The props stay only while the `/__vu1` Don't pairs render the old look. The kit's own `Segmented` (`src/ui/hardware/segmented-control.tsx`) is uncontrolled, the kit's `ItemList` is a selectable listbox, and the kit's `Lcd` and `Display` duplicate the VU-1 screens. They stay in the gallery and pages do not use them.
 
 **One frame.** A surface (screen, LCD, mini) sits straight on the device panel with one frame. A surface never sits inside another surface's frame, and its padding is the same on all four sides.
 

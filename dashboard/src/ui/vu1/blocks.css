@@ -450,15 +450,17 @@
 [data-skin="hardware"] [data-vu1="segment"][data-print="key"] [data-kit="segmented"]:not(#_) {
   max-width: 100%;
 }
-/* Folded onto a phone row, a keyed segment fills the row with equal keys, so the row meets both
- * edges of the device. */
+/* Folded onto a phone row, a keyed segment fills the row, so the row meets both edges of the device.
+ * Its keys size to their names with at least s2 either side; five sources still fit at 360px. */
 @media (max-width: 760px) {
   [data-skin="hardware"] [data-vu1="segment"][data-print="key"] [data-kit="segmented"]:not(#_) {
     width: 100%;
+    grid-auto-columns: auto;
   }
   [data-skin="hardware"] [data-vu1="segment"][data-print="key"] [data-kit="segment"]:not(#_):not(#_):not(#_) {
     min-width: 0;
-    padding: 0 var(--spacing-s1);
+    padding: 0 var(--spacing-s2);
+    letter-spacing: 0.08em;
   }
 }
 

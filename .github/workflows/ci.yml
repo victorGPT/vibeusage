@@ -47,3 +47,7 @@ jobs:
         run: npm run build:insforge:check
       - name: Build dashboard
         run: npm --prefix dashboard run build
+      - name: Install Chromium for the layout audits
+        run: npm --prefix dashboard exec -- playwright install --with-deps chromium
+      - name: Layout audits (small type, edge lines)
+        run: npm --prefix dashboard run audit:ui
