@@ -109,7 +109,7 @@ export function colorLiterals(value) {
 
 // A length in a radius that is not 0 or 50%. Unitless factors (calc(var(--h) / 2)) are fine.
 export function radiusLiterals(value) {
-  return [...value.matchAll(/(?<![\w.-])(\d*\.?\d+)(px|rem|em|%|vw|vh|vmin|vmax)(?![\w-])/g)]
+  return [...value.matchAll(/(?<![\w.-])(\d*\.?\d+)([a-z]+|%)(?![\w-])/gi)]
     .filter((m) => !(m[2] === "%" && Number(m[1]) === 50) && Number(m[1]) !== 0)
     .map((m) => ({ index: m.index, text: m[0] }));
 }
@@ -117,8 +117,8 @@ export function radiusLiterals(value) {
 // Each declaration of a stylesheet, comments blanked so offsets and line numbers hold.
 export function declarations(css) {
   const text = css.replace(/\/\*[\s\S]*?\*\//g, (c) => c.replace(/[^\n]/g, " "));
-  return [...text.matchAll(/(?<![\w-])(--[\w-]+|-?[a-z][a-z-]*)\s*:\s*([^;{}]*)(?=[;}])/g)].map((m) => ({
-    prop: m[1],
+  return [...text.matchAll(/(?<![\w-])(--[\w-]+|-?[a-z][a-z-]*)\s*:\s*([^;{}]*)(?=[;}])/gi)].map((m) => ({
+    prop: m[1].startsWith("--") ? m[1] : m[1].toLowerCase(),
     value: m[2],
     valueIndex: m.index + m[0].length - m[2].length,
   }));

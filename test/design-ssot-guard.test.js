@@ -116,12 +116,14 @@ test("design guard blocks literal radii, the kit included", () => {
       "[data-vu1] { --key-radius: 10px; }",
       "[data-vu1] { border-radius: calc(var(--radius-14) - 11px); }",
       "[data-vu1] { border-radius: var(--radius-75) / 25%; }",
+      "[data-vu1] { BORDER-RADIUS: 4PX; }",
+      "[data-vu1] { border-radius: 1ch; }",
     ].join("\n"),
     "src/ui/hardware/hardware/kit.css": "[data-kit] { border-radius: 0 3px 3px 0; }\n",
     "src/ui/vu1/Bad.tsx": 'export const B = () => <div className="rounded-[6px]" style={{ borderRadius: 4 }} />;\n',
   });
   assert.equal(out.status, 1);
-  for (const hit of ["r.css:1", "r.css:2", "r.css:3", "r.css:4", "r.css:5", "kit.css:1", "Bad.tsx:1"]) {
+  for (const hit of ["r.css:1", "r.css:2", "r.css:3", "r.css:4", "r.css:5", "r.css:6", "r.css:7", "kit.css:1", "Bad.tsx:1"]) {
     assert.match(out.stderr, new RegExp(hit.replace(".", "\\.") + " "), `expected ${hit} flagged`);
   }
 });
