@@ -85,10 +85,11 @@ Pick a component by what the content means, not by how it looks, and give one me
 | Meaning | Component | Use |
 | --- | --- | --- |
 | One of 2 to 5 options | Segmented | `Segment` in `src/ui/vu1/SourceSegment.tsx`, with `print="key"` |
-| A value on a continuous range, or more than 5 steps | SlideSwitch | `src/ui/hardware/slide-switch.tsx` |
+| One of more than 5 ordered steps | SlideSwitch | `src/ui/hardware/slide-switch.tsx` (a continuous value has no component yet) |
 | An action | Keys | `ShareKey` and `InstallKey` in `src/ui/vu1/Keys.tsx`, `Button` in `src/ui/hardware/button.tsx` |
 | Views of one screen | Tabs | the tabs in `src/ui/vu1/UsageScreen.tsx` |
 | A few headline readings and a chart | UsageScreen | `src/ui/vu1/UsageScreen.tsx` |
+| One or two readings in a row, such as the reader's rank | MyRankLcd | `src/ui/vu1/MyRankLcd.tsx` |
 | A label and its value | Mini | `src/ui/vu1/StatMinis.tsx` |
 | Rows that share columns | Table | `src/ui/vu1/ModelList.tsx`, `src/ui/vu1/RankScreen.tsx`, with `frame="single"` |
 | Pages of a table | Pager | `src/ui/vu1/Pager.tsx` |
@@ -96,7 +97,7 @@ Pick a component by what the content means, not by how it looks, and give one me
 | Nothing to show yet: loading, empty, error, signed out | StateScreen | `src/ui/vu1/StateScreen.tsx` |
 | A message that comes and goes | Toast | `notify` in `src/ui/hardware/toaster.tsx`, `UpgradeToast` |
 
-`print="key"` and `frame="single"` are the target look. They are opt-in until VU2-P3 and VU2-P4 move the pages onto them; then they become the only look and the props go. The kit's own `Segmented` (`src/ui/hardware/segmented-control.tsx`) is uncontrolled and the kit's `ItemList` is a selectable listbox; both stay in the gallery and pages do not use them.
+`print="key"` and `frame="single"` are the target look. They are opt-in until VU2-P3 and VU2-P4 move the pages onto them; then they become the only look and the props go. The kit's own `Segmented` (`src/ui/hardware/segmented-control.tsx`) is uncontrolled, the kit's `ItemList` is a selectable listbox, and the kit's `Lcd` and `Display` duplicate the VU-1 screens. They stay in the gallery and pages do not use them.
 
 **One frame.** A surface (screen, LCD, mini) sits straight on the device panel with one frame. A surface never sits inside another surface's frame, and its padding is the same on all four sides.
 
@@ -109,8 +110,8 @@ Pick a component by what the content means, not by how it looks, and give one me
 
 ### SlideSwitch
 
-- **Purpose.** Set a value along an ordered range by moving a lever.
-- **When.** The value is continuous, or there are more than 5 steps.
+- **Purpose.** Set one of many ordered steps by moving a lever.
+- **When.** More than 5 steps. A continuous value has no component yet; add one when a page needs it.
 - **Do.** Use a Segmented for 4 periods, the same one on every page that chooses a period.
 - **Don't.** Use a SlideSwitch for 4 named options on one page and a Segmented for the same choice on another.
 
@@ -131,7 +132,7 @@ Pick a component by what the content means, not by how it looks, and give one me
 ### UsageScreen
 
 - **Purpose.** The dark screen: the period's headline readings and its chart.
-- **When.** Once per Dashboard. A smaller screen row (`data-variant="row"`) carries one or two readings, such as the reader's rank.
+- **When.** Once per Dashboard. One or two readings in a row, such as the reader's rank, go on `MyRankLcd`.
 - **Do.** Give the bar chart one slot per unit of the period (7 for a week, the days of the month, the months of the total) and draw a dark slot for a unit with no usage.
 - **Don't.** Give the chart one slot per row of data: a week with two active days turns into two wide slabs.
 
@@ -146,7 +147,7 @@ Pick a component by what the content means, not by how it looks, and give one me
 
 - **Purpose.** Rows that share columns: models, the leaderboard.
 - **When.** More than one item with the same fields.
-- **Do.** One frame on the panel (`frame="single"`) with the same padding on all sides. A bar column, such as Share or Load, takes the width left over.
+- **Do.** One frame on the panel (`frame="single"`) with the same padding on all sides.
 - **Don't.** A bezel ring around the table's frame, so it reads as a box inside a box.
 
 ### Pager
@@ -183,8 +184,8 @@ Four levels, nothing between them. Functional text, meaning legends, column head
 
 | Level | Use | Size |
 | --- | --- | --- |
-| Page title | The device's name line | `--font-size-title` |
-| Section title | A screen's tabs, a gallery caption | `--font-size-label`, upper case |
+| Page title | The Landing hero title, the only page title | its own size in `src/ui/vu1/landing.css` |
+| Section title | The device's name line, a screen's tabs, a gallery caption | `--font-size-label`, upper case |
 | Label | A reading's or mini's label, a column head, a key legend | `--font-size-label`, upper case |
 | Description | A sentence that explains | `--font-size-body`, written, not spoken; in a Tooltip by default |
 
