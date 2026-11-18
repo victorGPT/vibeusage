@@ -62,7 +62,8 @@ jobs:
         run: node scripts/acceptance/model-identity-alias-table.cjs
 
   ci-gate:
-    runs-on: ubuntu-latest
+    # Playwright 1.57 ships no Chromium for ubuntu-latest (26.04); unpin once it does.
+    runs-on: ubuntu-24.04
     needs: [changes, preflight]
     timeout-minutes: 25
     steps:

@@ -12,7 +12,8 @@ permissions:
 
 jobs:
   ci:
-    runs-on: ubuntu-latest
+    # Playwright 1.57 ships no Chromium for ubuntu-latest (26.04); unpin once it does.
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - name: Checkout
