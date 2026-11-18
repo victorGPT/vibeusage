@@ -125,8 +125,12 @@ describe("UsageScreen", () => {
     const bars = screen.getByRole("group", { name: /peak 2\.0M/ }).querySelectorAll('[data-kit="bar-graph-bar"]');
     expect(bars).toHaveLength(7);
     expect([...bars].map((bar) => (bar as HTMLElement).style.getPropertyValue("--v"))).toEqual(["0.5", "1", "0", "0", "0", "0", "0"]);
-    expect(screen.getByText("Dec 29")).toBeTruthy();
-    expect(screen.getByText("Jan 4")).toBeTruthy();
+  });
+
+  it("prints no dates under the bars; the head names the period", () => {
+    render(<UsageScreen {...props} />);
+    expect(screen.getByText("Nov 10 – Nov 16")).toBeTruthy();
+    for (const day of ["Nov 10", "Nov 13", "Nov 16"]) expect(screen.queryByText(day)).toBeNull();
   });
 
   it("reads a bar's day and tokens on hover", async () => {
@@ -134,7 +138,7 @@ describe("UsageScreen", () => {
     render(<UsageScreen {...props} />);
     const bars = screen.getByRole("group", { name: /peak 7\.0M/ }).querySelectorAll('[data-kit="bar-graph-bar"]');
     await user.hover(bars[5]);
-    expect(await screen.findByRole("tooltip")).toHaveTextContent("Nov 15 · 6.0M tokens");
+    expect(await screen.findByRole("tooltip")).toHaveTextContent("Nov 15 · 6.0M");
   });
 
   it("is one tab stop on the latest day, and arrow keys step the read between bars", async () => {
@@ -144,14 +148,14 @@ describe("UsageScreen", () => {
     const bars = [...screen.getByRole("group", { name: /peak/ }).querySelectorAll('[data-kit="bar-graph-bar"]')] as HTMLElement[];
     expect(bars.filter((bar) => bar.tabIndex === 0)).toEqual([bars[6]]);
     act(() => bars[6].focus());
-    expect(await screen.findByRole("tooltip")).toHaveTextContent("Nov 16 · 7.0M tokens");
+    expect(await screen.findByRole("tooltip")).toHaveTextContent("Nov 16 · 7.0M");
     await user.keyboard("{ArrowLeft}");
     expect(document.activeElement).toBe(bars[5]);
-    expect(tip()).toHaveTextContent("Nov 15 · 6.0M tokens");
+    expect(tip()).toHaveTextContent("Nov 15 · 6.0M");
     await user.keyboard("{Home}");
-    expect(tip()).toHaveTextContent("Nov 10 · 1.0M tokens");
+    expect(tip()).toHaveTextContent("Nov 10 · 1.0M");
     await user.keyboard("{ArrowRight}");
-    expect(tip()).toHaveTextContent("Nov 11 · 2.0M tokens");
+    expect(tip()).toHaveTextContent("Nov 11 · 2.0M");
   });
 
   it("keeps one tab stop when the period shrinks under the picked bar", () => {
@@ -172,7 +176,7 @@ describe("UsageScreen", () => {
     render(<UsageScreen {...props} rows={week} />);
     const bars = [...screen.getByRole("group", { name: /peak/ }).querySelectorAll('[data-kit="bar-graph-bar"]')];
     act(() => (bars[2] as HTMLElement).focus());
-    expect(await screen.findByRole("tooltip")).toHaveTextContent("Nov 12 · 1.0M tokens");
+    expect(await screen.findByRole("tooltip")).toHaveTextContent("Nov 12 · 1.0M");
     await user.keyboard("{ArrowLeft}");
     expect(screen.getByRole("tooltip")).toHaveTextContent("Nov 11 · no usage");
     await user.keyboard("{End}");
@@ -190,7 +194,7 @@ describe("UsageScreen", () => {
     const user = userEvent.setup();
     render(<UsageScreen {...props} />);
     await user.click(screen.getByRole("tab", { name: "Activity" }));
-    expect(screen.getByText("2026-11-14 · 14.0M tokens")).toBeTruthy();
+    expect(screen.getByText("2026-11-14 · 14.0M")).toBeTruthy();
     expect(screen.queryByText(/arrow keys or hover/i)).toBeNull();
   });
 
@@ -199,16 +203,16 @@ describe("UsageScreen", () => {
     render(<UsageScreen {...props} />);
     await user.click(screen.getByRole("tab", { name: "Activity" }));
     expect(screen.getByRole("tab", { name: "Activity" })).toHaveAttribute("aria-selected", "true");
-    expect(screen.getByText("Last 52 weeks")).toBeTruthy();
+    for (const text of ["Last 52 weeks", "Nov 10 – Nov 16", "Less", "More"]) expect(screen.queryByText(text)).toBeNull();
     const dots = screen.getByRole("img", { name: /Arrow keys move between days/ });
     act(() => dots.focus());
-    expect(screen.getByText("2026-11-14 · 14.0M tokens")).toBeTruthy();
+    expect(screen.getByText("2026-11-14 · 14.0M")).toBeTruthy();
     await user.keyboard("{ArrowLeft}");
-    expect(screen.getByText("2026-11-07 · 6.0M tokens")).toBeTruthy();
+    expect(screen.getByText("2026-11-07 · 6.0M")).toBeTruthy();
     await user.keyboard("{ArrowUp}");
-    expect(screen.getByText("2026-11-06 · 5.0M tokens")).toBeTruthy();
+    expect(screen.getByText("2026-11-06 · 5.0M")).toBeTruthy();
     await user.keyboard("{ArrowRight}");
-    expect(screen.getByText("2026-11-13 · 12.0M tokens")).toBeTruthy();
+    expect(screen.getByText("2026-11-13 · 12.0M")).toBeTruthy();
     await user.keyboard("{Home}");
     expect(screen.getByText("2026-11-01 · no usage")).toBeTruthy();
   });
@@ -263,6 +267,13 @@ describe("ModelList", () => {
     expect(screen.queryByText("Model f")).toBeNull();
   });
 
+  it("names its columns for screen readers only", () => {
+    render(<ModelList breakdown={breakdown} />);
+    const heads = screen.getAllByRole("columnheader");
+    expect(heads.map((th) => th.textContent)).toEqual(["Model", "CLI", "Tokens", "Cost", "Share"]);
+    expect(heads.every((th) => th.closest("thead")?.classList.contains("sr-only"))).toBe(true);
+  });
+
   it("marks the CLI column and the share bar as what narrow screens drop", () => {
     const { container } = render(<ModelList breakdown={breakdown} />);
     const minor = [...container.querySelectorAll("[data-minor]")];
@@ -281,10 +292,12 @@ describe("RankScreen", () => {
     expect(within(rows[2]).getByText("GPT")).toBeTruthy();
   });
 
-  it("explains the Load column in a tooltip on its header", async () => {
+  it("names its columns for screen readers only, with no tooltip on Load", () => {
     render(<RankScreen entries={ENTRIES} me={null} handle="ada" />);
-    act(() => screen.getByText("Load").focus());
-    expect(await screen.findByRole("tooltip")).toHaveTextContent("Tokens relative to the highest total on this page.");
+    const heads = screen.getAllByRole("columnheader");
+    expect(heads.map((th) => th.textContent)).toEqual(["#", "Handle", "Top CLI", "Tokens", "Load"]);
+    expect(heads.every((th) => th.closest("thead")?.classList.contains("sr-only"))).toBe(true);
+    expect(heads[4].querySelector("[tabindex]")).toBeNull();
   });
 
   it("pins my row on top when I am off this page", () => {
@@ -438,6 +451,31 @@ describe("StateScreen", () => {
     await user.tab();
     await user.keyboard("{Enter}");
     expect(onSignIn).toHaveBeenCalled();
+  });
+});
+
+describe("StateScreen, lines the keys and the title already say", () => {
+  const body = (variant: StateVariant) => {
+    render(<StateScreen variant={variant} onRetry={() => {}} onSignIn={() => {}} />);
+    return [...screen.getByRole("region").querySelectorAll("p")].map((p) => p.textContent);
+  };
+
+  it("lets the skeleton say loading, naming it for screen readers only", () => {
+    render(<StateScreen variant="loading" />);
+    expect(screen.getByRole("heading", { name: "Loading" })).toHaveClass("sr-only");
+  });
+
+  it.each([
+    ["empty", ["Sync runs every 30 minutes."]],
+    ["error", ["Local tracking continues."]],
+    ["install", ["Requires Node.js 20.x."]],
+    ["expired", []],
+  ] as const)("prints only what %s adds", (variant, lines) => {
+    expect(body(variant)).toEqual(lines);
+  });
+
+  it("asks a crash for a bug report without repeating its Reload key", () => {
+    expect(body("crash")[0]).toBe("If the error persists, include the line below in a bug report.");
   });
 });
 

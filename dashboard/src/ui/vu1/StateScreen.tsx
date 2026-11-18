@@ -34,7 +34,9 @@ export function StateScreen({ variant, linkCode, detail, onRetry, onSignIn }: St
   const name = title(variant);
   return (
     <section data-vu1="screen" aria-label={name} aria-busy={variant === "loading" || undefined} className="min-h-60">
-      <h2 data-vu1="state-title">{name}</h2>
+      <h2 data-vu1="state-title" className={variant === "loading" ? "sr-only" : undefined}>
+        {name}
+      </h2>
       {variant === "loading" ? SKELETON.map((width) => <span key={width} data-vu1="skeleton" aria-hidden className={width} />) : null}
       {variant === "empty" ? <p data-vu1="state-body">{copy("vu1.state.empty_body")}</p> : null}
       {variant === "error" ? (
@@ -65,7 +67,6 @@ export function StateScreen({ variant, linkCode, detail, onRetry, onSignIn }: St
       {variant === "invalid" ? <p data-vu1="state-body">{copy("vu1.state.invalid_body")}</p> : null}
       {variant === "signed-out" || variant === "expired" ? (
         <>
-          {variant === "expired" ? <p data-vu1="state-body">{copy("vu1.state.expired_body")}</p> : null}
           <div>
             <Button tone="primary" onClick={onSignIn}>
               {copy("vu1.state.sign_in")}

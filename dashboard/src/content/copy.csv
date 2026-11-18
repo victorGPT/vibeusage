@@ -234,7 +234,6 @@ vu1.source.other,vu1,*,SourceSegment,other,"Other",,active
 vu1.usage.tabs_aria,vu1,DashboardPage,UsageScreen,tabs_aria,"Screen",,active
 vu1.usage.tab_usage,vu1,DashboardPage,UsageScreen,tab_usage,"Usage",,active
 vu1.usage.tab_activity,vu1,DashboardPage,UsageScreen,tab_activity,"Activity",,active
-vu1.usage.range_activity,vu1,DashboardPage,UsageScreen,range_activity,"Last 52 weeks",,active
 vu1.usage.tokens,vu1,DashboardPage,UsageScreen,tokens,"Tokens",,active
 vu1.usage.cost,vu1,DashboardPage,UsageScreen,cost,"Cost",,active
 vu1.usage.cost_hint,vu1,DashboardPage,UsageScreen,cost_hint,"Each token type (input, cached input, output, reasoning) is priced at the model's own rate.",,active
@@ -244,10 +243,8 @@ vu1.usage.rank_up,vu1,DashboardPage,UsageScreen,rank_up,"▲ {{n}}",,active
 vu1.usage.rank_down,vu1,DashboardPage,UsageScreen,rank_down,"▼ {{n}}",,active
 vu1.usage.bars_aria,vu1,DashboardPage,UsageScreen,bars_aria,"Tokens over the period, peak {{value}}",,active
 vu1.heat.aria,vu1,DashboardPage,UsageScreen,heat_aria,"Daily activity, last 52 weeks. Arrow keys move between days.",,active
-vu1.heat.day,vu1,DashboardPage,UsageScreen,heat_day,"{{date}} · {{value}} tokens",,active
+vu1.heat.day,vu1,DashboardPage,UsageScreen,heat_day,"{{date}} · {{value}}",,active
 vu1.heat.day_none,vu1,DashboardPage,UsageScreen,heat_day_none,"{{date}} · no usage",,active
-vu1.heat.less,vu1,DashboardPage,UsageScreen,heat_less,"Less",,active
-vu1.heat.more,vu1,DashboardPage,UsageScreen,heat_more,"More",,active
 vu1.stats.last_7,vu1,DashboardPage,StatMinis,last_7,"Last 7 days",,active
 vu1.stats.last_30,vu1,DashboardPage,StatMinis,last_30,"Last 30 days",,active
 vu1.stats.avg,vu1,DashboardPage,StatMinis,avg,"Average per active day",,active
@@ -264,7 +261,6 @@ vu1.rank.handle,vu1,LeaderboardPage,RankScreen,handle,"Handle",,active
 vu1.rank.top_cli,vu1,LeaderboardPage,RankScreen,top_cli,"Top CLI",,active
 vu1.rank.tokens,vu1,LeaderboardPage,RankScreen,tokens,"Tokens",,active
 vu1.rank.load,vu1,LeaderboardPage,RankScreen,load,"Load",,active
-vu1.rank.load_hint,vu1,LeaderboardPage,RankScreen,load_hint,"Tokens relative to the highest total on this page.",,active
 vu1.rank.cli_gpt,vu1,LeaderboardPage,RankScreen,cli_gpt,"GPT",,active
 vu1.rank.cli_claude,vu1,LeaderboardPage,RankScreen,cli_claude,"Claude",,active
 vu1.rank.cli_other,vu1,LeaderboardPage,RankScreen,cli_other,"Other",,active
@@ -286,20 +282,19 @@ vu1.toast.available_generic,vu1,*,UpgradeToast,available_generic,"A new CLI vers
 vu1.toast.update,vu1,*,UpgradeToast,update,"Copy update command",,active
 vu1.state.loading,vu1,*,StateScreen,loading,"Loading",,active
 vu1.state.empty_title,vu1,*,StateScreen,empty_title,"Waiting for first sync",,active
-vu1.state.empty_body,vu1,*,StateScreen,empty_body,"Usage appears after the first sync. Sync runs every 30 minutes.",,active
+vu1.state.empty_body,vu1,*,StateScreen,empty_body,"Sync runs every 30 minutes.",,active
 vu1.state.error_title,vu1,*,StateScreen,error_title,"The usage service is unavailable.",,active
-vu1.state.error_body,vu1,*,StateScreen,error_body,"Local tracking continues. Retry later.",,active
+vu1.state.error_body,vu1,*,StateScreen,error_body,"Local tracking continues.",,active
 vu1.state.retry,vu1,*,StateScreen,retry,"Retry",,active
 vu1.state.crash_title,vu1,*,StateScreen,crash_title,"An error occurred on this page.",,active
-vu1.state.crash_body,vu1,*,StateScreen,crash_body,"Reload the page. If the error persists, include the line below in a bug report.",,active
+vu1.state.crash_body,vu1,*,StateScreen,crash_body,"If the error persists, include the line below in a bug report.",,active
 vu1.state.reload,vu1,*,StateScreen,reload,"Reload",,active
 vu1.top.github_href,vu1,*,TopBar,github_href,"https://github.com/victorGPT/vibeusage",,active
 vu1.state.signed_out_title,vu1,*,StateScreen,signed_out_title,"Sign in with GitHub to view your usage and rank.",,active
 vu1.state.sign_in,vu1,*,StateScreen,sign_in,"Sign in",,active
 vu1.state.install_title,vu1,*,StateScreen,install_title,"Install the tracker",,active
-vu1.state.install_body,vu1,*,StateScreen,install_body,"Requires Node.js 20.x. Run:",,active
+vu1.state.install_body,vu1,*,StateScreen,install_body,"Requires Node.js 20.x.",,active
 vu1.state.expired_title,vu1,*,StateScreen,expired_title,"Session expired.",,active
-vu1.state.expired_body,vu1,*,StateScreen,expired_body,"Sign in again to resume syncing.",,active
 vu1.state.invalid_title,vu1,*,StateScreen,invalid_title,"This profile is private or the link is invalid.",,active
 vu1.state.invalid_body,vu1,*,StateScreen,invalid_body,"Request a new share link from the owner.",,active
 vu1.state.no_entries_title,vu1,LeaderboardPage,StateScreen,no_entries_title,"No entries for this period.",,active
@@ -307,10 +302,8 @@ vu1.identity.since,vu1,DashboardPage,IdentityStrip,since,"Since {{since}} · {{d
 vu1.identity.public,vu1,DashboardPage,IdentityStrip,public,"Public profile",,active
 vu1.identity.copy_link,vu1,DashboardPage,IdentityStrip,copy_link,"Copy share link",,active
 vu1.identity.copied,vu1,DashboardPage,IdentityStrip,copied,"Copied",,active
-vu1.identity.read_only,vu1,DashboardPage,IdentityStrip,read_only,"Public profile · read only",,active
 vu1.dashboard.device_name,vu1,DashboardPage,Device,name,"@{{handle}}",,active
 vu1.keys.install_copied,vu1,DashboardPage,InstallKey,install_copied,"Install command copied",,active
-vu1.landing.eyebrow,vu1,LandingPage,Hero,eyebrow,"Token usage tracker for AI coding CLIs",,active
 vu1.landing.title,vu1,LandingPage,Hero,title,"VIBEUSAGE",,active
 vu1.landing.body,vu1,LandingPage,Hero,body,"Reads token counts from the AI coding CLIs on your machine, prices them by model, and ranks totals across users. Only half-hour token totals are uploaded. Conversation content stays on your machine.",,active
 vu1.landing.clis,vu1,*,ClientList,clis,"Claude Code,Codex,Gemini,OpenCode,Kimi,Hermes,OpenClaw",,active
@@ -320,7 +313,6 @@ vu1.landing.leaderboard,vu1,LandingPage,Hero,leaderboard,"Leaderboard",,active
 vu1.landing.meter_name,vu1,LandingPage,Device,meter_name,"Global · example data",,active
 vu1.landing.meter_aria,vu1,*,GlobalMeter,meter_aria,"Global usage",,active
 vu1.landing.meter_period,vu1,*,GlobalMeter,meter_period,"Today",,active
-vu1.landing.meter_scope,vu1,*,GlobalMeter,meter_scope,"All users",,active
 vu1.landing.meter_tokens,vu1,*,GlobalMeter,meter_tokens,"Tokens",,active
 vu1.landing.meter_spend,vu1,*,GlobalMeter,meter_spend,"Cost",,active
 vu1.landing.meter_users,vu1,*,GlobalMeter,meter_users,"Users",,active
