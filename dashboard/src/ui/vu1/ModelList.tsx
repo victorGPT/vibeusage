@@ -19,7 +19,7 @@ export function ModelList({ breakdown, limit = 5 }: { breakdown: ModelBreakdown;
   return (
     <div data-vu1="lcd">
       <table data-vu1="list" data-vu1-cap="" aria-label={copy("vu1.models.aria")}>
-        <thead>
+        <thead className="sr-only">
           <tr>
             <th scope="col">{copy("vu1.models.model")}</th>
             <th scope="col" data-minor="">

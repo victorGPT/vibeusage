@@ -61,12 +61,7 @@ export function LandingPage({ signUpUrl }) {
         />
         <main className="grid-page gap-y-s4">
           <section className="col-span-12 flex flex-col gap-s4 self-center min-[761px]:col-span-6 min-[761px]:gap-s5">
-            <div className="flex flex-col gap-s3">
-              <p data-vu1-cap="" data-vu1="dim" className="m-0">
-                {copy("vu1.landing.eyebrow")}
-              </p>
-              <h1 data-vu1="hero-title">{copy("vu1.landing.title")}</h1>
-            </div>
+            <h1 data-vu1="hero-title">{copy("vu1.landing.title")}</h1>
             <p data-vu1="prose">{copy("vu1.landing.body")}</p>
             <InstallCommand command={copy("landing.install.command")} />
             <ClientList />

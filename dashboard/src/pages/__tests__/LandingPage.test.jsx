@@ -90,6 +90,11 @@ describe("LandingPage", () => {
     expect(within(hero).getByRole("link", { name: "Leaderboard" }).getAttribute("href")).toBe("/leaderboard");
   });
 
+  it("opens on the product name with no line above it", () => {
+    render(<LandingPage signInUrl="/sign-in" signUpUrl={SIGN_UP} />);
+    expect(screen.queryByText("Token usage tracker for AI coding CLIs")).toBeNull();
+  });
+
   it("never renders a raw copy key", () => {
     const { container } = render(<LandingPage signInUrl="/sign-in" signUpUrl={SIGN_UP} />);
     expect(container.textContent).not.toMatch(/\b(vu1|landing|dashboard|leaderboard)\.[a-z_]+/);

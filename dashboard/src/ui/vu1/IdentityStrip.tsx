@@ -15,7 +15,7 @@ type IdentityStripProps = {
 };
 
 // The meter's owner line: since when, plans, and the switch that publishes it at /share/<token>.
-// A share visitor sees it marked read-only instead.
+// A share visitor gets no keys, which is what marks it read-only.
 export function IdentityStrip({ owner, since, activeDays, subscriptions = [], publicEnabled = false, publicBusy = false, shareCopied = false, onPublicChange, onCopyShareLink }: IdentityStripProps) {
   return (
     <div data-vu1="identity" data-vu1-cap="" className="flex flex-wrap items-center justify-between gap-s4">
@@ -35,9 +35,7 @@ export function IdentityStrip({ owner, since, activeDays, subscriptions = [], pu
             {shareCopied ? copy("vu1.identity.copied") : copy("vu1.identity.copy_link")}
           </Button>
         </div>
-      ) : (
-        <span className="ml-auto">{copy("vu1.identity.read_only")}</span>
-      )}
+      ) : null}
     </div>
   );
 }

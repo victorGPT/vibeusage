@@ -175,19 +175,8 @@
 [data-skin="hardware"] [data-vu1="read-delta"][data-up] {
   color: var(--color-accent);
 }
-[data-skin="hardware"] [data-vu1="chart"] {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-s2);
-}
 [data-skin="hardware"] [data-vu1="chart"] [data-kit="bar-graph"] {
   height: 120px;
-}
-[data-skin="hardware"] [data-vu1="axis"] {
-  display: flex;
-  justify-content: space-between;
-  color: var(--color-screen-dim);
-  font-size: var(--font-size-label);
 }
 
 /* Activity: 52 weeks of LEDs, one column per week. Cell size is the LED pitch, no gap. */
@@ -202,14 +191,9 @@
   width: 100%;
   min-width: 420px;
 }
-[data-skin="hardware"] [data-vu1="heat"] i,
-[data-skin="hardware"] [data-vu1="heat-legend"] i {
+[data-skin="hardware"] [data-vu1="heat"] i {
   display: inline-grid;
   place-items: center;
-}
-[data-skin="hardware"] [data-vu1="heat-legend"] i {
-  width: 12px;
-  height: 12px;
 }
 [data-skin="hardware"] [data-vu1="heat"] i[data-level]::after {
   content: "";
@@ -231,17 +215,8 @@
   outline-offset: 1px;
 }
 [data-skin="hardware"] [data-vu1="heat-read"] {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: var(--spacing-s3);
   color: var(--color-screen-dim);
   font-size: var(--font-size-label);
-}
-[data-skin="hardware"] [data-vu1="heat-legend"] {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-s1);
 }
 
 /* Gray LCD: list screens and the mini readouts */
