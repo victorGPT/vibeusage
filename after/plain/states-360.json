@@ -1,0 +1,40 @@
+{
+ "state-loading": [
+  "Loading"
+ ],
+ "state-empty": [
+  "Waiting for first sync",
+  "Sync runs every 30 minutes."
+ ],
+ "state-error": [
+  "The usage service is unavailable.",
+  "Local tracking continues.",
+  "Retry"
+ ],
+ "state-crash": [
+  "An error occurred on this page.",
+  "If the error persists, include the line below in a bug report.",
+  "TypeError: x is undefined",
+  "Reload"
+ ],
+ "state-signed-out": [
+  "Sign in with GitHub to view your usage and rank.",
+  "Sign in"
+ ],
+ "state-install": [
+  "Install the tracker",
+  "Requires Node.js 20.x.",
+  "Copy"
+ ],
+ "state-expired": [
+  "Session expired.",
+  "Sign in"
+ ],
+ "state-invalid": [
+  "This profile is private or the link is invalid.",
+  "Request a new share link from the owner."
+ ],
+ "state-no-entries": [
+  "No entries for this period."
+ ]
+}
