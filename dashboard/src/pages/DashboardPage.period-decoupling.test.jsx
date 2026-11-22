@@ -376,7 +376,8 @@ describe("DashboardPage share link", () => {
     expect(screen.getByRole("button", { name: SHARE_LABEL })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: INSTALL_LABEL })).toBeNull();
     expect(screen.queryByRole("button", { name: "Sign out" })).toBeNull();
-    expect(screen.getByText("Public profile · read only")).toBeInTheDocument();
+    expect(screen.queryByRole("switch", { name: "Public profile" })).toBeNull();
+    expect(screen.queryByText(/read only/i)).toBeNull();
     expect(vibeusageApi.getLeaderboard).not.toHaveBeenCalled();
   });
 

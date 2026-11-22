@@ -27,10 +27,10 @@ describe("GlobalMeter", () => {
     expect([...bars].map((bar) => (bar as HTMLElement).style.getPropertyValue("--v"))).toEqual(["0.2", "1", "0.5"]);
   });
 
-  it("names the window and the scope it reads", () => {
+  it("names the window; the plate and the Users reading carry the scope", () => {
     render(<GlobalMeter {...props} />);
     expect(screen.getByText(copy("vu1.landing.meter_period"))).toBeTruthy();
-    expect(screen.getByText(copy("vu1.landing.meter_scope"))).toBeTruthy();
+    expect(screen.queryByText("All users")).toBeNull();
   });
 });
 

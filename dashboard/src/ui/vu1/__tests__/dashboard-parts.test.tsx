@@ -116,9 +116,11 @@ describe("IdentityStrip", () => {
     expect(screen.getByRole("button", { name: "Copy share link" })).toBeDisabled();
   });
 
-  it("reads as read-only for a share visitor", () => {
-    render(<IdentityStrip owner={false} />);
-    expect(screen.getByText("Public profile · read only")).toBeTruthy();
+  it("shows a share visitor no keys and no read-only note", () => {
+    render(<IdentityStrip owner={false} since="2026-01-02" activeDays={12} />);
+    expect(screen.getByText("Since 2026-01-02 · 12 active days")).toBeTruthy();
+    expect(screen.queryByText(/read only/i)).toBeNull();
     expect(screen.queryByRole("switch")).toBeNull();
+    expect(screen.queryByRole("button")).toBeNull();
   });
 });

@@ -18,9 +18,7 @@ export function GlobalMeter({ tokens, cost, users, bars }: GlobalMeterProps) {
   return (
     <section data-vu1="screen" data-variant="meter" aria-label={copy("vu1.landing.meter_aria")}>
       <div data-vu1="screen-head" data-vu1-cap="">
-        <span data-vu1="red">{copy("vu1.landing.meter_period")}</span>
-        <span data-vu1="range">{copy("vu1.landing.meter_scope")}</span>
-      </div>
+        <span data-vu1="red">{copy("vu1.landing.meter_period")}</span>      </div>
       <dl data-vu1="reads" data-vu1-cap="" className="m-0">
         {reads.map(([label, value]) => (
           <div key={label} data-vu1="read">

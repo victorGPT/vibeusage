@@ -29,7 +29,6 @@ type UsageScreenProps = {
   heatmap: Heatmap;
 };
 
-const LEVELS = [0, 1, 2, 3, 4];
 const SIGNS = ["−", "", "+"];
 const sign = (value: number) => SIGNS[Math.sign(value) + 1];
 const lit = (row: DailyRow) => (row.future ? 0 : tokens(row));
@@ -60,13 +59,6 @@ function readings(totals: UsageTotals, rank: number | null, delta: UsageDelta = 
       up: false,
     },
   ];
-}
-
-// At most five labels under the bars, first and last always among them.
-function axis(rows: DailyRow[], dateKey: DateKey) {
-  const count = Math.min(rows.length, rows.length <= 7 ? 7 : 5);
-  if (count < 2) return rows.map((row) => pointLabel(row, dateKey));
-  return Array.from({ length: count }, (_, i) => pointLabel(rows[Math.round((i * (rows.length - 1)) / (count - 1))], dateKey));
 }
 
 const STEPS: Record<string, (at: number, last: number) => number> = {
@@ -113,11 +105,6 @@ function UsageBars({ rows, dateKey }: { rows: DailyRow[]; dateKey: DateKey }) {
           );
         }}
       />
-      <div data-vu1="axis" aria-hidden>
-        {axis(rows, dateKey).map((label, i) => (
-          <span key={i}>{label}</span>
-        ))}
-      </div>
     </div>
   );
 }
@@ -161,16 +148,9 @@ function ActivityDots({ heatmap }: { heatmap: Heatmap }) {
           ))}
         </div>
       </div>
-      <div data-vu1="heat-read" data-vu1-cap="">
-        <span aria-live="polite">{current ? dayText(current) : null}</span>
-        <span data-vu1="heat-legend" aria-hidden>
-          {copy("vu1.heat.less")}
-          {LEVELS.map((level) => (
-            <i key={level} data-level={level} />
-          ))}
-          {copy("vu1.heat.more")}
-        </span>
-      </div>
+      <span data-vu1="heat-read" data-vu1-cap="" aria-live="polite">
+        {current ? dayText(current) : null}
+      </span>
     </div>
   );
 }
@@ -185,7 +165,7 @@ export function UsageScreen({ range, totals, rank, delta, rows, dateKey = "day",
             <TabsTab value="usage">{copy("vu1.usage.tab_usage")}</TabsTab>
             <TabsTab value="activity">{copy("vu1.usage.tab_activity")}</TabsTab>
           </TabsList>
-          <span data-vu1="range">{tab === "activity" ? copy("vu1.usage.range_activity") : range}</span>
+          {tab === "usage" ? <span data-vu1="range">{range}</span> : null}
         </div>
         <dl data-vu1="reads" data-vu1-cap="" className="m-0">
           {readings(totals, rank, delta).map((read) => (
