@@ -154,6 +154,64 @@ test("installOpenclawSessionPlugin grants conversation hook access via openclaw 
   await fs.rm(tmp, { recursive: true, force: true });
 });
 
+async function withStubbedSpawnSync(stub, fn) {
+  const original = childProcess.spawnSync;
+  childProcess.spawnSync = stub;
+  try {
+    return await fn();
+  } finally {
+    childProcess.spawnSync = original;
+  }
+}
+
+test("installOpenclawSessionPlugin fails when openclaw config set times out", async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "vibeusage-openclaw-plugin-"));
+  const home = path.join(tmp, "home");
+  const trackerDir = path.join(home, ".vibeusage", "tracker");
+  await fs.mkdir(trackerDir, { recursive: true });
+
+  // spawnSync's shape when its timeout kills the child: status null, a signal, an ETIMEDOUT error.
+  const stub = (_cmd, args) =>
+    args[0] === "config"
+      ? {
+          status: null,
+          signal: "SIGTERM",
+          error: Object.assign(new Error("spawnSync openclaw ETIMEDOUT"), { code: "ETIMEDOUT" }),
+          stdout: "",
+          stderr: "",
+        }
+      : { status: 0, signal: null, stdout: "", stderr: "" };
+
+  const result = await withStubbedSpawnSync(stub, () =>
+    installOpenclawSessionPlugin({ home, trackerDir, packageName: "vibeusage", env: {} }),
+  );
+
+  assert.equal(result.configured, false);
+  assert.equal(result.skippedReason, "openclaw-plugins-install-failed");
+  assert.match(result.error, /ETIMEDOUT/);
+
+  await fs.rm(tmp, { recursive: true, force: true });
+});
+
+test("openclaw-session integration install reports skipped when the plugin is not configured afterwards", async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "vibeusage-openclaw-plugin-"));
+  const home = path.join(tmp, "home");
+  const trackerDir = path.join(home, ".vibeusage", "tracker");
+  await fs.mkdir(trackerDir, { recursive: true });
+  const integration = require("../src/lib/integrations/openclaw-session");
+
+  // Every CLI call "succeeds" but nothing writes openclaw.json, so the probe stays unconfigured.
+  const stub = () => ({ status: 0, signal: null, stdout: "", stderr: "" });
+  const result = await withStubbedSpawnSync(stub, () =>
+    integration.install({ home, trackerPaths: { trackerDir }, env: {} }),
+  );
+
+  assert.equal(result.status, "skipped");
+  assert.equal(result.changed, false);
+
+  await fs.rm(tmp, { recursive: true, force: true });
+});
+
 test("installOpenclawSessionPlugin returns skipped when openclaw CLI is missing", async () => {
   const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "vibeusage-openclaw-plugin-"));
   const home = path.join(tmp, "home");

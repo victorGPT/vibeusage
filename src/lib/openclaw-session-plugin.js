@@ -307,11 +307,16 @@ function runOpenclawCli(args, env = process.env) {
     };
   }
 
-  if ((res.status || 0) !== 0) {
+  // status is null when spawnSync's timeout (or any signal) killed the child: that is a failure too.
+  if (res.error || res.signal || res.status !== 0) {
     return {
       code: Number(res.status || 1),
       skippedReason: "openclaw-plugins-install-failed",
-      error: (res.stderr || res.stdout || "").trim() || "openclaw plugins install failed",
+      error:
+        res.error?.message ||
+        (res.signal ? `openclaw ${args.join(" ")} killed by ${res.signal}` : "") ||
+        (res.stderr || res.stdout || "").trim() ||
+        "openclaw plugins install failed",
       stdout: res.stdout || "",
       stderr: res.stderr || "",
     };
