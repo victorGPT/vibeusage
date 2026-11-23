@@ -1305,7 +1305,8 @@ async function parseOpencodeSqliteRow({
 
   let msg;
   try {
-    msg = JSON.parse(String(row.data || ""));
+    // the v2 query returns data as an object
+    msg = row.data && typeof row.data === "object" ? row.data : JSON.parse(String(row.data || ""));
   } catch (_e) {
     return { eventsAggregated: 0 };
   }

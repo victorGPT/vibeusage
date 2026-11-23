@@ -114,6 +114,39 @@ test("opencode v2 session_message rows are counted with all token channels", asy
   });
 });
 
+test("opencode v2 rows migrated after a sync, with older timestamps, are still counted once", async () => {
+  // upstream migrates v1 sessions one by one in the background and keeps their original timestamps
+  await withTmp(async (tmp) => {
+    const dbPath = path.join(tmp, "opencode.db");
+    const queuePath = path.join(tmp, "queue.jsonl");
+    const t0 = T("2026-11-20T10:01:00.000Z");
+    sqlite(
+      dbPath,
+      [
+        V2_SCHEMA,
+        "INSERT INTO session_v2 VALUES ('ses_new', 'prj', NULL, " + t0 + ");",
+        "INSERT INTO session_v2 VALUES ('ses_old', 'prj', NULL, " + (t0 - 60000) + ");",
+        v2Row({ id: "msg_new", session: "ses_new", seq: 1, created: t0, updated: t0, data: assistant({ id: "msg_new", created: t0, completed: t0, tokens: tok(2, 1, 0, 0, 0) }) }),
+      ].join("\n"),
+    );
+    const cursors = { version: 1, files: {}, updatedAt: null };
+    const first = await parseOpencodeIncremental({ opencodeDbPath: dbPath, cursors, queuePath });
+    assert.equal(first.eventsAggregated, 1);
+
+    const old = [];
+    for (let i = 0; i < 100; i += 1) {
+      const at = t0 - 60000 + i;
+      old.push(v2Row({ id: "msg_old" + i, session: "ses_old", seq: i + 1, created: at, updated: at, data: assistant({ id: "msg_old" + i, created: at, completed: at, tokens: tok(1, 0, 0, 0, 0) }) }));
+    }
+    sqlite(dbPath, old.join("\n"));
+
+    const second = await parseOpencodeIncremental({ opencodeDbPath: dbPath, cursors, queuePath });
+    assert.equal(second.eventsAggregated, 100);
+    const third = await parseOpencodeIncremental({ opencodeDbPath: dbPath, cursors, queuePath });
+    assert.equal(third.eventsAggregated, 0);
+  });
+});
+
 test("opencode v2 rows already counted from v1 (same session|id) are not counted again", async () => {
   await withTmp(async (tmp) => {
     const dbPath = path.join(tmp, "opencode.db");

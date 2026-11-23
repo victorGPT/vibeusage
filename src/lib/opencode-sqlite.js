@@ -28,11 +28,12 @@ function buildMessageQuery(lastTimeCreated) {
 // Detect it by session_v2: pre-split v1 dbs already have a session_message table.
 const V2_PROBE_QUERY = "SELECT count(*) FROM sqlite_master WHERE type = 'table' AND name = 'session_v2';";
 
-// Tokens land when a step ends, which bumps time_updated, so v2 uses time_updated as the
-// cursor (emitted as time_created, the field the caller tracks). Rows without tokens are
-// still streaming and are picked up once they finish.
-function buildMessageQueryV2(lastTimeUpdated) {
-  const since = Number.isFinite(lastTimeUpdated) ? Math.max(0, Math.trunc(lastTimeUpdated)) : 0;
+// No time cursor: upstream migrates v1 sessions into session_message in the background with
+// their original timestamps, so rows can appear behind any cursor. Every sync reads all rows
+// that carry tokens (rows still streaming have none) and the session|id seen-keys dedupe.
+// data is trimmed to the fields the parser reads to keep the output small.
+// ponytail: full scan per sync; add a cursor with a lookback once migration completion is detectable.
+function buildMessageQueryV2() {
   return [
     "SELECT json_object(",
     "'id', m.id,",
@@ -40,13 +41,16 @@ function buildMessageQueryV2(lastTimeUpdated) {
     "'time_created', m.time_updated,",
     "'role', 'assistant',",
     "'project_worktree', p.worktree,",
-    "'data', m.data",
+    "'data', json_object(",
+    "'tokens', json_extract(m.data, '$.tokens'),",
+    "'time', json_extract(m.data, '$.time'),",
+    "'model', json_extract(m.data, '$.model')",
+    ")",
     ")",
     "FROM session_message m",
     "LEFT JOIN session_v2 s ON s.id = m.session_id",
     "LEFT JOIN project p ON p.id = s.project_id",
-    `WHERE m.time_updated >= ${since}`,
-    "AND m.type IN ('assistant', 'compaction')",
+    "WHERE m.type IN ('assistant', 'compaction')",
     "AND json_extract(m.data, '$.tokens') IS NOT NULL",
     // A fork copies its parent's rows under new ids but keeps their time_created, which predates the fork.
     "AND NOT (s.fork_session_id IS NOT NULL AND m.time_created < s.time_created)",
@@ -102,7 +106,7 @@ async function readOpencodeSqliteRows({
     const probe = await execFileFn("sqlite3", ["-readonly", dbPath, V2_PROBE_QUERY]);
     const query =
       String(probe?.stdout || "").trim() === "1"
-        ? buildMessageQueryV2(effectiveLastTimeCreated)
+        ? buildMessageQueryV2()
         : buildMessageQuery(effectiveLastTimeCreated);
     const { stdout } = await execFileFn("sqlite3", ["-readonly", dbPath, query], {
       maxBuffer: 64 * 1024 * 1024,
