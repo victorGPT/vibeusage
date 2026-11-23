@@ -5,7 +5,11 @@ const fs = require("node:fs/promises");
 const cp = require("node:child_process");
 const { test } = require("node:test");
 
+const { promisify } = require("node:util");
 const { parseOpencodeIncremental } = require("../src/lib/rollout");
+const { readOpencodeSqliteRows } = require("../src/lib/opencode-sqlite");
+
+const execFileAsync = promisify(cp.execFile);
 
 // Synthetic opencode.db fixtures. v2 schema follows anomalyco/opencode
 // packages/core/src/database/migration/20260804233008_loose_psylocke.ts (trimmed to the columns we read).
@@ -189,5 +193,67 @@ test("opencode v1 db (message table) is still read when session_v2 is absent", a
     assert.equal(res.eventsAggregated, 1);
     const queued = await readQueue(queuePath);
     assert.equal(queued[0].total_tokens, 5);
+  });
+});
+
+test("opencode sqlite rows: 130k rows in one read do not overflow the stack", async () => {
+  await withTmp(async (tmp) => {
+    const t0 = T("2026-11-20T10:01:00.000Z");
+    const data = JSON.stringify({ tokens: tok(1, 0, 0, 0, 0), time: { created: t0 } });
+    const rows = Array.from({ length: 130000 }, (_, i) => ({ id: "m" + i, session_id: "s", role: "assistant", time_created: t0 + i, data }));
+    const cursors = { version: 1, files: {}, updatedAt: null };
+    const res = await parseOpencodeIncremental({
+      opencodeDbPath: path.join(tmp, "opencode.db"),
+      cursors,
+      queuePath: path.join(tmp, "queue.jsonl"),
+      readSqliteRows: async () => ({ status: "ok", checkedAt: "2026-11-20T00:00:00.000Z", inode: 1, rows }),
+    });
+    assert.equal(res.eventsAggregated, 130000);
+    assert.equal(cursors.opencodeSqlite.lastTimeCreated, t0 + 129999);
+  });
+});
+
+test("opencode v2 reads in pages and later syncs only read new or updated rows", async () => {
+  await withTmp(async (tmp) => {
+    const dbPath = path.join(tmp, "opencode.db");
+    const queuePath = path.join(tmp, "queue.jsonl");
+    const t0 = T("2026-11-20T10:01:00.000Z");
+    const rowsFor = (from, to, at) => {
+      const out = [];
+      for (let i = from; i < to; i += 1) {
+        out.push(v2Row({ id: "msg_" + i, session: "ses_a", seq: i + 1, created: at + i, updated: at + i, data: assistant({ id: "msg_" + i, created: at + i, completed: at + i, tokens: tok(1, 0, 0, 0, 0) }) }));
+      }
+      return out.join("\n");
+    };
+    sqlite(dbPath, [V2_SCHEMA, "INSERT INTO session_v2 VALUES ('ses_a', 'prj', NULL, " + t0 + ");", rowsFor(0, 5, t0)].join("\n"));
+    const cursors = { version: 1, files: {}, updatedAt: null };
+    let queries = 0;
+    let returned = 0;
+    const readSqliteRows = async (args) => {
+      const res = await readOpencodeSqliteRows({
+        ...args,
+        pageSize: 2,
+        execFileFn: async (...a) => {
+          queries += 1;
+          return execFileAsync(...a);
+        },
+      });
+      returned = res.rows.length;
+      return res;
+    };
+
+    const first = await parseOpencodeIncremental({ opencodeDbPath: dbPath, cursors, queuePath, readSqliteRows });
+    assert.equal(first.eventsAggregated, 5);
+    assert.equal(queries, 4); // probe + pages of 2, 2, 1
+
+    // 3 rows migrated later with old timestamps, plus nothing else changed
+    sqlite(dbPath, rowsFor(5, 8, t0 - 60000));
+    const second = await parseOpencodeIncremental({ opencodeDbPath: dbPath, cursors, queuePath, readSqliteRows });
+    assert.equal(second.eventsAggregated, 3);
+    // 3 new rowids + the 1 row at the time_updated cursor (>=); not the whole table
+    assert.equal(returned, 4);
+
+    const third = await parseOpencodeIncremental({ opencodeDbPath: dbPath, cursors, queuePath, readSqliteRows });
+    assert.equal(third.eventsAggregated, 0);
   });
 });
