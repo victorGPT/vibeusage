@@ -34,6 +34,26 @@ test("upsertNotify treats a wrapped vibeusage notify as installed and leaves the
   assert.deepEqual(fs.readdirSync(dir), ["config.toml"]);
 });
 
+test("upsertNotify does not treat a different path that merely contains ours as installed", async () => {
+  const dir = tmpDir("vibeusage-codex-lookalike-");
+  const configPath = path.join(dir, "config.toml");
+  const notifyOriginalPath = path.join(dir, "codex_notify_original.json");
+  fs.writeFileSync(
+    configPath,
+    'notify = ["node", "/home/u/.vibeusage/bin/notify.cjs.other", "/x/home/u/.vibeusage/bin/notify.cjs"]\n',
+    "utf8",
+  );
+
+  const result = await upsertNotify({
+    configPath,
+    notifyCmd: ["/usr/bin/env", "node", "/home/u/.vibeusage/bin/notify.cjs"],
+    notifyOriginalPath,
+  });
+
+  assert.equal(result.changed, true);
+  assert.ok(fs.existsSync(result.backupPath));
+});
+
 test("upsertNotify still installs and backs up when notify points elsewhere", async () => {
   const dir = tmpDir("vibeusage-codex-other-");
   const configPath = path.join(dir, "config.toml");

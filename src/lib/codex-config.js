@@ -151,12 +151,15 @@ function extractNotify(text) {
 function notifyMentionsScript(text, notifyCmd) {
   const script = notifyCmd.find((p) => String(p).endsWith("notify.cjs"));
   if (!script) return false;
+  // Whole-path match only: bounded by a quote, whitespace, comma or bracket on both sides.
+  const escaped = script.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const re = new RegExp(`(?:^|["'\\s,[])${escaped}(?=["'\\s,\\]]|$)`);
   const lines = text.split(/\r?\n/);
   for (let i = 0; i < lines.length; i++) {
     const m = lines[i].match(/^\s*notify\s*=\s*(.*)\s*$/);
     if (!m) continue;
     const literal = readTomlArrayLiteral(lines, i, (m[1] || "").trim());
-    if (literal && literal.replace(/\\/g, "").includes(script)) return true;
+    if (literal && re.test(literal.replace(/\\/g, ""))) return true;
   }
   return false;
 }
