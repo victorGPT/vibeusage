@@ -23,6 +23,60 @@ function buildMessageQuery(lastTimeCreated) {
   ].join(" ");
 }
 
+// opencode v2 (anomalyco/opencode migration 20260804233008_loose_psylocke) moved messages to
+// session_message(id, session_id, type, seq, time_created, time_updated, data) under session_v2.
+// Detect it by session_v2: pre-split v1 dbs already have a session_message table.
+const V2_PROBE_QUERY = "SELECT count(*) FROM sqlite_master WHERE type = 'table' AND name = 'session_v2';";
+
+// Cursor on rowid OR time_updated. Upstream's background v1 migration inserts rows with their
+// original (old) timestamps but new rowids, so rowid catches them; tokens land at step end and
+// bump time_updated, so time_updated catches rows that were still streaming (no tokens yet).
+// session|id seen-keys keep it exact. Read in rowid pages so one sqlite3 call stays small.
+// data is trimmed to the fields the parser reads.
+const V2_PAGE_SIZE = 20000;
+
+// Pages are separate sqlite3 calls. Only rows with time_updated <= the bound read before paging
+// are returned, so the time cursor never passes a row updated mid-read (e.g. a row skipped on an
+// earlier page that finished meanwhile); such rows are newer than the bound and come next sync.
+const V2_BOUND_QUERY = "SELECT coalesce(max(time_updated), 0) FROM session_message;";
+
+function buildMessageQueryV2({
+  afterRowid = 0,
+  lastRowid = 0,
+  lastTimeUpdated = 0,
+  maxTimeUpdated = Number.MAX_SAFE_INTEGER,
+  limit = V2_PAGE_SIZE,
+} = {}) {
+  const int = (v) => (Number.isFinite(v) ? Math.max(0, Math.trunc(v)) : 0);
+  return [
+    "SELECT json_object(",
+    "'rowid', m.rowid,",
+    "'id', m.id,",
+    "'session_id', m.session_id,",
+    "'time_created', m.time_updated,",
+    "'role', 'assistant',",
+    "'project_worktree', p.worktree,",
+    "'data', json_object(",
+    "'tokens', json_extract(m.data, '$.tokens'),",
+    "'time', json_extract(m.data, '$.time'),",
+    "'model', json_extract(m.data, '$.model')",
+    ")",
+    ")",
+    "FROM session_message m",
+    "LEFT JOIN session_v2 s ON s.id = m.session_id",
+    "LEFT JOIN project p ON p.id = s.project_id",
+    `WHERE m.rowid > ${int(afterRowid)}`,
+    `AND (m.rowid > ${int(lastRowid)} OR m.time_updated >= ${int(lastTimeUpdated)})`,
+    `AND m.time_updated <= ${int(maxTimeUpdated)}`,
+    "AND m.type IN ('assistant', 'compaction')",
+    "AND json_extract(m.data, '$.tokens') IS NOT NULL",
+    // A fork copies its parent's rows under new ids but keeps their time_created, which predates the fork.
+    "AND NOT (s.fork_session_id IS NOT NULL AND m.time_created < s.time_created)",
+    "ORDER BY m.rowid ASC",
+    `LIMIT ${Math.max(1, int(limit))};`,
+  ].join(" ");
+}
+
 function parseMessageRows(stdout) {
   const lines = String(stdout || "")
     .split(/\r?\n/)
@@ -47,7 +101,9 @@ function normalizeErrorCode(error) {
 async function readOpencodeSqliteRows({
   dbPath,
   lastTimeCreated = 0,
+  lastRowid = 0,
   expectedInode = 0,
+  pageSize = V2_PAGE_SIZE,
   statFn = fs.stat,
   execFileFn = execFileAsync,
 }) {
@@ -66,17 +122,40 @@ async function readOpencodeSqliteRows({
 
   try {
     const inode = Number.isFinite(st.ino) ? st.ino : 0;
-    const effectiveLastTimeCreated =
-      expectedInode && inode && expectedInode !== inode ? 0 : lastTimeCreated;
-    const { stdout } = await execFileFn(
-      "sqlite3",
-      ["-readonly", dbPath, buildMessageQuery(effectiveLastTimeCreated)],
-      { maxBuffer: 64 * 1024 * 1024 },
-    );
+    const reset = Boolean(expectedInode && inode && expectedInode !== inode);
+    const effectiveLastTimeCreated = reset ? 0 : lastTimeCreated;
+    const run = async (query) =>
+      parseMessageRows(
+        (await execFileFn("sqlite3", ["-readonly", dbPath, query], { maxBuffer: 64 * 1024 * 1024 })).stdout,
+      );
+    const probe = await execFileFn("sqlite3", ["-readonly", dbPath, V2_PROBE_QUERY]);
+    let rows;
+    if (String(probe?.stdout || "").trim() === "1") {
+      rows = [];
+      const bound = await execFileFn("sqlite3", ["-readonly", dbPath, V2_BOUND_QUERY]);
+      const maxTimeUpdated = Number(String(bound?.stdout || "").trim()) || 0;
+      let afterRowid = 0;
+      for (;;) {
+        const page = await run(
+          buildMessageQueryV2({
+            afterRowid,
+            lastRowid: reset ? 0 : lastRowid,
+            lastTimeUpdated: effectiveLastTimeCreated,
+            maxTimeUpdated,
+            limit: pageSize,
+          }),
+        );
+        for (const row of page) rows.push(row);
+        if (page.length < pageSize) break;
+        afterRowid = Number(page[page.length - 1].rowid);
+      }
+    } else {
+      rows = await run(buildMessageQuery(effectiveLastTimeCreated));
+    }
     return {
       status: "ok",
       checkedAt,
-      rows: parseMessageRows(stdout),
+      rows,
       inode,
       cursorReset: Boolean(expectedInode && inode && expectedInode !== inode),
       errorCode: null,
@@ -108,6 +187,7 @@ async function readOpencodeSqliteRows({
 
 module.exports = {
   buildMessageQuery,
+  buildMessageQueryV2,
   parseMessageRows,
   readOpencodeSqliteRows,
 };

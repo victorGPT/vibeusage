@@ -616,6 +616,7 @@ async function parseOpencodeIncremental({
     const sqliteResult = await readRows({
       dbPath: opencodeDbPath,
       lastTimeCreated: opencodeSqliteState.lastTimeCreated,
+      lastRowid: opencodeSqliteState.lastRowid,
       expectedInode: opencodeSqliteState.inode,
     });
 
@@ -674,17 +675,17 @@ async function parseOpencodeIncremental({
         eventsAggregated += result.eventsAggregated;
       }
 
-      const lastTimeCreated = sameDb ? opencodeSqliteState.lastTimeCreated : 0;
-      const maxTime =
-        rawRows.length > 0
-          ? Math.max(
-              lastTimeCreated,
-              ...rawRows.map((row) =>
-                Number.isFinite(Number(row?.time_created)) ? Number(row.time_created) : 0,
-              ),
-            )
-          : lastTimeCreated;
+      // A loop, not Math.max(...rows): spreading 100k+ rows overflows the call stack.
+      let maxTime = sameDb ? opencodeSqliteState.lastTimeCreated : 0;
+      let maxRowid = sameDb ? opencodeSqliteState.lastRowid : 0;
+      for (const row of rawRows) {
+        const time = Number(row?.time_created);
+        if (Number.isFinite(time) && time > maxTime) maxTime = time;
+        const rowid = Number(row?.rowid);
+        if (Number.isFinite(rowid) && rowid > maxRowid) maxRowid = rowid;
+      }
       opencodeSqliteState.lastTimeCreated = maxTime;
+      opencodeSqliteState.lastRowid = maxRowid;
       opencodeSqliteState.lastProcessedIds = rawRows
         .filter((row) => Number(row?.time_created) === maxTime)
         .map((row) => row?.id)
@@ -1314,7 +1315,8 @@ async function parseOpencodeSqliteRow({
 
   let msg;
   try {
-    msg = JSON.parse(String(row.data || ""));
+    // the v2 query returns data as an object
+    msg = row.data && typeof row.data === "object" ? row.data : JSON.parse(String(row.data || ""));
   } catch (_e) {
     return { eventsAggregated: 0 };
   }
@@ -1351,7 +1353,8 @@ async function parseOpencodeSqliteRow({
     return { eventsAggregated: 0 };
   }
 
-  const model = normalizeModelInput(msg?.modelID || msg?.model || msg?.modelId) || DEFAULT_MODEL;
+  // v2 stores model as { id, providerID }.
+  const model = normalizeModelInput(msg?.modelID || msg?.model?.id || msg?.model || msg?.modelId) || DEFAULT_MODEL;
   const bucket = getHourlyBucket(hourlyState, source, model, bucketStart);
   addTotals(bucket.totals, currentTotals);
   touchedBuckets.add(bucketKey(source, model, bucketStart));
@@ -1903,6 +1906,7 @@ function normalizeOpencodeSqliteState(raw) {
     lastTimeCreated: Number.isFinite(Number(state.lastTimeCreated))
       ? Number(state.lastTimeCreated)
       : 0,
+    lastRowid: Number.isFinite(Number(state.lastRowid)) ? Number(state.lastRowid) : 0,
     lastProcessedIds: Array.isArray(state.lastProcessedIds)
       ? state.lastProcessedIds
           .filter((value) => typeof value === "string" && value.trim())
