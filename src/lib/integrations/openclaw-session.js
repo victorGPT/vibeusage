@@ -69,6 +69,9 @@ module.exports = {
         result.error ? `OpenClaw config unreadable: ${result.error}` : "OpenClaw config unreadable",
       );
     }
+    if (!result?.configured) {
+      return action(this, "skipped", false, "Session plugin not configured after install (conversation hook access missing?)");
+    }
     return action(
       this,
       before?.configured ? "set" : "installed",

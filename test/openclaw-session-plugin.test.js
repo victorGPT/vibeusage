@@ -52,7 +52,10 @@ test("probeOpenclawSessionPluginState detects linked + enabled plugin", async ()
       {
         plugins: {
           entries: {
-            [OPENCLAW_SESSION_PLUGIN_ID]: { enabled: true },
+            [OPENCLAW_SESSION_PLUGIN_ID]: {
+              enabled: true,
+              hooks: { allowConversationAccess: true },
+            },
           },
           load: {
             paths: [pluginEntryDir],
@@ -79,6 +82,132 @@ test("probeOpenclawSessionPluginState detects linked + enabled plugin", async ()
   assert.equal(state.linked, true);
   assert.equal(state.installed, true);
   assert.equal(state.pluginFilesReady, true);
+
+  await fs.rm(tmp, { recursive: true, force: true });
+});
+
+test("probeOpenclawSessionPluginState reports unconfigured without conversation hook access", async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "vibeusage-openclaw-plugin-"));
+  const home = path.join(tmp, "home");
+  const trackerDir = path.join(home, ".vibeusage", "tracker");
+  await fs.mkdir(trackerDir, { recursive: true });
+
+  const { pluginEntryDir, openclawConfigPath } = resolveOpenclawSessionPluginPaths({
+    home,
+    trackerDir,
+    env: {},
+  });
+  await ensureOpenclawSessionPluginFiles({
+    pluginDir: path.dirname(pluginEntryDir),
+    trackerDir,
+    packageName: "vibeusage",
+  });
+  await fs.mkdir(path.dirname(openclawConfigPath), { recursive: true });
+  await fs.writeFile(
+    openclawConfigPath,
+    JSON.stringify({
+      plugins: {
+        entries: { [OPENCLAW_SESSION_PLUGIN_ID]: { enabled: true } },
+        load: { paths: [pluginEntryDir] },
+      },
+    }),
+    "utf8",
+  );
+
+  const state = await probeOpenclawSessionPluginState({ home, trackerDir, env: {} });
+  assert.equal(state.enabled, true);
+  assert.equal(state.linked, true);
+  assert.equal(state.conversationAccess, false);
+  assert.equal(state.configured, false);
+
+  await fs.rm(tmp, { recursive: true, force: true });
+});
+
+test("installOpenclawSessionPlugin grants conversation hook access via openclaw config set", async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "vibeusage-openclaw-plugin-"));
+  const home = path.join(tmp, "home");
+  const trackerDir = path.join(home, ".vibeusage", "tracker");
+  const binDir = path.join(tmp, "bin");
+  const argvLog = path.join(tmp, "argv.log");
+  await fs.mkdir(trackerDir, { recursive: true });
+  await fs.mkdir(binDir, { recursive: true });
+  const fakeCli = path.join(binDir, "openclaw");
+  await fs.writeFile(fakeCli, `#!/bin/sh\necho "$*" >> "${argvLog}"\n`, "utf8");
+  await fs.chmod(fakeCli, 0o755);
+
+  await installOpenclawSessionPlugin({
+    home,
+    trackerDir,
+    packageName: "vibeusage",
+    env: { PATH: `${binDir}:/usr/bin:/bin`, OPENCLAW_CONFIG_PATH: path.join(home, ".openclaw", "openclaw.json") },
+  });
+
+  const calls = (await fs.readFile(argvLog, "utf8")).trim().split("\n");
+  assert.equal(calls.length, 3);
+  assert.match(calls[0], /^plugins install --link /);
+  assert.equal(calls[1], `plugins enable ${OPENCLAW_SESSION_PLUGIN_ID}`);
+  assert.equal(
+    calls[2],
+    `config set plugins.entries.${OPENCLAW_SESSION_PLUGIN_ID}.hooks.allowConversationAccess true --strict-json`,
+  );
+
+  await fs.rm(tmp, { recursive: true, force: true });
+});
+
+async function withStubbedSpawnSync(stub, fn) {
+  const original = childProcess.spawnSync;
+  childProcess.spawnSync = stub;
+  try {
+    return await fn();
+  } finally {
+    childProcess.spawnSync = original;
+  }
+}
+
+test("installOpenclawSessionPlugin fails when openclaw config set times out", async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "vibeusage-openclaw-plugin-"));
+  const home = path.join(tmp, "home");
+  const trackerDir = path.join(home, ".vibeusage", "tracker");
+  await fs.mkdir(trackerDir, { recursive: true });
+
+  // spawnSync's shape when its timeout kills the child: status null, a signal, an ETIMEDOUT error.
+  const stub = (_cmd, args) =>
+    args[0] === "config"
+      ? {
+          status: null,
+          signal: "SIGTERM",
+          error: Object.assign(new Error("spawnSync openclaw ETIMEDOUT"), { code: "ETIMEDOUT" }),
+          stdout: "",
+          stderr: "",
+        }
+      : { status: 0, signal: null, stdout: "", stderr: "" };
+
+  const result = await withStubbedSpawnSync(stub, () =>
+    installOpenclawSessionPlugin({ home, trackerDir, packageName: "vibeusage", env: {} }),
+  );
+
+  assert.equal(result.configured, false);
+  assert.equal(result.skippedReason, "openclaw-plugins-install-failed");
+  assert.match(result.error, /ETIMEDOUT/);
+
+  await fs.rm(tmp, { recursive: true, force: true });
+});
+
+test("openclaw-session integration install reports skipped when the plugin is not configured afterwards", async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "vibeusage-openclaw-plugin-"));
+  const home = path.join(tmp, "home");
+  const trackerDir = path.join(home, ".vibeusage", "tracker");
+  await fs.mkdir(trackerDir, { recursive: true });
+  const integration = require("../src/lib/integrations/openclaw-session");
+
+  // Every CLI call "succeeds" but nothing writes openclaw.json, so the probe stays unconfigured.
+  const stub = () => ({ status: 0, signal: null, stdout: "", stderr: "" });
+  const result = await withStubbedSpawnSync(stub, () =>
+    integration.install({ home, trackerPaths: { trackerDir }, env: {} }),
+  );
+
+  assert.equal(result.status, "skipped");
+  assert.equal(result.changed, false);
 
   await fs.rm(tmp, { recursive: true, force: true });
 });
@@ -129,7 +258,10 @@ test("removeOpenclawSessionPluginConfig removes linked config and plugin dir", a
       {
         plugins: {
           entries: {
-            [OPENCLAW_SESSION_PLUGIN_ID]: { enabled: true },
+            [OPENCLAW_SESSION_PLUGIN_ID]: {
+              enabled: true,
+              hooks: { allowConversationAccess: true },
+            },
             keep_plugin: { enabled: true },
           },
           load: {

@@ -138,7 +138,10 @@ test("diagnostics exposes only the supported OpenClaw session plugin path", asyn
       {
         plugins: {
           entries: {
-            [OPENCLAW_SESSION_PLUGIN_ID]: { enabled: true },
+            [OPENCLAW_SESSION_PLUGIN_ID]: {
+              enabled: true,
+              hooks: { allowConversationAccess: true },
+            },
           },
           load: {
             paths: [pluginEntryDir],
