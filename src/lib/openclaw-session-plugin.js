@@ -68,6 +68,24 @@ async function installOpenclawSessionPlugin({
     };
   }
 
+  // OpenClaw 2026.9.5+: non-bundled plugins only receive llm_output with this hook policy
+  // (upstream docs/plugins/hooks.md "Permissions and scope").
+  const hookResult = runOpenclawCli(
+    ["config", "set", `plugins.entries.${paths.pluginId}.hooks.allowConversationAccess`, "true", "--strict-json"],
+    env,
+  );
+  if (hookResult.skippedReason) {
+    return {
+      configured: false,
+      ...paths,
+      skippedReason: hookResult.skippedReason,
+      error: hookResult.error,
+      stdout: hookResult.stdout,
+      stderr: hookResult.stderr,
+      code: hookResult.code,
+    };
+  }
+
   const state = await probeOpenclawSessionPluginState({ home, trackerDir, env });
   return {
     configured: state.configured,
@@ -151,6 +169,7 @@ async function probeOpenclawSessionPluginState({
 
   const pluginEntry = cfg?.plugins?.entries?.[pluginId];
   const enabled = pluginEntry ? pluginEntry.enabled !== false : false;
+  const conversationAccess = pluginEntry?.hooks?.allowConversationAccess === true;
 
   const loadPaths = Array.isArray(cfg?.plugins?.load?.paths) ? cfg.plugins.load.paths : [];
   const normalizedPluginEntryDir = path.resolve(pluginEntryDir);
@@ -164,8 +183,9 @@ async function probeOpenclawSessionPluginState({
   const installed = Boolean(installEntry);
 
   return {
-    configured: enabled && linked && pluginFilesReady,
+    configured: enabled && conversationAccess && linked && pluginFilesReady,
     enabled,
+    conversationAccess,
     linked,
     installed,
     pluginFilesReady,
