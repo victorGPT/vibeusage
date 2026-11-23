@@ -23,6 +23,37 @@ function buildMessageQuery(lastTimeCreated) {
   ].join(" ");
 }
 
+// opencode v2 (anomalyco/opencode migration 20260804233008_loose_psylocke) moved messages to
+// session_message(id, session_id, type, seq, time_created, time_updated, data) under session_v2.
+// Detect it by session_v2: pre-split v1 dbs already have a session_message table.
+const V2_PROBE_QUERY = "SELECT count(*) FROM sqlite_master WHERE type = 'table' AND name = 'session_v2';";
+
+// Tokens land when a step ends, which bumps time_updated, so v2 uses time_updated as the
+// cursor (emitted as time_created, the field the caller tracks). Rows without tokens are
+// still streaming and are picked up once they finish.
+function buildMessageQueryV2(lastTimeUpdated) {
+  const since = Number.isFinite(lastTimeUpdated) ? Math.max(0, Math.trunc(lastTimeUpdated)) : 0;
+  return [
+    "SELECT json_object(",
+    "'id', m.id,",
+    "'session_id', m.session_id,",
+    "'time_created', m.time_updated,",
+    "'role', 'assistant',",
+    "'project_worktree', p.worktree,",
+    "'data', m.data",
+    ")",
+    "FROM session_message m",
+    "LEFT JOIN session_v2 s ON s.id = m.session_id",
+    "LEFT JOIN project p ON p.id = s.project_id",
+    `WHERE m.time_updated >= ${since}`,
+    "AND m.type IN ('assistant', 'compaction')",
+    "AND json_extract(m.data, '$.tokens') IS NOT NULL",
+    // A fork copies its parent's rows under new ids but keeps their time_created, which predates the fork.
+    "AND NOT (s.fork_session_id IS NOT NULL AND m.time_created < s.time_created)",
+    "ORDER BY m.time_updated ASC;",
+  ].join(" ");
+}
+
 function parseMessageRows(stdout) {
   const lines = String(stdout || "")
     .split(/\r?\n/)
@@ -68,11 +99,14 @@ async function readOpencodeSqliteRows({
     const inode = Number.isFinite(st.ino) ? st.ino : 0;
     const effectiveLastTimeCreated =
       expectedInode && inode && expectedInode !== inode ? 0 : lastTimeCreated;
-    const { stdout } = await execFileFn(
-      "sqlite3",
-      ["-readonly", dbPath, buildMessageQuery(effectiveLastTimeCreated)],
-      { maxBuffer: 64 * 1024 * 1024 },
-    );
+    const probe = await execFileFn("sqlite3", ["-readonly", dbPath, V2_PROBE_QUERY]);
+    const query =
+      String(probe?.stdout || "").trim() === "1"
+        ? buildMessageQueryV2(effectiveLastTimeCreated)
+        : buildMessageQuery(effectiveLastTimeCreated);
+    const { stdout } = await execFileFn("sqlite3", ["-readonly", dbPath, query], {
+      maxBuffer: 64 * 1024 * 1024,
+    });
     return {
       status: "ok",
       checkedAt,
@@ -108,6 +142,7 @@ async function readOpencodeSqliteRows({
 
 module.exports = {
   buildMessageQuery,
+  buildMessageQueryV2,
   parseMessageRows,
   readOpencodeSqliteRows,
 };

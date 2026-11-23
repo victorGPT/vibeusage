@@ -1342,7 +1342,8 @@ async function parseOpencodeSqliteRow({
     return { eventsAggregated: 0 };
   }
 
-  const model = normalizeModelInput(msg?.modelID || msg?.model || msg?.modelId) || DEFAULT_MODEL;
+  // v2 stores model as { id, providerID }.
+  const model = normalizeModelInput(msg?.modelID || msg?.model?.id || msg?.model || msg?.modelId) || DEFAULT_MODEL;
   const bucket = getHourlyBucket(hourlyState, source, model, bucketStart);
   addTotals(bucket.totals, currentTotals);
   touchedBuckets.add(bucketKey(source, model, bucketStart));
