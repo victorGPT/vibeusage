@@ -4,7 +4,7 @@ const path = require("node:path");
 const fs = require("node:fs/promises");
 const { test } = require("node:test");
 
-const { parseGeminiIncremental, listGeminiSessionFiles } = require("../src/lib/rollout");
+const { parseGeminiIncremental, listGeminiSessionFiles, readGeminiMessages } = require("../src/lib/rollout");
 
 // Gemini CLI records each API response's usageMetadata per message (not a
 // running total): input includes cached; total = input + output + thoughts + tool.
@@ -147,17 +147,40 @@ test("gemini legacy index cursor: messages up to lastIndex are not re-counted", 
   });
 });
 
-test("gemini seen-id cap: a session past 500 calls is not re-counted on the next sync", async () => {
+test("gemini: a rewind after 500+ synced calls never re-counts old calls", async () => {
   await withTmp(async (dir) => {
-    const file = path.join(dir, "session-f.json");
+    const file = path.join(dir, "session-f.jsonl");
     const queuePath = path.join(dir, "queue.jsonl");
     const cursors = { files: {} };
-    const messages = Array.from({ length: 501 }, (_, i) => gem(`g${i}`, tok(1, 0, 0, 0, 0)));
-    await fs.writeFile(file, JSON.stringify({ ...HEADER, messages }));
+    const records = [HEADER, ...Array.from({ length: 501 }, (_, i) => gem(`g${i}`, tok(1, 0, 0, 0, 0)))];
+    await fs.writeFile(file, jsonl(records));
     assert.equal((await run([file], cursors, queuePath)).eventsAggregated, 501);
-    assert.equal(cursors.files[file].seenIds.length, 500);
-    assert.equal((await run([file], cursors, queuePath)).eventsAggregated, 0);
+    await fs.appendFile(file, jsonl([{ $rewindTo: "g1" }, gem("new", tok(1, 0, 0, 0, 0))]));
+    assert.equal((await run([file], cursors, queuePath)).eventsAggregated, 1);
   });
+});
+
+test("gemini: the same session copied into two project dirs is counted once", async () => {
+  await withTmp(async (dir) => {
+    const queuePath = path.join(dir, "queue.jsonl");
+    const body = JSON.stringify({ ...HEADER, messages: [gem("g1", tok(10, 0, 5, 0, 0))] });
+    const a = path.join(dir, "hash-a", "session-x.json");
+    const b = path.join(dir, "named-b", "session-x.json");
+    for (const f of [a, b]) {
+      await fs.mkdir(path.dirname(f), { recursive: true });
+      await fs.writeFile(f, body);
+    }
+    const res = await run([a, b], { files: {} }, queuePath);
+    assert.equal(res.eventsAggregated, 1);
+    assert.equal((await lastRow(queuePath)).total_tokens, 15);
+  });
+});
+
+test("readGeminiMessages: $patch.orderIds reorders before a later $rewindTo", () => {
+  const records = ["a", "b", "c"].map((id) => gem(id, tok(1, 0, 0, 0, 0)));
+  records.push({ $patch: { orderIds: ["c", "a", "b"] } }, { $rewindTo: "b" });
+  const { messages } = readGeminiMessages(jsonl(records), "s.jsonl");
+  assert.deepEqual(messages.map((m) => m.id), ["c", "a"]);
 });
 
 test("listGeminiSessionFiles finds both .json and .jsonl sessions", async () => {

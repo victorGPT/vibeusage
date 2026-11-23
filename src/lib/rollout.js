@@ -360,6 +360,15 @@ async function parseGeminiIncremental({
   if (!cursors.files || typeof cursors.files !== "object") {
     cursors.files = {};
   }
+  // Counted message ids per Gemini sessionId, shared by every file: a session
+  // copied into two project dirs counts once, and a rewind can never make an
+  // old call look new.
+  // ponytail: unbounded (~40 bytes per call); prune sessions whose files are gone if it grows.
+  const seenBySession = new Map(
+    Object.entries(cursors.geminiSeen && typeof cursors.geminiSeen === "object" ? cursors.geminiSeen : {})
+      .filter(([, ids]) => Array.isArray(ids))
+      .map(([sid, ids]) => [sid, new Set(ids)]),
+  );
 
   for (let idx = 0; idx < files.length; idx++) {
     const entry = files[idx];
@@ -375,12 +384,9 @@ async function parseGeminiIncremental({
     const key = filePath;
     const prev = cursors.files[key] || null;
     const inode = st.ino || 0;
-    const sameFile = Boolean(prev && prev.inode === inode);
-    const priorSeenIds = sameFile && Array.isArray(prev.seenIds) ? prev.seenIds : null;
-    // Pre-seenIds cursors stored the last processed message index; honor it once
-    // so the upgrade does not re-count (backfill) old messages.
-    const legacyLastIndex =
-      sameFile && !priorSeenIds && Number.isFinite(Number(prev.lastIndex)) ? Number(prev.lastIndex) : -1;
+    // Legacy cursors stored the last processed message index; seed those ids as
+    // seen so the upgrade does not re-count (backfill) old messages.
+    const legacyLastIndex = Number.isFinite(Number(prev?.lastIndex)) ? Number(prev.lastIndex) : -1;
 
     const projectContext = projectEnabled
       ? await resolveProjectContextForFile({
@@ -396,7 +402,7 @@ async function parseGeminiIncremental({
 
     const result = await parseGeminiFile({
       filePath,
-      priorSeenIds,
+      seenBySession,
       legacyLastIndex,
       hourlyState,
       touchedBuckets,
@@ -407,11 +413,7 @@ async function parseGeminiIncremental({
       projectKey,
     });
 
-    cursors.files[key] = {
-      inode,
-      seenIds: result.seenIds,
-      updatedAt: new Date().toISOString(),
-    };
+    cursors.files[key] = { inode, updatedAt: new Date().toISOString() };
 
     filesProcessed += 1;
     eventsAggregated += result.eventsAggregated;
@@ -427,6 +429,8 @@ async function parseGeminiIncremental({
       });
     }
   }
+
+  cursors.geminiSeen = Object.fromEntries([...seenBySession].map(([sid, ids]) => [sid, [...ids]]));
 
   const bucketsQueued = await enqueueTouchedBuckets({ queuePath, hourlyState, touchedBuckets });
   const projectBucketsQueued = projectEnabled
@@ -1098,27 +1102,29 @@ function resolvePiAgentDir({ home = os.homedir(), env = process.env } = {}) {
   return raw;
 }
 
-const GEMINI_SEEN_IDS_LIMIT = 500;
-
 function isGeminiSessionName(name) {
   return name.startsWith("session-") && (name.endsWith(".json") || name.endsWith(".jsonl"));
 }
 
-// Returns the session's current message list. Legacy sessions are one JSON
-// document; Gemini CLI >= 0.65 appends JSONL records that the CLI replays
-// (chatRecordingService): message lines upsert by id, `$rewindTo` drops that id
-// and everything after it, `$patch.removeIds` drops ids, `$set.messages`
-// replaces the list.
+// Returns { sessionId, messages } for the session's current message list.
+// Legacy sessions are one JSON document; Gemini CLI >= 0.65 appends JSONL
+// records that the CLI replays (chatRecordingService): message lines upsert by
+// id, `$rewindTo` drops that id and everything after it, `$patch` removes
+// (removeIds) or reorders (orderIds) messages, `$set.messages` replaces the list.
 function readGeminiMessages(raw, filePath) {
   if (!filePath.endsWith(".jsonl")) {
     try {
       const session = JSON.parse(raw);
-      return Array.isArray(session?.messages) ? session.messages : [];
+      return {
+        sessionId: typeof session?.sessionId === "string" ? session.sessionId : null,
+        messages: Array.isArray(session?.messages) ? session.messages : [],
+      };
     } catch (_e) {
-      return [];
+      return { sessionId: null, messages: [] };
     }
   }
-  const byId = new Map();
+  let sessionId = null;
+  let byId = new Map();
   for (const line of raw.split("\n")) {
     if (!line.trim()) continue;
     let rec;
@@ -1136,18 +1142,32 @@ function readGeminiMessages(raw, filePath) {
       }
       if (!found) byId.clear();
     } else if (rec.$patch && typeof rec.$patch === "object") {
-      // ponytail: content-only patches and orderIds do not change usage; only removals do.
-      for (const id of Array.isArray(rec.$patch.removeIds) ? rec.$patch.removeIds : []) byId.delete(id);
+      // Content-only patches do not change usage; removals and reordering do.
+      const patch = rec.$patch;
+      for (const id of Array.isArray(patch.removeIds) ? patch.removeIds : []) byId.delete(id);
+      if (Array.isArray(patch.orderIds)) {
+        const ordered = patch.orderIds.filter((id) => byId.has(id));
+        const orderSet = new Set(ordered);
+        byId = new Map([
+          ...[...byId].filter(([id]) => !orderSet.has(id)),
+          ...ordered.map((id) => [id, byId.get(id)]),
+        ]);
+      }
     } else if (typeof rec.id === "string") {
       byId.set(rec.id, rec);
-    } else if (rec.$set && Array.isArray(rec.$set.messages)) {
-      byId.clear();
-      for (const msg of rec.$set.messages) {
-        if (msg && typeof msg.id === "string") byId.set(msg.id, msg);
+    } else if (rec.$set && typeof rec.$set === "object") {
+      if (!sessionId && typeof rec.$set.sessionId === "string") sessionId = rec.$set.sessionId;
+      if (Array.isArray(rec.$set.messages)) {
+        byId.clear();
+        for (const msg of rec.$set.messages) {
+          if (msg && typeof msg.id === "string") byId.set(msg.id, msg);
+        }
       }
+    } else if (!sessionId && typeof rec.sessionId === "string") {
+      sessionId = rec.sessionId;
     }
   }
-  return [...byId.values()];
+  return { sessionId, messages: [...byId.values()] };
 }
 
 function isBillableGeminiMessage(msg) {
@@ -1156,7 +1176,7 @@ function isBillableGeminiMessage(msg) {
 
 async function parseGeminiFile({
   filePath,
-  priorSeenIds,
+  seenBySession,
   legacyLastIndex,
   hourlyState,
   touchedBuckets,
@@ -1167,31 +1187,19 @@ async function parseGeminiFile({
   projectKey,
 }) {
   const raw = await fs.readFile(filePath, "utf8").catch(() => "");
-  const messages = raw.trim() ? readGeminiMessages(raw, filePath) : [];
-  const seenOrder = Array.isArray(priorSeenIds) ? priorSeenIds.slice() : [];
-  const seen = new Set(seenOrder);
+  if (!raw.trim()) return { eventsAggregated: 0 };
+  const { sessionId, messages } = readGeminiMessages(raw, filePath);
+  const sid = sessionId || filePath;
+  if (!seenBySession.has(sid)) seenBySession.set(sid, new Set());
+  const seen = seenBySession.get(sid);
   for (let idx = 0; idx <= legacyLastIndex && idx < messages.length; idx++) {
-    const msg = messages[idx];
-    if (isBillableGeminiMessage(msg) && !seen.has(msg.id)) {
-      seen.add(msg.id);
-      seenOrder.push(msg.id);
-    }
-  }
-
-  // The whole file is re-read each sync. Once the id window is full, older ids
-  // have been evicted, so skip everything before the oldest id still remembered.
-  let begin = 0;
-  if (seenOrder.length >= GEMINI_SEEN_IDS_LIMIT) {
-    const firstKnown = messages.findIndex((m) => m && seen.has(m.id));
-    if (firstKnown > 0) begin = firstKnown;
+    if (isBillableGeminiMessage(messages[idx])) seen.add(messages[idx].id);
   }
 
   let eventsAggregated = 0;
-  for (let idx = begin; idx < messages.length; idx++) {
-    const msg = messages[idx];
+  for (const msg of messages) {
     if (!isBillableGeminiMessage(msg) || seen.has(msg.id)) continue;
     seen.add(msg.id);
-    seenOrder.push(msg.id);
 
     const timestamp = typeof msg.timestamp === "string" ? msg.timestamp : null;
     const delta = normalizeGeminiTokens(msg.tokens);
@@ -1217,7 +1225,7 @@ async function parseGeminiFile({
     eventsAggregated += 1;
   }
 
-  return { seenIds: seenOrder.slice(-GEMINI_SEEN_IDS_LIMIT), eventsAggregated };
+  return { eventsAggregated };
 }
 
 async function parseOpencodeMessageFile({

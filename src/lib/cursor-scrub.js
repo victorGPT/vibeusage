@@ -48,6 +48,7 @@ const SOURCES = {
   gemini: {
     sessionRoot: ({ home, env }) =>
       path.join(env.GEMINI_HOME || path.join(home, ".gemini"), "tmp"),
+    extraCursorKeys: ["geminiSeen"],
   },
   kimi: {
     sessionRoot: ({ home, env }) =>

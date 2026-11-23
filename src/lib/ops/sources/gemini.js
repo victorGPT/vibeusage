@@ -14,8 +14,8 @@ const { readGeminiMessages, isGeminiSessionName } = require("../../rollout");
  * a running total), and `tokens.total` already covers every channel. We route
  * the total into a single channel so row.truth equals the DB total_tokens.
  *
- * Dedupe: readGeminiMessages replays the file into one entry per message id,
- * matching parseGeminiFile's per-file seen-id set.
+ * Dedupe: sessionId|messageId, matching parseGeminiFile, so a session copied
+ * into two project dirs counts once.
  */
 
 module.exports = {
@@ -47,7 +47,9 @@ module.exports = {
       return;
     }
     if (!raw.trim()) return;
-    for (const msg of readGeminiMessages(raw, filePath)) {
+    const { sessionId, messages } = readGeminiMessages(raw, filePath);
+    const sid = sessionId || filePath;
+    for (const msg of messages) {
       if (!msg || msg.type !== "gemini" || !msg.tokens) continue;
       const ts = typeof msg.timestamp === "string" ? msg.timestamp : null;
       if (!ts) continue;
@@ -55,7 +57,7 @@ module.exports = {
       if (!delta.total) continue;
 
       yield {
-        line: JSON.stringify({ timestamp: ts, delta }),
+        line: JSON.stringify({ timestamp: ts, delta, id: `${sid}|${msg.id}` }),
         context: { filePath },
       };
     }
@@ -73,7 +75,7 @@ module.exports = {
     if (!ts || !d || !Number(d.total)) return null;
     return {
       timestamp: ts,
-      dedupeId: null, // readGeminiMessages already keeps one entry per message id
+      dedupeId: typeof obj.id === "string" ? obj.id : null,
       channels: {
         input: 0,
         cache_creation: 0,
