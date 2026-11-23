@@ -2,6 +2,7 @@
 
 const fs = require("node:fs");
 const path = require("node:path");
+const { execFileSync } = require("node:child_process");
 
 /**
  * OpenCode audit strategy.
@@ -27,10 +28,10 @@ const path = require("node:path");
  *     the same logic used by src/commands/sync.js).
  *   - Only assistant messages carry tokens; user messages return null from
  *     extractUsage so the generic runner skips them.
- *   - New OpenCode installs may persist into opencode.db (sqlite) instead of
- *     these JSON files. The audit reports no-local-sessions in that case;
- *     users can dump the same rows to a JSON file and feed --db-json to
- *     compare via the backend path.
+ *   - New OpenCode installs persist into <opencodeHome>/opencode.db (sqlite).
+ *     walkSessions also returns that db; iterateRecords reads its message
+ *     rows via the sqlite3 CLI. v1 rows keep id in the table column, not in
+ *     data, so the column is merged in (same dedupeId as the JSON files).
  */
 
 module.exports = {
@@ -42,8 +43,10 @@ module.exports = {
     return path.join(opencodeHome, "storage", "message");
   },
   walkSessions({ root }) {
-    if (!fs.existsSync(root)) return [];
     const out = [];
+    const dbPath = path.join(root, "..", "..", "opencode.db");
+    if (fs.existsSync(dbPath)) out.push(dbPath);
+    if (!fs.existsSync(root)) return out;
     for (const entry of fs.readdirSync(root, { withFileTypes: true })) {
       if (!entry.isDirectory()) continue;
       const dir = path.join(root, entry.name);
@@ -59,6 +62,22 @@ module.exports = {
   // single "line" so extractUsage can JSON.parse it uniformly with the
   // line-based contract.
   *iterateRecords(filePath) {
+    if (filePath.endsWith(".db")) {
+      let stdout;
+      try {
+        stdout = execFileSync(
+          "sqlite3",
+          ["-readonly", filePath, "SELECT json_set(data, '$.id', coalesce(json_extract(data, '$.id'), id)) FROM message;"],
+          { encoding: "utf8", maxBuffer: 256 * 1024 * 1024 },
+        );
+      } catch (_err) {
+        return;
+      }
+      for (const line of stdout.split("\n")) {
+        if (line.trim()) yield { line, context: { filePath } };
+      }
+      return;
+    }
     let text;
     try {
       text = fs.readFileSync(filePath, "utf8");
