@@ -111,18 +111,52 @@ test("kimi-code large cache_read with tiny input/output keeps cache in total", a
   });
 });
 
-test("kimi-code /fork copy of the same usage.record counts once (dedupe key)", async () => {
+function forked(time, agentId = "main") {
+  // upstream sessionLifecycleService.ts forkedRecord(): closes the copied history in every fork path
+  return JSON.stringify({ type: "forked", agentId, time });
+}
+
+const U = { inputOther: 10, output: 5, inputCacheRead: 0, inputCacheCreation: 0 };
+
+test("kimi-code two independent sessions with identical-looking calls both count", async () => {
   await withTempDir(async (dir) => {
     const sessionsDir = path.join(dir, "sessions");
-    const rec = usageRecord({ time: T0, usage: { inputOther: 100, output: 20, inputCacheRead: 0, inputCacheCreation: 0 } });
-    await writeWire(sessionsDir, "session_a", "main", [rec]);
-    // fork copies the parent's wire verbatim, then appends a `forked` marker
-    await writeWire(sessionsDir, "session_b", "main", [rec, JSON.stringify({ type: "forked", agentId: "main", time: T0 + 5 })]);
+    await writeWire(sessionsDir, "session_a", "main", [usageRecord({ time: T0, usage: U })]);
+    await writeWire(sessionsDir, "session_b", "main", [usageRecord({ time: T0, usage: U })]);
+    const { res, queued } = await parse(dir, sessionsDir, { version: 1, files: {} });
+    assert.equal(res.eventsAggregated, 2);
+    assert.equal(lastRow(queued).total_tokens, 30);
+  });
+});
+
+test("kimi-code /fork: records before the forked marker are copies and never count", async () => {
+  await withTempDir(async (dir) => {
+    const sessionsDir = path.join(dir, "sessions");
+    const parentLines = Array.from({ length: 10001 }, (_, i) => usageRecord({ time: T0 + i, usage: U }));
+    await writeWire(sessionsDir, "session_a", "main", parentLines);
     const cursors = { version: 1, files: {} };
-    const { res, queued } = await parse(dir, sessionsDir, cursors);
-    assert.equal(res.eventsAggregated, 1);
-    assert.equal(lastRow(queued).total_tokens, 120);
-    assert.equal(cursors.kimiSeen.length, 1);
+    const first = await parse(dir, sessionsDir, cursors);
+    assert.equal(first.res.eventsAggregated, 10001);
+
+    // fork copies the parent's wire verbatim (oldest record included), then appends `forked`
+    await writeWire(sessionsDir, "session_b", "main", [...parentLines, forked(T0 + 20000)]);
+    const second = await parse(dir, sessionsDir, cursors);
+    assert.equal(second.res.eventsAggregated, 0);
+  });
+});
+
+test("kimi-code fork of a fork counts only activity after its own last forked marker", async () => {
+  await withTempDir(async (dir) => {
+    const sessionsDir = path.join(dir, "sessions");
+    const parent = usageRecord({ time: T0, usage: U });
+    const childOwn = usageRecord({ time: T0 + 1, usage: { inputOther: 1, output: 1, inputCacheRead: 0, inputCacheCreation: 0 } });
+    const grandOwn = usageRecord({ time: T0 + 2, usage: { inputOther: 100, output: 0, inputCacheRead: 0, inputCacheCreation: 0 } });
+    await writeWire(sessionsDir, "session_a", "main", [parent]);
+    await writeWire(sessionsDir, "session_b", "main", [parent, forked(T0 + 1), childOwn]);
+    await writeWire(sessionsDir, "session_c", "main", [parent, forked(T0 + 1), childOwn, forked(T0 + 2), grandOwn]);
+    const { res, queued } = await parse(dir, sessionsDir, { version: 1, files: {} });
+    assert.equal(res.eventsAggregated, 3);
+    assert.equal(lastRow(queued).total_tokens, 15 + 2 + 100);
   });
 });
 

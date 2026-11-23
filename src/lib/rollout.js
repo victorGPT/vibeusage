@@ -463,19 +463,8 @@ async function parseGeminiIncremental({
   return { filesProcessed, eventsAggregated, bucketsQueued, projectBucketsQueued };
 }
 
-// ponytail: recent-N dedupe keys, same ceiling as PI_SEEN_LIMIT (fork of a session whose keys aged out double counts).
-const KIMI_SEEN_LIMIT = 10000;
-
 async function parseKimiIncremental(opts) {
-  const cursors = opts.cursors;
-  const seen = new Set(Array.isArray(cursors.kimiSeen) ? cursors.kimiSeen : []);
-  const result = await parseJsonlFilesIncremental({
-    ...opts,
-    defaultSourceId: "kimi",
-    parseFile: (args) => parseKimiFile({ ...args, seen }),
-  });
-  if (seen.size > 0) cursors.kimiSeen = [...seen].slice(-KIMI_SEEN_LIMIT);
-  return result;
+  return parseJsonlFilesIncremental({ ...opts, defaultSourceId: "kimi", parseFile: parseKimiFile });
 }
 
 // ponytail: recent-N dedupe keys; a fork of a parent whose keys already aged out
@@ -961,7 +950,6 @@ async function parseClaudeFile({
 async function parseKimiFile({
   filePath,
   startOffset,
-  seen,
   hourlyState,
   touchedBuckets,
   source,
@@ -979,9 +967,13 @@ async function parseKimiFile({
   const stream = fssync.createReadStream(filePath, { encoding: "utf8", start: startOffset });
   const rl = readline.createInterface({ input: stream, crlfDelay: Infinity });
 
-  let eventsAggregated = 0;
+  // Kimi Code /fork copies the parent's wire verbatim and closes the copy with a `forked`
+  // record (upstream sessionLifecycleService.ts copyAgentWire / appendForkedMarker), so usage
+  // before the last `forked` record is already counted in the parent file: drop it.
+  // ponytail: a sync landing between the copy and the marker append counts the copy once.
+  const pending = [];
   for await (const line of rl) {
-    if (!line || !(line.includes("StatusUpdate") || line.includes("usage.record"))) continue;
+    if (!line || !/StatusUpdate|usage\.record|forked/.test(line)) continue;
     let obj;
     try {
       obj = JSON.parse(line);
@@ -1002,6 +994,9 @@ async function parseKimiFile({
       usage = obj.usage;
       rawTime = obj.time;
       rawModel = obj.model;
+    } else if (obj?.type === "forked") {
+      pending.length = 0;
+      continue;
     } else {
       continue;
     }
@@ -1015,17 +1010,13 @@ async function parseKimiFile({
     const bucketStart = toUtcHalfHourStart(tsIso);
     if (!bucketStart) continue;
 
-    if (obj.type === "usage.record" && seen) {
-      // usage.record has no upstream id; /fork copies parent wire lines verbatim into the new
-      // session, so key on fields a copy preserves. ponytail: two distinct requests with the
-      // same ms, agent, model and all four counts would collapse into one.
-      const u = usage;
-      const key = [obj.agentId || "", rawTime, rawModel || "", u.inputOther, u.output, u.inputCacheRead, u.inputCacheCreation].join("|");
-      if (seen.has(key)) continue;
-      seen.add(key);
-    }
+    pending.push({ delta, bucketStart, model: normalizeModelInput(rawModel) || DEFAULT_MODEL });
+  }
 
-    const model = normalizeModelInput(rawModel) || DEFAULT_MODEL;
+  rl.close();
+  stream.close?.();
+
+  for (const { delta, bucketStart, model } of pending) {
     const bucket = getHourlyBucket(hourlyState, source, model, bucketStart);
     addTotals(bucket.totals, delta);
     touchedBuckets.add(bucketKey(source, model, bucketStart));
@@ -1040,12 +1031,8 @@ async function parseKimiFile({
       addTotals(projectBucket.totals, delta);
       projectTouchedBuckets.add(projectBucketKey(projectKey, source, bucketStart));
     }
-    eventsAggregated += 1;
   }
-
-  rl.close();
-  stream.close?.();
-  return { endOffset, eventsAggregated };
+  return { endOffset, eventsAggregated: pending.length };
 }
 
 // Pi (pi-coding-agent) session logs: <agentDir>/sessions/<cwd-slug>/<ts>_<uuid>.jsonl.

@@ -54,7 +54,6 @@ const SOURCES = {
       path.join(env.KIMI_HOME || path.join(home, ".kimi"), "sessions"),
       path.join(env.KIMI_CODE_HOME || path.join(home, ".kimi-code"), "sessions"),
     ],
-    extraCursorKeys: ["kimiSeen"],
   },
   pi: {
     sessionRoot: ({ home, env }) =>
