@@ -181,6 +181,18 @@ test("gemini legacy cursor: a read failure keeps the cursor so recovery does not
   });
 });
 
+test("gemini legacy cursor: a replaced file (new inode) is metered, not seeded", async () => {
+  await withTmp(async (dir) => {
+    const queuePath = path.join(dir, "queue.jsonl");
+    const file = path.join(dir, "session-z.json");
+    await fs.writeFile(file, JSON.stringify({ ...HEADER, messages: [gem("g1", tok(10, 0, 0, 0, 0))] }));
+    const { ino } = await fs.stat(file);
+    const cursors = { files: { [file]: { inode: ino + 1, lastIndex: 0, lastTotals: { total_tokens: 10 } } } };
+    assert.equal((await run([file], cursors, queuePath)).eventsAggregated, 1);
+    assert.equal((await run([file], cursors, queuePath)).eventsAggregated, 0);
+  });
+});
+
 test("gemini: a rewind after 500+ synced calls never re-counts old calls", async () => {
   await withTmp(async (dir) => {
     const file = path.join(dir, "session-f.jsonl");

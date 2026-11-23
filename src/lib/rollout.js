@@ -377,9 +377,16 @@ async function parseGeminiIncremental({
   // Legacy cursors stored the last processed message index. Seed every one of
   // them before metering any file, so an uncursored copy of the same session
   // cannot re-count history. A file that cannot be read keeps its legacy
-  // cursor (and is not metered) until a later sync can migrate it.
+  // cursor (and is not metered) until a later sync can migrate it. A file whose
+  // inode changed was replaced: drop its legacy cursor and meter it as new.
   for (const [key, prev] of Object.entries(cursors.files)) {
     if (!Number.isInteger(prev?.lastIndex)) continue;
+    const st = await fs.stat(key).catch(() => null);
+    if (!st) continue;
+    if ((st.ino || 0) !== prev.inode) {
+      cursors.files[key] = { inode: st.ino || 0, updatedAt: new Date().toISOString() };
+      continue;
+    }
     const session = await loadGeminiSession(key);
     if (!session) continue;
     const seen = seenFor(session.sessionId || key);
