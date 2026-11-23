@@ -1327,7 +1327,11 @@ async function parseOpencodeSqliteRow({
     return { eventsAggregated: 0 };
   }
 
-  const messageKey = deriveOpencodeMessageKey(msg, null);
+  // opencode.db v1 keeps id/session_id in table columns, not in message.data.
+  const messageKey = deriveOpencodeMessageKey(
+    { ...msg, id: msg?.id ?? row.id, sessionID: msg?.sessionID ?? row.session_id },
+    null,
+  );
   if (!messageKey || knownMessageKeys.has(messageKey)) {
     return { eventsAggregated: 0 };
   }

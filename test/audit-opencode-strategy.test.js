@@ -99,6 +99,59 @@ test("opencode strategy sums all channels (input + cache.write + cache.read + ou
   });
 });
 
+test("opencode strategy also reads opencode.db v1 rows (id only in table column)", async () => {
+  await withTempDir(async (dir) => {
+    const opencodeHome = path.join(dir, "opencode");
+    await fs.mkdir(opencodeHome, { recursive: true });
+    const now = new Date();
+    const y = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 1));
+    const yIso = y.toISOString().slice(0, 10);
+    const ts = y.getTime() + 10 * 3600 * 1000;
+    const data = (msg) => {
+      const { id: _id, ...rest } = msg;
+      return JSON.stringify(rest).replace(/'/g, "''");
+    };
+    // msg_v1: 1+2+3+4+5 = 15 ; user row skipped
+    const a = data(assistantMsg({ id: "msg_v1", ts, input: 1, output: 2, reasoning: 3, cacheRead: 4, cacheWrite: 5 }));
+    const u = data({ role: "user", id: "msg_u", time: { completed: ts } });
+    const sql = `CREATE TABLE message (id text PRIMARY KEY, session_id text, data text);
+      INSERT INTO message VALUES ('msg_v1', 'ses_v1', '${a}'), ('msg_u', 'ses_v1', '${u}');`;
+    require("node:child_process").execFileSync("sqlite3", [path.join(opencodeHome, "opencode.db"), sql]);
+
+    const result = runSourceAudit({
+      strategy: getStrategy("opencode"),
+      days: 3,
+      threshold: 5,
+      dbJson: JSON.stringify([{ day: yIso, tokens: 15 }]),
+      home: dir,
+      env: { OPENCODE_HOME: opencodeHome },
+    });
+    assert.equal(result.ok, true);
+    assert.equal(result.uniqueMessages, 1);
+    const row = result.rows.find((r) => r.day === yIso);
+    assert.equal(row.truth, 15);
+  });
+});
+
+test("opencode strategy fails the audit when opencode.db cannot be read", async () => {
+  await withTempDir(async (dir) => {
+    const opencodeHome = path.join(dir, "opencode");
+    await fs.mkdir(opencodeHome, { recursive: true });
+    await fs.writeFile(path.join(opencodeHome, "opencode.db"), "not a sqlite database", "utf8");
+    const today = new Date().toISOString().slice(0, 10);
+    const result = runSourceAudit({
+      strategy: getStrategy("opencode"),
+      days: 3,
+      threshold: 5,
+      dbJson: JSON.stringify([{ day: today, tokens: 100 }]),
+      home: dir,
+      env: { OPENCODE_HOME: opencodeHome },
+    });
+    assert.equal(result.ok, false);
+    assert.equal(result.error, "local-read-failed");
+  });
+});
+
 test("opencode strategy reports no-local-sessions when storage dir is empty", async () => {
   await withTempDir(async (dir) => {
     const result = runSourceAudit({

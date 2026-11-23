@@ -106,7 +106,19 @@ function runSourceAudit({
     };
   }
 
-  const local = computeLocalTotals({ files, windowStartIso, strategy });
+  let local;
+  try {
+    local = computeLocalTotals({ files, windowStartIso, strategy });
+  } catch (err) {
+    return {
+      ok: false,
+      error: "local-read-failed",
+      source: strategy.id,
+      message: `cannot read local sessions for source=${strategy.id}: ${err?.message || err}`,
+      rows: [],
+      maxDriftPct: 0,
+    };
+  }
 
   let backend;
   if (dbJson) {

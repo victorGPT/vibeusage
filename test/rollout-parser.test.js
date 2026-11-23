@@ -881,6 +881,62 @@ test("parseOpencodeIncremental ingests sqlite rows when message files are absent
   }
 });
 
+test("parseOpencodeIncremental counts v1 sqlite rows whose data lacks id/sessionID", async () => {
+  // opencode.db v1 keeps id/session_id in table columns only; message.data has neither key.
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "vibescore-opencode-sqlite-v1-"));
+  try {
+    const queuePath = path.join(tmp, "queue.jsonl");
+    // ses_v1|msg_dup was already counted from a legacy message file.
+    const cursors = {
+      version: 1,
+      files: {},
+      updatedAt: null,
+      opencode: { messages: { "ses_v1|msg_dup": { lastTotals: null } } },
+    };
+    const v1Data = (tokens) => {
+      const msg = buildOpencodeMessage({
+        modelID: "gpt-5",
+        created: "2025-12-29T10:14:00.000Z",
+        completed: "2025-12-29T10:15:00.000Z",
+        tokens,
+      });
+      delete msg.id;
+      delete msg.sessionID;
+      return JSON.stringify({ ...msg, role: "assistant" });
+    };
+    const row = (id, timeIso, tokens) => ({
+      id,
+      session_id: "ses_v1",
+      role: "assistant",
+      time_created: Date.parse(timeIso),
+      data: v1Data(tokens),
+    });
+    const rows = [
+      row("msg_a", "2025-12-29T10:15:00.000Z", { input: 10, output: 2, reasoning: 1, cached: 3, cacheWrite: 5 }),
+      row("msg_b", "2025-12-29T10:16:00.000Z", { input: 4, output: 1, reasoning: 0, cached: 0, cacheWrite: 0 }),
+      row("msg_dup", "2025-12-29T10:16:00.000Z", { input: 100, output: 100, reasoning: 0, cached: 0, cacheWrite: 0 }),
+    ];
+    const readSqliteRows = async () => ({ status: "ok", checkedAt: "2026-04-03T00:00:00.000Z", inode: 7, rows });
+
+    const res = await parseOpencodeIncremental({ opencodeDbPath: path.join(tmp, "opencode.db"), cursors, queuePath, readSqliteRows });
+    assert.equal(res.eventsAggregated, 2);
+    const queued = await readJsonLines(queuePath);
+    assert.equal(queued.length, 1);
+    // msg_a: input 10+5, cached 3, output 2, reasoning 1; msg_b: input 4, output 1; msg_dup skipped
+    assert.equal(queued[0].input_tokens, 19);
+    assert.equal(queued[0].cached_input_tokens, 3);
+    assert.equal(queued[0].output_tokens, 3);
+    assert.equal(queued[0].reasoning_output_tokens, 1);
+    assert.equal(queued[0].total_tokens, 26);
+    assert.ok(cursors.opencode.messages["ses_v1|msg_a"]);
+
+    const again = await parseOpencodeIncremental({ opencodeDbPath: path.join(tmp, "opencode.db"), cursors, queuePath, readSqliteRows });
+    assert.equal(again.eventsAggregated, 0);
+  } finally {
+    await fs.rm(tmp, { recursive: true, force: true });
+  }
+});
+
 test("parseOpencodeIncremental persists missing sqlite db health without buckets", async () => {
   const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "vibescore-opencode-sqlite-missing-db-"));
   try {
