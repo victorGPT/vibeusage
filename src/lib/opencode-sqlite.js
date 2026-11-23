@@ -35,6 +35,14 @@ const V2_PROBE_QUERY = "SELECT count(*) FROM sqlite_master WHERE type = 'table' 
 // data is trimmed to the fields the parser reads.
 const V2_PAGE_SIZE = 20000;
 
+// Usage-bearing v2 rows; shared with the audit (src/lib/ops/sources/opencode.js) so both count the same rows.
+const V2_MESSAGE_FILTER = [
+  "m.type IN ('assistant', 'compaction')",
+  "AND json_extract(m.data, '$.tokens') IS NOT NULL",
+  // A fork copies its parent's rows under new ids but keeps their time_created, which predates the fork.
+  "AND NOT (s.fork_session_id IS NOT NULL AND m.time_created < s.time_created)",
+].join(" ");
+
 // Pages are separate sqlite3 calls. Only rows with time_updated <= the bound read before paging
 // are returned, so the time cursor never passes a row updated mid-read (e.g. a row skipped on an
 // earlier page that finished meanwhile); such rows are newer than the bound and come next sync.
@@ -68,10 +76,7 @@ function buildMessageQueryV2({
     `WHERE m.rowid > ${int(afterRowid)}`,
     `AND (m.rowid > ${int(lastRowid)} OR m.time_updated >= ${int(lastTimeUpdated)})`,
     `AND m.time_updated <= ${int(maxTimeUpdated)}`,
-    "AND m.type IN ('assistant', 'compaction')",
-    "AND json_extract(m.data, '$.tokens') IS NOT NULL",
-    // A fork copies its parent's rows under new ids but keeps their time_created, which predates the fork.
-    "AND NOT (s.fork_session_id IS NOT NULL AND m.time_created < s.time_created)",
+    `AND ${V2_MESSAGE_FILTER}`,
     "ORDER BY m.rowid ASC",
     `LIMIT ${Math.max(1, int(limit))};`,
   ].join(" ");
@@ -186,6 +191,8 @@ async function readOpencodeSqliteRows({
 }
 
 module.exports = {
+  V2_PROBE_QUERY,
+  V2_MESSAGE_FILTER,
   buildMessageQuery,
   buildMessageQueryV2,
   parseMessageRows,

@@ -133,6 +133,51 @@ test("opencode strategy also reads opencode.db v1 rows (id only in table column)
   });
 });
 
+test("opencode strategy reads opencode.db v2 session_message rows", async () => {
+  await withTempDir(async (dir) => {
+    const opencodeHome = path.join(dir, "opencode");
+    await fs.mkdir(opencodeHome, { recursive: true });
+    const now = new Date();
+    const y = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 1));
+    const yIso = y.toISOString().slice(0, 10);
+    const ts = y.getTime() + 10 * 3600 * 1000;
+    const tokens = (input, output, reasoning, read, write) => ({ input, output, reasoning, cache: { read, write } });
+    // v2 data has no role; type lives in the column (anomalyco/opencode migration 20260804233008_loose_psylocke)
+    const row = (id, session, type, created, data) =>
+      `('${id}', '${session}', '${type}', ${created}, ${created}, '${JSON.stringify(data)}')`;
+    const rows = [
+      // 10 + 2 + 1 + 1000 + 5 = 1018 (big cache_read)
+      row("msg_a", "ses_a", "assistant", ts, { id: "msg_a", tokens: tokens(10, 2, 1, 1000, 5), time: { created: ts, completed: ts } }),
+      // compaction usage: 4 + 1 = 5
+      row("msg_c", "ses_a", "compaction", ts + 1, { id: "msg_c", tokens: tokens(4, 1, 0, 0, 0), time: { created: ts + 1, completed: ts + 1 } }),
+      // still streaming (no tokens) -> skipped
+      row("msg_s", "ses_a", "assistant", ts + 2, { id: "msg_s", time: { created: ts + 2 } }),
+      // user row -> skipped
+      row("msg_u", "ses_a", "user", ts, { id: "msg_u", time: { created: ts } }),
+      // fork copy of msg_a (new id, parent's time_created) -> skipped
+      row("msg_f", "ses_f", "assistant", ts, { id: "msg_f", tokens: tokens(10, 2, 1, 1000, 5), time: { created: ts, completed: ts } }),
+    ];
+    const sql = `CREATE TABLE message (id text PRIMARY KEY, session_id text, data text);
+      CREATE TABLE session_v2 (id text PRIMARY KEY, fork_session_id text, time_created integer);
+      CREATE TABLE session_message (id text PRIMARY KEY, session_id text, type text, time_created integer, time_updated integer, data text);
+      INSERT INTO session_v2 VALUES ('ses_a', NULL, ${ts - 1000}), ('ses_f', 'ses_a', ${ts + 60000});
+      INSERT INTO session_message VALUES ${rows.join(", ")};`;
+    require("node:child_process").execFileSync("sqlite3", [path.join(opencodeHome, "opencode.db"), sql]);
+
+    const result = runSourceAudit({
+      strategy: getStrategy("opencode"),
+      days: 3,
+      threshold: 5,
+      dbJson: JSON.stringify([{ day: yIso, tokens: 1023 }]),
+      home: dir,
+      env: { OPENCODE_HOME: opencodeHome },
+    });
+    assert.equal(result.ok, true);
+    assert.equal(result.uniqueMessages, 2);
+    assert.equal(result.rows.find((r) => r.day === yIso).truth, 1018 + 5);
+  });
+});
+
 test("opencode strategy fails the audit when opencode.db cannot be read", async () => {
   await withTempDir(async (dir) => {
     const opencodeHome = path.join(dir, "opencode");

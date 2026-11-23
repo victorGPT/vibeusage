@@ -3,6 +3,13 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const { execFileSync } = require("node:child_process");
+const { V2_PROBE_QUERY, V2_MESSAGE_FILTER } = require("../../opencode-sqlite");
+
+// v2 data has no role (it's the type column) and may omit id; inject both so extractUsage reads it like v1.
+const V2_AUDIT_QUERY =
+  "SELECT json_set(m.data, '$.id', coalesce(json_extract(m.data, '$.id'), m.id), '$.role', 'assistant') " +
+  `FROM session_message m LEFT JOIN session_v2 s ON s.id = m.session_id WHERE ${V2_MESSAGE_FILTER};`;
+const V1_AUDIT_QUERY = "SELECT json_set(data, '$.id', coalesce(json_extract(data, '$.id'), id)) FROM message;";
 
 /**
  * OpenCode audit strategy.
@@ -32,6 +39,8 @@ const { execFileSync } = require("node:child_process");
  *     walkSessions also returns that db; iterateRecords reads its message
  *     rows via the sqlite3 CLI. v1 rows keep id in the table column, not in
  *     data, so the column is merged in (same dedupeId as the JSON files).
+ *     v2 dbs (session_v2 present) are read from session_message with the
+ *     same row filter the sync uses.
  */
 
 module.exports = {
@@ -65,11 +74,13 @@ module.exports = {
     if (filePath.endsWith(".db")) {
       // Throws when sqlite3 is missing or the query fails; runSourceAudit turns
       // that into local-read-failed instead of counting the db as zero.
-      const stdout = execFileSync(
-        "sqlite3",
-        ["-readonly", filePath, "SELECT json_set(data, '$.id', coalesce(json_extract(data, '$.id'), id)) FROM message;"],
-        { encoding: "utf8", maxBuffer: 256 * 1024 * 1024, stdio: ["ignore", "pipe", "pipe"] },
-      );
+      const sqlite = (query) =>
+        execFileSync("sqlite3", ["-readonly", filePath, query], {
+          encoding: "utf8",
+          maxBuffer: 256 * 1024 * 1024,
+          stdio: ["ignore", "pipe", "pipe"],
+        });
+      const stdout = sqlite(sqlite(V2_PROBE_QUERY).trim() === "1" ? V2_AUDIT_QUERY : V1_AUDIT_QUERY);
       for (const line of stdout.split("\n")) {
         if (line.trim()) yield { line, context: { filePath } };
       }
