@@ -244,7 +244,7 @@ test("opencode v2 reads in pages and later syncs only read new or updated rows",
 
     const first = await parseOpencodeIncremental({ opencodeDbPath: dbPath, cursors, queuePath, readSqliteRows });
     assert.equal(first.eventsAggregated, 5);
-    assert.equal(queries, 4); // probe + pages of 2, 2, 1
+    assert.equal(queries, 5); // probe + time bound + pages of 2, 2, 1
 
     // 3 rows migrated later with old timestamps, plus nothing else changed
     sqlite(dbPath, rowsFor(5, 8, t0 - 60000));
@@ -255,5 +255,51 @@ test("opencode v2 reads in pages and later syncs only read new or updated rows",
 
     const third = await parseOpencodeIncremental({ opencodeDbPath: dbPath, cursors, queuePath, readSqliteRows });
     assert.equal(third.eventsAggregated, 0);
+  });
+});
+
+test("opencode v2 row finishing while pages are read is not lost behind the cursors", async () => {
+  await withTmp(async (tmp) => {
+    const dbPath = path.join(tmp, "opencode.db");
+    const queuePath = path.join(tmp, "queue.jsonl");
+    const t0 = T("2026-11-20T10:01:00.000Z");
+    sqlite(
+      dbPath,
+      [
+        V2_SCHEMA,
+        "INSERT INTO session_v2 VALUES ('ses_a', 'prj', NULL, " + t0 + ");",
+        // a is still streaming (no tokens) when the first page is read
+        v2Row({ id: "msg_a", session: "ses_a", seq: 1, created: t0, updated: t0, data: assistant({ id: "msg_a", created: t0 }) }),
+        v2Row({ id: "msg_b", session: "ses_a", seq: 2, created: t0 + 100, updated: t0 + 100, data: assistant({ id: "msg_b", created: t0 + 100, completed: t0 + 100, tokens: tok(1, 0, 0, 0, 0) }) }),
+        v2Row({ id: "msg_c", session: "ses_a", seq: 3, created: t0 + 100, updated: t0 + 100, data: assistant({ id: "msg_c", created: t0 + 100, completed: t0 + 100, tokens: tok(1, 0, 0, 0, 0) }) }),
+      ].join("\n"),
+    );
+    const cursors = { version: 1, files: {}, updatedAt: null };
+    let pages = 0;
+    let mutated = false;
+    const readSqliteRows = (args) =>
+      readOpencodeSqliteRows({
+        ...args,
+        pageSize: 1,
+        execFileFn: async (...a) => {
+          const res = await execFileAsync(...a);
+          if (/LIMIT/.test(a[1][2]) && (pages += 1) === 1 && !mutated) {
+            mutated = true;
+            // between page 1 and page 2: a finishes, c is touched again
+            const done = assistant({ id: "msg_a", created: t0, completed: t0 + 200, tokens: tok(5, 0, 0, 0, 0) });
+            sqlite(dbPath, `UPDATE session_message SET data = ${sql(JSON.stringify(done))}, time_updated = ${t0 + 200} WHERE id = 'msg_a';
+UPDATE session_message SET time_updated = ${t0 + 300} WHERE id = 'msg_c';`);
+          }
+          return res;
+        },
+      });
+
+    const first = await parseOpencodeIncremental({ opencodeDbPath: dbPath, cursors, queuePath, readSqliteRows });
+    const second = await parseOpencodeIncremental({ opencodeDbPath: dbPath, cursors, queuePath, readSqliteRows });
+    const third = await parseOpencodeIncremental({ opencodeDbPath: dbPath, cursors, queuePath, readSqliteRows });
+    assert.equal(first.eventsAggregated + second.eventsAggregated, 3);
+    assert.equal(third.eventsAggregated, 0);
+    const queued = await readQueue(queuePath);
+    assert.equal(queued.at(-1).total_tokens, 7); // b 1 + c 1 + a 5
   });
 });

@@ -35,7 +35,18 @@ const V2_PROBE_QUERY = "SELECT count(*) FROM sqlite_master WHERE type = 'table' 
 // data is trimmed to the fields the parser reads.
 const V2_PAGE_SIZE = 20000;
 
-function buildMessageQueryV2({ afterRowid = 0, lastRowid = 0, lastTimeUpdated = 0, limit = V2_PAGE_SIZE } = {}) {
+// Pages are separate sqlite3 calls. Only rows with time_updated <= the bound read before paging
+// are returned, so the time cursor never passes a row updated mid-read (e.g. a row skipped on an
+// earlier page that finished meanwhile); such rows are newer than the bound and come next sync.
+const V2_BOUND_QUERY = "SELECT coalesce(max(time_updated), 0) FROM session_message;";
+
+function buildMessageQueryV2({
+  afterRowid = 0,
+  lastRowid = 0,
+  lastTimeUpdated = 0,
+  maxTimeUpdated = Number.MAX_SAFE_INTEGER,
+  limit = V2_PAGE_SIZE,
+} = {}) {
   const int = (v) => (Number.isFinite(v) ? Math.max(0, Math.trunc(v)) : 0);
   return [
     "SELECT json_object(",
@@ -56,6 +67,7 @@ function buildMessageQueryV2({ afterRowid = 0, lastRowid = 0, lastTimeUpdated = 
     "LEFT JOIN project p ON p.id = s.project_id",
     `WHERE m.rowid > ${int(afterRowid)}`,
     `AND (m.rowid > ${int(lastRowid)} OR m.time_updated >= ${int(lastTimeUpdated)})`,
+    `AND m.time_updated <= ${int(maxTimeUpdated)}`,
     "AND m.type IN ('assistant', 'compaction')",
     "AND json_extract(m.data, '$.tokens') IS NOT NULL",
     // A fork copies its parent's rows under new ids but keeps their time_created, which predates the fork.
@@ -120,6 +132,8 @@ async function readOpencodeSqliteRows({
     let rows;
     if (String(probe?.stdout || "").trim() === "1") {
       rows = [];
+      const bound = await execFileFn("sqlite3", ["-readonly", dbPath, V2_BOUND_QUERY]);
+      const maxTimeUpdated = Number(String(bound?.stdout || "").trim()) || 0;
       let afterRowid = 0;
       for (;;) {
         const page = await run(
@@ -127,6 +141,7 @@ async function readOpencodeSqliteRows({
             afterRowid,
             lastRowid: reset ? 0 : lastRowid,
             lastTimeUpdated: effectiveLastTimeCreated,
+            maxTimeUpdated,
             limit: pageSize,
           }),
         );
