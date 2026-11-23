@@ -133,6 +133,25 @@ test("opencode strategy also reads opencode.db v1 rows (id only in table column)
   });
 });
 
+test("opencode strategy fails the audit when opencode.db cannot be read", async () => {
+  await withTempDir(async (dir) => {
+    const opencodeHome = path.join(dir, "opencode");
+    await fs.mkdir(opencodeHome, { recursive: true });
+    await fs.writeFile(path.join(opencodeHome, "opencode.db"), "not a sqlite database", "utf8");
+    const today = new Date().toISOString().slice(0, 10);
+    const result = runSourceAudit({
+      strategy: getStrategy("opencode"),
+      days: 3,
+      threshold: 5,
+      dbJson: JSON.stringify([{ day: today, tokens: 100 }]),
+      home: dir,
+      env: { OPENCODE_HOME: opencodeHome },
+    });
+    assert.equal(result.ok, false);
+    assert.equal(result.error, "local-read-failed");
+  });
+});
+
 test("opencode strategy reports no-local-sessions when storage dir is empty", async () => {
   await withTempDir(async (dir) => {
     const result = runSourceAudit({

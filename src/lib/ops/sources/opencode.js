@@ -63,16 +63,13 @@ module.exports = {
   // line-based contract.
   *iterateRecords(filePath) {
     if (filePath.endsWith(".db")) {
-      let stdout;
-      try {
-        stdout = execFileSync(
-          "sqlite3",
-          ["-readonly", filePath, "SELECT json_set(data, '$.id', coalesce(json_extract(data, '$.id'), id)) FROM message;"],
-          { encoding: "utf8", maxBuffer: 256 * 1024 * 1024 },
-        );
-      } catch (_err) {
-        return;
-      }
+      // Throws when sqlite3 is missing or the query fails; runSourceAudit turns
+      // that into local-read-failed instead of counting the db as zero.
+      const stdout = execFileSync(
+        "sqlite3",
+        ["-readonly", filePath, "SELECT json_set(data, '$.id', coalesce(json_extract(data, '$.id'), id)) FROM message;"],
+        { encoding: "utf8", maxBuffer: 256 * 1024 * 1024, stdio: ["ignore", "pipe", "pipe"] },
+      );
       for (const line of stdout.split("\n")) {
         if (line.trim()) yield { line, context: { filePath } };
       }
