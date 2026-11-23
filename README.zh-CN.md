@@ -86,6 +86,7 @@ npx --yes vibeusage init --link-code <code>
 | **Every Code** | 自动检测 | `notify` hook | `~/.code/sessions/**/rollout-*.jsonl` |
 | **Claude Code** | 自动检测 | `Stop` + `SessionEnd` hooks | 本地 hook 输出 |
 | **Gemini CLI** | 自动检测 | `SessionEnd` hook | `~/.gemini/tmp/**/chats/session-*.json` |
+| **Kimi Code CLI** | 自动检测 | `SessionEnd` + `Stop` hooks | `~/.kimi-code/sessions/*/*/agents/*/wire.jsonl`（旧版 kimi-cli 的 `~/.kimi/sessions/*/*/wire.jsonl` 仍会解析） |
 | **OpenCode** | 自动检测 | plugin + 本地解析 | `~/.local/share/opencode/opencode.db`（SQLite 是唯一受支持的本地 accounting source） |
 | **OpenClaw** | 安装后自动检测 | session plugin | 本地 sanitized usage ledger |
 
@@ -234,6 +235,8 @@ npx vibeusage uninstall
 | `CODEX_HOME` | Codex CLI home 覆盖 | `~/.codex` |
 | `CODE_HOME` | Every Code home 覆盖 | `~/.code` |
 | `GEMINI_HOME` | Gemini CLI home 覆盖 | `~/.gemini` |
+| `KIMI_CODE_HOME` | Kimi Code CLI home 覆盖 | `~/.kimi-code` |
+| `KIMI_HOME` | 旧版 kimi-cli home 覆盖 | `~/.kimi` |
 | `OPENCODE_HOME` | OpenCode 数据目录覆盖 | `~/.local/share/opencode` |
 
 ## FAQ

@@ -10,6 +10,7 @@ const {
   listClaudeProjectFiles,
   listGeminiSessionFiles,
   listKimiSessionFiles,
+  listKimiCodeSessionFiles,
   listPiSessionFiles,
   resolvePiAgentDir,
   parseRolloutIncremental,
@@ -103,6 +104,7 @@ async function cmdSync(argv) {
     const geminiTmpDir = path.join(geminiHome, "tmp");
     const kimiHome = process.env.KIMI_HOME || path.join(home, ".kimi");
     const kimiSessionsDir = path.join(kimiHome, "sessions");
+    const kimiCodeHome = process.env.KIMI_CODE_HOME || path.join(home, ".kimi-code");
     const piSessionsDir = path.join(resolvePiAgentDir({ home, env: process.env }), "sessions");
     const xdgDataHome = process.env.XDG_DATA_HOME || path.join(home, ".local", "share");
     const opencodeHome = process.env.OPENCODE_HOME || path.join(xdgDataHome, "opencode");
@@ -213,7 +215,10 @@ async function cmdSync(argv) {
       });
     }
 
-    const kimiFiles = await listKimiSessionFiles(kimiSessionsDir);
+    const kimiFiles = [
+      ...(await listKimiSessionFiles(kimiSessionsDir)),
+      ...(await listKimiCodeSessionFiles(path.join(kimiCodeHome, "sessions"))),
+    ];
     let kimiResult = { filesProcessed: 0, eventsAggregated: 0, bucketsQueued: 0 };
     if (kimiFiles.length > 0) {
       if (progress?.enabled) {

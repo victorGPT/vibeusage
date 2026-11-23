@@ -15,6 +15,13 @@ function resolveKimiConfigDir({ home = os.homedir(), env = process.env } = {}) {
   return path.join(home, ".kimi");
 }
 
+// Kimi Code CLI (successor of kimi-cli) reads hooks from ${KIMI_CODE_HOME:-~/.kimi-code}/config.toml.
+function resolveKimiCodeConfigDir({ home = os.homedir(), env = process.env } = {}) {
+  const explicit = typeof env.KIMI_CODE_HOME === "string" ? env.KIMI_CODE_HOME.trim() : "";
+  if (explicit) return path.resolve(explicit);
+  return path.join(home, ".kimi-code");
+}
+
 function resolveKimiConfigPath({ configDir }) {
   return path.join(configDir, "config.toml");
 }
@@ -212,6 +219,7 @@ module.exports = {
   MANAGED_START,
   MANAGED_END,
   resolveKimiConfigDir,
+  resolveKimiCodeConfigDir,
   resolveKimiConfigPath,
   buildKimiHookCommand,
   upsertKimiHook,

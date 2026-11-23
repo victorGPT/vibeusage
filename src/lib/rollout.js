@@ -83,6 +83,27 @@ async function listKimiSessionFiles(sessionsDir) {
   return out;
 }
 
+// Kimi Code CLI: <sessionsDir>/<workDirKey>/<sessionId>/agents/<agentId>/wire.jsonl
+async function listKimiCodeSessionFiles(sessionsDir) {
+  const out = [];
+  for (const workDir of await safeReadDir(sessionsDir)) {
+    if (!workDir.isDirectory()) continue;
+    const workDirPath = path.join(sessionsDir, workDir.name);
+    for (const session of await safeReadDir(workDirPath)) {
+      if (!session.isDirectory()) continue;
+      const agentsDir = path.join(workDirPath, session.name, "agents");
+      for (const agent of await safeReadDir(agentsDir)) {
+        if (!agent.isDirectory()) continue;
+        const wirePath = path.join(agentsDir, agent.name, "wire.jsonl");
+        const st = await fs.stat(wirePath).catch(() => null);
+        if (st && st.isFile()) out.push(wirePath);
+      }
+    }
+  }
+  out.sort((a, b) => a.localeCompare(b));
+  return out;
+}
+
 async function listPiSessionFiles(sessionsDir) {
   const out = [];
   for (const project of await safeReadDir(sessionsDir)) {
@@ -982,28 +1003,56 @@ async function parseKimiFile({
   const stream = fssync.createReadStream(filePath, { encoding: "utf8", start: startOffset });
   const rl = readline.createInterface({ input: stream, crlfDelay: Infinity });
 
-  let eventsAggregated = 0;
+  // Kimi Code /fork copies the parent's wire verbatim and closes the copy with a `forked`
+  // record (upstream sessionLifecycleService.ts copyAgentWire / appendForkedMarker), so usage
+  // before the last `forked` record is already counted in the parent file: drop it.
+  // ponytail: a sync landing between the copy and the marker append counts the copy once.
+  const pending = [];
   for await (const line of rl) {
-    if (!line || !line.includes("StatusUpdate")) continue;
+    if (!line || !/StatusUpdate|usage\.record|forked/.test(line)) continue;
     let obj;
     try {
       obj = JSON.parse(line);
     } catch (_e) {
       continue;
     }
-    if (!obj || !obj.message || obj.message.type !== "StatusUpdate") continue;
+    // Legacy kimi-cli: StatusUpdate.payload.token_usage (snake_case), unix-second timestamp.
+    // Kimi Code CLI: one top-level `usage.record` per LLM request (camelCase usage, ms `time`);
+    // its `step.end` loop event repeats the same usage and is deliberately not counted.
+    let usage;
+    let rawTime;
+    let rawModel;
+    if (obj?.message?.type === "StatusUpdate") {
+      usage = obj.message.payload?.token_usage;
+      rawTime = obj.timestamp;
+      rawModel = obj.message.payload?.model;
+    } else if (obj?.type === "usage.record") {
+      usage = obj.usage;
+      rawTime = obj.time;
+      rawModel = obj.model;
+    } else if (obj?.type === "forked") {
+      pending.length = 0;
+      continue;
+    } else {
+      continue;
+    }
 
-    const payload = obj.message.payload;
-    const delta = normalizeKimiUsage(payload?.token_usage);
+    const delta = normalizeKimiUsage(usage);
     if (!delta || isAllZeroUsage(delta)) continue;
 
-    const tsIso = kimiTimestampToIso(obj.timestamp);
+    const tsIso = kimiTimestampToIso(rawTime);
     if (!tsIso) continue;
 
     const bucketStart = toUtcHalfHourStart(tsIso);
     if (!bucketStart) continue;
 
-    const model = normalizeModelInput(payload?.model) || DEFAULT_MODEL;
+    pending.push({ delta, bucketStart, model: normalizeModelInput(rawModel) || DEFAULT_MODEL });
+  }
+
+  rl.close();
+  stream.close?.();
+
+  for (const { delta, bucketStart, model } of pending) {
     const bucket = getHourlyBucket(hourlyState, source, model, bucketStart);
     addTotals(bucket.totals, delta);
     touchedBuckets.add(bucketKey(source, model, bucketStart));
@@ -1018,12 +1067,8 @@ async function parseKimiFile({
       addTotals(projectBucket.totals, delta);
       projectTouchedBuckets.add(projectBucketKey(projectKey, source, bucketStart));
     }
-    eventsAggregated += 1;
   }
-
-  rl.close();
-  stream.close?.();
-  return { endOffset, eventsAggregated };
+  return { endOffset, eventsAggregated: pending.length };
 }
 
 // Pi (pi-coding-agent) session logs: <agentDir>/sessions/<cwd-slug>/<ts>_<uuid>.jsonl.
@@ -2425,9 +2470,10 @@ function normalizeGeminiTokens(tokens) {
 
 function normalizeKimiUsage(usage) {
   if (!usage || typeof usage !== "object") return null;
-  const inputOther = toNonNegativeInt(usage.input_other);
-  const cacheCreation = toNonNegativeInt(usage.input_cache_creation);
-  const cacheRead = toNonNegativeInt(usage.input_cache_read);
+  // snake_case: legacy kimi-cli; camelCase: Kimi Code CLI.
+  const inputOther = toNonNegativeInt(usage.input_other ?? usage.inputOther);
+  const cacheCreation = toNonNegativeInt(usage.input_cache_creation ?? usage.inputCacheCreation);
+  const cacheRead = toNonNegativeInt(usage.input_cache_read ?? usage.inputCacheRead);
   const output = toNonNegativeInt(usage.output);
   const inputTokens = inputOther + cacheCreation;
   const total = inputTokens + cacheRead + output;
@@ -2718,6 +2764,7 @@ module.exports = {
   readGeminiMessages,
   isGeminiSessionName,
   listKimiSessionFiles,
+  listKimiCodeSessionFiles,
   listPiSessionFiles,
   resolvePiAgentDir,
   listOpencodeMessageFiles,

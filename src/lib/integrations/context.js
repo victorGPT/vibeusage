@@ -9,6 +9,7 @@ const {
 } = require("../gemini-config");
 const {
   resolveKimiConfigDir,
+  resolveKimiCodeConfigDir,
   resolveKimiConfigPath,
   buildKimiHookCommand,
 } = require("../kimi-config");
@@ -31,6 +32,7 @@ async function createIntegrationContext({
   const claudeDir = path.join(home, ".claude");
   const geminiConfigDir = resolveGeminiConfigDir({ home, env });
   const kimiConfigDir = resolveKimiConfigDir({ home, env });
+  const kimiCodeConfigDir = resolveKimiCodeConfigDir({ home, env });
   const opencodeConfigDir = resolveOpencodeConfigDir({ home, env });
 
   return {
@@ -66,6 +68,11 @@ async function createIntegrationContext({
       configPath: resolveKimiConfigPath({ configDir: kimiConfigDir }),
       hookCommand: buildKimiHookCommand(resolvedNotifyPath),
       sessionsDir: path.join(kimiConfigDir, "sessions"),
+    },
+    kimiCode: {
+      configDir: kimiCodeConfigDir,
+      configPath: resolveKimiConfigPath({ configDir: kimiCodeConfigDir }),
+      hookCommand: buildKimiHookCommand(resolvedNotifyPath),
     },
     opencode: {
       configDir: opencodeConfigDir,

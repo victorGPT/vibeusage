@@ -14,6 +14,7 @@ const INTEGRATIONS = [
   claude,
   gemini,
   kimi,
+  kimi.kimiCode,
   opencode,
   hermes,
   openclawSession,
