@@ -147,6 +147,40 @@ test("gemini legacy index cursor: messages up to lastIndex are not re-counted", 
   });
 });
 
+test("gemini legacy cursor: an uncursored copy processed first does not re-count", async () => {
+  await withTmp(async (dir) => {
+    const queuePath = path.join(dir, "queue.jsonl");
+    const body = JSON.stringify({ ...HEADER, messages: [gem("g1", tok(10, 0, 0, 0, 0))] });
+    const oldFile = path.join(dir, "old", "session-x.json");
+    const copy = path.join(dir, "new", "session-x.json");
+    for (const f of [oldFile, copy]) {
+      await fs.mkdir(path.dirname(f), { recursive: true });
+      await fs.writeFile(f, body);
+    }
+    const { ino } = await fs.stat(oldFile);
+    const cursors = { files: { [oldFile]: { inode: ino, lastIndex: 0, lastTotals: { total_tokens: 10 } } } };
+    assert.equal((await run([copy, oldFile], cursors, queuePath)).eventsAggregated, 0);
+  });
+});
+
+test("gemini legacy cursor: a read failure keeps the cursor so recovery does not re-count", async () => {
+  await withTmp(async (dir) => {
+    const queuePath = path.join(dir, "queue.jsonl");
+    const file = path.join(dir, "session-y.json");
+    await fs.writeFile(file, JSON.stringify({ ...HEADER, messages: [gem("g1", tok(10, 0, 0, 0, 0))] }));
+    const { ino } = await fs.stat(file);
+    const cursors = { files: { [file]: { inode: ino, lastIndex: 0, lastTotals: { total_tokens: 10 } } } };
+    await fs.chmod(file, 0o000);
+    try {
+      await run([file], cursors, queuePath);
+    } finally {
+      await fs.chmod(file, 0o644);
+    }
+    assert.equal(cursors.files[file].lastIndex, 0);
+    assert.equal((await run([file], JSON.parse(JSON.stringify(cursors)), queuePath)).eventsAggregated, 0);
+  });
+});
+
 test("gemini: a rewind after 500+ synced calls never re-counts old calls", async () => {
   await withTmp(async (dir) => {
     const file = path.join(dir, "session-f.jsonl");

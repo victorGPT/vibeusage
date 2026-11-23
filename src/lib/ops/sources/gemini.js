@@ -47,7 +47,9 @@ module.exports = {
       return;
     }
     if (!raw.trim()) return;
-    const { sessionId, messages } = readGeminiMessages(raw, filePath);
+    const session = readGeminiMessages(raw, filePath);
+    if (!session) return;
+    const { sessionId, messages } = session;
     const sid = sessionId || filePath;
     for (const msg of messages) {
       if (!msg || msg.type !== "gemini" || !msg.tokens) continue;

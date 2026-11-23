@@ -369,6 +369,25 @@ async function parseGeminiIncremental({
       .filter(([, ids]) => Array.isArray(ids))
       .map(([sid, ids]) => [sid, new Set(ids)]),
   );
+  const seenFor = (sid) => {
+    if (!seenBySession.has(sid)) seenBySession.set(sid, new Set());
+    return seenBySession.get(sid);
+  };
+
+  // Legacy cursors stored the last processed message index. Seed every one of
+  // them before metering any file, so an uncursored copy of the same session
+  // cannot re-count history. A file that cannot be read keeps its legacy
+  // cursor (and is not metered) until a later sync can migrate it.
+  for (const [key, prev] of Object.entries(cursors.files)) {
+    if (!Number.isInteger(prev?.lastIndex)) continue;
+    const session = await loadGeminiSession(key);
+    if (!session) continue;
+    const seen = seenFor(session.sessionId || key);
+    for (const msg of session.messages.slice(0, prev.lastIndex + 1)) {
+      if (isBillableGeminiMessage(msg)) seen.add(msg.id);
+    }
+    cursors.files[key] = { inode: prev.inode, updatedAt: new Date().toISOString() };
+  }
 
   for (let idx = 0; idx < files.length; idx++) {
     const entry = files[idx];
@@ -382,11 +401,8 @@ async function parseGeminiIncremental({
     if (!st || !st.isFile()) continue;
 
     const key = filePath;
-    const prev = cursors.files[key] || null;
     const inode = st.ino || 0;
-    // Legacy cursors stored the last processed message index; seed those ids as
-    // seen so the upgrade does not re-count (backfill) old messages.
-    const legacyLastIndex = Number.isFinite(Number(prev?.lastIndex)) ? Number(prev.lastIndex) : -1;
+    if (Number.isInteger(cursors.files[key]?.lastIndex)) continue; // migration pending
 
     const projectContext = projectEnabled
       ? await resolveProjectContextForFile({
@@ -402,8 +418,7 @@ async function parseGeminiIncremental({
 
     const result = await parseGeminiFile({
       filePath,
-      seenBySession,
-      legacyLastIndex,
+      seenFor,
       hourlyState,
       touchedBuckets,
       source: fileSource,
@@ -1106,7 +1121,8 @@ function isGeminiSessionName(name) {
   return name.startsWith("session-") && (name.endsWith(".json") || name.endsWith(".jsonl"));
 }
 
-// Returns { sessionId, messages } for the session's current message list.
+// Returns { sessionId, messages } for the session's current message list
+// (null when a legacy .json document does not parse).
 // Legacy sessions are one JSON document; Gemini CLI >= 0.65 appends JSONL
 // records that the CLI replays (chatRecordingService): message lines upsert by
 // id, `$rewindTo` drops that id and everything after it, `$patch` removes
@@ -1120,7 +1136,7 @@ function readGeminiMessages(raw, filePath) {
         messages: Array.isArray(session?.messages) ? session.messages : [],
       };
     } catch (_e) {
-      return { sessionId: null, messages: [] };
+      return null;
     }
   }
   let sessionId = null;
@@ -1170,14 +1186,20 @@ function readGeminiMessages(raw, filePath) {
   return { sessionId, messages: [...byId.values()] };
 }
 
+// null when the file cannot be read or parsed, so callers can tell "unreadable"
+// from "no messages" and keep their cursor.
+async function loadGeminiSession(filePath) {
+  const raw = await fs.readFile(filePath, "utf8").catch(() => "");
+  return raw.trim() ? readGeminiMessages(raw, filePath) : null;
+}
+
 function isBillableGeminiMessage(msg) {
   return Boolean(msg && msg.type === "gemini" && typeof msg.id === "string" && msg.tokens);
 }
 
 async function parseGeminiFile({
   filePath,
-  seenBySession,
-  legacyLastIndex,
+  seenFor,
   hourlyState,
   touchedBuckets,
   source,
@@ -1186,15 +1208,10 @@ async function parseGeminiFile({
   projectRef,
   projectKey,
 }) {
-  const raw = await fs.readFile(filePath, "utf8").catch(() => "");
-  if (!raw.trim()) return { eventsAggregated: 0 };
-  const { sessionId, messages } = readGeminiMessages(raw, filePath);
-  const sid = sessionId || filePath;
-  if (!seenBySession.has(sid)) seenBySession.set(sid, new Set());
-  const seen = seenBySession.get(sid);
-  for (let idx = 0; idx <= legacyLastIndex && idx < messages.length; idx++) {
-    if (isBillableGeminiMessage(messages[idx])) seen.add(messages[idx].id);
-  }
+  const session = await loadGeminiSession(filePath);
+  if (!session) return { eventsAggregated: 0 };
+  const { sessionId, messages } = session;
+  const seen = seenFor(sessionId || filePath);
 
   let eventsAggregated = 0;
   for (const msg of messages) {
