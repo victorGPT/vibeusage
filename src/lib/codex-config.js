@@ -12,7 +12,8 @@ async function upsertNotify({ configPath, notifyCmd, notifyOriginalPath, configL
   }
 
   const existingNotify = extractNotify(originalText);
-  const already = arraysEqual(existingNotify, notifyCmd);
+  const already =
+    arraysEqual(existingNotify, notifyCmd) || notifyMentionsScript(originalText, notifyCmd);
 
   if (!already) {
     // Persist original notify once (for uninstall + chaining).
@@ -142,6 +143,22 @@ function extractNotify(text) {
     if (parsed) return parsed;
   }
   return null;
+}
+
+// Wrappers (e.g. Codex Computer Use) embed our argv JSON-encoded inside one of theirs:
+// `... "--previous-notify", "[\"\\/usr\\/bin\\/env\", ...notify.cjs\"]"`.
+// The minimal argv parser can't unescape that, so match on the raw literal with backslashes dropped.
+function notifyMentionsScript(text, notifyCmd) {
+  const script = notifyCmd.find((p) => String(p).endsWith("notify.cjs"));
+  if (!script) return false;
+  const lines = text.split(/\r?\n/);
+  for (let i = 0; i < lines.length; i++) {
+    const m = lines[i].match(/^\s*notify\s*=\s*(.*)\s*$/);
+    if (!m) continue;
+    const literal = readTomlArrayLiteral(lines, i, (m[1] || "").trim());
+    if (literal && literal.replace(/\\/g, "").includes(script)) return true;
+  }
+  return false;
 }
 
 function setNotify(text, notifyCmd) {
