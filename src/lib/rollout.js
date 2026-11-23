@@ -890,25 +890,34 @@ async function parseClaudeFile({
     const tokenTimestamp = typeof obj?.timestamp === "string" ? obj.timestamp : null;
     if (!tokenTimestamp) continue;
 
-    const delta = normalizeClaudeUsage(usage);
-    if (!delta || isAllZeroUsage(delta)) continue;
+    // Top-level usage already sums the "message" iterations; "advisor_message"
+    // iterations run on their own model and are not in it, so count them apart.
+    const entries = [[model, normalizeClaudeUsage(usage)]];
+    for (const it of Array.isArray(usage.iterations) ? usage.iterations : []) {
+      if (it?.type !== "advisor_message") continue;
+      entries.push([normalizeModelInput(it.model) || model, normalizeClaudeUsage(it)]);
+    }
+    const counted = entries.filter(([, d]) => d && !isAllZeroUsage(d));
+    if (counted.length === 0) continue;
 
     const bucketStart = toUtcHalfHourStart(tokenTimestamp);
     if (!bucketStart) continue;
 
-    const bucket = getHourlyBucket(hourlyState, source, model, bucketStart);
-    addTotals(bucket.totals, delta);
-    touchedBuckets.add(bucketKey(source, model, bucketStart));
-    if (projectKey && projectState && projectTouchedBuckets) {
-      const projectBucket = getProjectBucket(
-        projectState,
-        projectKey,
-        source,
-        bucketStart,
-        projectRef,
-      );
-      addTotals(projectBucket.totals, delta);
-      projectTouchedBuckets.add(projectBucketKey(projectKey, source, bucketStart));
+    for (const [entryModel, delta] of counted) {
+      const bucket = getHourlyBucket(hourlyState, source, entryModel, bucketStart);
+      addTotals(bucket.totals, delta);
+      touchedBuckets.add(bucketKey(source, entryModel, bucketStart));
+      if (projectKey && projectState && projectTouchedBuckets) {
+        const projectBucket = getProjectBucket(
+          projectState,
+          projectKey,
+          source,
+          bucketStart,
+          projectRef,
+        );
+        addTotals(projectBucket.totals, delta);
+        projectTouchedBuckets.add(projectBucketKey(projectKey, source, bucketStart));
+      }
     }
     if (dedupeId) {
       seenSet.add(dedupeId);
@@ -2517,7 +2526,10 @@ function normalizeClaudeUsage(u) {
   const inputTokens =
     toNonNegativeInt(u?.input_tokens) + toNonNegativeInt(u?.cache_creation_input_tokens);
   const cachedInputTokens = toNonNegativeInt(u?.cache_read_input_tokens);
-  const outputTokens = toNonNegativeInt(u?.output_tokens);
+  const outputAll = toNonNegativeInt(u?.output_tokens);
+  // thinking_tokens is a subset of output_tokens: split it out (as
+  // normalizePiUsage does) so the channels stay disjoint and total is unchanged.
+  const reasoning = Math.min(toNonNegativeInt(u?.output_tokens_details?.thinking_tokens), outputAll);
   const hasTotal = u && Object.prototype.hasOwnProperty.call(u, "total_tokens");
   // Claude's Messages API does not emit `total_tokens`. When absent, compose it
   // from all four channels (input / cache_creation / cache_read / output). The
@@ -2525,12 +2537,12 @@ function normalizeClaudeUsage(u) {
   // Claude Opus sessions and was the main driver of user-visible under-counts.
   const totalTokens = hasTotal
     ? toNonNegativeInt(u?.total_tokens)
-    : inputTokens + cachedInputTokens + outputTokens;
+    : inputTokens + cachedInputTokens + outputAll;
   return {
     input_tokens: inputTokens,
     cached_input_tokens: cachedInputTokens,
-    output_tokens: outputTokens,
-    reasoning_output_tokens: 0,
+    output_tokens: outputAll - reasoning,
+    reasoning_output_tokens: reasoning,
     total_tokens: totalTokens,
   };
 }
