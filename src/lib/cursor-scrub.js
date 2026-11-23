@@ -50,8 +50,11 @@ const SOURCES = {
       path.join(env.GEMINI_HOME || path.join(home, ".gemini"), "tmp"),
   },
   kimi: {
-    sessionRoot: ({ home, env }) =>
+    sessionRoot: ({ home, env }) => [
       path.join(env.KIMI_HOME || path.join(home, ".kimi"), "sessions"),
+      path.join(env.KIMI_CODE_HOME || path.join(home, ".kimi-code"), "sessions"),
+    ],
+    extraCursorKeys: ["kimiSeen"],
   },
   pi: {
     sessionRoot: ({ home, env }) =>
@@ -97,10 +100,10 @@ function scrubSourceCursors({ cursors, sourceId, home, env = process.env }) {
   // 1) cursors.files — strip every entry whose path lives under this source's
   // session root, so the parser re-reads them from byte 0.
   if (config.sessionRoot && cursors.files && typeof cursors.files === "object") {
-    const prefix = config.sessionRoot({ home, env });
+    const prefixes = [].concat(config.sessionRoot({ home, env }));
     for (const key of Object.keys(cursors.files)) {
       if (typeof key !== "string") continue;
-      if (key.startsWith(prefix)) {
+      if (prefixes.some((prefix) => key.startsWith(prefix))) {
         delete cursors.files[key];
         result.filesRemoved += 1;
       }

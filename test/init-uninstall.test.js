@@ -8,6 +8,7 @@ const { cmdInit } = require("../src/commands/init");
 const { cmdUninstall } = require("../src/commands/uninstall");
 const { buildClaudeHookCommand } = require("../src/lib/claude-config");
 const { buildGeminiHookCommand } = require("../src/lib/gemini-config");
+const { buildKimiHookCommand, MANAGED_START } = require("../src/lib/kimi-config");
 const {
   buildOpencodePlugin,
   DEFAULT_EVENT,
@@ -1009,6 +1010,54 @@ test("init installs Opencode plugin when config dir is missing", async () => {
     else process.env.VIBEUSAGE_DEVICE_TOKEN = prevToken;
     if (prevOpencodeConfigDir === undefined) delete process.env.OPENCODE_CONFIG_DIR;
     else process.env.OPENCODE_CONFIG_DIR = prevOpencodeConfigDir;
+    await fs.rm(tmp, { recursive: true, force: true });
+  }
+});
+
+test("init then uninstall manages Kimi Code hooks in ~/.kimi-code/config.toml", async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "vibeusage-init-uninstall-"));
+  const saved = {};
+  for (const k of ["HOME", "CODEX_HOME", "VIBEUSAGE_DEVICE_TOKEN", "OPENCODE_CONFIG_DIR", "KIMI_HOME", "KIMI_CODE_HOME"]) {
+    saved[k] = process.env[k];
+  }
+  const prevWrite = process.stdout.write;
+
+  try {
+    process.env.HOME = tmp;
+    process.env.CODEX_HOME = path.join(tmp, ".codex");
+    delete process.env.VIBEUSAGE_DEVICE_TOKEN;
+    delete process.env.KIMI_HOME;
+    delete process.env.KIMI_CODE_HOME;
+    process.env.OPENCODE_CONFIG_DIR = path.join(tmp, ".config", "opencode");
+    await fs.mkdir(process.env.CODEX_HOME, { recursive: true });
+    await fs.writeFile(path.join(process.env.CODEX_HOME, "config.toml"), "# empty\n", "utf8");
+
+    const kimiCodeDir = path.join(tmp, ".kimi-code");
+    await fs.mkdir(kimiCodeDir, { recursive: true });
+    const configPath = path.join(kimiCodeDir, "config.toml");
+    const foreign = '[[hooks]]\nevent = "Stop"\ncommand = "echo other-tool"\ntimeout = 30\n';
+    await fs.writeFile(configPath, foreign, "utf8");
+
+    process.stdout.write = () => true;
+    await cmdInit(["--yes", "--no-auth", "--no-open", "--base-url", "https://example.invalid"]);
+
+    const hookCommand = buildKimiHookCommand(path.join(tmp, ".vibeusage", "bin", "notify.cjs"));
+    const installed = await fs.readFile(configPath, "utf8");
+    assert.ok(installed.startsWith(foreign), "expected existing hook to remain untouched");
+    assert.ok(installed.includes(MANAGED_START));
+    assert.ok(installed.includes(`command = ${JSON.stringify(hookCommand)}`));
+    assert.ok(installed.includes('event = "SessionEnd"'));
+    assert.ok(installed.includes('event = "Stop"'));
+    await assert.rejects(fs.stat(path.join(tmp, ".kimi")), /ENOENT/);
+
+    await cmdUninstall([]);
+    assert.equal(await fs.readFile(configPath, "utf8"), foreign);
+  } finally {
+    process.stdout.write = prevWrite;
+    for (const [k, v] of Object.entries(saved)) {
+      if (v === undefined) delete process.env[k];
+      else process.env[k] = v;
+    }
     await fs.rm(tmp, { recursive: true, force: true });
   }
 });

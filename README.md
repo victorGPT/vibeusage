@@ -86,6 +86,7 @@ This is useful when you want to copy an install command from the dashboard or le
 | **Every Code** | Auto-detected | `notify` hook | `~/.code/sessions/**/rollout-*.jsonl` |
 | **Claude Code** | Auto-detected | `Stop` + `SessionEnd` hooks | local hook output |
 | **Gemini CLI** | Auto-detected | `SessionEnd` hook | `~/.gemini/tmp/**/chats/session-*.json` |
+| **Kimi Code CLI** | Auto-detected | `SessionEnd` + `Stop` hooks | `~/.kimi-code/sessions/*/*/agents/*/wire.jsonl` (legacy kimi-cli `~/.kimi/sessions/*/*/wire.jsonl` still parsed) |
 | **OpenCode** | Auto-detected | plugin + local parsing | `~/.local/share/opencode/opencode.db` (SQLite is the only supported local accounting source) |
 | **Hermes** | Auto-detected when installed | plugin + local parsing | `~/.vibeusage/tracker/hermes.usage.jsonl` |
 | **OpenClaw** | Auto-detected when installed | session plugin | local sanitized usage ledger |
@@ -246,6 +247,8 @@ Run `node bin/tracker.js --help` or `npx vibeusage --help` for the current CLI s
 | `CODEX_HOME` | Codex CLI home override | `~/.codex` |
 | `CODE_HOME` | Every Code home override | `~/.code` |
 | `GEMINI_HOME` | Gemini CLI home override | `~/.gemini` |
+| `KIMI_CODE_HOME` | Kimi Code CLI home override | `~/.kimi-code` |
+| `KIMI_HOME` | legacy kimi-cli home override | `~/.kimi` |
 | `OPENCODE_HOME` | OpenCode data directory override | `~/.local/share/opencode` |
 
 ## FAQ

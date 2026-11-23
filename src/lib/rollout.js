@@ -83,6 +83,27 @@ async function listKimiSessionFiles(sessionsDir) {
   return out;
 }
 
+// Kimi Code CLI: <sessionsDir>/<workDirKey>/<sessionId>/agents/<agentId>/wire.jsonl
+async function listKimiCodeSessionFiles(sessionsDir) {
+  const out = [];
+  for (const workDir of await safeReadDir(sessionsDir)) {
+    if (!workDir.isDirectory()) continue;
+    const workDirPath = path.join(sessionsDir, workDir.name);
+    for (const session of await safeReadDir(workDirPath)) {
+      if (!session.isDirectory()) continue;
+      const agentsDir = path.join(workDirPath, session.name, "agents");
+      for (const agent of await safeReadDir(agentsDir)) {
+        if (!agent.isDirectory()) continue;
+        const wirePath = path.join(agentsDir, agent.name, "wire.jsonl");
+        const st = await fs.stat(wirePath).catch(() => null);
+        if (st && st.isFile()) out.push(wirePath);
+      }
+    }
+  }
+  out.sort((a, b) => a.localeCompare(b));
+  return out;
+}
+
 async function listPiSessionFiles(sessionsDir) {
   const out = [];
   for (const project of await safeReadDir(sessionsDir)) {
@@ -442,8 +463,19 @@ async function parseGeminiIncremental({
   return { filesProcessed, eventsAggregated, bucketsQueued, projectBucketsQueued };
 }
 
+// ponytail: recent-N dedupe keys, same ceiling as PI_SEEN_LIMIT (fork of a session whose keys aged out double counts).
+const KIMI_SEEN_LIMIT = 10000;
+
 async function parseKimiIncremental(opts) {
-  return parseJsonlFilesIncremental({ ...opts, defaultSourceId: "kimi", parseFile: parseKimiFile });
+  const cursors = opts.cursors;
+  const seen = new Set(Array.isArray(cursors.kimiSeen) ? cursors.kimiSeen : []);
+  const result = await parseJsonlFilesIncremental({
+    ...opts,
+    defaultSourceId: "kimi",
+    parseFile: (args) => parseKimiFile({ ...args, seen }),
+  });
+  if (seen.size > 0) cursors.kimiSeen = [...seen].slice(-KIMI_SEEN_LIMIT);
+  return result;
 }
 
 // ponytail: recent-N dedupe keys; a fork of a parent whose keys already aged out
@@ -929,6 +961,7 @@ async function parseClaudeFile({
 async function parseKimiFile({
   filePath,
   startOffset,
+  seen,
   hourlyState,
   touchedBuckets,
   source,
@@ -948,26 +981,51 @@ async function parseKimiFile({
 
   let eventsAggregated = 0;
   for await (const line of rl) {
-    if (!line || !line.includes("StatusUpdate")) continue;
+    if (!line || !(line.includes("StatusUpdate") || line.includes("usage.record"))) continue;
     let obj;
     try {
       obj = JSON.parse(line);
     } catch (_e) {
       continue;
     }
-    if (!obj || !obj.message || obj.message.type !== "StatusUpdate") continue;
+    // Legacy kimi-cli: StatusUpdate.payload.token_usage (snake_case), unix-second timestamp.
+    // Kimi Code CLI: one top-level `usage.record` per LLM request (camelCase usage, ms `time`);
+    // its `step.end` loop event repeats the same usage and is deliberately not counted.
+    let usage;
+    let rawTime;
+    let rawModel;
+    if (obj?.message?.type === "StatusUpdate") {
+      usage = obj.message.payload?.token_usage;
+      rawTime = obj.timestamp;
+      rawModel = obj.message.payload?.model;
+    } else if (obj?.type === "usage.record") {
+      usage = obj.usage;
+      rawTime = obj.time;
+      rawModel = obj.model;
+    } else {
+      continue;
+    }
 
-    const payload = obj.message.payload;
-    const delta = normalizeKimiUsage(payload?.token_usage);
+    const delta = normalizeKimiUsage(usage);
     if (!delta || isAllZeroUsage(delta)) continue;
 
-    const tsIso = kimiTimestampToIso(obj.timestamp);
+    const tsIso = kimiTimestampToIso(rawTime);
     if (!tsIso) continue;
 
     const bucketStart = toUtcHalfHourStart(tsIso);
     if (!bucketStart) continue;
 
-    const model = normalizeModelInput(payload?.model) || DEFAULT_MODEL;
+    if (obj.type === "usage.record" && seen) {
+      // usage.record has no upstream id; /fork copies parent wire lines verbatim into the new
+      // session, so key on fields a copy preserves. ponytail: two distinct requests with the
+      // same ms, agent, model and all four counts would collapse into one.
+      const u = usage;
+      const key = [obj.agentId || "", rawTime, rawModel || "", u.inputOther, u.output, u.inputCacheRead, u.inputCacheCreation].join("|");
+      if (seen.has(key)) continue;
+      seen.add(key);
+    }
+
+    const model = normalizeModelInput(rawModel) || DEFAULT_MODEL;
     const bucket = getHourlyBucket(hourlyState, source, model, bucketStart);
     addTotals(bucket.totals, delta);
     touchedBuckets.add(bucketKey(source, model, bucketStart));
@@ -2340,9 +2398,10 @@ function normalizeGeminiTokens(tokens) {
 
 function normalizeKimiUsage(usage) {
   if (!usage || typeof usage !== "object") return null;
-  const inputOther = toNonNegativeInt(usage.input_other);
-  const cacheCreation = toNonNegativeInt(usage.input_cache_creation);
-  const cacheRead = toNonNegativeInt(usage.input_cache_read);
+  // snake_case: legacy kimi-cli; camelCase: Kimi Code CLI.
+  const inputOther = toNonNegativeInt(usage.input_other ?? usage.inputOther);
+  const cacheCreation = toNonNegativeInt(usage.input_cache_creation ?? usage.inputCacheCreation);
+  const cacheRead = toNonNegativeInt(usage.input_cache_read ?? usage.inputCacheRead);
   const output = toNonNegativeInt(usage.output);
   const inputTokens = inputOther + cacheCreation;
   const total = inputTokens + cacheRead + output;
@@ -2628,6 +2687,7 @@ module.exports = {
   listClaudeProjectFiles,
   listGeminiSessionFiles,
   listKimiSessionFiles,
+  listKimiCodeSessionFiles,
   listPiSessionFiles,
   resolvePiAgentDir,
   listOpencodeMessageFiles,
