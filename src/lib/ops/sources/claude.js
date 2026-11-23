@@ -3,6 +3,11 @@
 const fs = require("node:fs");
 const path = require("node:path");
 
+function nonneg(v) {
+  const n = Number(v);
+  return Number.isFinite(n) && n > 0 ? Math.floor(n) : 0;
+}
+
 module.exports = {
   id: "claude",
   displayName: "Claude Code",
@@ -48,15 +53,26 @@ module.exports = {
     const timestamp = typeof obj.timestamp === "string" ? obj.timestamp : null;
     if (!timestamp) return null;
 
+    // Top-level usage already sums the "message" iterations; add the
+    // "advisor_message" ones (own model, not in the top level). thinking_tokens
+    // is a subset of output, split out so the channel sum stays the true total.
+    const parts = [usage].concat(
+      (Array.isArray(usage.iterations) ? usage.iterations : []).filter(
+        (it) => it?.type === "advisor_message",
+      ),
+    );
+    const sum = (k) => parts.reduce((s, p) => s + nonneg(p?.[k]), 0);
+    const output = sum("output_tokens");
+    const reasoning = Math.min(nonneg(usage.output_tokens_details?.thinking_tokens), nonneg(usage.output_tokens));
     return {
       timestamp,
       dedupeId: msg.id || obj.requestId || null,
       channels: {
-        input: usage.input_tokens,
-        cache_creation: usage.cache_creation_input_tokens,
-        cache_read: usage.cache_read_input_tokens,
-        output: usage.output_tokens,
-        reasoning: 0,
+        input: sum("input_tokens"),
+        cache_creation: sum("cache_creation_input_tokens"),
+        cache_read: sum("cache_read_input_tokens"),
+        output: output - reasoning,
+        reasoning,
       },
     };
   },
