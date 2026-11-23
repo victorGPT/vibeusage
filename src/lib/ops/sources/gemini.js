@@ -2,28 +2,20 @@
 
 const fs = require("node:fs");
 const path = require("node:path");
+const { readGeminiMessages, isGeminiSessionName } = require("../../rollout");
 
 /**
  * Gemini audit strategy.
  *
- * Gemini writes one JSON per session under
- *   ~/.gemini/tmp/<hash>/chats/session-YYYY-MM-DDTHH-MM-<id>.json
- * The file has `{ messages: [ { role, timestamp, model, tokens } ] }` where
- * `tokens` is the cumulative usage up to that message (not a per-turn delta).
+ * Gemini writes one session per file under
+ *   ~/.gemini/tmp/<hash>/chats/session-*.json   (legacy, one JSON document)
+ *   ~/.gemini/tmp/<hash>/chats/session-*.jsonl  (Gemini CLI >= 0.65, append log)
+ * Each `gemini` message's `tokens` is that API call's own usageMetadata (not
+ * a running total), and `tokens.total` already covers every channel. We route
+ * the total into a single channel so row.truth equals the DB total_tokens.
  *
- * Channel semantics differ from Claude but match Codex in one important way:
- *   input + cached + output + tool + thoughts != total
- * because `tokens.total` is the authoritative upstream count that
- * src/lib/rollout.js normalizeGeminiTokens passes through as-is to the DB.
- * Naively summing the five sub-channels double-counts. As with the Codex
- * strategy, we route `delta.total` into the output channel and zero the rest
- * so the framework's sum-of-channels row.truth equals the DB total_tokens
- * without exposing Gemini's internal breakdown through the generic contract.
- *
- * Dedupe:
- *   - Per-file index diff mirrors parseGeminiFile's `lastTotals` state.
- *   - When `tokens.total` drops (session reset / resume), we treat the current
- *     cumulative as the delta just like the parser does.
+ * Dedupe: sessionId|messageId, matching parseGeminiFile, so a session copied
+ * into two project dirs counts once.
  */
 
 module.exports = {
@@ -41,7 +33,7 @@ module.exports = {
       const chatsDir = path.join(root, hash.name, "chats");
       for (const f of safeReadDirSync(chatsDir)) {
         if (!f.isFile()) continue;
-        if (!f.name.startsWith("session-") || !f.name.endsWith(".json")) continue;
+        if (!isGeminiSessionName(f.name)) continue;
         out.push(path.join(chatsDir, f.name));
       }
     }
@@ -55,28 +47,19 @@ module.exports = {
       return;
     }
     if (!raw.trim()) return;
-    let session;
-    try {
-      session = JSON.parse(raw);
-    } catch (_err) {
-      return;
-    }
-    const messages = Array.isArray(session?.messages) ? session.messages : [];
-    let prevTotals = null;
+    const session = readGeminiMessages(raw, filePath);
+    if (!session) return;
+    const { sessionId, messages } = session;
+    const sid = sessionId || filePath;
     for (const msg of messages) {
-      if (!msg || typeof msg !== "object") continue;
+      if (!msg || msg.type !== "gemini" || !msg.tokens) continue;
       const ts = typeof msg.timestamp === "string" ? msg.timestamp : null;
       if (!ts) continue;
-      const tokens = msg.tokens;
-      if (!tokens || typeof tokens !== "object") continue;
-
-      const curr = normalizeTokens(tokens);
-      const delta = diffTotals(curr, prevTotals);
-      prevTotals = curr;
-      if (!delta || !delta.total) continue;
+      const delta = { total: nonneg(msg.tokens.total) };
+      if (!delta.total) continue;
 
       yield {
-        line: JSON.stringify({ timestamp: ts, delta }),
+        line: JSON.stringify({ timestamp: ts, delta, id: `${sid}|${msg.id}` }),
         context: { filePath },
       };
     }
@@ -94,7 +77,7 @@ module.exports = {
     if (!ts || !d || !Number(d.total)) return null;
     return {
       timestamp: ts,
-      dedupeId: null, // per-file index diff already dedupes
+      dedupeId: typeof obj.id === "string" ? obj.id : null,
       channels: {
         input: 0,
         cache_creation: 0,
@@ -107,37 +90,6 @@ module.exports = {
     };
   },
 };
-
-function normalizeTokens(tokens) {
-  return {
-    input: nonneg(tokens.input),
-    cached: nonneg(tokens.cached),
-    output: nonneg(tokens.output),
-    tool: nonneg(tokens.tool),
-    thoughts: nonneg(tokens.thoughts),
-    total: nonneg(tokens.total),
-  };
-}
-
-function diffTotals(curr, prev) {
-  if (!curr) return null;
-  if (!prev) {
-    // First message with tokens — the whole cumulative value is the delta.
-    return curr;
-  }
-  // Session reset: upstream total decreased (resume / new session). Trust the
-  // new value as the full delta.
-  if (curr.total < prev.total) return curr;
-  const delta = {
-    input: Math.max(0, curr.input - prev.input),
-    cached: Math.max(0, curr.cached - prev.cached),
-    output: Math.max(0, curr.output - prev.output),
-    tool: Math.max(0, curr.tool - prev.tool),
-    thoughts: Math.max(0, curr.thoughts - prev.thoughts),
-    total: Math.max(0, curr.total - prev.total),
-  };
-  return delta;
-}
 
 function nonneg(v) {
   const n = Number(v);

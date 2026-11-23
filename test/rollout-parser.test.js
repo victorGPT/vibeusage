@@ -687,7 +687,7 @@ test("parseGeminiIncremental aggregates gemini tokens and model", async () => {
       messages: [
         {
           id: "m1",
-          type: "assistant",
+          type: "gemini",
           timestamp: "2025-12-26T08:05:00.000Z",
           model: "gemini-3-flash-preview",
           content: { text: "ignore me" },
@@ -708,7 +708,7 @@ test("parseGeminiIncremental aggregates gemini tokens and model", async () => {
     assert.equal(queued[0].source, "gemini");
     assert.equal(queued[0].model, "gemini-3-flash-preview");
     assert.equal(queued[0].hour_start, "2025-12-26T08:00:00.000Z");
-    assert.equal(queued[0].input_tokens, 10);
+    assert.equal(queued[0].input_tokens, 8); // promptTokenCount 10 includes 2 cached
     assert.equal(queued[0].cached_input_tokens, 2);
     assert.equal(queued[0].output_tokens, 2);
     assert.equal(queued[0].reasoning_output_tokens, 0);
@@ -730,7 +730,7 @@ test("parseGeminiIncremental is idempotent with unchanged totals", async () => {
       messages: [
         {
           id: "m1",
-          type: "assistant",
+          type: "gemini",
           timestamp: "2025-12-26T08:05:00.000Z",
           model: "gemini-3-flash-preview",
           tokens: { input: 5, output: 1, cached: 0, thoughts: 0, tool: 0, total: 6 },
@@ -764,7 +764,7 @@ test("parseGeminiIncremental defaults missing model to unknown", async () => {
       messages: [
         {
           id: "m1",
-          type: "assistant",
+          type: "gemini",
           timestamp: "2025-12-26T08:05:00.000Z",
           tokens: { input: 1, output: 0, cached: 0, thoughts: 0, tool: 0, total: 1 },
         },

@@ -56,7 +56,7 @@ async function listGeminiSessionFiles(tmpDir) {
     const chats = await safeReadDir(chatsDir);
     for (const entry of chats) {
       if (!entry.isFile()) continue;
-      if (!entry.name.startsWith("session-") || !entry.name.endsWith(".json")) continue;
+      if (!isGeminiSessionName(entry.name)) continue;
       out.push(path.join(chatsDir, entry.name));
     }
   }
@@ -360,6 +360,41 @@ async function parseGeminiIncremental({
   if (!cursors.files || typeof cursors.files !== "object") {
     cursors.files = {};
   }
+  // Counted message ids per Gemini sessionId, shared by every file: a session
+  // copied into two project dirs counts once, and a rewind can never make an
+  // old call look new.
+  // ponytail: unbounded (~40 bytes per call); prune sessions whose files are gone if it grows.
+  const seenBySession = new Map(
+    Object.entries(cursors.geminiSeen && typeof cursors.geminiSeen === "object" ? cursors.geminiSeen : {})
+      .filter(([, ids]) => Array.isArray(ids))
+      .map(([sid, ids]) => [sid, new Set(ids)]),
+  );
+  const seenFor = (sid) => {
+    if (!seenBySession.has(sid)) seenBySession.set(sid, new Set());
+    return seenBySession.get(sid);
+  };
+
+  // Legacy cursors stored the last processed message index. Seed every one of
+  // them before metering any file, so an uncursored copy of the same session
+  // cannot re-count history. A file that cannot be read keeps its legacy
+  // cursor (and is not metered) until a later sync can migrate it. A file whose
+  // inode changed was replaced: drop its legacy cursor and meter it as new.
+  for (const [key, prev] of Object.entries(cursors.files)) {
+    if (!Number.isInteger(prev?.lastIndex)) continue;
+    const st = await fs.stat(key).catch(() => null);
+    if (!st) continue;
+    if ((st.ino || 0) !== prev.inode) {
+      cursors.files[key] = { inode: st.ino || 0, updatedAt: new Date().toISOString() };
+      continue;
+    }
+    const session = await loadGeminiSession(key);
+    if (!session) continue;
+    const seen = seenFor(session.sessionId || key);
+    for (const msg of session.messages.slice(0, prev.lastIndex + 1)) {
+      if (isBillableGeminiMessage(msg)) seen.add(msg.id);
+    }
+    cursors.files[key] = { inode: prev.inode, updatedAt: new Date().toISOString() };
+  }
 
   for (let idx = 0; idx < files.length; idx++) {
     const entry = files[idx];
@@ -373,11 +408,8 @@ async function parseGeminiIncremental({
     if (!st || !st.isFile()) continue;
 
     const key = filePath;
-    const prev = cursors.files[key] || null;
     const inode = st.ino || 0;
-    let startIndex = prev && prev.inode === inode ? Number(prev.lastIndex || -1) : -1;
-    let lastTotals = prev && prev.inode === inode ? prev.lastTotals || null : null;
-    let lastModel = prev && prev.inode === inode ? prev.lastModel || null : null;
+    if (Number.isInteger(cursors.files[key]?.lastIndex)) continue; // migration pending
 
     const projectContext = projectEnabled
       ? await resolveProjectContextForFile({
@@ -393,9 +425,7 @@ async function parseGeminiIncremental({
 
     const result = await parseGeminiFile({
       filePath,
-      startIndex,
-      lastTotals,
-      lastModel,
+      seenFor,
       hourlyState,
       touchedBuckets,
       source: fileSource,
@@ -405,13 +435,7 @@ async function parseGeminiIncremental({
       projectKey,
     });
 
-    cursors.files[key] = {
-      inode,
-      lastIndex: result.lastIndex,
-      lastTotals: result.lastTotals,
-      lastModel: result.lastModel,
-      updatedAt: new Date().toISOString(),
-    };
+    cursors.files[key] = { inode, updatedAt: new Date().toISOString() };
 
     filesProcessed += 1;
     eventsAggregated += result.eventsAggregated;
@@ -427,6 +451,8 @@ async function parseGeminiIncremental({
       });
     }
   }
+
+  cursors.geminiSeen = Object.fromEntries([...seenBySession].map(([sid, ids]) => [sid, [...ids]]));
 
   const bucketsQueued = await enqueueTouchedBuckets({ queuePath, hourlyState, touchedBuckets });
   const projectBucketsQueued = projectEnabled
@@ -1108,11 +1134,89 @@ function resolvePiAgentDir({ home = os.homedir(), env = process.env } = {}) {
   return raw;
 }
 
+function isGeminiSessionName(name) {
+  return name.startsWith("session-") && (name.endsWith(".json") || name.endsWith(".jsonl"));
+}
+
+// Returns { sessionId, messages } for the session's current message list
+// (null when a legacy .json document does not parse).
+// Legacy sessions are one JSON document; Gemini CLI >= 0.65 appends JSONL
+// records that the CLI replays (chatRecordingService): message lines upsert by
+// id, `$rewindTo` drops that id and everything after it, `$patch` removes
+// (removeIds) or reorders (orderIds) messages, `$set.messages` replaces the list.
+function readGeminiMessages(raw, filePath) {
+  if (!filePath.endsWith(".jsonl")) {
+    try {
+      const session = JSON.parse(raw);
+      return {
+        sessionId: typeof session?.sessionId === "string" ? session.sessionId : null,
+        messages: Array.isArray(session?.messages) ? session.messages : [],
+      };
+    } catch (_e) {
+      return null;
+    }
+  }
+  let sessionId = null;
+  let byId = new Map();
+  for (const line of raw.split("\n")) {
+    if (!line.trim()) continue;
+    let rec;
+    try {
+      rec = JSON.parse(line);
+    } catch (_e) {
+      continue;
+    }
+    if (!rec || typeof rec !== "object") continue;
+    if (typeof rec.$rewindTo === "string") {
+      let found = false;
+      for (const id of [...byId.keys()]) {
+        if (id === rec.$rewindTo) found = true;
+        if (found) byId.delete(id);
+      }
+      if (!found) byId.clear();
+    } else if (rec.$patch && typeof rec.$patch === "object") {
+      // Content-only patches do not change usage; removals and reordering do.
+      const patch = rec.$patch;
+      for (const id of Array.isArray(patch.removeIds) ? patch.removeIds : []) byId.delete(id);
+      if (Array.isArray(patch.orderIds)) {
+        const ordered = patch.orderIds.filter((id) => byId.has(id));
+        const orderSet = new Set(ordered);
+        byId = new Map([
+          ...[...byId].filter(([id]) => !orderSet.has(id)),
+          ...ordered.map((id) => [id, byId.get(id)]),
+        ]);
+      }
+    } else if (typeof rec.id === "string") {
+      byId.set(rec.id, rec);
+    } else if (rec.$set && typeof rec.$set === "object") {
+      if (!sessionId && typeof rec.$set.sessionId === "string") sessionId = rec.$set.sessionId;
+      if (Array.isArray(rec.$set.messages)) {
+        byId.clear();
+        for (const msg of rec.$set.messages) {
+          if (msg && typeof msg.id === "string") byId.set(msg.id, msg);
+        }
+      }
+    } else if (!sessionId && typeof rec.sessionId === "string") {
+      sessionId = rec.sessionId;
+    }
+  }
+  return { sessionId, messages: [...byId.values()] };
+}
+
+// null when the file cannot be read or parsed, so callers can tell "unreadable"
+// from "no messages" and keep their cursor.
+async function loadGeminiSession(filePath) {
+  const raw = await fs.readFile(filePath, "utf8").catch(() => "");
+  return raw.trim() ? readGeminiMessages(raw, filePath) : null;
+}
+
+function isBillableGeminiMessage(msg) {
+  return Boolean(msg && msg.type === "gemini" && typeof msg.id === "string" && msg.tokens);
+}
+
 async function parseGeminiFile({
   filePath,
-  startIndex,
-  lastTotals,
-  lastModel,
+  seenFor,
   hourlyState,
   touchedBuckets,
   source,
@@ -1121,54 +1225,23 @@ async function parseGeminiFile({
   projectRef,
   projectKey,
 }) {
-  const raw = await fs.readFile(filePath, "utf8").catch(() => "");
-  if (!raw.trim()) return { lastIndex: startIndex, lastTotals, lastModel, eventsAggregated: 0 };
-
-  let session;
-  try {
-    session = JSON.parse(raw);
-  } catch (_e) {
-    return { lastIndex: startIndex, lastTotals, lastModel, eventsAggregated: 0 };
-  }
-
-  const messages = Array.isArray(session?.messages) ? session.messages : [];
-  if (startIndex >= messages.length) {
-    startIndex = -1;
-    lastTotals = null;
-    lastModel = null;
-  }
+  const session = await loadGeminiSession(filePath);
+  if (!session) return { eventsAggregated: 0 };
+  const { sessionId, messages } = session;
+  const seen = seenFor(sessionId || filePath);
 
   let eventsAggregated = 0;
-  let model = typeof lastModel === "string" ? lastModel : null;
-  let totals = lastTotals && typeof lastTotals === "object" ? lastTotals : null;
-  const begin = Number.isFinite(startIndex) ? startIndex + 1 : 0;
-
-  for (let idx = begin; idx < messages.length; idx++) {
-    const msg = messages[idx];
-    if (!msg || typeof msg !== "object") continue;
-
-    const normalizedModel = normalizeModelInput(msg.model);
-    if (normalizedModel) model = normalizedModel;
+  for (const msg of messages) {
+    if (!isBillableGeminiMessage(msg) || seen.has(msg.id)) continue;
+    seen.add(msg.id);
 
     const timestamp = typeof msg.timestamp === "string" ? msg.timestamp : null;
-    const currentTotals = normalizeGeminiTokens(msg.tokens);
-    if (!timestamp || !currentTotals) {
-      totals = currentTotals || totals;
-      continue;
-    }
-
-    const delta = diffGeminiTotals(currentTotals, totals);
-    if (!delta || isAllZeroUsage(delta)) {
-      totals = currentTotals;
-      continue;
-    }
-
+    const delta = normalizeGeminiTokens(msg.tokens);
+    if (!timestamp || !delta || isAllZeroUsage(delta)) continue;
     const bucketStart = toUtcHalfHourStart(timestamp);
-    if (!bucketStart) {
-      totals = currentTotals;
-      continue;
-    }
+    if (!bucketStart) continue;
 
+    const model = normalizeModelInput(msg.model) || DEFAULT_MODEL;
     const bucket = getHourlyBucket(hourlyState, source, model, bucketStart);
     addTotals(bucket.totals, delta);
     touchedBuckets.add(bucketKey(source, model, bucketStart));
@@ -1184,15 +1257,9 @@ async function parseGeminiFile({
       projectTouchedBuckets.add(projectBucketKey(projectKey, source, bucketStart));
     }
     eventsAggregated += 1;
-    totals = currentTotals;
   }
 
-  return {
-    lastIndex: messages.length - 1,
-    lastTotals: totals,
-    lastModel: model,
-    eventsAggregated,
-  };
+  return { eventsAggregated };
 }
 
 async function parseOpencodeMessageFile({
@@ -2346,8 +2413,9 @@ function normalizeGeminiTokens(tokens) {
   const thoughts = toNonNegativeInt(tokens.thoughts);
   const total = toNonNegativeInt(tokens.total);
 
+  // promptTokenCount includes cachedContentTokenCount; split so channels stay disjoint.
   return {
-    input_tokens: input,
+    input_tokens: Math.max(0, input - cached),
     cached_input_tokens: cached,
     output_tokens: output + tool,
     reasoning_output_tokens: thoughts,
@@ -2647,6 +2715,8 @@ module.exports = {
   listRolloutFiles,
   listClaudeProjectFiles,
   listGeminiSessionFiles,
+  readGeminiMessages,
+  isGeminiSessionName,
   listKimiSessionFiles,
   listPiSessionFiles,
   resolvePiAgentDir,
